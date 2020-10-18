@@ -8,7 +8,6 @@ conf_location = "/etc/wireguard"
 
 app = Flask("Wireguard Dashboard")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-# app.config['STATIC_AUTO_RELOAD'] = True
 css = ""
 
 def get_conf_peers_data(config_name):
@@ -115,7 +114,7 @@ def get_conf_list():
     for i in os.listdir(conf_location):
         if ".conf" in i:
             i = i.replace('.conf','')
-            temp = {"conf":i, "status":get_conf_status(i)} 
+            temp = {"conf":i, "status":get_conf_status(i), "public_key": get_conf_pub_key(i)} 
             conf.append(temp)
     return conf
 

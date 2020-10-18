@@ -43,9 +43,16 @@
 						<a href="/configuration/{{i['conf']}}">
 							<h5 class="card-title">{{i['conf']}}</h5>
 						</a>
-						<h6 class="card-subtitle mb-2 text-muted">Status: {{i['status']}}
-							<span class="dot dot-{{i['status']}}"></span>
-						</h6>
+						<div class="row">
+							<div class="col-sm">
+								<small class="text-muted"><strong>STATUS</strong></small>
+								<h6 style="text-transform: uppercase;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>
+							</div>
+							<div class="col-sm">
+								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
+								<h6 style="text-transform: uppercase;"><samp>{{i['public_key']}}</samp></h6>
+							</div>
+						</div>
 					</div>
 				</div>
 			{%endfor%}
