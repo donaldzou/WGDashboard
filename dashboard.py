@@ -1,6 +1,5 @@
 import os
-from flask import Flask, request, render_template
-from tinydb import TinyDB, Query
+from flask import Flask, request, render_template, redirect, url_for
 import subprocess
 from datetime import datetime, date, time, timedelta
 
@@ -114,7 +113,10 @@ def get_conf_list():
     for i in os.listdir(conf_location):
         if ".conf" in i:
             i = i.replace('.conf','')
-            temp = {"conf":i, "status":get_conf_status(i), "public_key": get_conf_pub_key(i)} 
+            temp = {"conf":i, "status":get_conf_status(i), "public_key": get_conf_pub_key(i)}
+            if temp['status'] == "running":
+                temp['checked'] = 'checked'
+            else: temp['checked'] = "" 
             conf.append(temp)
     return conf
 
@@ -125,15 +127,33 @@ def index():
 
 @app.route('/configuration/<config_name>', methods=['GET'])
 def conf(config_name):
-    
     conf_data = {
         "name": config_name,
         "status": get_conf_status(config_name),
         "total_data_usage": get_conf_total_data(config_name),
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
-        "peer_data":get_conf_peers_data(config_name)
+        "peer_data":get_conf_peers_data(config_name),
+        "checked": ""
     }
-    return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data)
- 
+    if conf_data['status'] == "stopped":
+        return redirect('/')
+    else:
+        conf_data['checked'] = "checked"
+        return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data)
+
+
+@app.route('/switch/<config_name>', methods=['GET'])
+def switch(config_name):
+    status = get_conf_status(config_name)
+    if status == "running":
+        try: status = subprocess.check_output("wg-quick down "+config_name, shell=True)
+        except Exception: return redirect('/')
+    elif status == "stopped":
+        try: status = subprocess.check_output("wg-quick up "+config_name, shell=True)
+        except Exception: return redirect('/')
+    return redirect('/')
+
+
+
 app.run(host='0.0.0.0',debug=False, port=10086)
