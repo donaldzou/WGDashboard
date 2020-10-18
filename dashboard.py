@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, render_template
 from tinydb import TinyDB, Query
 import subprocess
-from datetime import datetime
+from datetime import datetime, date, time, timedelta
 
 conf_location = "/etc/wireguard"
 
@@ -48,9 +48,14 @@ def get_conf_peers_data(config_name):
     data_usage = data_usage.decode("UTF-8").split()
     count = 0
     now = datetime.now()
-    
+    b = timedelta(minutes=2)
     for i in range(int(len(data_usage)/2)):
         minus = now - datetime.fromtimestamp(int(data_usage[count+1]))
+        
+        if minus < b:
+            peer_data[data_usage[count]]['status'] = "running"
+        else:
+            peer_data[data_usage[count]]['status'] = "stopped"
         peer_data[data_usage[count]]['latest_handshake'] = minus
         count += 2
     
@@ -78,7 +83,6 @@ def get_conf_listen_port(config_name):
     except Exception: return "stopped"
     return pub_key.decode("UTF-8")
     
-
 
 def get_conf_total_data(config_name):
     try: data_usage = subprocess.check_output("wg show "+config_name+" transfer", shell=True)
@@ -132,6 +136,5 @@ def conf(config_name):
         "peer_data":get_conf_peers_data(config_name)
     }
     return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data)
-
-
+ 
 app.run(host='0.0.0.0',debug=False, port=10086)
