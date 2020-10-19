@@ -149,5 +149,10 @@
 	$('.switch').change(function() {
 		location.replace("/switch/"+$(this).attr('id'))
     })
+
+
+	setInterval(function(){
+		location.reload();
+	}, 10000)
 </script>
 </html>
