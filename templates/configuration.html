@@ -48,7 +48,7 @@
 					</div>
 					<div class="col-sm">
 						<small class="text-muted"><strong>ACTION</strong></small><br>
-						<input class="mt-2"id="chkToggle1" type="checkbox" data-toggle="toggle"  data-onstyle="outline-success" {{conf_data['checked']}}>
+						<input class="mt-2 switch" id="{{conf_data['name']}}" type="checkbox" data-toggle="toggle"  {{conf_data['checked']}} data-height="15">
 					</div>
 					<div class="w-100"></div>
 					<div class="col-sm">
@@ -119,6 +119,16 @@
 								<small class="text-muted"><strong>TOTAL SENT</strong></small>
 								<h6 style="text-transform: uppercase;">{{conf_data['peer_data'][i]['total_sent']}} GB</h6>
 							</div>
+							<div class="w-100"></div>
+							<div class="col-sm">
+								<small class="text-muted"><strong>ACTION</strong></small>
+								<div class="button-group">
+									<button type="button" class="btn btn-outline-primary btn-sm">QR CODE</button>
+									<button type="button" class="btn btn-outline-info btn-sm">CONF FILE</button>
+									<button type="button" class="btn btn-outline-danger btn-sm">DELETE</button>
+								</div>
+								
+							</div>
 						</div>
 					</div>
 				</div>
@@ -136,8 +146,8 @@
 	crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 <script>
-	// setInterval(function(){
-	// 	location.reload();
-	// },10000)
+	$('.switch').change(function() {
+		location.replace("/switch/"+$(this).attr('id'))
+    })
 </script>
 </html>
