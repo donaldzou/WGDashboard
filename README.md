@@ -15,5 +15,5 @@ Monitoring Wireguard is not convinient, need to login into server and type wg sh
 4. Access your server! e.g (http://your_server_ip:10086)
 
 ## Example
-![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/static/index.png)
-![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/static/configuration.png)
+![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
+![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
