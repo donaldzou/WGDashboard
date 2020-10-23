@@ -2,12 +2,30 @@ import os
 from flask import Flask, request, render_template, redirect, url_for
 import subprocess
 from datetime import datetime, date, time, timedelta
+from tinydb import TinyDB, Query
+import time
+import requests
+
 
 conf_location = "/etc/wireguard"
 
 app = Flask("Wireguard Dashboard")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 css = ""
+conf_data = {}
+
+
+def get_conf_peer_key(config_name):
+    keys = []
+    try: peer_key = subprocess.check_output("wg show "+config_name+" peers", shell=True)
+    except Exception: return "stopped"
+    peer_key = peer_key.decode("UTF-8").split()
+    for i in peer_key: keys.append(i)
+    return keys
+
+
+
+
 
 def get_conf_peers_data(config_name):
     peer_data = {}
@@ -26,9 +44,9 @@ def get_conf_peers_data(config_name):
     download_total = 0
     total = 0
     for i in range(int(len(data_usage)/3)):
-        peer_data[data_usage[count]]['total_recive'] = round(int(data_usage[count+1])/(1024**3), 4)
-        peer_data[data_usage[count]]['total_sent'] = round(int(data_usage[count+2])/(1024**3),4)
-        peer_data[data_usage[count]]['total_data'] = round((int(data_usage[count+2])+int(data_usage[count+1]))/(1024**3),4)
+        peer_data[data_usage[count]]['total_recive'] = int(data_usage[count+1])/(1024**3)
+        peer_data[data_usage[count]]['total_sent'] = int(data_usage[count+2])/(1024**3)
+        peer_data[data_usage[count]]['total_data'] = (int(data_usage[count+2])+int(data_usage[count+1]))/(1024**3)
         count += 3
 
     #Get endpoint
@@ -49,7 +67,6 @@ def get_conf_peers_data(config_name):
     b = timedelta(minutes=2)
     for i in range(int(len(data_usage)/2)):
         minus = now - datetime.fromtimestamp(int(data_usage[count+1]))
-        
         if minus < b:
             peer_data[data_usage[count]]['status'] = "running"
         else:
@@ -137,6 +154,7 @@ def conf(config_name):
         "checked": ""
     }
     if conf_data['status'] == "stopped":
+        print(conf_data)
         return redirect('/')
     else:
         conf_data['checked'] = "checked"
@@ -154,6 +172,22 @@ def switch(config_name):
         except Exception: return redirect('/')
     return redirect('/')
 
+
+@app.route('/add_peer/<config_name>', methods=['POST'])
+def add_peer(config_name):
+    data = request.get_json()
+    public_key = data['public_key']
+    allowed_ips = data['allowed_ips']
+    keys = get_conf_peer_key(config_name)
+    if public_key in keys:
+        return "Key already exist."
+    else:
+        try: 
+            status = subprocess.check_output("wg set "+config_name+" peer "+public_key+" allowed-ips "+allowed_ips, shell=True)
+            status = subprocess.check_output("wg-quick save "+config_name, shell=True)
+            return "Good"
+        except Exception: return redirect('/configuration/'+config_name)
+        
 
 
 app.run(host='0.0.0.0',debug=False, port=10086)

@@ -43,12 +43,15 @@
 					<div class="card-body">
 						
 						<div class="row">
-							<div class="col-sm">
+							<div class="col">
+								<small class="text-muted"><strong>CONFIGURATION</strong></small>
 								<a href="/configuration/{{i['conf']}}">
 									<h5 class="card-title">{{i['conf']}}</h5>
 								</a>
 							</div>
-							
+							<div class="col">
+								<input class="mt-2 switch" id="{{i['conf']}}"  type="checkbox" data-toggle="toggle"  {{i['checked']}} data-size="sm">
+							</div>
 							
 							<div class="w-100"></div>
 							<div class="col-sm">
@@ -59,9 +62,8 @@
 								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
 								<h6 style="text-transform: uppercase;"><samp>{{i['public_key']}}</samp></h6>
 							</div>
-							<div class="col-sm">
-								<input class="mt-2 switch" id="{{i['conf']}}"  type="checkbox" data-toggle="toggle"  {{i['checked']}} data-height="15">
-							</div>
+							
+
 						</div>
 					</div>
 				</div>
@@ -80,7 +82,14 @@
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 <script>
 	$('.switch').change(function() {
-		location.replace("/switch/"+$(this).attr('id'))
-    })
+		if ($(this).prop('checked') == false){
+			if (confirm('Are you sure you want to turn off this connection?')){
+				location.replace("/switch/"+$(this).attr('id'))
+			}
+		}
+		else{
+			location.replace("/switch/"+$(this).attr('id'))
+		}
+    });
 </script>
 </html>

@@ -1,5 +1,4 @@
-import os
-import subprocess
-try: status = subprocess.check_output("wg show wg0", shell=True)
-except Exception: print("false")
-else:print(status.decode("UTF-8"))
+from tinydb import TinyDB, Query
+conf_db = TinyDB("json/conf.json")
+
+print(conf_db.all())
