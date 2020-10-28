@@ -11,7 +11,7 @@ Monitoring Wireguard is not convinient, need to login into server and type wg sh
 
 **Install:**
 1. `git clone https://github.com/donaldzou/Wireguard-Dashboard.git`
-2. `cd Wireguard-Dashboard`
+2. `cd Wireguard-Dashboard\src`
 3. `python3 dashboard.py`
 4. Access your server! e.g (http://your_server_ip:10086)
 
