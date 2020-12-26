@@ -24,8 +24,21 @@ def get_conf_peer_key(config_name):
     return keys
 
 
-
-
+def get_conf_running_peer_number(config_name):
+    running = 0
+    #Get latest handshakes
+    try: data_usage = subprocess.check_output("wg show "+config_name+" latest-handshakes", shell=True)
+    except Exception: return "stopped"
+    data_usage = data_usage.decode("UTF-8").split()
+    count = 0
+    now = datetime.now()
+    b = timedelta(minutes=2)
+    for i in range(int(len(data_usage)/2)):
+        minus = now - datetime.fromtimestamp(int(data_usage[count+1]))
+        if minus < b:
+            running += 1
+        count += 2
+    return running
 
 def get_conf_peers_data(config_name):
     peer_data = {}
@@ -44,9 +57,9 @@ def get_conf_peers_data(config_name):
     download_total = 0
     total = 0
     for i in range(int(len(data_usage)/3)):
-        peer_data[data_usage[count]]['total_recive'] = int(data_usage[count+1])/(1024**3)
-        peer_data[data_usage[count]]['total_sent'] = int(data_usage[count+2])/(1024**3)
-        peer_data[data_usage[count]]['total_data'] = (int(data_usage[count+2])+int(data_usage[count+1]))/(1024**3)
+        peer_data[data_usage[count]]['total_recive'] = round(int(data_usage[count+1])/(1024**3),4)
+        peer_data[data_usage[count]]['total_sent'] = round(int(data_usage[count+2])/(1024**3),4)
+        peer_data[data_usage[count]]['total_data'] = round((int(data_usage[count+2])+int(data_usage[count+1]))/(1024**3),4)
         count += 3
 
     #Get endpoint
@@ -112,9 +125,9 @@ def get_conf_total_data(config_name):
         download_total += int(data_usage[count+2])
         count += 3
     
-    total = round(((((upload_total+download_total)/1024)/1024)/1024),3)
-    upload_total = round(((((upload_total)/1024)/1024)/1024),3)
-    download_total = round(((((download_total)/1024)/1024)/1024),3)
+    total = round(((((upload_total+download_total)/1024)/1024)/1024),4)
+    upload_total = round(((((upload_total)/1024)/1024)/1024),4)
+    download_total = round(((((download_total)/1024)/1024)/1024),4)
     
     return [total, upload_total, download_total]
 
@@ -151,6 +164,7 @@ def conf(config_name):
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
         "peer_data":get_conf_peers_data(config_name),
+        "running_peer": get_conf_running_peer_number(config_name),
         "checked": ""
     }
     if conf_data['status'] == "stopped":
@@ -187,7 +201,8 @@ def add_peer(config_name):
             status = subprocess.check_output("wg-quick save "+config_name, shell=True)
             return "Good"
         except Exception: return redirect('/configuration/'+config_name)
-        
 
+# @app.route('/remove_peer/<config_name>/<peer_id>', methods=['POST'])
+# def remove_peer(config_name, peer_id):
 
 app.run(host='0.0.0.0',debug=False, port=10086)

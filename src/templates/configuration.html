@@ -7,7 +7,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='dashboard.css') }}">
 	<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
-	
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
@@ -55,6 +55,10 @@
 						<h6 style="text-transform: uppercase;">{{conf_data['status']}}<span class="dot dot-{{conf_data['status']}}"></span></h6>
 					</div>
 					<div class="col-sm">
+						<small class="text-muted"><strong>CONNECTED PEERS</strong></small>
+						<h6 style="text-transform: uppercase;">{{conf_data['running_peer']}}</h6>
+					</div>
+					<div class="col-sm">
 						<small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>
 						<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][0]}} GB</h6>
 					</div>
@@ -78,7 +82,7 @@
 				</div>
 				<hr>
 				<div class="button-div" style="text-align: right;">
-					<button type="button" class="btn btn-outline-primary btn-sm mb-3" data-toggle="modal" data-target="#staticBackdrop">
+					<button type="button" class="btn btn-outline-primary btn-sm mb-3" data-toggle="modal" data-target="#add_modal">
 						<strong>ADD PEER</strong>
 					</button>
 					
@@ -126,11 +130,9 @@
 							</div>
 							<div class="w-100"></div>
 							<div class="col-sm">
-								<small class="text-muted"><strong>ACTION</strong></small>
+								<!-- <small class="text-muted"><strong>ACTION</strong></small> -->
 								<div class="button-group">
-									<button type="button" class="btn btn-outline-primary btn-sm">QR CODE</button>
-									<button type="button" class="btn btn-outline-info btn-sm">CONF FILE</button>
-									<button type="button" class="btn btn-outline-danger btn-sm">DELETE</button>
+									<button type="button" class="btn btn-outline-danger btn-sm btn-delete-peer" id="{{i}}" data-toggle="modal" data-target="#delete_modal"><span class="material-icons">delete_forever</span></button>
 								</div>
 								
 							</div>
@@ -140,7 +142,7 @@
 			{%endfor%}
 		</main>
 	</div>
-	<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
@@ -165,6 +167,26 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="button" class="btn btn-primary" id="save_peer" conf_id={{conf_data['name']}}>Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="delete_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+		aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this peer?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<h6>This action is not reversible.</h6>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+					<button type="button" class="btn btn-danger" id="delete_peer" conf_id={{conf_data['name']}} peer_id="">Yes</button>
 				</div>
 			</div>
 		</div>
@@ -206,8 +228,30 @@
 				}
 			})
 		}
-		
 	})
+
+	$(".btn-delete-peer").click(function(){
+		var peer_id = $(this).attr("id");
+		$("#delete_peer").attr("peer_id", peer_id);
+	});
+
+	$(".delete_peer").click(function(){
+		var peer_id = $(this).attr("peer_id");
+		var config = $(this).attr("conf_id");
+		$.ajax({
+			method: "POST",
+			url: "/remove_peer/"+config+"/"+peer_id,
+			headers:{
+				"Content-Type": "application/json"
+			},
+			data: JSON.stringify({"action": "delete"}),
+			success: function (response){
+				console.log(response);
+			}
+		})
+	});
+
+
 
 	// setInterval(function(){
 	// 	location.reload();
