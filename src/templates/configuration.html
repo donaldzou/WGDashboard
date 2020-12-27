@@ -99,7 +99,7 @@
 							</div>
 							<div class="col-sm">
 								<small class="text-muted"><strong>PEER</strong></small>
-								<h6 style="text-transform: uppercase;"><samp>{{i}}</samp></h6>
+								<h6><samp>{{i}}</samp></h6>
 							</div>
 							
 							<div class="w-100"></div>
@@ -153,6 +153,11 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<div id="add_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						  <span aria-hidden="true">&times;</span>
+						</button>
+					</div>
 					<form>
 						<div class="form-group">
 							<label for="public_key">Public Key</label>
@@ -182,6 +187,11 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<div id="remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						  <span aria-hidden="true">&times;</span>
+						</button>
+					</div>
 					<h6>This action is not reversible.</h6>
 				</div>
 				<div class="modal-footer">
@@ -204,11 +214,11 @@
 	$('.switch').change(function() {
 		if ($(this).prop('checked') == false){
 			if (confirm('Are you sure you want to turn off this connection?')){
-				location.replace("/switch/"+$(this).attr('id'))
+				location.replace("/switch/"+$(this).attr('id'));
 			}
 		}
 		else{
-			location.replace("/switch/"+$(this).attr('id'))
+			location.replace("/switch/"+$(this).attr('id'));
 		}
     });
 
@@ -224,7 +234,13 @@
 				},
 				data: JSON.stringify({"public_key":$("#public_key").val(), "allowed_ips": $("#allowed_ips").val()}),
 				success: function (response){
-					console.log(response);
+					if(response != "true"){
+						$("#add_peer_alert").html(response+$("#add_peer_alert").html());
+						$("#add_peer_alert").removeClass("d-none");
+					}
+					else{
+						location.reload();
+					}
 				}
 			})
 		}
@@ -235,18 +251,24 @@
 		$("#delete_peer").attr("peer_id", peer_id);
 	});
 
-	$(".delete_peer").click(function(){
+	$("#delete_peer").click(function(){
 		var peer_id = $(this).attr("peer_id");
 		var config = $(this).attr("conf_id");
 		$.ajax({
 			method: "POST",
-			url: "/remove_peer/"+config+"/"+peer_id,
+			url: "/remove_peer/"+config,
 			headers:{
 				"Content-Type": "application/json"
 			},
-			data: JSON.stringify({"action": "delete"}),
+			data: JSON.stringify({"action": "delete", "peer_id": peer_id}),
 			success: function (response){
-				console.log(response);
+				if(response != "true"){
+						$("#remove_peer_alert").html(response+$("#add_peer_alert").html());
+						$("#remove_peer_alert").removeClass("d-none");
+					}
+					else{
+						location.reload();
+					}
 			}
 		})
 	});

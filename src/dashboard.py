@@ -196,13 +196,29 @@ def add_peer(config_name):
     if public_key in keys:
         return "Key already exist."
     else:
+        status = ""
         try: 
-            status = subprocess.check_output("wg set "+config_name+" peer "+public_key+" allowed-ips "+allowed_ips, shell=True)
-            status = subprocess.check_output("wg-quick save "+config_name, shell=True)
-            return "Good"
-        except Exception: return redirect('/configuration/'+config_name)
+            status = subprocess.check_output("wg set "+config_name+" peer "+public_key+" allowed-ips "+allowed_ips, shell=True, stderr=subprocess.STDOUT)
+            status = subprocess.check_output("wg-quick save "+config_name, shell=True, stderr=subprocess.STDOUT)
+            return "true"
+        except subprocess.CalledProcessError as exc:
+            return exc.output.strip()
 
-# @app.route('/remove_peer/<config_name>/<peer_id>', methods=['POST'])
-# def remove_peer(config_name, peer_id):
+            # return redirect('/configuration/'+config_name)
+
+@app.route('/remove_peer/<config_name>', methods=['POST'])
+def remove_peer(config_name):
+    data = request.get_json()
+    delete_key = data['peer_id']
+    keys = get_conf_peer_key(config_name)
+    if delete_key not in keys:
+        return "This key does not exist"
+    else:
+        try:
+            status = subprocess.check_output("wg set "+config_name+" peer "+delete_key+" remove", shell=True, stderr=subprocess.STDOUT)
+            status = subprocess.check_output("wg-quick save "+config_name, shell=True, stderr=subprocess.STDOUT)
+            return "true"
+        except subprocess.CalledProcessError as exc:
+            return exc.output.strip()
 
 app.run(host='0.0.0.0',debug=False, port=10086)
