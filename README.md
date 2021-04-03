@@ -18,4 +18,4 @@ Monitoring Wireguard is not convinient, need to login into server and type `wg s
 
 ## Example
 ![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
-![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
+![Conf Image](https://github.com/donaldzou/wireguard-dashboard/raw/main/src/static/configuration.png)
