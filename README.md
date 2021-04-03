@@ -22,15 +22,15 @@ Monitoring Wireguard is not convinient, need to login into server and type `wg s
 **1. Install Python Dependencies**
 
 ```
-$	python3 -m pip install flask tinydb
+$ python3 -m pip install flask tinydb
 ```
 
 **2. Install Wireguard Dashboard**
 
 ```
 $ git clone https://github.com/donaldzou/Wireguard-Dashboard.git
-$	cd Wireguard-Dashboard/src
-$	python3 dashboard.py
+$ cd Wireguard-Dashboard/src
+$ python3 dashboard.py
 ```
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086)
@@ -38,12 +38,12 @@ Access your server with port `10086` ! e.g (http://your_server_ip:10086)
 **3. Install with Production Mode (Optional)**
 
 ```
-$	cd Wireguard-Dashboard/src
-$	export FLASK_APP=dashboard.py
-$	export FLASK_RUN_HOST=0.0.0.0
-$	export FLASK_ENV=development
-$	export FLASK_DEBUG=0
-$	flask run
+$ cd Wireguard-Dashboard/src
+$ export FLASK_APP=dashboard.py
+$ export FLASK_RUN_HOST=0.0.0.0
+$ export FLASK_ENV=development
+$ export FLASK_DEBUG=0
+$ flask run
 ```
 
 ## 🔍Example
