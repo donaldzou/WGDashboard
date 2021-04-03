@@ -259,6 +259,7 @@
             success: function(response){
                 if (response == ""){
                     $("#setting_modal .peer_name").html("Untitled Peer");
+                    $("#peer_name_textbox").val("")
                 }else{
                     $("#setting_modal .peer_name").html(response);
                     $("#peer_name_textbox").val(response)
