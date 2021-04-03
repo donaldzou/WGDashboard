@@ -2,20 +2,13 @@ import os
 from flask import Flask, request, render_template, redirect, url_for
 import subprocess
 from datetime import datetime, date, time, timedelta
-import sqlite3
-import time
-import requests
 from operator import itemgetter
-import collections
 from tinydb import TinyDB, Query
 conf_location = "/etc/wireguard"
 app = Flask("Wireguard Dashboard")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 css = ""
 conf_data = {}
-
-
-
 
 def get_conf_peer_key(config_name):
     keys = []
