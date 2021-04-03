@@ -66,7 +66,8 @@ def get_conf_peers_data(config_name):
             if len(file[i]) > 0:
                 if file[i] != "[Interface]":
                     tmp = file[i].replace(" ", "").split("=", 1)
-                    conf_peer_data['Interface'][tmp[0]] = tmp[1]
+                    if len(tmp) == 2:
+                        conf_peer_data['Interface'][tmp[0]] = tmp[1]
     conf_peers = file[peers_start:]
     peer = -1
     for i in conf_peers:
