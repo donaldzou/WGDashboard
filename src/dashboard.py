@@ -4,7 +4,6 @@ import subprocess
 from datetime import datetime, date, time, timedelta
 from operator import itemgetter
 from tinydb import TinyDB, Query
-import threading
 
 conf_location = "/etc/wireguard"
 app = Flask("Wireguard Dashboard")
@@ -49,7 +48,7 @@ def get_conf_peers_data(config_name):
     peer_data = {}
 
     # Read Configuration File Start
-    conf_location = "/etc/wireguard/wg0.conf"
+    conf_location = "/etc/wireguard/"+config_name+".conf"
     f = open(conf_location, 'r')
     file = f.read().split("\n")
     conf_peer_data = {
