@@ -137,7 +137,7 @@ def get_conf_peers_data(config_name):
 
         peer_data[data_usage[count]]['endpoint'] = data_usage[count + 1]
         count += 2
-
+        
     # Get latest handshakes
     try:
         data_usage = subprocess.check_output("wg show " + config_name + " latest-handshakes", shell=True)
@@ -156,9 +156,12 @@ def get_conf_peers_data(config_name):
         else:
             peer_data[data_usage[count]]['status'] = "stopped"
             status = "stopped"
-
-        db.update({"latest_handshake": str(minus).split(".")[0], "status": status}, peers.id == data_usage[count])
-        peer_data[data_usage[count]]['latest_handshake'] = str(minus).split(".")[0]
+        if (int(data_usage[count + 1]) > 0):
+            db.update({"latest_handshake": str(minus).split(".")[0], "status": status}, peers.id == data_usage[count])
+            peer_data[data_usage[count]]['latest_handshake'] = str(minus).split(".")[0]
+        else:
+            db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
+            peer_data[data_usage[count]]['latest_handshake'] = "(None)"      
         count += 2
 
     # Get allowed ip
@@ -226,14 +229,15 @@ def get_conf_status(config_name):
 def get_conf_list():
     conf = []
     for i in os.listdir(conf_location):
-        if ".conf" in i:
-            i = i.replace('.conf', '')
-            temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
-            if temp['status'] == "running":
-                temp['checked'] = 'checked'
-            else:
-                temp['checked'] = ""
-            conf.append(temp)
+        if not i.startswith('.'):
+            if ".conf" in i:
+                i = i.replace('.conf', '')
+                temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
+                if temp['status'] == "running":
+                    temp['checked'] = 'checked'
+                else:
+                    temp['checked'] = ""
+                conf.append(temp)
     conf = sorted(conf, key=itemgetter('status'))
     return conf
 
@@ -241,10 +245,11 @@ def get_conf_list():
 def get_running_conf_list():
     conf = []
     for i in os.listdir(conf_location):
-        if ".conf" in i:
-            i = i.replace('.conf', '')
-            if get_conf_status(i) == "running":
-                conf.append(i)
+        if not i.startswith('.'):
+            if ".conf" in i:
+                i = i.replace('.conf', '')
+                if get_conf_status(i) == "running":
+                    conf.append(i)
 
     return conf
 
