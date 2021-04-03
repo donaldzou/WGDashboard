@@ -52,29 +52,42 @@
 	{% for i in conf_data['peer_data']%}
 		<div class="card mb-3">
             <div class="card-header">
-                    {% if not i['name']%}
-                        {{ "Untitled Peer" }}
-                    {% else %}
-                        {{i['name']}}
-                    {% endif %}
+                <div class="row">
+                    <div class="col">
+                        <div class="card-header-body ">
+                            {% if not i['name']%}
+                                {{ "Untitled Peer" }}
+                            {% else %}
+                                {{i['name']}}
+                            {% endif %}
+                            <span class="dot dot-{{i['status']}}"></span>
+                        </div>
+                    </div>
+                    <div class="col" style="text-align: right">
+                        <p class="text-primary" style="text-transform: uppercase; display: inline-block; margin-bottom: 0; margin-right: 1rem"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</p>
+                        <p class="text-success" style="text-transform: uppercase;  display: inline-block; margin-bottom: 0"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</p>
+                    </div>
+
+                </div>
+
+
             </div>
 			<div class="card-body">
-
 				<div class="row">
-					<div class="col-sm">
-						<small class="text-muted"><strong>STATUS</strong></small>
-						<h6 style="text-transform: uppercase;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>
-					</div>
+{#					<div class="col-sm">#}
+{#						<small class="text-muted"><strong>STATUS</strong></small>#}
+{#						<h6 style="text-transform: uppercase;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>#}
+{#					</div>#}
 					<div class="col-sm">
 						<small class="text-muted"><strong>PEER</strong></small>
-						<h6><samp>{{i['id']}}</samp></h6>
+						<h6><samp class="ml-auto">{{i['id']}}</samp></h6>
 					</div>
-					
-					<div class="w-100"></div>
 					<div class="col-sm">
 						<small class="text-muted"><strong>ALLOWED IP</strong></small>
 						<h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
 					</div>
+					<div class="w-100"></div>
+
 					<div class="col-sm">
 						<small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
 						<h6 style="text-transform: uppercase;">{{i['latest_handshake']}}</h6>
@@ -83,20 +96,51 @@
 						<small class="text-muted"><strong>END POINT</strong></small>
 						<h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
 					</div>
-					<div class="w-100"></div>
-{#					<div class="col-sm">#}
-{#						<small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>#}
-{#						<h6 style="text-transform: uppercase;">{{i['total_data']}} GB</h6>#}
-{#					</div>#}
-					<div class="col-sm">
-						<small class="text-muted"><strong>TOTAL RECEIVED</strong></small>
-						<h6 style="text-transform: uppercase;"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</h6>
-					</div>
-					<div class="col-sm">
-						<small class="text-muted"><strong>TOTAL SENT</strong></small>
-						<h6 style="text-transform: uppercase;"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</h6>
-					</div>
-					<div class="w-100"></div>
+{#					<div class="w-100"></div>#}
+{#                    <div class="col-sm">#}
+{#                        <canvas id="{{ i['id'] }}_chart" style="width: 100%" height="200"></canvas>#}
+{#                    </div>#}
+{#                    <script>#}
+{#                        var data = "{{  i['traffic'] }}";#}
+{#                        data = data.replaceAll("&#39;", "\"")#}
+{#                        data = JSON.parse(data)#}
+{#                        y_label = [];#}
+{#                        data_point = [];#}
+{#                        for (var i = 1; i < data.length; i++){#}
+{#                            y_label.push(data[i]['time'])#}
+{#                            data_point.push(data[i]['total_sent'] - data[i-1]['total_sent']);#}
+{#                        }#}
+{#                        var ctx = document.getElementById('{{ i['id'] }}_chart');#}
+{#                        var plot_data =#}
+{#                            {#}
+{#                                labels: y_label,#}
+{#                                datasets:[{#}
+{#                                    label: "Traffic",#}
+{#                                    data: data_point,#}
+{#                                    fill: false,#}
+{#                                    borderColor: 'rgb(75, 192, 192)',#}
+{#                                    tension: 0.1#}
+{#                                }],#}
+{#                                options: {#}
+{#                                    scales: {#}
+{#                                        xAxes: [{#}
+{#                                            type: 'time',#}
+{#                                            ticks: {#}
+{#                                                autoSkip: true,#}
+{#                                                maxTicksLimit: 12#}
+{#                                            }#}
+{#                                        }]#}
+{#                                    },#}
+{#                                    responsive: true#}
+{#                                }#}
+{#                            }#}
+{##}
+{#                        var myLineChart = new Chart(ctx, {#}
+{#                            type: 'line',#}
+{#                            data: plot_data#}
+{#                        });#}
+{#                    </script>#}
+                    <div class="w-100"></div>
 					<div class="col-sm">
 						<!-- <small class="text-muted"><strong>ACTION</strong></small> -->
 						<div class="button-group">
