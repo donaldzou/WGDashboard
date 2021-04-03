@@ -1,3 +1,7 @@
 .vscode/sftp.json
 src/.vscode/sftp.json
 .DS_Store
+wg.db
+*.json
+.idea
+src/test.py

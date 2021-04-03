@@ -1,0 +1,112 @@
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4">
+	<div class="info mt-4">
+		<div class="row">
+			<div class="col-sm">
+				<small class="text-muted"><strong>CONFIGURATION</strong></small>
+				<h1 class="mb-3">{{conf_data['name']}}</h1>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>ACTION</strong></small><br>
+				<input class="mt-2 switch" id="{{conf_data['name']}}" type="checkbox" data-toggle="toggle"  {{conf_data['checked']}} data-size="sm">
+			</div>
+			<div class="w-100"></div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>STATUS</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['status']}}<span class="dot dot-{{conf_data['status']}}"></span></h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>CONNECTED PEERS</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['running_peer']}}</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][0]}} GB</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL RECIEVED</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][1]}} GB</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL SENT</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][2]}} GB</h6>
+			</div>
+			<div class="w-100"></div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>PUBLIC KEY</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['public_key']}}</samp></h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>LISTEN PORT</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
+			</div>
+		</div>
+		<hr>
+		<div class="button-div" style="text-align: right;">
+			<button type="button" class="btn btn-outline-primary btn-sm mb-3" data-toggle="modal" data-target="#add_modal">
+				<strong>ADD PEER</strong>
+			</button>
+			
+		</div>
+	</div>
+	
+	{% for i in conf_data['peer_data']%}
+		<div class="card mb-3">
+            <div class="card-header">
+                    {% if not i['name']%}
+                        {{ "Untitled Peer" }}
+                    {% else %}
+                        {{i['name']}}
+                    {% endif %}
+            </div>
+			<div class="card-body">
+
+				<div class="row">
+					<div class="col-sm">
+						<small class="text-muted"><strong>STATUS</strong></small>
+						<h6 style="text-transform: uppercase;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>
+					</div>
+					<div class="col-sm">
+						<small class="text-muted"><strong>PEER</strong></small>
+						<h6><samp>{{i['id']}}</samp></h6>
+					</div>
+					
+					<div class="w-100"></div>
+					<div class="col-sm">
+						<small class="text-muted"><strong>ALLOWED IP</strong></small>
+						<h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
+					</div>
+					<div class="col-sm">
+						<small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
+						<h6 style="text-transform: uppercase;">{{i['latest_handshake']}}</h6>
+					</div>
+					<div class="col-sm">
+						<small class="text-muted"><strong>END POINT</strong></small>
+						<h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
+					</div>
+					<div class="w-100"></div>
+{#					<div class="col-sm">#}
+{#						<small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>#}
+{#						<h6 style="text-transform: uppercase;">{{i['total_data']}} GB</h6>#}
+{#					</div>#}
+					<div class="col-sm">
+						<small class="text-muted"><strong>TOTAL RECEIVED</strong></small>
+						<h6 style="text-transform: uppercase;"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</h6>
+					</div>
+					<div class="col-sm">
+						<small class="text-muted"><strong>TOTAL SENT</strong></small>
+						<h6 style="text-transform: uppercase;"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</h6>
+					</div>
+					<div class="w-100"></div>
+					<div class="col-sm">
+						<!-- <small class="text-muted"><strong>ACTION</strong></small> -->
+						<div class="button-group">
+                            <hr>
+                            <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button>
+							<button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal" data-target="#delete_modal"><i class="bi bi-x-circle-fill"></i></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	{%endfor%}
+</main>

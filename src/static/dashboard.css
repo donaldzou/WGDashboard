@@ -122,3 +122,21 @@ body {
 .info h6{
   line-break: anywhere;
 }
+
+.btn-control{
+  border: none !important;
+  padding: 0;
+  padding-right: 0.5rem;
+}
+
+.btn-control:hover{
+  background: white;
+}
+
+.btn-delete-peer:hover{
+  color: #dc3545;
+}
+
+.btn-setting-peer:hover{
+  color:#007bff
+}
