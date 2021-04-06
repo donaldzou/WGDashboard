@@ -11,11 +11,13 @@
 ## 📝Requirement
 
 - Ubuntu 18.04.1 LTS, other OS might work, but haven't test yet.
-- **Wireguard**
+- ‼️ Make sure you have **Wireguard** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
 - Python 3.7
 
 ## 🛠Install
+
+
 
 **1. Install Python Dependencies**
 
