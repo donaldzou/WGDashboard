@@ -1,7 +1,7 @@
 ---
 version: "2.1"
 services:
-  wireguard:
+  wireguard-dashboard:
     image: aptupdate/wireguard-dashboard
     container_name: wireguard-dashboard
     network_mode: "host"
