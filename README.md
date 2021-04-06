@@ -1,5 +1,5 @@
-# Wireguard Dashboard
-Monitoring Wireguard is not convinient, need to login into server and type `wg show`. That's why this platform is being created, to view all configurations in a more straight forward way.
+<h1 align="center"> Wireguard Dashboard</h1>
+<p align="center">Monitoring Wireguard is not convinient, need to login into server and type `wg show`. That's why this platform is being created, to view all configurations in a more straight forward way.</p>
 
 ## 💡Features
 
