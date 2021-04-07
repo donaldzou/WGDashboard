@@ -9,25 +9,42 @@
 </p>
 <p align="center">Monitoring Wireguard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations in a more straight forward way.</p>
 
-## 💡Features
+## 💡 Features
 
 - Add peers in configuration
 - Manage peer names
 - Delete peers
 - And many more coming up! Welcome to contribute to this project!
 
-## 📝Requirement
+## 📝 Requirement
 
 - Ubuntu 18.04.1 LTS, other OS might work, but haven't test yet.
 - ‼️ Make sure you have **Wireguard** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
+
+  ***Example `.conf` file***
+  ```
+  [Interface]
+  Address = 192.168.0.1/24
+  SaveConfig = true
+  PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+  ListenPort = 12345
+  PrivateKey = ABCDEFGHIJKLMNOPQRSTUVWXYZ1234
+  
+  [Peer]
+  PublicKey = HABCDEFGHIJKLMNOPQRSTUVWXYZ123123123123
+  AllowedIPs = 192.168.0.2/32
+  Endpoint = 8.8.8.8:12345
+  
+  ...
+  ```
 - Python 3.7+ & Pip3
-  - To install Python 3 and Pip 3, for example on Debian bases OS (i.e Ubuntu):
   ```
   $ sudo apt-get install python3 python3-pip
   ```
 
-## 🛠Install
+## 🛠 Install
 
 **1. Install Python Dependencies**
 
@@ -45,7 +62,7 @@ $ python3 dashboard.py
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086)
 
-**3. Install with Production Mode (Optional)**
+**3. Install with Production Mode (Optional), not tested yet. Proceed with caution.**
 
 ```
 $ cd Wireguard-Dashboard/src
