@@ -21,11 +21,13 @@
 - Ubuntu 18.04.1 LTS, other OS might work, but haven't test yet.
 - ‼️ Make sure you have **Wireguard** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
-- Python 3.7
+- Python 3.7+ & Pip3
+  - To install Python 3 and Pip 3, for example on Debian bases OS (i.e Ubuntu):
+  ```
+  $ sudo apt-get install python3 python3-pip
+  ```
 
 ## 🛠Install
-
-
 
 **1. Install Python Dependencies**
 
