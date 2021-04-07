@@ -1,5 +1,12 @@
 <h1 align="center"> Wireguard Dashboard</h1>
-[![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
+
+<p align="center">
+  <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard">
+</p>
 <p align="center">Monitoring Wireguard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations in a more straight forward way.</p>
 
 ## 💡Features
