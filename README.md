@@ -1,5 +1,6 @@
 <h1 align="center"> Wireguard Dashboard</h1>
 <p align="center">Monitoring Wireguard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations in a more straight forward way.</p>
+[![wakatime](https://wakatime.com/badge/github/donaldzou/wireguard-dashboard.svg)](https://wakatime.com/badge/github/donaldzou/wireguard-dashboard)
 
 ## 💡Features
 
