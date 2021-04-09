@@ -73,11 +73,11 @@ $ export FLASK_DEBUG=0
 $ flask run
 ```
 
-## 🔍Example
+## 🔍 Example
 ![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
 ![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
 
-## 🙌Contributors
+## 🙌 Contributors
 <a href="https://github.com/donaldzou/wireguard-dashboard/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=donaldzou/wireguard-dashboard" />
 </a>
