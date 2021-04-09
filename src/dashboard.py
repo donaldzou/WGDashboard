@@ -1,3 +1,4 @@
+import ifcfg
 import os
 from flask import Flask, request, render_template, redirect, url_for
 import subprocess
@@ -8,7 +9,6 @@ from tinydb import TinyDB, Query
 conf_location = "/etc/wireguard"
 app = Flask("Wireguard Dashboard")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-css = ""
 conf_data = {}
 
 
@@ -41,21 +41,15 @@ def get_conf_running_peer_number(config_name):
         count += 2
     return running
 
-
-def get_conf_peers_data(config_name):
-    db = TinyDB('db/' + config_name + '.json')
-    peers = Query()
-    peer_data = {}
-
+def read_conf_file(config_name):
     # Read Configuration File Start
-    conf_location = "/etc/wireguard/"+config_name+".conf"
+    conf_location = "/etc/wireguard/" + config_name + ".conf"
     f = open(conf_location, 'r')
     file = f.read().split("\n")
     conf_peer_data = {
         "Interface": {},
         "Peers": []
     }
-    interface = []
     peers_start = 0
     for i in range(len(file)):
         if file[i] == "[Peer]":
@@ -79,20 +73,19 @@ def get_conf_peers_data(config_name):
                 if len(tmp) == 2:
                     conf_peer_data["Peers"][peer][tmp[0]] = tmp[1]
     # Read Configuration File End
+    return conf_peer_data
 
-    # Get key
-    try:
-        peer_key = subprocess.check_output("wg show " + config_name + " peers", shell=True)
-    except Exception:
-        return "stopped"
-    peer_key = peer_key.decode("UTF-8").split()
-    now = datetime.now()
-    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
-    for i in peer_key:
-        peer_data[i] = {}
-        if not db.search(peers.id == i):
+
+
+def get_conf_peers_data(config_name):
+    db = TinyDB('db/' + config_name + '.json')
+    peers = Query()
+    conf_peer_data = read_conf_file(config_name)
+
+    for i in conf_peer_data['Peers']:
+        if not db.search(peers.id == i['PublicKey']):
             db.insert({
-                "id": i,
+                "id": i['PublicKey'],
                 "name": "",
                 "total_receive": 0,
                 "total_sent": 0,
@@ -104,6 +97,28 @@ def get_conf_peers_data(config_name):
                 "traffic": []
             })
 
+        # Get latest handshakes
+        try:
+            data_usage = subprocess.check_output("wg show " + config_name + " latest-handshakes", shell=True)
+        except Exception:
+            return "stopped"
+        data_usage = data_usage.decode("UTF-8").split()
+        count = 0
+        now = datetime.now()
+        b = timedelta(minutes=2)
+        for i in range(int(len(data_usage) / 2)):
+            minus = now - datetime.fromtimestamp(int(data_usage[count + 1]))
+            if minus < b:
+                status = "running"
+            else:
+                status = "stopped"
+            if int(data_usage[count + 1]) > 0:
+                db.update({"latest_handshake": str(minus).split(".")[0], "status": status},
+                          peers.id == data_usage[count])
+            else:
+                db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
+            count += 2
+
     # Get transfer
     try:
         data_usage = subprocess.check_output("wg show " + config_name + " transfer", shell=True)
@@ -112,19 +127,31 @@ def get_conf_peers_data(config_name):
     data_usage = data_usage.decode("UTF-8").split()
     count = 0
     for i in range(int(len(data_usage) / 3)):
-        db.update({"total_receive": round(int(data_usage[count + 1]) / (1024 ** 3), 4),
-                   "total_sent": round(int(data_usage[count + 2]) / (1024 ** 3), 4),
-                   "total_data": round((int(data_usage[count + 2]) + int(data_usage[count + 1])) / (1024 ** 3), 4)},
-                  peers.id == data_usage[count])
-        peer_data[data_usage[count]]['total_receive'] = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
-        peer_data[data_usage[count]]['total_sent'] = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
-        peer_data[data_usage[count]]['total_data'] = round(
-            (int(data_usage[count + 2]) + int(data_usage[count + 1])) / (1024 ** 3), 4)
-        traffic = db.search(peers.id == data_usage[count])[0]['traffic']
-        traffic.append({"time": current_time, "total_receive": round(int(data_usage[count + 1]) / (1024 ** 3), 4),
-                        "total_sent": round(int(data_usage[count + 2]) / (1024 ** 3), 4)})
-        db.update({"traffic": traffic}, peers.id == data_usage[count])
+        cur_i = db.search(peers.id == data_usage[count])
+        total_sent = cur_i[0]['total_sent']
+        total_receive = cur_i[0]['total_receive']
+        cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
+        cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
+        if cur_i[0]["status"] == "running":
+            if total_sent <= cur_total_sent:
+                total_sent = cur_total_sent
+            else: total_sent += cur_total_sent
+
+            if total_receive <= cur_total_receive:
+                total_receive = cur_total_receive
+            else: total_receive += cur_total_receive
+            db.update({"total_receive": round(total_receive,4),
+                       "total_sent": round(total_sent,4),
+                       "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
+
+        # Will get implement in the future
+        # traffic = db.search(peers.id == data_usage[count])[0]['traffic']
+        # traffic.append({"time": current_time, "total_receive": round(int(data_usage[count + 1]) / (1024 ** 3), 4),
+        #                 "total_sent": round(int(data_usage[count + 2]) / (1024 ** 3), 4)})
+        # db.update({"traffic": traffic}, peers.id == data_usage[count])
+
         count += 3
+
     # Get endpoint
     try:
         data_usage = subprocess.check_output("wg show " + config_name + " endpoints", shell=True)
@@ -134,41 +161,14 @@ def get_conf_peers_data(config_name):
     count = 0
     for i in range(int(len(data_usage) / 2)):
         db.update({"endpoint": data_usage[count + 1]}, peers.id == data_usage[count])
-
-        peer_data[data_usage[count]]['endpoint'] = data_usage[count + 1]
-        count += 2
-        
-    # Get latest handshakes
-    try:
-        data_usage = subprocess.check_output("wg show " + config_name + " latest-handshakes", shell=True)
-    except Exception:
-        return "stopped"
-    data_usage = data_usage.decode("UTF-8").split()
-    count = 0
-    now = datetime.now()
-    b = timedelta(minutes=2)
-    for i in range(int(len(data_usage) / 2)):
-        minus = now - datetime.fromtimestamp(int(data_usage[count + 1]))
-        status = ""
-        if minus < b:
-            peer_data[data_usage[count]]['status'] = "running"
-            status = "running"
-        else:
-            peer_data[data_usage[count]]['status'] = "stopped"
-            status = "stopped"
-        if (int(data_usage[count + 1]) > 0):
-            db.update({"latest_handshake": str(minus).split(".")[0], "status": status}, peers.id == data_usage[count])
-            peer_data[data_usage[count]]['latest_handshake'] = str(minus).split(".")[0]
-        else:
-            db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
-            peer_data[data_usage[count]]['latest_handshake'] = "(None)"      
         count += 2
 
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
         db.update({"allowed_ip":i['AllowedIPs']}, peers.id == i["PublicKey"])
 
-def getdb(config_name):
+
+def get_peers(config_name):
     get_conf_peers_data(config_name)
     db = TinyDB('db/' + config_name + '.json')
     result = db.all()
@@ -178,8 +178,7 @@ def getdb(config_name):
 
 def get_conf_pub_key(config_name):
     try:
-        pub_key = subprocess.check_output("wg show " + config_name + " public-key", shell=True,
-                                          stderr=subprocess.STDOUT)
+        pub_key = subprocess.check_output("wg show " + config_name + " public-key", shell=True, stderr=subprocess.STDOUT)
     except Exception:
         return "stopped"
     return pub_key.decode("UTF-8")
@@ -195,35 +194,22 @@ def get_conf_listen_port(config_name):
 
 
 def get_conf_total_data(config_name):
-    try:
-        data_usage = subprocess.check_output("wg show " + config_name + " transfer", shell=True,
-                                             stderr=subprocess.STDOUT)
-    except Exception:
-        return "stopped"
-    data_usage = data_usage.decode("UTF-8").split()
-    count = 0
+    db = TinyDB('db/' + config_name + '.json')
     upload_total = 0
     download_total = 0
-    total = 0
-    for i in range(int(len(data_usage) / 3)):
-        upload_total += int(data_usage[count + 1])
-        download_total += int(data_usage[count + 2])
-        count += 3
-
-    total = round(((((upload_total + download_total) / 1024) / 1024) / 1024), 4)
-    upload_total = round(((((upload_total) / 1024) / 1024) / 1024), 4)
-    download_total = round(((((download_total) / 1024) / 1024) / 1024), 4)
-
+    for i in db.all():
+        upload_total += round(i['total_sent'],4)
+        download_total += round(i['total_receive'],4)
+    total = round(upload_total + download_total, 4)
     return [total, upload_total, download_total]
 
 
 def get_conf_status(config_name):
-    try:
-        status = subprocess.check_output("wg show " + config_name, shell=True, stderr=subprocess.STDOUT)
-    except Exception:
-        return "stopped"
-    else:
+    ifconfig = dict(ifcfg.interfaces().items())
+    if config_name in ifconfig.keys():
         return "running"
+    else:
+        return "stopped"
 
 
 def get_conf_list():
@@ -239,18 +225,6 @@ def get_conf_list():
                     temp['checked'] = ""
                 conf.append(temp)
     conf = sorted(conf, key=itemgetter('status'))
-    return conf
-
-
-def get_running_conf_list():
-    conf = []
-    for i in os.listdir(conf_location):
-        if not i.startswith('.'):
-            if ".conf" in i:
-                i = i.replace('.conf', '')
-                if get_conf_status(i) == "running":
-                    conf.append(i)
-
     return conf
 
 
@@ -278,12 +252,12 @@ def get_conf(config_name):
     db = TinyDB('db/' + config_name + '.json')
 
     conf_data = {
+        "peer_data": get_peers(config_name),
         "name": config_name,
         "status": get_conf_status(config_name),
         "total_data_usage": get_conf_total_data(config_name),
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
-        "peer_data": getdb(config_name),
         "running_peer": get_conf_running_peer_number(config_name),
     }
     if conf_data['status'] == "stopped":
@@ -371,10 +345,6 @@ def get_peer_name(config_name):
     peers = Query()
     result = db.search(peers.id == id)
     return result[0]['name']
-    # db.update({"name": name}, peers.id == id)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=10086)
-    # for i in get_running_conf_list():
-    #     p = Process(target=get_conf_peers_data, args=(i,))
-    #     p.start()
