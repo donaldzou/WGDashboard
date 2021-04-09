@@ -166,7 +166,7 @@ def get_conf_peers_data(config_name):
 
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
-        db.update({"allowed_ip":i['AllowedIPs']}, peers.id == i["PublicKey"])
+        db.update({"allowed_ip":i.get('AllowedIPs', None)}, peers.id == i["PublicKey"])
 
 def getdb(config_name):
     get_conf_peers_data(config_name)
