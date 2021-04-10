@@ -35,10 +35,10 @@
   [Peer]
   PublicKey = HABCDEFGHIJKLMNOPQRSTUVWXYZ123123123123
   AllowedIPs = 192.168.0.2/32
-  Endpoint = 8.8.8.8:12345
   
   ...
   ```
+  **Note: For peers, `PublicKey` & `AllowedIPs` is required.**
 - Python 3.7+ & Pip3
   ```
   $ sudo apt-get install python3 python3-pip
