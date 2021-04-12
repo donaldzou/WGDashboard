@@ -62,7 +62,7 @@ $ python3 dashboard.py
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086)
 
-**3. Install with Production Mode (Optional), not tested yet. Proceed with caution.**
+**3. Install with Production Mode (Optional), not tested yet. ‼️ Proceed with caution. ‼️**
 
 ```
 $ cd Wireguard-Dashboard/src
