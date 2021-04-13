@@ -78,11 +78,6 @@ $ flask run
 ![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
 ![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
 
-## 🙌 Contributors
-<a href="https://github.com/donaldzou/wireguard-dashboard/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=donaldzou/wireguard-dashboard" />
-</a>
-
 ## Contributors ✨
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
