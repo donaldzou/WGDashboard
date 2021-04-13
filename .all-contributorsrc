@@ -14,6 +14,15 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "tonjo",
+      "name": "tonjo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4726289?v=4",
+      "profile": "https://github.com/tonjo",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
