@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/donaldzou/wireguard-dashboard/main/img/Group%202.png" width="128">
+</p>
 <h1 align="center"> Wireguard Dashboard</h1>
 
 
