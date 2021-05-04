@@ -5,3 +5,5 @@ wg.db
 *.json
 .idea
 src/test.py
+tmp
+__pycache__

@@ -1,13 +1,22 @@
-import ifcfg
+# Python Built-in Library
 import os
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, session, abort
 import subprocess
 from datetime import datetime, date, time, timedelta
 from operator import itemgetter
-from tinydb import TinyDB, Query
+import secrets
+import hashlib
+import json, urllib.request
 
+# PIP installed library
+import ifcfg
+from tinydb import TinyDB, Query
+import configparser
+
+dashboard_conf = 'wg-dashboard.ini'
 conf_location = "/etc/wireguard"
 app = Flask("Wireguard Dashboard")
+app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 conf_data = {}
 
@@ -177,20 +186,20 @@ def get_peers(config_name):
 
 
 def get_conf_pub_key(config_name):
-    try:
-        pub_key = subprocess.check_output("wg show " + config_name + " public-key", shell=True, stderr=subprocess.STDOUT)
-    except Exception:
-        return "stopped"
-    return pub_key.decode("UTF-8")
+    conf = configparser.ConfigParser(strict=False)
+    conf.read(conf_location+"/"+config_name+".conf")
+    pri = conf.get("Interface", "PrivateKey")
+    pub = subprocess.check_output("echo '" + pri + "' | wg pubkey", shell=True)
+    conf.clear()
+    return pub.decode().strip("\n")
 
 
 def get_conf_listen_port(config_name):
-    try:
-        pub_key = subprocess.check_output("wg show " + config_name + " listen-port", shell=True,
-                                          stderr=subprocess.STDOUT)
-    except Exception:
-        return "stopped"
-    return pub_key.decode("UTF-8")
+    conf = configparser.ConfigParser(strict=False)
+    conf.read(conf_location + "/" + config_name + ".conf")
+    port = conf.get("Interface", "ListenPort")
+    conf.clear()
+    return port
 
 
 def get_conf_total_data(config_name):
@@ -219,19 +228,153 @@ def get_conf_list():
             if ".conf" in i:
                 i = i.replace('.conf', '')
                 temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
+                # get_conf_peers_data(i)
                 if temp['status'] == "running":
                     temp['checked'] = 'checked'
                 else:
                     temp['checked'] = ""
                 conf.append(temp)
-    conf = sorted(conf, key=itemgetter('status'))
+    conf = sorted(conf, key=itemgetter('conf'))
     return conf
 
+
+
+
+@app.before_request
+def auth_req():
+    conf = configparser.ConfigParser(strict=False)
+    conf.read(dashboard_conf)
+    req = conf.get("Server", "auth_req")
+    if req == "true":
+        if '/static/' not in request.path and \
+                request.endpoint != "signin" and \
+                request.endpoint != "signout" and \
+                request.endpoint != "auth" and \
+                "username" not in session:
+            print(request.path)
+            print("not loggedin")
+            return redirect(url_for("signin"))
+    else:
+        if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd', 'update_app_ip_port']:
+            return redirect(url_for("index"))
+
+@app.route('/signin', methods=['GET'])
+def signin():
+    message = ""
+    if "message" in session:
+        message = session['message']
+        session.pop("message")
+    return render_template('signin.html', message=message)
+
+
+@app.route('/signout', methods=['GET'])
+def signout():
+    if "username" in session:
+        session.pop("username")
+    message = "Sign out successfully!"
+    return render_template('signin.html', message=message)
+
+
+
+@app.route('/settings', methods=['GET'])
+def settings():
+    message = ""
+    status = ""
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    if "message" in session and "message_status" in session:
+        message = session['message']
+        status = session['message_status']
+        session.pop("message")
+        session.pop("message_status")
+    required_auth = config.get("Server", "auth_req")
+    return render_template('settings.html',conf=get_conf_list(),message=message, status=status, app_ip = config.get("Server", "app_ip"), app_port = config.get("Server", "app_port"), required_auth=required_auth)
+
+@app.route('/auth', methods=['POST'])
+def auth():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    password = hashlib.sha256(request.form['password'].encode())
+    if password.hexdigest() == config["Account"]["password"] and request.form['username'] == config["Account"]["username"]:
+        session['username'] = request.form['username']
+        config.clear()
+        return redirect(url_for("index"))
+    else:
+        session['message'] = "Username or Password is correct."
+        config.clear()
+        return redirect(url_for("signin"))
+
+@app.route('/update_acct', methods=['POST'])
+def update_acct():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    config.set("Account", "username", request.form['username'])
+    try:
+        config.write(open(dashboard_conf, "w"))
+        session['message'] = "Username update successfully!"
+        session['message_status'] = "success"
+        session['username'] = request.form['username']
+        config.clear()
+        return redirect(url_for("settings"))
+    except Exception:
+        session['message'] = "Username update failed."
+        session['message_status'] = "danger"
+        config.clear()
+        return redirect(url_for("settings"))
+
+@app.route('/update_pwd', methods=['POST'])
+def update_pwd():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    if hashlib.sha256(request.form['currentpass'].encode()).hexdigest() == config.get("Account", "password"):
+        if hashlib.sha256(request.form['newpass'].encode()).hexdigest() ==  hashlib.sha256(request.form['repnewpass'].encode()).hexdigest():
+            config.set("Account", "password", hashlib.sha256(request.form['repnewpass'].encode()).hexdigest())
+            try:
+                config.write(open(dashboard_conf, "w"))
+                session['message'] = "Password update successfully!"
+                session['message_status'] = "success"
+                config.clear()
+                return redirect(url_for("settings"))
+            except Exception:
+                session['message'] = "Password update failed"
+                session['message_status'] = "danger"
+                config.clear()
+                return redirect(url_for("settings"))
+        else:
+            session['message'] = "Your New Password does not match."
+            session['message_status'] = "danger"
+            config.clear()
+            return redirect(url_for("settings"))
+    else:
+        session['message'] = "Your Password does not match."
+        session['message_status'] = "danger"
+        config.clear()
+        return redirect(url_for("settings"))
+
+@app.route('/update_app_ip_port', methods=['POST'])
+def update_app_ip_port():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    config.set("Server", "app_ip", request.form['app_ip'])
+    config.set("Server", "app_port", request.form['app_port'])
+    config.write(open(dashboard_conf, "w"))
+    config.clear()
+    os.system('bash wgd.sh restart')
+
+@app.route('/check_update_dashboard', methods=['GET'])
+def check_update_dashboard():
+    conf = configparser.ConfigParser(strict=False)
+    conf.read(dashboard_conf)
+    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/wireguard-dashboard/releases").read()
+    output = json.loads(data)
+    if conf.get("Server", "version") == output[0]["tag_name"]:
+        return "false"
+    else:
+        return "true"
 
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html', conf=get_conf_list())
-
 
 @app.route('/configuration/<config_name>', methods=['GET'])
 def conf(config_name):
@@ -241,16 +384,15 @@ def conf(config_name):
         "checked": ""
     }
     if conf_data['status'] == "stopped":
-        return redirect('/')
+        conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-        return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data)
+    return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data)
 
 
 @app.route('/get_config/<config_name>', methods=['GET'])
 def get_conf(config_name):
     db = TinyDB('db/' + config_name + '.json')
-
     conf_data = {
         "peer_data": get_peers(config_name),
         "name": config_name,
@@ -261,14 +403,18 @@ def get_conf(config_name):
         "running_peer": get_conf_running_peer_number(config_name),
     }
     if conf_data['status'] == "stopped":
-        return redirect('/')
+        # return redirect('/')
+        conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-        return render_template('get_conf.html', conf=get_conf_list(), conf_data=conf_data)
+    return render_template('get_conf.html', conf=get_conf_list(), conf_data=conf_data)
 
 
 @app.route('/switch/<config_name>', methods=['GET'])
 def switch(config_name):
+    if "username" not in session:
+        print("not loggedin")
+        return redirect(url_for("signin"))
     status = get_conf_status(config_name)
     if status == "running":
         try:
@@ -301,7 +447,6 @@ def add_peer(config_name):
             return "true"
         except subprocess.CalledProcessError as exc:
             return exc.output.strip()
-
             # return redirect('/configuration/'+config_name)
 
 
@@ -347,4 +492,9 @@ def get_peer_name(config_name):
     return result[0]['name']
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False, port=10086)
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
+    app_ip = config.get("Server", "app_ip")
+    app_port = config.get("Server", "app_port")
+    config.clear()
+    app.run(host=app_ip, debug=False, port=app_port)

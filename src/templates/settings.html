@@ -1,0 +1,107 @@
+<html>
+    {% include "header.html" %}
+    <body>
+       {% include "navbar.html" %}
+        <div class="container-fluid">
+            {% include "sidebar.html" %}
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="setting-container mt-4">
+                    {% if message != ""%}
+                        <div class="alert alert-{{ status }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                    <h1 class="pb-4">Settings</h1>
+                    {% if required_auth == "true" %}
+                    <h3>Account</h3>
+                    <form action="/update_acct" method="post">
+                        <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control mb-4" id="username" name="username" value="{{ session['username'] }}">
+                        <button type="submit" class="btn btn-success" >Update Account</button>
+                        </div>
+                    </form>
+                    <hr>
+                    <h3>Security</h3>
+                    <form action="/update_pwd", method="post">
+                        <div class="form-group">
+                        <label for="currentpass">Current Password</label>
+                        <input type="password" class="form-control mb-2" id="currentpass" name="currentpass">
+                        <label for="newpass">New Password</label>
+                        <input type="password" class="form-control mb-2" id="newpass" name="newpass">
+                        <label for="repnewpass">Repeat New Password</label>
+                        <input type="password" class="form-control mb-4" id="repnewpass" name="repnewpass">
+                        <button type="submit" class="btn btn-danger">Update Password</button>
+                        </div>
+                    </form>
+                    <hr>
+                    {% endif %}
+                    <h3>Dashboard Configuration</h3>
+                    <form action="/update_app_ip_port" method="post" class="update_app_ip_port">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm">
+                                    <label for="app_ip" >Dashboard IP</label>
+                                    <input type="text" class="form-control mb-2" id="app_ip" name="app_ip" value="{{ app_ip }}">
+                                    <p><small class="text-danger mb-4">0.0.0.0 means it can be access by anyone with your server IP Address.</small></p>
+                                </div>
+                                <div class="col-sm">
+                                    <label for="app_port">Dashboard Port</label>
+                                    <input type="text" class="form-control mb-4" id="app_port" name="app_port" value="{{ app_port }}">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger confirm_modal" data-toggle="modal" data-target="#confirmModal">Update Configuration & Restart</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+            <!-- Modal -->
+            <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Confirm Dashboard Configuration</h5>
+                  </div>
+                  <div class="modal-body">
+                    <small>Dashboard Original IP</small>
+                    <p>{{ app_ip }}</p>
+                    <small style="font-weight: bold" class="text-bold">Dashboard New IP</small>
+                    <p class="app_new_ip text-bold text-danger" style="font-weight: bold"></p>
+                    <small>Dashboard Original Port</small>
+                    <p>{{ app_port }}</p>
+                    <small style="font-weight: bold" class="text-bold">Dashboard New Port</small>
+                    <p class="app_new_port text-bold text-danger" style="font-weight: bold"></p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary cancel_restart" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger confirm_restart">Confirm & Restart Dashboard</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </body>
+{% include "footer.html" %}
+<script>
+    $(".sb-settings-url").addClass("active")
+    $(".confirm_modal").click(function (){
+        $(".app_new_ip").html($("#app_ip")[0].value)
+        $(".app_new_port").html($("#app_port")[0].value)
+    })
+
+    $(".confirm_restart").click(function (){
+        $(".cancel_restart").remove()
+        countdown = 7;
+        $.post('/update_app_ip_port', $('.update_app_ip_port').serialize())
+        url = $("#app_ip")[0].value+":"+$("#app_port")[0].value;
+        $(".confirm_restart").attr("disabled", "disabled")
+        setInterval(function (){
+            if (countdown === 0){
+                window.location.replace("http://"+url);
+            }
+            $(".confirm_restart").html("Redirecting you in "+countdown+" seconds.")
+            countdown--;
+        },1000)
+    })
+</script>
+</html>

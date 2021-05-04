@@ -22,11 +22,11 @@ body {
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
 
-@media (max-width: 767.98px) {
-  .sidebar {
-    top: 5rem;
-  }
-}
+/*@media (max-width: 767.98px) {*/
+/*  .sidebar {*/
+/*    top: 5rem;*/
+/*  }*/
+/*}*/
 
 .sidebar-sticky {
   position: relative;
@@ -47,6 +47,11 @@ body {
 .sidebar .nav-link {
   font-weight: 500;
   color: #333;
+  transition: 0.2s cubic-bezier(0.82, -0.07, 0, 1.01);
+}
+
+.nav-link:hover {
+    padding-left: 30px;
 }
 
 .sidebar .nav-link .feather {
@@ -139,4 +144,21 @@ body {
 
 .btn-setting-peer:hover{
   color:#007bff
+}
+
+.login-container{
+  padding: 2rem;
+}
+
+@media (max-width: 992px){
+  .card-col{
+    margin-bottom: 1rem;
+  }
+}
+
+.switch{
+  font-size: 2rem;
+}
+.switch:hover{
+  text-decoration: none
 }

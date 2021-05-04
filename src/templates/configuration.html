@@ -1,45 +1,11 @@
 <html>
 
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Wireguard Dashboard</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='dashboard.css') }}">
-	<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.1/dist/chart.min.js"></script>
-</head>
+{% include "header.html" %}
 
 <body>
-	<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-		<a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="/">Wireguard Dashboard</a>
-		<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse"
-			data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-	</nav>
+	{% include "navbar.html" %}
 	<div class="container-fluid">
-		<div class="row">
-			<div class="row">
-				<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-					<div class="sidebar-sticky pt-3">
-						<ul class="nav flex-column">
-							<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-						</ul>
-						<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-							<span>Configurations</span>
-						</h6>
-						<ul class="nav flex-column">
-							{% for i in conf%}
-								<li class="nav-item"><a class="nav-link" href="/configuration/{{i['conf']}}">{{i['conf']}}</a></li>
-							{%endfor%}
-						</ul>
-					</div>
-				</nav>
-			</div>
-		</div>
+		{% include "sidebar.html" %}
 		<div id="config_body">
 
 		</div>
@@ -150,6 +116,9 @@
 	integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
 	crossorigin="anonymous"></script>
 <script>
+    $(".sb-{{conf_data['name']}}-url").addClass("active");
+
+
 	function load_data(){
 		$.ajax({
 			method: "GET",
@@ -176,16 +145,16 @@
 	});
 </script>
 <script>
-	$('.switch').change(function() {
-		if ($(this).prop('checked') == false){
+    $("body").on("click", ".switch", function (){
+        if ($(this).prop('checked') === true){
 			if (confirm('Are you sure you want to turn off this connection?')){
-				location.replace("/switch/"+$(this).attr('id'));
+				location.replace("/switch/"+$(this).attr('id'))
 			}
 		}
 		else{
-			location.replace("/switch/"+$(this).attr('id'));
+			location.replace("/switch/"+$(this).attr('id'))
 		}
-    });
+    })
 	$("#save_peer").click(function(){
 		if ($("#allowed_ips") != "" && $("#public_key") != ""){
 			var conf = $(this).attr('conf_id')
@@ -287,5 +256,7 @@
             }
         })
     })
+
+
 </script>
 </html>	
