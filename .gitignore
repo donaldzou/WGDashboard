@@ -7,3 +7,4 @@ wg.db
 src/test.py
 tmp
 __pycache__
+src/wg-dashboard.ini
