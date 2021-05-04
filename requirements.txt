@@ -1,2 +1,4 @@
 Flask==1.1.2
 tinydb==4.3.0
+ifcfg==0.21
+configparser==5.0.2

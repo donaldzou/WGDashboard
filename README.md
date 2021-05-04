@@ -59,7 +59,7 @@ $ python3 -m pip install flask tinydb
 **2. Install Wireguard Dashboard**
 
 ```
-$ git clone https://github.com/donaldzou/Wireguard-Dashboard.git
+$ git clone -b v1.1.2 https://github.com/donaldzou/Wireguard-Dashboard.git
 $ cd Wireguard-Dashboard/src
 $ python3 dashboard.py
 ```

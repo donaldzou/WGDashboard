@@ -7,7 +7,13 @@
 			</div>
 			<div class="col-sm">
 				<small class="text-muted"><strong>ACTION</strong></small><br>
-				<input class="mt-2 switch" id="{{conf_data['name']}}" type="checkbox" data-toggle="toggle"  {{conf_data['checked']}} data-size="sm">
+{#				<input class="mt-2 switch" id="{{conf_data['name']}}" type="checkbox" data-toggle="toggle"  {{conf_data['checked']}} data-size="sm">#}
+
+                {% if conf_data['checked'] == "checked" %}
+                    <a href="#" id="{{conf_data['name']}}" {{conf_data['checked']}} class="switch text-primary"><i class="bi bi-toggle2-on"></i> ON</a>
+                {% else %}
+                    <a href="#" id="{{conf_data['name']}}" {{conf_data['checked']}} class="switch text-secondary"><i class="bi bi-toggle2-off"></i> OFF</a>
+                {% endif %}
 			</div>
 			<div class="w-100"></div>
 			<div class="col-sm">
@@ -96,50 +102,6 @@
 						<small class="text-muted"><strong>END POINT</strong></small>
 						<h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
 					</div>
-{#					<div class="w-100"></div>#}
-{#                    <div class="col-sm">#}
-{#                        <canvas id="{{ i['id'] }}_chart" style="width: 100%" height="200"></canvas>#}
-{#                    </div>#}
-{#                    <script>#}
-{#                        var data = "{{  i['traffic'] }}";#}
-{#                        data = data.replaceAll("&#39;", "\"")#}
-{#                        data = JSON.parse(data)#}
-{#                        y_label = [];#}
-{#                        data_point = [];#}
-{#                        for (var i = 1; i < data.length; i++){#}
-{#                            y_label.push(data[i]['time'])#}
-{#                            data_point.push(data[i]['total_sent'] - data[i-1]['total_sent']);#}
-{#                        }#}
-{#                        var ctx = document.getElementById('{{ i['id'] }}_chart');#}
-{#                        var plot_data =#}
-{#                            {#}
-{#                                labels: y_label,#}
-{#                                datasets:[{#}
-{#                                    label: "Traffic",#}
-{#                                    data: data_point,#}
-{#                                    fill: false,#}
-{#                                    borderColor: 'rgb(75, 192, 192)',#}
-{#                                    tension: 0.1#}
-{#                                }],#}
-{#                                options: {#}
-{#                                    scales: {#}
-{#                                        xAxes: [{#}
-{#                                            type: 'time',#}
-{#                                            ticks: {#}
-{#                                                autoSkip: true,#}
-{#                                                maxTicksLimit: 12#}
-{#                                            }#}
-{#                                        }]#}
-{#                                    },#}
-{#                                    responsive: true#}
-{#                                }#}
-{#                            }#}
-{##}
-{#                        var myLineChart = new Chart(ctx, {#}
-{#                            type: 'line',#}
-{#                            data: plot_data#}
-{#                        });#}
-{#                    </script>#}
                     <div class="w-100"></div>
 					<div class="col-sm">
 						<!-- <small class="text-muted"><strong>ACTION</strong></small> -->

@@ -1,0 +1,30 @@
+<div class="row">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="sidebar-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link sb-home-url" href="/">Home</a></li>
+                    {% if "username" in session %}
+                        <li class="nav-item"><a class="nav-link sb-settings-url" href="/settings">Settings</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link sb-update-url" href="/">Check Update</a></li>
+                </ul>
+                <hr>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Configurations</span>
+                </h6>
+                <ul class="nav flex-column">
+                    {% for i in conf%}
+                        <li class="nav-item"><a class="nav-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}">{{i['conf']}}</a></li>
+                    {%endfor%}
+                </ul>
+                <hr>
+                {% if "username" in session %}
+                    <ul class="nav flex-column">
+                            <li class="nav-item"><a class="nav-link text-danger" href="/signout" style="font-weight: bold">Sign Out</a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</div>
