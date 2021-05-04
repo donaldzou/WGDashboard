@@ -7,12 +7,13 @@ from operator import itemgetter
 import secrets
 import hashlib
 import json, urllib.request
-
+import configparser
 # PIP installed library
 import ifcfg
 from tinydb import TinyDB, Query
-import configparser
 
+
+dashboard_version = 'v2.0'
 dashboard_conf = 'wg-dashboard.ini'
 conf_location = "/etc/wireguard"
 app = Flask("Wireguard Dashboard")
@@ -491,10 +492,39 @@ def get_peer_name(config_name):
     result = db.search(peers.id == id)
     return result[0]['name']
 
+def init_dashboard():
+    # Set Default INI File
+    conf = configparser.ConfigParser(strict=False)
+    if os.path.isfile("wg-dashboard.ini") == False:
+        conf_file = open("wg-dashboard.ini", "w+")
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+
+    if "Account" not in config:
+        config['Account'] = {}
+    if "username" not in config['Account']:
+        config['Account']['username'] = 'admin'
+    if "password" not in config['Account']:
+        config['Account']['password'] = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
+
+    if "Server" not in config:
+        config['Server'] = {}
+    if 'app_ip' not in config['Server']:
+        config['Server']['app_ip'] = '0.0.0.0'
+    if 'app_port' not in config['Server']:
+        config['Server']['app_port'] = '10086'
+    if 'auth_req' not in config['Server']:
+        config['Server']['auth_req'] = 'true'
+    if 'version' not in config['Server'] or config['Server']['version'] != dashboard_version:
+        config['Server']['version'] = dashboard_version
+    config.write(open(dashboard_conf, "w"))
+
 if __name__ == "__main__":
+    init_dashboard()
     config = configparser.ConfigParser(strict=False)
     config.read('wg-dashboard.ini')
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
     config.clear()
     app.run(host=app_ip, debug=False, port=app_port)
+
