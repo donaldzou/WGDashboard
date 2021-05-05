@@ -68,7 +68,6 @@ update_wgd() {
 }
 
 
-
 if [ "$#" != 1 ];
   then
     help
