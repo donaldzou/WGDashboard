@@ -20,7 +20,7 @@
 
 1. Stop the dashboard if it is running.
 2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.0`  to get the new update inside `Wireguard-Dashboard` directory.
-3. Proceed **Step 2 & 3** in the Install step down below.
+3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 <hr>
 
