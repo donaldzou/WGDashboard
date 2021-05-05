@@ -11,15 +11,15 @@ import configparser
 # PIP installed library
 import ifcfg
 from tinydb import TinyDB, Query
-
-
 dashboard_version = 'v2.0'
 dashboard_conf = 'wg-dashboard.ini'
-conf_location = "/etc/wireguard"
+update = ""
+
 app = Flask("Wireguard Dashboard")
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 conf_data = {}
+
 
 
 def get_conf_peer_key(config_name):
@@ -53,7 +53,7 @@ def get_conf_running_peer_number(config_name):
 
 def read_conf_file(config_name):
     # Read Configuration File Start
-    conf_location = "/etc/wireguard/" + config_name + ".conf"
+    conf_location = wg_conf_path+"/" + config_name + ".conf"
     f = open(conf_location, 'r')
     file = f.read().split("\n")
     conf_peer_data = {
@@ -188,7 +188,7 @@ def get_peers(config_name):
 
 def get_conf_pub_key(config_name):
     conf = configparser.ConfigParser(strict=False)
-    conf.read(conf_location+"/"+config_name+".conf")
+    conf.read(wg_conf_path + "/" + config_name + ".conf")
     pri = conf.get("Interface", "PrivateKey")
     pub = subprocess.check_output("echo '" + pri + "' | wg pubkey", shell=True)
     conf.clear()
@@ -197,7 +197,7 @@ def get_conf_pub_key(config_name):
 
 def get_conf_listen_port(config_name):
     conf = configparser.ConfigParser(strict=False)
-    conf.read(conf_location + "/" + config_name + ".conf")
+    conf.read(wg_conf_path + "/" + config_name + ".conf")
     port = conf.get("Interface", "ListenPort")
     conf.clear()
     return port
@@ -224,7 +224,7 @@ def get_conf_status(config_name):
 
 def get_conf_list():
     conf = []
-    for i in os.listdir(conf_location):
+    for i in os.listdir(wg_conf_path):
         if not i.startswith('.'):
             if ".conf" in i:
                 i = i.replace('.conf', '')
@@ -246,6 +246,8 @@ def auth_req():
     conf = configparser.ConfigParser(strict=False)
     conf.read(dashboard_conf)
     req = conf.get("Server", "auth_req")
+    session['update'] = update
+    session['dashboard_version'] = dashboard_version
     if req == "true":
         if '/static/' not in request.path and \
                 request.endpoint != "signin" and \
@@ -256,7 +258,7 @@ def auth_req():
             print("not loggedin")
             return redirect(url_for("signin"))
     else:
-        if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd', 'update_app_ip_port']:
+        if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd', 'update_app_ip_port', 'update_wg_conf_path']:
             return redirect(url_for("index"))
 
 @app.route('/signin', methods=['GET'])
@@ -289,7 +291,7 @@ def settings():
         session.pop("message")
         session.pop("message_status")
     required_auth = config.get("Server", "auth_req")
-    return render_template('settings.html',conf=get_conf_list(),message=message, status=status, app_ip = config.get("Server", "app_ip"), app_port = config.get("Server", "app_port"), required_auth=required_auth)
+    return render_template('settings.html',conf=get_conf_list(),message=message, status=status, app_ip=config.get("Server", "app_ip"), app_port=config.get("Server", "app_port"), required_auth=required_auth, wg_conf_path=config.get("Server", "wg_conf_path"))
 
 @app.route('/auth', methods=['POST'])
 def auth():
@@ -362,19 +364,24 @@ def update_app_ip_port():
     config.clear()
     os.system('bash wgd.sh restart')
 
-@app.route('/check_update_dashboard', methods=['GET'])
-def check_update_dashboard():
-    conf = configparser.ConfigParser(strict=False)
-    conf.read(dashboard_conf)
-    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/wireguard-dashboard/releases").read()
-    output = json.loads(data)
-    if conf.get("Server", "version") == output[0]["tag_name"]:
-        return "false"
-    else:
-        return "true"
+@app.route('/update_wg_conf_path', methods=['POST'])
+def update_wg_conf_path():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    config.set("Server", "wg_conf_path", request.form['wg_conf_path'])
+    config.write(open(dashboard_conf, "w"))
+    session['message'] = "WireGuard Configuration Path Update Successfully!"
+    session['message_status'] = "success"
+    config.clear()
+    os.system('bash wgd.sh restart')
+
+# @app.route('/check_update_dashboard', methods=['GET'])
+# def check_update_dashboard():
+#    return have_update
 
 @app.route('/', methods=['GET'])
 def index():
+    print(request.referrer)
     return render_template('index.html', conf=get_conf_list())
 
 @app.route('/configuration/<config_name>', methods=['GET'])
@@ -427,7 +434,8 @@ def switch(config_name):
             status = subprocess.check_output("wg-quick up " + config_name, shell=True)
         except Exception:
             return redirect('/')
-    return redirect('/')
+
+    return redirect(request.referrer)
 
 
 @app.route('/add_peer/<config_name>', methods=['POST'])
@@ -453,6 +461,9 @@ def add_peer(config_name):
 
 @app.route('/remove_peer/<config_name>', methods=['POST'])
 def remove_peer(config_name):
+    if get_conf_status(config_name) == "stopped":
+        return "Your need to turn on "+config_name+" first."
+
     db = TinyDB("db/" + config_name + ".json")
     peers = Query()
     data = request.get_json()
@@ -494,8 +505,7 @@ def get_peer_name(config_name):
 
 def init_dashboard():
     # Set Default INI File
-    conf = configparser.ConfigParser(strict=False)
-    if os.path.isfile("wg-dashboard.ini") == False:
+    if not os.path.isfile("wg-dashboard.ini"):
         conf_file = open("wg-dashboard.ini", "w+")
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
@@ -509,6 +519,8 @@ def init_dashboard():
 
     if "Server" not in config:
         config['Server'] = {}
+    if 'wg_conf_path' not in config['Server']:
+        config['Server']['wg_conf_path'] = '/etc/wireguard'
     if 'app_ip' not in config['Server']:
         config['Server']['app_ip'] = '0.0.0.0'
     if 'app_port' not in config['Server']:
@@ -518,13 +530,27 @@ def init_dashboard():
     if 'version' not in config['Server'] or config['Server']['version'] != dashboard_version:
         config['Server']['version'] = dashboard_version
     config.write(open(dashboard_conf, "w"))
+    config.clear()
+
+def check_update():
+    conf = configparser.ConfigParser(strict=False)
+    conf.read(dashboard_conf)
+    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/wireguard-dashboard/releases").read()
+    output = json.loads(data)
+    if conf.get("Server", "version") == output[0]["tag_name"]:
+        return "false"
+    else:
+        return "true"
+
 
 if __name__ == "__main__":
     init_dashboard()
+    update = check_update()
     config = configparser.ConfigParser(strict=False)
     config.read('wg-dashboard.ini')
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
+    wg_conf_path = config.get("Server", "wg_conf_path")
     config.clear()
     app.run(host=app_ip, debug=False, port=app_port)
 

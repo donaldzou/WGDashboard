@@ -9,3 +9,4 @@ tmp
 __pycache__
 src/wg-dashboard.ini
 src/wg-dashboard.ini
+src/static/pic.xd

@@ -22,6 +22,15 @@
                         </div>
                     </form>
                     <hr>
+                    <h3>WireGuard Configuration Path</h3>
+                    <form action="/update_wg_conf_path" method="post" class="update_wg_conf_path">
+                        <div class="form-group">
+                        <label for="username">Path</label>
+                        <input type="text" class="form-control mb-4" id="wg_conf_path" name="wg_conf_path" value="{{ wg_conf_path }}">
+                        <button class="btn btn-danger change_path">Update Path & Restart Dashboard</button>
+                        </div>
+                    </form>
+                    <hr>
                     <h3>Security</h3>
                     <form action="/update_pwd", method="post">
                         <div class="form-group">
@@ -102,6 +111,21 @@
             $(".confirm_restart").html("Redirecting you in "+countdown+" seconds.")
             countdown--;
         },1000)
-    })
+    });
+
+    $(".change_path").click(function (){
+        $(this).attr("disabled", "disabled");
+        countdown = 5;
+        setInterval(function (){
+            if (countdown === 0){
+                location.reload()
+            }
+            $(".change_path").html("Redirecting you in "+countdown+" seconds.")
+            countdown--;
+        },1000)
+        $.post('/update_wg_conf_path', $('.update_wg_conf_path').serialize())
+
+    });
+
 </script>
 </html>

@@ -7,42 +7,39 @@
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
 </p>
-
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
 </p>
-<p align="center">Monitoring Wireguard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations in a more straight forward way.</p>
+<p align="center">Monitoring Wireguard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
+
+
+
+## 📣 What's New: Version 2.0
+
+- Added login function to dashboard
+  - ***I'm not using the most ideal way to store the username and password, feel free to provide a better way to do this if you any good idea!***
+- Added a config file to the dashboard
+- Dashboard config can be change within the **Setting** tab on the side bar 
+- Adjusted UI
+- And much more!
 
 ## 💡 Features
 
-- Add peers in configuration
-- Manage peer names
+- Add peers for each WireGuard configuration
+- Manage peer
 - Delete peers
 - And many more coming up! Welcome to contribute to this project!
 
 ## 📝 Requirement
 
-- Ubuntu 18.04.1 LTS, other OS might work, but haven't test yet.
-- ‼️ Make sure you have **Wireguard** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
+- Ubuntu or Debian based OS, other might work, but haven't test yet. Tested on the following OS:
+  - [x] Ubuntu 18.04.1 LTS
+  - [ ] If you have tested on other OS and it works perfectly please provide it to me!
+
+- ‼️ Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
 
-  ***Example `.conf` file***
-  ```
-  [Interface]
-  Address = 192.168.0.1/24
-  SaveConfig = true
-  PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-  PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
-  ListenPort = 12345
-  PrivateKey = ABCDEFGHIJKLMNOPQRSTUVWXYZ1234
-  
-  [Peer]
-  PublicKey = HABCDEFGHIJKLMNOPQRSTUVWXYZ123123123123
-  AllowedIPs = 192.168.0.2/32
-  
-  ...
-  ```
-  **Note: For peers, `PublicKey` & `AllowedIPs` is required.**
+  - **Note: For peers, `PublicKey` & `AllowedIPs` is required.**
 - Python 3.7+ & Pip3
   ```
   $ sudo apt-get install python3 python3-pip
@@ -50,36 +47,98 @@
 
 ## 🛠 Install
 
-**1. Install Python Dependencies**
+1. Download Wireguard Dashboard
 
 ```
-$ python3 -m pip install flask tinydb
+$ git clone https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
 
-**2. Install Wireguard Dashboard**
-
-```
-$ git clone -b v1.1.2 https://github.com/donaldzou/Wireguard-Dashboard.git
-$ cd Wireguard-Dashboard/src
-$ python3 dashboard.py
-```
-
-Access your server with port `10086` ! e.g (http://your_server_ip:10086)
-
-**3. Install with Production Mode (Optional), not tested yet. ‼️ Proceed with caution. ‼️**
+**2. Install Python Dependencies**
 
 ```
 $ cd Wireguard-Dashboard/src
-$ export FLASK_APP=dashboard.py
-$ export FLASK_RUN_HOST=0.0.0.0
-$ export FLASK_ENV=development
-$ export FLASK_DEBUG=0
-$ flask run
+$ python3 -m pip install -r requirements.txt
 ```
+
+**3. Install & run Wireguard Dashboard**
+
+```
+$ sudo sh wgd.sh start
+```
+
+Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
+
+## 🪜 Usage
+
+**1. Start/Stop/Restart Wireguard Dashboard**
+
+```
+$ cd Wireguard-Dashboard/src
+$ sudo sh wgd.sh start    # Start the dashboard in background
+$ sudo sh wgd.sh debug    # Start the dashboard in foreground (debug mode)
+$ sudo sh wgd.sh stop     # Stop the dashboard
+$ sudo sh wgd.sh restart  # Restart the dasboard
+$ sudo sh wgd.sh update   # Update the dashboard
+```
+
+⚠️ **For first time user please also read the next section.**
+
+## ✂️ Dashboard Configuration
+
+Since version 2.0, Wireguard Dashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
+
+- `[Account]`
+  - `username` - Username (Default: `admin`)
+  - `password` - Password, will be hash with SHA256 (Default: `admin`).
+- `[Server]`
+  - `app_ip` - IP address the flask will run with (Default: `0.0.0.0`)
+  - `app_port` - Port the flask will run with (Default: `10086`)
+  - `auth_req` - Does the dashboard need authentication  (Default: `true`)
+    - If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **Can only changing the file directly in system**. 
+  - `version` - Dashboard Version
+
+All these settings***** will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. 
+
+- Example
+
+```
+[Account]
+username = admin
+password = 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+
+[Server]
+app_ip = 0.0.0.0
+app_port = 10086
+auth_req = true
+version = v2.0
+```
+
+**: Except `version` and `auth_req` due to security consideration.*
+
+## ❓ How to update the dashboard?
+
+```
+$ cd wireguard-dashboard
+$ sudo sh wgd.sh update  # Perform update
+$ sudo sh wgd.sh start   # Start dashboard
 
 ## 🔍 Example
+
 ![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
-![Conf Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
+
+<p align=center>Index Page</p>
+
+![Signin Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/signin.png)
+
+<p align=center>Signin Page</p>
+
+![Configuration Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
+
+<p align=center>Configuration Page</p>
+
+![Settings Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/settings.png)
+
+<p align=center>Settings Page</p>
 
 ## Contributors ✨
 
@@ -105,3 +164,4 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+

@@ -43,6 +43,18 @@ start_wgd_debug() {
   python3 "$app_name"
 }
 
+update_wgd() {
+  git pull
+  if check_wgd_status; then
+     stop_wgd
+     sleep 2
+     printf "Wireguard Dashboard is stopped. \n"
+     start_wgd_debug
+  else
+    start_wgd_debug
+  fi
+}
+
 
 
 if [ "$#" != 1 ];
@@ -63,7 +75,7 @@ if [ "$#" != 1 ];
               printf "Wireguard Dashboard is not running. \n"
         fi
       elif [ "$1" = "update" ]; then
-        echo "update";
+        update_wgd
       elif [ "$1" = "restart" ]; then
          if check_wgd_status; then
            stop_wgd

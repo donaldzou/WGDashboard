@@ -108,13 +108,7 @@
           </div>
     </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-	integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
-	crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
-	integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
-	crossorigin="anonymous"></script>
+{% include "footer.html" %}
 <script>
     $(".sb-{{conf_data['name']}}-url").addClass("active");
 
@@ -129,11 +123,6 @@
 			async:false,
 			success: function (response){
 				$("#config_body").html(response);
-				$.ajax({
-					url: "{{ url_for('static',filename='bootstrap4-toggle.min.js') }}",
-					dataType: "script",
-            		cache: true
-				});
 			}
 		})
 	}
@@ -146,19 +135,14 @@
 </script>
 <script>
     $("body").on("click", ".switch", function (){
-        if ($(this).prop('checked') === true){
-			if (confirm('Are you sure you want to turn off this connection?')){
-				location.replace("/switch/"+$(this).attr('id'))
-			}
-		}
-		else{
-			location.replace("/switch/"+$(this).attr('id'))
-		}
+        $(this).siblings($(".spinner-border")).css("display", "inline-block");
+         $(this).remove()
+       location.replace("/switch/"+$(this).attr('id'));
     })
+
 	$("#save_peer").click(function(){
 		if ($("#allowed_ips") != "" && $("#public_key") != ""){
 			var conf = $(this).attr('conf_id')
-
 			$.ajax({
 				method: "POST",
 				url: "/add_peer/"+conf,
