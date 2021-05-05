@@ -1,7 +1,7 @@
 #!/bin/bash
 
 app_name="dashboard.py"
-
+dashes='------------------------------------------------------------'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
   printf "Usage: sh wg-dashboard.sh <option>"
@@ -44,14 +44,34 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-  git pull
-  if check_wgd_status; then
-     stop_wgd
-     sleep 2
-     printf "Wireguard Dashboard is stopped. \n"
-     start_wgd_debug
+
+  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases').read(); output = json.loads(data);print(output[0]['tag_name'])")
+  printf "%s\n" "$dashes"
+  printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
+  read up
+  if [ "$up" = "Y" ]; then
+    printf "%s\n" "$dashes"
+    printf "| Shutting down Wireguard Dashboard...                     |\n"
+    printf "%s\n" "$dashes"
+    printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
+    printf "%s\n" "$dashes"
+    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver >  /dev/null 2>&1
+    printf "| Update Successfully!                                     |\n"
+    printf "%s\n" "$dashes"
+    printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
+   printf "%s\n" "$dashes"
+#    if check_wgd_status; then
+#       stop_wgd
+#       sleep 2
+#       printf "Wireguard Dashboard is stopped. \n"
+#       start_wgd_debug
+#    else
+#      start_wgd_debug
+#    fi
   else
-    start_wgd_debug
+    printf "%s\n" "$dashes"
+    printf "Cancel update. \n"
+    printf "%s\n" "$dashes"
   fi
 }
 

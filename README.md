@@ -16,19 +16,39 @@
 
 ## 📣 What's New: Version 2.0
 
+### ⚠️ **Update from v1.x.x**
+
+1. Stop the dashboard if it is running.
+2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.0`  to get the new update inside `Wireguard-Dashboard` directory.
+3. Proceed **Step 2 & 3** in the Install step down below.
+
+<hr>
+
 - Added login function to dashboard
+
   - ***I'm not using the most ideal way to store the username and password, feel free to provide a better way to do this if you any good idea!***
+
 - Added a config file to the dashboard
+
 - Dashboard config can be change within the **Setting** tab on the side bar 
+
 - Adjusted UI
+
 - And much more!
+
+  
 
 ## 💡 Features
 
 - Add peers for each WireGuard configuration
+
 - Manage peer
+
 - Delete peers
+
 - And many more coming up! Welcome to contribute to this project!
+
+  
 
 ## 📝 Requirement
 
@@ -45,12 +65,14 @@
   $ sudo apt-get install python3 python3-pip
   ```
 
+
+
 ## 🛠 Install
 
 1. Download Wireguard Dashboard
 
 ```
-$ git clone https://github.com/donaldzou/Wireguard-Dashboard.git
+$ git clone -b v2.0 https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
 
 **2. Install Python Dependencies**
@@ -68,6 +90,8 @@ $ sudo sh wgd.sh start
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
 
+
+
 ## 🪜 Usage
 
 **1. Start/Stop/Restart Wireguard Dashboard**
@@ -81,39 +105,37 @@ $ sudo sh wgd.sh restart  # Restart the dasboard
 $ sudo sh wgd.sh update   # Update the dashboard
 ```
 
-⚠️ **For first time user please also read the next section.**
+⚠️  **For first time user please also read the next section.**
+
+
 
 ## ✂️ Dashboard Configuration
 
 Since version 2.0, Wireguard Dashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
 
-- `[Account]`
-  - `username` - Username (Default: `admin`)
-  - `password` - Password, will be hash with SHA256 (Default: `admin`).
-- `[Server]`
-  - `app_ip` - IP address the flask will run with (Default: `0.0.0.0`)
-  - `app_port` - Port the flask will run with (Default: `10086`)
-  - `auth_req` - Does the dashboard need authentication  (Default: `true`)
-    - If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **Can only changing the file directly in system**. 
-  - `version` - Dashboard Version
+### `[Account]`
 
-All these settings***** will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. 
+`username` - Username (Default: `admin`)
 
-- Example
+`password` - Password, will be hash with SHA256 (Default: `admin`).
 
-```
-[Account]
-username = admin
-password = 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+### `[Server]`
 
-[Server]
-app_ip = 0.0.0.0
-app_port = 10086
-auth_req = true
-version = v2.0
-```
+`wg_conf_path` - The path of all the Wireguard configurations (Default: `/etc/wireguard`)
 
-**: Except `version` and `auth_req` due to security consideration.*
+`app_ip` - IP address the flask will run with (Default: `0.0.0.0`)
+
+`app_port` - Port the flask will run with (Default: `10086`)
+
+`auth_req` - Does the dashboard need authentication  (Default: `true`)
+
+- If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only change the file directly in system**. 
+
+`version` - Dashboard Version
+
+All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
+
+
 
 ## ❓ How to update the dashboard?
 
@@ -125,7 +147,7 @@ $ sudo sh wgd.sh start   # Start dashboard
 
 
 
-## 🔍 Example
+## 🔍 Screenshot
 
 ![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
 

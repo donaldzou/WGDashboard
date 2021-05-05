@@ -1,3 +1,6 @@
+dashboard_version = 'v2.0'
+
+
 # Python Built-in Library
 import os
 from flask import Flask, request, render_template, redirect, url_for, session, abort
@@ -11,10 +14,8 @@ import configparser
 # PIP installed library
 import ifcfg
 from tinydb import TinyDB, Query
-dashboard_version = 'v2.0'
 dashboard_conf = 'wg-dashboard.ini'
 update = ""
-
 app = Flask("Wireguard Dashboard")
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -254,8 +255,8 @@ def auth_req():
                 request.endpoint != "signout" and \
                 request.endpoint != "auth" and \
                 "username" not in session:
-            print(request.path)
             print("not loggedin")
+            session['message'] = "You need to sign in first!"
             return redirect(url_for("signin"))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd', 'update_app_ip_port', 'update_wg_conf_path']:
