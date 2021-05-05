@@ -121,6 +121,9 @@ version = v2.0
 $ cd wireguard-dashboard
 $ sudo sh wgd.sh update  # Perform update
 $ sudo sh wgd.sh start   # Start dashboard
+```
+
+
 
 ## 🔍 Example
 
