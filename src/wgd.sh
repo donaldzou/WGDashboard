@@ -63,7 +63,7 @@ update_wgd() {
     exit 1
   else
     printf "%s\n" "$dashes"
-    printf "Cancel update. \n"
+    printf "CANCEL update. \n"
     printf "%s\n" "$dashes"
   fi
 }
