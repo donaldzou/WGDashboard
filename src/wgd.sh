@@ -55,11 +55,12 @@ update_wgd() {
     printf "%s\n" "$dashes"
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     printf "%s\n" "$dashes"
-    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver >  /dev/null 2>&1
+    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
     printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
-   printf "%s\n" "$dashes"
+    printf "%s\n" "$dashes"
+    exit 1
   else
     printf "%s\n" "$dashes"
     printf "Cancel update. \n"
