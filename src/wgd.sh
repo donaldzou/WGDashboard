@@ -60,14 +60,6 @@ update_wgd() {
     printf "%s\n" "$dashes"
     printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
    printf "%s\n" "$dashes"
-#    if check_wgd_status; then
-#       stop_wgd
-#       sleep 2
-#       printf "Wireguard Dashboard is stopped. \n"
-#       start_wgd_debug
-#    else
-#      start_wgd_debug
-#    fi
   else
     printf "%s\n" "$dashes"
     printf "Cancel update. \n"
