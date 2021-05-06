@@ -69,7 +69,7 @@
 
 ## 🛠 Install
 
-1. Download Wireguard Dashboard
+**1. Download Wireguard Dashboard**
 
 ```
 $ git clone -b v2.0 https://github.com/donaldzou/Wireguard-Dashboard.git
