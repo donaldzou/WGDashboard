@@ -1,3 +1,7 @@
+<hr>
+<p align=center>I'm looking for someone that have experiences on migrating this project to a Docker app, with a complete solution ;) If you know how please <a href="https://github.com/donaldzou/wireguard-dashboard/issues/20">comment in here</a>.</p>
+<hr>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/donaldzou/wireguard-dashboard/main/img/Group%202.png" width="128">
 </p>
@@ -11,9 +15,7 @@
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
-<hr>
-<p align=center>I'm looking for someone that have experiences on migrating this project to a Docker app, with a complete solution ;) If you know how please <a href="https://github.com/donaldzou/wireguard-dashboard/issues/20">comment in here</a>.</p>
-<hr>
+
 
 
 ## 📣 What's New: Version 2.0
