@@ -143,9 +143,9 @@ All these settings will be able to configure within the dashboard in **Settings*
 
 ## ❓ How to update the dashboard?
 
-```
+```{shell}
 $ cd wireguard-dashboard
-$ sudo sh wgd.sh update  # Perform update
+$ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.0 --force # Perform update
 $ sudo sh wgd.sh start   # Start dashboard
 ```
 
