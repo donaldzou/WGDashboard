@@ -162,3 +162,27 @@ body {
 .switch:hover{
   text-decoration: none
 }
+
+.btn-group-label:hover{
+  color: #007bff;
+  border-color: #007bff;
+  background: white;
+}
+
+.peer_data_group{
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .peer_data_group{
+    text-align: left;
+  }
+}
+
+.index-switch{
+  text-align: right;
+}
+
+main{
+  margin-bottom: 3rem;
+}

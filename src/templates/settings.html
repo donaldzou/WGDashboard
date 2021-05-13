@@ -26,7 +26,9 @@
                     <form action="/update_wg_conf_path" method="post" class="update_wg_conf_path">
                         <div class="form-group">
                         <label for="username">Path</label>
+
                         <input type="text" class="form-control mb-4" id="wg_conf_path" name="wg_conf_path" value="{{ wg_conf_path }}">
+                            <p>Remember to remove <code>/</code> at the end of your path. e.g <code>/etc/wireguard</code></p>
                         <button class="btn btn-danger change_path">Update Path & Restart Dashboard</button>
                         </div>
                     </form>

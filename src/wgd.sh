@@ -4,7 +4,7 @@ app_name="dashboard.py"
 dashes='------------------------------------------------------------'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
-  printf "Usage: sh wg-dashboard.sh <option>"
+  printf "Usage: sh wgd.sh <option>"
   printf "\n \n"
   printf "Available options: \n"
   printf "    start: To start Wireguard Dashboard.\n"
@@ -25,6 +25,7 @@ check_wgd_status(){
 }
 
 start_wgd () {
+    printf "%s" "$PLATFORM"
     printf "Starting Wireguard Dashboard in the background. \n"
     if [ ! -d "log" ]
       then mkdir "log"
@@ -44,27 +45,21 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-
   new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases').read(); output = json.loads(data);print(output[0]['tag_name'])")
   printf "%s\n" "$dashes"
   printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
-    printf "%s\n" "$dashes"
     printf "| Shutting down Wireguard Dashboard...                     |\n"
-    printf "%s\n" "$dashes"
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
-    printf "%s\n" "$dashes"
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    printf "| Installing all required python package                   |\n"
+    python3 -m pip install -r requirements.txt
     printf "| Update Successfully!                                     |\n"
-    printf "%s\n" "$dashes"
     printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
-    printf "%s\n" "$dashes"
     exit 1
   else
-    printf "%s\n" "$dashes"
-    printf "CANCEL update. \n"
-    printf "%s\n" "$dashes"
+    printf "Cancel update. \n"
   fi
 }
 

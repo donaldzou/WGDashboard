@@ -1,14 +1,10 @@
 <html>
-
 {% include "header.html" %}
-
 <body>
 	{% include "navbar.html" %}
 	<div class="container-fluid">
 		{% include "sidebar.html" %}
-		<div id="config_body">
-
-		</div>
+		<div id="config_body"></div>
 	</div>
 	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -34,6 +30,10 @@
 						<div class="form-group">
 							<label for="allowed_ips">Allowed IPs</label>
 							<input type="text" class="form-control" id="allowed_ips">
+						</div>
+                        <div class="form-group">
+							<label for="allowed_ips">Name</label>
+							<input type="text" class="form-control" id="new_add_name">
 						</div>
 					</form>
 				</div>
@@ -107,12 +107,11 @@
             </div>
           </div>
     </div>
+    {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
 <script>
     $(".sb-{{conf_data['name']}}-url").addClass("active");
-
-
 	function load_data(){
 		$.ajax({
 			method: "GET",
@@ -123,6 +122,7 @@
 			async:false,
 			success: function (response){
 				$("#config_body").html(response);
+				$("[refresh-interval={{ dashboard_refresh_interval }}]").addClass("active")
 			}
 		})
 	}
@@ -130,8 +130,22 @@
 		load_data();
 		setInterval(function(){
 			load_data();
-		}, 15000)
+		}, {{dashboard_refresh_interval}})
 	});
+
+	$("body").on("click", ".update_interval", function(){
+	    $.ajax({
+            method:"POST",
+            data: "interval="+$(this).attr("refresh-interval"),
+            url: "/update_dashboard_refresh_interval",
+            success: function (res){
+                location.reload()
+            }
+        })
+    });
+	$("body").on("click", ".refresh", function (){
+	    load_data();
+    });
 </script>
 <script>
     $("body").on("click", ".switch", function (){
@@ -149,7 +163,7 @@
 				headers:{
 					"Content-Type": "application/json"
 				},
-				data: JSON.stringify({"public_key":$("#public_key").val(), "allowed_ips": $("#allowed_ips").val()}),
+				data: JSON.stringify({"public_key":$("#public_key").val(), "allowed_ips": $("#allowed_ips").val(), "name":$("#new_add_name").val()}),
 				success: function (response){
 					if(response != "true"){
 						$("#add_peer_alert").html(response+$("#add_peer_alert").html());
@@ -168,9 +182,6 @@
 		$("#delete_peer").attr("peer_id", peer_id);
     })
 
-	$(".btn-delete-peer").click(function(){
-
-	});
 
 	$("#delete_peer").click(function(){
 		var peer_id = $(this).attr("peer_id");
@@ -183,7 +194,7 @@
 			},
 			data: JSON.stringify({"action": "delete", "peer_id": peer_id}),
 			success: function (response){
-				if(response != "true"){
+				if(response !== "true"){
 						$("#remove_peer_alert").html(response+$("#add_peer_alert").html());
 						$("#remove_peer_alert").removeClass("d-none");
 					}
@@ -221,7 +232,6 @@
             }
         })
     });
-
 
 	$("#save_peer_name").click(function (){
 	    var peer_id = $(this).attr("peer_id");
