@@ -15,7 +15,7 @@ import ifcfg
 from tinydb import TinyDB, Query
 
 # Dashboard Version
-dashboard_version = 'v2.0.1'
+dashboard_version = 'v2.0'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Upgrade Required
@@ -633,7 +633,10 @@ def check_update():
     conf.read(dashboard_conf)
     data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/wireguard-dashboard/releases").read()
     output = json.loads(data)
-    if conf.get("Server", "version") == output[0]["tag_name"]:
+    release = []
+    for i in output:
+        if i["prerelease"] == False: release.append(i)
+    if conf.get("Server", "version") == release[0]["tag_name"]:
         return "false"
     else:
         return "true"
