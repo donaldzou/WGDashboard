@@ -56,7 +56,8 @@ update_wgd() {
     printf "| Installing all required python package                   |\n"
     python3 -m pip install -r requirements.txt
     printf "| Update Successfully!                                     |\n"
-    printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
+    printf "| Dashboard is running...                                  |\n"
+    exec "wgd.sh" "start"
     exit 1
   else
     printf "Cancel update. \n"
