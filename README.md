@@ -15,8 +15,6 @@
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
-
-
 ## 📣 What's New: Version 2.1
 
 
@@ -25,8 +23,6 @@
 - Added refresh interval of the dashboard
 - Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
 - Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
-
-
 <hr>
 
 
@@ -88,13 +84,14 @@ Access your server with port `10086` ! e.g (http://your_server_ip:10086), contin
 
 **1. Start/Stop/Restart Wireguard Dashboard**
 
+
 ```shell
 cd Wireguard-Dashboard/src
 ./wgd.sh start    # Start the dashboard in background
 ./wgd.sh debug    # Start the dashboard in foreground (debug mode)
 ./wgd.sh stop     # Stop the dashboard
 ./wgd.sh restart  # Restart the dasboard
-```
+
 
 ⚠️  **For first time user please also read the next section.**
 
@@ -144,8 +141,7 @@ All these settings will be able to configure within the dashboard in **Settings*
     ```
    $ ./wgd.sh start
    ```
-
-
+   
 ### ⚠️ **Update from v1.x.x**
 
 1. Stop the dashboard if it is running.
