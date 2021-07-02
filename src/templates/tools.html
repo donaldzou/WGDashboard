@@ -1,0 +1,121 @@
+<div class="modal fade" id="ping_modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Ping</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <small>Configuration</small>
+                            <select class="form-control mt-2 conf_dropdown">
+                                <option value="none" selected="selected" disabled>Select Configuration</option>
+                                {% for i in conf%}
+                                    <option value="{{ i['conf'] }}">{{ i['conf'] }}</option>
+                                {%endfor%}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <small>IP</small>
+                            <select class="form-control mt-2 ip_dropdown">
+                                <option value="none" selected="selected" disabled>Choose an IP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <small>Ping Count</small>
+                            <input type="number" class="form-control mt-2 ping_count" min=1 value=4>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="ping_result">
+                    <table class="table">
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary send_ping" disabled>Ping</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="traceroute_modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Traceroute</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <small>Configuration</small>
+                            <select class="form-control mt-2 conf_dropdown">
+                                <option value="none" selected="selected" disabled>Select Configuration</option>
+                                {% for i in conf%}
+                                    <option value="{{ i['conf'] }}">{{ i['conf'] }}</option>
+                                {%endfor%}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <small>IP</small>
+                            <select class="form-control mt-2 ip_dropdown">
+                                <option value="none" selected="selected" disabled>Choose an IP</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary send_traceroute" disabled>Traceroute</button>
+                <hr>
+                <div class="traceroute_result">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr>
+                          <th scope="col">Hop</th>
+                          <th scope="col">IP</th>
+                          <th scope="col">Avg RTT</th>
+                          <th scope="col">Min RTT</th>
+                            <th scope="col">Max RTT</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update_modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">How to update dashboard</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre><code>$ sudo sh wgd.sh stop</code><br><code>$ sudo sh wgd.sh update</code><br><code>$ sudo sh wgd.sh start</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

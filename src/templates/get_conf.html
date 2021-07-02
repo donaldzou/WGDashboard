@@ -1,4 +1,4 @@
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4">
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
 	<div class="info mt-4">
 		<div class="row">
 			<div class="col">
@@ -48,11 +48,17 @@
 			</div>
 		</div>
 		<hr>
-		<div class="button-div" style="text-align: right;">
-			<button type="button" class="btn btn-outline-primary btn-sm mb-3" data-toggle="modal" data-target="#add_modal">
-				<strong>ADD PEER</strong>
+		<div class="button-div mb-3" style="text-align: right;">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-outline-primary btn-sm btn-group-label refresh"><i class="bi bi-arrow-repeat"></i></button>
+                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="5000">5s</button>
+                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="10000">10s</button>
+                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="30000">30s</button>
+                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="60000">1m</button>
+            </div>
+            <button type="button" class="btn btn-primary add_btn btn-sm" data-toggle="modal" data-target="#add_modal">
+				<i class="bi bi-plus-circle-fill"></i> PEER
 			</button>
-			
 		</div>
 	</div>
 	
@@ -60,7 +66,7 @@
 		<div class="card mb-3">
             <div class="card-header">
                 <div class="row">
-                    <div class="col">
+                    <div class="col-sm">
                         <div class="card-header-body ">
                             {% if not i['name']%}
                                 {{ "Untitled Peer" }}
@@ -70,7 +76,7 @@
                             <span class="dot dot-{{i['status']}}"></span>
                         </div>
                     </div>
-                    <div class="col" style="text-align: right">
+                    <div class="col-sm peer_data_group">
                         <p class="text-primary" style="text-transform: uppercase; display: inline-block; margin-bottom: 0; margin-right: 1rem"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</p>
                         <p class="text-success" style="text-transform: uppercase;  display: inline-block; margin-bottom: 0"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</p>
                     </div>
@@ -81,10 +87,6 @@
             </div>
 			<div class="card-body">
 				<div class="row">
-{#					<div class="col-sm">#}
-{#						<small class="text-muted"><strong>STATUS</strong></small>#}
-{#						<h6 style="text-transform: uppercase;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>#}
-{#					</div>#}
 					<div class="col-sm">
 						<small class="text-muted"><strong>PEER</strong></small>
 						<h6><samp class="ml-auto">{{i['id']}}</samp></h6>
@@ -105,11 +107,10 @@
 					</div>
                     <div class="w-100"></div>
 					<div class="col-sm">
-						<!-- <small class="text-muted"><strong>ACTION</strong></small> -->
 						<div class="button-group">
                             <hr>
                             <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button>
-							<button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal" data-target="#delete_modal"><i class="bi bi-x-circle-fill"></i></button>
+							<button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
 						</div>
 					</div>
 				</div>

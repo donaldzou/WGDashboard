@@ -4,7 +4,7 @@ app_name="dashboard.py"
 dashes='------------------------------------------------------------'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
-  printf "Usage: sh wg-dashboard.sh <option>"
+  printf "Usage: sh wgd.sh <option>"
   printf "\n \n"
   printf "Available options: \n"
   printf "    start: To start Wireguard Dashboard.\n"
@@ -25,6 +25,7 @@ check_wgd_status(){
 }
 
 start_wgd () {
+    printf "%s" "$PLATFORM"
     printf "Starting Wireguard Dashboard in the background. \n"
     if [ ! -d "log" ]
       then mkdir "log"
@@ -44,7 +45,6 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-
   new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases').read(); output = json.loads(data);print(output[0]['tag_name'])")
   printf "%s\n" "$dashes"
   printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"

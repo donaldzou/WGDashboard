@@ -162,3 +162,37 @@ body {
 .switch:hover{
   text-decoration: none
 }
+
+.btn-group-label:hover{
+  color: #007bff;
+  border-color: #007bff;
+  background: white;
+}
+
+.peer_data_group{
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .peer_data_group{
+    text-align: left;
+  }
+}
+
+.index-switch{
+  text-align: right;
+}
+
+main{
+  margin-bottom: 3rem;
+}
+
+/*.add_btn{*/
+/*  position: fixed;*/
+/*  bottom: 1.75rem;*/
+/*  right: 1.75rem;*/
+/*  z-index: 1000;*/
+/*  padding: 0.75rem 1.5rem;*/
+/*  border-radius: 3rem;*/
+/*  font-size: 1rem;*/
+/*}*/

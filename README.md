@@ -7,7 +7,6 @@
 </p>
 <h1 align="center"> Wireguard Dashboard</h1>
 
-
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
 </p>
@@ -16,31 +15,18 @@
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
+## 📣 What's New: Version 2.1
 
 
-## 📣 What's New: Version 2.0
-
-### ⚠️ **Update from v1.x.x**
-
-1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.0`  to get the new update inside `Wireguard-Dashboard` directory.
-3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
-
+- Added **Ping** and **Traceroute** tools!
+- Adjusted the calculation of data usage on each peers
+- Added refresh interval of the dashboard
+- Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
+- Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
 <hr>
 
-- Added login function to dashboard
 
-  - ***I'm not using the most ideal way to store the username and password, feel free to provide a better way to do this if you any good idea!***
 
-- Added a config file to the dashboard
-
-- Dashboard config can be change within the **Setting** tab on the side bar 
-
-- Adjusted UI
-
-- And much more!
-
-  
 
 ## 💡 Features
 
@@ -65,9 +51,6 @@
 
   - **Note: For peers, `PublicKey` & `AllowedIPs` is required.**
 - Python 3.7+ & Pip3
-  ```
-  $ sudo apt-get install python3 python3-pip
-  ```
 
 
 
@@ -75,21 +58,22 @@
 
 **1. Download Wireguard Dashboard**
 
-```
-$ git clone -b v2.0 https://github.com/donaldzou/Wireguard-Dashboard.git
+```shell
+git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
 
 **2. Install Python Dependencies**
 
-```
-$ cd Wireguard-Dashboard/src
-$ python3 -m pip install -r requirements.txt
+```shell
+cd Wireguard-Dashboard/src
+python3 -m pip install -r requirements.txt
 ```
 
 **3. Install & run Wireguard Dashboard**
 
-```
-$ sudo sh wgd.sh start
+```shell
+chmod u+x wgd.sh
+./wgd.sh start
 ```
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
@@ -100,13 +84,14 @@ Access your server with port `10086` ! e.g (http://your_server_ip:10086), contin
 
 **1. Start/Stop/Restart Wireguard Dashboard**
 
-```
-$ cd Wireguard-Dashboard/src
-$ sudo sh wgd.sh start    # Start the dashboard in background
-$ sudo sh wgd.sh debug    # Start the dashboard in foreground (debug mode)
-$ sudo sh wgd.sh stop     # Stop the dashboard
-$ sudo sh wgd.sh restart  # Restart the dasboard
-```
+
+```shell
+cd Wireguard-Dashboard/src
+./wgd.sh start    # Start the dashboard in background
+./wgd.sh debug    # Start the dashboard in foreground (debug mode)
+./wgd.sh stop     # Stop the dashboard
+./wgd.sh restart  # Restart the dasboard
+
 
 ⚠️  **For first time user please also read the next section.**
 
@@ -138,17 +123,30 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 
 All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
 
-
-
 ## ❓ How to update the dashboard?
 
-```{shell}
-$ cd wireguard-dashboard
-$ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.0 --force # Perform update
-$ sudo sh wgd.sh start   # Start dashboard
-```
+1. Change your directory to `wireguard-dashboard` 
+    ```
+    $ cd wireguard-dashboard
+    ```
+2. Get the newest version
+    ```
+    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.1 --force
+    ```
+3. Update and install all python dependencies
+   ```
+   $ python3 -m pip install -r requirements.txt
+   ```
+4. Start the dashboard
+    ```
+   $ ./wgd.sh start
+   ```
+   
+### ⚠️ **Update from v1.x.x**
 
-
+1. Stop the dashboard if it is running.
+2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.1`  to get the new update inside `Wireguard-Dashboard` directory.
+3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 ## 🔍 Screenshot
 
@@ -167,6 +165,22 @@ $ sudo sh wgd.sh start   # Start dashboard
 ![Settings Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/settings.png)
 
 <p align=center>Settings Page</p>
+
+
+
+## 🛒 Dependencies
+
+- CSS/JS
+  - [Bootstrap](https://getbootstrap.com/docs/4.6/getting-started/introduction/) `v4.6.0`
+  - [Bootstrap Icon](https://icons.getbootstrap.com) `v1.4.0`
+  - [jQuery](https://jquery.com) `v3.5.1`
+- Python
+  - [Flask](https://pypi.org/project/Flask/) `v1.1.2`
+  - [TinyDB](https://pypi.org/project/tinydb/) `v4.3.0`
+  - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
+  - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
+
+
 
 ## Contributors ✨
 

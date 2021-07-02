@@ -4,8 +4,11 @@
 	{% include "navbar.html" %}
 	<div class="container-fluid">
         {% include "sidebar.html" %}
-		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
             <h1 class="pb-4 mt-4">Home</h1>
+            {% if conf == [] %}
+                <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
+            {% endif %}
 			{% for i in conf%}
 				<div class="card mt-3">
 					<div class="card-body">
@@ -24,7 +27,7 @@
 								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
 								<h6 style="text-transform: uppercase; margin:0 !important;"><samp>{{i['public_key']}}</samp></h6>
 							</div>
-							<div class="col-md">
+							<div class="col-md index-switch">
                                 {% if i['checked'] == "checked" %}
                                     <a href="#" id="{{i['conf']}}" {{i['checked']}} class="switch text-primary tt"><i class="bi bi-toggle2-on"></i></a>
                                 {% else %}
@@ -40,6 +43,7 @@
 			{%endfor%}
 		</main>
 	</div>
+{% include "tools.html" %}
 </body>
 {% include "footer.html" %}
 <script>

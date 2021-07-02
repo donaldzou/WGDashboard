@@ -8,7 +8,9 @@
                         <li class="nav-item"><a class="nav-link sb-settings-url" href="/settings">Settings</a></li>
                     {% endif %}
                     {% if session['update'] == "true" %}
-                    <li class="nav-item sb-update-li"><a class="nav-link sb-update-url" href="https://github.com/donaldzou/wireguard-dashboard/#-how-to-update-the-dashboard">New Update Available!<span class="dot dot-running"></span></a></li>
+                    <li class="nav-item sb-update-li">
+                        <a class="nav-link sb-update-url" href="https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard">New Update Available!<span class="dot dot-running"></span></a>
+                    </li>
                     {% endif %}
                 </ul>
                 <hr>
@@ -19,6 +21,16 @@
                     {% for i in conf%}
                         <li class="nav-item"><a class="nav-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}">{{i['conf']}}</a></li>
                     {%endfor%}
+                </ul>
+                <hr>
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Tools</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <ul class="nav flex-column">
+                            <li class="nav-item"><a class="nav-link" data-toggle="modal" data-target="#ping_modal" href="#">Ping</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="modal" data-target="#traceroute_modal" href="#">Traceroute</a></li>
+                    </ul>
                 </ul>
                 <hr>
                 {% if "username" in session %}
