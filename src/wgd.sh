@@ -50,17 +50,21 @@ update_wgd() {
   printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
+    printf "%s\n" "$dashes"
     printf "| Shutting down Wireguard Dashboard...                     |\n"
+    printf "%s\n" "$dashes"
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
+    printf "%s\n" "$dashes"
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
-    printf "| Installing all required python package                   |\n"
-    python3 -m pip install -r requirements.txt
     printf "| Update Successfully!                                     |\n"
-    printf "| Dashboard is running...                                  |\n"
-    exec "wgd.sh" "start"
+    printf "%s\n" "$dashes"
+    printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
+    printf "%s\n" "$dashes"
     exit 1
   else
-    printf "Cancel update. \n"
+    printf "%s\n" "$dashes"
+    printf "CANCEL update. \n"
+    printf "%s\n" "$dashes"
   fi
 }
 

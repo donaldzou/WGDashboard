@@ -17,20 +17,18 @@
 
 
 
-## 📣 What's New: Version 2.0.1
+## 📣 What's New: Version 2.1
 
 
-- Added **Ping** and **Traceroute** tool
+- Added **Ping** and **Traceroute** tools!
 - Adjusted the calculation of data usage on each peers
 - Added refresh interval of the dashboard
+- Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
+- Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
+
 
 <hr>
 
-### ⚠️ **Update from v1.x.x**
-
-1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.0.1`  to get the new update inside `Wireguard-Dashboard` directory.
-3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 
 
@@ -129,17 +127,31 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 
 All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
 
-
-
 ## ❓ How to update the dashboard?
 
-```shell
-cd wireguard-dashboard
-sudo sh wgd.sh update  # Perform update
-sudo sh wgd.sh start   # Start dashboard
-```
+1. Change your directory to `wireguard-dashboard` 
+    ```
+    $ cd wireguard-dashboard
+    ```
+2. Get the newest version
+    ```
+    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.1 --force
+    ```
+3. Update and install all python dependencies
+   ```
+   $ python3 -m pip install -r requirements.txt
+   ```
+4. Start the dashboard
+    ```
+   $ ./wgd.sh start
+   ```
 
 
+### ⚠️ **Update from v1.x.x**
+
+1. Stop the dashboard if it is running.
+2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.1`  to get the new update inside `Wireguard-Dashboard` directory.
+3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 ## 🔍 Screenshot
 

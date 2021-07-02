@@ -22,13 +22,13 @@
 						  <span aria-hidden="true">&times;</span>
 						</button>
 					</div>
-					<form>
+					<form id="add_peer_form">
 						<div class="form-group">
-							<label for="public_key">Public Key</label>
+							<label for="public_key">Public Key<code>*</code></label>
 							<input type="text" class="form-control" id="public_key" aria-describedby="public_key">
 						</div>
 						<div class="form-group">
-							<label for="allowed_ips">Allowed IPs</label>
+							<label for="allowed_ips">Allowed IPs<code>*</code></label>
 							<input type="text" class="form-control" id="allowed_ips">
 						</div>
                         <div class="form-group">
@@ -163,7 +163,9 @@
 				headers:{
 					"Content-Type": "application/json"
 				},
-				data: JSON.stringify({"public_key":$("#public_key").val(), "allowed_ips": $("#allowed_ips").val(), "name":$("#new_add_name").val()}),
+				data: JSON.stringify({"public_key":$("#public_key").val(),
+                    "allowed_ips": $("#allowed_ips").val(),
+                    "name":$("#new_add_name").val()}),
 				success: function (response){
 					if(response != "true"){
 						$("#add_peer_alert").html(response+$("#add_peer_alert").html());
@@ -177,11 +179,17 @@
 		}
 	})
 
+
+
+    var deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), {
+        keyboard: false
+    });
+
     $("body").on("click", ".btn-delete-peer", function(){
         var peer_id = $(this).attr("id");
 		$("#delete_peer").attr("peer_id", peer_id);
+		deleteModal.toggle();
     })
-
 
 	$("#delete_peer").click(function(){
 		var peer_id = $(this).attr("peer_id");
@@ -195,23 +203,26 @@
 			data: JSON.stringify({"action": "delete", "peer_id": peer_id}),
 			success: function (response){
 				if(response !== "true"){
-						$("#remove_peer_alert").html(response+$("#add_peer_alert").html());
-						$("#remove_peer_alert").removeClass("d-none");
-					}
-					else{
-						location.reload();
-					}
+                    $("#remove_peer_alert").html(response+$("#add_peer_alert").html());
+                    $("#remove_peer_alert").removeClass("d-none");
+                }
+                else{
+                    deleteModal.toggle();
+                    load_data();
+                    $('#alertToast').toast('show');
+                    $('#alertToast .toast-body').html("Peer deleted!");
+                }
 			}
 		})
 	});
 
 
-
-	var myModal = new bootstrap.Modal(document.getElementById('setting_modal'), {
+    var settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), {
         keyboard: false
     })
+
 	$("body").on("click", ".btn-setting-peer", function(){
-        myModal.toggle();
+        settingModal.toggle();
         var peer_id = $(this).attr("id");
 		$("#save_peer_name").attr("peer_id", peer_id);
         $.ajax({
@@ -233,6 +244,7 @@
         })
     });
 
+
 	$("#save_peer_name").click(function (){
 	    var peer_id = $(this).attr("peer_id");
 	    $.ajax({
@@ -243,7 +255,7 @@
 			},
             data: JSON.stringify({id: peer_id, name: $("#peer_name_textbox").val()}),
             success: function (response){
-                myModal.toggle();
+                settingModal.toggle();
                 load_data();
                 $('#alertToast').toast('show');
                 $('#alertToast .toast-body').html("Name Saved!");

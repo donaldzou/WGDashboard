@@ -1,9 +1,10 @@
 # Python Built-in Library
 import os
 from flask import Flask, request, render_template, redirect, url_for, session, abort, jsonify
-from icmplib import ping, multiping, traceroute, resolve, Host, Hop
+
 import subprocess
 from datetime import datetime, date, time, timedelta
+import time
 from operator import itemgetter
 import secrets
 import hashlib
@@ -13,9 +14,10 @@ import re
 # PIP installed library
 import ifcfg
 from tinydb import TinyDB, Query
+from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.0'
+dashboard_version = 'v2.1'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Upgrade Required
@@ -85,13 +87,91 @@ def read_conf_file(config_name):
             if i == "[Peer]":
                 peer += 1
                 conf_peer_data["Peers"].append({})
-            else:
+            elif peer > -1:
                 if len(i) > 0:
-                    tmp = re.split('\s*=\s*', i,1)
+                    tmp = re.split('\s*=\s*', i, 1)
                     if len(tmp) == 2:
                         conf_peer_data["Peers"][peer][tmp[0]] = tmp[1]
+
+    f.close()
     # Read Configuration File End
     return conf_peer_data
+
+
+def get_latest_handshake(config_name, db, peers):
+    # Get latest handshakes
+    try:
+        data_usage = subprocess.check_output("wg show " + config_name + " latest-handshakes", shell=True)
+    except Exception:
+        return "stopped"
+    data_usage = data_usage.decode("UTF-8").split()
+    count = 0
+    now = datetime.now()
+    b = timedelta(minutes=2)
+    for i in range(int(len(data_usage) / 2)):
+        minus = now - datetime.fromtimestamp(int(data_usage[count + 1]))
+        if minus < b:
+            status = "running"
+        else:
+            status = "stopped"
+        if int(data_usage[count + 1]) > 0:
+            db.update({"latest_handshake": str(minus).split(".")[0], "status": status},
+                      peers.id == data_usage[count])
+        else:
+            db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
+        count += 2
+
+def get_transfer(config_name, db, peers):
+    # Get transfer
+    try:
+        data_usage = subprocess.check_output("wg show " + config_name + " transfer", shell=True)
+    except Exception:
+        return "stopped"
+    data_usage = data_usage.decode("UTF-8").split()
+    count = 0
+    for i in range(int(len(data_usage) / 3)):
+        cur_i = db.search(peers.id == data_usage[count])
+        total_sent = cur_i[0]['total_sent']
+        total_receive = cur_i[0]['total_receive']
+        traffic = cur_i[0]['traffic']
+        cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
+        cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
+        if cur_i[0]["status"] == "running":
+            if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
+                total_sent = cur_total_sent
+                total_receive = cur_total_receive
+            else:
+                now = datetime.now()
+                ctime = now.strftime("%d/%m/%Y %H:%M:%S")
+                traffic.append(
+                    {"time": ctime, "total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
+                     "total_data": round(total_receive + total_sent, 4)})
+                total_sent = 0
+                total_receive = 0
+                db.update({"traffic": traffic}, peers.id == data_usage[count])
+            db.update({"total_receive": round(total_receive, 4),
+                       "total_sent": round(total_sent, 4),
+                       "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
+
+        count += 3
+
+def get_endpoint(config_name, db, peers):
+    # Get endpoint
+    try:
+        data_usage = subprocess.check_output("wg show " + config_name + " endpoints", shell=True)
+    except Exception:
+        return "stopped"
+    data_usage = data_usage.decode("UTF-8").split()
+    count = 0
+    for i in range(int(len(data_usage) / 2)):
+        db.update({"endpoint": data_usage[count + 1]}, peers.id == data_usage[count])
+        count += 2
+
+def get_allowed_ip(config_name, db, peers, conf_peer_data):
+    # Get allowed ip
+    for i in conf_peer_data["Peers"]:
+        db.update({"allowed_ip": i.get('AllowedIPs', '(None)')}, peers.id == i["PublicKey"])
+
 
 
 def get_conf_peers_data(config_name):
@@ -114,75 +194,18 @@ def get_conf_peers_data(config_name):
                 "traffic": []
             })
 
-        # Get latest handshakes
-        try:
-            data_usage = subprocess.check_output("wg show " + config_name + " latest-handshakes", shell=True)
-        except Exception:
-            return "stopped"
-        data_usage = data_usage.decode("UTF-8").split()
-        count = 0
-        now = datetime.now()
-        b = timedelta(minutes=2)
-        for i in range(int(len(data_usage) / 2)):
-            minus = now - datetime.fromtimestamp(int(data_usage[count + 1]))
-            if minus < b:
-                status = "running"
-            else:
-                status = "stopped"
-            if int(data_usage[count + 1]) > 0:
-                db.update({"latest_handshake": str(minus).split(".")[0], "status": status},
-                          peers.id == data_usage[count])
-            else:
-                db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
-            count += 2
-
-    # Get transfer
-    try:
-        data_usage = subprocess.check_output("wg show " + config_name + " transfer", shell=True)
-    except Exception:
-        return "stopped"
-    data_usage = data_usage.decode("UTF-8").split()
-    count = 0
-    for i in range(int(len(data_usage) / 3)):
-        cur_i = db.search(peers.id == data_usage[count])
-        total_sent = cur_i[0]['total_sent']
-        total_receive = cur_i[0]['total_receive']
-        traffic = cur_i[0]['traffic']
-        cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
-        cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
-        if cur_i[0]["status"] == "running":
-            if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
-                total_sent = cur_total_sent
-                total_receive = cur_total_receive
-            else:
-                now = datetime.now()
-                ctime = now.strftime("%d/%m/%Y %H:%M:%S")
-                traffic.append({"time": ctime, "total_receive": round(total_receive, 4),"total_sent": round(total_sent, 4),
-                                "total_data": round(total_receive + total_sent, 4)})
-                total_sent = 0
-                total_receive = 0
-                db.update({"traffic": traffic}, peers.id == data_usage[count])
-            db.update({"total_receive": round(total_receive, 4),
-                       "total_sent": round(total_sent, 4),
-                       "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
-
-        count += 3
-
-    # Get endpoint
-    try:
-        data_usage = subprocess.check_output("wg show " + config_name + " endpoints", shell=True)
-    except Exception:
-        return "stopped"
-    data_usage = data_usage.decode("UTF-8").split()
-    count = 0
-    for i in range(int(len(data_usage) / 2)):
-        db.update({"endpoint": data_usage[count + 1]}, peers.id == data_usage[count])
-        count += 2
-
-    # Get allowed ip
-    for i in conf_peer_data["Peers"]:
-        db.update({"allowed_ip": i.get('AllowedIPs', '(None)')}, peers.id == i["PublicKey"])
+    tic = time.perf_counter()
+    get_latest_handshake(config_name, db, peers)
+    get_transfer(config_name, db, peers)
+    get_endpoint(config_name, db, peers)
+    get_allowed_ip(config_name, db, peers, conf_peer_data)
+    toc = time.perf_counter()
+    print(f"Finish fetching data in {toc - tic:0.4f} seconds")
     db.close()
+
+
+
+
 
 
 def get_peers(config_name):
@@ -243,13 +266,13 @@ def get_conf_list():
             if ".conf" in i:
                 i = i.replace('.conf', '')
                 temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
-                # get_conf_peers_data(i)
                 if temp['status'] == "running":
                     temp['checked'] = 'checked'
                 else:
                     temp['checked'] = ""
                 conf.append(temp)
-    conf = sorted(conf, key=itemgetter('conf'))
+    if len(conf) > 0:
+        conf = sorted(conf, key=itemgetter('conf'))
     return conf
 
 
@@ -266,7 +289,7 @@ def auth_req():
                 request.endpoint != "signout" and \
                 request.endpoint != "auth" and \
                 "username" not in session:
-            print("not loggedin")
+            print("User not loggedin - Attemped access: "+str(request.endpoint))
             session['message'] = "You need to sign in first!"
             return redirect(url_for("signin"))
     else:
@@ -475,6 +498,9 @@ def conf(config_name):
         conf_data['checked'] = "checked"
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
+    config_list = get_conf_list()
+    if config_name not in [conf['conf'] for conf in config_list]:
+        return render_template('index.html', conf=get_conf_list())
     return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data, dashboard_refresh_interval=int(config.get("Server","dashboard_refresh_interval")))
 
 
@@ -523,7 +549,7 @@ def add_peer(config_name):
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']
     keys = get_conf_peer_key(config_name)
-    if public_key is not list:
+    if type(keys) != list:
         return config_name+" is not running."
     if public_key in keys:
         return "Key already exist."
@@ -531,8 +557,7 @@ def add_peer(config_name):
         status = ""
         try:
             status = subprocess.check_output(
-                "wg set " + config_name + " peer " + public_key + " allowed-ips " + allowed_ips, shell=True,
-                stderr=subprocess.STDOUT)
+                "wg set " + config_name + " peer " + public_key + " allowed-ips " + allowed_ips, shell=True, stderr=subprocess.STDOUT)
             status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
             get_conf_peers_data(config_name)
             db = TinyDB("db/" + config_name + ".json")
@@ -548,13 +573,12 @@ def add_peer(config_name):
 def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
-
     db = TinyDB("db/" + config_name + ".json")
     peers = Query()
     data = request.get_json()
     delete_key = data['peer_id']
     keys = get_conf_peer_key(config_name)
-    if keys is not list:
+    if type(keys) != list:
         return config_name+" is not running."
     if delete_key not in keys:
         db.close()

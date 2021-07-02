@@ -6,6 +6,9 @@
         {% include "sidebar.html" %}
 		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
             <h1 class="pb-4 mt-4">Home</h1>
+            {% if conf == [] %}
+                <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
+            {% endif %}
 			{% for i in conf%}
 				<div class="card mt-3">
 					<div class="card-body">
