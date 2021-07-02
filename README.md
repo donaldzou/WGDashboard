@@ -49,7 +49,9 @@
 - ‼️ Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
 
-  - **Note: For peers, `PublicKey` & `AllowedIPs` is required.**
+  - **Note**: 
+    - **For `[Interface]` in the `.conf` file, please make sure you have `SaveConfig = true` under `[Interface]`** (Bug mentioned in [#9](https://github.com/donaldzou/wireguard-dashboard/issues/9#issuecomment-852346481))
+    - **For peers, `PublicKey` & `AllowedIPs` is required.**
 - Python 3.7+ & Pip3
 
 
@@ -91,7 +93,7 @@ cd Wireguard-Dashboard/src
 ./wgd.sh debug    # Start the dashboard in foreground (debug mode)
 ./wgd.sh stop     # Stop the dashboard
 ./wgd.sh restart  # Restart the dasboard
-
+```
 
 ⚠️  **For first time user please also read the next section.**
 
