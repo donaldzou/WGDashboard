@@ -106,7 +106,6 @@ $ sudo sh wgd.sh start    # Start the dashboard in background
 $ sudo sh wgd.sh debug    # Start the dashboard in foreground (debug mode)
 $ sudo sh wgd.sh stop     # Stop the dashboard
 $ sudo sh wgd.sh restart  # Restart the dasboard
-$ sudo sh wgd.sh update   # Update the dashboard
 ```
 
 ⚠️  **For first time user please also read the next section.**
