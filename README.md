@@ -63,7 +63,7 @@
 **1. Download Wireguard Dashboard**
 
 ```shell
-git clone -b v2.0.1 https://github.com/donaldzou/Wireguard-Dashboard.git
+git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
 
 **2. Install Python Dependencies**
@@ -94,7 +94,6 @@ cd Wireguard-Dashboard/src
 ./wgd.sh debug    # Start the dashboard in foreground (debug mode)
 ./wgd.sh stop     # Stop the dashboard
 ./wgd.sh restart  # Restart the dasboard
-./wgd.sh update   # Update the dashboard
 ```
 
 ⚠️  **For first time user please also read the next section.**
