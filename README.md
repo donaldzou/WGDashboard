@@ -61,21 +61,21 @@
 **1. Download Wireguard Dashboard**
 
 ```shell
-git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
+$ git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
 
 **2. Install Python Dependencies**
 
 ```shell
-cd Wireguard-Dashboard/src
-python3 -m pip install -r requirements.txt
+$ cd Wireguard-Dashboard/src
+$ python3 -m pip install -r requirements.txt
 ```
 
 **3. Install & run Wireguard Dashboard**
 
 ```shell
-chmod u+x wgd.sh
-./wgd.sh start
+$ chmod u+x wgd.sh
+$ ./wgd.sh start
 ```
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
@@ -88,11 +88,15 @@ Access your server with port `10086` ! e.g (http://your_server_ip:10086), contin
 
 
 ```shell
-cd Wireguard-Dashboard/src
-./wgd.sh start    # Start the dashboard in background
-./wgd.sh debug    # Start the dashboard in foreground (debug mode)
-./wgd.sh stop     # Stop the dashboard
-./wgd.sh restart  # Restart the dasboard
+$ cd Wireguard-Dashboard/src
+-----------------------------
+$ ./wgd.sh start    # Start the dashboard in background
+-----------------------------
+$ ./wgd.sh debug    # Start the dashboard in foreground (debug mode)
+-----------------------------
+$ ./wgd.sh stop     # Stop the dashboard
+-----------------------------
+$ ./wgd.sh restart  # Restart the dasboard
 ```
 
 ⚠️  **For first time user please also read the next section.**
