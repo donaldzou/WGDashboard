@@ -74,7 +74,7 @@ $ python3 -m pip install -r requirements.txt
 **3. Install & run Wireguard Dashboard**
 
 ```shell
-$ sudo chmod -R 755 /etc/wireguard   # Add read and execute permission of the wireguard config folder
+$ sudo chmod -R 744 /etc/wireguard   # Add read and execute permission of the wireguard config folder
 $ sudo chmod u+x wgd.sh
 $ ./wgd.sh start
 ```
