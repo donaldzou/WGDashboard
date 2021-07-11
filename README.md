@@ -57,27 +57,25 @@
 
 
 ## 🛠 Install
-
-**1. Download Wireguard Dashboard**
-
+1. Download Wireguard Dashboard
 ```shell
 $ git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
 ```
-
 **2. Install Python Dependencies**
-
 ```shell
 $ cd Wireguard-Dashboard/src
 $ python3 -m pip install -r requirements.txt
 ```
-
 **3. Install & run Wireguard Dashboard**
-
 ```shell
 $ sudo chmod -R 744 /etc/wireguard   # Add read and execute permission of the wireguard config folder
 $ sudo chmod u+x wgd.sh
 $ ./wgd.sh start
 ```
+**Note**:
+> For [`pivpn`](https://github.com/pivpn/pivpn) user, please use `sudo ./wgd.sh start` to run if your current account does not have the permission to run `wg show` and `wg-quick`.
+
+**4. Access dashboard**
 
 Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
 
@@ -149,7 +147,7 @@ All these settings will be able to configure within the dashboard in **Settings*
    $ ./wgd.sh start
    ```
    
-### ⚠️ **Update from v1.x.x**
+### ⚠️  **Update from v1.x.x**
 
 1. Stop the dashboard if it is running.
 2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.1`  to get the new update inside `Wireguard-Dashboard` directory.
