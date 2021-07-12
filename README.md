@@ -16,8 +16,8 @@
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
-## 📣 What's New: Version 2.1
 
+## 📣 What's New: Version 2.1
 
 - Added **Ping** and **Traceroute** tools!
 - Adjusted the calculation of data usage on each peers
@@ -25,6 +25,7 @@
 - Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
 - Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
 <hr>
+
 ## 💡 Features
 
 - Add peers for each WireGuard configuration
