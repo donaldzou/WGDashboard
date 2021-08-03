@@ -25,6 +25,16 @@
 - Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
 - Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
 <hr>
+## Table of Content
+
+- [💡Features](https://github.com/donaldzou/wireguard-dashboard#-features)
+- [📝 Requirement](https://github.com/donaldzou/wireguard-dashboard#-requirement)
+- [🛠 Install](https://github.com/donaldzou/wireguard-dashboard#-install)
+- [🪜 Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
+- [✂️ Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
+- [❓How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
+  - [⚠️ Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
+- [🔍 Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
 
 ## 💡 Features
 
