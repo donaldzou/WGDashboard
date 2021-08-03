@@ -25,6 +25,8 @@
 - Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
 - Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
 <hr>
+
+
 ## Table of Content
 
 - [💡Features](https://github.com/donaldzou/wireguard-dashboard#-features)
