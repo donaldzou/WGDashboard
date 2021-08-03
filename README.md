@@ -29,14 +29,14 @@
 
 ## Table of Content
 
-- [💡Features](https://github.com/donaldzou/wireguard-dashboard#-features)
-- [📝 Requirement](https://github.com/donaldzou/wireguard-dashboard#-requirement)
-- [🛠 Install](https://github.com/donaldzou/wireguard-dashboard#-install)
-- [🪜 Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
-- [✂️ Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
-- [❓How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
-  - [⚠️ Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
-- [🔍 Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
+- [💡  Features](https://github.com/donaldzou/wireguard-dashboard#-features)
+- [📝  Requirement](https://github.com/donaldzou/wireguard-dashboard#-requirement)
+- [🛠  Install](https://github.com/donaldzou/wireguard-dashboard#-install)
+- [🪜  Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
+- [✂️  Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
+- [❓  How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
+  - [⚠️  Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
+- [🔍  Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
 
 ## 💡 Features
 
@@ -48,14 +48,17 @@
 
 - And many more coming up! Welcome to contribute to this project!
 
-  
 
 ## 📝 Requirement
 
 - Ubuntu or Debian based OS, other might work, but haven't test yet. Tested on the following OS:
   - [x] Ubuntu 18.04.1 LTS
+  - [x] Ubuntu 20.04.1 LTS
+  - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
+  - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
+  - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
   - [ ] If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!
-
+  
 - ‼️ Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
 
@@ -63,8 +66,6 @@
     - **For `[Interface]` in the `.conf` file, please make sure you have `SaveConfig = true` under `[Interface]`** (Bug mentioned in [#9](https://github.com/donaldzou/wireguard-dashboard/issues/9#issuecomment-852346481))
     - **For peers, `PublicKey` & `AllowedIPs` is required.**
 - Python 3.7+ & Pip3
-
-
 
 ## 🛠 Install
 1. **Download Wireguard Dashboard**
@@ -96,7 +97,7 @@
 
 ## 🪜 Usage
 
-**1. Start/Stop/Restart Wireguard Dashboard**
+#### Start/Stop/Restart Wireguard Dashboard
 
 
 ```shell
@@ -110,6 +111,125 @@ $ ./wgd.sh stop     # Stop the dashboard
 -----------------------------
 $ ./wgd.sh restart  # Restart the dasboard
 ```
+
+
+
+#### Autostart Wireguard Dashboard on boot
+
+In the `src` folder, it contained a file called `wg-dashboard.service`, we can use this file to let our system to autostart the dashboard after reboot. The following has tested on Ubuntu 18.04.1 LTS, please don't hesitate to provide your system if you have tested the autostart on another system.
+
+1. **Changing the directory to the dashboard's directory**
+
+   ```bash
+   $ cd wireguard-dashboard/src
+   ```
+
+2. **Get the full path of the dashboard's directory**
+
+   ```bash
+   $ pwd
+   #Output: /root/wireguard-dashboard/src
+   ```
+
+   For me, my output is the one above, your's might be different since it depends on where you downloaded the dashboard. **Copy the the output to somewhere, we will need this in the next step.**
+
+3. **Edit the service file**
+
+   ```bash
+   $ nano wg-dashboard.service
+   ```
+
+   You will see something like this:
+
+   ```
+   [Unit]
+   After=netword.service
+   
+   [Service]
+   WorkingDirectory=<your dashboard directory full path here>
+   ExecStart=/usr/bin/python3 <your dashboard directory full path here>/dashboard.py
+   Restart=always
+   
+   
+   [Install]
+   WantedBy=default.target
+   ```
+
+   Now, we need to replace both `<your dashboard directory full path here>` to the one you just copied from step 2. After doing this, the file will become something like this:
+
+   ```
+   [Unit]
+   After=netword.service
+   
+   [Service]
+   WorkingDirectory=/root/wireguard-dashboard/src
+   ExecStart=/usr/bin/python3 /root/wireguard-dashboard/src/dashboard.py
+   Restart=always
+   
+   
+   [Install]
+   WantedBy=default.target
+   ```
+
+   **Be aware that after the value of `WorkingDirectory`, it does not have  a `/` (slash).** You can save the file with `control+x` and press `Y`.
+
+4. **Copy the service file to systemd folder**
+
+   ```bash
+   $ cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
+   ```
+
+   To make sure you copy the file successfully, you can use this command `cat /etc/systemd/system/wg-dashboard.service` to see if it will output the file you just edited.
+
+5. **Enable the service**
+
+   ```bash
+   $ sudo chmod 664 /etc/systemd/system/wg-dashboard.service
+   $ sudo systemctl daemon-reload
+   $ sudo systemctl enable wg-dashboard.service
+   $ sudo systemctl start wg-dashboard.service  # <-- To start the service
+   ```
+
+6. **Check if the service run correctly**
+
+   ```bash
+   $ sudo systemctl status wg-dashboard.service
+   ```
+
+   And you should see something like this
+
+   ```bash
+   ● wg-dashboard.service
+        Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
+        Active: active (running) since Tue 2021-08-03 22:31:26 UTC; 4s ago
+      Main PID: 6602 (python3)
+         Tasks: 1 (limit: 453)
+        Memory: 26.1M
+        CGroup: /system.slice/wg-dashboard.service
+                └─6602 /usr/bin/python3 /root/wireguard-dashboard/src/dashboard.py
+   
+   Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "Wireguard Dashboard" (lazy loading)
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Environment: production
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:    Use a production WSGI server instead.
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Debug mode: off
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on all addresses.
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on http://0.0.0.0:10086/ (Press CTRL+C to quit)
+   ```
+
+   If you see `Active:` followed by `active (running) since...` then it means it run correctly.
+
+7. **Stop/Start/Restart the service**
+
+   ```bash
+   $ sudo systemctl stop wg-dashboard.service # <-- To stop the service
+   $ sudo systemctl start wg-dashboard.service # <-- To start the service
+   $ sudo systemctl restart wg-dashboard.service # <-- To restart the service
+   ```
+
+8. And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report a bug.
 
 ⚠️  **For first time user please also read the next section.**
 

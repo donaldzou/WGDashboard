@@ -70,7 +70,7 @@ def read_conf_file(config_name):
     }
     peers_start = 0
     for i in range(len(file)):
-        if not is_match("^#(.*)",file[i]):
+        if not is_match("#(.*)",file[i]):
             if file[i] == "[Peer]":
                 peers_start = i
                 break

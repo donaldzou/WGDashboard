@@ -1,0 +1,11 @@
+[Unit]
+After=netword.service
+
+[Service]
+WorkingDirectory=<your dashboard directory full path here>
+ExecStart=/usr/bin/python3 <your dashboard directory full path here>dashboard.py
+Restart=always
+
+
+[Install]
+WantedBy=default.target
