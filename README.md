@@ -21,7 +21,7 @@
 
 - 🎉  **New Features**
   - **QR Code**: You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**.
-  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot).
+  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot).
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.
@@ -30,19 +30,21 @@
 
 ## Table of Content
 
-- [💡  Features](https://github.com/donaldzou/wireguard-dashboard#-features)
-- [📝  Requirement](https://github.com/donaldzou/wireguard-dashboard#-requirement)
-- [🛠  Install](https://github.com/donaldzou/wireguard-dashboard#-install)
-- [🪜  Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
-  - [Start/Stop/Restart Wireguard Dashboard](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#startstoprestart-wireguard-dashboard)
-  - [Autostart Wireguard Dashboard on boot](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot)
-- [✂️  Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
-- [❓  How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
-  - [⚠️  Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
-- [🔍  Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
-- ⏰  Changelog
-- 🛒  Dependencies
-- ✨  Contributors
+- [💡  Features](#-features)
+- [📝  Requirement](#-requirement)
+- [🛠  Install](#-install)
+- [🪜  Usage](#-usage)
+  - [Start/Stop/Restart Wireguard Dashboard](#startstoprestart-wireguard-dashboard)
+  - [Autostart Wireguard Dashboard on boot](#autostart-wireguard-dashboard-on-boot)
+- [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
+  - [Dashboard Configuration file](#dashboard-configuration-file)
+  - [Generating QR code](#generating-qr-code)
+- [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
+  - [⚠️  Update from v1.x.x](#%EF%B8%8F--update-from-v1xx)
+- [🔍  Screenshot](#-screenshot)
+- [⏰  Changelog](#--changelog)
+- [🛒  Dependencies](#-dependencies)
+- [✨  Contributors](#-contributors)
 
 ## 💡 Features
 
