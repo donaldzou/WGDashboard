@@ -10,4 +10,6 @@ __pycache__
 src/wg-dashboard.ini
 src/static/pic.xd
 *.conf
+private_key.txt
+public_key.txt
 

@@ -20,8 +20,8 @@
 ## 📣 What's New: Version v2.2
 
 - 🎉  **New Features**
-  - **QR Code**: You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**.
-  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot).
+  - **QR Code**: You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/15)]  
+  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.
@@ -277,16 +277,16 @@ AllowedIPs = 0.0.0.0/0
 Endpoint = 0.0.0.0:51820
 ```
 
-|                   | Description                                   | Default Value                                                |
-| ----------------- | --------------------------------------------- | ------------------------------------------------------------ |
-| **`[Interface]`** |                                               |                                                              |
-| `PrivateKey`      | The private key of this peer                  | N/A                                                          |
-| `Address`         | The `allowed_ips` of your peer                | N/A                                                          |
-| `DNS`             | The DNS server your peer will use             | `1.1.1.1` - Cloud flare DNS, you can switch it to Google DNS - `8.8.8.8`, or use your own DNS, you can edit it later in the WireGuard phone app. |
-| **`[Peer]`**      |                                               |                                                              |
-| `PublicKey`       | The public key of your server                 | N/A                                                          |
-| `AllowedIPs`      | IP ranges for which a peer will route traffic | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer |
-| `Endpoint`        | Your wireguard server ip and port             | `<your server default interface ip>:<listen port>`           |
+|                   | Description                                                  | Default Value                                                |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **`[Interface]`** |                                                              |                                                              |
+| `PrivateKey`      | The private key of this peer                                 | N/A                                                          |
+| `Address`         | The `allowed_ips` of your peer                               | N/A                                                          |
+| `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can switch it to Google DNS - `8.8.8.8`, or use your own DNS, you can edit it later in the WireGuard phone app. |
+| **`[Peer]`**      |                                                              |                                                              |
+| `PublicKey`       | The public key of your server                                | N/A                                                          |
+| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer |
+| `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           |
 
 ## ❓ How to update the dashboard?
 
