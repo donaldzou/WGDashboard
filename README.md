@@ -20,7 +20,7 @@
 ## 📣 What's New: Version v2.2
 
 - 🎉  **New Features**
-  - **QR Code**: You can add the private key of your existed peer to create a QR code, or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**.
+  - **QR Code**: You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**.
   - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot).
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
