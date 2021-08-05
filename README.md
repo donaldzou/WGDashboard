@@ -40,8 +40,9 @@
 - [❓  How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
   - [⚠️  Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
 - [🔍  Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
-
-
+- ⏰  Changelog
+- 🛒  Dependencies
+- ✨  Contributors
 
 ## 💡 Features
 
@@ -329,6 +330,37 @@ Endpoint = 0.0.0.0:51820
 
 
 
+## ⏰  Changelog
+
+#### v2.1 - Jul 2, 2021
+
+- Added **Ping** and **Traceroute** tools!
+- Adjusted the calculation of data usage on each peers
+- Added refresh interval of the dashboard
+- Bug fixed when no configuration on fresh install ([#23](https://github.com/donaldzou/wireguard-dashboard/issues/23))
+- Fixed crash when too many peers ([#22](https://github.com/donaldzou/wireguard-dashboard/issues/22))
+
+#### v2.0 - May 5, 2021
+
+- Added login function to dashboard
+  - ***I'm not using the most ideal way to store the username and password, feel free to provide a better way to do this if you any good idea!***
+- Added a config file to the dashboard
+- Dashboard config can be change within the **Setting** tab on the side bar
+- Adjusted UI
+- And much more!
+
+#### v1.1.2 - Apr 3, 2021
+
+- Resolved issue [#3](https://github.com/donaldzou/wireguard-dashboard/issues/3).
+
+#### v1.1.1 - Apr 2, 2021
+
+- Able to add a friendly name to each peer. Thanks [#2](https://github.com/donaldzou/wireguard-dashboard/issues/2) !
+
+#### v1.0 - Dec 27, 2020
+
+- Added the function to remove peers
+
 ## 🛒 Dependencies
 
 - CSS/JS
@@ -341,9 +373,7 @@ Endpoint = 0.0.0.0:51820
   - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
   - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
 
-
-
-## Contributors ✨
+## ✨ Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
