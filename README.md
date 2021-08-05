@@ -34,9 +34,9 @@
 - [📝  Requirement](https://github.com/donaldzou/wireguard-dashboard#-requirement)
 - [🛠  Install](https://github.com/donaldzou/wireguard-dashboard#-install)
 - [🪜  Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
-- [✂️  Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
   - [Start/Stop/Restart Wireguard Dashboard](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#startstoprestart-wireguard-dashboard)
   - [Autostart Wireguard Dashboard on boot](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot)
+- [✂️  Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
 - [❓  How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
   - [⚠️  Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
 - [🔍  Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
@@ -57,8 +57,7 @@
 ## 📝 Requirement
 
 - Ubuntu or Debian based OS, other might work, but haven't test yet. Tested on the following OS:
-  - [x] Ubuntu 18.04.1 LTS
-  - [x] Ubuntu 20.04.1 LTS
+  - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS
   - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
   - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
   - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
@@ -76,7 +75,7 @@
 1. **Download Wireguard Dashboard**
 
    ```shell
-   $ git clone -b vv2.2 https://github.com/donaldzou/Wireguard-Dashboard.git
+   $ git clone -b v2.2 https://github.com/donaldzou/Wireguard-Dashboard.git
 2. **Install Python Dependencies**
 
    ```shell
@@ -116,8 +115,6 @@ $ ./wgd.sh stop     # Stop the dashboard
 -----------------------------
 $ ./wgd.sh restart  # Restart the dasboard
 ```
-
-
 
 #### Autostart Wireguard Dashboard on boot
 
@@ -240,6 +237,8 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
 ## ✂️ Dashboard Configuration
 
+#### Dashboard Configuration file
+
 Since version 2.0, Wireguard Dashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
 
 |                 | Description                                                  | Default Value            |
@@ -259,6 +258,33 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 
 All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
 
+#### Generating QR code
+
+Starting version 2.2, dashboard can now generate QR code for each peer. Here is a template of what each QR code encoded with:
+
+```
+[Interface]
+PrivateKey = QWERTYUIOPO234567890YUSDAKFH10E1B12JE129U21=
+Address = 0.0.0.0/32
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = QWERTYUIOPO234567890YUSDAKFH10E1B12JE129U21=
+AllowedIPs = 0.0.0.0/0
+Endpoint = 0.0.0.0:51820
+```
+
+|                   | Description                                   | Default Value                                                |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------------ |
+| **`[Interface]`** |                                               |                                                              |
+| `PrivateKey`      | The private key of this peer                  | N/A                                                          |
+| `Address`         | The `allowed_ips` of your peer                | N/A                                                          |
+| `DNS`             | The DNS server your peer will use             | `1.1.1.1` - Cloud flare DNS, you can switch it to Google DNS - `8.8.8.8`, or use your own DNS, you can edit it later in the WireGuard phone app. |
+| **`[Peer]`**      |                                               |                                                              |
+| `PublicKey`       | The public key of your server                 | N/A                                                          |
+| `AllowedIPs`      | IP ranges for which a peer will route traffic | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer |
+| `Endpoint`        | Your wireguard server ip and port             | `<your server default interface ip>:<listen port>`           |
+
 ## ❓ How to update the dashboard?
 
 1. Change your directory to `wireguard-dashboard` 
@@ -267,7 +293,7 @@ All these settings will be able to configure within the dashboard in **Settings*
     ```
 2. Get the newest version
     ```
-    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git vv2.2 --force
+    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2 --force
     ```
 3. Update and install all python dependencies
    ```
@@ -280,7 +306,7 @@ All these settings will be able to configure within the dashboard in **Settings*
 ### ⚠️  **Update from v1.x.x**
 
 1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git vv2.2`  to get the new update inside `Wireguard-Dashboard` directory.
+2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.2`  to get the new update inside `Wireguard-Dashboard` directory.
 3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 ## 🔍 Screenshot
