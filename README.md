@@ -17,13 +17,14 @@
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
 
-## 📣 What's New: Version 2.1
+## 📣 What's New: Version v2.2
 
-- Added **Ping** and **Traceroute** tools!
-- Adjusted the calculation of data usage on each peers
-- Added refresh interval of the dashboard
-- Bug fixed when no configuration on fresh install ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/23#issuecomment-869189672))
-- Fixed crash when too many peers ([Bug report](https://github.com/donaldzou/wireguard-dashboard/issues/22#issuecomment-868840564))
+- 🎉  **New Features**
+  - **QR Code**: You can add the private key of your existed peer to create a QR code, or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**.
+  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot).
+- 🪚  **Bug Fixed**
+  - When there are comments in the wireguard config file, will cause the dashboard to crash.
+  - Used regex to search for config files.
 <hr>
 
 
@@ -34,9 +35,13 @@
 - [🛠  Install](https://github.com/donaldzou/wireguard-dashboard#-install)
 - [🪜  Usage](https://github.com/donaldzou/wireguard-dashboard#-usage)
 - [✂️  Dashboard Configuration](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F-dashboard-configuration)
+  - [Start/Stop/Restart Wireguard Dashboard](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#startstoprestart-wireguard-dashboard)
+  - [Autostart Wireguard Dashboard on boot](https://github.com/donaldzou/wireguard-dashboard/tree/v2.2-beta#autostart-wireguard-dashboard-on-boot)
 - [❓  How to update the dashboard?](https://github.com/donaldzou/wireguard-dashboard#-how-to-update-the-dashboard)
   - [⚠️  Update from v1.x.x](https://github.com/donaldzou/wireguard-dashboard#%EF%B8%8F--update-from-v1xx)
 - [🔍  Screenshot](https://github.com/donaldzou/wireguard-dashboard#-screenshot)
+
+
 
 ## 💡 Features
 
@@ -71,7 +76,7 @@
 1. **Download Wireguard Dashboard**
 
    ```shell
-   $ git clone -b v2.1 https://github.com/donaldzou/Wireguard-Dashboard.git
+   $ git clone -b vv2.2 https://github.com/donaldzou/Wireguard-Dashboard.git
 2. **Install Python Dependencies**
 
    ```shell
@@ -262,7 +267,7 @@ All these settings will be able to configure within the dashboard in **Settings*
     ```
 2. Get the newest version
     ```
-    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.1 --force
+    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git vv2.2 --force
     ```
 3. Update and install all python dependencies
    ```
@@ -275,7 +280,7 @@ All these settings will be able to configure within the dashboard in **Settings*
 ### ⚠️  **Update from v1.x.x**
 
 1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.1`  to get the new update inside `Wireguard-Dashboard` directory.
+2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git vv2.2`  to get the new update inside `Wireguard-Dashboard` directory.
 3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 ## 🔍 Screenshot

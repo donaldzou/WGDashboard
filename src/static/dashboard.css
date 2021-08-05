@@ -196,3 +196,39 @@ main{
 /*  border-radius: 3rem;*/
 /*  font-size: 1rem;*/
 /*}*/
+
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+.rotating::before {
+  -webkit-animation: rotating 0.75s linear infinite;
+  -moz-animation: rotating 0.75s linear infinite;
+  -ms-animation: rotating 0.75s linear infinite;
+  -o-animation: rotating 0.75s linear infinite;
+  animation: rotating 0.75s linear infinite;
+}

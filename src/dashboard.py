@@ -13,6 +13,7 @@ import configparser
 import re
 # PIP installed library
 import ifcfg
+from flask_qrcode import QRcode
 from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
@@ -20,12 +21,16 @@ from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 dashboard_version = 'v2.1'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
+# Default Wireguard IP
+wg_ip = ifcfg.default_interface()['inet']
+
 # Upgrade Required
 update = ""
 # Flask App Configuration
 app = Flask("Wireguard Dashboard")
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+QRcode(app)
 
 
 def get_conf_peer_key(config_name):
@@ -53,7 +58,6 @@ def get_conf_running_peer_number(config_name):
             running += 1
         count += 2
     return running
-
 
 def is_match(regex, text):
     pattern = re.compile(regex)
@@ -96,7 +100,6 @@ def read_conf_file(config_name):
     f.close()
     # Read Configuration File End
     return conf_peer_data
-
 
 def get_latest_handshake(config_name, db, peers):
     # Get latest handshakes
@@ -172,17 +175,17 @@ def get_allowed_ip(config_name, db, peers, conf_peer_data):
     for i in conf_peer_data["Peers"]:
         db.update({"allowed_ip": i.get('AllowedIPs', '(None)')}, peers.id == i["PublicKey"])
 
-
-
 def get_conf_peers_data(config_name):
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     conf_peer_data = read_conf_file(config_name)
 
     for i in conf_peer_data['Peers']:
-        if not db.search(peers.id == i['PublicKey']):
+        search = db.search(peers.id == i['PublicKey'])
+        if not search:
             db.insert({
                 "id": i['PublicKey'],
+                "private_key": "",
                 "name": "",
                 "total_receive": 0,
                 "total_sent": 0,
@@ -193,6 +196,10 @@ def get_conf_peers_data(config_name):
                 "allowed_ip": 0,
                 "traffic": []
             })
+        else:
+            # Update database since V2.2
+            if "private_key" not in search[0]:
+                db.update({'private_key':''}, peers.id == i['PublicKey'])
 
     tic = time.perf_counter()
     get_latest_handshake(config_name, db, peers)
@@ -203,11 +210,6 @@ def get_conf_peers_data(config_name):
     print(f"Finish fetching data in {toc - tic:0.4f} seconds")
     db.close()
 
-
-
-
-
-
 def get_peers(config_name):
     get_conf_peers_data(config_name)
     db = TinyDB('db/' + config_name + '.json')
@@ -215,7 +217,6 @@ def get_peers(config_name):
     result = sorted(result, key=lambda d: d['status'])
     db.close()
     return result
-
 
 def get_conf_pub_key(config_name):
     conf = configparser.ConfigParser(strict=False)
@@ -225,14 +226,12 @@ def get_conf_pub_key(config_name):
     conf.clear()
     return pub.decode().strip("\n")
 
-
 def get_conf_listen_port(config_name):
     conf = configparser.ConfigParser(strict=False)
     conf.read(wg_conf_path + "/" + config_name + ".conf")
     port = conf.get("Interface", "ListenPort")
     conf.clear()
     return port
-
 
 def get_conf_total_data(config_name):
     db = TinyDB('db/' + config_name + '.json')
@@ -250,7 +249,6 @@ def get_conf_total_data(config_name):
     db.close()
     return [total, upload_total, download_total]
 
-
 def get_conf_status(config_name):
     ifconfig = dict(ifcfg.interfaces().items())
     if config_name in ifconfig.keys():
@@ -258,23 +256,20 @@ def get_conf_status(config_name):
     else:
         return "stopped"
 
-
 def get_conf_list():
     conf = []
     for i in os.listdir(wg_conf_path):
-        if not i.startswith('.'):
-            if ".conf" in i:
-                i = i.replace('.conf', '')
-                temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
-                if temp['status'] == "running":
-                    temp['checked'] = 'checked'
-                else:
-                    temp['checked'] = ""
-                conf.append(temp)
+        if is_match("^(.{1,}).(conf)$", i):
+            i = i.replace('.conf', '')
+            temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
+            if temp['status'] == "running":
+                temp['checked'] = 'checked'
+            else:
+                temp['checked'] = ""
+            conf.append(temp)
     if len(conf) > 0:
         conf = sorted(conf, key=itemgetter('conf'))
     return conf
-
 
 @app.before_request
 def auth_req():
@@ -520,7 +515,7 @@ def get_conf(config_name):
         conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-    return render_template('get_conf.html', conf=get_conf_list(), conf_data=conf_data)
+    return render_template('get_conf.html', conf=get_conf_list(), conf_data=conf_data, wg_ip=wg_ip)
 
 
 @app.route('/switch/<config_name>', methods=['GET'])
@@ -552,7 +547,7 @@ def add_peer(config_name):
     if type(keys) != list:
         return config_name+" is not running."
     if public_key in keys:
-        return "Key already exist."
+        return "Public key already exist."
     else:
         status = ""
         try:
@@ -562,7 +557,7 @@ def add_peer(config_name):
             get_conf_peers_data(config_name)
             db = TinyDB("db/" + config_name + ".json")
             peers = Query()
-            db.update({"name": data['name']}, peers.id == public_key)
+            db.update({"name": data['name'], "private_key": data['private_key']}, peers.id == public_key)
             db.close()
             return "true"
         except subprocess.CalledProcessError as exc:
@@ -617,8 +612,37 @@ def get_peer_name(config_name):
     db.close()
     return result[0]['name']
 
+@app.route('/generate_peer', methods=['GET'])
+def generate_peer():
+    gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',shell=True)
+    private = open('private_key.txt')
+    private_key = private.readline().strip()
+    public = open('public_key.txt')
+    public_key = public.readline().strip()
+    data = {"private_key": private_key, "public_key": public_key}
+    private.close()
+    public.close()
+    os.remove('private_key.txt')
+    os.remove('public_key.txt')
+    return jsonify(data)
 
-
+@app.route('/generate_public_key', methods=['POST'])
+def generate_public_key():
+    data = request.get_json()
+    private_key = data['private_key']
+    pri_key_file = open('private_key.txt', 'w')
+    pri_key_file.write(private_key)
+    pri_key_file.close()
+    try:
+        check = subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
+        public = open('public_key.txt')
+        public_key = public.readline().strip()
+        os.remove('private_key.txt')
+        os.remove('public_key.txt')
+        return jsonify({"status":'success', "msg":"", "data":public_key})
+    except subprocess.CalledProcessError as exc:
+        os.remove('private_key.txt')
+        return jsonify({"status":'failed', "msg":"Key is not the correct length or format", "data":""})
 
 def init_dashboard():
     # Set Default INI File

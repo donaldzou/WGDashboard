@@ -23,16 +23,32 @@
 						</button>
 					</div>
 					<form id="add_peer_form">
-						<div class="form-group">
-							<label for="public_key">Public Key<code>*</code></label>
-							<input type="text" class="form-control" id="public_key" aria-describedby="public_key">
+                        <div class="alert alert-warning" role="alert" style="font-size: 0.8rem">
+                            To generate QR code for this new peer, you need to provide the private key, or use the generated key. If you don't need the QR code, simply remove the private key and insert your existed public key.
+
+                        </div>
+                        <div>
+                               <label for="private_key">Private Key</label>
+                            </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="private_key" aria-describedby="public_key">
+                            <div class="input-group-append">
+                               <button type="button" class="btn btn-danger" id="re_generate_key">
+                                   <i class="bi bi-arrow-repeat"></i>
+                               </button>
+                            </div>
 						</div>
 						<div class="form-group">
-							<label for="allowed_ips">Allowed IPs<code>*</code></label>
+							<label for="public_key">Public Key <code>(Required)</code></label>
+							<input type="text" class="form-control" id="public_key" aria-describedby="public_key" disabled>
+						</div>
+
+						<div class="form-group">
+							<label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
 							<input type="text" class="form-control" id="allowed_ips">
 						</div>
                         <div class="form-group">
-							<label for="allowed_ips">Name</label>
+							<label for="new_add_name">Name</label>
 							<input type="text" class="form-control" id="new_add_name">
 						</div>
 					</form>
@@ -95,6 +111,23 @@
 		</div>
 	</div>
 
+    <div class="modal fade" id="qrcode_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+		aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="peer_name">QR Code</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+                    <img src="" id="qrcode_img" style="width: 100%">
+				</div>
+			</div>
+		</div>
+	</div>
+
     <div class="position-fixed top-0 right-0 p-3" style="z-index: 5; right: 0; top: 50px;">
           <div id="alertToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
             <div class="toast-header">
@@ -148,14 +181,63 @@
     });
 </script>
 <script>
+    function generate_key(){
+        $.ajax({
+            "url": "/generate_peer",
+            "method": "GET",
+        }).done(function(res){
+            $("#private_key").val(res.private_key)
+            $("#public_key").val(res.public_key)
+            $("#add_peer_alert").addClass("d-none");
+            $("#re_generate_key i").removeClass("rotating")
+        })
+    }
+    function generate_public_key(){
+        $.ajax({
+            "url": "/generate_public_key",
+            "method": "POST",
+            "headers":{"Content-Type": "application/json"},
+            "data": JSON.stringify({"private_key": $("#private_key").val()})
+        }).done(function(res){
+            if(res['status'] === "failed"){
+                $("#add_peer_alert").html(res['msg']+$("#add_peer_alert").html());
+                $("#add_peer_alert").removeClass("d-none");
+            }else{
+                $("#add_peer_alert").addClass("d-none");
+            }
+            $("#public_key").val(res['data'])
+             $("#re_generate_key i").removeClass("rotating")
+        })
+    }
+
+    $("#private_key").change(function(){
+        if ($("#private_key").val().length > 0){
+            $("#re_generate_key i").addClass("rotating")
+            generate_public_key()
+        }else{
+            $("#public_key").removeAttr("disabled")
+            $("#public_key").val("")
+        }
+    })
+    $('#add_modal').on('show.bs.modal', function (event) {
+        generate_key()
+    })
+    $("#re_generate_key").click(function (){
+        $("#public_key").attr("disabled","disabled")
+        $("#re_generate_key i").addClass("rotating")
+        generate_key()
+    })
+
     $("body").on("click", ".switch", function (){
         $(this).siblings($(".spinner-border")).css("display", "inline-block");
          $(this).remove()
        location.replace("/switch/"+$(this).attr('id'));
     })
 
+
+
 	$("#save_peer").click(function(){
-		if ($("#allowed_ips") != "" && $("#public_key") != ""){
+		if ($("#allowed_ips") !== "" && $("#public_key") !== ""){
 			var conf = $(this).attr('conf_id')
 			$.ajax({
 				method: "POST",
@@ -163,9 +245,12 @@
 				headers:{
 					"Content-Type": "application/json"
 				},
-				data: JSON.stringify({"public_key":$("#public_key").val(),
+				data: JSON.stringify({
+                    "private_key":$("#private_key").val(),
+                    "public_key":$("#public_key").val(),
                     "allowed_ips": $("#allowed_ips").val(),
-                    "name":$("#new_add_name").val()}),
+                    "name":$("#new_add_name").val()
+				}),
 				success: function (response){
 					if(response != "true"){
 						$("#add_peer_alert").html(response+$("#add_peer_alert").html());
@@ -178,8 +263,14 @@
 			})
 		}
 	})
+    var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
+        keyboard: false
+    })
 
-
+    $("body").on("click", ".btn-qrcode-peer", function (){
+        qrcodeModal.toggle();
+        $("#qrcode_img").attr('src', $(this).attr('img_src'))
+    })
 
     var deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), {
         keyboard: false
