@@ -313,23 +313,19 @@ Endpoint = 0.0.0.0:51820
 
 ## 🔍 Screenshot
 
-![Index Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/index.png)
+![Sign In Page](img/Sign In.png)
 
-<p align=center>Index Page</p>
+<p align=center>Sign In</p>
 
-![Signin Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/signin.png)
+![Index Image](img/Home Page.png)
 
-<p align=center>Signin Page</p>
+<p align=center>Home</p>
 
-![Configuration Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/configuration.png)
-
-<p align=center>Configuration Page</p>
-
-![Settings Image](https://github.com/donaldzou/Wireguard-Dashboard/raw/main/src/static/settings.png)
-
-<p align=center>Settings Page</p>
+![Configuration](img/Configuration.png)
 
 
+
+Home
 
 ## ⏰  Changelog
 
