@@ -41,7 +41,6 @@
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code](#generating-qr-code)
 - [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
-  - [⚠️  Update from v1.x.x](#%EF%B8%8F--update-from-v1xx)
 - [🔍  Screenshot](#-screenshot)
 - [⏰  Changelog](#--changelog)
 - [🛒  Dependencies](#-dependencies)
@@ -49,25 +48,24 @@
 
 ## 💡 Features
 
-- Add peers for each WireGuard configuration
-
-- Manage peer
-
-- Delete peers
-
-- And many more coming up! Welcome to contribute to this project!
+- Easy to use interface, provided username and password protection to the dashboard
+- Add peers and edit (Allowed IPs, DNS, Private Key...)
+- View peers and configuration real time details (Data Usage, Latest Handshakes...)
+- Share your peer configuration with QR code or file download
+- Testing tool: Ping and Traceroute to your peer's ip
+- **And more functions are coming up!**
 
 
 ## 📝 Requirement
 
-- Ubuntu or Debian based OS, other might work, but haven't test yet. Tested on the following OS:
+- Recommend the following OS, tested by our beloved users:
   - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS
   - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
   - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
   - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
   - [ ] If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!
   
-- ‼️ Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed.‼️  <a href="https://www.wireguard.com/install/">How to install?</a>
+- Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed. <a href="https://www.wireguard.com/install/">How to install?</a>
 - Configuration files under **/etc/wireguard**
 
   - **Note**: 
@@ -235,7 +233,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    $ sudo systemctl restart wg-dashboard.service # <-- To restart the service
    ```
 
-8. **And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report a bug.**
+8. **And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report it in the issue page.**
 
 ## ✂️ Dashboard Configuration
 
@@ -256,7 +254,7 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 |                 | If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only change the file directly in system**. |                          |
 | `version`       | Dashboard Version                                            | N/A                      |
 
-<p align=center>Latest Version: V2.1</p>
+<p align=center>Latest Version: V2.2</p>
 
 All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
 
@@ -305,27 +303,36 @@ Endpoint = 0.0.0.0:51820
     ```
    $ ./wgd.sh start
    ```
-### ⚠️  **Update from v1.x.x**
-
-1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2`  to get the new update inside `Wireguard-Dashboard` directory.
-3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
-
 ## 🔍 Screenshot
 
-![Sign In Page](img/Sign In.png)
-
+![Sign In Page](img/SignIn.png)
 <p align=center>Sign In</p>
 
-![Index Image](img/Home Page.png)
-
+![Index Image](img/HomePage.png)
 <p align=center>Home</p>
 
 ![Configuration](img/Configuration.png)
+<p align=center>Configuration</p>
+
+![Add Peer](img/AddPeer.png)
+<p align=center>Add Peer</p>
+
+![Edit Peer](img/EditPeer.png)
+<p align=center>Edit Peer</p>
+
+![Delete Peer](img/DeletePeer.png)
+<p align=center>Delete Peer</p>
+
+![Dashboard Setting](img/DashboardSetting.png)
+<p align=center>Dashboard Setting</p>
+
+![Ping](img/Ping.png)
+<p align=center>Ping</p>
+
+![Traceroute](img/Traceroute.png)
+<p align=center>Traceroute</p>
 
 
-
-Home
 
 ## ⏰  Changelog
 
