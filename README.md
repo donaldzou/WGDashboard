@@ -39,7 +39,7 @@
   - [Autostart Wireguard Dashboard on boot](#autostart-wireguard-dashboard-on-boot)
 - [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
   - [Dashboard Configuration file](#dashboard-configuration-file)
-  - [Generating QR code](#generating-qr-code)
+  - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
 - [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
 - [🔍  Screenshot](#-screenshot)
 - [⏰  Changelog](#--changelog)
