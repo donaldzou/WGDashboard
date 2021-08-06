@@ -130,8 +130,11 @@ body {
 
 .btn-control{
   border: none !important;
-  padding: 0;
-  padding-right: 0.5rem;
+  padding: 0 1rem 0 0;
+}
+
+.share_peer_btn_group .btn-control{
+  padding: 0 0 0 1rem;
 }
 
 .btn-control:hover{
@@ -144,6 +147,10 @@ body {
 
 .btn-setting-peer:hover{
   color:#007bff
+}
+
+.btn-download-peer:hover{
+  color: #17a2b8;
 }
 
 .login-container{
@@ -231,4 +238,12 @@ main{
   -ms-animation: rotating 0.75s linear infinite;
   -o-animation: rotating 0.75s linear infinite;
   animation: rotating 0.75s linear infinite;
+}
+
+.peer_private_key_textbox_switch{
+    position: absolute;
+    right: 2rem;
+    transform: translateY(-28px);
+    font-size: 1.2rem;
+    cursor: pointer;
 }

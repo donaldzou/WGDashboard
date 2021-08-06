@@ -20,8 +20,9 @@
 ## 📣 What's New: Version v2.2
 
 - 🎉  **New Features**
-  - **QR Code**: You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/15)]  
-  - **Autostart on boot**: Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
+  - **QR Code:** You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
+  - **Peer configuration file download:** Same as QR code, you now can download the peer configuration file, so you don't need to manually input all the details on the peer machine! [❤️ in [#40](https://github.com/donaldzou/wireguard-dashboard/issues/40)]
+  - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.
@@ -78,11 +79,11 @@
 1. **Download Wireguard Dashboard**
 
    ```shell
-   $ git clone -b v2.2 https://github.com/donaldzou/Wireguard-Dashboard.git
+   $ git clone -b v2.2 https://github.com/donaldzou/wireguard-dashboard.git
 2. **Install Python Dependencies**
 
    ```shell
-   $ cd Wireguard-Dashboard/src
+   $ cd wireguard-dashboard/src
    $ python3 -m pip install -r requirements.txt
    ```
 
@@ -234,9 +235,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    $ sudo systemctl restart wg-dashboard.service # <-- To restart the service
    ```
 
-8. And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report a bug.
-
-⚠️  **For first time user please also read the next section.**
+8. **And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report a bug.**
 
 ## ✂️ Dashboard Configuration
 
@@ -261,9 +260,9 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 
 All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
 
-#### Generating QR code
+#### Generating QR code and peer configuration file (.conf)
 
-Starting version 2.2, dashboard can now generate QR code for each peer. Here is a template of what each QR code encoded with:
+Starting version 2.2, dashboard can now generate QR code and configuration file for each peer. Here is a template of what each QR code encoded with and the same content will be inside the file:
 
 ```
 [Interface]
@@ -282,10 +281,10 @@ Endpoint = 0.0.0.0:51820
 | **`[Interface]`** |                                                              |                                                              |
 | `PrivateKey`      | The private key of this peer                                 | N/A                                                          |
 | `Address`         | The `allowed_ips` of your peer                               | N/A                                                          |
-| `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can switch it to Google DNS - `8.8.8.8`, or use your own DNS, you can edit it later in the WireGuard phone app. |
+| `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can change it when you adding the peer or in the peer setting. |
 | **`[Peer]`**      |                                                              |                                                              |
 | `PublicKey`       | The public key of your server                                | N/A                                                          |
-| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer |
+| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer. |
 | `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           |
 
 ## ❓ How to update the dashboard?
@@ -309,7 +308,7 @@ Endpoint = 0.0.0.0:51820
 ### ⚠️  **Update from v1.x.x**
 
 1. Stop the dashboard if it is running.
-2. You can use `git pull https://github.com/donaldzou/Wireguard-Dashboard.git v2.2`  to get the new update inside `Wireguard-Dashboard` directory.
+2. You can use `git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2`  to get the new update inside `Wireguard-Dashboard` directory.
 3. Proceed **Step 2 & 3** in the [Install](#-install) step down below.
 
 ## 🔍 Screenshot

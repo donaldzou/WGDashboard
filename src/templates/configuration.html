@@ -8,7 +8,7 @@
 	</div>
 	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="staticBackdropLabel">Add a new peer</h5>
@@ -25,32 +25,44 @@
 					<form id="add_peer_form">
                         <div class="alert alert-warning" role="alert" style="font-size: 0.8rem">
                             To generate QR code for this new peer, you need to provide the private key, or use the generated key. If you don't need the QR code, simply remove the private key and insert your existed public key.
-
                         </div>
-                        <div>
-                               <label for="private_key">Private Key</label>
+                        <div class="form-group">
+                            <div>
+                                <label for="private_key">Private Key</label>
                             </div>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="private_key" aria-describedby="public_key">
-                            <div class="input-group-append">
-                               <button type="button" class="btn btn-danger" id="re_generate_key">
-                                   <i class="bi bi-arrow-repeat"></i>
-                               </button>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="private_key" aria-describedby="public_key">
+                                <div class="input-group-append">
+                                   <button type="button" class="btn btn-danger" id="re_generate_key">
+                                       <i class="bi bi-arrow-repeat"></i>
+                                   </button>
+                                </div>
                             </div>
-						</div>
+                        </div>
 						<div class="form-group">
 							<label for="public_key">Public Key <code>(Required)</code></label>
 							<input type="text" class="form-control" id="public_key" aria-describedby="public_key" disabled>
 						</div>
-
-						<div class="form-group">
-							<label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
-							<input type="text" class="form-control" id="allowed_ips">
-						</div>
-                        <div class="form-group">
-							<label for="new_add_name">Name</label>
-							<input type="text" class="form-control" id="new_add_name">
-						</div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="form-group">
+                                    <label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
+                                    <input type="text" class="form-control" id="allowed_ips">
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                 <div class="form-group">
+                                    <label for="DNS">DNS</label>
+                                    <input type="text" class="form-control" id="DNS" value="1.1.1.1">
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                 <div class="form-group">
+                                    <label for="new_add_name">Name</label>
+                                    <input type="text" class="form-control" id="new_add_name">
+                                </div>
+                            </div>
+                        </div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -88,7 +100,7 @@
 
     <div class="modal fade" id="setting_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true" conf_id={{conf_data['name']}} peer_id="">
-		<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="peer_name"></h5>
@@ -97,15 +109,33 @@
 					</button>
 				</div>
 				<div class="modal-body">
+                    <div id="setting_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						  <span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+                    <div class="mb-3">
+                      <label for="peer_private_key_textbox" class="form-label">Private Key <code>(Required for QR Code and download)</code></label>
+                      <input type="password" class="form-control" id="peer_private_key_textbox" style="padding-right: 40px">
+                      <a class="peer_private_key_textbox_switch"><i class="bi bi-eye-fill"></i></a>
+                    </div>
+                    <div class="mb-3">
+                      <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs <code>(Required)</code></label>
+                      <input type="text" class="form-control" id="peer_allowed_ip_textbox">
 
+                    </div>
+                    <div class="mb-3">
+                      <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
+                      <input type="text" class="form-control" id="peer_DNS_textbox">
+                    </div>
 					<div class="mb-3">
-                      <label for="peer_name" class="form-label">Name</label>
+                      <label for="peer_name_textbox" class="form-label">Name</label>
                       <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
                     </div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="save_peer_name" conf_id={{conf_data['name']}} peer_id="">Save</button>
+					<button type="button" class="btn btn-primary" id="save_peer_setting" conf_id={{conf_data['name']}} peer_id="">Save</button>
 				</div>
 			</div>
 		</div>
@@ -180,180 +210,5 @@
 	    load_data();
     });
 </script>
-<script>
-    function generate_key(){
-        $.ajax({
-            "url": "/generate_peer",
-            "method": "GET",
-        }).done(function(res){
-            $("#private_key").val(res.private_key)
-            $("#public_key").val(res.public_key)
-            $("#add_peer_alert").addClass("d-none");
-            $("#re_generate_key i").removeClass("rotating")
-        })
-    }
-    function generate_public_key(){
-        $.ajax({
-            "url": "/generate_public_key",
-            "method": "POST",
-            "headers":{"Content-Type": "application/json"},
-            "data": JSON.stringify({"private_key": $("#private_key").val()})
-        }).done(function(res){
-            if(res['status'] === "failed"){
-                $("#add_peer_alert").html(res['msg']+$("#add_peer_alert").html());
-                $("#add_peer_alert").removeClass("d-none");
-            }else{
-                $("#add_peer_alert").addClass("d-none");
-            }
-            $("#public_key").val(res['data'])
-             $("#re_generate_key i").removeClass("rotating")
-        })
-    }
-
-    $("#private_key").change(function(){
-        if ($("#private_key").val().length > 0){
-            $("#re_generate_key i").addClass("rotating")
-            generate_public_key()
-        }else{
-            $("#public_key").removeAttr("disabled")
-            $("#public_key").val("")
-        }
-    })
-    $('#add_modal').on('show.bs.modal', function (event) {
-        generate_key()
-    })
-    $("#re_generate_key").click(function (){
-        $("#public_key").attr("disabled","disabled")
-        $("#re_generate_key i").addClass("rotating")
-        generate_key()
-    })
-
-    $("body").on("click", ".switch", function (){
-        $(this).siblings($(".spinner-border")).css("display", "inline-block");
-         $(this).remove()
-       location.replace("/switch/"+$(this).attr('id'));
-    })
-
-
-
-	$("#save_peer").click(function(){
-		if ($("#allowed_ips") !== "" && $("#public_key") !== ""){
-			var conf = $(this).attr('conf_id')
-			$.ajax({
-				method: "POST",
-				url: "/add_peer/"+conf,
-				headers:{
-					"Content-Type": "application/json"
-				},
-				data: JSON.stringify({
-                    "private_key":$("#private_key").val(),
-                    "public_key":$("#public_key").val(),
-                    "allowed_ips": $("#allowed_ips").val(),
-                    "name":$("#new_add_name").val()
-				}),
-				success: function (response){
-					if(response != "true"){
-						$("#add_peer_alert").html(response+$("#add_peer_alert").html());
-						$("#add_peer_alert").removeClass("d-none");
-					}
-					else{
-						location.reload();
-					}
-				}
-			})
-		}
-	})
-    var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
-        keyboard: false
-    })
-
-    $("body").on("click", ".btn-qrcode-peer", function (){
-        qrcodeModal.toggle();
-        $("#qrcode_img").attr('src', $(this).attr('img_src'))
-    })
-
-    var deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), {
-        keyboard: false
-    });
-
-    $("body").on("click", ".btn-delete-peer", function(){
-        var peer_id = $(this).attr("id");
-		$("#delete_peer").attr("peer_id", peer_id);
-		deleteModal.toggle();
-    })
-
-	$("#delete_peer").click(function(){
-		var peer_id = $(this).attr("peer_id");
-		var config = $(this).attr("conf_id");
-		$.ajax({
-			method: "POST",
-			url: "/remove_peer/"+config,
-			headers:{
-				"Content-Type": "application/json"
-			},
-			data: JSON.stringify({"action": "delete", "peer_id": peer_id}),
-			success: function (response){
-				if(response !== "true"){
-                    $("#remove_peer_alert").html(response+$("#add_peer_alert").html());
-                    $("#remove_peer_alert").removeClass("d-none");
-                }
-                else{
-                    deleteModal.toggle();
-                    load_data();
-                    $('#alertToast').toast('show');
-                    $('#alertToast .toast-body').html("Peer deleted!");
-                }
-			}
-		})
-	});
-
-
-    var settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), {
-        keyboard: false
-    })
-
-	$("body").on("click", ".btn-setting-peer", function(){
-        settingModal.toggle();
-        var peer_id = $(this).attr("id");
-		$("#save_peer_name").attr("peer_id", peer_id);
-        $.ajax({
-            method: "POST",
-            url: "/get_peer_name/"+$("#setting_modal").attr("conf_id"),
-            headers:{
-				"Content-Type": "application/json"
-			},
-			data: JSON.stringify({"id": peer_id}),
-            success: function(response){
-                if (response == ""){
-                    $("#setting_modal .peer_name").html("Untitled Peer");
-                    $("#peer_name_textbox").val("")
-                }else{
-                    $("#setting_modal .peer_name").html(response);
-                    $("#peer_name_textbox").val(response)
-                }
-            }
-        })
-    });
-
-
-	$("#save_peer_name").click(function (){
-	    var peer_id = $(this).attr("peer_id");
-	    $.ajax({
-            method: "POST",
-            url: "/save_peer_name/"+"{{conf_data['name']}}",
-            headers:{
-				"Content-Type": "application/json"
-			},
-            data: JSON.stringify({id: peer_id, name: $("#peer_name_textbox").val()}),
-            success: function (response){
-                settingModal.toggle();
-                load_data();
-                $('#alertToast').toast('show');
-                $('#alertToast .toast-body').html("Name Saved!");
-            }
-        })
-    })
-
-
-</script>
+<script src="{{ url_for('static',filename='configuration.js') }}"></script>
 </html>	

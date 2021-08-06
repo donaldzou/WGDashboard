@@ -93,9 +93,9 @@ if [ "$#" != 1 ];
            stop_wgd
            sleep 2
            printf "Wireguard Dashboard is stopped. \n"
-           start_wgd_debug
+           start_wgd
         else
-          start_wgd_debug
+          start_wgd
         fi
       elif [ "$1" = "debug" ]; then
         if check_wgd_status; then

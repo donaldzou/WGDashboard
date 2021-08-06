@@ -18,7 +18,7 @@ from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.1'
+dashboard_version = 'v2.2'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Default Wireguard IP
@@ -186,6 +186,7 @@ def get_conf_peers_data(config_name):
             db.insert({
                 "id": i['PublicKey'],
                 "private_key": "",
+                "DNS":"1.1.1.1",
                 "name": "",
                 "total_receive": 0,
                 "total_sent": 0,
@@ -198,8 +199,12 @@ def get_conf_peers_data(config_name):
             })
         else:
             # Update database since V2.2
+            update_db = {}
             if "private_key" not in search[0]:
-                db.update({'private_key':''}, peers.id == i['PublicKey'])
+                update_db['private_key'] = ''
+            if "DNS" not in search[0]:
+                update_db['DNS'] = '1.1.1.1'
+            db.update(update_db, peers.id == i['PublicKey'])
 
     tic = time.perf_counter()
     get_latest_handshake(config_name, db, peers)
@@ -271,6 +276,61 @@ def get_conf_list():
         conf = sorted(conf, key=itemgetter('conf'))
     return conf
 
+def genKeys():
+    gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',
+                                  shell=True)
+    private = open('private_key.txt')
+    private_key = private.readline().strip()
+    public = open('public_key.txt')
+    public_key = public.readline().strip()
+    data = {"private_key": private_key, "public_key": public_key}
+    private.close()
+    public.close()
+    os.remove('private_key.txt')
+    os.remove('public_key.txt')
+    return data
+
+def genPubKey(private_key):
+    pri_key_file = open('private_key.txt', 'w')
+    pri_key_file.write(private_key)
+    pri_key_file.close()
+    try:
+        check = subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
+        public = open('public_key.txt')
+        public_key = public.readline().strip()
+        os.remove('private_key.txt')
+        os.remove('public_key.txt')
+        return {"status":'success', "msg":"", "data":public_key}
+    except subprocess.CalledProcessError as exc:
+        os.remove('private_key.txt')
+        return {"status":'failed', "msg":"Key is not the correct length or format", "data":""}
+
+def checkKeyMatch(private_key, public_key, config_name):
+    result = genPubKey(private_key)
+    if result['status'] == 'failed':
+        return result
+    else:
+        db = TinyDB('db/' + config_name + '.json')
+        peers = Query()
+        match = db.search(peers.id == result['data'])
+        if len(match) != 1 or result['data'] != public_key:
+            return {'status': 'failed', 'msg': 'Please check your private key, it does not match with the public key.'}
+        else:
+            return {'status': 'success'}
+
+def checkAllowedIP(public_key, ip, config_name):
+    db = TinyDB('db/' + config_name + '.json')
+    peers = Query()
+    peer = db.search(peers.id == public_key)
+    if len(peer) != 1:
+        return {'status': 'failed', 'msg': 'Peer does not exist'}
+    else:
+        existed_ip = db.search((peers.id != public_key) & (peers.allowed_ip == ip))
+        if len(existed_ip) != 0:
+            return {'status':'failed', 'msg':"Allowed IP already taken by another peer."}
+        else:
+            return {'status':'success'}
+
 @app.before_request
 def auth_req():
     conf = configparser.ConfigParser(strict=False)
@@ -285,7 +345,10 @@ def auth_req():
                 request.endpoint != "auth" and \
                 "username" not in session:
             print("User not loggedin - Attemped access: "+str(request.endpoint))
-            session['message'] = "You need to sign in first!"
+            if request.endpoint != "index":
+                session['message'] = "You need to sign in first!"
+            else:
+                session['message'] = ""
             return redirect(url_for("signin"))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
@@ -509,6 +572,7 @@ def get_conf(config_name):
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
         "running_peer": get_conf_running_peer_number(config_name),
+
     }
     if conf_data['status'] == "stopped":
         # return redirect('/')
@@ -540,6 +604,8 @@ def switch(config_name):
 
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
+    db = TinyDB("db/" + config_name + ".json")
+    peers = Query()
     data = request.get_json()
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']
@@ -548,6 +614,8 @@ def add_peer(config_name):
         return config_name+" is not running."
     if public_key in keys:
         return "Public key already exist."
+    if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
+        return "Allowed IP already taken by another peer."
     else:
         status = ""
         try:
@@ -555,12 +623,11 @@ def add_peer(config_name):
                 "wg set " + config_name + " peer " + public_key + " allowed-ips " + allowed_ips, shell=True, stderr=subprocess.STDOUT)
             status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
             get_conf_peers_data(config_name)
-            db = TinyDB("db/" + config_name + ".json")
-            peers = Query()
-            db.update({"name": data['name'], "private_key": data['private_key']}, peers.id == public_key)
+            db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS']}, peers.id == public_key)
             db.close()
             return "true"
         except subprocess.CalledProcessError as exc:
+            db.close()
             return exc.output.strip()
 
 
@@ -590,19 +657,47 @@ def remove_peer(config_name):
             return exc.output.strip()
 
 
-@app.route('/save_peer_name/<config_name>', methods=['POST'])
-def save_peer_name(config_name):
+@app.route('/save_peer_setting/<config_name>', methods=['POST'])
+def save_peer_setting(config_name):
     data = request.get_json()
     id = data['id']
     name = data['name']
+    private_key = data['private_key']
+    DNS = data['DNS']
+    allowed_ip = data['allowed_ip']
     db = TinyDB("db/" + config_name + ".json")
     peers = Query()
-    db.update({"name": name}, peers.id == id)
-    db.close()
-    return id + " " + name
+    if len(db.search(peers.id == id)) == 1:
+        check_ip = checkAllowedIP(id, allowed_ip, config_name)
+        if private_key != "":
+            check_key = checkKeyMatch(private_key, id, config_name)
+            if check_key['status'] == "failed":
+                return jsonify(check_key)
+        if check_ip['status'] == "failed":
+            return jsonify(check_ip)
+
+        try:
+            if allowed_ip == "":
+                allowed_ip = '""'
+            change_ip = subprocess.check_output('wg set '+config_name+" peer "+id+" allowed-ips "+allowed_ip, shell=True, stderr=subprocess.STDOUT)
+            save_change_ip = subprocess.check_output('wg-quick save '+ config_name, shell=True,stderr=subprocess.STDOUT)
+            if change_ip.decode("UTF-8") != "":
+                return jsonify({"status":"failed", "msg": change_ip.decode("UTF-8")})
+
+            db.update({"name": name, "private_key": private_key, "DNS": DNS}, peers.id == id)
+            db.close()
+            return jsonify({"status": "success", "msg": ""})
+        except subprocess.CalledProcessError as exc:
+            return jsonify({"status":"failed", "msg": str(exc.output.decode("UTF-8").strip())})
 
 
-@app.route('/get_peer_name/<config_name>', methods=['POST'])
+
+
+    else:
+        return jsonify({"status":"failed","msg":"This peer does not exist."})
+
+
+@app.route('/get_peer_data/<config_name>', methods=['POST'])
 def get_peer_name(config_name):
     data = request.get_json()
     id = data['id']
@@ -610,39 +705,55 @@ def get_peer_name(config_name):
     peers = Query()
     result = db.search(peers.id == id)
     db.close()
-    return result[0]['name']
+    data = {"name": result[0]['name'], "allowed_ip":result[0]['allowed_ip'], "DNS": result[0]['DNS'], "private_key": result[0]['private_key']}
+    return jsonify(data)
 
 @app.route('/generate_peer', methods=['GET'])
 def generate_peer():
-    gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',shell=True)
-    private = open('private_key.txt')
-    private_key = private.readline().strip()
-    public = open('public_key.txt')
-    public_key = public.readline().strip()
-    data = {"private_key": private_key, "public_key": public_key}
-    private.close()
-    public.close()
-    os.remove('private_key.txt')
-    os.remove('public_key.txt')
-    return jsonify(data)
+    return jsonify(genKeys())
 
 @app.route('/generate_public_key', methods=['POST'])
 def generate_public_key():
     data = request.get_json()
     private_key = data['private_key']
-    pri_key_file = open('private_key.txt', 'w')
-    pri_key_file.write(private_key)
-    pri_key_file.close()
-    try:
-        check = subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
-        public = open('public_key.txt')
-        public_key = public.readline().strip()
-        os.remove('private_key.txt')
-        os.remove('public_key.txt')
-        return jsonify({"status":'success', "msg":"", "data":public_key})
-    except subprocess.CalledProcessError as exc:
-        os.remove('private_key.txt')
-        return jsonify({"status":'failed', "msg":"Key is not the correct length or format", "data":""})
+    return jsonify(genPubKey(private_key))
+
+@app.route('/check_key_match/<config_name>', methods=['POST'])
+def check_key_match(config_name):
+    data = request.get_json()
+    private_key = data['private_key']
+    public_key = data['public_key']
+    return jsonify(checkKeyMatch(private_key,public_key, config_name))
+
+@app.route('/download/<config_name>', methods=['GET'])
+def download(config_name):
+    id = request.args.get('id')
+    db = TinyDB("db/" + config_name + ".json")
+    peers = Query()
+    print(id)
+    get_peer = db.search(peers.id == id)
+    print(get_peer)
+    if len(get_peer) == 1:
+        peer = get_peer[0]
+        if peer['private_key'] != "":
+            public_key = get_conf_pub_key(config_name)
+            listen_port = get_conf_listen_port(config_name)
+            endpoint = wg_ip+":"+listen_port
+            private_key = peer['private_key']
+            allowed_ip = peer['allowed_ip']
+            DNS = peer['DNS']
+            name = "".join(peer['name'].split(' '))
+            if name == "": name = public_key
+            def generate(private_key, allowed_ip, DNS, public_key, endpoint):
+                yield "[Interface]\nPrivateKey = "+private_key+"\nAddress = "+allowed_ip+"\nDNS = "+DNS+"\n\n[Peer]\nPublicKey = "+public_key+"\nAllowedIPs = 0.0.0.0/0\nEndpoint = "+endpoint
+
+            return app.response_class(generate(private_key,allowed_ip,DNS, public_key,endpoint), mimetype='text/conf', headers={"Content-Disposition":"attachment;filename="+name+".conf"})
+    else:
+        return redirect("/configuration/" + config_name)
+
+
+
+
 
 def init_dashboard():
     # Set Default INI File

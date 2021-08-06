@@ -2,3 +2,4 @@ Flask==1.1.2
 tinydb==4.3.0
 ifcfg==0.21
 icmplib==2.1.1
+flask-qrcode==3.0.0
