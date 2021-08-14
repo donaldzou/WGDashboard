@@ -71,7 +71,8 @@ $("#save_peer").click(function(){
                 "public_key":$("#public_key").val(),
                 "allowed_ips": $("#allowed_ips").val(),
                 "name":$("#new_add_name").val(),
-                "DNS": $("#DNS").val()
+                "DNS": $("#new_add_DNS").val(),
+                "endpoint_allowed_ip": $("#new_add_endpoint_allowed_ip").val()
             }),
             success: function (response){
                 if(response != "true"){
@@ -123,7 +124,7 @@ $("#delete_peer").click(function(){
             }
             else{
                 deleteModal.toggle();
-                load_data();
+                load_data($('#search_peer_textbox').val());
                 $('#alertToast').toast('show');
                 $('#alertToast .toast-body').html("Peer deleted!");
             }
@@ -136,7 +137,7 @@ var settingModal = new bootstrap.Modal(document.getElementById('setting_modal'),
     keyboard: false
 })
 $("body").on("click", ".btn-setting-peer", function(){
-    settingModal.toggle();
+    startProgressBar()
     var peer_id = $(this).attr("id");
     $("#save_peer_setting").attr("peer_id", peer_id);
     $.ajax({
@@ -153,6 +154,9 @@ $("body").on("click", ".btn-setting-peer", function(){
             $("#setting_modal #peer_private_key_textbox").val(response['private_key'])
             $("#setting_modal #peer_DNS_textbox").val(response['DNS'])
             $("#setting_modal #peer_allowed_ip_textbox").val(response['allowed_ip'])
+            $("#setting_modal #peer_endpoint_allowed_ips").val(response['endpoint_allowed_ip'])
+            settingModal.toggle();
+            endProgressBar()
         }
     })
 });
@@ -199,7 +203,8 @@ $("#save_peer_setting").click(function (){
                 name: $("#peer_name_textbox").val(),
                 DNS: $("#peer_DNS_textbox").val(),
                 private_key: $("#peer_private_key_textbox").val(),
-                allowed_ip: $("#peer_allowed_ip_textbox").val()
+                allowed_ip: $("#peer_allowed_ip_textbox").val(),
+                endpoint_allowed_ip: $("#peer_endpoint_allowed_ips").val()
             }),
             success: function (response){
                 if (response['status'] === "failed"){
@@ -207,7 +212,7 @@ $("#save_peer_setting").click(function (){
                     $("#setting_peer_alert").removeClass("d-none");
                 }else{
                     settingModal.toggle();
-                    load_data();
+                    load_data($('#search_peer_textbox').val())
                     $('#alertToast').toast('show');
                     $('#alertToast .toast-body').html("Peer Saved!");
                 }
@@ -226,3 +231,64 @@ $(".peer_private_key_textbox_switch").click(function (){
     $("#peer_private_key_textbox").attr('type',mode)
     $(".peer_private_key_textbox_switch i").removeClass().addClass(icon)
 })
+
+
+// Search Peer
+var typingTimer;
+var doneTypingInterval = 200;
+var $input = $('#search_peer_textbox');
+$input.on('keyup', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(doneTyping, doneTypingInterval);
+});
+$input.on('keydown', function () {
+    clearTimeout(typingTimer);
+});
+function doneTyping () {
+    load_data($('#search_peer_textbox').val());
+}
+
+
+// Sorting
+$("body").on("change", "#sort_by_dropdown", function (){
+    $.ajax({
+        method:"POST",
+        data: JSON.stringify({'sort':$("#sort_by_dropdown option:selected").val()}),
+        headers:{"Content-Type": "application/json"},
+        url: "/update_dashboard_sort",
+        success: function (res){
+            location.reload()
+        }
+    })
+})
+
+
+$("body").on("mouseenter", ".key", function(){
+    var label = $(this).parent().siblings().children()[1]
+    label.style.opacity = "100"
+})
+$("body").on("mouseout", ".key", function(){
+    var label = $(this).parent().siblings().children()[1]
+    label.style.opacity = "0"
+    setTimeout(function (){
+        label.innerHTML = "CLICK TO COPY"
+    },200)
+
+});
+$("body").on("click", ".key", function(){
+    var label = $(this).parent().siblings().children()[1]
+    copyToClipboard($(this))
+    label.innerHTML = "COPIED!"
+})
+function copyToClipboard(element) {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($(element).text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+}
+
+
+// $(".key").mouseenter(function(){
+//
+// })

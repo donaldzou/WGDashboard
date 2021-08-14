@@ -1,10 +1,21 @@
 <html>
-{% include "header.html" %}
+{% with title=title%}
+    {% include "header.html"%}
+{% endwith %}
 <body>
 	{% include "navbar.html" %}
 	<div class="container-fluid">
 		{% include "sidebar.html" %}
-		<div id="config_body"></div>
+        <div class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
+            <div class="form-group">
+                <input type="text" class="form-control" id="search_peer_textbox" placeholder="Search Peer..." value="" style="display: none">
+            </div>
+        </div>
+
+
+		<div id="config_body">
+
+        </div>
 	</div>
 	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -44,22 +55,29 @@
 							<input type="text" class="form-control" id="public_key" aria-describedby="public_key" disabled>
 						</div>
                         <div class="row">
-                            <div class="col-sm">
+                            <div class="col-sm-6">
+                                 <div class="form-group">
+                                    <label for="new_add_name">Name</label>
+                                    <input type="text" class="form-control" id="new_add_name">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="allowed_ips">
                                 </div>
                             </div>
-                            <div class="col-sm">
+                            <div class="col-sm-6">
                                  <div class="form-group">
-                                    <label for="DNS">DNS</label>
-                                    <input type="text" class="form-control" id="DNS" value="1.1.1.1">
+                                    <label for="new_add_DNS">DNS</label>
+                                    <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
-                            <div class="col-sm">
+
+                            <div class="col-sm-6">
                                  <div class="form-group">
-                                    <label for="new_add_name">Name</label>
-                                    <input type="text" class="form-control" id="new_add_name">
+                                    <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs</label>
+                                    <input type="text" class="form-control" id="new_add_endpoint_allowed_ip" value="{{ endpoint_allowed_ip }}">
                                 </div>
                             </div>
                         </div>
@@ -115,6 +133,10 @@
 						</button>
 					</div>
                     <div class="mb-3">
+                      <label for="peer_name_textbox" class="form-label">Name</label>
+                      <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
+                    </div>
+                    <div class="mb-3">
                       <label for="peer_private_key_textbox" class="form-label">Private Key <code>(Required for QR Code and download)</code></label>
                       <input type="password" class="form-control" id="peer_private_key_textbox" style="padding-right: 40px">
                       <a class="peer_private_key_textbox_switch"><i class="bi bi-eye-fill"></i></a>
@@ -128,10 +150,11 @@
                       <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
                       <input type="text" class="form-control" id="peer_DNS_textbox">
                     </div>
-					<div class="mb-3">
-                      <label for="peer_name_textbox" class="form-label">Name</label>
-                      <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
+                    <div class="mb-3">
+                      <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>
+                      <input type="text" class="form-control" id="peer_endpoint_allowed_ips">
                     </div>
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -174,25 +197,59 @@
 </body>
 {% include "footer.html" %}
 <script>
-    $(".sb-{{conf_data['name']}}-url").addClass("active");
-	function load_data(){
+    var conf_name = "{{ conf_data['name'] }}"
+    $(".sb-"+conf_name+"-url").addClass("active");
+    // Progress Bar
+    let bar = $(".progress-bar")
+    function startProgressBar(){
+        bar.css("width","0%")
+        bar.css("opacity", "100")
+        bar.css("background", "rgb(255,69,69)")
+        bar.css("background", "linear-gradient(145deg, rgba(255,69,69,1) 0%, rgba(0,115,186,1) 100%)")
+        bar.css("width","25%")
+        setTimeout(function(){
+            stillLoadingProgressBar();
+        },300)
+    }
+    function stillLoadingProgressBar(){
+        bar.css("transition", "3s ease-in-out")
+        bar.css("width", "75%")
+    }
+    function endProgressBar(){
+        bar.css("transition", "0.3s ease-in-out")
+        bar.css("width","100%")
+        setTimeout(function(){
+            bar.css("opacity", "0")
+        },250)
+
+    }
+
+
+
+	function load_data(search){
+        startProgressBar()
+
 		$.ajax({
 			method: "GET",
-			url: "/get_config/"+"{{conf_data['name']}}",
+			url: "/get_config/"+conf_name+"?search="+encodeURIComponent(search),
 			headers:{
 				"Content-Type": "application/json"
 			},
-			async:false,
 			success: function (response){
 				$("#config_body").html(response);
-				$("[refresh-interval={{ dashboard_refresh_interval }}]").addClass("active")
+				{#$("[refresh-interval={{ dashboard_refresh_interval }}]").addClass("active")#}
+                $("#search_peer_textbox").css("display", "block")
+                if (bar.css("width") !== "0%"){
+                    endProgressBar()
+                }
+
 			}
 		})
 	}
 	$(document).ready(function(){
-		load_data();
+		load_data($('#search_peer_textbox').val());
 		setInterval(function(){
-			load_data();
+			load_data($('#search_peer_textbox').val());
 		}, {{dashboard_refresh_interval}})
 	});
 
@@ -207,8 +264,8 @@
         })
     });
 	$("body").on("click", ".refresh", function (){
-	    load_data();
+	    load_data($('#search_peer_textbox').val());
     });
 </script>
-<script src="{{ url_for('static',filename='configuration.js') }}"></script>
+<script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 </html>	

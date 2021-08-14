@@ -4,7 +4,7 @@
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/donaldzou/wireguard-dashboard/main/img/Group%202.png" width="128">
+  <img src="img/logo.png" width="128">
 </p>
 <h1 align="center"> Wireguard Dashboard</h1>
 
@@ -26,6 +26,9 @@
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.
+- **🧐  Other Changes**
+  - Moved all external CSS and JavaScript file to local hosting (Except Bootstrap Icon, due to large amount of SVG files).
+  - Updated `Flask` from`v1.1.2` to `v2.0.1`, and `Jinja` from `v2.10.1` to `v3.0.1`
 <hr>
 
 
@@ -59,45 +62,69 @@
 ## 📝 Requirement
 
 - Recommend the following OS, tested by our beloved users:
-  - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS
+  - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS [@Me]
   - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
   - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
   - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
-  - [ ] If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!
-  
-- Make sure you have **Wireguard** and **Wireguard-Tools (`wg-quick`)** installed. <a href="https://www.wireguard.com/install/">How to install?</a>
-- Configuration files under **/etc/wireguard**
 
-  - **Note**: 
-    - **For `[Interface]` in the `.conf` file, please make sure you have `SaveConfig = true` under `[Interface]`** (Bug mentioned in [#9](https://github.com/donaldzou/wireguard-dashboard/issues/9#issuecomment-852346481))
-    - **For peers, `PublicKey` & `AllowedIPs` is required.**
+  > **If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!**
+
+- **WireGuard** and **Wireguard-Tools (`wg-quick`)**  are installed.
+
+  > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
+
+- Configuration files under **`/etc/wireguard`**, but please note the following sample
+
+  ```ini
+  [Interface]
+  ...
+  SaveConfig = true
+  # Need to include this line to allow WireGuard Tool to save your configuration
+  
+  [Peer]
+  PublicKey = abcd1234
+  AllowedIPs = 1.2.3.4/32
+  # Must have for each peer
+  ```
+
 - Python 3.7+ & Pip3
 
 ## 🛠 Install
 1. **Download Wireguard Dashboard**
 
    ```shell
-   $ git clone -b v2.2 https://github.com/donaldzou/wireguard-dashboard.git
-2. **Install Python Dependencies**
+   git clone -b v2.2 https://github.com/donaldzou/wireguard-dashboard.git
+   
+2. Open the Wireguard Dashboard folder
 
    ```shell
-   $ cd wireguard-dashboard/src
-   $ python3 -m pip install -r requirements.txt
+   cd wireguard-dashboard/src
+   ```
+   
+3. Install Python Dependencies
+
+   ```shell
+   python3 -m pip install -r requirements.txt
    ```
 
-3. **Install & run Wireguard Dashboard**
+4. Give read, write and execute permission to root of the WireGuard configuration folder, you can change the path if your configuration files is not stored in `/etc/wireguard`
 
    ```shell
-   $ sudo chmod -R 744 /etc/wireguard   # Add read and execute permission of the wireguard config folder
-   $ sudo chmod u+x wgd.sh
-   $ ./wgd.sh start
+   sudo chmod -R 744 /etc/wireguard
+   ```
+
+5. Install & run Wireguard Dashboard
+
+   ```shell
+   sudo chmod u+x wgd.sh
+   ./wgd.sh start
    ```
 
    **Note**:
 
    > For [`pivpn`](https://github.com/pivpn/pivpn) user, please use `sudo ./wgd.sh start` to run if your current account does not have the permission to run `wg show` and `wg-quick`.
 
-4. **Access dashboard**
+6. **Access dashboard**
 
    Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
 
@@ -107,45 +134,45 @@
 
 
 ```shell
-$ cd Wireguard-Dashboard/src
+cd Wireguard-Dashboard/src
 -----------------------------
-$ ./wgd.sh start    # Start the dashboard in background
+./wgd.sh start    # Start the dashboard in background
 -----------------------------
-$ ./wgd.sh debug    # Start the dashboard in foreground (debug mode)
+./wgd.sh debug    # Start the dashboard in foreground (debug mode)
 -----------------------------
-$ ./wgd.sh stop     # Stop the dashboard
+./wgd.sh stop     # Stop the dashboard
 -----------------------------
-$ ./wgd.sh restart  # Restart the dasboard
+./wgd.sh restart  # Restart the dasboard
 ```
 
-#### Autostart Wireguard Dashboard on boot
+#### Autostart Wireguard Dashboard on boot (>= v2.2)
 
-In the `src` folder, it contained a file called `wg-dashboard.service`, we can use this file to let our system to autostart the dashboard after reboot. The following has tested on Ubuntu 18.04.1 LTS, please don't hesitate to provide your system if you have tested the autostart on another system.
+In the `src` folder, it contained a file called `wg-dashboard.service`, we can use this file to let our system to autostart the dashboard after reboot. The following guide has tested on **Ubuntu**, most **Debian** based OS might be the same, but some might not. Please don't hesitate to provide your system if you have tested the autostart on another system.
 
-1. **Changing the directory to the dashboard's directory**
+1. Changing the directory to the dashboard's directory
 
-   ```bash
-   $ cd wireguard-dashboard/src
+   ```shell
+   cd wireguard-dashboard/src
    ```
 
-2. **Get the full path of the dashboard's directory**
+2. Get the full path of the dashboard's directory
 
-   ```bash
-   $ pwd
+   ```shell
+   pwd
    #Output: /root/wireguard-dashboard/src
    ```
 
-   For me, my output is the one above, your's might be different since it depends on where you downloaded the dashboard. **Copy the the output to somewhere, we will need this in the next step.**
+   For this example, the output is `/root/wireguard-dashboard/src`, your path might be different since it depends on where you downloaded the dashboard in the first place. **Copy the the output to somewhere, we will need this in the next step.**
 
-3. **Edit the service file**
+3. Edit the service file, the service file is located in `wireguard-dashboard/src`, you can use other editor you like, here will be using `nano`
 
-   ```bash
-   $ nano wg-dashboard.service
+   ```shell
+   nano wg-dashboard.service
    ```
 
    You will see something like this:
 
-   ```
+   ```ini
    [Unit]
    After=netword.service
    
@@ -159,9 +186,9 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    WantedBy=default.target
    ```
 
-   Now, we need to replace both `<your dashboard directory full path here>` to the one you just copied from step 2. After doing this, the file will become something like this:
+   Now, we need to replace both `<your dashboard directory full path here>` to the one you just copied from step 2. After doing this, the file will become something like this, your file might be different:
 
-   ```
+   ```ini
    [Unit]
    After=netword.service
    
@@ -175,9 +202,9 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    WantedBy=default.target
    ```
 
-   **Be aware that after the value of `WorkingDirectory`, it does not have  a `/` (slash).** You can save the file with `control+x` and press `Y`.
+   **Be aware that after the value of `WorkingDirectory`, it does not have  a `/` (slash).** And then save the file after you edited it
 
-4. **Copy the service file to systemd folder**
+4. Copy the service file to systemd folder
 
    ```bash
    $ cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
@@ -185,7 +212,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
    To make sure you copy the file successfully, you can use this command `cat /etc/systemd/system/wg-dashboard.service` to see if it will output the file you just edited.
 
-5. **Enable the service**
+5. Enable the service
 
    ```bash
    $ sudo chmod 664 /etc/systemd/system/wg-dashboard.service
@@ -194,7 +221,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    $ sudo systemctl start wg-dashboard.service  # <-- To start the service
    ```
 
-6. **Check if the service run correctly**
+6. Check if the service run correctly
 
    ```bash
    $ sudo systemctl status wg-dashboard.service
@@ -202,7 +229,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
    And you should see something like this
 
-   ```bash
+   ```shell
    ● wg-dashboard.service
         Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
         Active: active (running) since Tue 2021-08-03 22:31:26 UTC; 4s ago
@@ -223,17 +250,17 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on http://0.0.0.0:10086/ (Press CTRL+C to quit)
    ```
 
-   If you see `Active:` followed by `active (running) since...` then it means it run correctly.
+   If you see `Active:` followed by `active (running) since...` then it means it run correctly. 
 
-7. **Stop/Start/Restart the service**
+7. Stop/Start/Restart the service
 
    ```bash
-   $ sudo systemctl stop wg-dashboard.service # <-- To stop the service
-   $ sudo systemctl start wg-dashboard.service # <-- To start the service
-   $ sudo systemctl restart wg-dashboard.service # <-- To restart the service
+   sudo systemctl stop wg-dashboard.service      # <-- To stop the service
+   sudo systemctl start wg-dashboard.service     # <-- To start the service
+   sudo systemctl restart wg-dashboard.service   # <-- To restart the service
    ```
 
-8. **And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot. If you have any questions or problem, please report it in the issue page.**
+8. **And now you can reboot your system, and use the command at step 6 to see if it will auto start after the reboot, or just simply access the dashboard through your browser. If you have any questions or problem, please report it in the issue page.**
 
 ## ✂️ Dashboard Configuration
 
@@ -241,28 +268,28 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
 Since version 2.0, Wireguard Dashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
 
-|                 | Description                                                  | Default Value            |
-| --------------- | ------------------------------------------------------------ | ------------------------ |
-| **`[Account]`** |                                                              |                          |
-| `username`      | Dashboard login username                                     | `admin`                  |
-| `password`      | Password, will be hash with SHA256                           | `admin` hashed in SHA256 |
-| **`[Server]`**  |                                                              |                          |
-| `wg_conf_path`  | The path of all the Wireguard configurations                 | `/etc/wireguard`         |
-| `app_ip`        | IP address the dashboard will run with                       | `0.0.0.0`                |
-| `app_port`      | Port the the dashboard will run with                         | `10086`                  |
-| `auth_req`      | Does the dashboard need authentication to access             | `true`                   |
-|                 | If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only change the file directly in system**. |                          |
-| `version`       | Dashboard Version                                            | N/A                      |
+|                 | Description                                                  | Default                  | Available in Setting |
+| --------------- | ------------------------------------------------------------ | ------------------------ | -------------------- |
+| **`[Account]`** |                                                              |                          |                      |
+| `username`      | Dashboard login username                                     | `admin`                  | Yes                  |
+| `password`      | Password, will be hash with SHA256                           | `admin` hashed in SHA256 | Yes                  |
+| **`[Server]`**  |                                                              |                          |                      |
+| `wg_conf_path`  | The path of all the Wireguard configurations                 | `/etc/wireguard`         | Yes                  |
+| `app_ip`        | IP address the dashboard will run with                       | `0.0.0.0`                | Yes                  |
+| `app_port`      | Port the the dashboard will run with                         | `10086`                  | Yes                  |
+| `auth_req`      | Does the dashboard need authentication to access             | `true`                   | No                   |
+|                 | If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. |                          |                      |
+| `version`       | Dashboard Version                                            | `v2.2`                   | No                   |
 
-<p align=center>Latest Version: V2.2</p>
+<p align=center>Latest Version: v2.2</p>
 
-All these settings will be able to configure within the dashboard in **Settings** on the sidebar, without changing the actual file. **Except `version` and `auth_req` due to security consideration.**
+**Except `auth_req` due to security consideration.**
 
 #### Generating QR code and peer configuration file (.conf)
 
 Starting version 2.2, dashboard can now generate QR code and configuration file for each peer. Here is a template of what each QR code encoded with and the same content will be inside the file:
 
-```
+```ini
 [Interface]
 PrivateKey = QWERTYUIOPO234567890YUSDAKFH10E1B12JE129U21=
 Address = 0.0.0.0/32
@@ -274,34 +301,34 @@ AllowedIPs = 0.0.0.0/0
 Endpoint = 0.0.0.0:51820
 ```
 
-|                   | Description                                                  | Default Value                                                |
-| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| **`[Interface]`** |                                                              |                                                              |
-| `PrivateKey`      | The private key of this peer                                 | N/A                                                          |
-| `Address`         | The `allowed_ips` of your peer                               | N/A                                                          |
-| `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can change it when you adding the peer or in the peer setting. |
-| **`[Peer]`**      |                                                              |                                                              |
-| `PublicKey`       | The public key of your server                                | N/A                                                          |
-| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer. |
-| `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           |
+|                   | Description                                                  | Default Value                                                | Available in Peer setting |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------- |
+| **`[Interface]`** |                                                              |                                                              |                           |
+| `PrivateKey`      | The private key of this peer                                 | Private key generated by WireGuard (`wg genkey`) or provided by user | Yes                       |
+| `Address`         | The `allowed_ips` of your peer                               | N/A                                                          | Yes                       |
+| `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can change it when you adding the peer or in the peer setting. | Yes                       |
+| **`[Peer]`**      |                                                              |                                                              |                           |
+| `PublicKey`       | The public key of your server                                | N/A                                                          | No                        |
+| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer. | No                        |
+| `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           | No                        |
 
 ## ❓ How to update the dashboard?
 
 1. Change your directory to `wireguard-dashboard` 
-    ```
-    $ cd wireguard-dashboard
+    ```shell
+    cd wireguard-dashboard
     ```
 2. Get the newest version
-    ```
-    $ sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2 --force
+    ```shell
+    sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2 --force
     ```
 3. Update and install all python dependencies
-   ```
-   $ python3 -m pip install -r requirements.txt
+   ```shell
+   python3 -m pip install -r requirements.txt
    ```
 4. Start the dashboard
-    ```
-   $ ./wgd.sh start
+    ```shell
+   ./wgd.sh start
    ```
 ## 🔍 Screenshot
 
@@ -372,10 +399,11 @@ Endpoint = 0.0.0.0:51820
   - [Bootstrap Icon](https://icons.getbootstrap.com) `v1.4.0`
   - [jQuery](https://jquery.com) `v3.5.1`
 - Python
-  - [Flask](https://pypi.org/project/Flask/) `v1.1.2`
+  - [Flask](https://pypi.org/project/Flask/) `v2.0.1`
   - [TinyDB](https://pypi.org/project/tinydb/) `v4.3.0`
   - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
   - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
+  - [flask-qrcode](https://pypi.org/project/Flask-QRcode/) `v3.0.0`
 
 ## ✨ Contributors
 
