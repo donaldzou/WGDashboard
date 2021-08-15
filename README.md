@@ -331,6 +331,7 @@ Endpoint = 0.0.0.0:51820
     ```
 2. Get the newest version
     ```shell
+    sudo git stash
     sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2 --force
     ```
 3. Update and install all python dependencies
