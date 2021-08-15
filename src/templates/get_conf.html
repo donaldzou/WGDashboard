@@ -39,82 +39,138 @@
 			</div>
 			<div class="w-100"></div>
 			<div class="col-sm">
-				<small class="text-muted"><strong>PUBLIC KEY</strong></small>
-				<h6 style="text-transform: uppercase;"><samp>{{conf_data['public_key']}}</samp></h6>
+				<small class="text-muted">
+                    <strong>PUBLIC KEY</strong>
+                    <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small>
+                </small>
+				<h6 style="text-transform: uppercase;"><samp class="key">{{conf_data['public_key']}}</samp></h6>
 			</div>
 			<div class="col-sm">
 				<small class="text-muted"><strong>LISTEN PORT</strong></small>
 				<h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
 			</div>
-		</div>
-		<hr>
-		<div class="button-div mb-3" style="text-align: right;">
-            <div class="btn-group" role="group" aria-label="Basic example">
-                <button type="button" class="btn btn-outline-primary btn-sm btn-group-label refresh"><i class="bi bi-arrow-repeat"></i></button>
-                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="5000">5s</button>
-                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="10000">10s</button>
-                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="30000">30s</button>
-                <button type="button" class="btn btn-outline-primary btn-sm update_interval" refresh-interval="60000">1m</button>
-            </div>
-            <button type="button" class="btn btn-primary add_btn btn-sm" data-toggle="modal" data-target="#add_modal">
-				<i class="bi bi-plus-circle-fill"></i> PEER
-			</button>
-		</div>
-	</div>
-	
-	{% for i in conf_data['peer_data']%}
-		<div class="card mb-3">
-            <div class="card-header">
-                <div class="row">
-                    <div class="col-sm">
-                        <div class="card-header-body ">
-                            {% if not i['name']%}
-                                {{ "Untitled Peer" }}
-                            {% else %}
-                                {{i['name']}}
-                            {% endif %}
-                            <span class="dot dot-{{i['status']}}"></span>
-                        </div>
-                    </div>
-                    <div class="col-sm peer_data_group">
-                        <p class="text-primary" style="text-transform: uppercase; display: inline-block; margin-bottom: 0; margin-right: 1rem"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</p>
-                        <p class="text-success" style="text-transform: uppercase;  display: inline-block; margin-bottom: 0"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</p>
-                    </div>
-
-                </div>
-
-
-            </div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-sm">
-						<small class="text-muted"><strong>PEER</strong></small>
-						<h6><samp class="ml-auto">{{i['id']}}</samp></h6>
-					</div>
-					<div class="col-sm">
-						<small class="text-muted"><strong>ALLOWED IP</strong></small>
-						<h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
-					</div>
-					<div class="w-100"></div>
-
-					<div class="col-sm">
-						<small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
-						<h6 style="text-transform: uppercase;">{{i['latest_handshake']}}</h6>
-					</div>
-					<div class="col-sm">
-						<small class="text-muted"><strong>END POINT</strong></small>
-						<h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
-					</div>
-                    <div class="w-100"></div>
-					<div class="col-sm">
-						<div class="button-group">
-                            <hr>
-                            <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button>
-							<button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
-						</div>
-					</div>
-				</div>
+            <div class="col-sm">
+				<small class="text-muted"><strong>ADDRESS</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['conf_address']}}</samp></h6>
 			</div>
 		</div>
-	{%endfor%}
+		<hr>
+		<div class="button-div mb-3">
+            <div class="row">
+                <div class="col-sm">
+                     <div class="form-group">
+                        <label for="sort_by_dropdown"><small class="text-muted">Sort Peers By</small></label>
+                        <select class="form-control" id="sort_by_dropdown">
+                            <option value="status" {% if sort_tag == "status" %} {{ "selected" }} {% endif %}>Status</option>
+                            <option value="name" {% if sort_tag == "name" %} {{ "selected" }} {% endif %}>Name</option>
+                            <option value="allowed_ip" {% if sort_tag == "allowed_ip" %} {{ "selected" }} {% endif %}>Allowed IP</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label><small class="text-muted">Refresh Interval</small></label><br>
+                        <div class="btn-group" role="group" style="width: 100%">
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary btn-group-label refresh"><i class="bi bi-arrow-repeat"></i></button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 5000 %} {{ "active" }} {% endif %}" refresh-interval="5000">5s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 10000 %} {{ "active" }} {% endif %}" refresh-interval="10000">10s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 30000 %} {{ "active" }} {% endif %}" refresh-interval="30000">30s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 60000 %} {{ "active" }} {% endif %}" refresh-interval="60000">1m</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="form-group">
+                        <label><small class="text-muted">Add</small></label><br>
+                        <button type="button" class="btn btn-primary add_btn" data-toggle="modal" data-target="#add_modal" style="width: 100%">
+                            <i class="bi bi-plus-circle-fill"></i> Add Peer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+		</div>
+	</div>
+
+    <div class="row">
+        {% if conf_data['peer_data']|length == 0 %}
+            <div class="col-12" style="text-align: center; margin-top: 1.5rem">
+                <h3 class="text-muted">Oops! No peers found ‘︿’</h3>
+            </div>
+        {% endif %}
+
+        {% for i in conf_data['peer_data']%}
+            <div class="col-sm-6 col-md-4">
+                <div class="card mb-3">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card-header-body ">
+                                {% if not i['name']%}
+                                    {{ "Untitled Peer" }}
+                                {% else %}
+                                    {{i['name']}}
+                                {% endif %}
+                                <span class="dot dot-{{i['status']}}"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 peer_data_group">
+                            <p class="text-primary" style="text-transform: uppercase; display: inline-block; margin-bottom: 0; margin-right: 1rem"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</p>
+                            <p class="text-success" style="text-transform: uppercase;  display: inline-block; margin-bottom: 0"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm">
+                            <small class="text-muted" style="display: flex">
+                                <strong>PEER</strong>
+                                <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small>
+                            <h6><samp class="ml-auto key">{{i['id']}}</samp></h6>
+                        </div>
+                        <div class="col-sm">
+                            <small class="text-muted"><strong>ALLOWED IP</strong></small>
+                            <h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
+                        </div>
+                        <div class="w-100"></div>
+
+                        <div class="col-sm">
+                            <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
+                            <h6 style="text-transform: uppercase;">{{i['latest_handshake']}}</h6>
+                        </div>
+                        <div class="w-100"></div>
+                        <div class="col-sm">
+                            <small class="text-muted"><strong>END POINT</strong></small>
+                            <h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
+                        </div>
+                        <div class="w-100"></div>
+                        <div class="col-sm">
+                            <hr>
+                            <div class="button-group" style="display:flex">
+
+                                <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button>
+                                <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
+                                {% if i['private_key'] %}
+                                    <div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
+                                        <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="{{ qrcode("[Interface]\nPrivateKey = "+i['private_key']+"\nAddress = "+i['allowed_ip']+"\nDNS = "+i['DNS']+"\n\n[Peer]\nPublicKey = "+conf_data['public_key']+"\nAllowedIPs = "+i['endpoint_allowed_ip']+"\nEndpoint = "+wg_ip+":"+conf_data['listen_port']) }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
+                                        </button>
+                                        <a href="/download/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}" class="btn btn-outline-info btn-download-peer btn-control">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+
+        {%endfor%}
+    </div>
+
+
+
 </main>
