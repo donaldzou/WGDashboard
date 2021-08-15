@@ -26,7 +26,7 @@
   - **Search peers**: You can now search peers by their name.
   - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
   - **Click to copy**: You can now click and copy all peer's public key and configuration's public key.
-  - And many more...
+  - ....
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.

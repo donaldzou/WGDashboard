@@ -908,6 +908,7 @@ def download(config_name):
             private_key = peer['private_key']
             allowed_ip = peer['allowed_ip']
             DNS = peer['DNS']
+            endpoint_allowed_ip = peer['endpoint_allowed_ip']
             filename = peer['name']
             if len(filename) == 0:
                 filename = "Untitled_Peers"
@@ -926,7 +927,7 @@ def download(config_name):
             filename = filename + "_" + config_name
 
             def generate(private_key, allowed_ip, DNS, public_key, endpoint):
-                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = 0.0.0.0/0\nEndpoint = " + endpoint
+                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint
 
             return app.response_class(generate(private_key, allowed_ip, DNS, public_key, endpoint),
                                       mimetype='text/conf',
