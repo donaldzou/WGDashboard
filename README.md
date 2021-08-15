@@ -20,15 +20,26 @@
 ## 📣 What's New: Version v2.2
 
 - 🎉  **New Features**
+  - **Add new peers**: Now you can add peers directly on dashboard, it will generate a pair of private key and public key. You can also set its DNS, endpoint allowed IPs. Both can set a default value in the setting page. [❤️ in [#44](https://github.com/donaldzou/wireguard-dashboard/issues/44)]  
   - **QR Code:** You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
   - **Peer configuration file download:** Same as QR code, you now can download the peer configuration file, so you don't need to manually input all the details on the peer machine! [❤️ in [#40](https://github.com/donaldzou/wireguard-dashboard/issues/40)]
+  - **Search peers**: You can now search peers by their name.
   - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
+  - **Click to copy**: You can now click and copy all peer's public key and configuration's public key.
+  - And many more...
 - 🪚  **Bug Fixed**
   - When there are comments in the wireguard config file, will cause the dashboard to crash.
   - Used regex to search for config files.
 - **🧐  Other Changes**
   - Moved all external CSS and JavaScript file to local hosting (Except Bootstrap Icon, due to large amount of SVG files).
-  - Updated `Flask` from`v1.1.2` to `v2.0.1`, and `Jinja` from `v2.10.1` to `v3.0.1`
+  - Updated Python dependencies
+    - Flask: `v1.1.2 => v2.0.1`
+    - Jinja: `v2.10.1 => v3.0.1`
+    - icmplib: `v2.1.1 => v3.0.1`
+  - Updated CSS/JS dependencies
+    - Bootstrap: `v4.5.3 => v4.6.0`
+  - UI adjustment
+    - Adjusted how peers will display in larger screens, used to be 1 row per peer, now is 3 peers in 1 row.
 <hr>
 
 

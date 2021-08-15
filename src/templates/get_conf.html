@@ -49,6 +49,10 @@
 				<small class="text-muted"><strong>LISTEN PORT</strong></small>
 				<h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
 			</div>
+            <div class="col-sm">
+				<small class="text-muted"><strong>ADDRESS</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['conf_address']}}</samp></h6>
+			</div>
 		</div>
 		<hr>
 		<div class="button-div mb-3">
@@ -66,12 +70,12 @@
                 <div class="col-sm">
                     <div class="form-group">
                         <label><small class="text-muted">Refresh Interval</small></label><br>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary btn-group-label refresh"><i class="bi bi-arrow-repeat"></i></button>
-                            <button type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 5000 %} {{ "active" }} {% endif %}" refresh-interval="5000">5s</button>
-                            <button type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 10000 %} {{ "active" }} {% endif %}" refresh-interval="10000">10s</button>
-                            <button type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 30000 %} {{ "active" }} {% endif %}" refresh-interval="30000">30s</button>
-                            <button type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 60000 %} {{ "active" }} {% endif %}" refresh-interval="60000">1m</button>
+                        <div class="btn-group" role="group" style="width: 100%">
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary btn-group-label refresh"><i class="bi bi-arrow-repeat"></i></button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 5000 %} {{ "active" }} {% endif %}" refresh-interval="5000">5s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 10000 %} {{ "active" }} {% endif %}" refresh-interval="10000">10s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 30000 %} {{ "active" }} {% endif %}" refresh-interval="30000">30s</button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval {% if dashboard_refresh_interval == 60000 %} {{ "active" }} {% endif %}" refresh-interval="60000">1m</button>
                         </div>
                     </div>
                 </div>
@@ -151,7 +155,7 @@
                                         <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="{{ qrcode("[Interface]\nPrivateKey = "+i['private_key']+"\nAddress = "+i['allowed_ip']+"\nDNS = 1.1.1.1\n\n[Peer]\nPublicKey = "+conf_data['public_key']+"\nAllowedIPs = 0.0.0.0/0\nEndpoint = "+wg_ip+":"+conf_data['listen_port']) }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
                                         </button>
-                                        <a href="/download/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}" type="button" class="btn btn-outline-info btn-download-peer btn-control">
+                                        <a href="/download/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}" class="btn btn-outline-info btn-download-peer btn-control">
                                             <i class="bi bi-download"></i>
                                         </a>
                                     </div>

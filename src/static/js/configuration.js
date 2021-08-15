@@ -58,8 +58,17 @@ $("#re_generate_key").click(function (){
 })
 
 $("#save_peer").click(function(){
-    if ($("#allowed_ips") !== "" && $("#public_key") !== ""){
+    $(this).attr("disabled","disabled")
+    $(this).html("Saving...")
+
+    if ($("#allowed_ips").val() !== "" && $("#public_key").val() !== "" && $("#new_add_DNS").val() !== "" && $("#new_add_endpoint_allowed_ip").val() != ""){
         var conf = $(this).attr('conf_id')
+        var data_list = [$("#private_key"), $("#allowed_ips"), $("#new_add_name"), $("#new_add_DNS"), $("#new_add_endpoint_allowed_ip")]
+        for (var i = 0; i < data_list.length; i++){
+            data_list[i].attr("disabled", "disabled")
+        }
+
+
         $.ajax({
             method: "POST",
             url: "/add_peer/"+conf,
@@ -84,6 +93,9 @@ $("#save_peer").click(function(){
                 }
             }
         })
+    }else{
+        $("#add_peer_alert").html("Please fill in all required box.");
+        $("#add_peer_alert").removeClass("d-none");
     }
 })
 var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
@@ -108,6 +120,8 @@ $("body").on("click", ".btn-delete-peer", function(){
 })
 
 $("#delete_peer").click(function(){
+    $(this).attr("disabled","disabled")
+    $(this).html("Deleting...")
     var peer_id = $(this).attr("peer_id");
     var config = $(this).attr("conf_id");
     $.ajax({
@@ -127,6 +141,8 @@ $("#delete_peer").click(function(){
                 load_data($('#search_peer_textbox').val());
                 $('#alertToast').toast('show');
                 $('#alertToast .toast-body').html("Peer deleted!");
+                $("#delete_peer").removeAttr("disabled")
+                $("#delete_peer").html("Delete")
             }
         }
     })
@@ -189,9 +205,16 @@ $("#peer_private_key_textbox").change(function(){
 $("#save_peer_setting").click(function (){
     $(this).attr("disabled","disabled")
     $(this).html("Saving...")
-    if ($("#peer_DNS_textbox").val() !== "" && $("#peer_allowed_ip_textbox").val() !== ""){
+    if ($("#peer_DNS_textbox").val() !== "" &&
+        $("#peer_allowed_ip_textbox").val() !== "" &&
+        $("#peer_endpoint_allowed_ips").val() != ""
+    ){
         var peer_id = $(this).attr("peer_id");
         var conf_id = $(this).attr("conf_id");
+        var data_list = [$("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"), $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips")]
+        for (var i = 0; i < data_list.length; i++){
+            data_list[i].attr("disabled", "disabled")
+        }
         $.ajax({
             method: "POST",
             url: "/save_peer_setting/"+conf_id,
@@ -218,8 +241,14 @@ $("#save_peer_setting").click(function (){
                 }
                 $("#save_peer_setting").removeAttr("disabled")
                 $("#save_peer_setting").html("Save")
+                for (var i = 0; i < data_list.length; i++){
+                    data_list[i].removeAttr("disabled")
+                }
             }
         })
+    }else{
+        $("#setting_peer_alert").html("Please fill in all required box.");
+        $("#setting_peer_alert").removeClass("d-none");
     }
 
 
@@ -288,7 +317,16 @@ function copyToClipboard(element) {
     $temp.remove();
 }
 
-
-// $(".key").mouseenter(function(){
-//
-// })
+$("body").on("click", ".update_interval", function(){
+	    $.ajax({
+            method:"POST",
+            data: "interval="+$(this).attr("refresh-interval"),
+            url: "/update_dashboard_refresh_interval",
+            success: function (res){
+                location.reload()
+            }
+        })
+    });
+$("body").on("click", ".refresh", function (){
+    load_data($('#search_peer_textbox').val());
+});

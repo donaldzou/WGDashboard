@@ -1,5 +1,8 @@
 <html>
-{% include "header.html" %}
+{% with %}
+    {% set title="Settings" %}
+    {% include "header.html"%}
+{% endwith %}
 <body>
 {% include "navbar.html" %}
 <div class="container-fluid">

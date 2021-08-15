@@ -69,14 +69,14 @@
                             </div>
                             <div class="col-sm-6">
                                  <div class="form-group">
-                                    <label for="new_add_DNS">DNS</label>
+                                    <label for="new_add_DNS">DNS <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
 
                             <div class="col-sm-6">
                                  <div class="form-group">
-                                    <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs</label>
+                                    <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="new_add_endpoint_allowed_ip" value="{{ endpoint_allowed_ip }}">
                                 </div>
                             </div>
@@ -228,7 +228,6 @@
 
 	function load_data(search){
         startProgressBar()
-
 		$.ajax({
 			method: "GET",
 			url: "/get_config/"+conf_name+"?search="+encodeURIComponent(search),
@@ -237,12 +236,10 @@
 			},
 			success: function (response){
 				$("#config_body").html(response);
-				{#$("[refresh-interval={{ dashboard_refresh_interval }}]").addClass("active")#}
                 $("#search_peer_textbox").css("display", "block")
                 if (bar.css("width") !== "0%"){
                     endProgressBar()
                 }
-
 			}
 		})
 	}
@@ -253,19 +250,7 @@
 		}, {{dashboard_refresh_interval}})
 	});
 
-	$("body").on("click", ".update_interval", function(){
-	    $.ajax({
-            method:"POST",
-            data: "interval="+$(this).attr("refresh-interval"),
-            url: "/update_dashboard_refresh_interval",
-            success: function (res){
-                location.reload()
-            }
-        })
-    });
-	$("body").on("click", ".refresh", function (){
-	    load_data($('#search_peer_textbox').val());
-    });
+
 </script>
 <script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 </html>	
