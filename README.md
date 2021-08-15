@@ -62,6 +62,7 @@
 
 ## 💡 Features
 
+- **No need to re-configure existing WireGuard configuration! It can search for existed configuration files.**
 - Easy to use interface, provided username and password protection to the dashboard
 - Add peers and edit (Allowed IPs, DNS, Private Key...)
 - View peers and configuration real time details (Data Usage, Latest Handshakes...)
@@ -320,8 +321,8 @@ Endpoint = 0.0.0.0:51820
 | `DNS`             | The DNS server your peer will use                            | `1.1.1.1` - Cloud flare DNS, you can change it when you adding the peer or in the peer setting. | Yes                       |
 | **`[Peer]`**      |                                                              |                                                              |                           |
 | `PublicKey`       | The public key of your server                                | N/A                                                          | No                        |
-| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer. | No                        |
-| `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           | No                        |
+| `AllowedIPs`      | IP ranges for which a peer will route traffic                | `0.0.0.0/0` - Indicated a default route to send all internet and VPN traffic through that peer. | Yes                       |
+| `Endpoint`        | Your wireguard server ip and port, the dashboard will search for your server's default interface's ip. | `<your server default interface ip>:<listen port>`           | Yes                       |
 
 ## ❓ How to update the dashboard?
 
@@ -345,31 +346,22 @@ Endpoint = 0.0.0.0:51820
 ## 🔍 Screenshot
 
 ![Sign In Page](img/SignIn.png)
-<p align=center>Sign In</p>
 
 ![Index Image](img/HomePage.png)
-<p align=center>Home</p>
 
 ![Configuration](img/Configuration.png)
-<p align=center>Configuration</p>
 
 ![Add Peer](img/AddPeer.png)
-<p align=center>Add Peer</p>
 
 ![Edit Peer](img/EditPeer.png)
-<p align=center>Edit Peer</p>
 
 ![Delete Peer](img/DeletePeer.png)
-<p align=center>Delete Peer</p>
 
 ![Dashboard Setting](img/DashboardSetting.png)
-<p align=center>Dashboard Setting</p>
 
 ![Ping](img/Ping.png)
-<p align=center>Ping</p>
 
 ![Traceroute](img/Traceroute.png)
-<p align=center>Traceroute</p>
 
 
 
