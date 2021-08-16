@@ -91,7 +91,9 @@
   [Interface]
   ...
   SaveConfig = true
-  # Need to include this line to allow WireGuard Tool to save your configuration
+  # Need to include this line to allow WireGuard Tool to save your configuration, 
+  # or if you just want it to monitor your WireGuard Interface and don't need to
+  # make any changes with the dashboard, you can set it to false.
   
   [Peer]
   PublicKey = abcd1234
