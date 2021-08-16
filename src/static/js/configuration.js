@@ -96,6 +96,8 @@ $("#save_peer").click(function(){
     }else{
         $("#add_peer_alert").html("Please fill in all required box.");
         $("#add_peer_alert").removeClass("d-none");
+        $(this).removeAttr("disabled")
+        $(this).html("Save")
     }
 })
 var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
@@ -249,6 +251,8 @@ $("#save_peer_setting").click(function (){
     }else{
         $("#setting_peer_alert").html("Please fill in all required box.");
         $("#setting_peer_alert").removeClass("d-none");
+        $("#save_peer_setting").removeAttr("disabled")
+        $("#save_peer_setting").html("Save")
     }
 
 
