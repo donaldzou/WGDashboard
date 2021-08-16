@@ -18,7 +18,7 @@ from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.2'
+dashboard_version = 'v2.2.1'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Default Wireguard IP
@@ -107,7 +107,7 @@ def read_conf_file(config_name):
     conf_peers = file[peers_start:]
     peer = -1
     for i in conf_peers:
-        if not is_match("^#(.*)", i):
+        if not is_match("#(.*)", i):
             if i == "[Peer]":
                 peer += 1
                 conf_peer_data["Peers"].append({})
@@ -388,7 +388,8 @@ def cleanIpWithRange(ip):
 
 
 def checkIpWithRange(ip):
-    return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|8|16|24|32)(,|$)", ip)
+    return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|"+
+                    "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
 
 
 def checkAllowedIPs(ip):
@@ -769,7 +770,6 @@ def add_peer(config_name):
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
         return "DNS formate is incorrect. Example: 1.1.1.1"
-
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
     else:
@@ -829,6 +829,9 @@ def save_peer_setting(config_name):
     peers = Query()
     if len(db.search(peers.id == id)) == 1:
         check_ip = checkAllowedIP(id, allowed_ip, config_name)
+        if not checkIpWithRange(endpoint_allowed_ip):
+            return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
+
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
             if check_key['status'] == "failed":
