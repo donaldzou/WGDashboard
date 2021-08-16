@@ -18,7 +18,7 @@ from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.2'
+dashboard_version = 'v2.2.1'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Default Wireguard IP
