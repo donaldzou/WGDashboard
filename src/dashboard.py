@@ -510,7 +510,7 @@ def update_peer_default_config():
     # Check DNS Format
     DNS = request.form['peer_global_DNS']
     DNS = cleanIp(DNS)
-    if not checkIp(DNS):
+    if not checkIp(DNS.split(",")[0]):
         session['message'] = "Peer DNS Format Incorrect. Example: 1.1.1.1"
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
