@@ -768,8 +768,8 @@ def add_peer(config_name):
         return "Public key already exist."
     if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
         return "Allowed IP already taken by another peer."
-    if not checkIp(DNS):
-        return "DNS formate is incorrect. Example: 1.1.1.1"
+    if not checkIp(DNS.split(",")[0]):
+        return "DNS format is incorrect. Example: 1.1.1.1"
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
     else:
