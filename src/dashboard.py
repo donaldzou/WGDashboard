@@ -530,7 +530,8 @@ def update_peer_default_config():
 
     # Wireguard endpoint
     remote_endpoint = request.form['peer_remote_endpoint']
-    if not validate(remote_endpoint):
+    remote_endpoint = cleanIp(remote_endpoint)
+    if not checkIp(remote_endpoint):
         session['message'] = "Remote peer incorrect"
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
@@ -781,7 +782,6 @@ def add_peer(config_name):
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     DNS = data['DNS']
     remote_endpoint = data['remote_endpoint']
-    print(remote_endpoint)
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(DNS) == 0 or len(remote_endpoint) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
@@ -794,10 +794,12 @@ def add_peer(config_name):
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
         return "DNS format is incorrect. Example: 1.1.1.1"
+        print(f"Check IP = {checkIp}")
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
-    if not validate(remote_endpoint):
+    if not checkIp(remote_endpoint):
         return "Remote peer incorrect"
+        print(f"Check IP = {checkIp}")
     else:
         status = ""
         try:
@@ -850,7 +852,6 @@ def save_peer_setting(config_name):
     private_key = data['private_key']
     DNS = data['DNS']
     remote_endpoint = data['remote_endpoint']
-    print(remote_endpoint)
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     db = TinyDB("db/" + config_name + ".json")
@@ -859,6 +860,9 @@ def save_peer_setting(config_name):
         check_ip = checkAllowedIP(id, allowed_ip, config_name)
         if not checkIpWithRange(endpoint_allowed_ip):
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
+
+        if not checkIp(DNS):
+            return jsonify({"status": "failed", "msg": "DNS format is incorrect. Example: 1.1.1.1"})
 
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
@@ -929,7 +933,6 @@ def download(config_name):
     peers = Query()
     print(id)
     get_peer = db.search(peers.id == id)
-    print(get_peer)
     if len(get_peer) == 1:
         peer = get_peer[0]
         if peer['private_key'] != "":
