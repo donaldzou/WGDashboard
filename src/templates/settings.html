@@ -36,6 +36,13 @@
                                        value="{{ peer_global_DNS }}" required>
                             </div>
                             <div class="col-sm">
+                                <label for="username">Peer Endpoint</label>
+                                <input type="text" class="form-control mb-4" id="peer_remote_endpoint" name="peer_remote_endpoint"
+                                       value="{{ peer_remote_endpoint }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
                                 <label for="username">Peer Endpoint Allowed IPs</label>
                                 <input type="text" class="form-control mb-4" id="peer_endpoint_allowed_ip" name="peer_endpoint_allowed_ip"
                                        value="{{ peer_endpoint_allowed_ip }}" required>

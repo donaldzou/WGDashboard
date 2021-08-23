@@ -73,7 +73,12 @@
                                     <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
-
+                            <div class="col-sm-6">
+                                 <div class="form-group">
+                                    <label for="new_add_remote_endpoint">Remote Endpoint <code>(Required)</code></label>
+                                    <input type="text" class="form-control" id="new_add_remote_endpoint" value="{{ DNS }}">
+                                </div>
+                            </div>
                             <div class="col-sm-6">
                                  <div class="form-group">
                                     <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs <code>(Required)</code></label>
@@ -144,11 +149,14 @@
                     <div class="mb-3">
                       <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs <code>(Required)</code></label>
                       <input type="text" class="form-control" id="peer_allowed_ip_textbox">
-
                     </div>
                     <div class="mb-3">
                       <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
                       <input type="text" class="form-control" id="peer_DNS_textbox">
+                    </div>
+                    <div class="mb-3">
+                      <label for="peer_remote_endpoint_textbox" class="form-label">Remote Endpoint <code>(Required)</code></label>
+                      <input type="text" class="form-control" id="peer_remote_endpoint_textbox">
                     </div>
                     <div class="mb-3">
                       <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>

@@ -61,9 +61,9 @@ $("#save_peer").click(function(){
     $(this).attr("disabled","disabled")
     $(this).html("Saving...")
 
-    if ($("#allowed_ips").val() !== "" && $("#public_key").val() !== "" && $("#new_add_DNS").val() !== "" && $("#new_add_endpoint_allowed_ip").val() != ""){
+    if ($("#allowed_ips").val() !== "" && $("#public_key").val() !== "" && $("#new_add_DNS").val() !== "" && $("#new_add_remote_endpoint").val() !== "" && $("#new_add_endpoint_allowed_ip").val() != ""){
         var conf = $(this).attr('conf_id')
-        var data_list = [$("#private_key"), $("#allowed_ips"), $("#new_add_name"), $("#new_add_DNS"), $("#new_add_endpoint_allowed_ip")]
+        var data_list = [$("#private_key"), $("#allowed_ips"), $("#new_add_name"), $("#new_add_DNS"), $("#new_add_remote_endpoint"), $("#new_add_endpoint_allowed_ip")]
         for (var i = 0; i < data_list.length; i++){
             data_list[i].attr("disabled", "disabled")
         }
@@ -81,6 +81,7 @@ $("#save_peer").click(function(){
                 "allowed_ips": $("#allowed_ips").val(),
                 "name":$("#new_add_name").val(),
                 "DNS": $("#new_add_DNS").val(),
+                "remote_endpoint": $("#new_add_remote_endpoint").val(),
                 "endpoint_allowed_ip": $("#new_add_endpoint_allowed_ip").val()
             }),
             success: function (response){
@@ -171,6 +172,7 @@ $("body").on("click", ".btn-setting-peer", function(){
             $("#setting_modal #peer_name_textbox").val(peer_name)
             $("#setting_modal #peer_private_key_textbox").val(response['private_key'])
             $("#setting_modal #peer_DNS_textbox").val(response['DNS'])
+            $("#setting_modal #peer_remote_endpoint_textbox").val(response['remote_endpoint'])
             $("#setting_modal #peer_allowed_ip_textbox").val(response['allowed_ip'])
             $("#setting_modal #peer_endpoint_allowed_ips").val(response['endpoint_allowed_ip'])
             settingModal.toggle();
@@ -209,11 +211,12 @@ $("#save_peer_setting").click(function (){
     $(this).html("Saving...")
     if ($("#peer_DNS_textbox").val() !== "" &&
         $("#peer_allowed_ip_textbox").val() !== "" &&
+        $("#peer_remote_endpoint_textbox").val() !== "" &&
         $("#peer_endpoint_allowed_ips").val() != ""
     ){
         var peer_id = $(this).attr("peer_id");
         var conf_id = $(this).attr("conf_id");
-        var data_list = [$("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"), $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips")]
+        var data_list = [$("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"), $("#peer_remote_endpoint_textbox"), $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips")]
         for (var i = 0; i < data_list.length; i++){
             data_list[i].attr("disabled", "disabled")
         }
@@ -228,6 +231,7 @@ $("#save_peer_setting").click(function (){
                 name: $("#peer_name_textbox").val(),
                 DNS: $("#peer_DNS_textbox").val(),
                 private_key: $("#peer_private_key_textbox").val(),
+                remote_endpoint: $("#peer_remote_endpoint_textbox").val(),
                 allowed_ip: $("#peer_allowed_ip_textbox").val(),
                 endpoint_allowed_ip: $("#peer_endpoint_allowed_ips").val()
             }),
