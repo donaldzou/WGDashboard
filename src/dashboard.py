@@ -945,6 +945,7 @@ def download(config_name):
     peers = Query()
     print(id)
     get_peer = db.search(peers.id == id)
+    print(get_peer)
     if len(get_peer) == 1:
         peer = get_peer[0]
         if peer['private_key'] != "":
