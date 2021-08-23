@@ -392,6 +392,17 @@ def checkIpWithRange(ip):
     return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|"+
                     "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
 
+# robbed from https://codereview.stackexchange.com/questions/235473/fqdn-validation
+def is_fqdn(hostname):
+    return re.match(r'^(?!.{255}|.{253}[^.])([a-z0-9](?:[-a-z-0-9]{0,61}[a-z0-9])?\.)*([a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?[.]?$', re.IGNORECASE)
+
+def validate(remoteEndpoint):
+    if checkIp(remoteEndpoint):
+        return cleanIp(ip).split(',')
+    elif is_fqdn(remoteEndpoint):
+        return remoteEndpoint
+    else:
+        return False
 
 def checkAllowedIPs(ip):
     ip = cleanIpWithRange(ip)
@@ -519,7 +530,10 @@ def update_peer_default_config():
 
     # Wireguard endpoint
     remote_endpoint = request.form['peer_remote_endpoint']
-    print(remote_endpoint)
+    if not validate(remote_endpoint):
+        session['message'] = "Remote peer incorrect"
+        session['message_status'] = "danger"
+        return redirect(url_for("settings"))
 
     # Check Endpoint Allowed IPs
     ip = request.form['peer_endpoint_allowed_ip']
@@ -779,9 +793,11 @@ def add_peer(config_name):
     if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
-        return "DNS formate is incorrect. Example: 1.1.1.1"
+        return "DNS format is incorrect. Example: 1.1.1.1"
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
+    if not validate(remote_endpoint):
+        return "Remote peer incorrect"
     else:
         status = ""
         try:
