@@ -392,17 +392,25 @@ def checkIpWithRange(ip):
     return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|"+
                     "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
 
+
 # robbed from https://codereview.stackexchange.com/questions/235473/fqdn-validation
-def is_fqdn(hostname):
-    return re.match(r'^(?!.{255}|.{253}[^.])([a-z0-9](?:[-a-z-0-9]{0,61}[a-z0-9])?\.)*([a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?[.]?$', re.IGNORECASE)
+# There appears to be a missing ) in the last section '([a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?[.]?$' but I don't really know where it should go
+# so I've just stuck it in until something breaks.
+def is_valid_hostname(hostname):
+    #return re.match(r'^(?!.{255}|.{253}[^.])([a-z0-9](?:[-a-z-0-9]{0,61}[a-z0-9])?\.)*([a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?[.]?$', re.IGNORECASE)
+    return re.match(r'^(?!.{255}|.{253}[^.])([a-z0-9](?:[-a-z-0-9]{0,61}[a-z0-9])?\.)*([a-z0-9](?:[-a-z0-9]{0,61})[a-z0-9])?[.]?$', hostname)
+
 
 def validate(remoteEndpoint):
+    remoteEndpoint = cleanIp(remoteEndpoint)
     if checkIp(remoteEndpoint):
-        return cleanIp(ip).split(',')
-    elif is_fqdn(remoteEndpoint):
-        return remoteEndpoint
+        return True
+    elif is_valid_hostname(remoteEndpoint):
+        print(f"Allowed = {is_valid_hostname(remoteEndpoint)}")
+        return True
     else:
         return False
+
 
 def checkAllowedIPs(ip):
     ip = cleanIpWithRange(ip)
@@ -528,13 +536,15 @@ def update_peer_default_config():
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
 
+
     # Wireguard endpoint
     remote_endpoint = request.form['peer_remote_endpoint']
     remote_endpoint = cleanIp(remote_endpoint)
-    if not checkIp(remote_endpoint):
+    if not validate(remote_endpoint):
         session['message'] = "Remote peer incorrect"
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
+
 
     # Check Endpoint Allowed IPs
     ip = request.form['peer_endpoint_allowed_ip']
@@ -543,6 +553,7 @@ def update_peer_default_config():
             'message'] = "Peer Endpoint Allowed IPs Format Incorrect. Example: 192.168.1.1/32 or 192.168.1.1/32,192.168.1.2/32"
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
+
 
     config.set("Peers", "peer_endpoint_allowed_ip", ','.join(cleanIpWithRange(ip)))
     config.set("Peers", "peer_global_DNS", request.form['peer_global_DNS'])
@@ -794,12 +805,10 @@ def add_peer(config_name):
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
         return "DNS format is incorrect. Example: 1.1.1.1"
-        print(f"Check IP = {checkIp}")
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
-    if not checkIp(remote_endpoint):
+    if not validate(remote_endpoint):
         return "Remote peer incorrect"
-        print(f"Check IP = {checkIp}")
     else:
         status = ""
         try:
@@ -863,6 +872,9 @@ def save_peer_setting(config_name):
 
         if not checkIp(DNS):
             return jsonify({"status": "failed", "msg": "DNS format is incorrect. Example: 1.1.1.1"})
+
+        if not validate(remote_endpoint):
+            return jsonify({"status": "failed", "msg": "Remote Peer format is incorrect."})
 
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
