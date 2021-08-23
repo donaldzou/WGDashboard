@@ -211,7 +211,6 @@ def get_all_peers_data(config_name):
                 "id": i['PublicKey'],
                 "private_key": "",
                 "DNS": "1.1.1.1",
-                "remote_endpoint": wg_ip,
                 "endpoint_allowed_ip": "0.0.0.0/0",
                 "name": "",
                 "total_receive": 0,
@@ -230,8 +229,6 @@ def get_all_peers_data(config_name):
                 update_db['private_key'] = ''
             if "DNS" not in search[0]:
                 update_db['DNS'] = '1.1.1.1'
-            if "remote_endpoint" not in search[0]:
-                update_db['remote_endpoint'] = wg_ip
             if "endpoint_allowed_ip" not in search[0]:
                 update_db['endpoint_allowed_ip'] = '0.0.0.0/0'
             db.update(update_db, peers.id == i['PublicKey'])
@@ -392,24 +389,11 @@ def checkIpWithRange(ip):
     return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|"+
                     "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
 
-# robbed from https://codereview.stackexchange.com/questions/235473/fqdn-validation
-def is_fqdn(hostname):
-    return re.match(r'^(?!.{255}|.{253}[^.])([a-z0-9](?:[-a-z-0-9]{0,61}[a-z0-9])?\.)*([a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?[.]?$', re.IGNORECASE)
-
-def validate(remoteEndpoint):
-    if checkIp(remoteEndpoint):
-        return cleanIp(ip).split(',')
-    elif is_fqdn(remoteEndpoint):
-        return remoteEndpoint
-    else:
-        return False
-
 def checkAllowedIPs(ip):
     ip = cleanIpWithRange(ip)
     for i in ip:
         if not checkIpWithRange(i): return False
     return True
-
 
 @app.before_request
 def auth_req():
@@ -469,7 +453,6 @@ def settings():
                            app_ip=config.get("Server", "app_ip"), app_port=config.get("Server", "app_port"),
                            required_auth=required_auth, wg_conf_path=config.get("Server", "wg_conf_path"),
                            peer_global_DNS=config.get("Peers", "peer_global_DNS"),
-                           peer_remote_endpoint=config.get("Peers", "peer_remote_endpoint"),
                            peer_endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"))
 
 
@@ -516,7 +499,7 @@ def update_acct():
 def update_peer_default_config():
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
-    if len(request.form['peer_endpoint_allowed_ip']) == 0 or len(request.form['peer_global_DNS']) == 0 or len(request.form['peer_remote_endpoint']) == 0:
+    if len(request.form['peer_endpoint_allowed_ip']) == 0 or len(request.form['peer_global_DNS']) == 0:
         session['message'] = "Peer DNS or Peer Endpoints cannot be empty."
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
@@ -525,14 +508,6 @@ def update_peer_default_config():
     DNS = cleanIp(DNS)
     if not checkIp(DNS):
         session['message'] = "Peer DNS Format Incorrect. Example: 1.1.1.1"
-        session['message_status'] = "danger"
-        return redirect(url_for("settings"))
-
-    # Wireguard endpoint
-    remote_endpoint = request.form['peer_remote_endpoint']
-    remote_endpoint = cleanIp(remote_endpoint)
-    if not checkIp(remote_endpoint):
-        session['message'] = "Remote peer incorrect"
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
 
@@ -546,7 +521,6 @@ def update_peer_default_config():
 
     config.set("Peers", "peer_endpoint_allowed_ip", ','.join(cleanIpWithRange(ip)))
     config.set("Peers", "peer_global_DNS", request.form['peer_global_DNS'])
-    config.set("Peers", "peer_remote_endpoint", request.form['peer_remote_endpoint'])
     try:
         config.write(open(dashboard_conf, "w"))
         session['message'] = "DNS and Enpoints update successfully!"
@@ -720,7 +694,6 @@ def conf(config_name):
     return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data,
                            dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")),
                            DNS=config.get("Peers", "peer_global_DNS"),
-                           remote_endpoint=config.get("Peers", "peer_remote_endpoint"),
                            endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"), title=config_name)
 
 
@@ -781,9 +754,8 @@ def add_peer(config_name):
     allowed_ips = data['allowed_ips']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     DNS = data['DNS']
-    remote_endpoint = data['remote_endpoint']
     keys = get_conf_peer_key(config_name)
-    if len(public_key) == 0 or len(DNS) == 0 or len(remote_endpoint) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
+    if len(public_key) == 0 or len(DNS) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
 
     if type(keys) != list:
@@ -797,9 +769,6 @@ def add_peer(config_name):
         print(f"Check IP = {checkIp}")
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
-    if not checkIp(remote_endpoint):
-        return "Remote peer incorrect"
-        print(f"Check IP = {checkIp}")
     else:
         status = ""
         try:
@@ -808,7 +777,7 @@ def add_peer(config_name):
                 stderr=subprocess.STDOUT)
             status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
             get_all_peers_data(config_name)
-            db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'], "remote_endpoint": data['remote_endpoint'],
+            db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'],
                        "endpoint_allowed_ip": endpoint_allowed_ip},
                       peers.id == public_key)
             db.close()
@@ -851,7 +820,6 @@ def save_peer_setting(config_name):
     name = data['name']
     private_key = data['private_key']
     DNS = data['DNS']
-    remote_endpoint = data['remote_endpoint']
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     db = TinyDB("db/" + config_name + ".json")
@@ -881,7 +849,7 @@ def save_peer_setting(config_name):
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
 
             db.update(
-                {"name": name, "private_key": private_key, "DNS": DNS, "remote_endpoint": remote_endpoint, "endpoint_allowed_ip": endpoint_allowed_ip},
+                {"name": name, "private_key": private_key, "DNS": DNS, "endpoint_allowed_ip": endpoint_allowed_ip},
                 peers.id == id)
             db.close()
             return jsonify({"status": "success", "msg": ""})
@@ -899,7 +867,7 @@ def get_peer_name(config_name):
     peers = Query()
     result = db.search(peers.id == id)
     db.close()
-    data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'], "remote_endpoint": result[0]['remote_endpoint'],
+    data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'],
             "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip']}
     return jsonify(data)
 
@@ -938,11 +906,10 @@ def download(config_name):
         if peer['private_key'] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
-#            endpoint = wg_ip + ":" + listen_port
+            endpoint = wg_ip + ":" + listen_port
             private_key = peer['private_key']
             allowed_ip = peer['allowed_ip']
             DNS = peer['DNS']
-            endpoint = peer['remote_endpoint'] + ":" + listen_port
             endpoint_allowed_ip = peer['endpoint_allowed_ip']
             filename = peer['name']
             if len(filename) == 0:
@@ -1004,8 +971,6 @@ def init_dashboard():
         config['Peers'] = {}
     if 'peer_global_DNS' not in config['Peers']:
         config['Peers']['peer_global_DNS'] = '1.1.1.1'
-    if 'peer_remote_endpoint' not in config['Peers']:
-        config['Peers']['peer_remote_endpoint'] = wg_ip
     if 'peer_endpoint_allowed_ip' not in config['Peers']:
         config['Peers']['peer_endpoint_allowed_ip'] = '0.0.0.0/0'
     config.write(open(dashboard_conf, "w"))
