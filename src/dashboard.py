@@ -500,7 +500,7 @@ def update_peer_default_config():
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
     if len(request.form['peer_endpoint_allowed_ip']) == 0 or len(request.form['peer_global_DNS']) == 0:
-        session['message'] = "Peer DNS or Peer Endpoints cannot be empty."
+        session['message'] = "Peer DNS or Peer Endpoint Allowed IP cannot be empty."
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
     # Check DNS Format
@@ -523,12 +523,12 @@ def update_peer_default_config():
     config.set("Peers", "peer_global_DNS", request.form['peer_global_DNS'])
     try:
         config.write(open(dashboard_conf, "w"))
-        session['message'] = "DNS and Enpoints update successfully!"
+        session['message'] = "DNS and Endpoint Allowed IP update successfully!"
         session['message_status'] = "success"
         config.clear()
         return redirect(url_for("settings"))
     except Exception:
-        session['message'] = "DNS and Enpoints update failed."
+        session['message'] = "DNS and Endpoint Allowed IP update failed."
         session['message_status'] = "danger"
         config.clear()
         return redirect(url_for("settings"))
@@ -903,6 +903,7 @@ def download(config_name):
     get_peer = db.search(peers.id == id)
     if len(get_peer) == 1:
         peer = get_peer[0]
+        print(get_peer)
         if peer['private_key'] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
