@@ -406,7 +406,6 @@ def validate(remoteEndpoint):
     if checkIp(remoteEndpoint):
         return True
     elif is_valid_hostname(remoteEndpoint):
-        print(f"Allowed = {is_valid_hostname(remoteEndpoint)}")
         return True
     else:
         return False
