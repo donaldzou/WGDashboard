@@ -766,7 +766,6 @@ def add_peer(config_name):
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
         return "DNS format is incorrect. Example: 1.1.1.1"
-        print(f"Check IP = {checkIp}")
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
     else:
@@ -901,9 +900,9 @@ def download(config_name):
     peers = Query()
     print(id)
     get_peer = db.search(peers.id == id)
+    print(get_peer)
     if len(get_peer) == 1:
         peer = get_peer[0]
-        print(get_peer)
         if peer['private_key'] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
