@@ -81,6 +81,18 @@
                             </div>
                             <div class="col-sm-6">
                                  <div class="form-group">
+                                    <label for="new_add_mtu">MTU Size <code>(Default is 1420)</code></label>
+                                    <input type="text" class="form-control" id="new_add_mtu" value="{{ mtu }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                 <div class="form-group">
+                                    <label for="new_add_mtu">Persistent Keepalive <code>(Time in seconds, default is Off)</code></label>
+                                    <input type="text" class="form-control" id="new_add_keepalive" value="{{ keepalive }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                 <div class="form-group">
                                     <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="new_add_endpoint_allowed_ip" value="{{ endpoint_allowed_ip }}">
                                 </div>
@@ -157,6 +169,14 @@
                     <div class="mb-3">
                       <label for="peer_remote_endpoint_textbox" class="form-label">Remote Endpoint <code>(Required)</code></label>
                       <input type="text" class="form-control" id="peer_remote_endpoint_textbox">
+                    </div>
+                    <div class="mb-3">
+                      <label for="peer_mtu_textbox" class="form-label">MTU Size <code>(Default is 1420)</code></label>
+                      <input type="text" class="form-control" id="peer_mtu_textbox">
+                    </div>
+                    <div class="mb-3">
+                      <label for="peer_keepalive_textbox" class="form-label">Persistent Keepalive <code>(Time in seconds, default is Off)</code></label>
+                      <input type="text" class="form-control" id="peer_keepalive_textbox">
                     </div>
                     <div class="mb-3">
                       <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>

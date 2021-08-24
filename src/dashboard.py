@@ -212,6 +212,8 @@ def get_all_peers_data(config_name):
                 "private_key": "",
                 "DNS": "1.1.1.1",
                 "remote_endpoint": wg_ip,
+                "mtu": "",
+                "keepalive": "",
                 "endpoint_allowed_ip": "0.0.0.0/0",
                 "name": "",
                 "total_receive": 0,
@@ -232,6 +234,10 @@ def get_all_peers_data(config_name):
                 update_db['DNS'] = '1.1.1.1'
             if "remote_endpoint" not in search[0]:
                 update_db['remote_endpoint'] = wg_ip
+            if "mtu" not in search[0]:
+                update_db['mtu'] = ''
+            if "keepalive" not in search[0]:
+                update_db['keepalive'] = ''
             if "endpoint_allowed_ip" not in search[0]:
                 update_db['endpoint_allowed_ip'] = '0.0.0.0/0'
             db.update(update_db, peers.id == i['PublicKey'])
@@ -410,6 +416,30 @@ def validate(remoteEndpoint):
         return True
     else:
         return False
+
+def checkInt(value):
+    try:
+        return int(value)
+    except Exception:
+        return False
+
+
+def checkMTUValues(mtu):
+    # From https://en.wikipedia.org/wiki/Maximum_transmission_unit is seems that 68 - 2000 should cover most situations
+#    if 68 <= int(mtu) <= 2000:
+    if mtu == "":
+        return True
+    if 68 <= checkInt(mtu) <= 2000:
+        return True
+
+
+def checkKeepaliveValues(keepalive):
+    # Keepalive is how often the client pokes the servers. How big is too big? Let's cap it at two minutes.
+#    if 1 <= keepalive <= 120: 
+    if keepalive == "":
+        return True
+    if 1 <= checkInt(keepalive) <= 120:
+        return True
 
 
 def checkAllowedIPs(ip):
@@ -793,6 +823,8 @@ def add_peer(config_name):
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     DNS = data['DNS']
     remote_endpoint = data['remote_endpoint']
+    mtu = data['mtu']
+    keepalive = data['keepalive']
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(DNS) == 0 or len(remote_endpoint) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
@@ -809,6 +841,10 @@ def add_peer(config_name):
         return "Remote peer incorrect"
     if not checkAllowedIPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
+    if not checkMTUValues(mtu):
+        return "MTU needs to be between 68 and 2000"
+    if not checkKeepaliveValues(keepalive):
+        return "Keepalive needs to be between 1 and 120"
     else:
         status = ""
         try:
@@ -818,7 +854,7 @@ def add_peer(config_name):
             status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
             get_all_peers_data(config_name)
             db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'], "remote_endpoint": data['remote_endpoint'],
-                       "endpoint_allowed_ip": endpoint_allowed_ip},
+                      "mtu": data['mtu'], "keepalive": data['keepalive'], "endpoint_allowed_ip": endpoint_allowed_ip},
                       peers.id == public_key)
             db.close()
             return "true"
@@ -861,6 +897,8 @@ def save_peer_setting(config_name):
     private_key = data['private_key']
     DNS = data['DNS']
     remote_endpoint = data['remote_endpoint']
+    mtu = data['mtu']
+    keepalive = data['keepalive']
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     db = TinyDB("db/" + config_name + ".json")
@@ -875,6 +913,12 @@ def save_peer_setting(config_name):
 
         if not validate(remote_endpoint):
             return jsonify({"status": "failed", "msg": "Remote Peer format is incorrect."})
+
+        if not checkMTUValues(mtu):
+            return jsonify({"status": "failed", "msg": "MTU out of range."})
+
+        if not checkKeepaliveValues(keepalive):
+            return jsonify({"status": "failed", "msg": "Keepalive out of range."})
 
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
@@ -893,7 +937,7 @@ def save_peer_setting(config_name):
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
 
             db.update(
-                {"name": name, "private_key": private_key, "DNS": DNS, "remote_endpoint": remote_endpoint, "endpoint_allowed_ip": endpoint_allowed_ip},
+                {"name": name, "private_key": private_key, "DNS": DNS, "remote_endpoint": remote_endpoint, "mtu": mtu, "keepalive": keepalive, "endpoint_allowed_ip": endpoint_allowed_ip},
                 peers.id == id)
             db.close()
             return jsonify({"status": "success", "msg": ""})
@@ -912,7 +956,7 @@ def get_peer_name(config_name):
     result = db.search(peers.id == id)
     db.close()
     data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'], "remote_endpoint": result[0]['remote_endpoint'],
-            "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip']}
+            "mtu": result[0]['mtu'], "keepalive": result[0]['keepalive'], "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip']}
     return jsonify(data)
 
 
@@ -955,6 +999,8 @@ def download(config_name):
             allowed_ip = peer['allowed_ip']
             DNS = peer['DNS']
             endpoint = peer['remote_endpoint'] + ":" + listen_port
+            mtu = peer['mtu']
+            keepalive = peer['keepalive']
             endpoint_allowed_ip = peer['endpoint_allowed_ip']
             filename = peer['name']
             if len(filename) == 0:
@@ -973,12 +1019,39 @@ def download(config_name):
                 filename = "".join(filename.split(' '))
             filename = filename + "_" + config_name
 
-            def generate(private_key, allowed_ip, DNS, public_key, endpoint):
-                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint
+            print(f"Keepalive value = {keepalive}")
+            print(f"MTU value = {mtu}")
 
-            return app.response_class(generate(private_key, allowed_ip, DNS, public_key, endpoint),
+            if mtu != "" and keepalive == "":
+                print(f"Using MTU of {mtu} and a Keepalive value = {keepalive}")
+                def generate(private_key, allowed_ip, DNS, mtu, public_key, endpoint):
+                    yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\nMTU = " + mtu + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint
+                return app.response_class(generate(private_key, allowed_ip, DNS, mtu, public_key, endpoint),
                                       mimetype='text/conf',
                                       headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
+            elif mtu == "" and keepalive != "":
+                print(f"Using MTU of {mtu} and a Keepalive value = {keepalive}")
+                def generate(private_key, allowed_ip, DNS, public_key, endpoint, keepalive):
+                    yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint + "\nPersistentKeepalive = " + keepalive
+                return app.response_class(generate(private_key, allowed_ip, DNS, public_key, endpoint, keepalive),
+                                      mimetype='text/conf',
+                                      headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
+            elif mtu != "" and keepalive != "":
+                print(f"Using MTU of {mtu} and a Keepalive value = {keepalive}")
+                def generate(private_key, allowed_ip, DNS, mtu, public_key, endpoint, keepalive):
+                    yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\nMTU = " + mtu + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint + "\nPersistentKeepalive = " + keepalive
+                return app.response_class(generate(private_key, allowed_ip, DNS, mtu, public_key, endpoint, keepalive),
+                                      mimetype='text/conf',
+                                      headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
+            else:
+                print(f"Using MTU of {mtu} and a Keepalive value = {keepalive}")
+                def generate(private_key, allowed_ip, DNS, public_key, endpoint):
+                    yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint
+                return app.response_class(generate(private_key, allowed_ip, DNS, public_key, endpoint),
+                                      mimetype='text/conf',
+                                      headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"}) 
+
+            
     else:
         return redirect("/configuration/" + config_name)
 
@@ -1018,6 +1091,10 @@ def init_dashboard():
         config['Peers']['peer_global_DNS'] = '1.1.1.1'
     if 'peer_remote_endpoint' not in config['Peers']:
         config['Peers']['peer_remote_endpoint'] = wg_ip
+    if 'mtu' not in config['Peers']:
+        config['Peers']['mtu'] = ''
+    if 'keepalive' not in config['Peers']:
+        config['Peers']['keepalive'] = ''
     if 'peer_endpoint_allowed_ip' not in config['Peers']:
         config['Peers']['peer_endpoint_allowed_ip'] = '0.0.0.0/0'
     config.write(open(dashboard_conf, "w"))
