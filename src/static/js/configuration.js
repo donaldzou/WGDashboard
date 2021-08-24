@@ -210,8 +210,8 @@ $("#save_peer_setting").click(function (){
     $(this).attr("disabled","disabled")
     $(this).html("Saving...")
     if ($("#peer_DNS_textbox").val() !== "" &&
-        $("#peer_allowed_ip_textbox").val() !== "" &&
         $("#peer_remote_endpoint_textbox").val() !== "" &&
+        $("#peer_allowed_ip_textbox").val() !== "" &&
         $("#peer_endpoint_allowed_ips").val() != ""
     ){
         var peer_id = $(this).attr("peer_id");
