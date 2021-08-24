@@ -1019,9 +1019,6 @@ def download(config_name):
                 filename = "".join(filename.split(' '))
             filename = filename + "_" + config_name
 
-            print(f"Keepalive value = {keepalive}")
-            print(f"MTU value = {mtu}")
-
             if mtu != "" and keepalive == "":
                 print(f"Using MTU of {mtu} and a Keepalive value = {keepalive}")
                 def generate(private_key, allowed_ip, DNS, mtu, public_key, endpoint):
