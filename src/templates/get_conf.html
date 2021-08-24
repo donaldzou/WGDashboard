@@ -1,12 +1,12 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
-    <div class="info mt-4">
-        <div class="row">
-            <div class="col">
-                <small class="text-muted"><strong>CONFIGURATION</strong></small>
-                <h1 class="mb-3">{{conf_data['name']}}</h1>
-            </div>
-            <div class="col">
-                <small class="text-muted"><strong>ACTION</strong></small><br>
+	<div class="info mt-4">
+		<div class="row">
+			<div class="col">
+				<small class="text-muted"><strong>CONFIGURATION</strong></small>
+				<h1 class="mb-3">{{conf_data['name']}}</h1>
+			</div>
+			<div class="col">
+				<small class="text-muted"><strong>ACTION</strong></small><br>
                 {% if conf_data['checked'] == "checked" %}
                     <a href="#" id="{{conf_data['name']}}" {{conf_data['checked']}} class="switch text-primary"><i class="bi bi-toggle2-on"></i> ON</a>
                 {% else %}
@@ -15,47 +15,47 @@
                 <div class="spinner-border text-primary" role="status" style="display: none; margin-top: 10px">
                     <span class="sr-only">Loading...</span>
                 </div>
-            </div>
-            <div class="w-100"></div>
-            <div class="col">
-                <small class="text-muted"><strong>STATUS</strong></small>
-                <h6 style="text-transform: uppercase;">{{conf_data['status']}}<span class="dot dot-{{conf_data['status']}}"></span></h6>
-            </div>
-            <div class="col">
-                <small class="text-muted"><strong>CONNECTED PEERS</strong></small>
-                <h6 style="text-transform: uppercase;">{{conf_data['running_peer']}}</h6>
-            </div>
-            <div class="col-sm">
-                <small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>
-                <h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][0]}} GB</h6>
-            </div>
-            <div class="col-sm">
-                <small class="text-muted"><strong>TOTAL RECIEVED</strong></small>
-                <h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][1]}} GB</h6>
-            </div>
-            <div class="col-sm">
-                <small class="text-muted"><strong>TOTAL SENT</strong></small>
-                <h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][2]}} GB</h6>
-            </div>
-            <div class="w-100"></div>
-            <div class="col-sm">
-                <small class="text-muted">
+			</div>
+			<div class="w-100"></div>
+			<div class="col">
+				<small class="text-muted"><strong>STATUS</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['status']}}<span class="dot dot-{{conf_data['status']}}"></span></h6>
+			</div>
+			<div class="col">
+				<small class="text-muted"><strong>CONNECTED PEERS</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['running_peer']}}</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL DATA USAGE</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][0]}} GB</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL RECIEVED</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][1]}} GB</h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>TOTAL SENT</strong></small>
+				<h6 style="text-transform: uppercase;">{{conf_data['total_data_usage'][2]}} GB</h6>
+			</div>
+			<div class="w-100"></div>
+			<div class="col-sm">
+				<small class="text-muted">
                     <strong>PUBLIC KEY</strong>
                     <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small>
                 </small>
-                <h6 style="text-transform: uppercase;"><samp class="key">{{conf_data['public_key']}}</samp></h6>
-            </div>
+				<h6 style="text-transform: uppercase;"><samp class="key">{{conf_data['public_key']}}</samp></h6>
+			</div>
+			<div class="col-sm">
+				<small class="text-muted"><strong>LISTEN PORT</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
+			</div>
             <div class="col-sm">
-                <small class="text-muted"><strong>LISTEN PORT</strong></small>
-                <h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
-            </div>
-            <div class="col-sm">
-                <small class="text-muted"><strong>ADDRESS</strong></small>
-                <h6 style="text-transform: uppercase;"><samp>{{conf_data['conf_address']}}</samp></h6>
-            </div>
-        </div>
-        <hr>
-        <div class="button-div mb-3">
+				<small class="text-muted"><strong>ADDRESS</strong></small>
+				<h6 style="text-transform: uppercase;"><samp>{{conf_data['conf_address']}}</samp></h6>
+			</div>
+		</div>
+		<hr>
+		<div class="button-div mb-3">
             <div class="row">
                 <div class="col-sm">
                      <div class="form-group">
@@ -89,8 +89,8 @@
                 </div>
             </div>
             <hr>
-        </div>
-    </div>
+		</div>
+	</div>
 
     <div class="row">
         {% if conf_data['peer_data']|length == 0 %}
@@ -139,7 +139,7 @@
                         </div>
                         <div class="w-100"></div>
                         <div class="col-sm">
-                            <small class="text-muted"><strong>LOCAL ENDPOINT</strong></small>
+                            <small class="text-muted"><strong>END POINT</strong></small>
                             <h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
                         </div>
                         <div class="w-100"></div>
@@ -151,7 +151,7 @@
                                 <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
                                 {% if i['private_key'] %}
                                     <div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
-                                        <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="{{ qrcode("[Interface]\nPrivateKey = "+i['private_key']+"\nAddress = "+i['allowed_ip']+"\nDNS = "+i['DNS']+"\n\n[Peer]\nPublicKey = "+conf_data['public_key']+"\nAllowedIPs = "+i['endpoint_allowed_ip']+"\nEndpoint = "+i['remote_endpoint']+":"+conf_data['listen_port']) }}">
+                                        <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="{{ qrcode("[Interface]\nPrivateKey = "+i['private_key']+"\nAddress = "+i['allowed_ip']+"\nDNS = "+i['DNS']+"\n\n[Peer]\nPublicKey = "+conf_data['public_key']+"\nAllowedIPs = "+i['endpoint_allowed_ip']+"\nEndpoint = "+wg_ip+":"+conf_data['listen_port']) }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
                                         </button>
                                         <a href="/download/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}" class="btn btn-outline-info btn-download-peer btn-control">
