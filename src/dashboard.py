@@ -805,10 +805,10 @@ def add_peer(config_name):
         return "Allowed IP already taken by another peer."
     if not checkIp(DNS):
         return "DNS format is incorrect. Example: 1.1.1.1"
-    if not checkAllowedIPs(endpoint_allowed_ip):
-        return "Endpoint Allowed IPs format is incorrect."
     if not validate(remote_endpoint):
         return "Remote peer incorrect"
+    if not checkAllowedIPs(endpoint_allowed_ip):
+        return "Endpoint Allowed IPs format is incorrect."
     else:
         status = ""
         try:
