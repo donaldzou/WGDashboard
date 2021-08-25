@@ -18,7 +18,7 @@ from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.2.1'
+dashboard_version = 'v2.2.2'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Default Wireguard IP
@@ -471,7 +471,7 @@ def auth():
         config.clear()
         return redirect(url_for("index"))
     else:
-        session['message'] = "Username or Password is correct."
+        session['message'] = "Username or Password is incorrect."
         config.clear()
         return redirect(url_for("signin"))
 
@@ -650,6 +650,10 @@ def ping_ip():
             "package_received": result.packets_received,
             "package_loss": result.packet_loss
         }
+        if returnjson['package_loss'] == 1.0:
+            returnjson['package_loss'] = returnjson['package_sent']
+
+
         return jsonify(returnjson)
     except Exception:
         return "Error"
