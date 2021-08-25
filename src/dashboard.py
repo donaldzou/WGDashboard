@@ -225,6 +225,7 @@ def get_all_peers_data(config_name):
             })
         else:
             # Update database since V2.2
+            print("looking for "+search[0]['id'])
             update_db = {}
             if "private_key" not in search[0]:
                 update_db['private_key'] = ''
@@ -233,6 +234,15 @@ def get_all_peers_data(config_name):
             if "endpoint_allowed_ip" not in search[0]:
                 update_db['endpoint_allowed_ip'] = '0.0.0.0/0'
             db.update(update_db, peers.id == i['PublicKey'])
+    # Remove peers no longer exist in WireGuard configuration file
+    db_key = list(map(lambda a: a['id'], db.all()))
+    wg_key = list(map(lambda a: a['PublicKey'], conf_peer_data['Peers']))
+    for i in db_key:
+        if i not in wg_key:
+            db.remove(peers.id == i)
+    print(db_key)
+    print(wg_key)
+
 
     tic = time.perf_counter()
     get_latest_handshake(config_name, db, peers)
@@ -765,7 +775,6 @@ def add_peer(config_name):
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(DNS) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
-
     if type(keys) != list:
         return config_name + " is not running."
     if public_key in keys:
@@ -835,7 +844,8 @@ def save_peer_setting(config_name):
         check_ip = checkAllowedIP(id, allowed_ip, config_name)
         if not checkIpWithRange(endpoint_allowed_ip):
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
-
+        if not checkIp(DNS):
+            return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
             if check_key['status'] == "failed":
@@ -843,15 +853,13 @@ def save_peer_setting(config_name):
         if check_ip['status'] == "failed":
             return jsonify(check_ip)
         try:
-            if allowed_ip == "":
-                allowed_ip = '""'
+            if allowed_ip == "": allowed_ip = '""'
             change_ip = subprocess.check_output('wg set ' + config_name + " peer " + id + " allowed-ips " + allowed_ip,
                                                 shell=True, stderr=subprocess.STDOUT)
             save_change_ip = subprocess.check_output('wg-quick save ' + config_name, shell=True,
                                                      stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
-
             db.update(
                 {"name": name, "private_key": private_key, "DNS": DNS, "endpoint_allowed_ip": endpoint_allowed_ip},
                 peers.id == id)

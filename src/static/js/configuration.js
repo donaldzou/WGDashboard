@@ -67,8 +67,6 @@ $("#save_peer").click(function(){
         for (var i = 0; i < data_list.length; i++){
             data_list[i].attr("disabled", "disabled")
         }
-
-
         $.ajax({
             method: "POST",
             url: "/add_peer/"+conf,
@@ -248,7 +246,7 @@ $("#save_peer_setting").click(function (){
                 }
             }
         })
-    }else{
+        }else{
         $("#setting_peer_alert").html("Please fill in all required box.");
         $("#setting_peer_alert").removeClass("d-none");
         $("#save_peer_setting").removeAttr("disabled")
