@@ -16,11 +16,12 @@ help () {
 }
 
 install_wgd(){
-    rm db/hi.txt
+    rm db/hi.txt >  /dev/null 2>&1
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    printf "| Wireguard Dashboard installed successfully!              |\n"
+    printf "| Starting Dashboard                                       |\n"
     start_wgd
-
 }
 
 
@@ -34,14 +35,13 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    printf "%s" "$PLATFORM"
-    printf "Starting Wireguard Dashboard in the background. \n"
+    printf "| Starting Wireguard Dashboard in the background.           \n"
     if [ ! -d "log" ]
       then mkdir "log"
     fi
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "Log file: log/%s""$d"".txt\n"
+    printf "| Log files is under log/                                   \n"
 }
 
 stop_wgd() {
@@ -49,7 +49,7 @@ stop_wgd() {
 }
 
 start_wgd_debug() {
-  printf "Starting Wireguard Dashboard in the foreground. \n"
+  printf "| Starting Wireguard Dashboard in the foreground.           \n"
   python3 "$app_name"
 }
 
@@ -59,19 +59,14 @@ update_wgd() {
   printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
-    printf "%s\n" "$dashes"
     printf "| Shutting down Wireguard Dashboard...                     |\n"
-    printf "%s\n" "$dashes"
     stop_wgd
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
-    printf "%s\n" "$dashes"
     git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
-    printf "%s\n" "$dashes"
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
-    printf "%s\n" "$dashes"
     start_wgd
   else
     printf "%s\n" "$dashes"
