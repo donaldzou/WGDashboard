@@ -100,6 +100,8 @@ if [ "$#" != 1 ];
         fi
       elif [ "$1" = "update" ]; then
         update_wgd
+      elif [ "$1" = "install" ]; then
+        install_wgd
       elif [ "$1" = "restart" ]; then
          if check_wgd_status; then
            stop_wgd
