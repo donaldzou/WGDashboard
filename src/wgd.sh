@@ -1,23 +1,33 @@
 #!/bin/bash
 
 app_name="dashboard.py"
+app_official_name="Wireguard Dashboard"
 dashes='------------------------------------------------------------'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
   printf "Usage: ./wgd.sh <option>"
   printf "\n \n"
   printf "Available options: \n"
-  printf "    start: To start Wireguard Dashboard.\n"
-  printf "    stop: To stop Wireguard Dashboard.\n"
-  printf "    debug: To start Wireguard Dashboard in debug mode (i.e run in foreground).\n"
-  printf "    update: To update Wireguard Dashboard to the newest version from GitHub.\n"
-  printf "    install: To install Wireguard Dasboard.\n"
-  printf "Thank you for using this dashboard! Your support is my motivation ;) \n"
+  printf "    start: To start "app_official_name".\n"
+  printf "    stop: To stop "app_official_name".\n"
+  printf "    debug: To start "app_official_name" in debug mode (i.e run in foreground).\n"
+  printf "    update: To update "app_official_name" to the newest version from GitHub.\n"
+  printf "    install: To install "app_official_name".\n"
+  printf "Thank you for using! Your support is my motivation ;) \n"
   printf "\n"
 }
 
 install_wgd(){
+    minimum_python_version=3.7
+    python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
+    echo $python_version>$minimum_python_version
+
+
+
     rm db/hi.txt >  /dev/null 2>&1
+    if [ ! -d "log" ]
+      then mkdir "log"
+    fi
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| Wireguard Dashboard installed successfully!              |\n"
@@ -37,9 +47,6 @@ check_wgd_status(){
 
 start_wgd () {
     printf "| Starting Wireguard Dashboard in the background.          |\n"
-    if [ ! -d "log" ]
-      then mkdir "log"
-    fi
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
     printf "| Log files is under log/                                  |\n"
