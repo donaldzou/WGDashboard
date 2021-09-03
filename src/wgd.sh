@@ -4,13 +4,14 @@ app_name="dashboard.py"
 dashes='------------------------------------------------------------'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
-  printf "Usage: sh wgd.sh <option>"
+  printf "Usage: ./wgd.sh <option>"
   printf "\n \n"
   printf "Available options: \n"
   printf "    start: To start Wireguard Dashboard.\n"
   printf "    stop: To stop Wireguard Dashboard.\n"
   printf "    debug: To start Wireguard Dashboard in debug mode (i.e run in foreground).\n"
   printf "    update: To update Wireguard Dashboard to the newest version from GitHub.\n"
+  printf "    install: To install Wireguard Dasboard.\n"
   printf "Thank you for using this dashboard! Your support is my motivation ;) \n"
   printf "\n"
 }
@@ -54,13 +55,13 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases').read(); output = json.loads(data);print(output[0]['tag_name'])")
+  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases/latest').read(); output = json.loads(data);print(output[0]['tag_name'])")
   printf "%s\n" "$dashes"
   printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
     printf "| Shutting down Wireguard Dashboard...                     |\n"
-    stop_wgd
+    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
