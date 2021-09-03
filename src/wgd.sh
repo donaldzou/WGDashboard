@@ -53,9 +53,14 @@ update_wgd() {
     printf "%s\n" "$dashes"
     printf "| Shutting down Wireguard Dashboard...                     |\n"
     printf "%s\n" "$dashes"
+    stop_wgd
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     printf "%s\n" "$dashes"
+    git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    printf "%s\n" "$dashes"
+    printf "| Installing latest Python dependencies                    |\n"
+    python3 -m pip install -r requirements.txt
     printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
     printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"

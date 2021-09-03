@@ -1,5 +1,5 @@
-Flask==2.0.1
-tinydb==4.3.0
-ifcfg==0.21
-icmplib==3.0.1
-flask-qrcode==3.0.0
+Flask
+tinydb
+ifcfg
+icmplib
+flask-qrcode
