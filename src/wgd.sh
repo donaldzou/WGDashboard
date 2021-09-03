@@ -82,16 +82,16 @@ if [ "$#" != 1 ];
   else
     if [ "$1" = "start" ]; then
         if check_wgd_status; then
-          printf "Wireguard Dashboard is already running. \n"
+          printf "| Wireguard Dashboard is already running.                  |\n"
           else
             start_wgd
         fi
       elif [ "$1" = "stop" ]; then
         if check_wgd_status; then
             stop_wgd
-            printf "Wireguard Dashboard is stopped. \n"
+            printf "| Wireguard Dashboard is stopped.                          |\n"
             else
-              printf "Wireguard Dashboard is not running. \n"
+              printf "| Wireguard Dashboard is not running.                      |\n"
         fi
       elif [ "$1" = "update" ]; then
         update_wgd
@@ -101,14 +101,14 @@ if [ "$#" != 1 ];
          if check_wgd_status; then
            stop_wgd
            sleep 2
-           printf "Wireguard Dashboard is stopped. \n"
+           printf "| Wireguard Dashboard is stopped.                          |\n"
            start_wgd
         else
           start_wgd
         fi
       elif [ "$1" = "debug" ]; then
         if check_wgd_status; then
-          printf "Wireguard Dashboard is already running. \n"
+          printf "| Wireguard Dashboard is already running.                  |\n"
           else
             start_wgd_debug
         fi
