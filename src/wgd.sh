@@ -20,7 +20,7 @@ help () {
 install_wgd(){
     minimum_python_version=3.7
     python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
-    if [ $python_version \> $minimum_python_version]
+    if [ $python_version \> $minimum_python_version ]
       then echo "true"
     else
       echo "false"
