@@ -15,6 +15,15 @@ help () {
   printf "\n"
 }
 
+install_wgd(){
+    rm db/hi.txt
+    printf "| Installing latest Python dependencies                    |\n"
+    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    start_wgd
+
+}
+
+
 check_wgd_status(){
   if ps aux | grep '[p]ython3 '$app_name > /dev/null;
     then
@@ -60,12 +69,10 @@ update_wgd() {
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
     printf "%s\n" "$dashes"
     printf "| Installing latest Python dependencies                    |\n"
-    python3 -m pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
-    printf "| Now you can start the dashboard with >> sh wgd.sh start  |\n"
-    printf "%s\n" "$dashes"
-    exit 1
+    start_wgd
   else
     printf "%s\n" "$dashes"
     printf "CANCEL update. \n"
