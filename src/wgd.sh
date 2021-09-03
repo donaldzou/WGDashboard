@@ -18,16 +18,12 @@ help () {
 }
 
 install_wgd(){
-    minimum_python_version=3.7
-    python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[0:2])))')
-    if [ $python_version \> $minimum_python_version ]
-      then echo "true"
-    else
-      echo "false"
+    # Check Python3 version
+    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
+    if [ $version_pass == "0" ]
+      then echo "| Wireguard Dashboard required Python3.7+                  |\n"
+      exit 1
     fi
-
-
-
     rm db/hi.txt >  /dev/null 2>&1
     if [ ! -d "log" ]
       then mkdir "log"
