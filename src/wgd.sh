@@ -49,10 +49,12 @@ check_wgd_status(){
 }
 
 start_wgd () {
+    printf "%s\n" "$dashes"
     printf "| Starting Wireguard Dashboard in the background.          |\n"
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
     printf "| Log files is under log/                                  |\n"
+    printf "%s\n" "$dashes"
 }
 
 stop_wgd() {
@@ -60,14 +62,16 @@ stop_wgd() {
 }
 
 start_wgd_debug() {
+  printf "%s\n" "$dashes"
   printf "| Starting Wireguard Dashboard in the foreground.          |\n"
   python3 "$app_name"
+  printf "%s\n" "$dashes"
 }
 
 update_wgd() {
   new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
-  printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
+  printf "| Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
     printf "| Shutting down Wireguard Dashboard...                     |\n"
@@ -81,7 +85,7 @@ update_wgd() {
     start_wgd
   else
     printf "%s\n" "$dashes"
-    printf "CANCEL update. \n"
+    printf "| Update Canceled.                                         |\n"
     printf "%s\n" "$dashes"
   fi
 }
@@ -93,16 +97,22 @@ if [ "$#" != 1 ];
   else
     if [ "$1" = "start" ]; then
         if check_wgd_status; then
+          printf "%s\n" "$dashes"
           printf "| Wireguard Dashboard is already running.                  |\n"
+          printf "%s\n" "$dashes"
           else
             start_wgd
         fi
       elif [ "$1" = "stop" ]; then
         if check_wgd_status; then
+            printf "%s\n" "$dashes"
             stop_wgd
             printf "| Wireguard Dashboard is stopped.                          |\n"
+            printf "%s\n" "$dashes"
             else
+              printf "%s\n" "$dashes"
               printf "| Wireguard Dashboard is not running.                      |\n"
+              printf "%s\n" "$dashes"
         fi
       elif [ "$1" = "update" ]; then
         update_wgd
