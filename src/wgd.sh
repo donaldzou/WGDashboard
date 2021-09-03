@@ -35,13 +35,13 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    printf "| Starting Wireguard Dashboard in the background.           \n"
+    printf "| Starting Wireguard Dashboard in the background.          |\n"
     if [ ! -d "log" ]
       then mkdir "log"
     fi
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "| Log files is under log/                                   \n"
+    printf "| Log files is under log/                                  |\n"
 }
 
 stop_wgd() {
@@ -49,7 +49,7 @@ stop_wgd() {
 }
 
 start_wgd_debug() {
-  printf "| Starting Wireguard Dashboard in the foreground.           \n"
+  printf "| Starting Wireguard Dashboard in the foreground.          |\n"
   python3 "$app_name"
 }
 
