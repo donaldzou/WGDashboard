@@ -50,6 +50,9 @@ check_wgd_status(){
 start_wgd () {
     printf "%s\n" "$dashes"
     printf "| Starting Wireguard Dashboard in the background.          |\n"
+    if [ ! -d "log" ]
+      then mkdir "log"
+    fi
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
     printf "| Log files is under log/                                  |\n"

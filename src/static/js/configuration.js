@@ -332,3 +332,14 @@ $("body").on("click", ".update_interval", function(){
 $("body").on("click", ".refresh", function (){
     load_data($('#search_peer_textbox').val());
 });
+
+
+$("body").on("click", ".display_mode", function(){
+    $.ajax({
+        method:"GET",
+        url: "/switch_display_mode/"+$(this).attr("display-mode"),
+        success: function (res){
+            location.reload()
+        }
+    })
+})

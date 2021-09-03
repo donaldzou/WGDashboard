@@ -17,29 +17,19 @@
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
 
-## 📣 What's New: Version v2.2
+## 📣 What's New: Version v2.3
 
 - 🎉  **New Features**
-  - **Add new peers**: Now you can add peers directly on dashboard, it will generate a pair of private key and public key. You can also set its DNS, endpoint allowed IPs. Both can set a default value in the setting page. [❤️ in [#44](https://github.com/donaldzou/wireguard-dashboard/issues/44)]  
-  - **QR Code:** You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
-  - **Peer configuration file download:** Same as QR code, you now can download the peer configuration file, so you don't need to manually input all the details on the peer machine! [❤️ in [#40](https://github.com/donaldzou/wireguard-dashboard/issues/40)]
-  - **Search peers**: You can now search peers by their name.
-  - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
-  - **Click to copy**: You can now click and copy all peer's public key and configuration's public key.
-  - ....
+  - **Update directly from `wgd.sh`:** Now you can update Wireguard Dashboard directly from the bash script.
+  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
 - 🪚  **Bug Fixed**
-  - When there are comments in the wireguard config file, will cause the dashboard to crash.
-  - Used regex to search for config files.
+  - [Peer DNS Validation Fails #67](https://github.com/donaldzou/wireguard-dashboard/issues/67): Added DNS format check
+  - [configparser.NoSectionError: No section: 'Interface' #66](https://github.com/donaldzou/wireguard-dashboard/issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`
+
 - **🧐  Other Changes**
-  - Moved all external CSS and JavaScript file to local hosting (Except Bootstrap Icon, due to large amount of SVG files).
-  - Updated Python dependencies
-    - Flask: `v1.1.2 => v2.0.1`
-    - Jinja: `v2.10.1 => v3.0.1`
-    - icmplib: `v2.1.1 => v3.0.1`
-  - Updated CSS/JS dependencies
-    - Bootstrap: `v4.5.3 => v4.6.0`
-  - UI adjustment
-    - Adjusted how peers will display in larger screens, used to be 1 row per peer, now is 3 peers in 1 row.
+
+
+
 <hr>
 
 
@@ -115,30 +105,30 @@
    cd wireguard-dashboard/src
    ```
    
-3. Install Python Dependencies
-
-   ```shell
-   python3 -m pip install -r requirements.txt
-   ```
-
-4. Give read, write and execute permission to root of the WireGuard configuration folder, you can change the path if your configuration files is not stored in `/etc/wireguard`
-
-   ```shell
-   sudo chmod -R 744 /etc/wireguard
-   ```
-
-5. Install & run Wireguard Dashboard
+3. Install Wireguard Dashboard
 
    ```shell
    sudo chmod u+x wgd.sh
-   ./wgd.sh start
+   sudo ./wgd.sh install
    ```
 
+4. Give read and execute permission to root of the WireGuard configuration folder, you can change the path if your configuration files are not stored in `/etc/wireguard`
+
+   ```shell
+   sudo chmod -R 755 /etc/wireguard
+   ```
+
+5. Run Wireguard Dashboard
+
+   ```shell
+   ./wgd.sh start
+   ```
+   
    **Note**:
 
    > For [`pivpn`](https://github.com/pivpn/pivpn) user, please use `sudo ./wgd.sh start` to run if your current account does not have the permission to run `wg show` and `wg-quick`.
 
-6. **Access dashboard**
+6. Access dashboard
 
    Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
 
@@ -330,21 +320,12 @@ Endpoint = 0.0.0.0:51820
 
 1. Change your directory to `wireguard-dashboard` 
     ```shell
-    cd wireguard-dashboard
+    cd wireguard-dashboard/src
     ```
-2. Get the newest version
+2. Update the dashboard
     ```shell
-    sudo git stash
-    sudo git pull https://github.com/donaldzou/wireguard-dashboard.git v2.2.1 --force
+    sudo ./wgd.sh update
     ```
-3. Update and install all python dependencies
-   ```shell
-   python3 -m pip install -r requirements.txt
-   ```
-4. Start the dashboard
-    ```shell
-   ./wgd.sh start
-   ```
 ## 🔍 Screenshot
 
 ![Sign In Page](img/SignIn.png)
@@ -368,6 +349,36 @@ Endpoint = 0.0.0.0:51820
 
 
 ## ⏰  Changelog
+
+#### v2.2.1 - Aug 16, 2021
+
+Bug Fixed:
+- Added support for full subnet on Allowed IP
+- Peer setting Save button
+
+#### v2.2 - Aug 14, 2021
+
+- 🎉  **New Features**
+  - **Add new peers**: Now you can add peers directly on dashboard, it will generate a pair of private key and public key. You can also set its DNS, endpoint allowed IPs. Both can set a default value in the setting page. [❤️ in [#44](https://github.com/donaldzou/wireguard-dashboard/issues/44)]  
+  - **QR Code:** You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
+  - **Peer configuration file download:** Same as QR code, you now can download the peer configuration file, so you don't need to manually input all the details on the peer machine! [❤️ in [#40](https://github.com/donaldzou/wireguard-dashboard/issues/40)]
+  - **Search peers**: You can now search peers by their name.
+  - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
+  - **Click to copy**: You can now click and copy all peer's public key and configuration's public key.
+  - ....
+- 🪚  **Bug Fixed**
+  - When there are comments in the wireguard config file, will cause the dashboard to crash.
+  - Used regex to search for config files.
+- **🧐  Other Changes**
+  - Moved all external CSS and JavaScript file to local hosting (Except Bootstrap Icon, due to large amount of SVG files).
+  - Updated Python dependencies
+    - Flask: `v1.1.2 => v2.0.1`
+    - Jinja: `v2.10.1 => v3.0.1`
+    - icmplib: `v2.1.1 => v3.0.1`
+  - Updated CSS/JS dependencies
+    - Bootstrap: `v4.5.3 => v4.6.0`
+  - UI adjustment
+    - Adjusted how peers will display in larger screens, used to be 1 row per peer, now is 3 peers in 1 row.
 
 #### v2.1 - Jul 2, 2021
 

@@ -18,7 +18,7 @@ from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 # Dashboard Version
-dashboard_version = 'v2.2.2'
+dashboard_version = 'v2.3'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Default Wireguard IP
@@ -718,13 +718,13 @@ def conf(config_name):
 @app.route('/get_config/<config_name>', methods=['GET'])
 def get_conf(config_name):
     config_interface = read_conf_file_interface(config_name)
-
     search = request.args.get('search')
     if len(search) == 0: search = ""
     search = urllib.parse.unquote(search)
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
     sort = config.get("Server", "dashboard_sort")
+    peer_display_mode = config.get("Peers", "peer_display_mode")
     conf_data = {
         "peer_data": get_peers(config_name, search, sort),
         "name": config_name,
@@ -740,7 +740,7 @@ def get_conf(config_name):
     else:
         conf_data['checked'] = "checked"
     return render_template('get_conf.html', conf_data=conf_data, wg_ip=wg_ip, sort_tag=sort,
-                           dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")))
+                           dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
 
 
 @app.route('/switch/<config_name>', methods=['GET'])
@@ -950,6 +950,18 @@ def download(config_name):
     else:
         return redirect("/configuration/" + config_name)
 
+@app.route('/switch_display_mode/<mode>', methods=['GET'])
+def switch_display_mode(mode):
+    print(mode)
+    if mode in ['list','grid']:
+        config.read(dashboard_conf)
+        config.set("Peers", "peer_display_mode", mode)
+        config.write(open(dashboard_conf, "w"))
+        return "true"
+    else:
+        return "false"
+
+
 
 def init_dashboard():
     # Set Default INI File
@@ -977,7 +989,7 @@ def init_dashboard():
     if 'version' not in config['Server'] or config['Server']['version'] != dashboard_version:
         config['Server']['version'] = dashboard_version
     if 'dashboard_refresh_interval' not in config['Server']:
-        config['Server']['dashboard_refresh_interval'] = '15000'
+        config['Server']['dashboard_refresh_interval'] = '60000'
     if 'dashboard_sort' not in config['Server']:
         config['Server']['dashboard_sort'] = 'status'
     if "Peers" not in config:
@@ -986,6 +998,8 @@ def init_dashboard():
         config['Peers']['peer_global_DNS'] = '1.1.1.1'
     if 'peer_endpoint_allowed_ip' not in config['Peers']:
         config['Peers']['peer_endpoint_allowed_ip'] = '0.0.0.0/0'
+    if 'peer_display_mode' not in config['Peers']:
+        config['Peers']['peer_display_mode'] = 'grid'
     config.write(open(dashboard_conf, "w"))
     config.clear()
 

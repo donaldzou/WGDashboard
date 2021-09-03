@@ -81,6 +81,15 @@
                 </div>
                 <div class="col-sm">
                     <div class="form-group">
+                        <label><small class="text-muted">Display Mode</small></label><br>
+                        <div class="btn-group" role="group" style="width: 100%">
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary display_mode {% if peer_display_mode == "grid" %} {{ "active" }} {% endif %}" display-mode="grid"><i class="bi bi-grid-fill" style="font-size: 1.5rem;"></i></button>
+                            <button style="width: 20%" type="button" class="btn btn-outline-primary display_mode {% if peer_display_mode == "list" %} {{ "active" }} {% endif %}" display-mode="list"><i class="bi bi-list" style="font-size: 1.5rem;"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="form-group">
                         <label><small class="text-muted">Add</small></label><br>
                         <button type="button" class="btn btn-primary add_btn" data-toggle="modal" data-target="#add_modal" style="width: 100%">
                             <i class="bi bi-plus-circle-fill"></i> Add Peer
@@ -100,7 +109,11 @@
         {% endif %}
 
         {% for i in conf_data['peer_data']%}
-            <div class="col-sm-6 col-md-4">
+            {% if peer_display_mode == "list" %}
+                <div class="col-12">
+            {% else %}
+                <div class="col-sm-6 col-md-4">
+            {% endif %}
                 <div class="card mb-3">
                 <div class="card-header">
                     <div class="row">
