@@ -3,6 +3,7 @@
 app_name="dashboard.py"
 app_official_name="Wireguard Dashboard"
 dashes='------------------------------------------------------------'
+equals='============================================================'
 help () {
   printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
   printf "Usage: ./wgd.sh <option>"
@@ -18,7 +19,6 @@ help () {
 }
 
 install_wgd(){
-    printf "%s\n" "$dashes"
     # Check Python3 version
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
@@ -35,7 +35,6 @@ install_wgd(){
     printf "| Wireguard Dashboard installed successfully!              |\n"
     printf "| Starting Dashboard                                       |\n"
     start_wgd
-    printf "%s\n" "$dashes"
 }
 
 
