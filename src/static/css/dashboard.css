@@ -194,15 +194,30 @@ main{
     margin-bottom: 3rem;
 }
 
-/*.add_btn{*/
-/*  position: fixed;*/
-/*  bottom: 1.75rem;*/
-/*  right: 1.75rem;*/
-/*  z-index: 1000;*/
-/*  padding: 0.75rem 1.5rem;*/
-/*  border-radius: 3rem;*/
-/*  font-size: 1rem;*/
-/*}*/
+.peer_list{
+    margin-bottom: 7rem
+}
+
+@media (max-width: 768px) {
+    .add_btn{
+        bottom: 1.5rem !important;
+    }
+
+    .peer_list{
+        margin-bottom: 4rem !important;
+    }
+}
+
+.add_btn{
+    position: fixed;
+    bottom: 3rem;
+    right: 2rem;
+    z-index: 99;
+    border-radius: 100px;
+    padding: 10px 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
 
 @-webkit-keyframes rotating /* Safari and Chrome */ {
     from {

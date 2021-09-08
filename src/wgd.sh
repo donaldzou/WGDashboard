@@ -1,26 +1,42 @@
 #!/bin/bash
 
 app_name="dashboard.py"
+app_official_name="Wireguard Dashboard"
 dashes='------------------------------------------------------------'
+equals='============================================================'
 help () {
-  printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
-  printf "Usage: sh wgd.sh <option>"
-  printf "\n \n"
-  printf "Available options: \n"
-  printf "    start: To start Wireguard Dashboard.\n"
-  printf "    stop: To stop Wireguard Dashboard.\n"
-  printf "    debug: To start Wireguard Dashboard in debug mode (i.e run in foreground).\n"
-  printf "    update: To update Wireguard Dashboard to the newest version from GitHub.\n"
-  printf "Thank you for using this dashboard! Your support is my motivation ;) \n"
-  printf "\n"
+  printf "=================================================================================\n"
+  printf "+ <Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou            +\n"
+  printf "=================================================================================\n"
+  printf "| Usage: ./wgd.sh <option>                                                      |\n"
+  printf "|                                                                               |\n"
+  printf "| Available options:                                                            |\n"
+  printf "|    start: To start Wireguard Dashboard                                        |\n"
+  printf "|    stop: To stop Wireguard Dashboard.                                         |\n"
+  printf "|    debug: To start Wireguard Dashboard in debug mode (i.e run in foreground). |\n"
+  printf "|    update: To update Wireguard Dashboard to the newest version from GitHub.   |\n"
+  printf "|    install: To install Wireguard Dashboard.                                   |\n"
+  printf "| Thank you for using! Your support is my motivation ;)                         |\n"
+  printf "=================================================================================\n"
 }
 
 install_wgd(){
-    rm db/hi.txt
+    # Check Python3 version
+    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
+    if [ $version_pass == "0" ]
+      then printf "| Wireguard Dashboard required Python3.7+                  |\n"
+      printf "%s\n" "$dashes"
+      exit 1
+    fi
+    rm db/hi.txt >  /dev/null 2>&1
+    if [ ! -d "log" ]
+      then mkdir "log"
+    fi
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    printf "| Wireguard Dashboard installed successfully!              |\n"
+    printf "| Starting Dashboard                                       |\n"
     start_wgd
-
 }
 
 
@@ -34,14 +50,15 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    printf "%s" "$PLATFORM"
-    printf "Starting Wireguard Dashboard in the background. \n"
+    printf "%s\n" "$dashes"
+    printf "| Starting Wireguard Dashboard in the background.          |\n"
     if [ ! -d "log" ]
       then mkdir "log"
     fi
     d=$(date '+%Y%m%d%H%M%S')
     python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "Log file: log/%s""$d"".txt\n"
+    printf "| Log files is under log/                                  |\n"
+    printf "%s\n" "$dashes"
 }
 
 stop_wgd() {
@@ -49,33 +66,30 @@ stop_wgd() {
 }
 
 start_wgd_debug() {
-  printf "Starting Wireguard Dashboard in the foreground. \n"
+  printf "%s\n" "$dashes"
+  printf "| Starting Wireguard Dashboard in the foreground.          |\n"
   python3 "$app_name"
+  printf "%s\n" "$dashes"
 }
 
 update_wgd() {
-  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases').read(); output = json.loads(data);print(output[0]['tag_name'])")
+  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/wireguard-dashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
-  printf "Are you sure you want to update to the %s? (Y/N): " "$new_ver"
+  printf "| Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
   if [ "$up" = "Y" ]; then
-    printf "%s\n" "$dashes"
     printf "| Shutting down Wireguard Dashboard...                     |\n"
-    printf "%s\n" "$dashes"
-    stop_wgd
+    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
-    printf "%s\n" "$dashes"
     git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
-    printf "%s\n" "$dashes"
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
-    printf "%s\n" "$dashes"
     start_wgd
   else
     printf "%s\n" "$dashes"
-    printf "CANCEL update. \n"
+    printf "| Update Canceled.                                         |\n"
     printf "%s\n" "$dashes"
   fi
 }
@@ -87,31 +101,40 @@ if [ "$#" != 1 ];
   else
     if [ "$1" = "start" ]; then
         if check_wgd_status; then
-          printf "Wireguard Dashboard is already running. \n"
+          printf "%s\n" "$dashes"
+          printf "| Wireguard Dashboard is already running.                  |\n"
+          printf "%s\n" "$dashes"
           else
             start_wgd
         fi
       elif [ "$1" = "stop" ]; then
         if check_wgd_status; then
+            printf "%s\n" "$dashes"
             stop_wgd
-            printf "Wireguard Dashboard is stopped. \n"
+            printf "| Wireguard Dashboard is stopped.                          |\n"
+            printf "%s\n" "$dashes"
             else
-              printf "Wireguard Dashboard is not running. \n"
+              printf "%s\n" "$dashes"
+              printf "| Wireguard Dashboard is not running.                      |\n"
+              printf "%s\n" "$dashes"
         fi
       elif [ "$1" = "update" ]; then
         update_wgd
+      elif [ "$1" = "install" ]; then
+        install_wgd
       elif [ "$1" = "restart" ]; then
          if check_wgd_status; then
+           printf "%s\n" "$dashes"
            stop_wgd
+           printf "| Wireguard Dashboard is stopped.                          |\n"
            sleep 2
-           printf "Wireguard Dashboard is stopped. \n"
            start_wgd
         else
           start_wgd
         fi
       elif [ "$1" = "debug" ]; then
         if check_wgd_status; then
-          printf "Wireguard Dashboard is already running. \n"
+          printf "| Wireguard Dashboard is already running.                  |\n"
           else
             start_wgd_debug
         fi

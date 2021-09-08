@@ -17,7 +17,6 @@ function generate_key(){
         $("#re_generate_key i").removeClass("rotating")
     })
 }
-
 function generate_public_key(){
     $.ajax({
         "url": "/generate_public_key",
@@ -26,7 +25,7 @@ function generate_public_key(){
         "data": JSON.stringify({"private_key": $("#private_key").val()})
     }).done(function(res){
         if(res['status'] === "failed"){
-            $("#add_peer_alert").html(res['msg']+$("#add_peer_alert").html());
+            $("#add_peer_alert").html(res['msg']);
             $("#add_peer_alert").removeClass("d-none");
         }else{
             $("#add_peer_alert").addClass("d-none");
@@ -46,24 +45,21 @@ $("#private_key").change(function(){
         $("#public_key").val("")
     }
 })
-
 $('#add_modal').on('show.bs.modal', function (event) {
     generate_key()
 })
-
 $("#re_generate_key").click(function (){
     $("#public_key").attr("disabled","disabled")
     $("#re_generate_key i").addClass("rotating")
     generate_key()
 })
-
 $("#save_peer").click(function(){
     $(this).attr("disabled","disabled")
     $(this).html("Saving...")
 
     if ($("#allowed_ips").val() !== "" && $("#public_key").val() !== "" && $("#new_add_DNS").val() !== "" && $("#new_add_endpoint_allowed_ip").val() != ""){
         var conf = $(this).attr('conf_id')
-        var data_list = [$("#private_key"), $("#allowed_ips"), $("#new_add_name"), $("#new_add_DNS"), $("#new_add_endpoint_allowed_ip")]
+        var data_list = [$("#private_key"), $("#allowed_ips"), $("#new_add_name"), $("#new_add_DNS"), $("#new_add_endpoint_allowed_ip"),$("#new_add_MTU"),$("#new_add_keep_alive")]
         for (var i = 0; i < data_list.length; i++){
             data_list[i].attr("disabled", "disabled")
         }
@@ -79,12 +75,19 @@ $("#save_peer").click(function(){
                 "allowed_ips": $("#allowed_ips").val(),
                 "name":$("#new_add_name").val(),
                 "DNS": $("#new_add_DNS").val(),
-                "endpoint_allowed_ip": $("#new_add_endpoint_allowed_ip").val()
+                "endpoint_allowed_ip": $("#new_add_endpoint_allowed_ip").val(),
+                "MTU": $("#new_add_MTU").val(),
+                "keep_alive": $("#new_add_keep_alive").val()
             }),
             success: function (response){
                 if(response != "true"){
-                    $("#add_peer_alert").html(response+$("#add_peer_alert").html());
+                    $("#add_peer_alert").html(response);
                     $("#add_peer_alert").removeClass("d-none");
+                    for (var i = 0; i < data_list.length; i++){
+                        data_list[i].removeAttr("disabled", "disabled")
+                    }
+                    $("#save_peer").removeAttr("disabled")
+                    $("#save_peer").html("Save")
                 }
                 else{
                     location.reload();
@@ -164,13 +167,15 @@ $("body").on("click", ".btn-setting-peer", function(){
         },
         data: JSON.stringify({"id": peer_id}),
         success: function(response){
-            let peer_name = ((response['name'] === "") ? "Untitled Peer" : response['name']);
+            var peer_name = ((response['name'] === "") ? "Untitled Peer" : response['name'])
             $("#setting_modal .peer_name").html(peer_name);
-            $("#setting_modal #peer_name_textbox").val(peer_name)
+            $("#setting_modal #peer_name_textbox").val(response['name'])
             $("#setting_modal #peer_private_key_textbox").val(response['private_key'])
             $("#setting_modal #peer_DNS_textbox").val(response['DNS'])
             $("#setting_modal #peer_allowed_ip_textbox").val(response['allowed_ip'])
             $("#setting_modal #peer_endpoint_allowed_ips").val(response['endpoint_allowed_ip'])
+            $("#setting_modal #peer_mtu").val(response['mtu'])
+            $("#setting_modal #peer_keep_alive").val(response['keep_alive'])
             settingModal.toggle();
             endProgressBar()
         }
@@ -211,7 +216,10 @@ $("#save_peer_setting").click(function (){
     ){
         var peer_id = $(this).attr("peer_id");
         var conf_id = $(this).attr("conf_id");
-        var data_list = [$("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"), $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips")]
+        var data_list = [
+            $("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"),
+            $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips"), $("#peer_mtu"), $("#peer_keep_alive")
+        ]
         for (var i = 0; i < data_list.length; i++){
             data_list[i].attr("disabled", "disabled")
         }
@@ -227,7 +235,9 @@ $("#save_peer_setting").click(function (){
                 DNS: $("#peer_DNS_textbox").val(),
                 private_key: $("#peer_private_key_textbox").val(),
                 allowed_ip: $("#peer_allowed_ip_textbox").val(),
-                endpoint_allowed_ip: $("#peer_endpoint_allowed_ips").val()
+                endpoint_allowed_ip: $("#peer_endpoint_allowed_ips").val(),
+                MTU: $("#peer_mtu").val(),
+                keep_alive: $("#peer_keep_alive").val()
             }),
             success: function (response){
                 if (response['status'] === "failed"){
@@ -279,7 +289,6 @@ function doneTyping () {
     load_data($('#search_peer_textbox').val());
 }
 
-
 // Sorting
 $("body").on("change", "#sort_by_dropdown", function (){
     $.ajax({
@@ -293,7 +302,7 @@ $("body").on("change", "#sort_by_dropdown", function (){
     })
 })
 
-
+// Click key to copy
 $("body").on("mouseenter", ".key", function(){
     var label = $(this).parent().siblings().children()[1]
     label.style.opacity = "100"
@@ -319,6 +328,7 @@ function copyToClipboard(element) {
     $temp.remove();
 }
 
+// Update Interval
 $("body").on("click", ".update_interval", function(){
 	    $.ajax({
             method:"POST",
@@ -332,3 +342,14 @@ $("body").on("click", ".update_interval", function(){
 $("body").on("click", ".refresh", function (){
     load_data($('#search_peer_textbox').val());
 });
+
+// Switch display mode
+$("body").on("click", ".display_mode", function(){
+    $.ajax({
+        method:"GET",
+        url: "/switch_display_mode/"+$(this).attr("display-mode"),
+        success: function (res){
+            location.reload()
+        }
+    })
+})

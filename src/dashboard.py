@@ -1,7 +1,12 @@
+"""
+< Wireguard Dashbaord > - by Donald Zou [https://github.com/donaldzou]
+Under Apache-2.0 License
+"""
+
+
 # Python Built-in Library
 import os
 from flask import Flask, request, render_template, redirect, url_for, session, abort, jsonify
-
 import subprocess
 from datetime import datetime, date, time, timedelta
 import time
@@ -16,13 +21,10 @@ import ifcfg
 from flask_qrcode import QRcode
 from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
-
 # Dashboard Version
-dashboard_version = 'v2.2.2'
+dashboard_version = 'v2.3'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
-# Default Wireguard IP
-wg_ip = ifcfg.default_interface()['inet']
 # Upgrade Required
 update = ""
 # Flask App Configuration
@@ -32,7 +34,70 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator
 QRcode(app)
 
+"""
+Helper Functions
+"""
+# Regex Match
+def regex_match(regex, text):
+    pattern = re.compile(regex)
+    return pattern.search(text) is not None
 
+# Check IP format (IPv4 only now)
+# TODO: Add IPv6 support
+def check_IP(ip):
+    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", ip)
+
+# Clean IP
+def clean_IP(ip):
+    return ip.replace(' ', '')
+
+# Clean IP with range
+def clean_IP_with_range(ip):
+    return clean_IP(ip).split(',')
+
+# Check IP with range (IPv4 only now)
+# TODO: Add IPv6 support
+def check_IP_with_range(ip):
+    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|" +
+                    "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
+
+# Check allowed ips list
+def check_Allowed_IPs(ip):
+    ip = clean_IP_with_range(ip)
+    for i in ip:
+        if not check_IP_with_range(i): return False
+    return True
+
+# Check DNS
+def check_DNS(dns):
+    dns = dns.replace(' ','').split(',')
+    status = True
+    for i in dns:
+        if not (regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", i) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]",i)):
+            return False
+    return True
+
+# Check remote endpoint (Both IPv4 address and valid hostname)
+# TODO: Add IPv6 support
+def check_remote_endpoint(address):
+    return (regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", address) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]",address))
+
+
+"""
+Dashboard Configuration Related
+"""
+# Read / Write Dashboard Config File
+def get_dashboard_conf():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    return config
+def set_dashboard_conf(config):
+    config.write(open(dashboard_conf, "w"))
+
+"""
+Configuration Related
+"""
+# Get all keys from a configuration
 def get_conf_peer_key(config_name):
     try:
         peer_key = subprocess.check_output("wg show " + config_name + " peers", shell=True)
@@ -41,7 +106,7 @@ def get_conf_peer_key(config_name):
     except Exception:
         return config_name + " is not running."
 
-
+# Get numbers of connected peer of a configuration
 def get_conf_running_peer_number(config_name):
     running = 0
     # Get latest handshakes
@@ -60,12 +125,7 @@ def get_conf_running_peer_number(config_name):
         count += 2
     return running
 
-
-def is_match(regex, text):
-    pattern = re.compile(regex)
-    return pattern.search(text) is not None
-
-
+# Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
     conf_location = wg_conf_path + "/" + config_name + ".conf"
     f = open(conf_location, 'r')
@@ -73,7 +133,7 @@ def read_conf_file_interface(config_name):
     data = {}
     peers_start = 0
     for i in range(len(file)):
-        if not is_match("#(.*)", file[i]):
+        if not regex_match("#(.*)", file[i]):
             if len(file[i]) > 0:
                 if file[i] != "[Interface]":
                     tmp = re.split(r'\s*=\s*', file[i], 1)
@@ -82,7 +142,7 @@ def read_conf_file_interface(config_name):
     f.close()
     return data
 
-
+# Read the whole configuration file
 def read_conf_file(config_name):
     # Read Configuration File Start
     conf_location = wg_conf_path + "/" + config_name + ".conf"
@@ -94,7 +154,7 @@ def read_conf_file(config_name):
     }
     peers_start = 0
     for i in range(len(file)):
-        if not is_match("#(.*)", file[i]):
+        if not regex_match("#(.*)", file[i]):
             if file[i] == "[Peer]":
                 peers_start = i
                 break
@@ -107,7 +167,7 @@ def read_conf_file(config_name):
     conf_peers = file[peers_start:]
     peer = -1
     for i in conf_peers:
-        if not is_match("#(.*)", i):
+        if not regex_match("#(.*)", i):
             if i == "[Peer]":
                 peer += 1
                 conf_peer_data["Peers"].append({})
@@ -121,7 +181,7 @@ def read_conf_file(config_name):
     # Read Configuration File End
     return conf_peer_data
 
-
+# Get latest handshake from all peers of a configuration
 def get_latest_handshake(config_name, db, peers):
     # Get latest handshakes
     try:
@@ -145,7 +205,7 @@ def get_latest_handshake(config_name, db, peers):
             db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
         count += 2
 
-
+# Get transfer from all peers of a configuration
 def get_transfer(config_name, db, peers):
     # Get transfer
     try:
@@ -180,7 +240,7 @@ def get_transfer(config_name, db, peers):
 
         count += 3
 
-
+# Get endpoint from all peers of a configuration
 def get_endpoint(config_name, db, peers):
     # Get endpoint
     try:
@@ -193,46 +253,56 @@ def get_endpoint(config_name, db, peers):
         db.update({"endpoint": data_usage[count + 1]}, peers.id == data_usage[count])
         count += 2
 
-
+# Get allowed ips from all peers of a configuration
 def get_allowed_ip(config_name, db, peers, conf_peer_data):
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
         db.update({"allowed_ip": i.get('AllowedIPs', '(None)')}, peers.id == i["PublicKey"])
 
-
+# Look for new peers from WireGuard
 def get_all_peers_data(config_name):
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     conf_peer_data = read_conf_file(config_name)
-
+    config = get_dashboard_conf()
     for i in conf_peer_data['Peers']:
         search = db.search(peers.id == i['PublicKey'])
         if not search:
             db.insert({
                 "id": i['PublicKey'],
                 "private_key": "",
-                "DNS": "1.1.1.1",
-                "endpoint_allowed_ip": "0.0.0.0/0",
+                "DNS": config.get("Peers", "peer_global_DNS"),
+                "endpoint_allowed_ip": config.get("Peers","peer_endpoint_allowed_ip"),
                 "name": "",
                 "total_receive": 0,
                 "total_sent": 0,
                 "total_data": 0,
-                "endpoint": 0,
-                "status": 0,
-                "latest_handshake": 0,
-                "allowed_ip": 0,
-                "traffic": []
+                "endpoint": "N/A",
+                "status": "stopped",
+                "latest_handshake": "N/A",
+                "allowed_ip": "N/A",
+                "traffic": [],
+                "mtu": config.get("Peers", "peer_mtu"),
+                "keepalive": config.get("Peers","peer_keep_alive"),
+                "remote_endpoint":config.get("Peers","remote_endpoint")
             })
         else:
             # Update database since V2.2
-            print("looking for "+search[0]['id'])
             update_db = {}
+            # Required peer settings
+            if "DNS" not in search[0]:
+                update_db['DNS'] = config.get("Peers", "peer_global_DNS")
+            if "endpoint_allowed_ip" not in search[0]:
+                update_db['endpoint_allowed_ip'] = config.get("Peers", "peer_endpoint_allowed_ip")
+            # Not required peers settings (Only for QR code)
             if "private_key" not in search[0]:
                 update_db['private_key'] = ''
-            if "DNS" not in search[0]:
-                update_db['DNS'] = '1.1.1.1'
-            if "endpoint_allowed_ip" not in search[0]:
-                update_db['endpoint_allowed_ip'] = '0.0.0.0/0'
+            if "mtu" not in search[0]:
+                update_db['mtu'] = config.get("Peers", "peer_mtu")
+            if "keepalive" not in search[0]:
+                update_db['keepalive'] = config.get("Peers","peer_keep_alive")
+            if "remote_endpoint" not in search[0]:
+                update_db['remote_endpoint'] = config.get("Peers","remote_endpoint")
             db.update(update_db, peers.id == i['PublicKey'])
     # Remove peers no longer exist in WireGuard configuration file
     db_key = list(map(lambda a: a['id'], db.all()))
@@ -240,10 +310,6 @@ def get_all_peers_data(config_name):
     for i in db_key:
         if i not in wg_key:
             db.remove(peers.id == i)
-    print(db_key)
-    print(wg_key)
-
-
     tic = time.perf_counter()
     get_latest_handshake(config_name, db, peers)
     get_transfer(config_name, db, peers)
@@ -253,12 +319,14 @@ def get_all_peers_data(config_name):
     print(f"Finish fetching data in {toc - tic:0.4f} seconds")
     db.close()
 
-
+"""
+Frontend Related Functions
+"""
+# Search for peers
 def get_peers(config_name, search, sort_t):
     get_all_peers_data(config_name)
     db = TinyDB('db/' + config_name + '.json')
     peer = Query()
-    print(search)
     if len(search) == 0:
         result = db.all()
     else:
@@ -268,6 +336,9 @@ def get_peers(config_name, search, sort_t):
     return result
 
 
+
+
+# Get configuration public key
 def get_conf_pub_key(config_name):
     conf = configparser.ConfigParser(strict=False)
     conf.read(wg_conf_path + "/" + config_name + ".conf")
@@ -276,15 +347,21 @@ def get_conf_pub_key(config_name):
     conf.clear()
     return pub.decode().strip("\n")
 
-
+# Get configuration listen port
 def get_conf_listen_port(config_name):
     conf = configparser.ConfigParser(strict=False)
     conf.read(wg_conf_path + "/" + config_name + ".conf")
-    port = conf.get("Interface", "ListenPort")
+    port = ""
+    try:
+        port = conf.get("Interface", "ListenPort")
+    except:
+        if get_conf_status(config_name) == "running":
+            port = subprocess.check_output("wg show "+config_name+" listen-port", shell=True)
+            port = port.decode("UTF-8")
     conf.clear()
     return port
 
-
+# Get configuration total data
 def get_conf_total_data(config_name):
     db = TinyDB('db/' + config_name + '.json')
     upload_total = 0
@@ -301,7 +378,7 @@ def get_conf_total_data(config_name):
     db.close()
     return [total, upload_total, download_total]
 
-
+# Get configuration status
 def get_conf_status(config_name):
     ifconfig = dict(ifcfg.interfaces().items())
     if config_name in ifconfig.keys():
@@ -309,11 +386,11 @@ def get_conf_status(config_name):
     else:
         return "stopped"
 
-
+# Get all configuration as a list
 def get_conf_list():
     conf = []
     for i in os.listdir(wg_conf_path):
-        if is_match("^(.{1,}).(conf)$", i):
+        if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
             if temp['status'] == "running":
@@ -325,8 +402,8 @@ def get_conf_list():
         conf = sorted(conf, key=itemgetter('conf'))
     return conf
 
-
-def genKeys():
+# Generate private key
+def gen_private_key():
     gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',
                                   shell=True)
     private = open('private_key.txt')
@@ -340,8 +417,8 @@ def genKeys():
     os.remove('public_key.txt')
     return data
 
-
-def genPubKey(private_key):
+# Generate public key
+def gen_public_key(private_key):
     pri_key_file = open('private_key.txt', 'w')
     pri_key_file.write(private_key)
     pri_key_file.close()
@@ -356,9 +433,9 @@ def genPubKey(private_key):
         os.remove('private_key.txt')
         return {"status": 'failed', "msg": "Key is not the correct length or format", "data": ""}
 
-
+# Check if private key and public key match
 def checkKeyMatch(private_key, public_key, config_name):
-    result = genPubKey(private_key)
+    result = gen_public_key(private_key)
     if result['status'] == 'failed':
         return result
     else:
@@ -370,8 +447,8 @@ def checkKeyMatch(private_key, public_key, config_name):
         else:
             return {'status': 'success'}
 
-
-def checkAllowedIP(public_key, ip, config_name):
+# Check if there is repeated allowed IP
+def check_repeat_allowed_IP(public_key, ip, config_name):
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     peer = db.search(peers.id == public_key)
@@ -385,30 +462,11 @@ def checkAllowedIP(public_key, ip, config_name):
             return {'status': 'success'}
 
 
-def checkIp(ip):
-    return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", ip)
+"""
+Flask Functions
+"""
 
-
-def cleanIp(ip):
-    return ip.replace(' ', '')
-
-
-def cleanIpWithRange(ip):
-    return cleanIp(ip).split(',')
-
-
-def checkIpWithRange(ip):
-    return is_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|"+
-                    "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
-
-
-def checkAllowedIPs(ip):
-    ip = cleanIpWithRange(ip)
-    for i in ip:
-        if not checkIpWithRange(i): return False
-    return True
-
-
+# Before request
 @app.before_request
 def auth_req():
     conf = configparser.ConfigParser(strict=False)
@@ -433,7 +491,10 @@ def auth_req():
                                 'update_app_ip_port', 'update_wg_conf_path']:
             return redirect(url_for("index"))
 
-
+"""
+Sign In / Sign Out
+"""
+#Sign In
 @app.route('/signin', methods=['GET'])
 def signin():
     message = ""
@@ -442,7 +503,7 @@ def signin():
         session.pop("message")
     return render_template('signin.html', message=message)
 
-
+#Sign Out
 @app.route('/signout', methods=['GET'])
 def signout():
     if "username" in session:
@@ -450,7 +511,34 @@ def signout():
     message = "Sign out successfully!"
     return render_template('signin.html', message=message)
 
+# Authentication
+@app.route('/auth', methods=['POST'])
+def auth():
+    config = configparser.ConfigParser(strict=False)
+    config.read(dashboard_conf)
+    password = hashlib.sha256(request.form['password'].encode())
+    if password.hexdigest() == config["Account"]["password"] and request.form['username'] == config["Account"][
+        "username"]:
+        session['username'] = request.form['username']
+        config.clear()
+        return redirect(url_for("index"))
+    else:
+        session['message'] = "Username or Password is incorrect."
+        config.clear()
+        return redirect(url_for("signin"))
 
+"""
+Index Page Related
+"""
+@app.route('/', methods=['GET'])
+def index():
+    update = check_update()
+    return render_template('index.html', conf=get_conf_list())
+
+"""
+Setting Page Related
+"""
+# Setting Page
 @app.route('/settings', methods=['GET'])
 def settings():
     message = ""
@@ -467,25 +555,12 @@ def settings():
                            app_ip=config.get("Server", "app_ip"), app_port=config.get("Server", "app_port"),
                            required_auth=required_auth, wg_conf_path=config.get("Server", "wg_conf_path"),
                            peer_global_DNS=config.get("Peers", "peer_global_DNS"),
-                           peer_endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"))
+                           peer_endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"),
+                           peer_mtu=config.get("Peers", "peer_mtu"),
+                           peer_keepalive=config.get("Peers","peer_keep_alive"),
+                           peer_remote_endpoint=config.get("Peers","remote_endpoint"))
 
-
-@app.route('/auth', methods=['POST'])
-def auth():
-    config = configparser.ConfigParser(strict=False)
-    config.read(dashboard_conf)
-    password = hashlib.sha256(request.form['password'].encode())
-    if password.hexdigest() == config["Account"]["password"] and request.form['username'] == config["Account"][
-        "username"]:
-        session['username'] = request.form['username']
-        config.clear()
-        return redirect(url_for("index"))
-    else:
-        session['message'] = "Username or Password is incorrect."
-        config.clear()
-        return redirect(url_for("signin"))
-
-
+# Update account username
 @app.route('/update_acct', methods=['POST'])
 def update_acct():
     if len(request.form['username']) == 0:
@@ -508,46 +583,75 @@ def update_acct():
         config.clear()
         return redirect(url_for("settings"))
 
-
+# Update peer default settting
 @app.route('/update_peer_default_config', methods=['POST'])
 def update_peer_default_config():
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
-    if len(request.form['peer_endpoint_allowed_ip']) == 0 or len(request.form['peer_global_DNS']) == 0:
-        session['message'] = "Peer DNS or Peer Endpoint Allowed IP cannot be empty."
+    if len(request.form['peer_endpoint_allowed_ip']) == 0 or \
+            len(request.form['peer_global_DNS']) == 0 or \
+            len(request.form['peer_remote_endpoint']) == 0:
+        session['message'] = "Please fill in all required boxes."
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
     # Check DNS Format
     DNS = request.form['peer_global_DNS']
-    DNS = cleanIp(DNS)
-    if not checkIp(DNS):
-        session['message'] = "Peer DNS Format Incorrect. Example: 1.1.1.1"
+    if not check_DNS(DNS):
+        session['message'] = "Peer DNS Format Incorrect."
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
+    DNS = DNS.replace(" ","").split(',')
+    DNS = ",".join(DNS)
 
     # Check Endpoint Allowed IPs
     ip = request.form['peer_endpoint_allowed_ip']
-    if not checkAllowedIPs(ip):
+    if not check_Allowed_IPs(ip):
+        session['message'] = "Peer Endpoint Allowed IPs Format Incorrect. Example: 192.168.1.1/32 or 192.168.1.1/32,192.168.1.2/32"
+        session['message_status'] = "danger"
+        return redirect(url_for("settings"))
+    # Check MTU Format
+    if len(request.form['peer_mtu']) > 0:
+        try:
+            mtu = int(request.form['peer_mtu'])
+        except:
+            session['message'] = "MTU format is incorrect."
+            session['message_status'] = "danger"
+            return redirect(url_for("settings"))
+    # Check keepalive Format
+    if len(request.form['peer_keep_alive']) > 0:
+        try:
+            mtu = int(request.form['peer_keep_alive'])
+        except:
+            session['message'] = "Persistent keepalive format is incorrect."
+            session['message_status'] = "danger"
+            return redirect(url_for("settings"))
+    # Check peer remote endpoint
+    if not check_remote_endpoint(request.form['peer_remote_endpoint']):
         session[
-            'message'] = "Peer Endpoint Allowed IPs Format Incorrect. Example: 192.168.1.1/32 or 192.168.1.1/32,192.168.1.2/32"
+            'message'] = "Peer Remote Endpoint format is incorrect. It can only be a valid IP address or valid domain (without http:// or https://). "
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
 
-    config.set("Peers", "peer_endpoint_allowed_ip", ','.join(cleanIpWithRange(ip)))
-    config.set("Peers", "peer_global_DNS", request.form['peer_global_DNS'])
+    config.set("Peers", "remote_endpoint", request.form['peer_remote_endpoint'])
+    config.set("Peers", "peer_keep_alive", request.form['peer_keep_alive'])
+    config.set("Peers", "peer_mtu", request.form['peer_mtu'])
+    config.set("Peers", "peer_endpoint_allowed_ip", ','.join(clean_IP_with_range(ip)))
+    config.set("Peers", "peer_global_DNS", DNS)
+
+
     try:
         config.write(open(dashboard_conf, "w"))
-        session['message'] = "DNS and Enpoint Allowed IP update successfully!"
+        session['message'] = "Peer Default Settings update successfully!"
         session['message_status'] = "success"
         config.clear()
         return redirect(url_for("settings"))
     except Exception:
-        session['message'] = "DNS and Enpoint Allowed IP update failed."
+        session['message'] = "Peer Default Settings update failed."
         session['message_status'] = "danger"
         config.clear()
         return redirect(url_for("settings"))
 
-
+# Update dashboard password
 @app.route('/update_pwd', methods=['POST'])
 def update_pwd():
     config = configparser.ConfigParser(strict=False)
@@ -578,7 +682,7 @@ def update_pwd():
         config.clear()
         return redirect(url_for("settings"))
 
-
+# Update dashboard IP and port
 @app.route('/update_app_ip_port', methods=['POST'])
 def update_app_ip_port():
     config = configparser.ConfigParser(strict=False)
@@ -589,7 +693,7 @@ def update_app_ip_port():
     config.clear()
     os.system('bash wgd.sh restart')
 
-
+# Update WireGuard configuration file path
 @app.route('/update_wg_conf_path', methods=['POST'])
 def update_wg_conf_path():
     config = configparser.ConfigParser(strict=False)
@@ -601,7 +705,10 @@ def update_wg_conf_path():
     config.clear()
     os.system('bash wgd.sh restart')
 
-
+"""
+Configuration Page Related
+"""
+# Update configuration sorting
 @app.route('/update_dashboard_sort', methods=['POST'])
 def update_dashbaord_sort():
     config = configparser.ConfigParser(strict=False)
@@ -616,7 +723,7 @@ def update_dashbaord_sort():
     config.clear()
     return "true"
 
-
+# Update configuration refresh interval
 @app.route('/update_dashboard_refresh_interval', methods=['POST'])
 def update_dashboard_refresh_interval():
     config = configparser.ConfigParser(strict=False)
@@ -626,71 +733,7 @@ def update_dashboard_refresh_interval():
     config.clear()
     return "true"
 
-
-@app.route('/get_ping_ip', methods=['POST'])
-def get_ping_ip():
-    config = request.form['config']
-    db = TinyDB('db/' + config + '.json')
-    html = ""
-    for i in db.all():
-        html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
-        allowed_ip = str(i['allowed_ip']).split(",")
-        for k in allowed_ip:
-            k = k.split("/")
-            if len(k) == 2:
-                html += "<option value=" + k[0] + ">" + k[0] + "</option>"
-        endpoint = str(i['endpoint']).split(":")
-        if len(endpoint) == 2:
-            html += "<option value=" + endpoint[0] + ">" + endpoint[0] + "</option>"
-        html += "</optgroup>"
-    return html
-
-
-@app.route('/ping_ip', methods=['POST'])
-def ping_ip():
-    try:
-        result = ping('' + request.form['ip'] + '', count=int(request.form['count']), privileged=True, source=None)
-        returnjson = {
-            "address": result.address,
-            "is_alive": result.is_alive,
-            "min_rtt": result.min_rtt,
-            "avg_rtt": result.avg_rtt,
-            "max_rtt": result.max_rtt,
-            "package_sent": result.packets_sent,
-            "package_received": result.packets_received,
-            "package_loss": result.packet_loss
-        }
-        if returnjson['package_loss'] == 1.0:
-            returnjson['package_loss'] = returnjson['package_sent']
-
-
-        return jsonify(returnjson)
-    except Exception:
-        return "Error"
-
-
-@app.route('/traceroute_ip', methods=['POST'])
-def traceroute_ip():
-    try:
-        result = traceroute('' + request.form['ip'] + '', first_hop=1, max_hops=30, count=1, fast=True)
-        returnjson = []
-        last_distance = 0
-        for hop in result:
-            if last_distance + 1 != hop.distance:
-                returnjson.append({"hop": "*", "ip": "*", "avg_rtt": "", "min_rtt": "", "max_rtt": ""})
-            returnjson.append({"hop": hop.distance, "ip": hop.address, "avg_rtt": hop.avg_rtt, "min_rtt": hop.min_rtt,
-                               "max_rtt": hop.max_rtt})
-            last_distance = hop.distance
-        return jsonify(returnjson)
-    except Exception:
-        return "Error"
-
-
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html', conf=get_conf_list())
-
-
+# Configuration Page
 @app.route('/configuration/<config_name>', methods=['GET'])
 def conf(config_name):
     config = configparser.ConfigParser(strict=False)
@@ -712,19 +755,26 @@ def conf(config_name):
     return render_template('configuration.html', conf=get_conf_list(), conf_data=conf_data,
                            dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")),
                            DNS=config.get("Peers", "peer_global_DNS"),
-                           endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"), title=config_name)
+                           endpoint_allowed_ip=config.get("Peers", "peer_endpoint_allowed_ip"),
+                           title=config_name,
+                           mtu=config.get("Peers","peer_MTU"),
+                           keep_alive=config.get("Peers","peer_keep_alive"))
 
-
+# Get configuration details
 @app.route('/get_config/<config_name>', methods=['GET'])
 def get_conf(config_name):
     config_interface = read_conf_file_interface(config_name)
-
     search = request.args.get('search')
     if len(search) == 0: search = ""
     search = urllib.parse.unquote(search)
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
     sort = config.get("Server", "dashboard_sort")
+    peer_display_mode = config.get("Peers", "peer_display_mode")
+    if "Address" not in config_interface.keys():
+        conf_address = "N/A"
+    else:
+        conf_address = config_interface['Address']
     conf_data = {
         "peer_data": get_peers(config_name, search, sort),
         "name": config_name,
@@ -733,16 +783,17 @@ def get_conf(config_name):
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
         "running_peer": get_conf_running_peer_number(config_name),
-        "conf_address": config_interface['Address']
+        "conf_address": conf_address
     }
     if conf_data['status'] == "stopped":
         conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-    return render_template('get_conf.html', conf_data=conf_data, wg_ip=wg_ip, sort_tag=sort,
-                           dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")))
+    print(config.get("Peers","remote_endpoint"))
+    return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
+                           dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
 
-
+# Turn on / off a configuration
 @app.route('/switch/<config_name>', methods=['GET'])
 def switch(config_name):
     if "username" not in session:
@@ -762,7 +813,7 @@ def switch(config_name):
 
     return redirect(request.referrer)
 
-
+# Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
     db = TinyDB("db/" + config_name + ".json")
@@ -781,28 +832,36 @@ def add_peer(config_name):
         return "Public key already exist."
     if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
         return "Allowed IP already taken by another peer."
-    if not checkIp(DNS):
+    if not check_DNS(DNS):
         return "DNS formate is incorrect. Example: 1.1.1.1"
-    if not checkAllowedIPs(endpoint_allowed_ip):
+    if not check_Allowed_IPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
-    else:
-        status = ""
+    if len(data['MTU']) != 0:
         try:
-            status = subprocess.check_output(
-                "wg set " + config_name + " peer " + public_key + " allowed-ips " + allowed_ips, shell=True,
-                stderr=subprocess.STDOUT)
-            status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
-            get_all_peers_data(config_name)
-            db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'],
-                       "endpoint_allowed_ip": endpoint_allowed_ip},
-                      peers.id == public_key)
-            db.close()
-            return "true"
-        except subprocess.CalledProcessError as exc:
-            db.close()
-            return exc.output.strip()
+            mtu = int(data['MTU'])
+        except:
+            return "MTU format is not correct."
+    if len(data['keep_alive']) != 0:
+        try:
+            keep_alive = int(data['keep_alive'])
+        except:
+            return "Persistent Keepalive format is not correct."
+    try:
+        status = subprocess.check_output(
+            "wg set " + config_name + " peer " + public_key + " allowed-ips " + allowed_ips, shell=True,
+            stderr=subprocess.STDOUT)
+        status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
+        get_all_peers_data(config_name)
+        db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'],
+                   "endpoint_allowed_ip": endpoint_allowed_ip},
+                  peers.id == public_key)
+        db.close()
+        return "true"
+    except subprocess.CalledProcessError as exc:
+        db.close()
+        return exc.output.strip()
 
-
+# Remove peer
 @app.route('/remove_peer/<config_name>', methods=['POST'])
 def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
@@ -828,7 +887,7 @@ def remove_peer(config_name):
         except subprocess.CalledProcessError as exc:
             return exc.output.strip()
 
-
+# Save peer settings
 @app.route('/save_peer_setting/<config_name>', methods=['POST'])
 def save_peer_setting(config_name):
     data = request.get_json()
@@ -841,11 +900,21 @@ def save_peer_setting(config_name):
     db = TinyDB("db/" + config_name + ".json")
     peers = Query()
     if len(db.search(peers.id == id)) == 1:
-        check_ip = checkAllowedIP(id, allowed_ip, config_name)
-        if not checkIpWithRange(endpoint_allowed_ip):
+        check_ip = check_repeat_allowed_IP(id, allowed_ip, config_name)
+        if not check_IP_with_range(endpoint_allowed_ip):
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
-        if not checkIp(DNS):
+        if not check_DNS(DNS):
             return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
+        if len(data['MTU']) != 0:
+            try:
+                mtu = int(data['MTU'])
+            except:
+                return jsonify({"status": "failed", "msg": "MTU format is not correct."})
+        if len(data['keep_alive']) != 0:
+            try:
+                keep_alive = int(data['keep_alive'])
+            except:
+                return jsonify({"status": "failed", "msg": "Persistent Keepalive format is not correct."})
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
             if check_key['status'] == "failed":
@@ -861,7 +930,10 @@ def save_peer_setting(config_name):
             if change_ip.decode("UTF-8") != "":
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
             db.update(
-                {"name": name, "private_key": private_key, "DNS": DNS, "endpoint_allowed_ip": endpoint_allowed_ip},
+                {"name": name, "private_key": private_key,
+                 "DNS": DNS, "endpoint_allowed_ip": endpoint_allowed_ip,
+                 "mtu": data['MTU'],
+                 "keepalive":data['keep_alive']},
                 peers.id == id)
             db.close()
             return jsonify({"status": "success", "msg": ""})
@@ -870,7 +942,7 @@ def save_peer_setting(config_name):
     else:
         return jsonify({"status": "failed", "msg": "This peer does not exist."})
 
-
+# Get peer settings
 @app.route('/get_peer_data/<config_name>', methods=['POST'])
 def get_peer_name(config_name):
     data = request.get_json()
@@ -880,22 +952,23 @@ def get_peer_name(config_name):
     result = db.search(peers.id == id)
     db.close()
     data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'],
-            "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip']}
+            "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip'],
+            "mtu": result[0]['mtu'], "keep_alive": result[0]['keepalive']}
     return jsonify(data)
 
-
+# Generate a private key
 @app.route('/generate_peer', methods=['GET'])
 def generate_peer():
-    return jsonify(genKeys())
+    return jsonify(gen_private_key())
 
-
+# Generate a public key from a private key
 @app.route('/generate_public_key', methods=['POST'])
 def generate_public_key():
     data = request.get_json()
     private_key = data['private_key']
-    return jsonify(genPubKey(private_key))
+    return jsonify(gen_public_key(private_key))
 
-
+# Check if both key match
 @app.route('/check_key_match/<config_name>', methods=['POST'])
 def check_key_match(config_name):
     data = request.get_json()
@@ -903,23 +976,21 @@ def check_key_match(config_name):
     public_key = data['public_key']
     return jsonify(checkKeyMatch(private_key, public_key, config_name))
 
-
+# Download configuration file
 @app.route('/download/<config_name>', methods=['GET'])
 def download(config_name):
     print(request.headers.get('User-Agent'))
-
     id = request.args.get('id')
     db = TinyDB("db/" + config_name + ".json")
     peers = Query()
-    print(id)
     get_peer = db.search(peers.id == id)
-    print(get_peer)
+    config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
         if peer['private_key'] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
-            endpoint = wg_ip + ":" + listen_port
+            endpoint = config.get("Peers","remote_endpoint") + ":" + listen_port
             private_key = peer['private_key']
             allowed_ip = peer['allowed_ip']
             DNS = peer['DNS']
@@ -935,7 +1006,6 @@ def download(config_name):
                                     "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
                 for i in illegal_filename:
                     filename = filename.replace(i, "")
-                print(filename)
                 if len(filename) == 0:
                     filename = "Untitled_Peer"
                 filename = "".join(filename.split(' '))
@@ -950,20 +1020,97 @@ def download(config_name):
     else:
         return redirect("/configuration/" + config_name)
 
+# Switch peer displate mode
+@app.route('/switch_display_mode/<mode>', methods=['GET'])
+def switch_display_mode(mode):
+    if mode in ['list','grid']:
+        config.read(dashboard_conf)
+        config.set("Peers", "peer_display_mode", mode)
+        config.write(open(dashboard_conf, "w"))
+        return "true"
+    else:
+        return "false"
 
+
+"""
+Dashboard Tools Related
+"""
+# Get all IP for ping
+@app.route('/get_ping_ip', methods=['POST'])
+def get_ping_ip():
+    config = request.form['config']
+    db = TinyDB('db/' + config + '.json')
+    html = ""
+    for i in db.all():
+        html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
+        allowed_ip = str(i['allowed_ip']).split(",")
+        for k in allowed_ip:
+            k = k.split("/")
+            if len(k) == 2:
+                html += "<option value=" + k[0] + ">" + k[0] + "</option>"
+        endpoint = str(i['endpoint']).split(":")
+        if len(endpoint) == 2:
+            html += "<option value=" + endpoint[0] + ">" + endpoint[0] + "</option>"
+        html += "</optgroup>"
+    return html
+
+# Ping IP
+@app.route('/ping_ip', methods=['POST'])
+def ping_ip():
+    try:
+        result = ping('' + request.form['ip'] + '', count=int(request.form['count']), privileged=True, source=None)
+        returnjson = {
+            "address": result.address,
+            "is_alive": result.is_alive,
+            "min_rtt": result.min_rtt,
+            "avg_rtt": result.avg_rtt,
+            "max_rtt": result.max_rtt,
+            "package_sent": result.packets_sent,
+            "package_received": result.packets_received,
+            "package_loss": result.packet_loss
+        }
+        if returnjson['package_loss'] == 1.0:
+            returnjson['package_loss'] = returnjson['package_sent']
+
+
+        return jsonify(returnjson)
+    except Exception:
+        return "Error"
+
+# Traceroute IP
+@app.route('/traceroute_ip', methods=['POST'])
+def traceroute_ip():
+    try:
+        result = traceroute('' + request.form['ip'] + '', first_hop=1, max_hops=30, count=1, fast=True)
+        returnjson = []
+        last_distance = 0
+        for hop in result:
+            if last_distance + 1 != hop.distance:
+                returnjson.append({"hop": "*", "ip": "*", "avg_rtt": "", "min_rtt": "", "max_rtt": ""})
+            returnjson.append({"hop": hop.distance, "ip": hop.address, "avg_rtt": hop.avg_rtt, "min_rtt": hop.min_rtt,
+                               "max_rtt": hop.max_rtt})
+            last_distance = hop.distance
+        return jsonify(returnjson)
+    except Exception:
+        return "Error"
+
+"""
+Dashboard Initialization
+"""
 def init_dashboard():
     # Set Default INI File
     if not os.path.isfile("wg-dashboard.ini"):
         conf_file = open("wg-dashboard.ini", "w+")
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
-
+    # Defualt dashboard account setting
     if "Account" not in config:
         config['Account'] = {}
     if "username" not in config['Account']:
         config['Account']['username'] = 'admin'
     if "password" not in config['Account']:
         config['Account']['password'] = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
+    # Defualt dashboard server setting
     if "Server" not in config:
         config['Server'] = {}
     if 'wg_conf_path' not in config['Server']:
@@ -977,19 +1124,30 @@ def init_dashboard():
     if 'version' not in config['Server'] or config['Server']['version'] != dashboard_version:
         config['Server']['version'] = dashboard_version
     if 'dashboard_refresh_interval' not in config['Server']:
-        config['Server']['dashboard_refresh_interval'] = '15000'
+        config['Server']['dashboard_refresh_interval'] = '60000'
     if 'dashboard_sort' not in config['Server']:
         config['Server']['dashboard_sort'] = 'status'
+    # Defualt dashboard peers setting
     if "Peers" not in config:
         config['Peers'] = {}
     if 'peer_global_DNS' not in config['Peers']:
         config['Peers']['peer_global_DNS'] = '1.1.1.1'
     if 'peer_endpoint_allowed_ip' not in config['Peers']:
         config['Peers']['peer_endpoint_allowed_ip'] = '0.0.0.0/0'
+    if 'peer_display_mode' not in config['Peers']:
+        config['Peers']['peer_display_mode'] = 'grid'
+    if 'remote_endpoint' not in config['Peers']:
+        config['Peers']['remote_endpoint'] = ifcfg.default_interface()['inet']
+    if 'peer_MTU' not in config['Peers']:
+        config['Peers']['peer_MTU'] = "1420"
+    if 'peer_keep_alive' not in config['Peers']:
+        config['Peers']['peer_keep_alive'] = "21"
     config.write(open(dashboard_conf, "w"))
     config.clear()
 
-
+"""
+Dashboard check update
+"""
 def check_update():
     conf = configparser.ConfigParser(strict=False)
     conf.read(dashboard_conf)
