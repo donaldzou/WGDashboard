@@ -441,7 +441,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/antonioag95"><img src="https://avatars.githubusercontent.com/u/30556866?v=4?s=100" width="100px;" alt=""/><br /><sub><b>antonioag95</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=antonioag95" title="Tests">⚠️</a> <a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=antonioag95" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/tonjo"><img src="https://avatars.githubusercontent.com/u/4726289?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tonjo</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=tonjo" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/reafian"><img src="https://avatars.githubusercontent.com/u/11992416?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Newton</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=reafian" title="Code">💻</a></td>
-    <td align="center"><a href="http://www.davejlong.com"><img src="https://avatars.githubusercontent.com/u/175317?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Long</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=davejlong" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/davejlong"><img src="https://avatars.githubusercontent.com/u/175317?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Long</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=davejlong" title="Code">💻</a></td>
   </tr>
 </table>
 
