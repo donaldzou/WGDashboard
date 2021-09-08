@@ -100,7 +100,7 @@
 1. **Download Wireguard Dashboard**
 
    ```shell
-   git clone -b v2.2.1 https://github.com/donaldzou/wireguard-dashboard.git
+   git clone -b v2.3 https://github.com/donaldzou/wireguard-dashboard.git
    
 2. Open the Wireguard Dashboard folder
 
