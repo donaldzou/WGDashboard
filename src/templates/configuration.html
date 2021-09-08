@@ -11,11 +11,7 @@
                 <input type="text" class="form-control" id="search_peer_textbox" placeholder="Search Peer..." value="" style="display: none">
             </div>
         </div>
-
-
-		<div id="config_body">
-
-        </div>
+		<div id="config_body"></div>
 	</div>
 	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -44,9 +40,7 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="private_key" aria-describedby="public_key">
                                 <div class="input-group-append">
-                                   <button type="button" class="btn btn-danger" id="re_generate_key">
-                                       <i class="bi bi-arrow-repeat"></i>
-                                   </button>
+                                   <button type="button" class="btn btn-danger" id="re_generate_key"><i class="bi bi-arrow-repeat"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -73,11 +67,22 @@
                                     <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
-
                             <div class="col-sm-6">
                                  <div class="form-group">
                                     <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="new_add_endpoint_allowed_ip" value="{{ endpoint_allowed_ip }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                 <div class="form-group">
+                                    <label for="new_add_MTU">MTU</label>
+                                    <input type="text" class="form-control" id="new_add_MTU" value="{{ mtu }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                 <div class="form-group">
+                                    <label for="new_add_keep_alive">Persistent keepalive</label>
+                                    <input type="text" class="form-control" id="new_add_keep_alive" value="{{ keep_alive }}">
                                 </div>
                             </div>
                         </div>
@@ -132,29 +137,51 @@
 						  <span aria-hidden="true">&times;</span>
 						</button>
 					</div>
-                    <div class="mb-3">
-                      <label for="peer_name_textbox" class="form-label">Name</label>
-                      <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
-                    </div>
-                    <div class="mb-3">
+                    <div>
                       <label for="peer_private_key_textbox" class="form-label">Private Key <code>(Required for QR Code and download)</code></label>
                       <input type="password" class="form-control" id="peer_private_key_textbox" style="padding-right: 40px">
                       <a class="peer_private_key_textbox_switch"><i class="bi bi-eye-fill"></i></a>
                     </div>
-                    <div class="mb-3">
-                      <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs <code>(Required)</code></label>
-                      <input type="text" class="form-control" id="peer_allowed_ip_textbox">
+                    <hr>
 
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_name_textbox" class="form-label">Name</label>
+                              <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs <code>(Required)</code></label>
+                              <input type="text" class="form-control" id="peer_allowed_ip_textbox">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
+                              <input type="text" class="form-control" id="peer_DNS_textbox">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>
+                              <input type="text" class="form-control" id="peer_endpoint_allowed_ips">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_mtu" class="form-label">MTU</label>
+                              <input type="text" class="form-control" id="peer_mtu">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                              <label for="peer_keep_alive" class="form-label">Persistent Keepalive</label>
+                              <input type="text" class="form-control" id="peer_keep_alive">
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                      <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
-                      <input type="text" class="form-control" id="peer_DNS_textbox">
-                    </div>
-                    <div class="mb-3">
-                      <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>
-                      <input type="text" class="form-control" id="peer_endpoint_allowed_ips">
-                    </div>
-
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -223,9 +250,6 @@
         },250)
 
     }
-
-
-
 	function load_data(search){
         startProgressBar()
 		$.ajax({
@@ -237,9 +261,7 @@
 			success: function (response){
 				$("#config_body").html(response);
                 $("#search_peer_textbox").css("display", "block")
-                if (bar.css("width") !== "0%"){
-                    endProgressBar()
-                }
+                endProgressBar()
 			}
 		})
 	}
@@ -249,8 +271,6 @@
 			load_data($('#search_peer_textbox').val());
 		}, {{dashboard_refresh_interval}})
 	});
-
-
 </script>
 <script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 </html>	

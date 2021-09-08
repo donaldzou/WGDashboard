@@ -1,9 +1,19 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
 	<div class="info mt-4">
+        {% if conf_data['listen_port'] == "" and conf_data['status'] == "stopped" %}
+            <div class="alert alert-warning" role="alert">
+                Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.
+            </div>
+        {% endif %}
+        {% if conf_data['conf_address'] == "N/A" %}
+            <div class="alert alert-warning" role="alert">
+                Configuration <strong>Address</strong> not be specified to have peer connect to it.
+            </div>
+        {% endif %}
 		<div class="row">
 			<div class="col">
 				<small class="text-muted"><strong>CONFIGURATION</strong></small>
-				<h1 class="mb-3">{{conf_data['name']}}</h1>
+				<h1 class="mb-3"><samp>{{conf_data['name']}}</samp></h1>
 			</div>
 			<div class="col">
 				<small class="text-muted"><strong>ACTION</strong></small><br>
@@ -47,7 +57,14 @@
 			</div>
 			<div class="col-sm">
 				<small class="text-muted"><strong>LISTEN PORT</strong></small>
-				<h6 style="text-transform: uppercase;"><samp>{{conf_data['listen_port']}}</samp></h6>
+				<h6 style="text-transform: uppercase;"><samp>
+                    {% if conf_data['listen_port'] == "" %}
+                        N/A
+                    {% else %}
+                        {{conf_data['listen_port']}}
+                    {% endif %}
+
+                </samp></h6>
 			</div>
             <div class="col-sm">
 				<small class="text-muted"><strong>ADDRESS</strong></small>
@@ -88,20 +105,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm">
-                    <div class="form-group">
-                        <label><small class="text-muted">Add</small></label><br>
-                        <button type="button" class="btn btn-primary add_btn" data-toggle="modal" data-target="#add_modal" style="width: 100%">
-                            <i class="bi bi-plus-circle-fill"></i> Add Peer
-                        </button>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-primary add_btn" data-toggle="modal" data-target="#add_modal">
+                    <i class="bi bi-plus-circle-fill" style=""></i> Add Peer
+                </button>
             </div>
             <hr>
 		</div>
 	</div>
 
-    <div class="row">
+    <div class="row peer_list">
         {% if conf_data['peer_data']|length == 0 %}
             <div class="col-12" style="text-align: center; margin-top: 1.5rem">
                 <h3 class="text-muted">Oops! No peers found ‘︿’</h3>
@@ -112,29 +124,34 @@
             {% if peer_display_mode == "list" %}
                 <div class="col-12">
             {% else %}
-                <div class="col-sm-6 col-md-4">
+                <div class="col-sm-6 col-lg-4">
             {% endif %}
                 <div class="card mb-3">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col">
                             <div class="card-header-body ">
                                 {% if not i['name']%}
-                                    {{ "Untitled Peer" }}
+                                    {{ "Untitled" }}
                                 {% else %}
                                     {{i['name']}}
                                 {% endif %}
-                                <span class="dot dot-{{i['status']}}"></span>
+{#                                <span class="dot dot-{{i['status']}}"></span>#}
                             </div>
-                        </div>
-                        <div class="col-12 peer_data_group">
-                            <p class="text-primary" style="text-transform: uppercase; display: inline-block; margin-bottom: 0; margin-right: 1rem"><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</p>
-                            <p class="text-success" style="text-transform: uppercase;  display: inline-block; margin-bottom: 0"><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</p>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted"><strong>STATUS</strong></small>
+                            <h6 style="text-transform: uppercase;" class="mb-2"><span class="dot dot-{{i['status']}}" style="margin-left: 0 !important;margin-top: 5px"></span></h6>
+                        </div>
+                        <div class="col-6 peer_data_group" style="text-align: right">
+                            <small class="text-muted"><strong>TRANSFER</strong></small>
+                            <p class="text-primary" style="text-transform: uppercase; margin-bottom: 0;"><small><i class="bi bi-arrow-down-right"></i> {{i['total_receive']}} GB</small></p>
+                            <p class="text-success" style="text-transform: uppercase; margin-bottom: 0"><small><i class="bi bi-arrow-up-right"></i> {{i['total_sent']}} GB</small></p>
+                        </div>
                         <div class="col-sm">
                             <small class="text-muted" style="display: flex">
                                 <strong>PEER</strong>

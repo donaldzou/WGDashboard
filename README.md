@@ -4,9 +4,9 @@
 
 
 <p align="center">
-  <img src="img/logo.png" width="128">
+  <img alt="Wireguard Dashboard Logo" src="img/logo.png" width="128">
 </p>
-<h1 align="center"> Wireguard Dashboard</h1>
+<h1 align="center">Wireguard Dashboard</h1>
 
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
@@ -23,10 +23,13 @@
   - **Update directly from `wgd.sh`:** Now you can update Wireguard Dashboard directly from the bash script.
   - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
 - 🪚  **Bug Fixed**
-  - [Peer DNS Validation Fails #67](https://github.com/donaldzou/wireguard-dashboard/issues/67): Added DNS format check
-  - [configparser.NoSectionError: No section: 'Interface' #66](https://github.com/donaldzou/wireguard-dashboard/issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`
-
+  - [Peer DNS Validation Fails #67](https://github.com/donaldzou/wireguard-dashboard/issues/67): Added DNS format check. [❤️ @realfian]
+  - [configparser.NoSectionError: No section: 'Interface' #66](https://github.com/donaldzou/wireguard-dashboard/issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
+  - [Feature request: Interface not loading when information missing #73](https://github.com/donaldzou/wireguard-dashboard/issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
+  - [Remote Peer, MTU and PersistentKeepalives added #70](https://github.com/donaldzou/wireguard-dashboard/pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
+  - [Fixes DNS check to support search domain #65](https://github.com/donaldzou/wireguard-dashboard/pull/65): Added allow input domain into DNS. [❤️@davejlong]
 - **🧐  Other Changes**
+  - Moved Add Peer Button into the right bottom corner.
 
 
 

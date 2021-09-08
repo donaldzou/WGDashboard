@@ -19,7 +19,7 @@
                 </h6>
                 <ul class="nav flex-column">
                     {% for i in conf%}
-                        <li class="nav-item"><a class="nav-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}">{{i['conf']}}</a></li>
+                        <li class="nav-item"><a class="nav-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}"><samp>{{i['conf']}}</samp></a></li>
                     {%endfor%}
                 </ul>
                 <hr>

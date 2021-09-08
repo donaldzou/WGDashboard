@@ -5,17 +5,19 @@ app_official_name="Wireguard Dashboard"
 dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
-  printf "<Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou \n"
-  printf "Usage: ./wgd.sh <option>"
-  printf "\n \n"
-  printf "Available options: \n"
-  printf "    start: To start "app_official_name".\n"
-  printf "    stop: To stop "app_official_name".\n"
-  printf "    debug: To start "app_official_name" in debug mode (i.e run in foreground).\n"
-  printf "    update: To update "app_official_name" to the newest version from GitHub.\n"
-  printf "    install: To install "app_official_name".\n"
-  printf "Thank you for using! Your support is my motivation ;) \n"
-  printf "\n"
+  printf "=================================================================================\n"
+  printf "+ <Wireguard Dashboard> by Donald Zou - https://github.com/donaldzou            +\n"
+  printf "=================================================================================\n"
+  printf "| Usage: ./wgd.sh <option>                                                      |\n"
+  printf "|                                                                               |\n"
+  printf "| Available options:                                                            |\n"
+  printf "|    start: To start Wireguard Dashboard                                        |\n"
+  printf "|    stop: To stop Wireguard Dashboard.                                         |\n"
+  printf "|    debug: To start Wireguard Dashboard in debug mode (i.e run in foreground). |\n"
+  printf "|    update: To update Wireguard Dashboard to the newest version from GitHub.   |\n"
+  printf "|    install: To install Wireguard Dashboard.                                   |\n"
+  printf "| Thank you for using! Your support is my motivation ;)                         |\n"
+  printf "=================================================================================\n"
 }
 
 install_wgd(){
@@ -122,9 +124,10 @@ if [ "$#" != 1 ];
         install_wgd
       elif [ "$1" = "restart" ]; then
          if check_wgd_status; then
+           printf "%s\n" "$dashes"
            stop_wgd
-           sleep 2
            printf "| Wireguard Dashboard is stopped.                          |\n"
+           sleep 2
            start_wgd
         else
           start_wgd
