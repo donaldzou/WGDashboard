@@ -32,6 +32,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "davejlong",
+      "name": "David Long",
+      "avatar_url": "https://avatars.githubusercontent.com/u/175317?v=4",
+      "profile": "http://www.davejlong.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
