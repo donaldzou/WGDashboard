@@ -17,7 +17,7 @@
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
 
-## 📣 What's New: Version v2.3
+## 📣 What's New: v2.3
 
 - 🎉  **New Features**
   - **Update directly from `wgd.sh`:** Now you can update Wireguard Dashboard directly from the bash script.
