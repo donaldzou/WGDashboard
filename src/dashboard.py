@@ -1,5 +1,5 @@
 """
-< Wireguard Dashbaord > - by Donald Zou [https://github.com/donaldzou]
+< WGDashboard > - by Donald Zou [https://github.com/donaldzou]
 Under Apache-2.0 License
 """
 
@@ -28,7 +28,7 @@ dashboard_conf = 'wg-dashboard.ini'
 # Upgrade Required
 update = ""
 # Flask App Configuration
-app = Flask("Wireguard Dashboard")
+app = Flask("WGDashboard")
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator

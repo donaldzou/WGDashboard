@@ -4,9 +4,10 @@
 
 
 <p align="center">
-  <img alt="Wireguard Dashboard Logo" src="img/logo.png" width="128">
+  <img alt="WGDashboard" src="img/logo.png" width="128">
 </p>
-<h1 align="center">Wireguard Dashboard</h1>
+<h1 align="center">WGDashboard</h1>
+<p align="center"><small>Originally: Wireguard Dashboard</small></p>
 
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
@@ -16,11 +17,10 @@
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 
-
 ## 📣 What's New: v2.3
 
 - 🎉  **New Features**
-  - **Update directly from `wgd.sh`:** Now you can update Wireguard Dashboard directly from the bash script.
+  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
   - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
 - 🪚  **Bug Fixed**
   - [Peer DNS Validation Fails #67](https://github.com/donaldzou/wireguard-dashboard/issues/67): Added DNS format check. [❤️ @realfian]
@@ -42,8 +42,8 @@
 - [📝  Requirement](#-requirement)
 - [🛠  Install](#-install)
 - [🪜  Usage](#-usage)
-  - [Start/Stop/Restart Wireguard Dashboard](#startstoprestart-wireguard-dashboard)
-  - [Autostart Wireguard Dashboard on boot](#autostart-wireguard-dashboard-on-boot)
+  - [Start/Stop/Restart WGDashboard](#startstoprestart-wireguard-dashboard)
+  - [Autostart WGDashboard on boot](#autostart-wireguard-dashboard-on-boot)
 - [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
@@ -74,7 +74,7 @@
 
   > **If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!**
 
-- **WireGuard** and **Wireguard-Tools (`wg-quick`)**  are installed.
+- **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
 
   > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
 
@@ -97,18 +97,18 @@
 - Python 3.7+ & Pip3
 
 ## 🛠 Install
-1. **Download Wireguard Dashboard**
+1. Download WGDashboard
 
    ```shell
    git clone -b v2.3 https://github.com/donaldzou/wireguard-dashboard.git
    
-2. Open the Wireguard Dashboard folder
+2. Open the WGDashboard folder
 
    ```shell
    cd wireguard-dashboard/src
    ```
    
-3. Install Wireguard Dashboard
+3. Install WGDashboard
 
    ```shell
    sudo chmod u+x wgd.sh
@@ -121,7 +121,7 @@
    sudo chmod -R 755 /etc/wireguard
    ```
 
-5. Run Wireguard Dashboard
+5. Run WGDashboard
 
    ```shell
    ./wgd.sh start
@@ -137,7 +137,7 @@
 
 ## 🪜 Usage
 
-#### Start/Stop/Restart Wireguard Dashboard
+#### Start/Stop/Restart WGDashboard
 
 
 ```shell
@@ -152,7 +152,7 @@ cd Wireguard-Dashboard/src
 ./wgd.sh restart  # Restart the dasboard
 ```
 
-#### Autostart Wireguard Dashboard on boot (>= v2.2)
+#### Autostart WGDashboard on boot (>= v2.2)
 
 In the `src` folder, it contained a file called `wg-dashboard.service`, we can use this file to let our system to autostart the dashboard after reboot. The following guide has tested on **Ubuntu**, most **Debian** based OS might be the same, but some might not. Please don't hesitate to provide your system if you have tested the autostart on another system.
 
@@ -247,7 +247,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
                 └─6602 /usr/bin/python3 /root/wireguard-dashboard/src/dashboard.py
    
    Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "Wireguard Dashboard" (lazy loading)
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "WGDashboard" (lazy loading)
    Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Environment: production
    Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
    Aug 03 22:31:27 ubuntu-wg python3[6602]:    Use a production WSGI server instead.
@@ -273,7 +273,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
 #### Dashboard Configuration file
 
-Since version 2.0, Wireguard Dashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
+Since version 2.0, WGDashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
 
 |                 | Description                                                  | Default                  | Available in Setting |
 | --------------- | ------------------------------------------------------------ | ------------------------ | -------------------- |
@@ -287,8 +287,6 @@ Since version 2.0, Wireguard Dashboard will be using a configuration file called
 | `auth_req`      | Does the dashboard need authentication to access             | `true`                   | No                   |
 |                 | If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. |                          |                      |
 | `version`       | Dashboard Version                                            | `v2.2`                   | No                   |
-
-<p align=center>Latest Version: v2.2</p>
 
 **Except `auth_req` due to security consideration.**
 
