@@ -43,7 +43,7 @@
 - [🛠  Install](#-install)
 - [🪜  Usage](#-usage)
   - [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
-  - [Autostart WGDashboard on boot](#autostart-wgdashboard-on-boot)
+  - [Autostart WGDashboard on boot](#autostart-wgdashboard-on-boot--v22)
 - [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
