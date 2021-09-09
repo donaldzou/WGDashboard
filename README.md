@@ -100,7 +100,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v2.3 https://github.com/donaldzou/wireguard-dashboard.git
+   git clone -b v2.3.1 https://github.com/donaldzou/wireguard-dashboard.git
    
 2. Open the WGDashboard folder
 
