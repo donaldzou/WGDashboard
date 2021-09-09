@@ -22,7 +22,7 @@ from flask_qrcode import QRcode
 from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 # Dashboard Version
-dashboard_version = 'v2.3'
+dashboard_version = 'v2.3.1'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Upgrade Required
