@@ -23,11 +23,11 @@
   - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
   - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
 - 🪚  **Bug Fixed**
-  - [Peer DNS Validation Fails #67](https://github.com/donaldzou/wireguard-dashboard/issues/67): Added DNS format check. [❤️ @realfian]
-  - [configparser.NoSectionError: No section: 'Interface' #66](https://github.com/donaldzou/wireguard-dashboard/issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
-  - [Feature request: Interface not loading when information missing #73](https://github.com/donaldzou/wireguard-dashboard/issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
-  - [Remote Peer, MTU and PersistentKeepalives added #70](https://github.com/donaldzou/wireguard-dashboard/pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
-  - [Fixes DNS check to support search domain #65](https://github.com/donaldzou/wireguard-dashboard/pull/65): Added allow input domain into DNS. [❤️@davejlong]
+  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
+  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
+  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
+  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
+  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
 - **🧐  Other Changes**
   - Moved Add Peer Button into the right bottom corner.
 
@@ -42,8 +42,8 @@
 - [📝  Requirement](#-requirement)
 - [🛠  Install](#-install)
 - [🪜  Usage](#-usage)
-  - [Start/Stop/Restart WGDashboard](#startstoprestart-wireguard-dashboard)
-  - [Autostart WGDashboard on boot](#autostart-wireguard-dashboard-on-boot)
+  - [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
+  - [Autostart WGDashboard on boot](#autostart-wgdashboard-on-boot)
 - [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
@@ -100,12 +100,12 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v2.3.1 https://github.com/donaldzou/wireguard-dashboard.git
+   git clone -b v2.3.1 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
    ```shell
-   cd wireguard-dashboard/src
+   cd wgdashboard/src
    ```
    
 3. Install WGDashboard
@@ -141,7 +141,7 @@
 
 
 ```shell
-cd Wireguard-Dashboard/src
+cd wgdashboard/src
 -----------------------------
 ./wgd.sh start    # Start the dashboard in background
 -----------------------------
@@ -159,14 +159,14 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 1. Changing the directory to the dashboard's directory
 
    ```shell
-   cd wireguard-dashboard/src
+   cd wgdashboard/src
    ```
 
 2. Get the full path of the dashboard's directory
 
    ```shell
    pwd
-   #Output: /root/wireguard-dashboard/src
+   #Output: /root/wgdashboard/src
    ```
 
    For this example, the output is `/root/wireguard-dashboard/src`, your path might be different since it depends on where you downloaded the dashboard in the first place. **Copy the the output to somewhere, we will need this in the next step.**
@@ -200,8 +200,8 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    After=netword.service
    
    [Service]
-   WorkingDirectory=/root/wireguard-dashboard/src
-   ExecStart=/usr/bin/python3 /root/wireguard-dashboard/src/dashboard.py
+   WorkingDirectory=/root/wgdashboard/src
+   ExecStart=/usr/bin/python3 /root/wgdashboard/src/dashboard.py
    Restart=always
    
    
@@ -244,7 +244,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
          Tasks: 1 (limit: 453)
         Memory: 26.1M
         CGroup: /system.slice/wg-dashboard.service
-                └─6602 /usr/bin/python3 /root/wireguard-dashboard/src/dashboard.py
+                └─6602 /usr/bin/python3 /root/wgdashboard/src/dashboard.py
    
    Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
    Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "WGDashboard" (lazy loading)

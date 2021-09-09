@@ -1151,7 +1151,7 @@ Dashboard check update
 def check_update():
     conf = configparser.ConfigParser(strict=False)
     conf.read(dashboard_conf)
-    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/wireguard-dashboard/releases").read()
+    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases").read()
     output = json.loads(data)
     release = []
     for i in output:
