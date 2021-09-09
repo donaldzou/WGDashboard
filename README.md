@@ -7,7 +7,7 @@
   <img alt="WGDashboard" src="img/logo.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
-<p align="center"><small>Originally: Wireguard Dashboard</small></p>
+<p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
 
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
