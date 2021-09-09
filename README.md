@@ -181,7 +181,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
    ```ini
    [Unit]
-   After=netword.service
+   After=network.service
    
    [Service]
    WorkingDirectory=<your dashboard directory full path here>
