@@ -133,7 +133,7 @@
 
 6. Access dashboard
 
-   Access your server with port `10086` ! e.g (http://your_server_ip:10086), continue to read to on how to change port and ip that dashboard is running with.
+   Access your server with port `10086` (e.g. http://your_server_ip:10086), using username `admin` and password `admin`. See below how to change port and ip that the dashboard is running with.
 
 ## 🪜 Usage
 
