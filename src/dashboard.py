@@ -46,7 +46,7 @@ def regex_match(regex, text):
 def check_IP(ip):
     ip_patterns = (
         r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}",
-        r"((^|:)([0-9a-fA-F]{0,4})){1,8}$"
+        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}$"
     )
 
     for match_pattern in ip_patterns:
@@ -71,7 +71,7 @@ def clean_IP_with_range(ip):
 def check_IP_with_range(ip):
     ip_patterns = (
         r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)",
-        r"((^|:)([0-9a-fA-F]{0,4})){1,8}\/([0-9]{1,3})(,|$)"
+        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}\/([0-9]{1,3})(,|$)"
     )
 
     for match_pattern in ip_patterns:
