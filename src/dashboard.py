@@ -42,10 +42,22 @@ def regex_match(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
 
-# Check IP format (IPv4 only now)
-# TODO: Add IPv6 support
+# Check IP format
 def check_IP(ip):
-    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", ip)
+    ip_patterns = (
+        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}",
+        r"((^|:)([0-9a-fA-F]{0,4})){1,8}$"
+    )
+
+    for match_pattern in ip_patterns:
+        match_result = regex_match(match_pattern, ip)
+        if match_result:
+            result = match_result
+            break
+    else:
+        result = None
+
+    return result
 
 # Clean IP
 def clean_IP(ip):
@@ -55,10 +67,22 @@ def clean_IP(ip):
 def clean_IP_with_range(ip):
     return clean_IP(ip).split(',')
 
-# Check IP with range (IPv4 only now)
-# TODO: Add IPv6 support
+# Check IP with range
 def check_IP_with_range(ip):
-    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)", ip)
+    ip_patterns = (
+        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)",
+        r"((^|:)([0-9a-fA-F]{0,4})){1,8}\/([0-9]{1,3})(,|$)"
+    )
+
+    for match_pattern in ip_patterns:
+        match_result = regex_match(match_pattern, ip)
+        if match_result:
+            result = match_result
+            break
+    else:
+        result = None
+
+    return result
 
 # Check allowed ips list
 def check_Allowed_IPs(ip):
@@ -76,10 +100,10 @@ def check_DNS(dns):
             return False
     return True
 
-# Check remote endpoint (Both IPv4 address and valid hostname)
-# TODO: Add IPv6 support
+# Check remote endpoint
 def check_remote_endpoint(address):
-    return (regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}", address) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]",address))
+
+    return (check_IP(address) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]", address))
 
 
 """
