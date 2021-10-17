@@ -1139,7 +1139,7 @@ def init_dashboard():
     if 'wg_conf_path' not in config['Server']:
         config['Server']['wg_conf_path'] = '/etc/wireguard'
     if 'app_ip' not in config['Server']:
-        config['Server']['app_ip'] = '0.0.0.0'
+        config['Server']['app_ip'] = '::'
     if 'app_port' not in config['Server']:
         config['Server']['app_port'] = '10086'
     if 'auth_req' not in config['Server']:
