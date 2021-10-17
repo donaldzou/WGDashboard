@@ -2,6 +2,7 @@
 
 app_name="dashboard.py"
 app_official_name="WGDashboard"
+environment=$(if [[ $ENVIRONMENT ]] ; then echo $ENVIRONMENT else echo 'develop')
 dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
@@ -50,15 +51,28 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    printf "%s\n" "$dashes"
-    printf "| Starting WGDashboard in the background.          |\n"
-    if [ ! -d "log" ]
-      then mkdir "log"
+    if [[ $environment == 'production']]; then
+      printf "%s\n" "$dashes"
+      printf "| Starting WGDashboard in the background.          |\n"
+      if [ ! -d "log" ]
+        then mkdir "log"
+      fi
+      d=$(date '+%Y%m%d%H%M%S')
+      /usr/local/bin/gunicorn --access-logfile log/access_"$d".log \
+      --error-logfile log/error_"$d".log 'dashboard.run_dashboard()'
+      printf "| Log files is under log/                                  |\n"
+      printf "%s\n" "$dashes"
+    else
+      printf "%s\n" "$dashes"
+      printf "| Starting WGDashboard in the background.          |\n"
+      if [ ! -d "log" ]
+        then mkdir "log"
+      fi
+      d=$(date '+%Y%m%d%H%M%S')
+      python3 "$app_name" > log/"$d".txt 2>&1 &
+      printf "| Log files is under log/                                  |\n"
+      printf "%s\n" "$dashes"
     fi
-    d=$(date '+%Y%m%d%H%M%S')
-    python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "| Log files is under log/                                  |\n"
-    printf "%s\n" "$dashes"
 }
 
 stop_wgd() {

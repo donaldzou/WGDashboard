@@ -1161,8 +1161,12 @@ def check_update():
     else:
         return "true"
 
-def run_wsgi():
+"""
+Configure DashBoard before start web-server
+"""
+def run_dashboard():
     init_dashboard()
+    update = check_update()
     global config
     config = configparser.ConfigParser(strict=False)
     config.read('wg-dashboard.ini')
@@ -1175,13 +1179,15 @@ def run_wsgi():
     config.clear()
     return app
 
-if __name__ == "__main__":
-    init_dashboard()
-    update = check_update()
-    config = configparser.ConfigParser(strict=False)
-    config.read('wg-dashboard.ini')
+"""
+Get host and port for web-server
+"""
+def get_host_bind():
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
-    wg_conf_path = config.get("Server", "wg_conf_path")
-    config.clear()
+
+    return app_ip, app_port
+
+if __name__ == "__main__":
+    run_dashboard()
     app.run(host=app_ip, debug=False, port=app_port)
