@@ -1183,6 +1183,8 @@ def run_dashboard():
 Get host and port for web-server
 """
 def get_host_bind():
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
 

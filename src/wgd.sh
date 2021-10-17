@@ -2,7 +2,7 @@
 
 app_name="dashboard.py"
 app_official_name="WGDashboard"
-environment=$(if [[ $ENVIRONMENT ]] ; then echo $ENVIRONMENT else echo 'develop')
+environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
@@ -51,7 +51,7 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    if [[ $environment == 'production']]; then
+    if [[ $environment == 'production' ]]; then
       printf "%s\n" "$dashes"
       printf "| Starting WGDashboard in the background.          |\n"
       if [ ! -d "log" ]
@@ -59,7 +59,7 @@ start_wgd () {
       fi
       d=$(date '+%Y%m%d%H%M%S')
       /usr/local/bin/gunicorn --access-logfile log/access_"$d".log \
-      --error-logfile log/error_"$d".log 'dashboard.run_dashboard()'
+      --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
       printf "| Log files is under log/                                  |\n"
       printf "%s\n" "$dashes"
     else
@@ -76,7 +76,11 @@ start_wgd () {
 }
 
 stop_wgd() {
-  kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  if [[ $environment == 'production' ]]; then
+    kill $(cat ./gunicorn.pid)
+  else
+    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  fi
 }
 
 start_wgd_debug() {
