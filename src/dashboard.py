@@ -58,8 +58,7 @@ def clean_IP_with_range(ip):
 # Check IP with range (IPv4 only now)
 # TODO: Add IPv6 support
 def check_IP_with_range(ip):
-    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|" +
-                    "18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)(,|$)", ip)
+    return regex_match("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)", ip)
 
 # Check allowed ips list
 def check_Allowed_IPs(ip):
