@@ -1161,6 +1161,19 @@ def check_update():
     else:
         return "true"
 
+def run_wsgi():
+    init_dashboard()
+    global config
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
+    global app_ip
+    app_ip = config.get("Server", "app_ip")
+    global app_port
+    app_port = config.get("Server", "app_port")
+    global wg_conf_path
+    wg_conf_path = config.get("Server", "wg_conf_path")
+    config.clear()
+    return app
 
 if __name__ == "__main__":
     init_dashboard()
