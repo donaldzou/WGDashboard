@@ -42,11 +42,18 @@ install_wgd(){
 
 
 check_wgd_status(){
-  if ps aux | grep '[p]ython3 '$app_name > /dev/null;
-    then
+  if [[ $environment == 'production' ]]; then
+    if ps aux | grep -v grep | cat ./gunicorn.pid  > /dev/null; then
       return 0
-      else
-        return 1
+    else
+      return 1
+    fi
+  else
+    if ps aux | grep -v grep |grep '[p]ython3 '$app_name > /dev/null; then
+      return 0
+    else
+      return 1
+    fi
   fi
 }
 
