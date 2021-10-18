@@ -49,7 +49,7 @@ check_wgd_status(){
       return 1
     fi
   else
-    if ps aux | grep -v grep |grep '[p]ython3 '$app_name > /dev/null; then
+    if ps aux | grep -v grep | grep '[p]ython3 '$app_name > /dev/null; then
       return 0
     else
       return 1
