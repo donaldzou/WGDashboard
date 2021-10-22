@@ -2,6 +2,7 @@
 
 app_name="dashboard.py"
 app_official_name="WGDashboard"
+environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
@@ -41,28 +42,55 @@ install_wgd(){
 
 
 check_wgd_status(){
-  if ps aux | grep '[p]ython3 '$app_name > /dev/null;
-    then
+  if [[ $environment == 'production' ]]; then
+    if ps aux | grep -v grep | cat ./gunicorn.pid  > /dev/null; then
       return 0
-      else
-        return 1
+    else
+      return 1
+    fi
+  else
+    if ps aux | grep -v grep | grep '[p]ython3 '$app_name > /dev/null; then
+      return 0
+    else
+      return 1
+    fi
   fi
 }
 
 start_wgd () {
-    printf "%s\n" "$dashes"
-    printf "| Starting WGDashboard in the background.          |\n"
-    if [ ! -d "log" ]
-      then mkdir "log"
+    if [[ $environment == 'production' ]]; then
+      printf "%s\n" "$dashes"
+      printf "| Starting WGDashboard in the background.          |\n"
+      if [ ! -d "log" ]
+        then mkdir "log"
+      fi
+      d=$(date '+%Y%m%d%H%M%S')
+      if [[ $USER == root ]]; then
+        export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
+      fi
+      gunicorn --access-logfile log/access_"$d".log \
+      --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+      printf "| Log files is under log/                                  |\n"
+      printf "%s\n" "$dashes"
+    else
+      printf "%s\n" "$dashes"
+      printf "| Starting WGDashboard in the background.          |\n"
+      if [ ! -d "log" ]
+        then mkdir "log"
+      fi
+      d=$(date '+%Y%m%d%H%M%S')
+      python3 "$app_name" > log/"$d".txt 2>&1 &
+      printf "| Log files is under log/                                  |\n"
+      printf "%s\n" "$dashes"
     fi
-    d=$(date '+%Y%m%d%H%M%S')
-    python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "| Log files is under log/                                  |\n"
-    printf "%s\n" "$dashes"
 }
 
 stop_wgd() {
-  kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  if [[ $environment == 'production' ]]; then
+    kill $(cat ./gunicorn.pid)
+  else
+    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  fi
 }
 
 start_wgd_debug() {
