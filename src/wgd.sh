@@ -43,7 +43,7 @@ install_wgd(){
 
 check_wgd_status(){
   if [[ $environment == 'production' ]]; then
-    if ps aux | grep -v grep | cat ./gunicorn.pid  > /dev/null; then
+    if ps aux | grep -v grep | grep $(cat ./gunicorn.pid)  > /dev/null; then
       return 0
     else
       return 1
