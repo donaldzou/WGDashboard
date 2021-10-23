@@ -6,7 +6,6 @@ Under Apache-2.0 License
 
 # Python Built-in Library
 import os
-import sys
 
 from flask import Flask, request, render_template, redirect, url_for, session, abort, jsonify
 import subprocess
