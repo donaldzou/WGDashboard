@@ -28,6 +28,7 @@ dashboard_version = 'v2.3.1'
 # Dashboard Config Name
 configuration_path = os.getenv('CONFIGURATION_PATH', '.')
 db_path = os.path.join(configuration_path, 'db')
+os.mkdir(db_path)
 dashboard_conf = os.path.join(configuration_path, 'wg-dashboard.ini')
 sys.exit()
 # Upgrade Required
