@@ -1166,6 +1166,7 @@ Configure DashBoard before start web-server
 """
 def run_dashboard():
     init_dashboard()
+    global update
     update = check_update()
     global config
     config = configparser.ConfigParser(strict=False)
