@@ -2,7 +2,7 @@
 <p align=center>Hi! I'm planning the next major update for this project, please let me know if you have any suggestions or feature requests ;) You can create an issue with the "Feature request" template. Cheers!</p>
 <hr>
 <h3 align=center>Help Wanted</h3>
-<p align=center>- If anyone know a better way to distubute releases of python application other than GitHub, please let me know in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/31">#31</a>!</p>
+<p align=center>- If anyone know a better way to distubute releases of python application other than GitHub, please let me know in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/103">#103</a>!</p>
 <p align=center>- Please provide your OS name and version if you can run the dashboard on it perfectly in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/31">#31</a>, since I only tested on Ubuntu. Thank you!</p>
 <hr>
 
