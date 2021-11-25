@@ -28,7 +28,7 @@ _check_and_set_venv(){
     if [ ! -d $VIRTUAL_ENV ]; then
         python3 -m venv $VIRTUAL_ENV
     fi
-    . ${VIRTUAL_ENV}/activate
+    . ${VIRTUAL_ENV}/bin/activate
 }
 
 install_wgd(){
@@ -56,6 +56,7 @@ install_wgd(){
     sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
     cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
     systemctl daemon-reload
+    echo
     printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
     printf "       and 'systemctl start wg-dashboard'\n"
     printf "       use '${0} stop' before starting with systemctl\n"
