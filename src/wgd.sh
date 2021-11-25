@@ -20,6 +20,17 @@ help () {
   printf "=================================================================================\n"
 }
 
+_check_and_set_venv(){
+    # deb/ubuntu users: might need a 'apt install python3.8-venv'
+    # set up the local environment
+    APP_ROOT=`pwd`
+    VIRTUAL_ENV="${APP_ROOT%/*}/venv"
+    if [ ! -d $VIRTUAL_ENV ]; then
+        python3 -m venv $VIRTUAL_ENV
+    fi
+    . ${VIRTUAL_ENV}/activate
+}
+
 install_wgd(){
     # Check Python3 version
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
@@ -33,9 +44,24 @@ install_wgd(){
       then mkdir "log"
     fi
     printf "| Installing latest Python dependencies                    |\n"
+    
+    # set up the local environment
+    _check_and_set_venv
+    
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| WGDashboard installed successfully!              |\n"
-    printf "| Starting Dashboard                                       |\n"
+    
+    printf "| Preparing the systemctl unit file                        |\n"
+    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
+    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
+    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
+    systemctl daemon-reload
+    printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
+    printf "       and 'systemctl start wg-dashboard'\n"
+    printf "       use '${0} stop' before starting with systemctl\n"
+    echo
+    
+    printf "| Now starting Dashboard in background                     |\n"
     start_wgd
 }
 
@@ -50,6 +76,7 @@ check_wgd_status(){
 }
 
 start_wgd () {
+    _check_and_set_venv
     printf "%s\n" "$dashes"
     printf "| Starting WGDashboard in the background.          |\n"
     if [ ! -d "log" ]
@@ -67,6 +94,7 @@ stop_wgd() {
 
 start_wgd_debug() {
   printf "%s\n" "$dashes"
+  _check_and_set_venv
   printf "| Starting WGDashboard in the foreground.                  |\n"
   python3 "$app_name"
   printf "%s\n" "$dashes"
@@ -84,6 +112,7 @@ update_wgd() {
     git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
     printf "| Installing latest Python dependencies                    |\n"
+    _check_and_set_venv
     python3 -m pip install -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
     start_wgd
@@ -142,4 +171,3 @@ if [ "$#" != 1 ];
         help
     fi
 fi
-
