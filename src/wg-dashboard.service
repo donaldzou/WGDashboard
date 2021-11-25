@@ -4,7 +4,7 @@ ConditionPathIsDirectory=/etc/wireguard
 
 [Service]
 Environment="VIRTUAL_ENV={{VIRTUAL_ENV}"
-WorkingDirectory=${{APP_ROOT}}
+WorkingDirectory={{APP_ROOT}}
 ExecStart={{VIRTUAL_ENV}}/bin/python3 {{APP_ROOT}}/dashboard.py
 PrivateTmp=yes
 Restart=always
