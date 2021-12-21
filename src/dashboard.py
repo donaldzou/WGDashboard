@@ -994,7 +994,9 @@ def download(config_name):
             private_key = peer['private_key']
             allowed_ip = peer['allowed_ip']
             DNS = peer['DNS']
+            MTU = peer['mtu']
             endpoint_allowed_ip = peer['endpoint_allowed_ip']
+            keepalive = peer['keepalive']
             filename = peer['name']
             if len(filename) == 0:
                 filename = "Untitled_Peers"
@@ -1011,10 +1013,10 @@ def download(config_name):
                 filename = "".join(filename.split(' '))
             filename = filename + "_" + config_name
 
-            def generate(private_key, allowed_ip, DNS, public_key, endpoint):
-                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = "+endpoint_allowed_ip+"\nEndpoint = " + endpoint
+            def generate(private_key, allowed_ip, DNS, MTU, public_key, endpoint, keepalive):
+                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\nMTU = " + MTU + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + endpoint+ "\nPersistentKeepalive = " + keepalive
 
-            return app.response_class(generate(private_key, allowed_ip, DNS, public_key, endpoint),
+            return app.response_class(generate(private_key, allowed_ip, DNS, MTU, public_key, endpoint, keepalive),
                                       mimetype='text/conf',
                                       headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
     else:

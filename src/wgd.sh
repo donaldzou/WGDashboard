@@ -37,7 +37,7 @@ _check_and_set_venv(){
     if [ ! -d $VIRTUAL_ENV ]; then
         python3 -m venv $VIRTUAL_ENV
     fi
-    . ${VIRTUAL_ENV}/activate
+    . ${VIRTUAL_ENV}/bin/activate
 }
 
 install_wgd(){
