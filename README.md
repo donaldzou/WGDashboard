@@ -433,7 +433,7 @@ Bug Fixed:
 ## ✨ Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -443,10 +443,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/antonioag95"><img src="https://avatars.githubusercontent.com/u/30556866?v=4?s=100" width="100px;" alt=""/><br /><sub><b>antonioag95</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=antonioag95" title="Tests">⚠️</a> <a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=antonioag95" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/tonjo"><img src="https://avatars.githubusercontent.com/u/4726289?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tonjo</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=tonjo" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/reafian"><img src="https://avatars.githubusercontent.com/u/11992416?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Newton</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=reafian" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/davejlong"><img src="https://avatars.githubusercontent.com/u/175317?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Long</b></sub></a><br /><a href="https://github.com/donaldzou/wireguard-dashboard/commits?author=davejlong" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/antonioag95"><img src="https://avatars.githubusercontent.com/u/30556866?v=4?s=100" width="100px;" alt=""/><br /><sub><b>antonioag95</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=antonioag95" title="Tests">⚠️</a> <a href="https://github.com/donaldzou/WGDashboard/commits?author=antonioag95" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/tonjo"><img src="https://avatars.githubusercontent.com/u/4726289?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tonjo</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=tonjo" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/reafian"><img src="https://avatars.githubusercontent.com/u/11992416?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Newton</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=reafian" title="Code">💻</a></td>
+    <td align="center"><a href="http://www.davejlong.com"><img src="https://avatars.githubusercontent.com/u/175317?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Long</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=davejlong" title="Code">💻</a></td>
+    <td align="center"><a href="http://www.std-soft.com"><img src="https://avatars.githubusercontent.com/u/5978293?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Markus Neubauer</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=marneu" title="Code">💻</a></td>
   </tr>
 </table>
 
