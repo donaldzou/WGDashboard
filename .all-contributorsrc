@@ -41,10 +41,19 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "marneu",
+      "name": "Markus Neubauer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5978293?v=4",
+      "profile": "http://www.std-soft.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "projectName": "wireguard-dashboard",
+  "projectName": "WGDashboard",
   "projectOwner": "donaldzou",
   "repoType": "github",
   "repoHost": "https://github.com",
