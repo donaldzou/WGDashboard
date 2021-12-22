@@ -22,7 +22,7 @@ from flask_qrcode import QRcode
 from tinydb import TinyDB, Query
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 # Dashboard Version
-dashboard_version = 'v2.3.1'
+dashboard_version = 'v3.0'
 # Dashboard Config Name
 dashboard_conf = 'wg-dashboard.ini'
 # Upgrade Required
@@ -1140,8 +1140,9 @@ def init_dashboard():
         config['Server'] = {}
     if 'wg_conf_path' not in config['Server']:
         config['Server']['wg_conf_path'] = '/etc/wireguard'
+    # TODO: IPv6 for the app IP might need to configure with Gunicorn...
     if 'app_ip' not in config['Server']:
-        config['Server']['app_ip'] = '::'
+        config['Server']['app_ip'] = '0.0.0.0'
     if 'app_port' not in config['Server']:
         config['Server']['app_port'] = '10086'
     if 'auth_req' not in config['Server']:
