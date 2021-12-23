@@ -465,6 +465,7 @@ def checkKeyMatch(private_key, public_key, config_name):
         db = TinyDB('db/' + config_name + '.json')
         peers = Query()
         match = db.search(peers.id == result['data'])
+        db.close
         if len(match) != 1 or result['data'] != public_key:
             return {'status': 'failed', 'msg': 'Please check your private key, it does not match with the public key.'}
         else:
@@ -475,6 +476,7 @@ def check_repeat_allowed_IP(public_key, ip, config_name):
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     peer = db.search(peers.id == public_key)
+    db.close
     if len(peer) != 1:
         return {'status': 'failed', 'msg': 'Peer does not exist'}
     else:
@@ -962,9 +964,10 @@ def save_peer_setting(config_name):
             return jsonify({"status": "success", "msg": ""})
         except subprocess.CalledProcessError as exc:
             return jsonify({"status": "failed", "msg": str(exc.output.decode("UTF-8").strip())})
+            db.close
     else:
         return jsonify({"status": "failed", "msg": "This peer does not exist."})
-
+        db.close
 # Get peer settings
 @app.route('/get_peer_data/<config_name>', methods=['POST'])
 def get_peer_name(config_name):
@@ -1008,6 +1011,7 @@ def download(config_name):
     peers = Query()
     get_peer = db.search(peers.id == id)
     config = get_dashboard_conf()
+    db.close
     if len(get_peer) == 1:
         peer = get_peer[0]
         if peer['private_key'] != "":
@@ -1077,7 +1081,9 @@ def get_ping_ip():
         if len(endpoint) == 2:
             html += "<option value=" + endpoint[0] + ">" + endpoint[0] + "</option>"
         html += "</optgroup>"
+    db.close
     return html
+
 
 # Ping IP
 @app.route('/ping_ip', methods=['POST'])
