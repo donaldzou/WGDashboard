@@ -48,7 +48,7 @@ install_wgd(){
     # set up the local environment
     _check_and_set_venv
     
-    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
     printf "| WGDashboard installed successfully!              |\n"
     
     printf "| Preparing the systemctl unit file                        |\n"
