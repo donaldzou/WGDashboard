@@ -1122,9 +1122,7 @@ Dashboard Tools Related
 def get_ping_ip():
     config = request.form['config']
     sem.acquire()
-    
-    db = TinyDB('db/' + config_name + '.json')
-
+    db = TinyDB('db/' + config + '.json')
     html = ""
     for i in db.all():
         html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
@@ -1158,8 +1156,6 @@ def ping_ip():
         }
         if returnjson['package_loss'] == 1.0:
             returnjson['package_loss'] = returnjson['package_sent']
-
-
         return jsonify(returnjson)
     except Exception:
         return "Error"

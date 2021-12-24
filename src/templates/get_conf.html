@@ -109,7 +109,6 @@
                     <i class="bi bi-plus-circle-fill" style=""></i> Add Peer
                 </button>
             </div>
-            <hr>
 		</div>
 	</div>
 
@@ -126,26 +125,35 @@
             {% else %}
                 <div class="col-sm-6 col-lg-4">
             {% endif %}
-                <div class="card mb-3">
-                <div class="card-header">
+                <div class="card mb-3 card-{{i['status']}}">
+{#                <div class="card-header">#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <div class="card-header-body ">#}
+{#                                {% if not i['name']%}#}
+{#                                    {{ "Untitled" }}#}
+{#                                {% else %}#}
+{#                                    {{i['name']}}#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+                <div class="card-body">
                     <div class="row">
-                        <div class="col">
-                            <div class="card-header-body ">
+                        <div class="col-sm">
+                            <h4>
                                 {% if not i['name']%}
                                     {{ "Untitled" }}
                                 {% else %}
                                     {{i['name']}}
                                 {% endif %}
-{#                                <span class="dot dot-{{i['status']}}"></span>#}
-                            </div>
+                            </h4>
                         </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
+                        <div class="w-100"></div>
                         <div class="col-6">
                             <small class="text-muted"><strong>STATUS</strong></small>
-                            <h6 style="text-transform: uppercase;" class="mb-2"><span class="dot dot-{{i['status']}}" style="margin-left: 0 !important;margin-top: 5px"></span></h6>
+                            <h6 style="text-transform: uppercase;" class="mb-2 h6-dot-{{i['status']}}"><span class="dot dot-{{i['status']}}" style="margin-left: 0 !important;margin-top: 5px"></span></h6>
                         </div>
                         <div class="col-6 peer_data_group" style="text-align: right">
                             <small class="text-muted"><strong>TRANSFER</strong></small>
@@ -162,7 +170,7 @@
                             <small class="text-muted"><strong>ALLOWED IP</strong></small>
                             <h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
                         </div>
-                        <div class="w-100"></div>
+{#                        <div class="w-100"></div>#}
 
                         <div class="col-sm">
                             <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
