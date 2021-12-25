@@ -33,28 +33,30 @@ _check_and_set_venv(){
 
 install_wgd(){
     # Check Python3 version
+    printf "%s\n" "$dashes"
+    printf "| Starting to install WGDashboard                          |\n"
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
-      then printf "| WGDashboard required Python3.7+                  |\n"
+      then printf "| WGDashboard required Python 3.7 or above          |\n"
       printf "%s\n" "$dashes"
       exit 1
     fi
-    rm db/hi.txt >  /dev/null 2>&1
+    if [ ! -d "db" ]
+      then mkdir "db"
+    fi
     if [ ! -d "log" ]
       then mkdir "log"
     fi
-    printf "| Installing latest Python dependencies                    |\n"
-    
 #    _check_and_set_venv
 #    ${VIRTUAL_ENV}/bin/python3 -m pip install -U pip
 #    ${VIRTUAL_ENV}/bin/python3 -m pip install virtualenv
-    # set up the local environment
-
 #    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
+    printf "| Upgrading pip                                            |\n"
+    python3 -m pip install -U pip
+    printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -U -r requirements.txt
-    printf "| WGDashboard installed successfully!              |\n"
-    
-    printf "| Preparing the systemctl unit file                        |\n"
+    printf "| WGDashboard installed successfully!                     |\n"
+#    printf "| Preparing the systemctl unit file                        |\n"
 #    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
 #    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
 #    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
@@ -78,7 +80,7 @@ check_wgd_status(){
 }
 
 start_wgd () {
-    _check_and_set_venv
+#    _check_and_set_venv
     printf "%s\n" "$dashes"
     printf "| Starting WGDashboard in the background.          |\n"
     if [ ! -d "log" ]
@@ -96,7 +98,7 @@ stop_wgd() {
 
 start_wgd_debug() {
   printf "%s\n" "$dashes"
-  _check_and_set_venv
+#  _check_and_set_venv
   printf "| Starting WGDashboard in the foreground.                  |\n"
   python3 "$app_name"
   printf "%s\n" "$dashes"
@@ -110,12 +112,14 @@ update_wgd() {
   if [ "$up" = "Y" ]; then
     printf "| Shutting down WGDashboard...                             |\n"
     kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+    mv wgd.sh wgd.sh.old
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
-    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    git pull
+#    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
     printf "| Installing latest Python dependencies                    |\n"
-    _check_and_set_venv
-    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+#    _check_and_set_venv
+    python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
     start_wgd
   else
