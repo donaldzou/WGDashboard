@@ -1,5 +1,5 @@
 Flask
-tinydb
+tinydb==4.5.2
 ifcfg
 icmplib
 flask-qrcode

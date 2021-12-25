@@ -107,8 +107,14 @@ var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
 
 // QR Code
 $("body").on("click", ".btn-qrcode-peer", function (){
-    qrcodeModal.toggle();
-    $("#qrcode_img").attr('src', $(this).attr('img_src'))
+    var src = $(this).attr('img_src');
+    $.ajax({
+        "url": src,
+        "method": "GET"
+    }).done(function(res){
+        $("#qrcode_img").attr('src', res)
+        qrcodeModal.toggle();
+    })
 })
 
 // Delete Peer Modal

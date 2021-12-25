@@ -33,9 +33,9 @@ _check_and_set_venv(){
 
 install_wgd(){
     # Check Python3 version
-    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
+    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 8) else print("0");')
     if [ $version_pass == "0" ]
-      then printf "| WGDashboard required Python3.7+                  |\n"
+      then printf "| WGDashboard required Python3.8+                  |\n"
       printf "%s\n" "$dashes"
       exit 1
     fi
@@ -47,14 +47,14 @@ install_wgd(){
     
     # set up the local environment
     _check_and_set_venv
-    
-    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    ${VIRTUAL_ENV}/bin/python3 -m pip -U pip
+    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
     printf "| WGDashboard installed successfully!              |\n"
     
     printf "| Preparing the systemctl unit file                        |\n"
     sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
     sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
-    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
+#    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
     systemctl daemon-reload
     printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
     printf "       and 'systemctl start wg-dashboard'\n"

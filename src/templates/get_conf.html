@@ -109,7 +109,6 @@
                     <i class="bi bi-plus-circle-fill" style=""></i> Add Peer
                 </button>
             </div>
-            <hr>
 		</div>
 	</div>
 
@@ -126,26 +125,35 @@
             {% else %}
                 <div class="col-sm-6 col-lg-4">
             {% endif %}
-                <div class="card mb-3">
-                <div class="card-header">
+                <div class="card mb-3 card-{{i['status']}}">
+{#                <div class="card-header">#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <div class="card-header-body ">#}
+{#                                {% if not i['name']%}#}
+{#                                    {{ "Untitled" }}#}
+{#                                {% else %}#}
+{#                                    {{i['name']}}#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+                <div class="card-body">
                     <div class="row">
-                        <div class="col">
-                            <div class="card-header-body ">
+                        <div class="col-sm">
+                            <h4>
                                 {% if not i['name']%}
                                     {{ "Untitled" }}
                                 {% else %}
                                     {{i['name']}}
                                 {% endif %}
-{#                                <span class="dot dot-{{i['status']}}"></span>#}
-                            </div>
+                            </h4>
                         </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
+                        <div class="w-100"></div>
                         <div class="col-6">
                             <small class="text-muted"><strong>STATUS</strong></small>
-                            <h6 style="text-transform: uppercase;" class="mb-2"><span class="dot dot-{{i['status']}}" style="margin-left: 0 !important;margin-top: 5px"></span></h6>
+                            <h6 style="text-transform: uppercase;" class="mb-2 h6-dot-{{i['status']}}"><span class="dot dot-{{i['status']}}" style="margin-left: 0 !important;margin-top: 5px"></span></h6>
                         </div>
                         <div class="col-6 peer_data_group" style="text-align: right">
                             <small class="text-muted"><strong>TRANSFER</strong></small>
@@ -162,7 +170,7 @@
                             <small class="text-muted"><strong>ALLOWED IP</strong></small>
                             <h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
                         </div>
-                        <div class="w-100"></div>
+{#                        <div class="w-100"></div>#}
 
                         <div class="col-sm">
                             <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
@@ -182,7 +190,7 @@
                                 <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
                                 {% if i['private_key'] %}
                                     <div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
-                                        <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="{{ qrcode("[Interface]\nPrivateKey = "+i['private_key']+"\nAddress = "+i['allowed_ip']+"\nMTU = "+i['mtu']+"\nDNS = "+i['DNS']+"\n\n[Peer]\nPublicKey = "+conf_data['public_key']+"\nAllowedIPs = "+i['endpoint_allowed_ip']+"\nPersistentKeepalive = "+i['keepalive']+"\nEndpoint = "+wg_ip+":"+conf_data['listen_port']) }}">
+                                        <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="/qrcode/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
                                         </button>
                                         <a href="/download/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}" class="btn btn-outline-info btn-download-peer btn-control">

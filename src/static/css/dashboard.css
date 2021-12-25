@@ -117,20 +117,48 @@ body {
 
 .dot-running{
     background-color: #28a745!important;
+    box-shadow: 0 0 0 0.2rem #28a74545;
+}
+
+.h6-dot-running{
+    margin-left: 0.3rem;
 }
 
 .dot-stopped{
     background-color: #6c757d!important;
 }
 
+.card-running{
+    border-color: #28a745;
+}
 
 .info h6{
     line-break: anywhere;
 }
 
+.info .row .col-sm{
+    display: flex;
+    flex-direction: column;
+}
+
+.info .row .col-sm small{
+    display: flex;
+
+}
+
+.info .row .col-sm small strong:last-child(1){
+    margin-left: auto !important;
+}
+
 .btn-control{
     border: none !important;
     padding: 0 1rem 0 0;
+}
+
+.btn-control:active, .btn-control:focus{
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none;
 }
 
 .share_peer_btn_group .btn-control{
@@ -213,7 +241,7 @@ main{
     bottom: 3rem;
     right: 2rem;
     z-index: 99;
-    border-radius: 100px;
+    border-radius: 100px !important;
     padding: 10px 20px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
@@ -274,4 +302,24 @@ main{
 
 .key:hover{
     color: #007bff;
+}
+
+.card{
+    border-radius: 10px;
+}
+
+.peer_list .card .button-group{
+    height: 22px;
+}
+
+.form-control{
+    border-radius: 10px;
+}
+
+.btn{
+    border-radius: 8px;
+}
+
+.modal-content{
+    border-radius: 10px;
 }
