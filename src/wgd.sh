@@ -115,9 +115,8 @@ update_wgd() {
 #    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
 #    printf "| Installing latest Python dependencies                    |\n"
 #    python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
-#    printf "| Update Successfully!                                     |\n"
     install_wgd
-    printf "| Enter ./wgd start to start the dashboard                 |\n"
+    printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
     rm wgd.sh.old
   else
