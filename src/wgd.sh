@@ -48,13 +48,13 @@ install_wgd(){
     # set up the local environment
     _check_and_set_venv
     
-    python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
+    ${VIRTUAL_ENV} -m pip install -U -r requirements.txt >  /dev/null 2>&1
     printf "| WGDashboard installed successfully!              |\n"
     
     printf "| Preparing the systemctl unit file                        |\n"
     sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
     sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
-    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
+#    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
     systemctl daemon-reload
     printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
     printf "       and 'systemctl start wg-dashboard'\n"

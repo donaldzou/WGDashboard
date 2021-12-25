@@ -35,6 +35,7 @@ dashboard_conf = 'wg-dashboard.ini'
 update = ""
 # Flask App Configuration
 app = Flask("WGDashboard")
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator
@@ -456,6 +457,7 @@ Flask Functions
 # Before request
 @app.before_request
 def auth_req():
+
     conf = configparser.ConfigParser(strict=False)
     conf.read(dashboard_conf)
     req = conf.get("Server", "auth_req")
@@ -1256,3 +1258,12 @@ if __name__ == "__main__":
     wg_conf_path = config.get("Server", "wg_conf_path")
     config.clear()
     app.run(host=app_ip, debug=False, port=app_port)
+else:
+    init_dashboard()
+    update = check_update()
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
+    app_ip = config.get("Server", "app_ip")
+    app_port = config.get("Server", "app_port")
+    wg_conf_path = config.get("Server", "wg_conf_path")
+    config.clear()
