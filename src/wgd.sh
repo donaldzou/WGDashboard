@@ -115,10 +115,8 @@ update_wgd() {
     mv wgd.sh wgd.sh.old
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
-    git pull
-#    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
     printf "| Installing latest Python dependencies                    |\n"
-#    _check_and_set_venv
     python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
     start_wgd
