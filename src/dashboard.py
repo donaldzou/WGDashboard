@@ -3,7 +3,8 @@
 Under Apache-2.0 License
 """
 
-
+# Import other python files
+from util import *
 # Python Built-in Library
 import os
 from flask import Flask, request, render_template, redirect, url_for, session, abort, jsonify
@@ -16,10 +17,15 @@ import hashlib
 import json, urllib.request
 import configparser
 import re
+import ipaddress
+import sqlite3
+import threading
 # PIP installed library
 import ifcfg
 from flask_qrcode import QRcode
 from tinydb import TinyDB, Query
+from tinydb.storages import JSONStorage
+from tinydb.middlewares import CachingMiddleware
 from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 # Dashboard Version
 dashboard_version = 'v3.0'
@@ -29,81 +35,14 @@ dashboard_conf = 'wg-dashboard.ini'
 update = ""
 # Flask App Configuration
 app = Flask("WGDashboard")
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator
 QRcode(app)
 
-"""
-Helper Functions
-"""
-# Regex Match
-def regex_match(regex, text):
-    pattern = re.compile(regex)
-    return pattern.search(text) is not None
-
-# Check IP format
-def check_IP(ip):
-    ip_patterns = (
-        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}",
-        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}$"
-    )
-
-    for match_pattern in ip_patterns:
-        match_result = regex_match(match_pattern, ip)
-        if match_result:
-            result = match_result
-            break
-    else:
-        result = None
-
-    return result
-
-# Clean IP
-def clean_IP(ip):
-    return ip.replace(' ', '')
-
-# Clean IP with range
-def clean_IP_with_range(ip):
-    return clean_IP(ip).split(',')
-
-# Check IP with range
-def check_IP_with_range(ip):
-    ip_patterns = (
-        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)",
-        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}\/([0-9]{1,3})(,|$)"
-    )
-
-    for match_pattern in ip_patterns:
-        match_result = regex_match(match_pattern, ip)
-        if match_result:
-            result = match_result
-            break
-    else:
-        result = None
-
-    return result
-
-# Check allowed ips list
-def check_Allowed_IPs(ip):
-    ip = clean_IP_with_range(ip)
-    for i in ip:
-        if not check_IP_with_range(i): return False
-    return True
-
-# Check DNS
-def check_DNS(dns):
-    dns = dns.replace(' ','').split(',')
-    status = True
-    for i in dns:
-        if not (check_IP(i) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]",i)):
-            return False
-    return True
-
-# Check remote endpoint
-def check_remote_endpoint(address):
-
-    return (check_IP(address) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]", address))
+# TODO: Testing semaphore on reading/writing database
+sem = threading.RLock()
 
 
 """
@@ -284,7 +223,10 @@ def get_allowed_ip(config_name, db, peers, conf_peer_data):
 
 # Look for new peers from WireGuard
 def get_all_peers_data(config_name):
+    sem.acquire()
+
     db = TinyDB('db/' + config_name + '.json')
+
     peers = Query()
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
@@ -341,6 +283,7 @@ def get_all_peers_data(config_name):
     toc = time.perf_counter()
     print(f"Finish fetching data in {toc - tic:0.4f} seconds")
     db.close()
+    sem.release()
 
 """
 Frontend Related Functions
@@ -348,14 +291,20 @@ Frontend Related Functions
 # Search for peers
 def get_peers(config_name, search, sort_t):
     get_all_peers_data(config_name)
+    sem.acquire()
+
     db = TinyDB('db/' + config_name + '.json')
     peer = Query()
     if len(search) == 0:
         result = db.all()
     else:
         result = db.search(peer.name.matches('(.*)(' + re.escape(search) + ')(.*)'))
-    result = sorted(result, key=lambda d: d[sort_t])
+    if sort_t == "allowed_ip":
+        result = sorted(result, key = lambda d: ipaddress.ip_network(d[sort_t].split(",")[0]))
+    else:
+        result = sorted(result, key=lambda d: d[sort_t])
     db.close()
+    sem.release()
     return result
 
 
@@ -386,6 +335,8 @@ def get_conf_listen_port(config_name):
 
 # Get configuration total data
 def get_conf_total_data(config_name):
+    sem.acquire()
+
     db = TinyDB('db/' + config_name + '.json')
     upload_total = 0
     download_total = 0
@@ -399,6 +350,7 @@ def get_conf_total_data(config_name):
     upload_total = round(upload_total, 4)
     download_total = round(download_total, 4)
     db.close()
+    sem.release()
     return [total, upload_total, download_total]
 
 # Get configuration status
@@ -462,16 +414,25 @@ def checkKeyMatch(private_key, public_key, config_name):
     if result['status'] == 'failed':
         return result
     else:
+        sem.acquire()
+
         db = TinyDB('db/' + config_name + '.json')
         peers = Query()
         match = db.search(peers.id == result['data'])
         if len(match) != 1 or result['data'] != public_key:
+            db.close()
+            sem.release()
             return {'status': 'failed', 'msg': 'Please check your private key, it does not match with the public key.'}
         else:
+            db.close()
+            sem.release()
             return {'status': 'success'}
 
 # Check if there is repeated allowed IP
 def check_repeat_allowed_IP(public_key, ip, config_name):
+
+    sem.acquire()
+
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     peer = db.search(peers.id == public_key)
@@ -480,8 +441,12 @@ def check_repeat_allowed_IP(public_key, ip, config_name):
     else:
         existed_ip = db.search((peers.id != public_key) & (peers.allowed_ip == ip))
         if len(existed_ip) != 0:
+            db.close()
+            sem.release()
             return {'status': 'failed', 'msg': "Allowed IP already taken by another peer."}
         else:
+            db.close()
+            sem.release()
             return {'status': 'success'}
 
 
@@ -492,6 +457,7 @@ Flask Functions
 # Before request
 @app.before_request
 def auth_req():
+
     conf = configparser.ConfigParser(strict=False)
     conf.read(dashboard_conf)
     req = conf.get("Server", "auth_req")
@@ -839,7 +805,9 @@ def switch(config_name):
 # Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
-    db = TinyDB("db/" + config_name + ".json")
+    sem.acquire()
+
+    db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     data = request.get_json()
     public_key = data['public_key']
@@ -848,26 +816,42 @@ def add_peer(config_name):
     DNS = data['DNS']
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(DNS) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
+        db.close()
+        sem.release()
         return "Please fill in all required box."
     if type(keys) != list:
+        db.close()
+        sem.release()
         return config_name + " is not running."
     if public_key in keys:
+        db.close()
+        sem.release()
         return "Public key already exist."
     if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
+        db.close()
+        sem.release()
         return "Allowed IP already taken by another peer."
     if not check_DNS(DNS):
+        db.close()
+        sem.release()
         return "DNS formate is incorrect. Example: 1.1.1.1"
     if not check_Allowed_IPs(endpoint_allowed_ip):
+        db.close()
+        sem.release()
         return "Endpoint Allowed IPs format is incorrect."
     if len(data['MTU']) != 0:
         try:
             mtu = int(data['MTU'])
         except:
+            db.close()
+            sem.release()
             return "MTU format is not correct."
     if len(data['keep_alive']) != 0:
         try:
             keep_alive = int(data['keep_alive'])
         except:
+            db.close()
+            sem.release()
             return "Persistent Keepalive format is not correct."
     try:
         status = subprocess.check_output(
@@ -879,9 +863,11 @@ def add_peer(config_name):
                    "endpoint_allowed_ip": endpoint_allowed_ip},
                   peers.id == public_key)
         db.close()
+        sem.release()
         return "true"
     except subprocess.CalledProcessError as exc:
         db.close()
+        sem.release()
         return exc.output.strip()
 
 # Remove peer
@@ -889,7 +875,9 @@ def add_peer(config_name):
 def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
-    db = TinyDB("db/" + config_name + ".json")
+    sem.acquire()
+
+    db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     data = request.get_json()
     delete_key = data['peer_id']
@@ -906,8 +894,11 @@ def remove_peer(config_name):
             status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
             db.remove(peers.id == delete_key)
             db.close()
+            sem.release()
             return "true"
         except subprocess.CalledProcessError as exc:
+            db.close()
+            sem.release()
             return exc.output.strip()
 
 # Save peer settings
@@ -920,37 +911,55 @@ def save_peer_setting(config_name):
     DNS = data['DNS']
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
-    db = TinyDB("db/" + config_name + ".json")
+    sem.acquire()
+
+    db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     if len(db.search(peers.id == id)) == 1:
         check_ip = check_repeat_allowed_IP(id, allowed_ip, config_name)
         if not check_IP_with_range(endpoint_allowed_ip):
+            db.close()
+            sem.release()
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
         if not check_DNS(DNS):
+            db.close()
+            sem.release()
             return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
         if len(data['MTU']) != 0:
             try:
                 mtu = int(data['MTU'])
             except:
+                db.close()
+                sem.release()
                 return jsonify({"status": "failed", "msg": "MTU format is not correct."})
         if len(data['keep_alive']) != 0:
             try:
                 keep_alive = int(data['keep_alive'])
             except:
+                db.close()
+                sem.release()
                 return jsonify({"status": "failed", "msg": "Persistent Keepalive format is not correct."})
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
             if check_key['status'] == "failed":
+                db.close()
+                sem.release()
                 return jsonify(check_key)
         if check_ip['status'] == "failed":
+            db.close()
+            sem.release()
             return jsonify(check_ip)
         try:
-            if allowed_ip == "": allowed_ip = '""'
+            if allowed_ip == "":
+                allowed_ip = '""'
+            allowed_ip = allowed_ip.replace(" ", "")
             change_ip = subprocess.check_output('wg set ' + config_name + " peer " + id + " allowed-ips " + allowed_ip,
                                                 shell=True, stderr=subprocess.STDOUT)
             save_change_ip = subprocess.check_output('wg-quick save ' + config_name, shell=True,
                                                      stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
+                db.close()
+                sem.release()
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
             db.update(
                 {"name": name, "private_key": private_key,
@@ -959,10 +968,15 @@ def save_peer_setting(config_name):
                  "keepalive":data['keep_alive']},
                 peers.id == id)
             db.close()
+            sem.release()
             return jsonify({"status": "success", "msg": ""})
         except subprocess.CalledProcessError as exc:
+            db.close()
+            sem.release()
             return jsonify({"status": "failed", "msg": str(exc.output.decode("UTF-8").strip())})
     else:
+        db.close()
+        sem.release()
         return jsonify({"status": "failed", "msg": "This peer does not exist."})
 
 # Get peer settings
@@ -970,13 +984,16 @@ def save_peer_setting(config_name):
 def get_peer_name(config_name):
     data = request.get_json()
     id = data['id']
-    db = TinyDB("db/" + config_name + ".json")
+    sem.acquire()
+
+    db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     result = db.search(peers.id == id)
     db.close()
     data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'],
             "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip'],
             "mtu": result[0]['mtu'], "keep_alive": result[0]['keepalive']}
+    sem.release()
     return jsonify(data)
 
 # Generate a private key
@@ -999,12 +1016,52 @@ def check_key_match(config_name):
     public_key = data['public_key']
     return jsonify(checkKeyMatch(private_key, public_key, config_name))
 
+
+@app.route("/qrcode/<config_name>", methods=['GET'])
+def generate_qrcode(config_name):
+    id = request.args.get('id')
+    sem.acquire()
+    db = TinyDB('db/' + config_name + '.json')
+    peers = Query()
+    get_peer = db.search(peers.id == id)
+    config = get_dashboard_conf()
+    if len(get_peer) == 1:
+        peer = get_peer[0]
+        if peer['private_key'] != "":
+            public_key = get_conf_pub_key(config_name)
+            listen_port = get_conf_listen_port(config_name)
+            endpoint = config.get("Peers", "remote_endpoint") + ":" + listen_port
+            private_key = peer['private_key']
+            allowed_ip = peer['allowed_ip']
+            DNS = peer['DNS']
+            MTU = peer['mtu']
+            endpoint_allowed_ip = peer['endpoint_allowed_ip']
+            keepalive = peer['keepalive']
+            conf = {
+                "public_key": public_key,
+                "listen_port": listen_port,
+                "endpoint": endpoint,
+                "private_key": private_key,
+                "allowed_ip": allowed_ip,
+                "DNS": DNS,
+                "mtu": MTU,
+                "endpoint_allowed_ip": endpoint_allowed_ip,
+                "keepalive": keepalive,
+            }
+            db.close()
+            sem.release()
+            return render_template("qrcode.html", i=conf)
+    else:
+        db.close()
+        sem.release()
+        return redirect("/configuration/" + config_name)
 # Download configuration file
-@app.route('/download/<config_name>', methods=['GET'])
+@app.route('/<config_name>', methods=['GET'])
 def download(config_name):
     print(request.headers.get('User-Agent'))
     id = request.args.get('id')
-    db = TinyDB("db/" + config_name + ".json")
+    sem.acquire()
+    db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     get_peer = db.search(peers.id == id)
     config = get_dashboard_conf()
@@ -1038,11 +1095,13 @@ def download(config_name):
 
             def generate(private_key, allowed_ip, DNS, MTU, public_key, endpoint, keepalive):
                 yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + DNS + "\nMTU = " + MTU + "\n\n[Peer]\nPublicKey = " + public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + endpoint+ "\nPersistentKeepalive = " + keepalive
-
+            db.close()
+            sem.release()
             return app.response_class(generate(private_key, allowed_ip, DNS, MTU, public_key, endpoint, keepalive),
                                       mimetype='text/conf',
                                       headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
     else:
+        db.close()
         return redirect("/configuration/" + config_name)
 
 # Switch peer displate mode
@@ -1064,6 +1123,7 @@ Dashboard Tools Related
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
     config = request.form['config']
+    sem.acquire()
     db = TinyDB('db/' + config + '.json')
     html = ""
     for i in db.all():
@@ -1077,6 +1137,8 @@ def get_ping_ip():
         if len(endpoint) == 2:
             html += "<option value=" + endpoint[0] + ">" + endpoint[0] + "</option>"
         html += "</optgroup>"
+    db.close()
+    sem.release()
     return html
 
 # Ping IP
@@ -1096,8 +1158,6 @@ def ping_ip():
         }
         if returnjson['package_loss'] == 1.0:
             returnjson['package_loss'] = returnjson['package_sent']
-
-
         return jsonify(returnjson)
     except Exception:
         return "Error"
@@ -1221,3 +1281,12 @@ def get_host_bind():
 if __name__ == "__main__":
     run_dashboard()
     app.run(host=app_ip, debug=False, port=app_port)
+else:
+    init_dashboard()
+    update = check_update()
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
+    app_ip = config.get("Server", "app_ip")
+    app_port = config.get("Server", "app_port")
+    wg_conf_path = config.get("Server", "wg_conf_path")
+    config.clear()
