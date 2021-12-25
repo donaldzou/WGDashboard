@@ -1,11 +1,14 @@
 [Unit]
-After=netword.service
+After=syslog.target network-online.target
+ConditionPathIsDirectory=/etc/wireguard
 
 [Service]
-WorkingDirectory=<your dashboard directory full path here>
-ExecStart=/usr/bin/python3 <your dashboard directory full path here>dashboard.py
+Environment="VIRTUAL_ENV={{VIRTUAL_ENV}}"
+WorkingDirectory={{APP_ROOT}}
+ExecStart={{VIRTUAL_ENV}}/bin/python3 {{APP_ROOT}}/dashboard.py
+PrivateTmp=yes
 Restart=always
 
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
