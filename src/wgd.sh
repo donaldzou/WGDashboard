@@ -6,7 +6,7 @@ dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
   printf "=================================================================================\n"
-  printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
+  printf "+          <WGDashboard 1.1.1> by Donald Zou - https://github.com/donaldzou           +\n"
   printf "=================================================================================\n"
   printf "| Usage: ./wgd.sh <option>                                                      |\n"
   printf "|                                                                               |\n"
