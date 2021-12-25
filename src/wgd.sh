@@ -45,24 +45,24 @@ install_wgd(){
     fi
     printf "| Installing latest Python dependencies                    |\n"
     
-    _check_and_set_venv
-    ${VIRTUAL_ENV}/bin/python3 -m pip install -U pip
+#    _check_and_set_venv
+#    ${VIRTUAL_ENV}/bin/python3 -m pip install -U pip
 #    ${VIRTUAL_ENV}/bin/python3 -m pip install virtualenv
     # set up the local environment
 
-    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
+#    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
+    python3 -m pip install -U -r requirements.txt
     printf "| WGDashboard installed successfully!              |\n"
     
     printf "| Preparing the systemctl unit file                        |\n"
-    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
-    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
+#    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
+#    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
 #    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
-    systemctl daemon-reload
-    printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
-    printf "       and 'systemctl start wg-dashboard'\n"
-    printf "       use '${0} stop' before starting with systemctl\n"
+#    systemctl daemon-reload
+#    printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
+#    printf "       and 'systemctl start wg-dashboard'\n"
+#    printf "       use '${0} stop' before starting with systemctl\n"
     echo
-    
     printf "| Now starting Dashboard in background                     |\n"
     start_wgd
 }
