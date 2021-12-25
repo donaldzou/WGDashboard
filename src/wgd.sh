@@ -106,7 +106,8 @@ update_wgd() {
   read up
   if [ "$up" = "Y" ]; then
     printf "| Shutting down WGDashboard...                             |\n"
-    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+    if check_wgd_status; then
+      stop_wgd
     mv wgd.sh wgd.sh.old
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
