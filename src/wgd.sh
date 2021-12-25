@@ -108,6 +108,7 @@ update_wgd() {
     printf "| Shutting down WGDashboard...                             |\n"
     if check_wgd_status; then
       stop_wgd
+    fi
     mv wgd.sh wgd.sh.old
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
