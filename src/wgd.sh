@@ -119,7 +119,8 @@ update_wgd() {
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
     printf "| Update Successfully!                                     |\n"
-    start_wgd
+    rm wgd.sh.old
+    printf "| Enter ./wgd start to start the dashboard                 |\n"
   else
     printf "%s\n" "$dashes"
     printf "| Update Canceled.                                         |\n"
