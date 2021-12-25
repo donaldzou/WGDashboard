@@ -47,7 +47,7 @@ install_wgd(){
     
     # set up the local environment
     _check_and_set_venv
-    
+    ${VIRTUAL_ENV}/bin/python3 -m pip -U pip
     ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
     printf "| WGDashboard installed successfully!              |\n"
     
