@@ -32,7 +32,6 @@ _check_and_set_venv(){
 }
 
 install_wgd(){
-    # Check Python3 version
     printf "| Starting to install WGDashboard                          |\n"
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
@@ -46,23 +45,11 @@ install_wgd(){
     if [ ! -d "log" ]
       then mkdir "log"
     fi
-#    _check_and_set_venv
-#    ${VIRTUAL_ENV}/bin/python3 -m pip install -U pip
-#    ${VIRTUAL_ENV}/bin/python3 -m pip install virtualenv
-#    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
     printf "| Upgrading pip                                            |\n"
     python3 -m pip install -U pip
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -U -r requirements.txt
     printf "| WGDashboard installed successfully!                     |\n"
-#    printf "| Preparing the systemctl unit file                        |\n"
-#    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
-#    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
-#    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
-#    systemctl daemon-reload
-#    printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
-#    printf "       and 'systemctl start wg-dashboard'\n"
-#    printf "       use '${0} stop' before starting with systemctl\n"
     printf "| Enter ./wgd start to start the dashboard                 |\n"
 }
 
@@ -114,9 +101,10 @@ update_wgd() {
     git stash > /dev/null 2>&1
     git pull
 #    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
-#    printf "| Installing latest Python dependencies                    |\n"
-#    python3 -m pip install -U -r requirements.txt >  /dev/null 2>&1
-    install_wgd
+    printf "| Upgrading pip                                            |\n"
+    python3 -m pip install -U pip
+    printf "| Installing latest Python dependencies                    |\n"
+    python3 -m pip install -U -r requirements.txt
     printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
     rm wgd.sh.old
