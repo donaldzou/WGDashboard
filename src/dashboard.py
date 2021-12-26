@@ -8,7 +8,6 @@ import hashlib
 import ipaddress
 import json
 # Python Built-in Library
-import logging
 import os
 import secrets
 import subprocess
@@ -59,7 +58,8 @@ def get_dashboard_conf():
 
 
 def set_dashboard_conf(config):
-    config.write(open(dashboard_conf, "w"))
+    with open(dashboard_conf, "w") as conf_object:
+        config.write(conf_object)
 
 
 # Get all keys from a configuration
@@ -101,17 +101,16 @@ def get_conf_running_peer_number(config_name):
 # Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
     conf_location = wg_conf_path + "/" + config_name + ".conf"
-    f = open(conf_location, 'r')
-    file = f.read().split("\n")
-    data = {}
-    for i in range(len(file)):
-        if not regex_match("#(.*)", file[i]):
-            if len(file[i]) > 0:
-                if file[i] != "[Interface]":
-                    tmp = re.split(r'\s*=\s*', file[i], 1)
-                    if len(tmp) == 2:
-                        data[tmp[0]] = tmp[1]
-    f.close()
+    with open(conf_location, 'r') as file_object:
+        file = file_object.read().split("\n")
+        data = {}
+        for i in range(len(file)):
+            if not regex_match("#(.*)", file[i]):
+                if len(file[i]) > 0:
+                    if file[i] != "[Interface]":
+                        tmp = re.split(r'\s*=\s*', file[i], 1)
+                        if len(tmp) == 2:
+                            data[tmp[0]] = tmp[1]
     return data
 
 
@@ -119,8 +118,8 @@ def read_conf_file_interface(config_name):
 def read_conf_file(config_name):
     # Read Configuration File Start
     conf_location = wg_conf_path + "/" + config_name + ".conf"
-    f = open(conf_location, 'r')
-    file = f.read().split("\n")
+    with open(conf_location, 'r') as file_object:
+        file = file_object.read().split("\n")
     conf_peer_data = {
         "Interface": {},
         "Peers": []
@@ -150,7 +149,6 @@ def read_conf_file(config_name):
                     if len(tmp) == 2:
                         conf_peer_data["Peers"][peer][tmp[0]] = tmp[1]
 
-    f.close()
     # Read Configuration File End
     return conf_peer_data
 
@@ -404,13 +402,11 @@ def get_conf_list():
 
 # Generate private key
 def gen_private_key():
-    private = open('private_key.txt')
-    private_key = private.readline().strip()
-    public = open('public_key.txt')
-    public_key = public.readline().strip()
+    with open('private_key.txt') as file_object:
+        private_key = file_object.readline().strip()
+    with open('public_key.txt') as file_object:
+        public_key = file_object.readline().strip()
     data = {"private_key": private_key, "public_key": public_key}
-    private.close()
-    public.close()
     os.remove('private_key.txt')
     os.remove('public_key.txt')
     return data
@@ -418,12 +414,11 @@ def gen_private_key():
 
 # Generate public key
 def gen_public_key(private_key):
-    pri_key_file = open('private_key.txt', 'w')
-    pri_key_file.write(private_key)
-    pri_key_file.close()
+    with open('private_key.txt', 'w') as file_object:
+        file_object.write(private_key)
     try:
-        public = open('public_key.txt')
-        public_key = public.readline().strip()
+        with open('public_key.txt') as file_object:
+            public_key = file_object.readline().strip()
         os.remove('private_key.txt')
         os.remove('public_key.txt')
         return {"status": 'success', "msg": "", "data": public_key}
@@ -593,14 +588,14 @@ def update_acct():
     config.read(dashboard_conf)
     config.set("Account", "username", request.form['username'])
     try:
-        config.write(open(dashboard_conf, "w"))
+        with open(dashboard_conf, "w") as config_object:
+            config.write(config_object)
+            config.clear()
         session['message'] = "Username update successfully!"
         session['message_status'] = "success"
         session['username'] = request.form['username']
-        config.clear()
         return redirect(url_for("settings"))
-    except Exception as exc:
-        logging.error(exc)
+    except Exception:
         session['message'] = "Username update failed."
         session['message_status'] = "danger"
         config.clear()
@@ -635,25 +630,15 @@ def update_peer_default_config():
         session['message_status'] = "danger"
         return redirect(url_for("settings"))
     # Check MTU Format
-    if len(request.form['peer_mtu']) > 0:
-        try:
-            # TODO need to using
-            mtu = int(request.form['peer_mtu'])
-        except Exception as exc:
-            logging.info(exc)
-            session['message'] = "MTU format is incorrect."
-            session['message_status'] = "danger"
-            return redirect(url_for("settings"))
+    if not len(request.form['peer_mtu']) > 0 or not request.form['peer_mtu'].isdigit():
+        session['message'] = "MTU format is incorrect."
+        session['message_status'] = "danger"
+        return redirect(url_for("settings"))
     # Check keepalive Format
-    if len(request.form['peer_keep_alive']) > 0:
-        try:
-            # TODO need to using
-            mtu = int(request.form['peer_keep_alive'])
-        except Exception as exc:
-            logging.error(exc)
-            session['message'] = "Persistent keepalive format is incorrect."
-            session['message_status'] = "danger"
-            return redirect(url_for("settings"))
+    if not len(request.form['peer_keep_alive']) > 0 or not request.form['peer_keep_alive'].isdigit():
+        session['message'] = "Persistent keepalive format is incorrect."
+        session['message_status'] = "danger"
+        return redirect(url_for("settings"))
     # Check peer remote endpoint
     if not check_remote_endpoint(request.form['peer_remote_endpoint']):
         session['message'] = "Peer Remote Endpoint format is incorrect. It can only be a valid " \
@@ -668,13 +653,13 @@ def update_peer_default_config():
     config.set("Peers", "peer_global_DNS", dns_addresses)
 
     try:
-        config.write(open(dashboard_conf, "w"))
-        session['message'] = "Peer Default Settings update successfully!"
-        session['message_status'] = "success"
-        config.clear()
+        with open(dashboard_conf, "w") as conf_object:
+            config.write(conf_object)
+            session['message'] = "Peer Default Settings update successfully!"
+            session['message_status'] = "success"
+            config.clear()
         return redirect(url_for("settings"))
-    except Exception as exc:
-        logging.error(exc)
+    except Exception:
         session['message'] = "Peer Default Settings update failed."
         session['message_status'] = "danger"
         config.clear()
@@ -691,13 +676,13 @@ def update_pwd():
                 request.form['repnewpass'].encode()).hexdigest():
             config.set("Account", "password", hashlib.sha256(request.form['repnewpass'].encode()).hexdigest())
             try:
-                config.write(open(dashboard_conf, "w"))
-                session['message'] = "Password update successfully!"
-                session['message_status'] = "success"
-                config.clear()
-                return redirect(url_for("settings"))
-            except Exception as exc:
-                logging.error(exc)
+                with open(dashboard_conf, "w") as conf_object:
+                    config.write(conf_object)
+                    session['message'] = "Password update successfully!"
+                    session['message_status'] = "success"
+                    config.clear()
+                    return redirect(url_for("settings"))
+            except Exception:
                 session['message'] = "Password update failed"
                 session['message_status'] = "danger"
                 config.clear()
@@ -721,8 +706,9 @@ def update_app_ip_port():
     config.read(dashboard_conf)
     config.set("Server", "app_ip", request.form['app_ip'])
     config.set("Server", "app_port", request.form['app_port'])
-    config.write(open(dashboard_conf, "w"))
-    config.clear()
+    with open(dashboard_conf, "w") as config_object:
+        config.write(config_object)
+        config.clear()
     os.system('bash wgd.sh restart')
 
 
@@ -732,10 +718,11 @@ def update_wg_conf_path():
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
     config.set("Server", "wg_conf_path", request.form['wg_conf_path'])
-    config.write(open(dashboard_conf, "w"))
+    with open(dashboard_conf, "w") as config_object:
+        config.write(config_object)
+        config.clear()
     session['message'] = "WireGuard Configuration Path Update Successfully!"
     session['message_status'] = "success"
-    config.clear()
     os.system('bash wgd.sh restart')
 
 
@@ -754,8 +741,9 @@ def update_dashbaord_sort():
         config.set("Server", "dashboard_sort", data['sort'])
     else:
         config.set("Server", "dashboard_sort", 'status')
-    config.write(open(dashboard_conf, "w"))
-    config.clear()
+    with open(dashboard_conf, "w") as config_object:
+        config.write(config_object)
+        config.clear()
     return "true"
 
 
@@ -765,8 +753,9 @@ def update_dashboard_refresh_interval():
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
     config.set("Server", "dashboard_refresh_interval", str(request.form['interval']))
-    config.write(open(dashboard_conf, "w"))
-    config.clear()
+    with open(dashboard_conf, "w") as config_object:
+        config.write(config_object)
+        config.clear()
     return "true"
 
 
@@ -895,24 +884,14 @@ def add_peer(config_name):
         db.close()
         sem.release()
         return "Endpoint Allowed IPs format is incorrect."
-    if len(data['MTU']) != 0:
-        try:
-            # TODO need to using
-            mtu = int(data['MTU'])
-        except Exception as exc:
-            logging.error(exc)
-            db.close()
-            sem.release()
-            return "MTU format is not correct."
-    if len(data['keep_alive']) != 0:
-        try:
-            # TODO need to using
-            keep_alive = int(data['keep_alive'])
-        except Exception as exc:
-            logging.error(exc)
-            db.close()
-            sem.release()
-            return "Persistent Keepalive format is not correct."
+    if len(data['MTU']) == 0 or not data['MTU'].isdigit():
+        db.close()
+        sem.release()
+        return "MTU format is not correct."
+    if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
+        db.close()
+        sem.release()
+        return "Persistent Keepalive format is not correct."
     try:
         subprocess.run(f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips}",
                        check=True, shell=True, capture_output=True, stderr=subprocess.STDOUT)
@@ -988,24 +967,14 @@ def save_peer_setting(config_name):
             db.close()
             sem.release()
             return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
-        if len(data['MTU']) != 0:
-            try:
-                # TODO need to use
-                mtu = int(data['MTU'])
-            except Exception as exc:
-                logging.error(exc)
-                db.close()
-                sem.release()
-                return jsonify({"status": "failed", "msg": "MTU format is not correct."})
-        if len(data['keep_alive']) != 0:
-            try:
-                # TODO need to using
-                keep_alive = int(data['keep_alive'])
-            except Exception as exc:
-                logging.error(exc)
-                db.close()
-                sem.release()
-                return jsonify({"status": "failed", "msg": "Persistent Keepalive format is not correct."})
+        if len(data['MTU']) == 0 or not data['MTU'].isdigit():
+            db.close()
+            sem.release()
+            return jsonify({"status": "failed", "msg": "MTU format is not correct."})
+        if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
+            db.close()
+            sem.release()
+            return jsonify({"status": "failed", "msg": "Persistent Keepalive format is not correct."})
         if private_key != "":
             check_key = checkKeyMatch(private_key, id, config_name)
             if check_key['status'] == "failed":
@@ -1187,7 +1156,8 @@ def switch_display_mode(mode):
     if mode in ['list', 'grid']:
         config.read(dashboard_conf)
         config.set("Peers", "peer_display_mode", mode)
-        config.write(open(dashboard_conf, "w"))
+        with open(dashboard_conf, "w") as config_object:
+            config.write(config_object)
         return "true"
     else:
         return "false"
@@ -1239,8 +1209,7 @@ def ping_ip():
         if returnjson['package_loss'] == 1.0:
             returnjson['package_loss'] = returnjson['package_sent']
         return jsonify(returnjson)
-    except Exception as exc:
-        logging.error(exc)
+    except Exception:
         return "Error"
 
 
@@ -1258,8 +1227,7 @@ def traceroute_ip():
                                "max_rtt": hop.max_rtt})
             last_distance = hop.distance
         return jsonify(returnjson)
-    except Exception as exc:
-        logging.error(exc)
+    except Exception:
         return "Error"
 
 
@@ -1314,8 +1282,9 @@ def init_dashboard():
         config['Peers']['peer_MTU'] = "1420"
     if 'peer_keep_alive' not in config['Peers']:
         config['Peers']['peer_keep_alive'] = "21"
-    config.write(open(dashboard_conf, "w"))
-    config.clear()
+    with open(dashboard_conf, "w") as config_object:
+        config.write(config_object)
+        config.clear()
 
 
 def check_update():
