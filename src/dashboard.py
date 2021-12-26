@@ -1026,7 +1026,7 @@ def check_key_match(config_name):
 def generate_qrcode(config_name):
     id = request.args.get('id')
     sem.acquire()
-    db = TinyDB('db/' + config_name + '.json')
+    db = TinyDB(os.path.join(db_path, config_name + ".json"))
     peers = Query()
     get_peer = db.search(peers.id == id)
     config = get_dashboard_conf()
