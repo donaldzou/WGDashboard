@@ -41,37 +41,25 @@ _check_and_set_venv(){
 }
 
 install_wgd(){
-    # Check Python3 version
-    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 8) else print("0");')
+    printf "| Starting to install WGDashboard                          |\n"
+    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
-      then printf "| WGDashboard required Python3.8+                  |\n"
+      then printf "| WGDashboard required Python 3.7 or above          |\n"
       printf "%s\n" "$dashes"
       exit 1
     fi
-    rm db/hi.txt >  /dev/null 2>&1
+    if [ ! -d "db" ]
+      then mkdir "db"
+    fi
     if [ ! -d "log" ]
       then mkdir "log"
     fi
+    printf "| Upgrading pip                                            |\n"
+    python3 -m pip install -U pip
     printf "| Installing latest Python dependencies                    |\n"
-
-    # set up the local environment
-    _check_and_set_venv
-    ${VIRTUAL_ENV}/bin/python3 -m pip -U pip
-    ${VIRTUAL_ENV}/bin/python3 -m pip install -U -r requirements.txt
-    printf "| WGDashboard installed successfully!              |\n"
-
-    printf "| Preparing the systemctl unit file                        |\n"
-    sed -i "s#{{APP_ROOT}}#${APP_ROOT}#" wg-dashboard.service
-    sed -i "s#{{VIRTUAL_ENV}}#${VIRTUAL_ENV}#" wg-dashboard.service
-#    cat wg-dashboard.service | sudo SYSTEMD_EDITOR=tee systemctl edit --force --full wg-dashboard.service
-    systemctl daemon-reload
-    printf "| Consider 'systemctl enable wg-dashboard'                 |\n"
-    printf "       and 'systemctl start wg-dashboard'\n"
-    printf "       use '${0} stop' before starting with systemctl\n"
-    echo
-
-    printf "| Now starting Dashboard in background                     |\n"
-    start_wgd
+    python3 -m pip install -U -r requirements.txt
+    printf "| WGDashboard installed successfully!                     |\n"
+    printf "| Enter ./wgd start to start the dashboard                 |\n"
 }
 
 
@@ -134,7 +122,6 @@ gunicorn_stop () {
 }
 
 start_wgd () {
-    _check_and_set_venv
     if [[ $environment == 'production' ]]; then
       gunicorn_start
     else
@@ -160,8 +147,6 @@ stop_wgd() {
 
 start_wgd_debug() {
   printf "%s\n" "$dashes"
-  _check_and_set_venv
-  printf "%s\n" "$dashes"
   printf "| Starting WGDashboard in the foreground.                  |\n"
   python3 "$app_name"
   printf "%s\n" "$dashes"
@@ -174,15 +159,21 @@ update_wgd() {
   read up
   if [ "$up" = "Y" ]; then
     printf "| Shutting down WGDashboard...                             |\n"
-    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+    if check_wgd_status; then
+      stop_wgd
+    fi
+    mv wgd.sh wgd.sh.old
     printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
     git stash > /dev/null 2>&1
-    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    git pull
+#    git pull https://github.com/donaldzou/wireguard-dashboard.git $new_ver --force >  /dev/null 2>&1
+    printf "| Upgrading pip                                            |\n"
+    python3 -m pip install -U pip
     printf "| Installing latest Python dependencies                    |\n"
-    _check_and_set_venv
-    python3 -m pip install -r requirements.txt >  /dev/null 2>&1
+    python3 -m pip install -U -r requirements.txt
     printf "| Update Successfully!                                     |\n"
-    start_wgd
+    printf "%s\n" "$dashes"
+    rm wgd.sh.old
   else
     printf "%s\n" "$dashes"
     printf "| Update Canceled.                                         |\n"
@@ -217,7 +208,9 @@ if [ "$#" != 1 ];
       elif [ "$1" = "update" ]; then
         update_wgd
       elif [ "$1" = "install" ]; then
+        printf "%s\n" "$dashes"
         install_wgd
+        printf "%s\n" "$dashes"
       elif [ "$1" = "restart" ]; then
          if check_wgd_status; then
            printf "%s\n" "$dashes"
