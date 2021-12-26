@@ -1269,7 +1269,7 @@ else:
     init_dashboard()
     update = check_update()
     config = configparser.ConfigParser(strict=False)
-    config.read('wg-dashboard.ini')
+    config.read(dashboard_conf)
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
     wg_conf_path = config.get("Server", "wg_conf_path")
