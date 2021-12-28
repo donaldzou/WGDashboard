@@ -1056,7 +1056,7 @@ def generate_qrcode(config_name):
         sem.release()
         return redirect("/configuration/" + config_name)
 # Download configuration file
-@app.route('/<config_name>', methods=['GET'])
+@app.route('/download/<config_name>', methods=['GET'])
 def download(config_name):
     print(request.headers.get('User-Agent'))
     id = request.args.get('id')
