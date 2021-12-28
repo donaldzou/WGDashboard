@@ -1124,7 +1124,7 @@ Dashboard Tools Related
 # Get all IP for ping
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
-    config = request.form['config']
+    config_name = request.form['config']
     sem.acquire(timeout=1)
     db = TinyDB(os.path.join(db_path, config_name + ".json"))
 
