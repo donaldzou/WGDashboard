@@ -223,10 +223,8 @@ def get_allowed_ip(config_name, db, peers, conf_peer_data):
 
 # Look for new peers from WireGuard
 def get_all_peers_data(config_name):
-    sem.acquire()
-    
+    sem.acquire(timeout=1)
     db = TinyDB('db/' + config_name + '.json')
-
     peers = Query()
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
@@ -283,7 +281,10 @@ def get_all_peers_data(config_name):
     toc = time.perf_counter()
     print(f"Finish fetching data in {toc - tic:0.4f} seconds")
     db.close()
-    sem.release()
+    try:
+        sem.release()
+    except RuntimeError as e:
+        pass
 
 """
 Frontend Related Functions
@@ -291,7 +292,7 @@ Frontend Related Functions
 # Search for peers
 def get_peers(config_name, search, sort_t):
     get_all_peers_data(config_name)
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peer = Query()
@@ -335,7 +336,7 @@ def get_conf_listen_port(config_name):
 
 # Get configuration total data
 def get_conf_total_data(config_name):
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     upload_total = 0
@@ -414,7 +415,7 @@ def checkKeyMatch(private_key, public_key, config_name):
     if result['status'] == 'failed':
         return result
     else:
-        sem.acquire()
+        sem.acquire(timeout=1)
         
         db = TinyDB('db/' + config_name + '.json')
         peers = Query()
@@ -431,7 +432,7 @@ def checkKeyMatch(private_key, public_key, config_name):
 # Check if there is repeated allowed IP
 def check_repeat_allowed_IP(public_key, ip, config_name):
 
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
@@ -754,7 +755,8 @@ def conf(config_name):
 def get_conf(config_name):
     config_interface = read_conf_file_interface(config_name)
     search = request.args.get('search')
-    if len(search) == 0: search = ""
+    if len(search) == 0:
+        search = ""
     search = urllib.parse.unquote(search)
     config = configparser.ConfigParser(strict=False)
     config.read(dashboard_conf)
@@ -772,15 +774,20 @@ def get_conf(config_name):
         "public_key": get_conf_pub_key(config_name),
         "listen_port": get_conf_listen_port(config_name),
         "running_peer": get_conf_running_peer_number(config_name),
-        "conf_address": conf_address
+        "conf_address": conf_address,
+        "wg_ip": config.get("Peers","remote_endpoint"),
+        "sort_tag": sort,
+        "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
+        "peer_display_mode": peer_display_mode
     }
     if conf_data['status'] == "stopped":
         conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
     print(config.get("Peers","remote_endpoint"))
-    return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
-                           dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
+    return jsonify(conf_data)
+    # return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
+    #                        dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
 
 # Turn on / off a configuration
 @app.route('/switch/<config_name>', methods=['GET'])
@@ -805,7 +812,7 @@ def switch(config_name):
 # Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
@@ -875,7 +882,7 @@ def add_peer(config_name):
 def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
@@ -911,7 +918,7 @@ def save_peer_setting(config_name):
     DNS = data['DNS']
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
@@ -984,7 +991,7 @@ def save_peer_setting(config_name):
 def get_peer_name(config_name):
     data = request.get_json()
     id = data['id']
-    sem.acquire()
+    sem.acquire(timeout=1)
     
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
@@ -1020,7 +1027,7 @@ def check_key_match(config_name):
 @app.route("/qrcode/<config_name>", methods=['GET'])
 def generate_qrcode(config_name):
     id = request.args.get('id')
-    sem.acquire()
+    sem.acquire(timeout=1)
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     get_peer = db.search(peers.id == id)
@@ -1060,7 +1067,7 @@ def generate_qrcode(config_name):
 def download(config_name):
     print(request.headers.get('User-Agent'))
     id = request.args.get('id')
-    sem.acquire()
+    sem.acquire(timeout=1)
     db = TinyDB('db/' + config_name + '.json')
     peers = Query()
     get_peer = db.search(peers.id == id)
@@ -1123,7 +1130,7 @@ Dashboard Tools Related
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
     config = request.form['config']
-    sem.acquire()
+    sem.acquire(timeout=1)
     db = TinyDB('db/' + config + '.json')
     html = ""
     for i in db.all():
