@@ -303,7 +303,7 @@ $("body").on("change", "#sort_by_dropdown", function (){
         headers:{"Content-Type": "application/json"},
         url: "/update_dashboard_sort",
         success: function (res){
-            location.reload()
+            load_data($('#search_peer_textbox').val())
         }
     })
 })
@@ -336,26 +336,41 @@ function copyToClipboard(element) {
 
 // Update Interval
 $("body").on("click", ".update_interval", function(){
-	    $.ajax({
-            method:"POST",
-            data: "interval="+$(this).attr("refresh-interval"),
-            url: "/update_dashboard_refresh_interval",
-            success: function (res){
-                location.reload()
-            }
-        })
-    });
+    $(".interval-btn-group button").removeClass("active");
+    $(this).addClass("active");
+    $.ajax({
+        method:"POST",
+        data: "interval="+$(this).data("refresh-interval"),
+        url: "/update_dashboard_refresh_interval",
+        success: function (res){
+
+            load_data($('#search_peer_textbox').val())
+        }
+    })
+});
 $("body").on("click", ".refresh", function (){
     load_data($('#search_peer_textbox').val());
 });
 
 // Switch display mode
 $("body").on("click", ".display_mode", function(){
+    $(".display-btn-group button").removeClass("active");
+    $(this).addClass("active");
+    let display_mode = $(this).data("display-mode");
     $.ajax({
         method:"GET",
-        url: "/switch_display_mode/"+$(this).attr("display-mode"),
+        url: "/switch_display_mode/"+$(this).data("display-mode"),
         success: function (res){
-            location.reload()
+            // load_data($('#search_peer_textbox').val())
+            if (display_mode === "list"){
+                Array($(".peer_list").children()).forEach(function(child){
+                    $(child).removeClass().addClass("col-12");
+                })
+            }else{
+               Array($(".peer_list").children()).forEach(function(child){
+                    $(child).removeClass().addClass("col-sm-6 col-lg-4");
+                })
+            }
         }
     })
 })

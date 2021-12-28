@@ -1,9 +1,7 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
 	<div class="info mt-4">
         {% if conf_data['listen_port'] == "" and conf_data['status'] == "stopped" %}
-            <div class="alert alert-warning" role="alert">
-                Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.
-            </div>
+            <div class="alert alert-warning" role="alert">Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.</div>
         {% endif %}
         {% if conf_data['conf_address'] == "N/A" %}
             <div class="alert alert-warning" role="alert">
@@ -51,7 +49,7 @@
 			<div class="col-sm">
 				<small class="text-muted">
                     <strong>PUBLIC KEY</strong>
-                    <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small>
+                    <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong>
                 </small>
 				<h6><samp class="key">{{conf_data['public_key']}}</samp></h6>
 			</div>
@@ -63,7 +61,6 @@
                     {% else %}
                         {{conf_data['listen_port']}}
                     {% endif %}
-
                 </samp></h6>
 			</div>
             <div class="col-sm">
@@ -114,9 +111,7 @@
 
     <div class="row peer_list">
         {% if conf_data['peer_data']|length == 0 %}
-            <div class="col-12" style="text-align: center; margin-top: 1.5rem">
-                <h3 class="text-muted">Oops! No peers found ‘︿’</h3>
-            </div>
+            <div class="col-12" style="text-align: center; margin-top: 1.5rem"><h3 class="text-muted">Oops! No peers found ‘︿’</h3></div>
         {% endif %}
 
         {% for i in conf_data['peer_data']%}
@@ -125,20 +120,7 @@
             {% else %}
                 <div class="col-sm-6 col-lg-4">
             {% endif %}
-                <div class="card mb-3 card-{{i['status']}}">
-{#                <div class="card-header">#}
-{#                    <div class="row">#}
-{#                        <div class="col">#}
-{#                            <div class="card-header-body ">#}
-{#                                {% if not i['name']%}#}
-{#                                    {{ "Untitled" }}#}
-{#                                {% else %}#}
-{#                                    {{i['name']}}#}
-{#                                {% endif %}#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
+            <div class="card mb-3 card-{{i['status']}}">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm">
@@ -170,8 +152,6 @@
                             <small class="text-muted"><strong>ALLOWED IP</strong></small>
                             <h6 style="text-transform: uppercase;">{{i['allowed_ip']}}</h6>
                         </div>
-{#                        <div class="w-100"></div>#}
-
                         <div class="col-sm">
                             <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
                             <h6 style="text-transform: uppercase;">{{i['latest_handshake']}}</h6>
@@ -182,12 +162,7 @@
                             <h6 style="text-transform: uppercase;">{{i['endpoint']}}</h6>
                         </div>
                         <div class="w-100"></div>
-                        <div class="col-sm">
-                            <hr>
-                            <div class="button-group" style="display:flex">
-
-                                <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button>
-                                <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
+                        <div class="col-sm"><hr><div class="button-group" style="display:flex"><button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-gear-fill"></i></button><button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="{{i['id']}}" data-toggle="modal"><i class="bi bi-x-circle-fill"></i></button>
                                 {% if i['private_key'] %}
                                     <div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
                                         <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="/qrcode/{{ conf_data['name'] }}?id={{ i['id']|urlencode }}">
@@ -204,11 +179,6 @@
                 </div>
             </div>
             </div>
-
-
         {%endfor%}
     </div>
-
-
-
 </main>
