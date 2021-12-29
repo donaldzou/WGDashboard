@@ -1,5 +1,38 @@
+let $body = $("body");
+
+// Progress Bar
+let $progress_bar = $(".progress-bar")
+function startProgressBar(){
+    $progress_bar.css("width","0%")
+    $progress_bar.css("opacity", "100")
+    $progress_bar.css("background", "rgb(255,69,69)")
+    $progress_bar.css("background", "linear-gradient(145deg, rgba(255,69,69,1) 0%, rgba(0,115,186,1) 100%)")
+    $progress_bar.css("width","25%")
+    setTimeout(function(){
+        stillLoadingProgressBar();
+    },300)
+}
+function stillLoadingProgressBar(){
+    $progress_bar.css("transition", "3s ease-in-out")
+    $progress_bar.css("width", "75%")
+}
+function endProgressBar(){
+    $progress_bar.css("transition", "0.3s ease-in-out")
+    $progress_bar.css("width","100%")
+    setTimeout(function(){
+        $progress_bar.css("opacity", "0")
+    },250)
+
+}
+
+function showToast(msg) {
+    $('#alertToast').toast('show');
+    $('#alertToast .toast-body').html(msg);
+}
+
+
 // Config Toggle
-$("body").on("click", ".switch", function (){
+$body.on("click", ".switch", function (){
     $(this).siblings($(".spinner-border")).css("display", "inline-block");
      $(this).remove()
    location.replace("/switch/"+$(this).attr('id'));
@@ -13,6 +46,7 @@ function generate_key(){
     }).done(function(res){
         $("#private_key").val(res.private_key)
         $("#public_key").val(res.public_key)
+        $("#preshare_key").val(res.preshared_key)
         $("#add_peer_alert").addClass("d-none");
         $("#re_generate_key i").removeClass("rotating")
     })
@@ -36,7 +70,7 @@ function generate_public_key(){
 }
 
 // Add Peer
-$("#private_key").change(function(){
+$("#private_key").on("change",function(){
     if ($("#private_key").val().length > 0){
         $("#re_generate_key i").addClass("rotating")
         generate_public_key()
@@ -53,7 +87,15 @@ $("#re_generate_key").click(function (){
     $("#re_generate_key i").addClass("rotating")
     generate_key()
 })
-$("#save_peer").click(function(){
+let addModal = new bootstrap.Modal(document.getElementById('add_modal'), {
+    keyboard: false
+})
+
+$(".add_btn").on("click", function(){
+    addModal.toggle();
+})
+
+$("#save_peer").on("click",function(){
     $(this).attr("disabled","disabled")
     $(this).html("Saving...")
 
@@ -77,7 +119,8 @@ $("#save_peer").click(function(){
                 "DNS": $("#new_add_DNS").val(),
                 "endpoint_allowed_ip": $("#new_add_endpoint_allowed_ip").val(),
                 "MTU": $("#new_add_MTU").val(),
-                "keep_alive": $("#new_add_keep_alive").val()
+                "keep_alive": $("#new_add_keep_alive").val(),
+                "enable_preshared_key": $("#enable_preshare_key").prop("checked"),
             }),
             success: function (response){
                 if(response != "true"){
@@ -90,7 +133,8 @@ $("#save_peer").click(function(){
                     $("#save_peer").html("Save")
                 }
                 else{
-                    location.reload();
+                    load_data("");
+                    addModal.hide();
                 }
             }
         })
@@ -106,7 +150,7 @@ var qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
 })
 
 // QR Code
-$("body").on("click", ".btn-qrcode-peer", function (){
+$body.on("click", ".btn-qrcode-peer", function (){
     var src = $(this).attr('img_src');
     $.ajax({
         "url": src,
@@ -122,7 +166,7 @@ var deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), {
     keyboard: false
 });
 
-$("body").on("click", ".btn-delete-peer", function(){
+$body.on("click", ".btn-delete-peer", function(){
     var peer_id = $(this).attr("id");
     $("#delete_peer").attr("peer_id", peer_id);
     deleteModal.toggle();
@@ -161,7 +205,7 @@ $("#delete_peer").click(function(){
 var settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), {
     keyboard: false
 })
-$("body").on("click", ".btn-setting-peer", function(){
+$body.on("click", ".btn-setting-peer", function(){
     startProgressBar()
     var peer_id = $(this).attr("id");
     $("#save_peer_setting").attr("peer_id", peer_id);
@@ -182,6 +226,7 @@ $("body").on("click", ".btn-setting-peer", function(){
             $("#setting_modal #peer_endpoint_allowed_ips").val(response['endpoint_allowed_ip'])
             $("#setting_modal #peer_mtu").val(response['mtu'])
             $("#setting_modal #peer_keep_alive").val(response['keep_alive'])
+            $("#setting_modal #peer_preshared_key_textbox").val(response["preshared_key"])
             settingModal.toggle();
             endProgressBar()
         }
@@ -223,7 +268,7 @@ $("#save_peer_setting").click(function (){
         var peer_id = $(this).attr("peer_id");
         var conf_id = $(this).attr("conf_id");
         var data_list = [
-            $("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"),
+            $("#peer_name_textbox"), $("#peer_DNS_textbox"), $("#peer_private_key_textbox"), $("#peer_preshared_key_textbox"),
             $("#peer_allowed_ip_textbox"), $("#peer_endpoint_allowed_ips"), $("#peer_mtu"), $("#peer_keep_alive")
         ]
         for (var i = 0; i < data_list.length; i++){
@@ -243,7 +288,8 @@ $("#save_peer_setting").click(function (){
                 allowed_ip: $("#peer_allowed_ip_textbox").val(),
                 endpoint_allowed_ip: $("#peer_endpoint_allowed_ips").val(),
                 MTU: $("#peer_mtu").val(),
-                keep_alive: $("#peer_keep_alive").val()
+                keep_alive: $("#peer_keep_alive").val(),
+                preshared_key: $("#peer_preshared_key_textbox").val()
             }),
             success: function (response){
                 if (response['status'] === "failed"){
@@ -296,7 +342,7 @@ function doneTyping () {
 }
 
 // Sorting
-$("body").on("change", "#sort_by_dropdown", function (){
+$body.on("change", "#sort_by_dropdown", function (){
     $.ajax({
         method:"POST",
         data: JSON.stringify({'sort':$("#sort_by_dropdown option:selected").val()}),
@@ -309,11 +355,11 @@ $("body").on("change", "#sort_by_dropdown", function (){
 })
 
 // Click key to copy
-$("body").on("mouseenter", ".key", function(){
+$body.on("mouseenter", ".key", function(){
     var label = $(this).parent().siblings().children()[1]
     label.style.opacity = "100"
 })
-$("body").on("mouseout", ".key", function(){
+$body.on("mouseout", ".key", function(){
     var label = $(this).parent().siblings().children()[1]
     label.style.opacity = "0"
     setTimeout(function (){
@@ -321,39 +367,54 @@ $("body").on("mouseout", ".key", function(){
     },200)
 
 });
-$("body").on("click", ".key", function(){
+$body.on("click", ".key", function(){
     var label = $(this).parent().siblings().children()[1]
     copyToClipboard($(this))
     label.innerHTML = "COPIED!"
 })
 function copyToClipboard(element) {
     var $temp = $("<input>");
-    $("body").append($temp);
+    $body.append($temp);
     $temp.val($(element).text()).select();
     document.execCommand("copy");
     $temp.remove();
 }
 
 // Update Interval
-$("body").on("click", ".update_interval", function(){
+$body.on("click", ".update_interval", function(){
+    let prev = $(".interval-btn-group.active button");
     $(".interval-btn-group button").removeClass("active");
-    $(this).addClass("active");
+    let _new = $(this)
+    _new.addClass("active");
+    let interval = $(this).data("refresh-interval");
     $.ajax({
         method:"POST",
         data: "interval="+$(this).data("refresh-interval"),
         url: "/update_dashboard_refresh_interval",
         success: function (res){
-
-            load_data($('#search_peer_textbox').val())
+            if (res === "true"){
+                load_interval = interval;
+                clearInterval(load_timeout);
+                load_timeout = setInterval(function (){
+                    load_data($('#search_peer_textbox').val());
+                }, interval);
+                showToast("Refresh Interval set to "+Math.round(interval/1000)+" seconds");
+            }else{
+                $(".interval-btn-group button").removeClass("active");
+                $('.interval-btn-group button[data-refresh-interval="'+load_interval+'"]').addClass("active");
+                showToast("Refresh Interval set unsuccessful");
+            }
         }
     })
 });
-$("body").on("click", ".refresh", function (){
+$body.on("click", ".refresh", function (){
     load_data($('#search_peer_textbox').val());
 });
 
+
+
 // Switch display mode
-$("body").on("click", ".display_mode", function(){
+$body.on("click", ".display_mode", function(){
     $(".display-btn-group button").removeClass("active");
     $(this).addClass("active");
     let display_mode = $(this).data("display-mode");
@@ -361,16 +422,25 @@ $("body").on("click", ".display_mode", function(){
         method:"GET",
         url: "/switch_display_mode/"+$(this).data("display-mode"),
         success: function (res){
-            // load_data($('#search_peer_textbox').val())
-            if (display_mode === "list"){
+           if (res === "true"){
+                if (display_mode === "list"){
                 Array($(".peer_list").children()).forEach(function(child){
                     $(child).removeClass().addClass("col-12");
                 })
+                showToast("Displaying as List");
             }else{
                Array($(".peer_list").children()).forEach(function(child){
                     $(child).removeClass().addClass("col-sm-6 col-lg-4");
-                })
+               });
+               showToast("Displaying as Grid");
             }
+           }
         }
     })
 })
+
+// Pre-share key
+// $("#enable_preshare_key").on("change", function(){
+//     $(".preshare_key_container").css("display", $(".preshare_key_container").css("display") === "none" ? "block":"none");
+//
+// })

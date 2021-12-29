@@ -134,6 +134,7 @@ body {
 
 .info h6{
     line-break: anywhere;
+    transition: 0.2s ease-in-out;
 }
 
 .info .row .col-sm{
@@ -291,6 +292,10 @@ main{
     cursor: pointer;
 }
 
+#peer_private_key_textbox, #private_key, #public_key{
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+
 .progress-bar{
     transition: 0.3s ease-in-out;
 }
@@ -322,4 +327,57 @@ main{
 
 .modal-content{
     border-radius: 10px;
+}
+
+.tooltip-inner{
+    font-size: 0.8rem;
+}
+
+@-webkit-keyframes loading {
+    0%{
+        background-color: #dfdfdf;
+    }
+    50%{
+        background-color: #adadad;
+    }
+    100%{
+        background-color: #dfdfdf;
+    }
+}
+@-moz-keyframes loading {
+    0%{
+        background-color: #dfdfdf;
+    }
+    50%{
+        background-color: #adadad;
+    }
+    100%{
+        background-color: #dfdfdf;
+    }
+}
+
+.conf_card{
+    transition: 0.2s ease-in-out;
+}
+
+.conf_card:hover{
+    border-color: #007bff;
+    cursor: pointer;
+}
+
+.info_loading{
+    animation: loading 2s infinite ease-in-out;
+    border-radius: 5px;
+    height: 19px;
+    transition: 0.3s ease-in-out;
+}
+
+#conf_status_btn{
+    transition: 0.2s ease-in-out;
+}
+
+#conf_status_btn.info_loading{
+    height: 38px;
+    border-radius: 5px;
+    animation: loading 2s infinite ease-in-out;
 }
