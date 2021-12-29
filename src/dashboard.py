@@ -124,24 +124,24 @@ def read_conf_file_interface(config_name):
 def read_conf_file(config_name):
     # Read Configuration File Start
     conf_location = wg_conf_path + "/" + config_name + ".conf"
-    with open(conf_location, 'r', encoding='utf-8') as file_object:
-        file = file_object.read().split("\n")
+    f = open(conf_location, 'r')
+    file = f.read().split("\n")
     conf_peer_data = {
         "Interface": {},
         "Peers": []
     }
     peers_start = 0
-    for i in file:
-        if not regex_match("#(.*)", i):
-            if i == "[Peer]":
+    for i in range(len(file)):
+        if not regex_match("#(.*)", file[i]):
+            if file[i] == "[Peer]":
                 peers_start = i
                 break
-
-            if len(i) > 0:
-                if i != "[Interface]":
-                    tmp = re.split(r'\s*=\s*', i, 1)
-                    if len(tmp) == 2:
-                        conf_peer_data['Interface'][tmp[0]] = tmp[1]
+            else:
+                if len(file[i]) > 0:
+                    if file[i] != "[Interface]":
+                        tmp = re.split(r'\s*=\s*', file[i], 1)
+                        if len(tmp) == 2:
+                            conf_peer_data['Interface'][tmp[0]] = tmp[1]
     conf_peers = file[peers_start:]
     peer = -1
     for i in conf_peers:
@@ -151,10 +151,11 @@ def read_conf_file(config_name):
                 conf_peer_data["Peers"].append({})
             elif peer > -1:
                 if len(i) > 0:
-                    tmp = re.split(r'\s*=\s*', i, 1)
+                    tmp = re.split('\s*=\s*', i, 1)
                     if len(tmp) == 2:
                         conf_peer_data["Peers"][peer][tmp[0]] = tmp[1]
 
+    f.close()
     # Read Configuration File End
     return conf_peer_data
 
@@ -199,27 +200,28 @@ def get_transfer(config_name, db, peers):
     count = 0
     for _ in range(int(len(data_usage) / 3)):
         cur_i = db.search(peers.id == data_usage[count])
-        total_sent = cur_i[0]['total_sent']
-        total_receive = cur_i[0]['total_receive']
-        traffic = cur_i[0]['traffic']
-        cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
-        cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
-        if cur_i[0]["status"] == "running":
-            if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
-                total_sent = cur_total_sent
-                total_receive = cur_total_receive
-            else:
-                now = datetime.now()
-                ctime = now.strftime("%d/%m/%Y %H:%M:%S")
-                traffic.append(
-                    {"time": ctime, "total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
-                     "total_data": round(total_receive + total_sent, 4)})
-                total_sent = 0
-                total_receive = 0
-                db.update({"traffic": traffic}, peers.id == data_usage[count])
-            db.update({"total_receive": round(total_receive, 4),
-                       "total_sent": round(total_sent, 4),
-                       "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
+        if len(cur_i) > 0:
+            total_sent = cur_i[0]['total_sent']
+            total_receive = cur_i[0]['total_receive']
+            traffic = cur_i[0]['traffic']
+            cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
+            cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
+            if cur_i[0]["status"] == "running":
+                if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
+                    total_sent = cur_total_sent
+                    total_receive = cur_total_receive
+                else:
+                    now = datetime.now()
+                    ctime = now.strftime("%d/%m/%Y %H:%M:%S")
+                    traffic.append(
+                        {"time": ctime, "total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
+                         "total_data": round(total_receive + total_sent, 4)})
+                    total_sent = 0
+                    total_receive = 0
+                    db.update({"traffic": traffic}, peers.id == data_usage[count])
+                db.update({"total_receive": round(total_receive, 4),
+                           "total_sent": round(total_sent, 4),
+                           "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
 
         count += 3
 
@@ -353,12 +355,15 @@ def get_peers(config_name, search, sort_t):
 
 # Get configuration public key
 def get_conf_pub_key(config_name):
-    conf = configparser.ConfigParser(strict=False)
-    conf.read(wg_conf_path + "/" + config_name + ".conf")
-    pri = conf.get("Interface", "PrivateKey")
-    pub = subprocess.run(f"echo '{pri}' | wg pubkey", check=True, shell=True, capture_output=True).stdout
-    conf.clear()
-    return pub.decode().strip("\n")
+    try:
+        conf = configparser.ConfigParser(strict=False)
+        conf.read(wg_conf_path + "/" + config_name + ".conf")
+        pri = conf.get("Interface", "PrivateKey")
+        pub = subprocess.run(f"echo '{pri}' | wg pubkey", check=True, shell=True, capture_output=True).stdout
+        conf.clear()
+        return pub.decode().strip("\n")
+    except configparser.NoSectionError as e:
+        return ""
 
 
 # Get configuration listen port
@@ -1322,8 +1327,7 @@ Dashboard Tools Related
 def get_ping_ip():
     config_name = request.form['config']
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config + ".json"))
-
+    db = TinyDB(os.path.join(db_path, config_name + ".json"))
     html = ""
     for i in db.all():
         html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
