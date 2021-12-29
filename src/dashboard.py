@@ -435,8 +435,6 @@ def gen_private_key():
     with open('public_key.txt', encoding='utf-8') as file_object:
         public_key = file_object.readline().strip()
     data = {"private_key": private_key, "public_key": public_key, "preshared_key": preshare_key}
-    private.close()
-    public.close()
     return data
 
 
@@ -792,7 +790,7 @@ def update_dashboard_refresh_interval():
     preset_interval = ["5000", "10000", "30000", "60000"]
     if request.form["interval"] in preset_interval:
         config = configparser.ConfigParser(strict=False)
-        config.read(dashboard_conf)
+        config.read(DASHBOARD_CONF)
         config.set("Server", "dashboard_refresh_interval", str(request.form['interval']))
         with open(DASHBOARD_CONF, "w", encoding='utf-8') as config_object:
             config.write(config_object)
@@ -902,7 +900,7 @@ def add_peer(config_name):
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
-    DNS = data['DNS']
+    dns_addresses = data['DNS']
     enable_preshared_key = data["enable_preshared_key"]
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(dns_addresses) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
@@ -1320,7 +1318,7 @@ Dashboard Tools Related
 # Get all IP for ping
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
-    config_name = request.form['config']
+    config = request.form['config']
     sem.acquire(timeout=1)
     db = TinyDB(os.path.join(db_path, config + ".json"))
 
