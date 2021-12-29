@@ -72,7 +72,6 @@ def get_conf_peer_key(config_name):
     """
     Configuration Related
     """
-
     try:
         peer_key = subprocess.run(f"wg show {config_name} peers",
                                   check=True, shell=True, capture_output=True).stdout
@@ -195,16 +194,19 @@ def get_transfer(config_name, db, peers):
                                     check=True, shell=True, capture_output=True).stdout
     except subprocess.CalledProcessError:
         return "stopped"
-    data_usage = data_usage.decode("UTF-8").split()
-    count = 0
-    for _ in range(int(len(data_usage) / 3)):
-        cur_i = db.search(peers.id == data_usage[count])
+    data_usage = data_usage.decode("UTF-8").split("\n")
+    final = []
+    for i in data_usage:
+        final.append(i.split("\t"))
+    data_usage = final
+    for i in range(len(data_usage)):
+        cur_i = db.search(peers.id == data_usage[i][0])
         if len(cur_i) > 0:
             total_sent = cur_i[0]['total_sent']
             total_receive = cur_i[0]['total_receive']
             traffic = cur_i[0]['traffic']
-            cur_total_sent = round(int(data_usage[count + 2]) / (1024 ** 3), 4)
-            cur_total_receive = round(int(data_usage[count + 1]) / (1024 ** 3), 4)
+            cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
+            cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
             if cur_i[0]["status"] == "running":
                 if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
                     total_sent = cur_total_sent
@@ -213,17 +215,17 @@ def get_transfer(config_name, db, peers):
                     now = datetime.now()
                     ctime = now.strftime("%d/%m/%Y %H:%M:%S")
                     traffic.append(
-                        {"time": ctime, "total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
-                         "total_data": round(total_receive + total_sent, 4)})
+                        {
+                            "time": ctime, "total_receive": round(total_receive, 4),
+                            "total_sent": round(total_sent, 4),
+                            "total_data": round(total_receive + total_sent, 4)
+                        }
+                    )
                     total_sent = 0
                     total_receive = 0
-                    db.update({"traffic": traffic}, peers.id == data_usage[count])
-                db.update({"total_receive": round(total_receive, 4),
-                           "total_sent": round(total_sent, 4),
-                           "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[count])
-
-        count += 3
-
+                    db.update({"traffic": traffic}, peers.id == data_usage[i][0])
+                db.update({"total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
+                           "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[i][0])
     return None
 
 
@@ -447,6 +449,7 @@ def gen_public_key(private_key):
     with open('private_key.txt', 'w', encoding='utf-8') as file_object:
         file_object.write(private_key)
     try:
+        check = subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
         with open('public_key.txt', encoding='utf-8') as file_object:
             public_key = file_object.readline().strip()
         os.remove('private_key.txt')
@@ -1084,7 +1087,8 @@ def save_peer_setting(config_name):
             tmp_psk = open("tmp_edit_psk.txt", "w+")
             tmp_psk.write(preshared_key)
             tmp_psk.close()
-            change_psk = subprocess.check_output("wg set " + config_name + " peer " + id + " preshared-key tmp_edit_psk.txt", shell=True, stderr=subprocess.STDOUT)
+            change_psk = subprocess.check_output(f"wg set {config_name} peer {id} preshared-key tmp_edit_psk.txt",
+                                                 shell=True, stderr=subprocess.STDOUT)
             if change_psk.decode("UTF-8") != "":
                 db.close()
                 try:
@@ -1095,10 +1099,9 @@ def save_peer_setting(config_name):
             if allowed_ip == "":
                 allowed_ip = '""'
             allowed_ip = allowed_ip.replace(" ", "")
-            change_ip = subprocess.run('wg set ' + config_name + " peer " + id + " allowed-ips " + allowed_ip,
-                                       check=True, shell=True, capture_output=True, stderr=subprocess.STDOUT).stdout
-            subprocess.run('wg-quick save ' + config_name,
-                           check=True, shell=True, capture_output=True, stderr=subprocess.STDOUT)
+            change_ip = subprocess.check_output(f"wg set {config_name} peer {id} allowed-ips {allowed_ip}",
+                                                shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(f'wg-quick save {config_name}', shell=True, stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
                 db.close()
                 try:
