@@ -1,6 +1,6 @@
 #!/bin/bash
 
-app_name="dashboard.py"
+app_name="wsgi.py"
 app_official_name="WGDashboard"
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
@@ -108,10 +108,10 @@ gunicorn_start () {
     gunicorn --certfile $cb_config_dir/live/"$SERVERURL"/cert.pem \
     --keyfile $cb_config_dir/live/"$SERVERURL"/privkey.pem \
     --access-logfile log/access_"$d".log \
-    --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+    --error-logfile log/error_"$d".log 'wsgi:app'
   else
     gunicorn --access-logfile log/access_"$d".log \
-    --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+    --error-logfile log/error_"$d".log 'wsgi:app'
   fi
   printf "| Log files is under log/                                  |\n"
   printf "%s\n" "$dashes"
