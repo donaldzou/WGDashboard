@@ -883,9 +883,7 @@ def switch(config_name):
                            check=True, shell=True, capture_output=True).stdout
         except subprocess.CalledProcessError:
             return redirect('/')
-
     return redirect(request.referrer)
-
 
 # Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
@@ -1315,7 +1313,7 @@ Dashboard Tools Related
 def get_ping_ip():
     config = request.form['config']
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(db_path, config + ".json"))
     html = ""
     for i in db.all():
         html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
@@ -1411,7 +1409,7 @@ def init_dashboard():
         config['Server']['dashboard_refresh_interval'] = '60000'
     if 'dashboard_sort' not in config['Server']:
         config['Server']['dashboard_sort'] = 'status'
-    # Defualt dashboard peers setting
+    # Default dashboard peers setting
     if "Peers" not in config:
         config['Peers'] = {}
     if 'peer_global_DNS' not in config['Peers']:
@@ -1454,7 +1452,7 @@ if __name__ == "__main__":
     UPDATE = check_update()
     configuration_settings = get_dashboard_conf()
     app_ip = configuration_settings.get("Server", "app_ip")
-    app_port = configuration_settings.get("Server", "app_port")
+    app_port = int(configuration_settings.get("Server", "app_port"))
     wg_conf_path = configuration_settings.get("Server", "wg_conf_path")
     configuration_settings.clear()
     app.run(host=app_ip, debug=False, port=app_port)
