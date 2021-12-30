@@ -329,12 +329,8 @@
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
-<script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
+<script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
 <script>
-    function roundN(value, digits) {
-       var tenToN = 10 ** digits;
-       return /*Math.trunc*/(Math.round(value * tenToN)) / tenToN;
-    }
     let load_timeout;
     let load_interval = 0;
     let conf_name = "{{ conf_data['name'] }}"

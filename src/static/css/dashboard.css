@@ -379,5 +379,6 @@ main{
 #conf_status_btn.info_loading{
     height: 38px;
     border-radius: 5px;
-    animation: loading 2s infinite ease-in-out;
+    animation: loading 3s infinite ease-in-out;
 }
+

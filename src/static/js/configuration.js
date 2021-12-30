@@ -1,5 +1,10 @@
 let $body = $("body");
 
+function roundN(value, digits) {
+   let tenToN = 10 ** digits;
+   return (Math.round(value * tenToN)) / tenToN;
+}
+
 // Progress Bar
 let $progress_bar = $(".progress-bar");
 function startProgressBar(){
@@ -13,9 +18,11 @@ function startProgressBar(){
         stillLoadingProgressBar();
     },300);
 }
+
 function stillLoadingProgressBar(){
     $progress_bar.css("transition", "3s ease-in-out").css("width", "75%");
 }
+
 function endProgressBar(){
     $progress_bar.css("transition", "0.3s ease-in-out").css("width","100%");
     setTimeout(function(){
@@ -433,7 +440,7 @@ $body.on("click", ".display_mode", function(){
                Array($(".peer_list").children()).forEach(function(child){
                     $(child).removeClass().addClass("col-sm-6 col-lg-4");
                });
-               showToast("Displaying as Grid");
+               showToast("Displaying as Grids");
             }
            }
         }

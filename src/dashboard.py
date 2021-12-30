@@ -519,6 +519,7 @@ Flask Functions
 # Before request
 @app.before_request
 def auth_req():
+    sem.acquire(timeout=1)
     conf = get_dashboard_conf()
     req = conf.get("Server", "auth_req")
     session['update'] = UPDATE
@@ -535,6 +536,10 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
+            try:
+                sem.release()
+            except RuntimeError as e:
+                print("RuntimeError: cannot release un-acquired lock")
             return redirect(url_for("signin"))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
@@ -836,6 +841,7 @@ def get_conf(config_name):
     config = get_dashboard_conf()
     sort = config.get("Server", "dashboard_sort")
     peer_display_mode = config.get("Peers", "peer_display_mode")
+    wg_ip = config.get("Peers","remote_endpoint")
     if "Address" not in config_interface:
         conf_address = "N/A"
     else:
@@ -849,7 +855,7 @@ def get_conf(config_name):
         "listen_port": get_conf_listen_port(config_name),
         "running_peer": get_conf_running_peer_number(config_name),
         "conf_address": conf_address,
-        "wg_ip": config.get("Peers","remote_endpoint"),
+        "wg_ip": wg_ip,
         "sort_tag": sort,
         "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
         "peer_display_mode": peer_display_mode
@@ -858,7 +864,7 @@ def get_conf(config_name):
         conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-    print(config.get("Peers","remote_endpoint"))
+    print(wg_ip)
     config.clear()
     return jsonify(conf_data)
     # return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
