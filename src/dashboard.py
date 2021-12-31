@@ -34,9 +34,9 @@ from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoin
 DASHBOARD_VERSION = 'v3.0'
 # Dashboard Config Name
 configuration_path = os.getenv('CONFIGURATION_PATH', '.')
-db_path = os.path.join(configuration_path, 'db')
-if not os.path.isdir(db_path):
-    os.mkdir(db_path)
+DB_PATH = os.path.join(configuration_path, 'db')
+if not os.path.isdir(DB_PATH):
+    os.mkdir(DB_PATH)
 DASHBOARD_CONF = os.path.join(configuration_path, 'wg-dashboard.ini')
 # Upgrade Required
 UPDATE = None
@@ -256,7 +256,7 @@ def get_allowed_ip(db, peers, conf_peer_data):
 # Look for new peers from WireGuard
 def get_all_peers_data(config_name):
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + '.json'))
+    db = TinyDB(os.path.join(DB_PATH, config_name + '.json'))
     peers = Query()
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
@@ -336,7 +336,7 @@ def get_peers(config_name, search, sort_t):
 
     get_all_peers_data(config_name)
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peer = Query()
     if len(search) == 0:
         result = db.all()
@@ -386,7 +386,7 @@ def get_conf_listen_port(config_name):
 # Get configuration total data
 def get_conf_total_data(config_name):
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     upload_total = 0
     download_total = 0
     for i in db.all():
@@ -467,7 +467,7 @@ def f_check_key_match(private_key, public_key, config_name):
         return result
     else:
         sem.acquire(timeout=1)
-        db = TinyDB(os.path.join(db_path, config_name + ".json"))
+        db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
         peers = Query()
         match = db.search(peers.id == result['data'])
         if len(match) != 1 or result['data'] != public_key:
@@ -488,7 +488,7 @@ def f_check_key_match(private_key, public_key, config_name):
 # Check if there is repeated allowed IP
 def check_repeat_allowed_ip(public_key, ip, config_name):
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     peer = db.search(peers.id == public_key)
     if len(peer) != 1:
@@ -890,7 +890,7 @@ def switch(config_name):
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     data = request.get_json()
     public_key = data['public_key']
@@ -991,7 +991,7 @@ def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     data = request.get_json()
     delete_key = data['peer_id']
@@ -1034,7 +1034,7 @@ def save_peer_setting(config_name):
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     preshared_key = data['preshared_key']
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     if len(db.search(peers.id == id)) == 1:
         check_ip = check_repeat_allowed_ip(id, allowed_ip, config_name)
@@ -1145,7 +1145,7 @@ def get_peer_name(config_name):
     data = request.get_json()
     id = data['id']
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     result = db.search(peers.id == id)
     db.close()
@@ -1187,7 +1187,7 @@ def check_key_match(config_name):
 def generate_qrcode(config_name):
     id = request.args.get('id')
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     get_peer = db.search(peers.id == id)
     config = get_dashboard_conf()
@@ -1243,7 +1243,7 @@ def download(config_name):
     print(request.headers.get('User-Agent'))
     id = request.args.get('id')
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config_name + ".json"))
     peers = Query()
     get_peer = db.search(peers.id == id)
     config = get_dashboard_conf()
@@ -1314,7 +1314,7 @@ Dashboard Tools Related
 def get_ping_ip():
     config = request.form['config']
     sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config + ".json"))
+    db = TinyDB(os.path.join(DB_PATH, config + ".json"))
     html = ""
     for i in db.all():
         html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
