@@ -519,7 +519,6 @@ Flask Functions
 # Before request
 @app.before_request
 def auth_req():
-    sem.acquire(timeout=1)
     conf = get_dashboard_conf()
     req = conf.get("Server", "auth_req")
     session['update'] = UPDATE
@@ -536,10 +535,6 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return redirect(url_for("signin"))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
