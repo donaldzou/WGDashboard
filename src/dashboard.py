@@ -32,6 +32,8 @@ from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoin
 
 # Dashboard Version
 DASHBOARD_VERSION = 'v3.0'
+# WireGuard configuration path
+WG_CONF_PATH = None
 # Dashboard Config Name
 configuration_path = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(configuration_path, 'db')
@@ -104,7 +106,7 @@ def get_conf_running_peer_number(config_name):
 
 # Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
-    conf_location = wg_conf_path + "/" + config_name + ".conf"
+    conf_location = WG_CONF_PATH + "/" + config_name + ".conf"
     with open(conf_location, 'r', encoding='utf-8') as file_object:
         file = file_object.read().split("\n")
         data = {}
@@ -121,7 +123,7 @@ def read_conf_file_interface(config_name):
 # Read the whole configuration file
 def read_conf_file(config_name):
     # Read Configuration File Start
-    conf_location = wg_conf_path + "/" + config_name + ".conf"
+    conf_location = WG_CONF_PATH + "/" + config_name + ".conf"
     f = open(conf_location, 'r')
     file = f.read().split("\n")
     conf_peer_data = {
@@ -358,7 +360,7 @@ def get_peers(config_name, search, sort_t):
 def get_conf_pub_key(config_name):
     try:
         conf = configparser.ConfigParser(strict=False)
-        conf.read(wg_conf_path + "/" + config_name + ".conf")
+        conf.read(WG_CONF_PATH + "/" + config_name + ".conf")
         pri = conf.get("Interface", "PrivateKey")
         pub = subprocess.run(f"echo '{pri}' | wg pubkey", check=True, shell=True, capture_output=True).stdout
         conf.clear()
@@ -370,7 +372,7 @@ def get_conf_pub_key(config_name):
 # Get configuration listen port
 def get_conf_listen_port(config_name):
     conf = configparser.ConfigParser(strict=False)
-    conf.read(wg_conf_path + "/" + config_name + ".conf")
+    conf.read(WG_CONF_PATH + "/" + config_name + ".conf")
     port = ""
     try:
         port = conf.get("Interface", "ListenPort")
@@ -416,7 +418,7 @@ def get_conf_status(config_name):
 # Get all configuration as a list
 def get_conf_list():
     conf = []
-    for i in os.listdir(wg_conf_path):
+    for i in os.listdir(WG_CONF_PATH):
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
@@ -1454,6 +1456,6 @@ if __name__ == "__main__":
     configuration_settings = get_dashboard_conf()
     app_ip = configuration_settings.get("Server", "app_ip")
     app_port = int(configuration_settings.get("Server", "app_port"))
-    wg_conf_path = configuration_settings.get("Server", "wg_conf_path")
+    WG_CONF_PATH = configuration_settings.get("Server", "wg_conf_path")
     configuration_settings.clear()
     app.run(host=app_ip, debug=False, port=app_port)
