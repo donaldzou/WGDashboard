@@ -2,7 +2,9 @@
 < WGDashboard > - by Donald Zou [https://github.com/donaldzou]
 Under Apache-2.0 License
 """
-
+# TODO: Testing migrate to sqlite
+import sqlite3
+from flask import g
 import configparser
 import hashlib
 import ipaddress
@@ -18,7 +20,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
 from operator import itemgetter
-
+import signal
 # PIP installed library
 import ifcfg
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
@@ -27,7 +29,7 @@ from icmplib import ping, traceroute
 from tinydb import TinyDB, Query
 
 # Import other python files
-from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint,\
+from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint, \
     check_IP_with_range, clean_IP_with_range
 
 # Dashboard Version
@@ -48,8 +50,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator
 QRcode(app)
 
-# TODO: Testing semaphore on reading/writing database
-sem = threading.RLock()
+
+def connect_db():
+    return sqlite3.connect(os.path.join(configuration_path, 'db', 'wgdashboard.db'))
 
 
 # Read / Write Dashboard Config File
@@ -158,8 +161,8 @@ def read_conf_file(config_name):
     return conf_peer_data
 
 
-# Get latest handshake from all peers of a configuration
-def get_latest_handshake(config_name, db, peers):
+# Get the latest handshake from all peers of a configuration
+def get_latest_handshake(config_name):
     # Get latest handshakes
     try:
         data_usage = subprocess.run(f"wg show {config_name} latest-handshakes",
@@ -177,17 +180,17 @@ def get_latest_handshake(config_name, db, peers):
         else:
             status = "stopped"
         if int(data_usage[count + 1]) > 0:
-            db.update({"latest_handshake": str(minus).split(".", maxsplit=1)[0], "status": status},
-                      peers.id == data_usage[count])
+            g.cur.execute("UPDATE %s SET latest_handshake = '%s', status = '%s' WHERE id='%s'"
+                          % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
         else:
-            db.update({"latest_handshake": "(None)", "status": status}, peers.id == data_usage[count])
+            g.cur.execute("UPDATE %s SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
+                          % (config_name, status, data_usage[count]))
         count += 2
-
     return None
 
 
 # Get transfer from all peers of a configuration
-def get_transfer(config_name, db, peers):
+def get_transfer(config_name):
     # Get transfer
     try:
         data_usage = subprocess.run(f"wg show {config_name} transfer",
@@ -200,37 +203,37 @@ def get_transfer(config_name, db, peers):
         final.append(i.split("\t"))
     data_usage = final
     for i in range(len(data_usage)):
-        cur_i = db.search(peers.id == data_usage[i][0])
+        cur_i = g.cur.execute(
+            "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id='%s'"
+            % (config_name, data_usage[i][0])).fetchall()
         if len(cur_i) > 0:
-            total_sent = cur_i[0]['total_sent']
-            total_receive = cur_i[0]['total_receive']
-            traffic = cur_i[0]['traffic']
+            total_sent = cur_i[0][1]
+            total_receive = cur_i[0][0]
+            # traffic = cur_i[0]['traffic']
             cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
             cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
-            if cur_i[0]["status"] == "running":
+            if cur_i[0][4] == "running":
                 if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
                     total_sent = cur_total_sent
                     total_receive = cur_total_receive
                 else:
                     now = datetime.now()
                     ctime = now.strftime("%d/%m/%Y %H:%M:%S")
-                    traffic.append(
-                        {
-                            "time": ctime, "total_receive": round(total_receive, 4),
-                            "total_sent": round(total_sent, 4),
-                            "total_data": round(total_receive + total_sent, 4)
-                        }
-                    )
+                    cumu_receive = cur_i[0][2] + total_receive
+                    cumu_sent = cur_i[0][3] + total_sent
+                    g.cur.execute("UPDATE %s SET cumu_receive = %f, cumu_sent = %f, cumu_data = %f WHERE id = '%s'" %
+                                  (config_name, round(cumu_receive, 4), round(cumu_sent, 4),
+                                   round(cumu_sent + cumu_receive, 4), data_usage[i][0]))
                     total_sent = 0
                     total_receive = 0
-                    db.update({"traffic": traffic}, peers.id == data_usage[i][0])
-                db.update({"total_receive": round(total_receive, 4), "total_sent": round(total_sent, 4),
-                           "total_data": round(total_receive + total_sent, 4)}, peers.id == data_usage[i][0])
+                g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
+                              (config_name, round(total_receive, 4), round(total_sent, 4),
+                               round(total_receive + total_sent, 4), data_usage[i][0]))
     return None
 
 
 # Get endpoint from all peers of a configuration
-def get_endpoint(config_name, db, peers):
+def get_endpoint(config_name):
     # Get endpoint
     try:
         data_usage = subprocess.run(f"wg show {config_name} endpoints",
@@ -240,29 +243,27 @@ def get_endpoint(config_name, db, peers):
     data_usage = data_usage.decode("UTF-8").split()
     count = 0
     for _ in range(int(len(data_usage) / 2)):
-        db.update({"endpoint": data_usage[count + 1]}, peers.id == data_usage[count])
+        g.cur.execute("UPDATE " + config_name + " SET endpoint = '%s' WHERE id = '%s'"
+                      % (data_usage[count + 1], data_usage[count]))
         count += 2
-
     return None
 
 
 # Get allowed ips from all peers of a configuration
-def get_allowed_ip(db, peers, conf_peer_data):
+def get_allowed_ip(conf_peer_data, config_name):
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
-        db.update({"allowed_ip": i.get('AllowedIPs', '(None)')}, peers.id == i["PublicKey"])
+        g.cur.execute("UPDATE " + config_name + " SET allowed_ip = '%s' WHERE id = '%s'"
+                      % (i.get('AllowedIPs', '(None)'), i["PublicKey"]))
 
 
 # Look for new peers from WireGuard
 def get_all_peers_data(config_name):
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + '.json'))
-    peers = Query()
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
     for i in conf_peer_data['Peers']:
-        search = db.search(peers.id == i['PublicKey'])
-        if not search:
+        result = g.cur.execute("SELECT * FROM %s WHERE id='%s'" % (config_name, i["PublicKey"])).fetchall()
+        if len(result) == 0:
             new_data = {
                 "id": i['PublicKey'],
                 "private_key": "",
@@ -276,6 +277,9 @@ def get_all_peers_data(config_name):
                 "status": "stopped",
                 "latest_handshake": "N/A",
                 "allowed_ip": "N/A",
+                "cumu_receive": 0,
+                "cumu_sent": 0,
+                "cumu_data": 0,
                 "traffic": [],
                 "mtu": config.get("Peers", "peer_mtu"),
                 "keepalive": config.get("Peers", "peer_keep_alive"),
@@ -284,48 +288,25 @@ def get_all_peers_data(config_name):
             }
             if "PresharedKey" in i.keys():
                 new_data["preshared_key"] = i["PresharedKey"]
-            db.insert(new_data)
+            g.cur.execute(
+                "INSERT INTO " + config_name + " VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key)",
+                new_data)
         else:
-            # Update database since V2.2
-            update_db = {}
-            # Required peer settings
-            if "DNS" not in search[0]:
-                update_db['DNS'] = config.get("Peers", "peer_global_DNS")
-            if "endpoint_allowed_ip" not in search[0]:
-                update_db['endpoint_allowed_ip'] = config.get("Peers", "peer_endpoint_allowed_ip")
-            # Not required peers settings (Only for QR code)
-            if "private_key" not in search[0]:
-                update_db['private_key'] = ''
-            if "mtu" not in search[0]:
-                update_db['mtu'] = config.get("Peers", "peer_mtu")
-            if "keepalive" not in search[0]:
-                update_db['keepalive'] = config.get("Peers", "peer_keep_alive")
-            if "remote_endpoint" not in search[0]:
-                update_db['remote_endpoint'] = config.get("Peers","remote_endpoint")
-            if "preshared_key" not in search[0]:
-                if "PresharedKey" in i.keys():
-                    update_db['preshared_key'] = i["PresharedKey"]
-                else:
-                    update_db['preshared_key'] = ""
-            db.update(update_db, peers.id == i['PublicKey'])
+            pass
+
     # Remove peers no longer exist in WireGuard configuration file
-    db_key = list(map(lambda a: a['id'], db.all()))
+    db_key = list(map(lambda a: a[0], g.cur.execute("SELECT id FROM %s" % config_name)))
     wg_key = list(map(lambda a: a['PublicKey'], conf_peer_data['Peers']))
     for i in db_key:
         if i not in wg_key:
-            db.remove(peers.id == i)
+            g.cur.execute("DELETE FROM %s WHERE id = '%s'" % (config_name, i))
     tic = time.perf_counter()
-    get_latest_handshake(config_name, db, peers)
-    get_transfer(config_name, db, peers)
-    get_endpoint(config_name, db, peers)
-    get_allowed_ip(db, peers, conf_peer_data)
+    get_latest_handshake(config_name)
+    get_transfer(config_name)
+    get_endpoint(config_name)
+    get_allowed_ip(conf_peer_data, config_name)
     toc = time.perf_counter()
     print(f"Finish fetching data in {toc - tic:0.4f} seconds")
-    db.close()
-    try:
-        sem.release()
-    except RuntimeError as e:
-        print("RuntimeError: cannot release un-acquired lock")
 
 
 # Search for peers
@@ -333,24 +314,26 @@ def get_peers(config_name, search, sort_t):
     """
     Frontend Related Functions
     """
-
+    tic = time.perf_counter()
+    col = g.cur.execute("PRAGMA table_info(" + config_name + ")").fetchall()
+    col = [a[1] for a in col]
+    # col = ['id', 'private_key', 'DNS', 'endpoint_allowed_ip', 'name', 'total_receive',
+    # 'total_sent', 'total_data', 'endpoint', 'status', 'latest_handshake', 'allowed_ip',
+    # 'cumu_receive', 'cumu_sent', 'cumu_data', 'mtu', 'keepalive', 'remote_endpoint', 'preshared_key']
     get_all_peers_data(config_name)
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peer = Query()
     if len(search) == 0:
-        result = db.all()
+        data = g.cur.execute("SELECT * FROM " + config_name).fetchall()
+        result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     else:
-        result = db.search(peer.name.matches('(.*)(' + re.escape(search) + ')(.*)'))
+        sql = "SELECT * FROM " + config_name + " WHERE name LIKE '%"+search+"%'"
+        data = g.cur.execute(sql).fetchall()
+        result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     if sort_t == "allowed_ip":
         result = sorted(result, key=lambda d: ipaddress.ip_network(d[sort_t].split(",")[0]))
     else:
         result = sorted(result, key=lambda d: d[sort_t])
-    db.close()
-    try:
-        sem.release()
-    except RuntimeError as e:
-        print("RuntimeError: cannot release un-acquired lock")
+    toc = time.perf_counter()
+    print(f"Finish fetching peers in {toc - tic:0.4f} seconds")
     return result
 
 
@@ -385,24 +368,17 @@ def get_conf_listen_port(config_name):
 
 # Get configuration total data
 def get_conf_total_data(config_name):
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
+    data = g.cur.execute("SELECT total_sent, total_receive, cumu_sent, cumu_receive FROM " + config_name)
     upload_total = 0
     download_total = 0
-    for i in db.all():
-        upload_total += i['total_sent']
-        download_total += i['total_receive']
-        for k in i['traffic']:
-            upload_total += k['total_sent']
-            download_total += k['total_receive']
+    for i in data.fetchall():
+        upload_total += i[0]
+        download_total += i[1]
+        upload_total += i[2]
+        download_total += i[3]
     total = round(upload_total + download_total, 4)
     upload_total = round(upload_total, 4)
     download_total = round(download_total, 4)
-    db.close()
-    try:
-        sem.release()
-    except RuntimeError as e:
-        print("RuntimeError: cannot release un-acquired lock")
     return [total, upload_total, download_total]
 
 
@@ -419,6 +395,8 @@ def get_conf_list():
     for i in os.listdir(wg_conf_path):
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
+            g.cur.execute(
+                "CREATE TABLE IF NOT EXISTS " + i + " (id VARCHAR NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL)")
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
             if temp['status'] == "running":
                 temp['checked'] = 'checked'
@@ -466,48 +444,25 @@ def f_check_key_match(private_key, public_key, config_name):
     if result['status'] == 'failed':
         return result
     else:
-        sem.acquire(timeout=1)
-        db = TinyDB(os.path.join(db_path, config_name + ".json"))
-        peers = Query()
-        match = db.search(peers.id == result['data'])
+        sql = "SELECT * FROM " + config_name + " WHERE id = ?"
+        match = g.cur.execute(sql, (result['data'],)).fetchall()
         if len(match) != 1 or result['data'] != public_key:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return {'status': 'failed', 'msg': 'Please check your private key, it does not match with the public key.'}
         else:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return {'status': 'success'}
+
 
 # Check if there is repeated allowed IP
 def check_repeat_allowed_ip(public_key, ip, config_name):
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
-    peer = db.search(peers.id == public_key)
-    if len(peer) != 1:
+    peer = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE id = ?", (public_key,)).fetchone()
+    if peer[0] != 1:
         return {'status': 'failed', 'msg': 'Peer does not exist'}
     else:
-        existed_ip = db.search((peers.id != public_key) & (peers.allowed_ip == ip))
-        if len(existed_ip) != 0:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
+        existed_ip = g.cur.execute("SELECT COUNT(*) FROM " +
+                                   config_name + " WHERE id != ? AND allowed_ip = ?", (public_key, ip)).fetchone()
+        if existed_ip[0] != 0:
             return {'status': 'failed', 'msg': "Allowed IP already taken by another peer."}
         else:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return {'status': 'success'}
 
 
@@ -516,10 +471,19 @@ Flask Functions
 """
 
 
+@app.teardown_request
+def close_DB(exception):
+    if hasattr(g, 'db'):
+        g.db.commit()
+        g.db.close()
+
+
 # Before request
 @app.before_request
 def auth_req():
-    sem.acquire(timeout=1)
+    if getattr(g, 'db', None) is None:
+        g.db = connect_db()
+        g.cur = g.db.cursor()
     conf = get_dashboard_conf()
     req = conf.get("Server", "auth_req")
     session['update'] = UPDATE
@@ -536,10 +500,6 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return redirect(url_for("signin"))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
@@ -595,7 +555,6 @@ def index():
     """
     Index Page Related
     """
-
     return render_template('index.html', conf=get_conf_list())
 
 
@@ -841,7 +800,7 @@ def get_conf(config_name):
     config = get_dashboard_conf()
     sort = config.get("Server", "dashboard_sort")
     peer_display_mode = config.get("Peers", "peer_display_mode")
-    wg_ip = config.get("Peers","remote_endpoint")
+    wg_ip = config.get("Peers", "remote_endpoint")
     if "Address" not in config_interface:
         conf_address = "N/A"
     else:
@@ -864,17 +823,17 @@ def get_conf(config_name):
         conf_data['checked'] = "nope"
     else:
         conf_data['checked'] = "checked"
-    print(wg_ip)
     config.clear()
     return jsonify(conf_data)
     # return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
     #                        dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
 
+
 # Turn on / off a configuration
 @app.route('/switch/<config_name>', methods=['GET'])
 def switch(config_name):
     if "username" not in session:
-        print("not loggedin")
+        print("User not logged in")
         return redirect(url_for("signin"))
     status = get_conf_status(config_name)
     if status == "running":
@@ -891,12 +850,10 @@ def switch(config_name):
             return redirect('/')
     return redirect(request.referrer)
 
+
 # Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
     data = request.get_json()
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']
@@ -905,88 +862,40 @@ def add_peer(config_name):
     enable_preshared_key = data["enable_preshared_key"]
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(dns_addresses) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return "Please fill in all required box."
     if not isinstance(keys, list):
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return config_name + " is not running."
     if public_key in keys:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return "Public key already exist."
-    if len(db.search(peers.allowed_ip.matches(allowed_ips))) != 0:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
+    check_dup_ip = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip = ?",
+                                 (allowed_ips,)).fetchone()
+    if check_dup_ip[0] != 0:
         return "Allowed IP already taken by another peer."
     if not check_DNS(dns_addresses):
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return "DNS formate is incorrect. Example: 1.1.1.1"
     if not check_Allowed_IPs(endpoint_allowed_ip):
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return "Endpoint Allowed IPs format is incorrect."
     if len(data['MTU']) == 0 or not data['MTU'].isdigit():
-          db.close()
-          try:
-              sem.release()
-          except RuntimeError as e:
-              print("RuntimeError: cannot release un-acquired lock")
-          return "MTU format is not correct."
+        return "MTU format is not correct."
     if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
-          db.close()
-          try:
-              sem.release()
-          except RuntimeError as e:
-              print("RuntimeError: cannot release un-acquired lock")
-          return "Persistent Keepalive format is not correct."
+        return "Persistent Keepalive format is not correct."
     try:
-        if enable_preshared_key == True:
+        if enable_preshared_key:
             key = subprocess.check_output("wg genpsk > tmp_psk.txt", shell=True)
-            status = subprocess.check_output(f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips} preshared-key tmp_psk.txt",
-                                             shell=True, stderr=subprocess.STDOUT)
+            status = subprocess.check_output(
+                f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips} preshared-key tmp_psk.txt",
+                shell=True, stderr=subprocess.STDOUT)
             os.remove("tmp_psk.txt")
-        elif enable_preshared_key == False:
+        elif not enable_preshared_key:
             status = subprocess.check_output(f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips}",
                                              shell=True, stderr=subprocess.STDOUT)
         status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
 
         get_all_peers_data(config_name)
-        db.update({"name": data['name'], "private_key": data['private_key'], "DNS": data['DNS'],
-                   "endpoint_allowed_ip": endpoint_allowed_ip},
-                  peers.id == public_key)
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
+        sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ? WHERE id = ?"
+        g.cur.execute(sql, (data['name'], data['private_key'], data['DNS'], endpoint_allowed_ip, public_key))
         return "true"
     except subprocess.CalledProcessError as exc:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return exc.output.strip()
 
 
@@ -995,37 +904,25 @@ def add_peer(config_name):
 def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
     data = request.get_json()
     delete_key = data['peer_id']
     keys = get_conf_peer_key(config_name)
     if not isinstance(keys, list):
         return config_name + " is not running."
     if delete_key not in keys:
-        db.close()
         return "This key does not exist"
     else:
         try:
-            remove_wg = subprocess.check_output(f"wg set {config_name} peer {delete_key} remove", 
-                                             shell=True, stderr=subprocess.STDOUT)
+            remove_wg = subprocess.check_output(f"wg set {config_name} peer {delete_key} remove",
+                                                shell=True, stderr=subprocess.STDOUT)
             save_wg = subprocess.check_output(f"wg-quick save {config_name}",
-                                             shell=True, stderr=subprocess.STDOUT)
-            db.remove(peers.id == delete_key)
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
+                                              shell=True, stderr=subprocess.STDOUT)
+            sql = "DELETE FROM " + config_name + " WHERE id = ?"
+            g.cur.execute(sql, (delete_key,))
             return "true"
         except subprocess.CalledProcessError as exc:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return exc.output.strip()
+
 
 # Save peer settings
 @app.route('/save_peer_setting/<config_name>', methods=['POST'])
@@ -1038,54 +935,22 @@ def save_peer_setting(config_name):
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     preshared_key = data['preshared_key']
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
-    if len(db.search(peers.id == id)) == 1:
+    check_peer_exist = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE id = ?", (id,)).fetchone()
+    if check_peer_exist[0] == 1:
         check_ip = check_repeat_allowed_ip(id, allowed_ip, config_name)
         if not check_IP_with_range(endpoint_allowed_ip):
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
         if not check_DNS(dns_addresses):
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
         if len(data['MTU']) == 0 or not data['MTU'].isdigit():
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify({"status": "failed", "msg": "MTU format is not correct."})
         if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify({"status": "failed", "msg": "Persistent Keepalive format is not correct."})
         if private_key != "":
             check_key = f_check_key_match(private_key, id, config_name)
             if check_key['status'] == "failed":
-                db.close()
-                try:
-                    sem.release()
-                except RuntimeError as e:
-                    print("RuntimeError: cannot release un-acquired lock")
                 return jsonify(check_key)
         if check_ip['status'] == "failed":
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify(check_ip)
         try:
             tmp_psk = open("tmp_edit_psk.txt", "w+")
@@ -1094,11 +959,6 @@ def save_peer_setting(config_name):
             change_psk = subprocess.check_output(f"wg set {config_name} peer {id} preshared-key tmp_edit_psk.txt",
                                                  shell=True, stderr=subprocess.STDOUT)
             if change_psk.decode("UTF-8") != "":
-                db.close()
-                try:
-                    sem.release()
-                except RuntimeError as e:
-                    print("RuntimeError: cannot release un-acquired lock")
                 return jsonify({"status": "failed", "msg": change_psk.decode("UTF-8")})
             if allowed_ip == "":
                 allowed_ip = '""'
@@ -1107,40 +967,14 @@ def save_peer_setting(config_name):
                                                 shell=True, stderr=subprocess.STDOUT)
             subprocess.check_output(f'wg-quick save {config_name}', shell=True, stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
-                db.close()
-                try:
-                    sem.release()
-                except RuntimeError as e:
-                    print("RuntimeError: cannot release un-acquired lock")
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
-            db.update(
-                {
-                    "name": name, 
-                     "private_key": private_key,
-                     "DNS": dns_addresses, 
-                     "endpoint_allowed_ip": endpoint_allowed_ip,
-                     "mtu": data['MTU'],
-                     "keepalive":data['keep_alive'], "preshared_key": preshared_key
-                }, peers.id == id)
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
+            sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, keepalive = ?, preshared_key = ? WHERE id = ?"
+            g.cur.execute(sql, (name, private_key, dns_addresses, endpoint_allowed_ip, data["MTU"],
+                                data["keep_alive"], preshared_key, id))
             return jsonify({"status": "success", "msg": ""})
         except subprocess.CalledProcessError as exc:
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
             return jsonify({"status": "failed", "msg": str(exc.output.decode("UTF-8").strip())})
     else:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return jsonify({"status": "failed", "msg": "This peer does not exist."})
 
 
@@ -1148,20 +982,13 @@ def save_peer_setting(config_name):
 @app.route('/get_peer_data/<config_name>', methods=['POST'])
 def get_peer_name(config_name):
     data = request.get_json()
-    id = data['id']
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
-    result = db.search(peers.id == id)
-    db.close()
-    data = {"name": result[0]['name'], "allowed_ip": result[0]['allowed_ip'], "DNS": result[0]['DNS'],
-            "private_key": result[0]['private_key'], "endpoint_allowed_ip": result[0]['endpoint_allowed_ip'],
-            "mtu": result[0]['mtu'], "keep_alive": result[0]['keepalive'], "preshared_key": result[0]["preshared_key"]}
-
-    try:
-        sem.release()
-    except RuntimeError as e:
-        print("RuntimeError: cannot release un-acquired lock")
+    peer_id = data['id']
+    result = g.cur.execute(
+        "SELECT name, allowed_ip, DNS, private_key, endpoint_allowed_ip, mtu, keepalive, preshared_key FROM "
+        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+    data = {"name": result[0][0], "allowed_ip": result[0][1], "DNS": result[0][2],
+            "private_key": result[0][3], "endpoint_allowed_ip": result[0][4],
+            "mtu": result[0][5], "keep_alive": result[0][6], "preshared_key": result[0][7]}
     return jsonify(data)
 
 
@@ -1190,55 +1017,33 @@ def check_key_match(config_name):
 
 @app.route("/qrcode/<config_name>", methods=['GET'])
 def generate_qrcode(config_name):
-    id = request.args.get('id')
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
-    get_peer = db.search(peers.id == id)
+    peer_id = request.args.get('id')
+    get_peer = g.cur.execute("SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM "
+                             + config_name + " WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
-        if peer['private_key'] != "":
+        if peer[0] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
             endpoint = config.get("Peers", "remote_endpoint") + ":" + listen_port
-            private_key = peer['private_key']
-            allowed_ip = peer['allowed_ip']
-            dns_addresses = peer['DNS']
-            mtu_value = peer['mtu']
-            endpoint_allowed_ip = peer['endpoint_allowed_ip']
-            keepalive = peer['keepalive']
-            preshared_key = peer["preshared_key"]
-            conf = {
-                "public_key": public_key,
-                "listen_port": listen_port,
-                "endpoint": endpoint,
-                "private_key": private_key,
-                "allowed_ip": allowed_ip,
-                "DNS": dns_addresses,
-                "mtu": mtu_value,
-                "endpoint_allowed_ip": endpoint_allowed_ip,
-                "keepalive": keepalive,
-                "preshared_key": preshared_key
-            }
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
+            private_key = peer[0]
+            allowed_ip = peer[1]
+            dns_addresses = peer[2]
+            mtu_value = peer[3]
+            endpoint_allowed_ip = peer[4]
+            keepalive = peer[5]
+            preshared_key = peer[6]
 
-            result = "[Interface]\nPrivateKey = "+conf['private_key']+"\nAddress = "+conf['allowed_ip']+"\nMTU = "+conf['mtu']+"\nDNS = "+conf['DNS']\
-                     +"\n\n[Peer]\nPublicKey = "+conf['public_key']+"\nAllowedIPs = "+conf['endpoint_allowed_ip']+"\nPersistentKeepalive = "+conf['keepalive']+"\nEndpoint = "+conf['endpoint']
+            result = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nMTU = " \
+                     + str(mtu_value) + "\nDNS = " + dns_addresses + "\n\n[Peer]\nPublicKey = " + public_key \
+                     + "\nAllowedIPs = " + endpoint_allowed_ip + "\nPersistentKeepalive = " \
+                     + str(keepalive) + "\nEndpoint = " + endpoint
             if preshared_key != "":
-                result += "\nPresharedKey = "+preshared_key
+                result += "\nPresharedKey = " + preshared_key
 
             return render_template("qrcode.html", i=result)
     else:
-        db.close()
-        try:
-            sem.release()
-        except RuntimeError as e:
-            print("RuntimeError: cannot release un-acquired lock")
         return redirect("/configuration/" + config_name)
 
 
@@ -1246,30 +1051,29 @@ def generate_qrcode(config_name):
 @app.route('/download/<config_name>', methods=['GET'])
 def download(config_name):
     print(request.headers.get('User-Agent'))
-    id = request.args.get('id')
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config_name + ".json"))
-    peers = Query()
-    get_peer = db.search(peers.id == id)
+    peer_id = request.args.get('id')
+    get_peer = g.cur.execute(
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
+                             + config_name + " WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
-        if peer['private_key'] != "":
+        if peer[0] != "":
             public_key = get_conf_pub_key(config_name)
             listen_port = get_conf_listen_port(config_name)
             endpoint = config.get("Peers", "remote_endpoint") + ":" + listen_port
-            private_key = peer['private_key']
-            allowed_ip = peer['allowed_ip']
-            dns_addresses = peer['DNS']
-            mtu_value = peer['mtu']
-            endpoint_allowed_ip = peer['endpoint_allowed_ip']
-            keepalive = peer['keepalive']
-            filename = peer['name']
-            preshared_key = peer["preshared_key"]
+            private_key = peer[0]
+            allowed_ip = peer[1]
+            dns_addresses = peer[2]
+            mtu_value = peer[3]
+            endpoint_allowed_ip = peer[4]
+            keepalive = peer[5]
+            preshared_key = peer[6]
+            filename = peer[7]
             if len(filename) == 0:
-                filename = "Untitled_Peers"
+                filename = "Untitled_Peer"
             else:
-                filename = peer['name']
+                filename = peer[7]
                 # Clean filename
                 illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
                                     "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
@@ -1282,18 +1086,15 @@ def download(config_name):
             filename = filename + "_" + config_name
             psk = ""
             if preshared_key != "":
-                psk = "\nPresharedKey = "+preshared_key
-            db.close()
-            try:
-                sem.release()
-            except RuntimeError as e:
-                print("RuntimeError: cannot release un-acquired lock")
-            result = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
-                     dns_addresses + "\nMTU = " + mtu_value + "\n\n[Peer]\nPublicKey = " + \
-                     public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
-                     endpoint + "\nPersistentKeepalive = " + keepalive + psk
-            return app.response_class((yield result), mimetype='text/conf', headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
-    db.close()
+                psk = "\nPresharedKey = " + preshared_key
+
+            def generate():
+                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
+                         dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+                         public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+                         endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+            return app.response_class(generate(), mimetype='text/conf',
+                                      headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
     return redirect("/configuration/" + config_name)
 
 
@@ -1318,25 +1119,19 @@ Dashboard Tools Related
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
     config = request.form['config']
-    sem.acquire(timeout=1)
-    db = TinyDB(os.path.join(db_path, config + ".json"))
+    peers = g.cur.execute("SELECT id, name, allowed_ip, endpoint FROM " + config).fetchall()
     html = ""
-    for i in db.all():
-        html += '<optgroup label="' + i['name'] + ' - ' + i['id'] + '">'
-        allowed_ip = str(i['allowed_ip']).split(",")
+    for i in peers:
+        html += '<optgroup label="' + i[1] + ' - ' + i[0] + '">'
+        allowed_ip = str(i[2]).split(",")
         for k in allowed_ip:
             k = k.split("/")
             if len(k) == 2:
                 html += "<option value=" + k[0] + ">" + k[0] + "</option>"
-        endpoint = str(i['endpoint']).split(":")
+        endpoint = str(i[3]).split(":")
         if len(endpoint) == 2:
             html += "<option value=" + endpoint[0] + ">" + endpoint[0] + "</option>"
         html += "</optgroup>"
-    db.close()
-    try:
-        sem.release()
-    except RuntimeError as e:
-        print("RuntimeError: cannot release un-acquired lock")
     return html
 
 

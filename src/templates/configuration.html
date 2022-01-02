@@ -387,10 +387,8 @@
                     response["peer_data"].forEach(function(peer){
                         let total_r = 0;
                         let total_s = 0;
-                        for (let i = 0; i < peer["traffic"].length; i++){
-                            total_r += peer["traffic"][i]["total_receive"];
-                            total_s += peer["traffic"][i]["total_sent"];
-                        }
+                        total_r += peer["cumu_receive"];
+                        total_s += peer["cumu_sent"];
                         let spliter = '<div class="w-100"></div>';
                         let peer_name =
                             '<div class="col-sm display" style="display: flex; align-items: center; margin-bottom: 0.2rem">' +

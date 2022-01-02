@@ -15,3 +15,5 @@ public_key.txt
 venv/**
 log/**
 release/*
+*.db
+src/db/wgdashboard.db
