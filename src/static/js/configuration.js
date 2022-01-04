@@ -1,12 +1,27 @@
+$("[data-toggle='tooltip']").tooltip()
 let $body = $("body");
+let $progress_bar = $(".progress-bar");
+let available_ips = [];
+let $save_peer = $("#save_peer");
 
+$(".add_btn").on("click", function(){
+    addModal.toggle();
+});
+
+/**
+ * Round Transfer number into 4 digits
+ * @param value
+ * @param digits
+ * @returns {number}
+ */
 function roundN(value, digits) {
    let tenToN = 10 ** digits;
    return (Math.round(value * tenToN)) / tenToN;
 }
 
-// Progress Bar
-let $progress_bar = $(".progress-bar");
+/**
+ * Start Progress Bar
+ */
 function startProgressBar(){
     $progress_bar.css("width","0%")
         .css("opacity", "100")
@@ -19,10 +34,16 @@ function startProgressBar(){
     },300);
 }
 
+/**
+ * Still Loading Progress Bar
+ */
 function stillLoadingProgressBar(){
     $progress_bar.css("transition", "3s ease-in-out").css("width", "75%");
 }
 
+/**
+ * End Progress Bae
+ */
 function endProgressBar(){
     $progress_bar.css("transition", "0.3s ease-in-out").css("width","100%");
     setTimeout(function(){
@@ -31,20 +52,27 @@ function endProgressBar(){
 
 }
 
+/**
+ * Show toast
+ * @param msg
+ */
 function showToast(msg) {
     $('#alertToast').toast('show');
     $('#alertToast .toast-body').html(msg);
 }
 
-
-// Config Toggle
+/**
+ * When configuration switch got click
+ */
 $body.on("click", ".switch", function (){
     $(this).siblings($(".spinner-border")).css("display", "inline-block");
      $(this).remove();
    location.replace("/switch/"+$(this).attr('id'));
 });
 
-// Generating Keys
+/**
+ * Generate Private and Public key for a new peer
+ */
 function generate_key(){
     $.ajax({
         "url": "/generate_peer",
@@ -52,11 +80,14 @@ function generate_key(){
     }).done(function(res){
         $("#private_key").val(res.private_key);
         $("#public_key").val(res.public_key);
-        $("#preshare_key").val(res.preshared_key);
         $("#add_peer_alert").addClass("d-none");
         $("#re_generate_key i").removeClass("rotating");
     });
 }
+
+/**
+ * Generate public for existing peer
+ */
 function generate_public_key(){
     $.ajax({
         "url": "/generate_public_key",
@@ -70,11 +101,13 @@ function generate_public_key(){
             $("#add_peer_alert").addClass("d-none");
         }
         $("#public_key").val(res.data);
-         $("#re_generate_key i").removeClass("rotating");
+        $("#re_generate_key i").removeClass("rotating");
     });
 }
 
-// Add Peer
+/**
+ * Generate Public key when private got change
+ */
 $("#private_key").on("change",function(){
     if ($(this).val().length > 0){
         $("#re_generate_key i").addClass("rotating");
@@ -84,33 +117,144 @@ $("#private_key").on("change",function(){
     }
 });
 
+/**
+ * Trigger IP badge and item
+ * @param ip
+ */
+function trigger_ip(ip){
+    let $ip_ele = $(".available-ip-item[data-ip='"+ip+"']");
+    if ($ip_ele.html()){
+        if ($ip_ele.hasClass("active")){
+            $ip_ele.removeClass("active");
+            $("#selected_ip_list .badge[data-ip='"+ip+"']").remove();
+        }else{
+            $ip_ele.addClass("active");
+            $("#selected_ip_list").append('<span class="badge badge-primary available-ip-badge" style="cursor: pointer" data-ip="'+ip+'">'+ip+'</span>')
+        }
+    }
+}
+
+/**
+ * Get all available IP for this configuration
+ */
+function get_available_ip(){
+    $.ajax({
+        "url": "/available_ips/"+$save_peer.attr("conf_id"),
+        "method": "GET",
+    }).done(function (res) {
+        available_ips = res;
+        let $list_group = $("#available_ip_modal .modal-body .list-group");
+        $list_group.html("");
+        $("#allowed_ips").val(available_ips[0]);
+        available_ips.forEach((ip) =>
+            $list_group.append('<a class="list-group-item list-group-item-action available-ip-item" style="cursor: pointer" data-ip="'+ip+'">'+ip+'</a>'));
+    });
+}
+
+$("#available_ip_modal").on("show.bs.modal", () => {
+    $('#add_modal').addClass("ip_modal_open");
+}).on("hidden.bs.modal", function () {
+    $('#add_modal').removeClass("ip_modal_open");
+    let ips = [];
+    let $selected_ip_list = $("#selected_ip_list");
+    $selected_ip_list.children().each(function(){
+        ips.push($(this).data("ip"));
+    });
+    ips.forEach((ele) => trigger_ip(ele));
+})
+
+/**
+ * When IP Badge got click
+ */
+$body.on("click", ".available-ip-badge", function(){
+    $(".available-ip-item[data-ip='"+$(this).data("ip")+"']").removeClass("active");
+    $(this).remove();
+})
+
+/**
+ * When available ip item got click
+ */
+$body.on("click", ".available-ip-item", function () {
+    trigger_ip($(this).data("ip"));
+});
+
+let $ipModal = new bootstrap.Modal(document.getElementById('available_ip_modal'), {
+    keyboard: false
+});
+
+$("#search_available_ip").on("click", function () {
+    $ipModal.toggle();
+    let $allowed_ips = $("#allowed_ips");
+    if ($allowed_ips.val().length > 0){
+        let s = $allowed_ips.val().split(",");
+        for (let i = 0; i < s.length; i++){
+            s[i] = s[i].trim();
+            trigger_ip(s[i]);
+        }
+    }
+}).tooltip();
+
+$("#confirm_ip").on("click", () => {
+    $ipModal.toggle();
+    let ips = [];
+    let $selected_ip_list = $("#selected_ip_list");
+    $selected_ip_list.children().each(function(){
+        ips.push($(this).data("ip"));
+    });
+    $("#allowed_ips").val(ips.join(", "));
+    ips.forEach((ele) => trigger_ip(ele));
+});
+
+$("#allowed_ips").on("keyup", function(){
+    let s = clean_ip($(this).val());
+    s = s.split(",");
+    if (available_ips.includes(s[s.length - 1])){
+        $("#allowed_ips_indicator").removeClass().addClass("text-success")
+            .html('<i class="bi bi-check-circle-fill"></i>');
+    }else{
+        $("#allowed_ips_indicator").removeClass().addClass("text-warning")
+            .html('<i class="bi bi-exclamation-circle-fill"></i>');
+    }
+})
+
+
 $('#add_modal').on('show.bs.modal', function (event) {
     generate_key();
+    get_available_ip();
+}).on('hide.bs.modal', function(){
+    $("#allowed_ips_indicator").html('');
 });
+
 $("#re_generate_key").on("click",function (){
     $("#public_key").attr("disabled","disabled");
     $("#re_generate_key i").addClass("rotating");
     generate_key();
 });
+
 let addModal = new bootstrap.Modal(document.getElementById('add_modal'), {
     keyboard: false
 });
 
-$(".add_btn").on("click", function(){
-    addModal.toggle();
-});
+function clean_ip(val){
+    let clean_ip = val.split(',');
+    for (let i = 0; i < clean_ip.length; i++) clean_ip[i] = clean_ip[i].trim(' ');
+    return clean_ip.filter(Boolean).join(",");
+}
 
-$("#save_peer").on("click",function(){
+$save_peer.on("click",function(){
     let $public_key = $("#public_key");
     let $private_key = $("#private_key");
     let $allowed_ips = $("#allowed_ips");
+    $allowed_ips.val(clean_ip($allowed_ips.val()));
     let $new_add_DNS = $("#new_add_DNS");
+    $new_add_DNS.val(clean_ip($new_add_DNS.val()));
     let $new_add_endpoint_allowed_ip = $("#new_add_endpoint_allowed_ip");
+    $new_add_endpoint_allowed_ip.val(clean_ip($new_add_endpoint_allowed_ip.val()));
     let $new_add_name = $("#new_add_name");
     let $new_add_MTU = $("#new_add_MTU");
     let $new_add_keep_alive = $("#new_add_keep_alive");
     let $enable_preshare_key = $("#enable_preshare_key");
-
+    let p_key = $public_key.val()
     $(this).attr("disabled","disabled");
     $(this).html("Saving...");
     if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
@@ -138,10 +282,14 @@ $("#save_peer").on("click",function(){
                 if(response !== "true"){
                     $("#add_peer_alert").html(response).removeClass("d-none");
                     data_list.forEach((ele) => ele.removeAttr("disabled"));
-                    $("#save_peer").removeAttr("disabled").html("Save");
+                    $save_peer.removeAttr("disabled").html("Save");
                 }
                 else{
                     load_data("");
+                    data_list.forEach((ele) => ele.removeAttr("disabled"));
+                    $("#add_peer_form").trigger("reset");
+                    $save_peer.removeAttr("disabled").html("Save");
+                    showToast("Add peer successful!");
                     addModal.toggle();
                 }
             }
@@ -159,6 +307,8 @@ let qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
 });
 // QR Code
 $body.on("click", ".btn-qrcode-peer", function (){
+
+
     let src = $(this).attr('img_src');
     $.ajax({
         "url": src,
@@ -326,7 +476,6 @@ $(".peer_private_key_textbox_switch").on("click",function (){
     $(".peer_private_key_textbox_switch i").removeClass().addClass(icon);
 });
 
-
 // Search Peer
 let typingTimer;
 let doneTypingInterval = 200;
@@ -335,13 +484,14 @@ $input.on('keyup', function () {
     clearTimeout(typingTimer);
     typingTimer = setTimeout(doneTyping, doneTypingInterval);
 });
+
 $input.on('keydown', function () {
     clearTimeout(typingTimer);
 });
+
 function doneTyping () {
     load_data($input.val());
 }
-
 
 // Sorting
 $body.on("change", "#sort_by_dropdown", function (){
@@ -360,16 +510,13 @@ $body.on("change", "#sort_by_dropdown", function (){
 $body.on("mouseenter", ".key", function(){
     let label = $(this).parent().siblings().children()[1];
     label.style.opacity = "100";
-})
-$body.on("mouseout", ".key", function(){
+}).on("mouseout", ".key", function(){
     let label = $(this).parent().siblings().children()[1];
     label.style.opacity = "0";
     setTimeout(function (){
         label.innerHTML = "CLICK TO COPY";
     },200);
-});
-
-$body.on("click", ".key", function(){
+}).on("click", ".key", function(){
     var label = $(this).parent().siblings().children()[1];
     copyToClipboard($(this));
     label.innerHTML = "COPIED!";
@@ -419,7 +566,6 @@ $body.on("click", ".update_interval", function(){
 $body.on("click", ".refresh", function (){
     load_data($('#search_peer_textbox').val());
 });
-
 
 // Switch display mode
 $body.on("click", ".display_mode", function(){

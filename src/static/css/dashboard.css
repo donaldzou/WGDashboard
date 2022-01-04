@@ -382,3 +382,15 @@ main{
     animation: loading 3s infinite ease-in-out;
 }
 
+#qrcode_img img{
+    width: 100%;
+}
+
+#selected_ip_list .badge{
+    margin: 0.1rem
+}
+
+#add_modal.ip_modal_open{
+    transition: filter 0.2s ease-in-out;
+    filter: brightness(0.5);
+}

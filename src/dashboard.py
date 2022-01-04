@@ -13,20 +13,17 @@ import json
 import os
 import secrets
 import subprocess
-import threading
 import time
 import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
 from operator import itemgetter
-import signal
 # PIP installed library
 import ifcfg
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
-from tinydb import TinyDB, Query
 
 # Import other python files
 from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint, \
@@ -325,7 +322,7 @@ def get_peers(config_name, search, sort_t):
         data = g.cur.execute("SELECT * FROM " + config_name).fetchall()
         result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     else:
-        sql = "SELECT * FROM " + config_name + " WHERE name LIKE '%"+search+"%'"
+        sql = "SELECT * FROM " + config_name + " WHERE name LIKE '%" + search + "%'"
         data = g.cur.execute(sql).fetchall()
         result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     if sort_t == "allowed_ip":
@@ -395,8 +392,18 @@ def get_conf_list():
     for i in os.listdir(wg_conf_path):
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
-            g.cur.execute(
-                "CREATE TABLE IF NOT EXISTS " + i + " (id VARCHAR NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL)")
+            create_table = f"""
+                CREATE TABLE IF NOT EXISTS {i} (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL, 
+                    PRIMARY KEY (id)
+                )
+            """
+            g.cur.execute(create_table)
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
             if temp['status'] == "running":
                 temp['checked'] = 'checked'
@@ -412,13 +419,11 @@ def get_conf_list():
 def gen_private_key():
     gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',
                                   shell=True)
-    gen_psk = subprocess.check_output('wg genpsk', shell=True)
-    preshare_key = gen_psk.decode("UTF-8").strip()
     with open('private_key.txt', encoding='utf-8') as file_object:
         private_key = file_object.readline().strip()
     with open('public_key.txt', encoding='utf-8') as file_object:
         public_key = file_object.readline().strip()
-    data = {"private_key": private_key, "public_key": public_key, "preshared_key": preshare_key}
+    data = {"private_key": private_key, "public_key": public_key}
     return data
 
 
@@ -867,8 +872,9 @@ def add_peer(config_name):
         return config_name + " is not running."
     if public_key in keys:
         return "Public key already exist."
-    check_dup_ip = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip = ?",
-                                 (allowed_ips,)).fetchone()
+    check_dup_ip = g.cur.execute(
+        "SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip LIKE '" + allowed_ips + "%'", ) \
+        .fetchone()
     if check_dup_ip[0] != 0:
         return "Allowed IP already taken by another peer."
     if not check_DNS(dns_addresses):
@@ -890,7 +896,6 @@ def add_peer(config_name):
             status = subprocess.check_output(f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips}",
                                              shell=True, stderr=subprocess.STDOUT)
         status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
-
         get_all_peers_data(config_name)
         sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ? WHERE id = ?"
         g.cur.execute(sql, (data['name'], data['private_key'], data['DNS'], endpoint_allowed_ip, public_key))
@@ -992,6 +997,35 @@ def get_peer_name(config_name):
     return jsonify(data)
 
 
+# Return available IPs
+@app.route('/available_ips/<config_name>', methods=['GET'])
+def available_ips(config_name):
+    config_interface = read_conf_file_interface(config_name)
+    if "Address" in config_interface:
+        existed = []
+        conf_address = config_interface['Address']
+        address = conf_address.split(',')
+        for i in address:
+            add, sub = i.split("/")
+            existed.append(ipaddress.ip_address(add))
+        peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
+        for i in peers:
+            add = i[0].split(",")
+            for k in add:
+                a, s = k.split("/")
+                existed.append(ipaddress.ip_address(a))
+        available = list(ipaddress.ip_network(address[0], False).hosts())
+        for i in existed:
+            try:
+                available.remove(i)
+            except ValueError as e:
+                pass
+        available = [str(i) for i in available]
+        return jsonify(available)
+    else:
+        return jsonify([])
+
+
 # Generate a private key
 @app.route('/generate_peer', methods=['GET'])
 def generate_peer():
@@ -1018,8 +1052,9 @@ def check_key_match(config_name):
 @app.route("/qrcode/<config_name>", methods=['GET'])
 def generate_qrcode(config_name):
     peer_id = request.args.get('id')
-    get_peer = g.cur.execute("SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM "
-                             + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+    get_peer = g.cur.execute(
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM "
+        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
@@ -1041,7 +1076,6 @@ def generate_qrcode(config_name):
                      + str(keepalive) + "\nEndpoint = " + endpoint
             if preshared_key != "":
                 result += "\nPresharedKey = " + preshared_key
-
             return render_template("qrcode.html", i=result)
     else:
         return redirect("/configuration/" + config_name)
@@ -1054,7 +1088,7 @@ def download(config_name):
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
-                             + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
@@ -1090,9 +1124,10 @@ def download(config_name):
 
             def generate():
                 yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
-                         dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
-                         public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
-                         endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+                      dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+                      public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+                      endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+
             return app.response_class(generate(), mimetype='text/conf',
                                       headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
     return redirect("/configuration/" + config_name)
