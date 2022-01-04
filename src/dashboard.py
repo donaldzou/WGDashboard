@@ -1750,7 +1750,7 @@ def init_dashboard():
     # Defualt dashboard server setting
     if "Server" not in config:
         config['Server'] = {}
-    if 'wg_conf_path' not in config['Serxecute ping traceroute command.ver']:
+    if 'wg_conf_path' not in config['Server']:
         config['Server']['wg_conf_path'] = '/etc/wireguard'
     # TODO: IPv6 for the app IP might need to configure with Gunicorn...
     if 'app_ip' not in config['Server']:
