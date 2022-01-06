@@ -90,6 +90,14 @@ body {
     right: 1rem;
 }
 
+.form-control{
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:disabled{
+    cursor: not-allowed;
+}
+
 .navbar .form-control {
     padding: .75rem 1rem;
     border-width: 0;

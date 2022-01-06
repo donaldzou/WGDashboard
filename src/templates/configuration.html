@@ -100,9 +100,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary add_btn">
-                            <i class="bi bi-plus-circle-fill" style=""></i> Add Peer
-                        </button>
+                        <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill" style=""></i> Add Peer</button>
                     </div>
                 </div>
                 <div class="row peer_list"></div>
@@ -121,16 +119,29 @@
 					</button>
 				</div>
 				<div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm" style="display: flex; align-items: center;">
+                            <div class="custom-control custom-switch">
+                                <input class="custom-control-input" type="checkbox" id="bulk_add">
+                                <label class="custom-control-label" for="bulk_add"><strong>Add Peers by bulk</strong></label>
+                                <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body" data-toggle="popover" data-placement="right" data-trigger="click" data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group" style="margin: 0">
+{#                                <label for="new_add_amount">Amount</label>#}
+                                <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
 					<div id="add_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
 						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 						  <span aria-hidden="true">&times;</span>
 						</button>
 					</div>
 					<form id="add_peer_form">
-                        <div class="alert alert-warning" role="alert" style="font-size: 0.8rem">
-                            To generate QR code for this new peer, you need to provide the private key, or use the generated key. If you don't need the QR code, simply remove the private key and insert your existed public key.
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group non-bulk">
                             <div>
                                 <label for="private_key">Private Key</label>
                             </div>
@@ -141,18 +152,18 @@
                                 </div>
                             </div>
                         </div>
-						<div class="form-group">
+						<div class="form-group non-bulk">
 							<label for="public_key">Public Key <code>(Required)</code></label>
 							<input type="text" class="form-control" id="public_key" aria-describedby="public_key" disabled>
 						</div>
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 non-bulk">
                                  <div class="form-group">
                                     <label for="new_add_name">Name</label>
                                     <input type="text" class="form-control" id="new_add_name">
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 non-bulk">
                                 <div class="form-group">
                                     <label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
                                     <div class="input-group">
@@ -201,7 +212,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="save_peer" conf_id={{conf_data['name']}}>Save</button>
+					<button type="button" class="btn btn-primary" id="save_peer" conf_id={{conf_data['name']}}>Add</button>
 				</div>
 			</div>
 		</div>
@@ -363,6 +374,7 @@
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
+<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
 
 <script>

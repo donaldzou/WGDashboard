@@ -1,4 +1,5 @@
 $("[data-toggle='tooltip']").tooltip()
+$("[data-toggle='popover']").popover()
 let $body = $("body");
 let $progress_bar = $(".progress-bar");
 let available_ips = [];
@@ -74,44 +75,21 @@ $body.on("click", ".switch", function (){
  * Generate Private and Public key for a new peer
  */
 function generate_key(){
-    $.ajax({
-        "url": "/generate_peer",
-        "method": "GET",
-    }).done(function(res){
-        $("#private_key").val(res.private_key);
-        $("#public_key").val(res.public_key);
-        $("#add_peer_alert").addClass("d-none");
-        $("#re_generate_key i").removeClass("rotating");
-    });
-}
-
-/**
- * Generate public for existing peer
- */
-function generate_public_key(){
-    $.ajax({
-        "url": "/generate_public_key",
-        "method": "POST",
-        "headers":{"Content-Type": "application/json"},
-        "data": JSON.stringify({"private_key": $("#private_key").val()})
-    }).done(function(res){
-        if(res.status === "failed"){
-            $("#add_peer_alert").html(res.msg).removeClass("d-none");
-        }else{
-            $("#add_peer_alert").addClass("d-none");
-        }
-        $("#public_key").val(res.data);
-        $("#re_generate_key i").removeClass("rotating");
-    });
+    let keys = wireguard.generateKeypair();
+    $("#private_key").val(keys.privateKey);
+    $("#public_key").val(keys.publicKey);
+    $("#add_peer_alert").addClass("d-none");
+    $("#re_generate_key i").removeClass("rotating");
+    $("#enable_preshare_key").val(keys.presharedKey);
 }
 
 /**
  * Generate Public key when private got change
  */
 $("#private_key").on("change",function(){
-    if ($(this).val().length > 0){
+    if ($(this).val().length === 44){
         $("#re_generate_key i").addClass("rotating");
-        generate_public_key();
+        $("#public_key").val(wireguard.generatePublicKey($("#private_key").val()));
     }else{
         $("#public_key").removeAttr("disabled").val("");
     }
@@ -241,63 +219,130 @@ function clean_ip(val){
     return clean_ip.filter(Boolean).join(",");
 }
 
-$save_peer.on("click",function(){
-    let $public_key = $("#public_key");
-    let $private_key = $("#private_key");
-    let $allowed_ips = $("#allowed_ips");
-    $allowed_ips.val(clean_ip($allowed_ips.val()));
+let bulk_add_peers = () => {
+    $save_peer.attr("disabled","disabled");
+    $save_peer.html("Adding...");
+
     let $new_add_DNS = $("#new_add_DNS");
     $new_add_DNS.val(clean_ip($new_add_DNS.val()));
     let $new_add_endpoint_allowed_ip = $("#new_add_endpoint_allowed_ip");
-    $new_add_endpoint_allowed_ip.val(clean_ip($new_add_endpoint_allowed_ip.val()));
-    let $new_add_name = $("#new_add_name");
+        $new_add_endpoint_allowed_ip.val(clean_ip($new_add_endpoint_allowed_ip.val()));
     let $new_add_MTU = $("#new_add_MTU");
     let $new_add_keep_alive = $("#new_add_keep_alive");
     let $enable_preshare_key = $("#enable_preshare_key");
-    let p_key = $public_key.val()
-    $(this).attr("disabled","disabled");
-    $(this).html("Saving...");
-    if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
-        let conf = $(this).attr('conf_id');
-        let data_list = [$private_key, $allowed_ips, $new_add_name, $new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
-        data_list.forEach((ele) => ele.attr("disabled", "disabled"));
-        $.ajax({
-            method: "POST",
-            url: "/add_peer/"+conf,
-            headers:{
-                "Content-Type": "application/json"
-            },
-            data: JSON.stringify({
-                "private_key":$private_key.val(),
-                "public_key":$public_key.val(),
-                "allowed_ips": $allowed_ips.val(),
-                "name":$new_add_name.val(),
-                "DNS": $new_add_DNS.val(),
-                "endpoint_allowed_ip": $new_add_endpoint_allowed_ip.val(),
-                "MTU": $new_add_MTU.val(),
-                "keep_alive": $new_add_keep_alive.val(),
-                "enable_preshared_key": $enable_preshare_key.prop("checked"),
-            }),
-            success: function (response){
-                if(response !== "true"){
-                    $("#add_peer_alert").html(response).removeClass("d-none");
-                    data_list.forEach((ele) => ele.removeAttr("disabled"));
-                    $save_peer.removeAttr("disabled").html("Save");
+    let $new_add_amount = $("#new_add_amount");
+    let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
+    if ($new_add_amount.val() > 0){
+        if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
+            let conf = $save_peer.attr('conf_id');
+            let keys = [];
+            for (let i = 0; i < $new_add_amount.val(); i++) keys.push(wireguard.generateKeypair());
+            $.ajax({
+                method: "POST",
+                url: "/add_peer_bulk/"+conf,
+                headers:{
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({
+                    "DNS": $new_add_DNS.val(),
+                    "endpoint_allowed_ip": $new_add_endpoint_allowed_ip.val(),
+                    "MTU": $new_add_MTU.val(),
+                    "keep_alive": $new_add_keep_alive.val(),
+                    "enable_preshared_key": $enable_preshare_key.prop("checked"),
+                    "keys": keys,
+                    "amount": $new_add_amount.val()
+                }),
+                success: function (response){
+                    if(response !== "true"){
+                        $("#add_peer_alert").html(response).removeClass("d-none");
+                        data_list.forEach((ele) => ele.removeAttr("disabled"));
+                        $save_peer.removeAttr("disabled").html("Save");
+                    }
+                    else{
+                        load_data("");
+                        data_list.forEach((ele) => ele.removeAttr("disabled"));
+                        $("#add_peer_form").trigger("reset");
+                        $save_peer.removeAttr("disabled").html("Save");
+                        showToast($new_add_amount.val()+"peers added successful!");
+                        addModal.toggle();
+                    }
                 }
-                else{
-                    load_data("");
-                    data_list.forEach((ele) => ele.removeAttr("disabled"));
-                    $("#add_peer_form").trigger("reset");
-                    $save_peer.removeAttr("disabled").html("Save");
-                    showToast("Add peer successful!");
-                    addModal.toggle();
-                }
-            }
-        });
+            })
+        }else{
+            $("#add_peer_alert").html("Please fill in all required box.").removeClass("d-none");
+            $save_peer.removeAttr("disabled");
+            $save_peer.html("Add");
+        }
     }else{
-        $("#add_peer_alert").html("Please fill in all required box.").removeClass("d-none");
-        $(this).removeAttr("disabled");
-        $(this).html("Save");
+        $("#add_peer_alert").html("Please enter 1 or more amount.").removeClass("d-none");
+        $save_peer.removeAttr("disabled");
+        $save_peer.html("Add");
+    }
+}
+
+
+$save_peer.on("click",function(){
+    let $bulk_add = $("#bulk_add");
+    if ($bulk_add.prop("checked")){
+        bulk_add_peers()
+    }else {
+        let $public_key = $("#public_key");
+        let $private_key = $("#private_key");
+        let $allowed_ips = $("#allowed_ips");
+        $allowed_ips.val(clean_ip($allowed_ips.val()));
+        let $new_add_DNS = $("#new_add_DNS");
+        $new_add_DNS.val(clean_ip($new_add_DNS.val()));
+        let $new_add_endpoint_allowed_ip = $("#new_add_endpoint_allowed_ip");
+        $new_add_endpoint_allowed_ip.val(clean_ip($new_add_endpoint_allowed_ip.val()));
+        let $new_add_name = $("#new_add_name");
+        let $new_add_MTU = $("#new_add_MTU");
+        let $new_add_keep_alive = $("#new_add_keep_alive");
+        let $enable_preshare_key = $("#enable_preshare_key");
+        $(this).attr("disabled","disabled");
+        $(this).html("Adding...");
+        if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
+            let conf = $(this).attr('conf_id');
+            let data_list = [$private_key, $allowed_ips, $new_add_name, $new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
+            data_list.forEach((ele) => ele.attr("disabled", "disabled"));
+            $.ajax({
+                method: "POST",
+                url: "/add_peer/"+conf,
+                headers:{
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({
+                    "private_key":$private_key.val(),
+                    "public_key":$public_key.val(),
+                    "allowed_ips": $allowed_ips.val(),
+                    "name":$new_add_name.val(),
+                    "DNS": $new_add_DNS.val(),
+                    "endpoint_allowed_ip": $new_add_endpoint_allowed_ip.val(),
+                    "MTU": $new_add_MTU.val(),
+                    "keep_alive": $new_add_keep_alive.val(),
+                    "enable_preshared_key": $enable_preshare_key.prop("checked"),
+                    "preshared_key": $enable_preshare_key.val()
+                }),
+                success: function (response){
+                    if(response !== "true"){
+                        $("#add_peer_alert").html(response).removeClass("d-none");
+                        data_list.forEach((ele) => ele.removeAttr("disabled"));
+                        $save_peer.removeAttr("disabled").html("Save");
+                    }
+                    else{
+                        load_data("");
+                        data_list.forEach((ele) => ele.removeAttr("disabled"));
+                        $("#add_peer_form").trigger("reset");
+                        $save_peer.removeAttr("disabled").html("Save");
+                        showToast("Add peer successful!");
+                        addModal.toggle();
+                    }
+                }
+            });
+        }else{
+            $("#add_peer_alert").html("Please fill in all required box.").removeClass("d-none");
+            $(this).removeAttr("disabled");
+            $(this).html("Add");
+        }
     }
 });
 
@@ -592,3 +637,22 @@ $body.on("click", ".display_mode", function(){
         }
     });
 });
+
+$("#bulk_add").on("change", function (){
+    let hide = $(".non-bulk").find("input");
+    let amount = $("#new_add_amount");
+    if ($(this).prop("checked") === true){
+        for(let i = 0; i < hide.length; i++){
+            $(hide[i]).attr("disabled", "disabled");
+        }
+        amount.removeAttr("disabled");
+    }
+    else{
+        for(let i = 0; i < hide.length; i++){
+            if ($(hide[i]).attr('id') !== "public_key"){
+                $(hide[i]).removeAttr("disabled");
+            }
+        }
+        amount.attr("disabled", "disabled");
+    }
+})

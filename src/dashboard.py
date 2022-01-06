@@ -464,11 +464,39 @@ def check_repeat_allowed_ip(public_key, ip, config_name):
         return {'status': 'failed', 'msg': 'Peer does not exist'}
     else:
         existed_ip = g.cur.execute("SELECT COUNT(*) FROM " +
-                                   config_name + " WHERE id != ? AND allowed_ip = ?", (public_key, ip)).fetchone()
+                                   config_name + " WHERE id != ? AND allowed_ip LIKE '" + ip + "/%'", (public_key,))\
+            .fetchone()
         if existed_ip[0] != 0:
             return {'status': 'failed', 'msg': "Allowed IP already taken by another peer."}
         else:
             return {'status': 'success'}
+
+
+def f_available_ips(config_name):
+    config_interface = read_conf_file_interface(config_name)
+    if "Address" in config_interface:
+        existed = []
+        conf_address = config_interface['Address']
+        address = conf_address.split(',')
+        for i in address:
+            add, sub = i.split("/")
+            existed.append(ipaddress.ip_address(add))
+        peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
+        for i in peers:
+            add = i[0].split(",")
+            for k in add:
+                a, s = k.split("/")
+                existed.append(ipaddress.ip_address(a))
+        available = list(ipaddress.ip_network(address[0], False).hosts())
+        for i in existed:
+            try:
+                available.remove(i)
+            except ValueError as e:
+                pass
+        available = [str(i) for i in available]
+        return available
+    else:
+        return []
 
 
 """
@@ -830,8 +858,6 @@ def get_conf(config_name):
         conf_data['checked'] = "checked"
     config.clear()
     return jsonify(conf_data)
-    # return render_template('get_conf.html', conf_data=conf_data, wg_ip=config.get("Peers","remote_endpoint"), sort_tag=sort,
-    #                        dashboard_refresh_interval=int(config.get("Server", "dashboard_refresh_interval")), peer_display_mode=peer_display_mode)
 
 
 # Turn on / off a configuration
@@ -856,6 +882,64 @@ def switch(config_name):
     return redirect(request.referrer)
 
 
+@app.route('/add_peer_bulk/<config_name>', methods=['POST'])
+def add_peer_bulk(config_name):
+    data = request.get_json()
+    keys = data['keys']
+    endpoint_allowed_ip = data['endpoint_allowed_ip']
+    dns_addresses = data['DNS']
+    enable_preshared_key = data["enable_preshared_key"]
+    amount = data['amount']
+    if not amount.isdigit() or int(amount) < 1:
+        return "Amount must be integer larger than 0"
+    amount = int(amount)
+    if not check_DNS(dns_addresses):
+        return "DNS formate is incorrect. Example: 1.1.1.1"
+    if not check_Allowed_IPs(endpoint_allowed_ip):
+        return "Endpoint Allowed IPs format is incorrect."
+    if len(data['MTU']) == 0 or not data['MTU'].isdigit():
+        return "MTU format is not correct."
+    if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
+        return "Persistent Keepalive format is not correct."
+    ips = f_available_ips(config_name)
+    wg_command = ["wg", "set", config_name]
+    sql_command = []
+    for i in range(amount):
+        keys[i]['name'] = f"{config_name}_{datetime.now().strftime('%m%d%Y%H%M%S')}_Peer_#_{(i + 1)}"
+        wg_command.append("peer")
+        wg_command.append(keys[i]['publicKey'])
+        keys[i]['allowed_ips'] = ips.pop(0)
+        if enable_preshared_key:
+            keys[i]['psk_file'] = f"{keys[i]['name']}.txt"
+            f = open(keys[i]['psk_file'], "w+")
+            f.write(keys[i]['presharedKey'])
+            f.close()
+            wg_command.append("preshared-key")
+            wg_command.append(keys[i]['psk_file'])
+        else:
+            keys[i]['psk_file'] = ""
+        wg_command.append("allowed-ips")
+        wg_command.append(keys[i]['allowed_ips'])
+        update = ["UPDATE ", config_name, " SET name = '", keys[i]['name'],
+                  "', private_key = '", keys[i]['privateKey'], "', DNS = '", dns_addresses,
+                  "', endpoint_allowed_ip = '", endpoint_allowed_ip, "' WHERE id = '", keys[i]['publicKey'], "'"]
+        sql_command.append(update)
+    try:
+        status = subprocess.check_output(" ".join(wg_command), shell=True, stderr=subprocess.STDOUT)
+        status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
+        get_all_peers_data(config_name)
+        if enable_preshared_key:
+            for i in keys:
+                os.remove(i['psk_file'])
+        for i in range(len(sql_command)):
+            sql_command[i] = "".join(sql_command[i])
+        g.cur.executescript("; ".join(sql_command))
+        return "true"
+    except subprocess.CalledProcessError as exc:
+        return exc.output.strip()
+
+
+
 # Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
@@ -865,6 +949,7 @@ def add_peer(config_name):
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     dns_addresses = data['DNS']
     enable_preshared_key = data["enable_preshared_key"]
+    preshared_key = data['preshared_key']
     keys = get_conf_peer_key(config_name)
     if len(public_key) == 0 or len(dns_addresses) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
@@ -873,7 +958,7 @@ def add_peer(config_name):
     if public_key in keys:
         return "Public key already exist."
     check_dup_ip = g.cur.execute(
-        "SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip LIKE '" + allowed_ips + "%'", ) \
+        "SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip LIKE '" + allowed_ips + "/%'", ) \
         .fetchone()
     if check_dup_ip[0] != 0:
         return "Allowed IP already taken by another peer."
@@ -887,11 +972,16 @@ def add_peer(config_name):
         return "Persistent Keepalive format is not correct."
     try:
         if enable_preshared_key:
-            key = subprocess.check_output("wg genpsk > tmp_psk.txt", shell=True)
+            now = str(datetime.now().strftime("%m%d%Y%H%M%S"))
+            f_name = now + "_tmp_psk.txt"
+            print(f_name)
+            f = open(f_name, "w+")
+            f.write(preshared_key)
+            f.close()
             status = subprocess.check_output(
-                f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips} preshared-key tmp_psk.txt",
+                f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips} preshared-key {f_name}",
                 shell=True, stderr=subprocess.STDOUT)
-            os.remove("tmp_psk.txt")
+            os.remove(f_name)
         elif not enable_preshared_key:
             status = subprocess.check_output(f"wg set {config_name} peer {public_key} allowed-ips {allowed_ips}",
                                              shell=True, stderr=subprocess.STDOUT)
@@ -924,6 +1014,7 @@ def remove_peer(config_name):
                                               shell=True, stderr=subprocess.STDOUT)
             sql = "DELETE FROM " + config_name + " WHERE id = ?"
             g.cur.execute(sql, (delete_key,))
+            g.db.commit()
             return "true"
         except subprocess.CalledProcessError as exc:
             return exc.output.strip()
@@ -1000,30 +1091,7 @@ def get_peer_name(config_name):
 # Return available IPs
 @app.route('/available_ips/<config_name>', methods=['GET'])
 def available_ips(config_name):
-    config_interface = read_conf_file_interface(config_name)
-    if "Address" in config_interface:
-        existed = []
-        conf_address = config_interface['Address']
-        address = conf_address.split(',')
-        for i in address:
-            add, sub = i.split("/")
-            existed.append(ipaddress.ip_address(add))
-        peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
-        for i in peers:
-            add = i[0].split(",")
-            for k in add:
-                a, s = k.split("/")
-                existed.append(ipaddress.ip_address(a))
-        available = list(ipaddress.ip_network(address[0], False).hosts())
-        for i in existed:
-            try:
-                available.remove(i)
-            except ValueError as e:
-                pass
-        available = [str(i) for i in available]
-        return jsonify(available)
-    else:
-        return jsonify([])
+    return jsonify(f_available_ips(config_name))
 
 
 # Generate a private key
