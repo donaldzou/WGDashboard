@@ -1000,24 +1000,29 @@ def remove_peer(config_name):
     if get_conf_status(config_name) == "stopped":
         return "Your need to turn on " + config_name + " first."
     data = request.get_json()
-    delete_key = data['peer_id']
+    delete_keys = data['peer_ids']
     keys = get_conf_peer_key(config_name)
     if not isinstance(keys, list):
         return config_name + " is not running."
-    if delete_key not in keys:
-        return "This key does not exist"
     else:
+        sql_command = []
+        wg_command = ["wg", "set", config_name]
+        for delete_key in delete_keys:
+            if delete_key not in keys:
+                return "This key does not exist"
+            sql_command.append("DELETE FROM " + config_name + " WHERE id = '"+delete_key+"';")
+            wg_command.append("peer")
+            wg_command.append(delete_key)
+            wg_command.append("remove")
         try:
-            remove_wg = subprocess.check_output(f"wg set {config_name} peer {delete_key} remove",
+            remove_wg = subprocess.check_output(" ".join(wg_command),
                                                 shell=True, stderr=subprocess.STDOUT)
-            save_wg = subprocess.check_output(f"wg-quick save {config_name}",
-                                              shell=True, stderr=subprocess.STDOUT)
-            sql = "DELETE FROM " + config_name + " WHERE id = ?"
-            g.cur.execute(sql, (delete_key,))
+            save_wg = subprocess.check_output(f"wg-quick save {config_name}", shell=True, stderr=subprocess.STDOUT)
+            g.cur.executescript(' '.join(sql_command))
             g.db.commit()
-            return "true"
         except subprocess.CalledProcessError as exc:
             return exc.output.strip()
+        return "true"
 
 
 # Save peer settings

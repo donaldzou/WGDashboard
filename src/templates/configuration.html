@@ -100,7 +100,15 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill" style=""></i> Add Peer</button>
+                        <div class="btn-manage-group">
+                            <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill" style=""></i></button>
+                            <button type="button" class="btn btn-secondary setting_btn"><i class="bi bi-three-dots"></i></button>
+                            <div class="setting_btn_menu">
+                                <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i> Delete Peers</a>
+                                <a class="text-info"><i class="bi bi-cloud-download-fill"></i> Download All Peers</a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <div class="row peer_list"></div>
@@ -113,26 +121,23 @@
 		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Add a new peer</h5>
+					<h5 class="modal-title" id="staticBackdropLabel">Add New Peer</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
 				<div class="modal-body">
-                    <div class="row">
-                        <div class="col-sm" style="display: flex; align-items: center;">
-                            <div class="custom-control custom-switch">
-                                <input class="custom-control-input" type="checkbox" id="bulk_add">
-                                <label class="custom-control-label" for="bulk_add"><strong>Add Peers by bulk</strong></label>
-                                <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body" data-toggle="popover" data-placement="right" data-trigger="click" data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
-                            </div>
+                    <div>
+                        <div class="custom-control custom-switch" style="margin-bottom: 1rem">
+                            <input class="custom-control-input" type="checkbox" id="bulk_add">
+                            <label class="custom-control-label" for="bulk_add"><strong>Add Peers by bulk</strong></label>
+                            <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body" data-toggle="popover" data-placement="right" data-trigger="click" data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
                         </div>
-                        <div class="col-sm">
-                            <div class="form-group" style="margin: 0">
+                        <div class="form-group" style="margin: 0">
 {#                                <label for="new_add_amount">Amount</label>#}
-                                <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount" disabled>
-                            </div>
+                            <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount" disabled>
                         </div>
+
                     </div>
                     <hr>
 					<div id="add_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
@@ -242,7 +247,6 @@
 			</div>
 		</div>
 	</div>
-
     <div class="modal fade" id="setting_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true" conf_id={{conf_data['name']}} peer_id="">
 		<div class="modal-dialog modal-dialog-centered modal-lg">
@@ -316,7 +320,7 @@
 			</div>
 		</div>
 	</div>
-    <div class="modal fade" id="available_ip_modal" data-backdrop="static" data-keyboard="false" tabindex="1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="available_ip_modal" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -341,7 +345,34 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="delete_bulk_modal" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Select Peers to Delete</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+                <div id="bulk_remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="selected_peers" style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
+                        <small class="text-muted"><strong>SELECTED PEERS (CLICK TO REMOVE)</strong></small>
+                        <div id="selected_peer_list"></div>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: scroll;">
+                    <div class="list-group"></div>
+                </div>
+                <div class="modal-footer">
+                    <a class="text-danger" id="select_all_delete_bulk_peers" style="cursor: pointer; margin-right: auto;"><small><strong>SELECT ALL</strong></small></a>
+					<button type="button" class="btn btn-danger" id="confirm_delete_bulk_peers" disabled data-conf="{{conf_data['name']}}">Delete</button>
+				</div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="qrcode_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
@@ -358,7 +389,6 @@
 			</div>
 		</div>
 	</div>
-
     <div class="position-fixed top-0 right-0 p-3" style="z-index: 5; right: 0; top: 50px;">
           <div id="alertToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
             <div class="toast-header">
@@ -381,6 +411,7 @@
     let load_timeout;
     let load_interval = 0;
     let conf_name = "{{ conf_data['name'] }}"
+    let peers = [];
     $(".sb-"+conf_name+"-url").addClass("active");
 	function load_data(search){
         startProgressBar()
@@ -392,6 +423,7 @@
 				"Content-Type": "application/json"
 			},
 			success: function (response){
+                peers = response["peer_data"];
                 {# Check all status #}
                 if (response["listen_port"] === "" && response["status"] === "stopped"){
                     $("config_info_alert").append('<div class="alert alert-warning" role="alert">Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.</div>')
@@ -480,11 +512,9 @@
                         },response["dashboard_refresh_interval"])
                     }
                 }
-				{#$("#config_body").html(response);#}
                 $(".dot.dot-running").attr("title","Peer Running").tooltip();
                 $(".dot.dot-stopped").attr("title","Peer Stopped").tooltip();
                 $("i[data-toggle='tooltip']").tooltip();
-                {#$("#search_peer_textbox").css("display", "block")#}
                 endProgressBar()
 			}
 		})

@@ -6,7 +6,7 @@ let available_ips = [];
 let $save_peer = $("#save_peer");
 
 $(".add_btn").on("click", function(){
-    addModal.toggle();
+    $addModal.toggle();
 });
 
 /**
@@ -157,7 +157,8 @@ $body.on("click", ".available-ip-item", function () {
 });
 
 let $ipModal = new bootstrap.Modal(document.getElementById('available_ip_modal'), {
-    keyboard: false
+    keyboard: false,
+    backdrop: 'static'
 });
 
 $("#search_available_ip").on("click", function () {
@@ -209,8 +210,9 @@ $("#re_generate_key").on("click",function (){
     generate_key();
 });
 
-let addModal = new bootstrap.Modal(document.getElementById('add_modal'), {
-    keyboard: false
+let $addModal = new bootstrap.Modal(document.getElementById('add_modal'), {
+    keyboard: false,
+    backdrop: 'static'
 });
 
 function clean_ip(val){
@@ -220,8 +222,9 @@ function clean_ip(val){
 }
 
 let bulk_add_peers = () => {
+    let $new_add_amount = $("#new_add_amount");
     $save_peer.attr("disabled","disabled");
-    $save_peer.html("Adding...");
+    $save_peer.html("Adding "+$new_add_amount.val()+" peers...");
 
     let $new_add_DNS = $("#new_add_DNS");
     $new_add_DNS.val(clean_ip($new_add_DNS.val()));
@@ -230,7 +233,6 @@ let bulk_add_peers = () => {
     let $new_add_MTU = $("#new_add_MTU");
     let $new_add_keep_alive = $("#new_add_keep_alive");
     let $enable_preshare_key = $("#enable_preshare_key");
-    let $new_add_amount = $("#new_add_amount");
     let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
     if ($new_add_amount.val() > 0){
         if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
@@ -263,8 +265,8 @@ let bulk_add_peers = () => {
                         data_list.forEach((ele) => ele.removeAttr("disabled"));
                         $("#add_peer_form").trigger("reset");
                         $save_peer.removeAttr("disabled").html("Save");
-                        showToast($new_add_amount.val()+"peers added successful!");
-                        addModal.toggle();
+                        showToast($new_add_amount.val()+" peers added successful!");
+                        $addModal.toggle();
                     }
                 }
             })
@@ -334,7 +336,7 @@ $save_peer.on("click",function(){
                         $("#add_peer_form").trigger("reset");
                         $save_peer.removeAttr("disabled").html("Save");
                         showToast("Add peer successful!");
-                        addModal.toggle();
+                        $addModal.toggle();
                     }
                 }
             });
@@ -366,7 +368,8 @@ $body.on("click", ".btn-qrcode-peer", function (){
 
 // Delete Peer Modal
 let deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), {
-    keyboard: false
+    keyboard: false,
+    backdrop: 'static'
 });
 
 $body.on("click", ".btn-delete-peer", function(){
@@ -380,19 +383,40 @@ $("#delete_peer").on("click",function(){
     $(this).html("Deleting...");
     let peer_id = $(this).attr("peer_id");
     let config = $(this).attr("conf_id");
+    let peer_ids = [peer_id];
+    deletePeers(config, peer_ids);
+});
+
+function deletePeers(config, peer_ids){
     $.ajax({
         method: "POST",
         url: "/remove_peer/"+config,
         headers:{
             "Content-Type": "application/json"
         },
-        data: JSON.stringify({"action": "delete", "peer_id": peer_id}),
+        data: JSON.stringify({"action": "delete", "peer_ids": peer_ids}),
         success: function (response){
             if(response !== "true"){
-                $("#remove_peer_alert").html(response+$("#add_peer_alert").html()).removeClass("d-none");
+                if (deleteModal._isShown) {
+                    $("#remove_peer_alert").html(response+$("#add_peer_alert").html())
+                                        .removeClass("d-none");
+                }
+                if (deleteBulkModal._isShown){
+                    $("#bulk_remove_peer_alert").html(response+$("#bulk_remove_peer_alert").html())
+                                                            .removeClass("d-none");
+                }
+
             }
             else{
-                deleteModal.toggle();
+                if (deleteModal._isShown) {
+                    deleteModal.toggle()
+                }
+                if (deleteBulkModal._isShown){
+                    $("#confirm_delete_bulk_peers").removeAttr("disabled").html("Delete");
+                    $("#selected_peer_list").html('');
+                    $(".delete-bulk-peer-item.active").removeClass('active');
+                    deleteBulkModal.toggle();
+                }
                 load_data($('#search_peer_textbox').val());
                 $('#alertToast').toast('show');
                 $('#alertToast .toast-body').html("Peer deleted!");
@@ -400,11 +424,12 @@ $("#delete_peer").on("click",function(){
             }
         }
     });
-});
+}
 
 // Peer Setting Modal
 let settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), {
-    keyboard: false
+    keyboard: false,
+    backdrop: 'static'
 });
 $body.on("click", ".btn-setting-peer", function(){
     startProgressBar();
@@ -638,6 +663,7 @@ $body.on("click", ".display_mode", function(){
     });
 });
 
+// Toggle bulk add mode
 $("#bulk_add").on("change", function (){
     let hide = $(".non-bulk").find("input");
     let amount = $("#new_add_amount");
@@ -655,4 +681,125 @@ $("#bulk_add").on("change", function (){
         }
         amount.attr("disabled", "disabled");
     }
+})
+
+// Configuration sub menu
+let $setting_btn_menu = $(".setting_btn_menu");
+$setting_btn_menu.css("top", ($setting_btn_menu.height() + 54)*(-1));
+let $setting_btn = $(".setting_btn");
+$setting_btn.on("click", function(){
+    if ($setting_btn_menu.hasClass("show")){
+        $setting_btn_menu.removeClass("showing");
+        setTimeout(function(){
+            $setting_btn_menu.removeClass("show");
+        }, 201)
+
+    }else{
+         $setting_btn_menu.addClass("show");
+         setTimeout(function(){
+             $setting_btn_menu.addClass("showing");
+         },10)
+    }
+})
+$body.on("click", function(r){
+    if (document.querySelector(".setting_btn") !== r.target){
+       if (!document.querySelector(".setting_btn").contains(r.target)){
+            if (!document.querySelector(".setting_btn_menu").contains(r.target)){
+                $setting_btn_menu.removeClass("showing");
+                setTimeout(function(){
+                    $setting_btn_menu.removeClass("show");
+                }, 310)
+            }
+        }
+    }
+});
+
+// Delete peers by bulk
+let deleteBulkModal = new bootstrap.Modal(document.getElementById('delete_bulk_modal'), {
+    keyboard: false,
+    backdrop: 'static'
+});
+$("#delete_peers_by_bulk_btn").on("click", () => {
+    let $delete_bulk_modal_list = $("#delete_bulk_modal .list-group");
+    $delete_bulk_modal_list.html('');
+    peers.forEach((peer) => {
+        let name = ""
+        if (peer["name"] === "") { name = "Untitled Peer"; }
+        else { name = peer["name"]; }
+        $delete_bulk_modal_list.append('<a class="list-group-item list-group-item-action delete-bulk-peer-item" style="cursor: pointer" data-id="'
+            +peer['id']+'" data-name="'+name+'">'+name+'<br><code>'+peer['id']+'</code></a>');
+    });
+    deleteBulkModal.toggle();
+});
+
+function toggleBulkIP(element){
+    let $selected_peer_list = $("#selected_peer_list");
+    let id = element.data("id");
+    let name = element.data("name") === "" ? "Untitled Peer" : element.data("name");
+     if (element.hasClass("active")){
+        element.removeClass("active");
+        $("#selected_peer_list .badge[data-id='"+id+"']").remove();
+    }else{
+        element.addClass("active");
+        $selected_peer_list.append('<span class="badge badge-danger delete-peer-bulk-badge" style="cursor: pointer; text-overflow: ellipsis; max-width: 100%; overflow-x: hidden" data-id="'+id+'">'+name+' - '+id+'</span>')
+    }
+}
+
+$body.on("click", ".delete-bulk-peer-item", function(){
+    toggleBulkIP($(this));
+}).on("click", ".delete-peer-bulk-badge", function(){
+    toggleBulkIP($(".delete-bulk-peer-item[data-id='" + $(this).data("id") + "']"));
+});
+
+let $selected_peer_list = document.getElementById("selected_peer_list");
+let changeObserver = new MutationObserver(function(mutationsList, observer){
+    if ($selected_peer_list.hasChildNodes()){
+        $("#confirm_delete_bulk_peers").removeAttr("disabled");
+    }else{
+        $("#confirm_delete_bulk_peers").attr("disabled", "disabled");
+    }
+});
+changeObserver.observe($selected_peer_list, {
+    attributes: true,
+    childList: true,
+    characterData: true
+})
+
+
+let confirm_delete_bulk_peers_interval = undefined;
+$("#confirm_delete_bulk_peers").on("click", function(){
+    let btn = $(this);
+    if (confirm_delete_bulk_peers_interval !== undefined){
+        clearInterval(confirm_delete_bulk_peers_interval);
+        confirm_delete_bulk_peers_interval = undefined;
+        btn.html("Delete");
+    }else{
+        let timer = 5;
+        btn.html(`Deleting in ${timer} secs... Click to cancel`);
+        confirm_delete_bulk_peers_interval = setInterval(function(){
+            timer -= 1;
+            btn.html(`Deleting in ${timer} secs... Click to cancel`);
+            if (timer === 0){
+                btn.html(`Deleting...`);
+                btn.attr("disabled", "disabled");
+                let ips = [];
+                $selected_peer_list.childNodes.forEach((ele) => ips.push(ele.dataset.id));
+                deletePeers(btn.data("conf"), ips);
+                clearInterval(confirm_delete_bulk_peers_interval);
+                confirm_delete_bulk_peers_interval = undefined;
+            }
+        }, 1000)
+    }
+});
+
+$("#select_all_delete_bulk_peers").on("click", function(){
+   $(".delete-bulk-peer-item").each(function(){
+       if (!$(this).hasClass("active")) toggleBulkIP($(this));
+   });
+});
+
+$(deleteBulkModal._element).on("hidden.bs.modal", function(){
+    $(".delete-bulk-peer-item").each(function(){
+       if ($(this).hasClass("active")) toggleBulkIP($(this));
+   });
 })

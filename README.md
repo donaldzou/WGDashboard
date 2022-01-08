@@ -1,18 +1,8 @@
-<hr>
-
-> Hi! I'm planning the next major update for this project, please let me know if you have any suggestions or feature requests ;) You can create an issue with the "Feature request" template. Cheers!
-
-### Help Wanted
-
-> If anyone know a better way to distribute releases of python application other than GitHub, please let me know in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/103">#103</a>!
-
-> Please provide your OS name and version if you can run the dashboard on it perfectly in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/31">#31</a>, since I only tested on Ubuntu. Thank you!
-
-<hr>
 <p align="center">
   <img alt="WGDashboard" src="img/logo.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
+
 
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
@@ -24,19 +14,25 @@
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 <p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
 
-## 📣 What's New: v2.3
+## 📣 What's New: v3.0
 
 - 🎉  **New Features**
-  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
-  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
+  - **Add Peers by Bulk: ** Now you can add peers by bulk, just simply set the amount and click add.
+  - **Delete Peers by Bulk**: User can click the menu button (three-dots) on the bottom right of each configuration, and click **Delete Peers**, then select peers.
+  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
 - 🪚  **Bug Fixed**
-  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
-  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
-  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
-  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
-  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
+  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
+  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ ikidd]
+  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @ pgalonza]
+  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
 - **🧐  Other Changes**
-  - Moved Add Peer Button into the right bottom corner.
+  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
+  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
+  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
+  - **Moved from TinyDB to SQLite**: This could provide better performance and loading speed when showing peers, also avoided changing the database could crash.
+  - UI adjustment on the whole dashboard.
+  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
+  
 
 
 
@@ -357,6 +353,24 @@ Endpoint = 0.0.0.0:51820
 
 
 ## ⏰  Changelog
+
+#### v2.3.1 - Sep 8, 2021
+
+- Updated dashboard's name to **WGDashboard**!!
+
+#### v2.3 - Sep 8, 2021
+
+- 🎉  **New Features**
+  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
+  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
+- 🪚  **Bug Fixed**
+  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
+  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
+  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
+  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
+  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
+- **🧐  Other Changes**
+  - Moved Add Peer Button into the right bottom corner.
 
 #### v2.2.1 - Aug 16, 2021
 

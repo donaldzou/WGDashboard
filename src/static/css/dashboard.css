@@ -241,18 +241,77 @@ main{
     }
 
     .peer_list{
-        margin-bottom: 4rem !important;
+        margin-bottom: 7rem !important;
     }
 }
 
-.add_btn{
+.btn-manage-group{
+    z-index: 99;
     position: fixed;
     bottom: 3rem;
     right: 2rem;
+    display: flex;
+}
+
+.btn-manage-group .setting_btn_menu{
+    position: absolute;
+    top: -124px;
+    background-color: white;
+    padding: 1rem 0;
+    right: 0;
+    box-shadow: 0 10px 20px rgb(0 0 0 / 19%), 0 6px 6px rgb(0 0 0 / 23%);
+    border-radius: 10px;
+    min-width: 200px;
+    display: none;
+    transform: translateY(-30px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.58, 0.03, 0.05, 1.28);
+}
+
+.btn-manage-group .setting_btn_menu.show{
+    display: block;
+}
+
+.setting_btn_menu.showing{
+    transform: translateY(0px);
+    opacity: 1;
+}
+
+.setting_btn_menu a{
+    display: flex;
+    padding: 0.5rem 1rem;
+    transition: all 0.1s ease-in-out;
+    font-size: 1rem;
+    align-items: center;
+    cursor: pointer;
+}
+
+.setting_btn_menu a:hover{
+    background-color: #efefef;
+    text-decoration: none;
+}
+
+.setting_btn_menu a i{
+    margin-right: auto !important;
+}
+
+.add_btn{
+    height: 54px;
     z-index: 99;
     border-radius: 100px !important;
-    padding: 10px 20px;
+    padding: 0 14px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    margin-right: 1rem;
+    font-size: 1.5rem;
+}
+
+.setting_btn{
+    height: 54px;
+    z-index: 99;
+    border-radius: 100px !important;
+    padding: 0 14px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    font-size: 1.5rem;
 }
 
 
@@ -394,11 +453,22 @@ main{
     width: 100%;
 }
 
-#selected_ip_list .badge{
+#selected_ip_list .badge, #selected_peer_list .badge{
     margin: 0.1rem
 }
 
 #add_modal.ip_modal_open{
     transition: filter 0.2s ease-in-out;
     filter: brightness(0.5);
+}
+
+#delete_bulk_modal .list-group a.active{
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#selected_peer_list{
+    max-height: 80px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
