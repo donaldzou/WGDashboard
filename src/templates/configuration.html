@@ -1,10 +1,18 @@
+<!-- configuration.html - < WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]-->
 <html lang="en">
 {% with title=title%}
     {% include "header.html"%}
 {% endwith %}
 <body>
+    <div class="no-response">
+        <div class="container">
+            <h1 class="text-white display-1"><i class="bi bi-emoji-frown-fill"></i></h1>
+            <h4 class="text-white">Oops!<br>I can't connect to the server.</h4>
+        </div>
+    </div>
 	{% include "navbar.html" %}
-	<div class="container-fluid">
+
+	<div class="container-fluid" id="right_body">
 		{% include "sidebar.html" %}
         <div class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
             <div class="form-group">
@@ -105,7 +113,7 @@
                             <button type="button" class="btn btn-secondary setting_btn"><i class="bi bi-three-dots"></i></button>
                             <div class="setting_btn_menu">
                                 <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i> Delete Peers</a>
-                                <a class="text-info"><i class="bi bi-cloud-download-fill"></i> Download All Peers</a>
+                                <a class="text-info" id="download_all_peers" data-url="/download_all/{{conf_data['name']}}"><i class="bi bi-cloud-download-fill"></i> Download All Peers</a>
                             </div>
                         </div>
 
@@ -134,8 +142,8 @@
                             <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body" data-toggle="popover" data-placement="right" data-trigger="click" data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
                         </div>
                         <div class="form-group" style="margin: 0">
-{#                                <label for="new_add_amount">Amount</label>#}
                             <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount" disabled>
+                            <div id="bulk_amount_validation" class="invalid-feedback"></div>
                         </div>
 
                     </div>
@@ -406,122 +414,14 @@
 {% include "footer.html" %}
 <script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
-
 <script>
     let load_timeout;
     let load_interval = 0;
     let conf_name = "{{ conf_data['name'] }}"
     let peers = [];
     $(".sb-"+conf_name+"-url").addClass("active");
-	function load_data(search){
-        startProgressBar()
-        let result = '';
-		$.ajax({
-			method: "GET",
-			url: "/get_config/"+conf_name+"?search="+encodeURIComponent(search),
-			headers:{
-				"Content-Type": "application/json"
-			},
-			success: function (response){
-                peers = response["peer_data"];
-                {# Check all status #}
-                if (response["listen_port"] === "" && response["status"] === "stopped"){
-                    $("config_info_alert").append('<div class="alert alert-warning" role="alert">Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.</div>')
-                }
-                if (response["conf_address"] === "N/A"){
-                    $("config_info_alert").append('<div class="alert alert-warning" role="alert">Configuration <strong>Address</strong> need to be specified to have peers connect to it.</div>')
-                }
-                {# Status Button #}
-                if (response["checked"] === "checked"){
-                    $("#conf_status_btn").html('<a href="#" id="'+response["name"]+'" '+response["checked"]+' class="switch text-primary"><i class="bi bi-toggle2-on"></i> ON</a>');
-                }else{
-                    $("#conf_status_btn").html('<a href="#" id="'+response["name"]+'" '+response["checked"]+' class="switch text-primary"><i class="bi bi-toggle2-off"></i> OFF</a>');
-                }
-                $("#sort_by_dropdown option").removeAttr("selected");
-                $("#sort_by_dropdown option[value="+response["sort_tag"]+"]").attr("selected", "selected");
-                $(".interval-btn-group button").removeClass("active");
-                $("button[data-refresh-interval="+response["dashboard_refresh_interval"]+"]").addClass("active");
-                $(".display-btn-group button").removeClass("active");
-                $("button[data-display-mode="+response["peer_display_mode"]+"]").addClass("active");
-
-
-
-                $("#conf_status").html(response["status"]+'<span class="dot dot-'+response["status"]+'"></span>');
-                $("#conf_connected_peers").html(response["running_peer"]);
-                $("#conf_total_data_usage").html(response["total_data_usage"][0] +" GB");
-                $("#conf_total_data_received").html(response["total_data_usage"][2] +" GB");
-                $("#conf_total_data_sent").html(response["total_data_usage"][1]+" GB");
-                $("#conf_public_key").html(response["public_key"]);
-                $("#conf_listen_port").html(response["listen_port"] === "" ? "N/A":response["listen_port"]);
-                $("#conf_address").html(response["conf_address"]);
-                $(".info h6").removeClass("info_loading");
-                $("#conf_status_btn").removeClass("info_loading")
-
-
-
-                if (response["peer_data"].length === 0){
-                    $(".peer_list").html('<div class="col-12" style="text-align: center; margin-top: 1.5rem"><h3 class="text-muted">Oops! No peers found ‘︿’</h3></div>');
-                }else{
-                    let display_mode = response["peer_display_mode"] === "list" ? "col-12" : "col-sm-6 col-lg-4";
-                    response["peer_data"].forEach(function(peer){
-                        let total_r = 0;
-                        let total_s = 0;
-                        total_r += peer["cumu_receive"];
-                        total_s += peer["cumu_sent"];
-                        let spliter = '<div class="w-100"></div>';
-                        let peer_name =
-                            '<div class="col-sm display" style="display: flex; align-items: center; margin-bottom: 0.2rem">' +
-                                '<h5 style="margin: 0;">'+ (peer["name"] === "" ? "Untitled" : peer["name"]) +'</h5>' +
-                                '<h6 style="text-transform: uppercase; margin: 0; margin-left: auto !important;"><span class="dot dot-'+peer["status"]+'" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left" title="Peer Running"></span></h6>' +
-                            '</div>';
-                        let peer_transfer = '<div class="col-12 peer_data_group" style="text-align: right; display: flex; margin-bottom: 0.5rem"><p class="text-primary" style="text-transform: uppercase; margin-bottom: 0; margin-right: 1rem"><small><i class="bi bi-arrow-down-right"></i> '+ roundN(peer["total_receive"] + total_r, 4) +' GB</small></p> <p class="text-success" style="text-transform: uppercase; margin-bottom: 0"><small><i class="bi bi-arrow-up-right"></i> '+ roundN(peer["total_sent"] + total_s, 4) +' GB</small></p> </div>'
-                        let peer_key = '<div class="col-sm"><small class="text-muted" style="display: flex"><strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small> <h6><samp class="ml-auto key">'+peer["id"]+'</samp></h6></div>';
-                        let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">'+peer["allowed_ip"]+'</h6></div>';
-                        let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">'+peer['latest_handshake']+'</h6> </div>';
-                        let peer_endpoint = '<div class="col-sm"><small class="text-muted"><strong>END POINT</strong></small><h6 style="text-transform: uppercase;">'+peer["endpoint"]+'</h6></div>';
-                        let peer_control = '<div class="col-sm"><hr><div class="button-group" style="display:flex"><button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="'+peer["id"]+'" data-toggle="modal"><i class="bi bi-gear-fill" data-toggle="tooltip" data-placement="bottom" title="Peer Settings"></i></button> <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="'+peer["id"]+'" data-toggle="modal"><i class="bi bi-x-circle-fill" data-toggle="tooltip" data-placement="bottom" title="Delete Peer"></i></button>';
-                        if (peer["private_key"] !== ""){
-                            peer_control += '<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline"><button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="/qrcode/'+response['name']+'?id='+encodeURIComponent(peer["id"])+'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></button><a href="/download/'+response["name"]+'?id='+encodeURIComponent(peer["id"])+'" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a></div>';
-                        }
-                        peer_control += '</div>';
-                        let html = '<div class="'+display_mode+'" data-id="'+peer["id"]+'">' +
-                                        '<div class="card mb-3 card-'+peer["status"]+'">' +
-                                            '<div class="card-body">' +
-                                             '<div class="row">'
-                                                + peer_name
-                                                + spliter
-                                                + peer_transfer
-                                                + peer_key
-                                                + peer_allowed_ip
-                                                + peer_latest_handshake
-                                                + spliter
-                                                + peer_endpoint
-                                                + spliter
-                                                + peer_control
-                                            + '</div>' +
-                                        '</div></div>' +
-                                    '</div></div>';
-                        result += html;
-                    })
-                    $(".peer_list").html(result);
-                    if (response["dashboard_refresh_interval"] !== load_interval){
-                        load_interval = response["dashboard_refresh_interval"];
-                        clearInterval(load_timeout);
-                        load_timeout = setInterval(function (){
-                            load_data($('#search_peer_textbox').val());
-                        },response["dashboard_refresh_interval"])
-                    }
-                }
-                $(".dot.dot-running").attr("title","Peer Running").tooltip();
-                $(".dot.dot-stopped").attr("title","Peer Stopped").tooltip();
-                $("i[data-toggle='tooltip']").tooltip();
-                endProgressBar()
-			}
-		})
-	}
 	$(function(){
 		load_data($('#search_peer_textbox').val());
 	});
 </script>
-
 </html>	

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# wgd.sh - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]
+# Under Apache-2.0 License
 app_name="dashboard.py"
 app_official_name="WGDashboard"
 dashes='------------------------------------------------------------'

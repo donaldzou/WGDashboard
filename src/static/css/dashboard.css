@@ -472,3 +472,34 @@ main{
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
+.no-response{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: #000000ba;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 1s ease-in-out;
+}
+
+.no-response.active{
+    display: flex;
+}
+
+.no-response.active.show{
+    opacity: 100;
+}
+
+.no-response .container > *{
+    text-align: center;
+}
+
+.no-responding{
+    transition: all 1s ease-in-out;
+    filter: blur(10px);
+}

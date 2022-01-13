@@ -1,4 +1,5 @@
-<html>
+<!-- index.html - < WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]-->
+<html lang="en">
 {% with %}
     {% set title="Home" %}
     {% include "header.html"%}
@@ -9,7 +10,11 @@
 	<div class="container-fluid">
         {% include "sidebar.html" %}
 		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
-            <h1 class="pb-4 mt-4">Home</h1>
+            <div style="display: flex; flex-direction: row; align-items: center;">
+                <h1 class="pb-4 mt-4">Home</h1>
+{#                <button class="btn btn-primary" style="margin-left: auto"><i class="bi bi-plus-circle-fill"></i> Configuration</button>#}
+            </div>
+
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
@@ -20,7 +25,7 @@
 							<div class="col card-col">
 								<small class="text-muted"><strong>CONFIGURATION</strong></small>
 								<a href="/configuration/{{i['conf']}}" class="conf_link">
-									<h6 class="card-title" style="margin:0 !important;">{{i['conf']}}</h6>
+									<h6 class="card-title" style="margin:0 !important;"><samp>{{i['conf']}}</samp></h6>
 								</a>
 							</div>
 							<div class="col card-col">

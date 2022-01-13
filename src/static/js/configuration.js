@@ -1,5 +1,142 @@
-$("[data-toggle='tooltip']").tooltip()
-$("[data-toggle='popover']").popover()
+/**
+ * configuration.js - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]
+ * Under Apache-2.0 License
+ */
+
+/**
+ * This will load peers data from server
+ * @param search
+ */
+function load_data(search){
+    startProgressBar();
+    let result = '';
+    $.ajax({
+        method: "GET",
+        url: "/get_config/"+conf_name+"?search="+encodeURIComponent(search),
+        headers:{
+            "Content-Type": "application/json"
+        },
+        success: function (response){
+            removeNoResponding();
+            peers = response.peer_data;
+            if (response.listen_port === "" && response.status === "stopped"){
+                $("config_info_alert").append('<div class="alert alert-warning" role="alert">Peer QR Code and configuration file download required a specified <strong>Listen Port</strong>.</div>');
+            }
+            if (response.conf_address === "N/A"){
+                $("config_info_alert").append('<div class="alert alert-warning" role="alert">Configuration <strong>Address</strong> need to be specified to have peers connect to it.</div>');
+            }
+            let $conf_status_btn = $("#conf_status_btn");
+            if (response.checked === "checked"){
+                $conf_status_btn.html('<a href="#" id="'+response.name+'" '+response.checked+' class="switch text-primary"><i class="bi bi-toggle2-on"></i> ON</a>');
+            }else{
+                $conf_status_btn.html('<a href="#" id="'+response.name+'" '+response.checked+' class="switch text-primary"><i class="bi bi-toggle2-off"></i> OFF</a>');
+            }
+            $("#sort_by_dropdown option").removeAttr("selected");
+            $("#sort_by_dropdown option[value="+response.sort_tag+"]").attr("selected", "selected");
+            $(".interval-btn-group button").removeClass("active");
+            $("button[data-refresh-interval="+response.dashboard_refresh_interval+"]").addClass("active");
+            $(".display-btn-group button").removeClass("active");
+            $("button[data-display-mode="+response.peer_display_mode+"]").addClass("active");
+
+
+
+            $("#conf_status").html(response.status+'<span class="dot dot-'+response.status+'"></span>');
+            $("#conf_connected_peers").html(response.running_peer);
+            $("#conf_total_data_usage").html(response.total_data_usage[0] +" GB");
+            $("#conf_total_data_received").html(response.total_data_usage[2] +" GB");
+            $("#conf_total_data_sent").html(response.total_data_usage[1]+" GB");
+            $("#conf_public_key").html(response.public_key);
+            $("#conf_listen_port").html(response.listen_port === "" ? "N/A":response.listen_port);
+            $("#conf_address").html(response.listen_port);
+            $(".info h6").removeClass("info_loading");
+            $conf_status_btn.removeClass("info_loading");
+
+
+
+            if (response.peer_data.length === 0){
+                $(".peer_list").html('<div class="col-12" style="text-align: center; margin-top: 1.5rem"><h3 class="text-muted">Oops! No peers found ‘︿’</h3></div>');
+            }else{
+                let display_mode = response.peer_display_mode === "list" ? "col-12" : "col-sm-6 col-lg-4";
+                response.peer_data.forEach(function(peer){
+                    let total_r = 0;
+                    let total_s = 0;
+                    total_r += peer.cumu_receive;
+                    total_s += peer.cumu_sent;
+                    let spliter = '<div class="w-100"></div>';
+                    let peer_name =
+                        '<div class="col-sm display" style="display: flex; align-items: center; margin-bottom: 0.2rem">' +
+                            '<h5 style="margin: 0;">'+ (peer.name === "" ? "Untitled" : peer.name) +'</h5>' +
+                            '<h6 style="text-transform: uppercase; margin: 0; margin-left: auto !important;"><span class="dot dot-'+peer.status+'" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left" title="Peer Connected"></span></h6>' +
+                        '</div>';
+                    let peer_transfer = '<div class="col-12 peer_data_group" style="text-align: right; display: flex; margin-bottom: 0.5rem"><p class="text-primary" style="text-transform: uppercase; margin-bottom: 0; margin-right: 1rem"><small><i class="bi bi-arrow-down-right"></i> '+ roundN(peer.total_receive + total_r, 4) +' GB</small></p> <p class="text-success" style="text-transform: uppercase; margin-bottom: 0"><small><i class="bi bi-arrow-up-right"></i> '+ roundN(peer.total_sent + total_s, 4) +' GB</small></p> </div>';
+                    let peer_key = '<div class="col-sm"><small class="text-muted" style="display: flex"><strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small> <h6><samp class="ml-auto key">'+peer.id+'</samp></h6></div>';
+                    let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">'+peer.allowed_ip+'</h6></div>';
+                    let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">'+peer.latest_handshake+'</h6> </div>';
+                    let peer_endpoint = '<div class="col-sm"><small class="text-muted"><strong>END POINT</strong></small><h6 style="text-transform: uppercase;">'+peer.endpoint+'</h6></div>';
+                    let peer_control = '<div class="col-sm"><hr><div class="button-group" style="display:flex"><button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="'+peer.id+'" data-toggle="modal"><i class="bi bi-gear-fill" data-toggle="tooltip" data-placement="bottom" title="Peer Settings"></i></button> <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="'+peer.id+'" data-toggle="modal"><i class="bi bi-x-circle-fill" data-toggle="tooltip" data-placement="bottom" title="Delete Peer"></i></button>';
+                    if (peer.private_key !== ""){
+                        peer_control += '<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline"><button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" img_src="/qrcode/'+response.name+'?id='+encodeURIComponent(peer.id)+'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></button><a href="/download/'+response.name+'?id='+encodeURIComponent(peer.id)+'" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a></div>';
+                    }
+                    peer_control += '</div>';
+                    let html = '<div class="'+display_mode+'" data-id="'+peer.id+'">' +
+                                    '<div class="card mb-3 card-'+peer.status+'">' +
+                                        '<div class="card-body">' +
+                                         '<div class="row">' +
+                                            peer_name +
+                                            spliter +
+                                            peer_transfer +
+                                            peer_key +
+                                            peer_allowed_ip +
+                                            peer_latest_handshake +
+                                            spliter +
+                                            peer_endpoint +
+                                            spliter +
+                                            peer_control +
+                                        '</div>' +
+                                    '</div>' +
+                                    '</div>' +
+                                '</div></div>';
+                    result += html;
+                });
+                $(".peer_list").html(result);
+                if (response.dashboard_refresh_interval !== load_interval){
+                    load_interval = response.dashboard_refresh_interval;
+                    clearInterval(load_timeout);
+                    load_timeout = setInterval(function (){
+                        load_data($('#search_peer_textbox').val());
+                    }, response.dashboard_refresh_interval);
+                }
+            }
+            $(".dot.dot-running").attr("title","Peer Connected").tooltip();
+            $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
+            $("i[data-toggle='tooltip']").tooltip();
+            endProgressBar();
+        }
+    }).fail(function(){
+        noResponding();
+    });
+}
+
+function noResponding(){
+    $(".no-response").addClass("active");
+    setTimeout(function (){
+        $(".no-response").addClass("show");
+        $("#right_body").addClass("no-responding");
+        $(".navbar").addClass("no-responding");
+    },10);
+}
+
+function removeNoResponding(){
+    $(".no-response").removeClass("show");
+    $("#right_body").removeClass("no-responding");
+    $(".navbar").removeClass("no-responding");
+    setTimeout(function (){
+        $(".no-response").removeClass("active");
+    },1010);
+}
+
+$("[data-toggle='tooltip']").tooltip();
+$("[data-toggle='popover']").popover();
 let $body = $("body");
 let $progress_bar = $(".progress-bar");
 let available_ips = [];
@@ -221,11 +358,33 @@ function clean_ip(val){
     return clean_ip.filter(Boolean).join(",");
 }
 
-let bulk_add_peers = () => {
+
+$("#new_add_amount").on("keyup", function(){
+    let $bulk_amount_validation = $("#bulk_amount_validation");
+    // $(this).removeClass("is-valid").addClass("is-invalid");
+    if ($(this).val().length > 0){
+        if (isNaN($(this).val())){
+            $(this).removeClass("is-valid").addClass("is-invalid");
+            $bulk_amount_validation.html("Please enter a valid integer");
+        }else if ($(this).val() > available_ips.length){
+            $(this).removeClass("is-valid").addClass("is-invalid");
+            $bulk_amount_validation.html(`Cannot create more than ${available_ips.length} peers.`);
+        }else if ($(this).val() < 1){
+            $(this).removeClass("is-valid").addClass("is-invalid");
+            $bulk_amount_validation.html("Please enter at least 1 or more.");
+        }else{
+            $(this).removeClass("is-invalid").addClass("is-valid");
+        }
+    }else{
+        $(this).removeClass("is-invalid").removeClass("is-valid");
+    }
+});
+
+
+function bulk_add_peers() {
     let $new_add_amount = $("#new_add_amount");
     $save_peer.attr("disabled","disabled");
     $save_peer.html("Adding "+$new_add_amount.val()+" peers...");
-
     let $new_add_DNS = $("#new_add_DNS");
     $new_add_DNS.val(clean_ip($new_add_DNS.val()));
     let $new_add_endpoint_allowed_ip = $("#new_add_endpoint_allowed_ip");
@@ -234,11 +393,13 @@ let bulk_add_peers = () => {
     let $new_add_keep_alive = $("#new_add_keep_alive");
     let $enable_preshare_key = $("#enable_preshare_key");
     let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
-    if ($new_add_amount.val() > 0){
+    if ($new_add_amount.val() > 0 && !$new_add_amount.hasClass("is-invalid")){
         if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
             let conf = $save_peer.attr('conf_id');
             let keys = [];
-            for (let i = 0; i < $new_add_amount.val(); i++) keys.push(wireguard.generateKeypair());
+            for (let i = 0; i < $new_add_amount.val(); i++) {
+                keys.push(wireguard.generateKeypair());
+            }
             $.ajax({
                 method: "POST",
                 url: "/add_peer_bulk/"+conf,
@@ -269,16 +430,14 @@ let bulk_add_peers = () => {
                         $addModal.toggle();
                     }
                 }
-            })
+            });
         }else{
             $("#add_peer_alert").html("Please fill in all required box.").removeClass("d-none");
             $save_peer.removeAttr("disabled");
             $save_peer.html("Add");
         }
     }else{
-        $("#add_peer_alert").html("Please enter 1 or more amount.").removeClass("d-none");
-        $save_peer.removeAttr("disabled");
-        $save_peer.html("Add");
+        $save_peer.removeAttr("disabled").html("Add");
     }
 }
 
@@ -286,7 +445,9 @@ let bulk_add_peers = () => {
 $save_peer.on("click",function(){
     let $bulk_add = $("#bulk_add");
     if ($bulk_add.prop("checked")){
-        bulk_add_peers()
+        if (!$("#new_add_amount").hasClass("is-invalid")){
+           bulk_add_peers()
+        }
     }else {
         let $public_key = $("#public_key");
         let $private_key = $("#private_key");
@@ -348,14 +509,11 @@ $save_peer.on("click",function(){
     }
 });
 
-
+// QR Code
 let qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), {
     keyboard: false
 });
-// QR Code
 $body.on("click", ".btn-qrcode-peer", function (){
-
-
     let src = $(this).attr('img_src');
     $.ajax({
         "url": src,
@@ -606,7 +764,6 @@ function copyToClipboard(element) {
 
 // Update Interval
 $body.on("click", ".update_interval", function(){
-    let prev = $(".interval-btn-group.active button");
     $(".interval-btn-group button").removeClass("active");
     let _new = $(this);
     _new.addClass("active");
@@ -629,7 +786,7 @@ $body.on("click", ".update_interval", function(){
                 showToast("Refresh Interval set unsuccessful");
             }
         }
-    })
+    });
 });
 
 // Refresh Button
@@ -681,7 +838,7 @@ $("#bulk_add").on("change", function (){
         }
         amount.attr("disabled", "disabled");
     }
-})
+});
 
 // Configuration sub menu
 let $setting_btn_menu = $(".setting_btn_menu");
@@ -692,23 +849,23 @@ $setting_btn.on("click", function(){
         $setting_btn_menu.removeClass("showing");
         setTimeout(function(){
             $setting_btn_menu.removeClass("show");
-        }, 201)
+        }, 201);
 
     }else{
          $setting_btn_menu.addClass("show");
          setTimeout(function(){
              $setting_btn_menu.addClass("showing");
-         },10)
+         },10);
     }
 })
-$body.on("click", function(r){
+$("html").on("click", function(r){
     if (document.querySelector(".setting_btn") !== r.target){
-       if (!document.querySelector(".setting_btn").contains(r.target)){
+        if (!document.querySelector(".setting_btn").contains(r.target)){
             if (!document.querySelector(".setting_btn_menu").contains(r.target)){
                 $setting_btn_menu.removeClass("showing");
                 setTimeout(function(){
                     $setting_btn_menu.removeClass("show");
-                }, 310)
+                }, 310);
             }
         }
     }
@@ -794,12 +951,56 @@ $("#confirm_delete_bulk_peers").on("click", function(){
 
 $("#select_all_delete_bulk_peers").on("click", function(){
    $(".delete-bulk-peer-item").each(function(){
-       if (!$(this).hasClass("active")) toggleBulkIP($(this));
+       if (!$(this).hasClass("active")) {
+           toggleBulkIP($(this));
+       }
    });
 });
 
 $(deleteBulkModal._element).on("hidden.bs.modal", function(){
     $(".delete-bulk-peer-item").each(function(){
-       if ($(this).hasClass("active")) toggleBulkIP($(this));
+       if ($(this).hasClass("active")) {
+           toggleBulkIP($(this));
+       }
    });
-})
+});
+
+// Download Peers
+function download_one_config(conf){
+    let link = document.createElement('a');
+    link.download = conf.filename;
+    let blob = new Blob([conf.content], {type: 'text/conf'});
+    link.href = window.URL.createObjectURL(blob);
+    link.click();
+}
+
+function download_all_config(confs){
+    wireguard.generateZipFiles(confs);
+}
+
+$body.on("click", ".btn-download-peer", function(e){
+    e.preventDefault();
+    let link = $(this).attr("href");
+    $.ajax({
+        "url": link,
+        "method": "GET",
+        success: function(res){
+            download_one_config(res);
+        }
+    });
+});
+
+$("#download_all_peers").on("click", function(){
+    $.ajax({
+        "url": $(this).data("url"),
+        "method": "GET",
+        success: function(res){
+            if (res.peers.length > 0){
+                download_all_config(res);
+            }
+        }
+    });
+});
+
+
+

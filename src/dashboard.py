@@ -1,7 +1,8 @@
 """
-< WGDashboard > - by Donald Zou [https://github.com/donaldzou]
+< WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]
 Under Apache-2.0 License
 """
+
 # TODO: Testing migrate to sqlite
 import sqlite3
 from flask import g
@@ -130,7 +131,7 @@ def read_conf_file(config_name):
     }
     peers_start = 0
     for i in range(len(file)):
-        if not regex_match("#(.*)", file[i]):
+        if not regex_match("#(.*)", file[i]) and regex_match(";(.*)", file[i]):
             if file[i] == "[Peer]":
                 peers_start = i
                 break
@@ -143,7 +144,7 @@ def read_conf_file(config_name):
     conf_peers = file[peers_start:]
     peer = -1
     for i in conf_peers:
-        if not regex_match("#(.*)", i):
+        if not regex_match("#(.*)", i) and not regex_match(";(.*)", i):
             if i == "[Peer]":
                 peer += 1
                 conf_peer_data["Peers"].append({})
@@ -206,7 +207,6 @@ def get_transfer(config_name):
         if len(cur_i) > 0:
             total_sent = cur_i[0][1]
             total_receive = cur_i[0][0]
-            # traffic = cur_i[0]['traffic']
             cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
             cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
             if cur_i[0][4] == "running":
@@ -214,13 +214,11 @@ def get_transfer(config_name):
                     total_sent = cur_total_sent
                     total_receive = cur_total_receive
                 else:
-                    now = datetime.now()
-                    ctime = now.strftime("%d/%m/%Y %H:%M:%S")
-                    cumu_receive = cur_i[0][2] + total_receive
-                    cumu_sent = cur_i[0][3] + total_sent
+                    cumulative_receive = cur_i[0][2] + total_receive
+                    cumulative_sent = cur_i[0][3] + total_sent
                     g.cur.execute("UPDATE %s SET cumu_receive = %f, cumu_sent = %f, cumu_data = %f WHERE id = '%s'" %
-                                  (config_name, round(cumu_receive, 4), round(cumu_sent, 4),
-                                   round(cumu_sent + cumu_receive, 4), data_usage[i][0]))
+                                  (config_name, round(cumulative_receive, 4), round(cumulative_sent, 4),
+                                   round(cumulative_sent + cumulative_receive, 4), data_usage[i][0]))
                     total_sent = 0
                     total_receive = 0
                 g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
@@ -258,39 +256,49 @@ def get_allowed_ip(conf_peer_data, config_name):
 def get_all_peers_data(config_name):
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
-    for i in conf_peer_data['Peers']:
-        result = g.cur.execute("SELECT * FROM %s WHERE id='%s'" % (config_name, i["PublicKey"])).fetchall()
-        if len(result) == 0:
-            new_data = {
-                "id": i['PublicKey'],
-                "private_key": "",
-                "DNS": config.get("Peers", "peer_global_DNS"),
-                "endpoint_allowed_ip": config.get("Peers", "peer_endpoint_allowed_ip"),
-                "name": "",
-                "total_receive": 0,
-                "total_sent": 0,
-                "total_data": 0,
-                "endpoint": "N/A",
-                "status": "stopped",
-                "latest_handshake": "N/A",
-                "allowed_ip": "N/A",
-                "cumu_receive": 0,
-                "cumu_sent": 0,
-                "cumu_data": 0,
-                "traffic": [],
-                "mtu": config.get("Peers", "peer_mtu"),
-                "keepalive": config.get("Peers", "peer_keep_alive"),
-                "remote_endpoint": config.get("Peers", "remote_endpoint"),
-                "preshared_key": ""
-            }
-            if "PresharedKey" in i.keys():
-                new_data["preshared_key"] = i["PresharedKey"]
-            g.cur.execute(
-                "INSERT INTO " + config_name + " VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key)",
-                new_data)
+    failed_index = []
+    for i in range(len(conf_peer_data['Peers'])):
+        if "PublicKey" in conf_peer_data['Peers'][i].keys():
+            result = g.cur.execute(
+                "SELECT * FROM %s WHERE id='%s'" % (config_name, conf_peer_data['Peers'][i]["PublicKey"])).fetchall()
+            if len(result) == 0:
+                new_data = {
+                    "id": conf_peer_data['Peers'][i]['PublicKey'],
+                    "private_key": "",
+                    "DNS": config.get("Peers", "peer_global_DNS"),
+                    "endpoint_allowed_ip": config.get("Peers", "peer_endpoint_allowed_ip"),
+                    "name": "",
+                    "total_receive": 0,
+                    "total_sent": 0,
+                    "total_data": 0,
+                    "endpoint": "N/A",
+                    "status": "stopped",
+                    "latest_handshake": "N/A",
+                    "allowed_ip": "N/A",
+                    "cumu_receive": 0,
+                    "cumu_sent": 0,
+                    "cumu_data": 0,
+                    "traffic": [],
+                    "mtu": config.get("Peers", "peer_mtu"),
+                    "keepalive": config.get("Peers", "peer_keep_alive"),
+                    "remote_endpoint": config.get("Peers", "remote_endpoint"),
+                    "preshared_key": ""
+                }
+                if "PresharedKey" in conf_peer_data['Peers'][i].keys():
+                    new_data["preshared_key"] = conf_peer_data['Peers'][i]["PresharedKey"]
+                sql = f"""
+                INSERT INTO {config_name} 
+                    VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                    :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                    :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                """
+                g.cur.execute(sql, new_data)
         else:
-            pass
+            print("Trying to parse a peer doesn't have public key...")
+            failed_index.append(i)
 
+    for i in failed_index:
+        conf_peer_data['Peers'].pop(i)
     # Remove peers no longer exist in WireGuard configuration file
     db_key = list(map(lambda a: a[0], g.cur.execute("SELECT id FROM %s" % config_name)))
     wg_key = list(map(lambda a: a['PublicKey'], conf_peer_data['Peers']))
@@ -314,9 +322,6 @@ def get_peers(config_name, search, sort_t):
     tic = time.perf_counter()
     col = g.cur.execute("PRAGMA table_info(" + config_name + ")").fetchall()
     col = [a[1] for a in col]
-    # col = ['id', 'private_key', 'DNS', 'endpoint_allowed_ip', 'name', 'total_receive',
-    # 'total_sent', 'total_data', 'endpoint', 'status', 'latest_handshake', 'allowed_ip',
-    # 'cumu_receive', 'cumu_sent', 'cumu_data', 'mtu', 'keepalive', 'remote_endpoint', 'preshared_key']
     get_all_peers_data(config_name)
     if len(search) == 0:
         data = g.cur.execute("SELECT * FROM " + config_name).fetchall()
@@ -326,7 +331,8 @@ def get_peers(config_name, search, sort_t):
         data = g.cur.execute(sql).fetchall()
         result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     if sort_t == "allowed_ip":
-        result = sorted(result, key=lambda d: ipaddress.ip_network(d[sort_t].split(",")[0]))
+        result = sorted(result, key=lambda d: ipaddress.ip_network(
+            "0.0.0.0/0" if d[sort_t].split(",")[0] == "(None)" else d[sort_t].split(",")[0]))
     else:
         result = sorted(result, key=lambda d: d[sort_t])
     toc = time.perf_counter()
@@ -343,7 +349,7 @@ def get_conf_pub_key(config_name):
         pub = subprocess.run(f"echo '{pri}' | wg pubkey", check=True, shell=True, capture_output=True).stdout
         conf.clear()
         return pub.decode().strip("\n")
-    except configparser.NoSectionError as e:
+    except configparser.NoSectionError:
         return ""
 
 
@@ -417,8 +423,7 @@ def get_conf_list():
 
 # Generate private key
 def gen_private_key():
-    gen = subprocess.check_output('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt',
-                                  shell=True)
+    subprocess.run('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt', shell=True)
     with open('private_key.txt', encoding='utf-8') as file_object:
         private_key = file_object.readline().strip()
     with open('public_key.txt', encoding='utf-8') as file_object:
@@ -432,7 +437,7 @@ def gen_public_key(private_key):
     with open('private_key.txt', 'w', encoding='utf-8') as file_object:
         file_object.write(private_key)
     try:
-        check = subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
+        subprocess.check_output("wg pubkey < private_key.txt > public_key.txt", shell=True)
         with open('public_key.txt', encoding='utf-8') as file_object:
             public_key = file_object.readline().strip()
         os.remove('private_key.txt')
@@ -464,7 +469,7 @@ def check_repeat_allowed_ip(public_key, ip, config_name):
         return {'status': 'failed', 'msg': 'Peer does not exist'}
     else:
         existed_ip = g.cur.execute("SELECT COUNT(*) FROM " +
-                                   config_name + " WHERE id != ? AND allowed_ip LIKE '" + ip + "/%'", (public_key,))\
+                                   config_name + " WHERE id != ? AND allowed_ip LIKE '" + ip + "/%'", (public_key,)) \
             .fetchone()
         if existed_ip[0] != 0:
             return {'status': 'failed', 'msg': "Allowed IP already taken by another peer."}
@@ -486,12 +491,12 @@ def f_available_ips(config_name):
             add = i[0].split(",")
             for k in add:
                 a, s = k.split("/")
-                existed.append(ipaddress.ip_address(a))
+                existed.append(ipaddress.ip_address(a.strip()))
         available = list(ipaddress.ip_network(address[0], False).hosts())
         for i in existed:
             try:
                 available.remove(i)
-            except ValueError as e:
+            except ValueError:
                 pass
         available = [str(i) for i in available]
         return available
@@ -527,7 +532,7 @@ def auth_req():
                 request.endpoint != "signout" and \
                 request.endpoint != "auth" and \
                 "username" not in session:
-            print("User not loggedin - Attemped access: " + str(request.endpoint))
+            print("User not signed in - Attempted access: " + str(request.endpoint))
             if request.endpoint != "index":
                 session['message'] = "You need to sign in first!"
             else:
@@ -890,6 +895,9 @@ def add_peer_bulk(config_name):
     dns_addresses = data['DNS']
     enable_preshared_key = data["enable_preshared_key"]
     amount = data['amount']
+    config_interface = read_conf_file_interface(config_name)
+    if "Address" not in config_interface:
+        return "Configuration must have an IP address."
     if not amount.isdigit() or int(amount) < 1:
         return "Amount must be integer larger than 0"
     amount = int(amount)
@@ -902,6 +910,8 @@ def add_peer_bulk(config_name):
     if len(data['keep_alive']) == 0 or not data['keep_alive'].isdigit():
         return "Persistent Keepalive format is not correct."
     ips = f_available_ips(config_name)
+    if amount > len(ips):
+        return f"Cannot create more than {len(ips)} peers."
     wg_command = ["wg", "set", config_name]
     sql_command = []
     for i in range(amount):
@@ -937,7 +947,6 @@ def add_peer_bulk(config_name):
         return "true"
     except subprocess.CalledProcessError as exc:
         return exc.output.strip()
-
 
 
 # Add peer
@@ -1010,7 +1019,7 @@ def remove_peer(config_name):
         for delete_key in delete_keys:
             if delete_key not in keys:
                 return "This key does not exist"
-            sql_command.append("DELETE FROM " + config_name + " WHERE id = '"+delete_key+"';")
+            sql_command.append("DELETE FROM " + config_name + " WHERE id = '" + delete_key + "';")
             wg_command.append("peer")
             wg_command.append(delete_key)
             wg_command.append("remove")
@@ -1154,10 +1163,55 @@ def generate_qrcode(config_name):
         return redirect("/configuration/" + config_name)
 
 
+# Download all configuration file
+@app.route('/download_all/<config_name>', methods=['GET'])
+def download_all(config_name):
+    get_peer = g.cur.execute(
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
+        + config_name + " WHERE private_key != ''").fetchall()
+    config = get_dashboard_conf()
+    data = []
+    public_key = get_conf_pub_key(config_name)
+    listen_port = get_conf_listen_port(config_name)
+    endpoint = config.get("Peers", "remote_endpoint") + ":" + listen_port
+    for peer in get_peer:
+        private_key = peer[0]
+        allowed_ip = peer[1]
+        dns_addresses = peer[2]
+        mtu_value = peer[3]
+        endpoint_allowed_ip = peer[4]
+        keepalive = peer[5]
+        preshared_key = peer[6]
+        filename = peer[7]
+        if len(filename) == 0:
+            filename = "Untitled_Peer"
+        else:
+            filename = peer[7]
+            # Clean filename
+            illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
+                                "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
+                                "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+            for i in illegal_filename:
+                filename = filename.replace(i, "")
+            if len(filename) == 0:
+                filename = "Untitled_Peer"
+            filename = "".join(filename.split(' '))
+        filename = filename + "_" + config_name
+        psk = ""
+        if preshared_key != "":
+            psk = "\nPresharedKey = " + preshared_key
+
+        return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
+                      dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+                      public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+                      endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+        data.append({"filename": f"{filename}.conf", "content": return_data})
+    return jsonify({"status": True, "peers": data, "filename": f"{config_name}.zip"})
+
+
 # Download configuration file
 @app.route('/download/<config_name>', methods=['GET'])
 def download(config_name):
-    print(request.headers.get('User-Agent'))
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
@@ -1195,15 +1249,13 @@ def download(config_name):
             if preshared_key != "":
                 psk = "\nPresharedKey = " + preshared_key
 
-            def generate():
-                yield "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
-                      dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
-                      public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
-                      endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+            return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
+                          dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+                          public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+                          endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
 
-            return app.response_class(generate(), mimetype='text/conf',
-                                      headers={"Content-Disposition": "attachment;filename=" + filename + ".conf"})
-    return redirect("/configuration/" + config_name)
+            return jsonify({"status": True, "filename": f"{filename}.conf", "content": return_data})
+    return jsonify({"status": False, "filename": "", "content": ""})
 
 
 # Switch peer display mode
@@ -1291,7 +1343,7 @@ Dashboard Initialization
 def init_dashboard():
     # Set Default INI File
     if not os.path.isfile(DASHBOARD_CONF):
-        conf_file = open(DASHBOARD_CONF, "w+")
+        open(DASHBOARD_CONF, "w+").close()
     config = get_dashboard_conf()
     # Defualt dashboard account setting
     if "Account" not in config:

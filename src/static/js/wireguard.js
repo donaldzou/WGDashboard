@@ -171,6 +171,105 @@
 		return String.fromCharCode.apply(null, base64);
 	}
 
+	function putU32(b, n)
+	{
+		b.push(n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff);
+	}
+
+	function putU16(b, n)
+	{
+		b.push(n & 0xff, (n >>> 8) & 0xff);
+	}
+
+	function putBytes(b, a)
+	{
+		for (var i = 0; i < a.length; ++i)
+			b.push(a[i] & 0xff);
+	}
+
+	function encodeString(s)
+	{
+		var utf8 = unescape(encodeURIComponent(s));
+		var b = new Uint8Array(utf8.length);
+		for (var i = 0; i < utf8.length; ++i)
+			b[i] = utf8.charCodeAt(i);
+		return b;
+	}
+
+	function crc32(b)
+	{
+		if (!crc32.table) {
+			crc32.table = [];
+			for (var c = 0, n = 0; n < 256; c = ++n) {
+				for (var k = 0; k < 8; ++k)
+					c = ((c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1));
+				crc32.table[n] = c;
+			}
+		}
+		var crc = -1;
+		for (var i = 0; i < b.length; ++i)
+			crc = (crc >>> 8) ^ crc32.table[(crc ^ b[i]) & 0xff];
+		return (crc ^ (-1)) >>> 0;
+	}
+
+	function createZipFile(files)
+	{
+		var b = [];
+		var cd = [];
+		var offset = 0;
+
+		for (var i = 0; i < files.length; ++i) {
+			var name = encodeString(files[i].filename);
+			var contents = encodeString(files[i].content);
+			var crc = crc32(contents);
+
+			putU32(b, 0x04034b50); /* signature */
+			putU16(b, 20); /* version needed */
+			putU16(b, 0); /* flags */
+			putU16(b, 0); /* compression method */
+			putU16(b, 0); /* mtime */
+			putU16(b, 0); /* mdate */
+			putU32(b, crc); /* crc32 */
+			putU32(b, contents.length); /* compressed size */
+			putU32(b, contents.length); /* uncompressed size */
+			putU16(b, name.length); /* file name length */
+			putU16(b, 0); /* extra field length */
+			putBytes(b, name);
+			putBytes(b, contents);
+
+			putU32(cd, 0x02014b50); /* signature */
+			putU16(cd, 0); /* version made */
+			putU16(cd, 20); /* version needed */
+			putU16(cd, 0); /* flags */
+			putU16(cd, 0); /* compression method */
+			putU16(cd, 0); /* mtime */
+			putU16(cd, 0); /* mdate */
+			putU32(cd, crc); /* crc32 */
+			putU32(cd, contents.length); /* compressed size */
+			putU32(cd, contents.length); /* uncompressed size */
+			putU16(cd, name.length); /* file name length */
+			putU16(cd, 0); /* extra field length */
+			putU16(cd, 0); /* file comment length */
+			putU16(cd, 0); /* disk number start */
+			putU16(cd, 0); /* internal file attributes */
+			putU32(cd, 32); /* external file attributes - 'archive' bit set (32) */
+			putU32(cd, offset); /* relative offset of local header */
+			putBytes(cd, name); /* file name */
+
+			offset += 30 + contents.length + name.length
+		}
+		putBytes(b, cd); /* central directory */
+		putU32(b, 0x06054b50); /* end of central directory signature */
+		putU16(b, 0); /* number of this disk */
+		putU16(b, 0); /* number of disk with central directory start */
+		putU16(b, files.length); /* number of entries on disk */
+		putU16(b, files.length); /* number of entries */
+		putU32(b, cd.length); /* length of central directory */
+		putU32(b, offset); /* offset to start of central directory */
+		putU16(b, 0); /* zip comment size */
+		return Uint8Array.from(b);
+	}
+
 	window.wireguard = {
 		generateKeypair: function() {
 			var privateKey = generatePrivateKey();
@@ -184,6 +283,19 @@
 		},
 		generatePublicKey: function (privateKey){
 			return keyToBase64(generatePublicKey(privateKey))
+		},
+
+		generateZipFiles: function(res){
+			var files = res.peers;
+			var zipFile = createZipFile(files);
+			var blob = new Blob([zipFile], { type: "application/zip" });
+			var a = document.createElement("a");
+			a.download = res.filename;
+			a.href = URL.createObjectURL(blob);
+			a.style.display = "none";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
 		}
 	};
 })();
