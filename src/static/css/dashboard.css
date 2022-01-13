@@ -503,3 +503,13 @@ main{
     transition: all 1s ease-in-out;
     filter: blur(10px);
 }
+
+pre.index-alert{
+    margin-bottom: 0;
+    padding: 1rem;
+    background-color: #343a40;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+    margin-top: 1rem;
+    color: white;
+}

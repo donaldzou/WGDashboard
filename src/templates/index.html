@@ -12,8 +12,13 @@
 		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
             <div style="display: flex; flex-direction: row; align-items: center;">
                 <h1 class="pb-4 mt-4">Home</h1>
-{#                <button class="btn btn-primary" style="margin-left: auto"><i class="bi bi-plus-circle-fill"></i> Configuration</button>#}
             </div>
+            {% if msg != "" %}
+                <div class="alert alert-danger" role="alert">
+                    Configuration toggle failed. Please check the following error message:
+                </div>
+                <pre class="index-alert"><code>{{ msg }}</code></pre>
+            {% endif %}
 
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>

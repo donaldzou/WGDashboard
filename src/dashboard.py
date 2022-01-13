@@ -3,7 +3,6 @@
 Under Apache-2.0 License
 """
 
-# TODO: Testing migrate to sqlite
 import sqlite3
 from flask import g
 import configparser
@@ -32,7 +31,7 @@ from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoin
 
 # Dashboard Version
 DASHBOARD_VERSION = 'v3.0'
-# WireGuard configuration path
+# WireGuard's configuration path
 WG_CONF_PATH = None
 # Dashboard Config Name
 configuration_path = os.getenv('CONFIGURATION_PATH', '.')
@@ -51,18 +50,20 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 QRcode(app)
 
 
+# TODO: use class and object oriented programming
+
 def connect_db():
+    """
+    Connect to the database
+    @return: sqlite3.Connection
+    """
     return sqlite3.connect(os.path.join(configuration_path, 'db', 'wgdashboard.db'))
 
 
-# TODO use class and object oriented programming
-
-# Read / Write Dashboard Config File
 def get_dashboard_conf():
-    """Dashboard Configuration Related
-
-    :return: A config parser object
-    :rtype: configparser.ConfigParser
+    """
+    Get dashboard configuration
+    @return: configparser.ConfigParser
     """
 
     config = configparser.ConfigParser(strict=False)
@@ -71,10 +72,9 @@ def get_dashboard_conf():
 
 
 def set_dashboard_conf(config):
-    """Configuration writer
-
-    :param config: A config parser object
-    :type config: configparser.ConfigParser
+    """
+    Write to configuration
+    @param config: Input configuration
     """
 
     with open(DASHBOARD_CONF, "w", encoding='utf-8') as conf_object:
@@ -83,17 +83,17 @@ def set_dashboard_conf(config):
 
 # Get all keys from a configuration
 def get_conf_peer_key(config_name):
-    """Get the peers keys of wireguard interface.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return list of peers keys or text if configuration not running
-    :rtype: list, str
+    """
+    Get the peers keys of wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return list of peers keys or text if configuration not running
+    @rtype: list, str
     """
 
     try:
-        peers_keys = subprocess.run(f"wg show {config_name} peers",
-                                    check=True, shell=True, capture_output=True).stdout
+        peers_keys = subprocess.check_output(f"wg show {config_name} peers",
+                                             shell=True, stderr=subprocess.STDOUT)
         peers_keys = peers_keys.decode("UTF-8").split()
         return peers_keys
     except subprocess.CalledProcessError:
@@ -102,19 +102,19 @@ def get_conf_peer_key(config_name):
 
 # Get numbers of connected peer of a configuration
 def get_conf_running_peer_number(config_name):
-    """Get number of running peers on wireguard interface.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Number of running peers, or test if configuration not running
-    :rtype: int, str
+    """
+    Get number of running peers on wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Number of running peers, or test if configuration not running
+    @rtype: int, str
     """
 
     running = 0
     # Get latest handshakes
     try:
-        data_usage = subprocess.run(f"wg show {config_name} latest-handshakes",
-                                    check=True, shell=True, capture_output=True).stdout
+        data_usage = subprocess.check_output(f"wg show {config_name} latest-handshakes",
+                                             shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
         return "stopped"
     data_usage = data_usage.decode("UTF-8").split()
@@ -132,12 +132,12 @@ def get_conf_running_peer_number(config_name):
 # TODO use modules for working with ini(configparser or wireguard)
 # Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
-    """Get interface settings.
-    
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Dictionary with interface settings
-    :rtype: dict
+    """
+    Get interface settings.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Dictionary with interface settings
+    @rtype: dict
     """
 
     conf_location = WG_CONF_PATH + "/" + config_name + ".conf"
@@ -155,14 +155,16 @@ def read_conf_file_interface(config_name):
 
 
 # TODO use modules for working with ini(configparser or wireguard)
-# Read the whole configuration file
-def read_conf_file(config_name):
-    """Get configurations from file of wireguard interface.
+# Tried to use configparser but it does not support sections with the same name
 
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Dictionary with interface and peers settings
-    :rtype: dict
+
+def read_conf_file(config_name):
+    """
+    Get configurations from file of wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Dictionary with interface and peers settings
+    @rtype: dict
     """
 
     # Read Configuration File Start
@@ -203,12 +205,17 @@ def read_conf_file(config_name):
     return conf_peer_data
 
 
-# Get the latest handshake from all peers of a configuration
 def get_latest_handshake(config_name):
+    """
+    Get the latest handshake from all peers of a configuration
+    @param config_name: Configuration name
+    @return: str
+    """
+
     # Get latest handshakes
     try:
-        data_usage = subprocess.run(f"wg show {config_name} latest-handshakes",
-                                    check=True, shell=True, capture_output=True).stdout
+        data_usage = subprocess.check_output(f"wg show {config_name} latest-handshakes",
+                                             shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
         return "stopped"
     data_usage = data_usage.decode("UTF-8").split()
@@ -228,15 +235,18 @@ def get_latest_handshake(config_name):
             g.cur.execute("UPDATE %s SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
                           % (config_name, status, data_usage[count]))
         count += 2
-    return None
 
 
-# Get transfer from all peers of a configuration
 def get_transfer(config_name):
+    """
+    Get transfer from all peers of a configuration
+    @param config_name: Configuration name
+    @return: str
+    """
     # Get transfer
     try:
-        data_usage = subprocess.run(f"wg show {config_name} transfer",
-                                    check=True, shell=True, capture_output=True).stdout
+        data_usage = subprocess.check_output(f"wg show {config_name} transfer",
+                                             shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
         return "stopped"
     data_usage = data_usage.decode("UTF-8").split("\n")
@@ -268,15 +278,18 @@ def get_transfer(config_name):
                 g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
                               (config_name, round(total_receive, 4), round(total_sent, 4),
                                round(total_receive + total_sent, 4), data_usage[i][0]))
-    return None
 
 
-# Get endpoint from all peers of a configuration
 def get_endpoint(config_name):
+    """
+    Get endpoint from all peers of a configuration
+    @param config_name: Configuration name
+    @return: str
+    """
     # Get endpoint
     try:
-        data_usage = subprocess.run(f"wg show {config_name} endpoints",
-                                    check=True, shell=True, capture_output=True).stdout
+        data_usage = subprocess.check_output(f"wg show {config_name} endpoints",
+                                             shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
         return "stopped"
     data_usage = data_usage.decode("UTF-8").split()
@@ -285,19 +298,27 @@ def get_endpoint(config_name):
         g.cur.execute("UPDATE " + config_name + " SET endpoint = '%s' WHERE id = '%s'"
                       % (data_usage[count + 1], data_usage[count]))
         count += 2
-    return None
 
 
-# Get allowed ips from all peers of a configuration
 def get_allowed_ip(conf_peer_data, config_name):
+    """
+    Get allowed ips from all peers of a configuration
+    @param conf_peer_data: Configuration peer data
+    @param config_name: Configuration name
+    @return: None
+    """
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
         g.cur.execute("UPDATE " + config_name + " SET allowed_ip = '%s' WHERE id = '%s'"
                       % (i.get('AllowedIPs', '(None)'), i["PublicKey"]))
 
 
-# Look for new peers from WireGuard
 def get_all_peers_data(config_name):
+    """
+    Look for new peers from WireGuard
+    @param config_name: Configuration name
+    @return: None
+    """
     conf_peer_data = read_conf_file(config_name)
     config = get_dashboard_conf()
     failed_index = []
@@ -340,7 +361,6 @@ def get_all_peers_data(config_name):
         else:
             print("Trying to parse a peer doesn't have public key...")
             failed_index.append(i)
-
     for i in failed_index:
         conf_peer_data['Peers'].pop(i)
     # Remove peers no longer exist in WireGuard configuration file
@@ -349,26 +369,23 @@ def get_all_peers_data(config_name):
     for i in db_key:
         if i not in wg_key:
             g.cur.execute("DELETE FROM %s WHERE id = '%s'" % (config_name, i))
-    tic = time.perf_counter()
     get_latest_handshake(config_name)
     get_transfer(config_name)
     get_endpoint(config_name)
     get_allowed_ip(conf_peer_data, config_name)
-    toc = time.perf_counter()
-    print(f"Finish fetching data in {toc - tic:0.4f} seconds")
 
 
 # Search for peers
 def get_peers(config_name, search, sort_t):
-    """Get all peers.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :param search: Search string
-    :type search: str
-    :param sort_t: TODO
-    :type sort_t: str
-    :return: TODO
+    """
+    Get all peers.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @param search: Search string
+    @type search: str
+    @param sort_t: Sorting tag
+    @type sort_t: str
+    @return: list
     """
     tic = time.perf_counter()
     col = g.cur.execute("PRAGMA table_info(" + config_name + ")").fetchall()
@@ -391,21 +408,20 @@ def get_peers(config_name, search, sort_t):
     return result
 
 
-# Get configuration public key
 def get_conf_pub_key(config_name):
-    """Get public key for configuration.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return public key or empty string
-    :rtype: str
+    """
+    Get public key for configuration.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return public key or empty string
+    @rtype: str
     """
 
     try:
         conf = configparser.ConfigParser(strict=False)
         conf.read(WG_CONF_PATH + "/" + config_name + ".conf")
         pri = conf.get("Interface", "PrivateKey")
-        pub = subprocess.run(f"echo '{pri}' | wg pubkey", check=True, shell=True, capture_output=True).stdout
+        pub = subprocess.check_output(f"echo '{pri}' | wg pubkey", shell=True, stderr=subprocess.STDOUT)
         conf.clear()
         return pub.decode().strip("\n")
     except configparser.NoSectionError:
@@ -414,12 +430,12 @@ def get_conf_pub_key(config_name):
 
 # Get configuration listen port
 def get_conf_listen_port(config_name):
-    """Get listen port number.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return number of port or empty string
-    :rtype: str
+    """
+    Get listen port number.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return number of port or empty string
+    @rtype: str
     """
 
     conf = configparser.ConfigParser(strict=False)
@@ -429,8 +445,8 @@ def get_conf_listen_port(config_name):
         port = conf.get("Interface", "ListenPort")
     except (configparser.NoSectionError, configparser.NoOptionError):
         if get_conf_status(config_name) == "running":
-            port = subprocess.run(f"wg show {config_name} listen-port",
-                                  check=True, shell=True, capture_output=True).stdout
+            port = subprocess.check_output(f"wg show {config_name} listen-port",
+                                           shell=True, stderr=subprocess.STDOUT)
             port = port.decode("UTF-8")
     conf.clear()
     return port
@@ -529,18 +545,17 @@ def gen_public_key(private_key):
         return {"status": 'failed', "msg": "Key is not the correct length or format", "data": ""}
 
 
-# Check if private key and public key match
 def f_check_key_match(private_key, public_key, config_name):
-    """TODO
-
-    :param private_key: Private key
-    :type private_key: str
-    :param public_key: Public key
-    :type public_key: str
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return dictionary with status
-    :rtype: dict
+    """
+    Check if private key and public key match
+    @param private_key: Private key
+    @type private_key: str
+    @param public_key: Public key
+    @type public_key: str
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return dictionary with status
+    @rtype: dict
     """
 
     result = gen_public_key(private_key)
@@ -581,6 +596,7 @@ def f_available_ips(config_name):
             existed.append(ipaddress.ip_address(add))
         peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
         for i in peers:
+            print(i[0])
             add = i[0].split(",")
             for k in add:
                 a, s = k.split("/")
@@ -706,7 +722,12 @@ def index():
     :return: TODO
     :rtype: TODO
     """
-    return render_template('index.html', conf=get_conf_list())
+    msg = ""
+    if "switch_msg" in session:
+        msg = session["switch_msg"]
+        session.pop("switch_msg")
+
+    return render_template('index.html', conf=get_conf_list(), msg=msg)
 
 
 # Setting Page
@@ -1026,7 +1047,6 @@ def get_conf(config_name):
     return jsonify(conf_data)
 
 
-
 # Turn on / off a configuration
 @app.route('/switch/<config_name>', methods=['GET'])
 def switch(config_name):
@@ -1038,21 +1058,20 @@ def switch(config_name):
     :rtype: TODO
     """
 
-    if "username" not in session:
-        print("User not logged in")
-        return redirect(url_for("signin"))
     status = get_conf_status(config_name)
     if status == "running":
         try:
-            subprocess.run("wg-quick down " + config_name,
-                           check=True, shell=True, capture_output=True).stdout
-        except subprocess.CalledProcessError:
+            check = subprocess.check_output("wg-quick down " + config_name,
+                                    shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as exc:
+            session["switch_msg"] = exc.output.strip().decode("utf-8")
             return redirect('/')
     elif status == "stopped":
         try:
-            subprocess.run("wg-quick up " + config_name,
-                           check=True, shell=True, capture_output=True).stdout
-        except subprocess.CalledProcessError:
+            subprocess.check_output("wg-quick up " + config_name,
+                                    shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as exc:
+            session["switch_msg"] = exc.output.strip().decode("utf-8")
             return redirect('/')
     return redirect(request.referrer)
 
@@ -1252,16 +1271,16 @@ def save_peer_setting(config_name):
             tmp_psk = open("tmp_edit_psk.txt", "w+")
             tmp_psk.write(preshared_key)
             tmp_psk.close()
-            change_psk = subprocess.run(f"wg set {config_name} peer {id} preshared-key tmp_edit_psk.txt",
-                                        shell=True, check=True, stderr=subprocess.STDOUT)
+            change_psk = subprocess.check_output(f"wg set {config_name} peer {id} preshared-key tmp_edit_psk.txt",
+                                                 shell=True, stderr=subprocess.STDOUT)
             if change_psk.decode("UTF-8") != "":
                 return jsonify({"status": "failed", "msg": change_psk.decode("UTF-8")})
             if allowed_ip == "":
                 allowed_ip = '""'
             allowed_ip = allowed_ip.replace(" ", "")
-            change_ip = subprocess.run(f"wg set {config_name} peer {id} allowed-ips {allowed_ip}",
-                                       shell=True, check=True, stderr=subprocess.STDOUT)
-            subprocess.run(f'wg-quick save {config_name}', shell=True, check=True, stderr=subprocess.STDOUT)
+            change_ip = subprocess.check_output(f"wg set {config_name} peer {id} allowed-ips {allowed_ip}",
+                                                shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(f'wg-quick save {config_name}', shell=True, stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
             sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, keepalive = ?, preshared_key = ? WHERE id = ?"
@@ -1600,7 +1619,6 @@ def init_dashboard():
         config['Server'] = {}
     if 'wg_conf_path' not in config['Server']:
         config['Server']['wg_conf_path'] = '/etc/wireguard'
-    # TODO: IPv6 for the app IP might need to configure with Gunicorn...
     if 'app_ip' not in config['Server']:
         config['Server']['app_ip'] = '0.0.0.0'
     if 'app_port' not in config['Server']:
