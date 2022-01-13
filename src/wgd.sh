@@ -4,6 +4,15 @@
 # Under Apache-2.0 License
 app_name="dashboard.py"
 app_official_name="WGDashboard"
+environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
+if [[ $CONFIGURATION_PATH ]]; then
+  cb_work_dir=$CONFIGURATION_PATH/letsencrypt/work-dir
+  cb_config_dir=$CONFIGURATION_PATH/letsencrypt/config-dir
+else
+  cb_work_dir=/etc/letsencrypt
+  cb_config_dir=/var/lib/letsencrypt
+fi
+
 dashes='------------------------------------------------------------'
 equals='============================================================'
 help () {
@@ -57,28 +66,85 @@ install_wgd(){
 
 
 check_wgd_status(){
-  if ps aux | grep '[p]ython3 '$app_name > /dev/null;
-    then
+  if [[ $environment == 'production' ]]; then
+    if ps aux | grep -v grep | grep $(cat ./gunicorn.pid)  > /dev/null; then
       return 0
-      else
-        return 1
+    else
+      return 1
+    fi
+  else
+    if ps aux | grep -v grep | grep '[p]ython3 '$app_name > /dev/null; then
+      return 0
+    else
+      return 1
+    fi
   fi
 }
 
-start_wgd () {
-    printf "%s\n" "$dashes"
-    printf "| Starting WGDashboard in the background.          |\n"
-    if [ ! -d "log" ]
-      then mkdir "log"
+certbot_create_ssl () {
+  certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
+}
+
+certbot_renew_ssl () {
+  certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
+}
+
+gunicorn_start () {
+  if [[ $SSL ]]; then
+    if [ ! -d $cb_config_dir ]; then
+      certbot_create_ssl
+    else
+      certbot_renew_ssl
     fi
-    d=$(date '+%Y%m%d%H%M%S')
-    python3 "$app_name" > log/"$d".txt 2>&1 &
-    printf "| Log files is under log/                                  |\n"
-    printf "%s\n" "$dashes"
+  fi
+  printf "%s\n" "$dashes"
+  printf "| Starting WGDashboard in the background.          |\n"
+  if [ ! -d "log" ]; then
+    mkdir "log"
+  fi
+  d=$(date '+%Y%m%d%H%M%S')
+  if [[ $USER == root ]]; then
+    export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
+  fi
+  if [[ $SSL ]]; then
+    gunicorn --certfile $cb_config_dir/live/"$SERVERURL"/cert.pem \
+    --keyfile $cb_config_dir/live/"$SERVERURL"/privkey.pem \
+    --access-logfile log/access_"$d".log \
+    --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+  else
+    gunicorn --access-logfile log/access_"$d".log \
+    --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+  fi
+  printf "| Log files is under log/                                  |\n"
+  printf "%s\n" "$dashes"
+}
+
+gunicorn_stop () {
+  kill $(cat ./gunicorn.pid)
+}
+
+start_wgd () {
+    if [[ $environment == 'production' ]]; then
+      gunicorn_start
+    else
+      printf "%s\n" "$dashes"
+      printf "| Starting WGDashboard in the background.          |\n"
+      if [ ! -d "log" ]
+        then mkdir "log"
+      fi
+      d=$(date '+%Y%m%d%H%M%S')
+      python3 "$app_name" > log/"$d".txt 2>&1 &
+      printf "| Log files is under log/                                  |\n"
+      printf "%s\n" "$dashes"
+    fi
 }
 
 stop_wgd() {
-  kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  if [[ $environment == 'production' ]]; then
+    gunicorn_stop
+  else
+    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+  fi
 }
 
 start_wgd_debug() {
