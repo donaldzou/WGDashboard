@@ -47,7 +47,7 @@ function load_data(search){
             $("#conf_total_data_sent").html(response.total_data_usage[1]+" GB");
             $("#conf_public_key").html(response.public_key);
             $("#conf_listen_port").html(response.listen_port === "" ? "N/A":response.listen_port);
-            $("#conf_address").html(response.listen_port);
+            $("#conf_address").html(response.conf_address);
             $(".info h6").removeClass("info_loading");
             $conf_status_btn.removeClass("info_loading");
 
