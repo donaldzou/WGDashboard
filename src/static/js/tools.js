@@ -14,12 +14,7 @@ $(".conf_dropdown").change(function (){
         }
     })
 });
-
-
 // Ping Tools
-
-
-
 $(".send_ping").click(function (){
     $(this).attr("disabled","disabled")
     $(this).html("Pinging...")

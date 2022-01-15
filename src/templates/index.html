@@ -14,12 +14,12 @@
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
 			{% for i in conf%}
-				<div class="card mt-3">
+				<div class="card mt-3 conf_card">
 					<div class="card-body">
 						<div class="row">
 							<div class="col card-col">
 								<small class="text-muted"><strong>CONFIGURATION</strong></small>
-								<a href="/configuration/{{i['conf']}}">
+								<a href="/configuration/{{i['conf']}}" class="conf_link">
 									<h6 class="card-title" style="margin:0 !important;">{{i['conf']}}</h6>
 								</a>
 							</div>
@@ -51,11 +51,18 @@
 </body>
 {% include "footer.html" %}
 <script>
-	$('.switch').click(function() {
+
+	$('.switch').on("click", function() {
 	    $(this).siblings($(".spinner-border")).css("display", "inline-block")
 	    $(this).remove()
 		location.replace("/switch/"+$(this).attr('id'))
     });
-	$(".sb-home-url").addClass("active")
+	$(".sb-home-url").addClass("active");
+
+    $(".card-body").on("click", function(handle){
+        if ($(handle.target).attr("class") !== "bi bi-toggle2-off" && $(handle.target).attr("class") !== "bi bi-toggle2-on") {
+            window.open($(this).find("a").attr("href"), "_self");
+        }
+    })
 </script>
 </html>
