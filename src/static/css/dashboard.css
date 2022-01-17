@@ -52,6 +52,7 @@ body {
 
 .nav-link:hover {
     padding-left: 30px;
+    background-color: #dfdfdf;
 }
 
 .sidebar .nav-link .feather {
@@ -170,8 +171,24 @@ body {
     box-shadow: none;
 }
 
+.btn-qrcode-peer{
+    padding: 0 !important;
+}
+
+.btn-qrcode-peer:active, .btn-qrcode-peer:hover{
+    transform: scale(0.9) rotate(180deg);
+    border: 0 !important;
+}
+
+.btn-download-peer:active, .btn-download-peer:hover{
+    color: #17a2b8 !important;
+    transform: translateY(5px);
+}
+
 .share_peer_btn_group .btn-control{
-    padding: 0 0 0 1rem;
+    margin: 0 0 0 1rem;
+    padding: 0 !important;
+    transition: all 0.4s cubic-bezier(1, -0.43, 0, 1.37);
 }
 
 .btn-control:hover{

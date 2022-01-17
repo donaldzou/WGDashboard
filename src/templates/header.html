@@ -1,7 +1,16 @@
 <head>
 <meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>WGDashboard | {{ title }}</title>
+	<title>{{ title }} | WGDashboard</title>
+    <link rel="manifest" href="{{ url_for('static',filename='json/manifest.json') }}">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="e">
+    <meta name="apple-mobile-web-app-title" content="e">
+    <meta name="msapplication-starturl" content="/">
+    <link rel="apple-touch-icon" sizes="192x192" href="{{ url_for('static',filename='img/192x192ios.png') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="{{ url_for('static',filename='img/logo.png') }}"/>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dashboard.css') }}">

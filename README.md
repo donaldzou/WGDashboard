@@ -33,6 +33,7 @@
   - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
   - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
   - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
+  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
 
 
 *And many other small changes for performance and bug fixes! :laughing:*

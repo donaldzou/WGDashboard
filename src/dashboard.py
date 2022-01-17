@@ -1062,7 +1062,7 @@ def switch(config_name):
     if status == "running":
         try:
             check = subprocess.check_output("wg-quick down " + config_name,
-                                    shell=True, stderr=subprocess.STDOUT)
+                                            shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             session["switch_msg"] = exc.output.strip().decode("utf-8")
             return redirect('/')
@@ -1670,28 +1670,33 @@ def check_update():
 
     return result
 
+
 """
 Configure DashBoard before start web-server
 """
+
+
 def run_dashboard():
     init_dashboard()
-    global update
-    update = check_update()
-    global config
+    global UPDATE
+    UPDATE = check_update()
     config = configparser.ConfigParser(strict=False)
     config.read('wg-dashboard.ini')
-    global app_ip
+    # global app_ip
     app_ip = config.get("Server", "app_ip")
-    global app_port
+    # global app_port
     app_port = config.get("Server", "app_port")
-    global wg_conf_path
-    wg_conf_path = config.get("Server", "wg_conf_path")
+    global WG_CONF_PATH
+    WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
     return app
+
 
 """
 Get host and port for web-server
 """
+
+
 def get_host_bind():
     init_dashboard()
     config = configparser.ConfigParser(strict=False)
@@ -1701,6 +1706,15 @@ def get_host_bind():
 
     return app_ip, app_port
 
+
 if __name__ == "__main__":
-    run_dashboard()
+    UPDATE = check_update()
+    config = configparser.ConfigParser(strict=False)
+    config.read('wg-dashboard.ini')
+    # global app_ip
+    app_ip = config.get("Server", "app_ip")
+    # global app_port
+    app_port = config.get("Server", "app_port")
+    WG_CONF_PATH = config.get("Server", "wg_conf_path")
+    config.clear()
     app.run(host=app_ip, debug=False, port=app_port)
