@@ -18,7 +18,7 @@
 
 - 🎉  **New Features**
   - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
-  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart: **
+  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
   - **Add Peers by Bulk: ** User can add peers by bulk, just simply set the amount and click add.
   - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
   - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
