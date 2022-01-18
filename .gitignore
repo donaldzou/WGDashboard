@@ -1,12 +1,11 @@
 .vscode/sftp.json
 src/.vscode/sftp.json
 .DS_Store
-wg.db
-*.json
 .idea
-src/test.py
-tmp
+src/db
 __pycache__
+src/test.py
+*.db
 src/wg-dashboard.ini
 src/static/pic.xd
 *.conf
@@ -15,7 +14,5 @@ public_key.txt
 venv/**
 log/**
 release/*
-*.db
 src/db/wgdashboard.db
 .jshintrc
-src/db
