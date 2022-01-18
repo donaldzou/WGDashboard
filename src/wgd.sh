@@ -61,8 +61,8 @@ install_wgd(){
     python3 -m pip install -U pip > /dev/null 2>&1
     printf "| Installing latest Python dependencies                    |\n"
     python3 -m pip install -U -r requirements.txt > /dev/null 2>&1
-    printf "| WGDashboard installed successfully!                     |\n"
-    printf "| Enter ./wgd start to start the dashboard                 |\n"
+    printf "| WGDashboard installed successfully!                      |\n"
+    printf "| Enter ./wgd.sh start to start the dashboard              |\n"
 }
 
 
