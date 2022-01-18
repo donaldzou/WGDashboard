@@ -359,6 +359,12 @@ Endpoint = 0.0.0.0:51820
     git pull https://github.com/donaldzou/WGDashboard.git v3.0 --force
     ```
 
+3. Install
+
+   ```shell
+   ./wgd.sh install
+   ```
+
 Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
 ## 🥘 Experimental Functions
