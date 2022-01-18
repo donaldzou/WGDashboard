@@ -24,6 +24,7 @@
   - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
   - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
   - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
+  - **Added Some [🥘 Experimental Functions](#-experimental-functions)** 
   
 - 🪚  **Bug Fixed**
   - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
@@ -40,7 +41,9 @@
 
 *And many other small changes for performance and bug fixes! :laughing:*
 
->  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart: 
+>  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
+
+**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
 
 <hr>
 
@@ -57,6 +60,7 @@
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
 - [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
+- [🥘 Experimental Functions](#-experimental-functions)
 - [🔍  Screenshot](#-screenshot)
 - [⏰  Changelog](#--changelog)
 - [🛒  Dependencies](#-dependencies)
@@ -359,9 +363,9 @@ Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
 ## 🥘 Experimental Functions
 
-#### Progressive Web App (PWA)
+#### Progressive Web App (PWA) for WGDashboard
 
-With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
+- With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
 
 <img src="img/PWA.gif"/>
 
