@@ -18,7 +18,7 @@
 
 - 🎉  **New Features**
   - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
-  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart: **
+  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
   - **Add Peers by Bulk: ** User can add peers by bulk, just simply set the amount and click add.
   - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
   - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
@@ -28,8 +28,8 @@
   
 - 🪚  **Bug Fixed**
   - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
-  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ ikidd]
-  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @ pgalonza]
+  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
+  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
   - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
   - **And many other bugs provided by our beloved users** :heart:
 - **🧐  Other Changes**
@@ -349,7 +349,7 @@ Endpoint = 0.0.0.0:51820
 <hr>
 
 1. Change your directory to `wgdashboard` 
-    
+   
     ```shell
     cd wgdashboard
     ```
