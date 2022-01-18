@@ -4,6 +4,7 @@
 # Under Apache-2.0 License
 app_name="dashboard.py"
 app_official_name="WGDashboard"
+PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
   cb_work_dir=$CONFIGURATION_PATH/letsencrypt/work-dir
@@ -66,18 +67,12 @@ install_wgd(){
 
 
 check_wgd_status(){
-  if [[ $environment == 'production' ]]; then
-    PID_FILE=./gunicorn.pid
-    if test -f "$PID_FILE"; then
-      if ps aux | grep -v grep | grep $(cat ./gunicorn.pid)  > /dev/null; then
-      return 0
-      else
-        return 1
-      fi
+  if test -f "$PID_FILE"; then
+    if ps aux | grep -v grep | grep $(cat ./gunicorn.pid)  > /dev/null; then
+    return 0
     else
       return 1
     fi
-
   else
     if ps aux | grep -v grep | grep '[p]ython3 '$app_name > /dev/null; then
       return 0
@@ -96,15 +91,8 @@ certbot_renew_ssl () {
 }
 
 gunicorn_start () {
-#  if [[ $SSL ]]; then
-#    if [ ! -d $cb_config_dir ]; then
-#      certbot_create_ssl
-#    else
-#      certbot_renew_ssl
-#    fi
-#  fi
   printf "%s\n" "$dashes"
-  printf "| Starting WGDashboard in the background.                  |\n"
+  printf "| Starting WGDashboard with Gunicorn in the background.    |\n"
   if [ ! -d "log" ]; then
     mkdir "log"
   fi
@@ -112,15 +100,8 @@ gunicorn_start () {
   if [[ $USER == root ]]; then
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
-#  if [[ $SSL ]]; then
-#    gunicorn --certfile $cb_config_dir/live/"$SERVERURL"/cert.pem \
-#    --keyfile $cb_config_dir/live/"$SERVERURL"/privkey.pem \
-#    --access-logfile log/access_"$d".log \
-#    --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
-#  else
   gunicorn --access-logfile log/access_"$d".log \
   --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
-#  fi
   printf "| Log files is under log/                                  |\n"
   printf "%s\n" "$dashes"
 }
@@ -130,23 +111,11 @@ gunicorn_stop () {
 }
 
 start_wgd () {
-    if [[ $environment == 'production' ]]; then
-      gunicorn_start
-    else
-      printf "%s\n" "$dashes"
-      printf "| Starting WGDashboard in the background.                  |\n"
-      if [ ! -d "log" ]
-        then mkdir "log"
-      fi
-      d=$(date '+%Y%m%d%H%M%S')
-      python3 "$app_name" > log/"$d".txt 2>&1 &
-      printf "| Log files is under log/                                  |\n"
-      printf "%s\n" "$dashes"
-    fi
+    gunicorn_start
 }
 
 stop_wgd() {
-  if [[ $environment == 'production' ]]; then
+  if test -f "$PID_FILE"; then
     gunicorn_stop
   else
     kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"

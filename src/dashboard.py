@@ -17,6 +17,7 @@ import time
 import re
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import datetime, timedelta
 from operator import itemgetter
 # PIP installed library
@@ -65,7 +66,6 @@ def get_dashboard_conf():
     Get dashboard configuration
     @return: configparser.ConfigParser
     """
-
     config = configparser.ConfigParser(strict=False)
     config.read(DASHBOARD_CONF)
     return config
@@ -76,7 +76,6 @@ def set_dashboard_conf(config):
     Write to configuration
     @param config: Input configuration
     """
-
     with open(DASHBOARD_CONF, "w", encoding='utf-8') as conf_object:
         config.write(conf_object)
 
@@ -129,7 +128,6 @@ def get_conf_running_peer_number(config_name):
     return running
 
 
-# TODO use modules for working with ini(configparser or wireguard)
 # Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
     """
@@ -152,10 +150,6 @@ def read_conf_file_interface(config_name):
                         if len(tmp) == 2:
                             data[tmp[0]] = tmp[1]
     return data
-
-
-# TODO use modules for working with ini(configparser or wireguard)
-# Tried to use configparser but it does not support sections with the same name
 
 
 def read_conf_file(config_name):
@@ -375,7 +369,6 @@ def get_all_peers_data(config_name):
     get_allowed_ip(conf_peer_data, config_name)
 
 
-# Search for peers
 def get_peers(config_name, search, sort_t):
     """
     Get all peers.
@@ -428,7 +421,6 @@ def get_conf_pub_key(config_name):
         return ""
 
 
-# Get configuration listen port
 def get_conf_listen_port(config_name):
     """
     Get listen port number.
@@ -452,8 +444,12 @@ def get_conf_listen_port(config_name):
     return port
 
 
-# Get configuration total data
 def get_conf_total_data(config_name):
+    """
+    Get configuration's total amount of data
+    @param config_name: Configuration name
+    @return: list
+    """
     data = g.cur.execute("SELECT total_sent, total_receive, cumu_sent, cumu_receive FROM " + config_name)
     upload_total = 0
     download_total = 0
@@ -468,19 +464,21 @@ def get_conf_total_data(config_name):
     return [total, upload_total, download_total]
 
 
-# Get configuration status
 def get_conf_status(config_name):
+    """
+    Check if the configuration is running or not
+    @param config_name:
+    @return: Return a string indicate the running status
+    """
     ifconfig = dict(ifcfg.interfaces().items())
-
     return "running" if config_name in ifconfig.keys() else "stopped"
 
 
-# Get all configuration as a list
 def get_conf_list():
     """Get all wireguard interfaces with status.
 
-    :return: Return a list of dicts with interfaces and its statuses
-    :rtype: list
+    @return: Return a list of dicts with interfaces and its statuses
+    @rtype: list
     """
 
     conf = []
@@ -510,25 +508,13 @@ def get_conf_list():
     return conf
 
 
-# Generate private key
-def gen_private_key():
-    subprocess.run('wg genkey > private_key.txt && wg pubkey < private_key.txt > public_key.txt', shell=True)
-    with open('private_key.txt', encoding='utf-8') as file_object:
-        private_key = file_object.readline().strip()
-    with open('public_key.txt', encoding='utf-8') as file_object:
-        public_key = file_object.readline().strip()
-    data = {"private_key": private_key, "public_key": public_key}
-    return data
-
-
-# Generate public key
 def gen_public_key(private_key):
     """Generate the public key.
 
-    :param private_key: Pricate key
-    :type private_key: str
-    :return: Return dict with public key or error message
-    :rtype: dict
+    @param private_key: Private key
+    @type private_key: str
+    @return: Return dict with public key or error message
+    @rtype: dict
     """
 
     with open('private_key.txt', 'w', encoding='utf-8') as file_object:
@@ -570,8 +556,14 @@ def f_check_key_match(private_key, public_key, config_name):
             return {'status': 'success'}
 
 
-# Check if there is repeated allowed IP
 def check_repeat_allowed_ip(public_key, ip, config_name):
+    """
+    Check if there are repeated IPs
+    @param public_key: Public key of the peer
+    @param ip: IP of the peer
+    @param config_name: configuration name
+    @return: a JSON object
+    """
     peer = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE id = ?", (public_key,)).fetchone()
     if peer[0] != 1:
         return {'status': 'failed', 'msg': 'Peer does not exist'}
@@ -586,6 +578,11 @@ def check_repeat_allowed_ip(public_key, ip, config_name):
 
 
 def f_available_ips(config_name):
+    """
+    Get a list of available IPs
+    @param config_name: Configuration Name
+    @return: list
+    """
     config_interface = read_conf_file_interface(config_name)
     if "Address" in config_interface:
         existed = []
@@ -596,7 +593,6 @@ def f_available_ips(config_name):
             existed.append(ipaddress.ip_address(add))
         peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
         for i in peers:
-            print(i[0])
             add = i[0].split(",")
             for k in add:
                 a, s = k.split("/")
@@ -620,6 +616,11 @@ Flask Functions
 
 @app.teardown_request
 def close_DB(exception):
+    """
+    Commit to the database for every request
+    @param exception: Exception
+    @return: None
+    """
     if hasattr(g, 'db'):
         g.db.commit()
         g.db.close()
@@ -628,6 +629,10 @@ def close_DB(exception):
 # Before request
 @app.before_request
 def auth_req():
+    """
+    Action before every request
+    @return: Redirect
+    """
     if getattr(g, 'db', None) is None:
         g.db = connect_db()
         g.cur = g.db.cursor()
@@ -647,7 +652,7 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            return redirect(url_for("signin"))
+            return redirect("/signin?redirect=" + str(request.url))
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
                                 'update_app_ip_port', 'update_wg_conf_path']:
@@ -662,13 +667,11 @@ Sign In / Sign Out
 """
 
 
-# Sign In
 @app.route('/signin', methods=['GET'])
 def signin():
-    """Sign in request.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Sign in request
+    @return: template
     """
 
     message = ""
@@ -681,46 +684,43 @@ def signin():
 # Sign Out
 @app.route('/signout', methods=['GET'])
 def signout():
-    """Sign out request.
-
-    :return: TODO
-    :rtype: TODO
     """
-
+    Sign out request
+    @return: redirect back to sign in
+    """
     if "username" in session:
         session.pop("username")
-    message = "Sign out successfully!"
-    return render_template('signin.html', message=message)
+    return redirect(url_for('signin'))
 
 
-# Authentication
 @app.route('/auth', methods=['POST'])
 def auth():
-    """Authentication request.
-
-    :return: TODO
-    :rtype: TODO
     """
-
+    Authentication request
+    @return: json object indicating verifying
+    """
+    data = request.get_json()
     config = get_dashboard_conf()
-    password = hashlib.sha256(request.form['password'].encode())
+    password = hashlib.sha256(data['password'].encode())
     if password.hexdigest() == config["Account"]["password"] \
-            and request.form['username'] == config["Account"]["username"]:
-        session['username'] = request.form['username']
+            and data['username'] == config["Account"]["username"]:
+        session['username'] = data['username']
         config.clear()
-        return redirect(url_for("index"))
-
-    session['message'] = "Username or Password is incorrect."
+        return jsonify({"status": True, "msg": ""})
     config.clear()
-    return redirect(url_for("signin"))
+    return jsonify({"status": False, "msg": "Username or Password is incorrect."})
+
+
+"""
+Index Page
+"""
 
 
 @app.route('/', methods=['GET'])
 def index():
-    """Index Page Related.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Index page related
+    @return: Template
     """
     msg = ""
     if "switch_msg" in session:
@@ -733,10 +733,9 @@ def index():
 # Setting Page
 @app.route('/settings', methods=['GET'])
 def settings():
-    """Setting Page Related.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Settings page related
+    @return: Template
     """
     message = ""
     status = ""
@@ -757,13 +756,11 @@ def settings():
                            peer_remote_endpoint=config.get("Peers", "remote_endpoint"))
 
 
-# Update account username
 @app.route('/update_acct', methods=['POST'])
 def update_acct():
-    """Change account user name.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Change dashboard username
+    @return: Redirect
     """
 
     if len(request.form['username']) == 0:
@@ -786,13 +783,12 @@ def update_acct():
         return redirect(url_for("settings"))
 
 
-# Update peer default settting
+# Update peer default setting
 @app.route('/update_peer_default_config', methods=['POST'])
 def update_peer_default_config():
-    """Change default configurations for peers.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Update new peers default setting
+    @return: None
     """
 
     config = get_dashboard_conf()
@@ -860,10 +856,9 @@ def update_peer_default_config():
 # Update dashboard password
 @app.route('/update_pwd', methods=['POST'])
 def update_pwd():
-    """Change account password.
-
-    :return: TODO
-    :rtype: TODO
+    """
+    Update dashboard password
+    @return: Redirect
     """
 
     config = get_dashboard_conf()
@@ -894,10 +889,11 @@ def update_pwd():
         return redirect(url_for("settings"))
 
 
-# Update dashboard IP and port
 @app.route('/update_app_ip_port', methods=['POST'])
 def update_app_ip_port():
-    """Change port number of dashboard.
+    """
+    Update dashboard ip and port
+    @return: None
     """
 
     config = get_dashboard_conf()
@@ -905,13 +901,15 @@ def update_app_ip_port():
     config.set("Server", "app_port", request.form['app_port'])
     set_dashboard_conf(config)
     config.clear()
-    os.system('bash wgd.sh restart')
+    os.system('./wgd.sh restart')
 
 
 # Update WireGuard configuration file path
 @app.route('/update_wg_conf_path', methods=['POST'])
 def update_wg_conf_path():
-    """Change path to dashboard configuration.
+    """
+    Update configuration path
+    @return: None
     """
 
     config = get_dashboard_conf()
@@ -920,13 +918,14 @@ def update_wg_conf_path():
     config.clear()
     session['message'] = "WireGuard Configuration Path Update Successfully!"
     session['message_status'] = "success"
-    os.system('bash wgd.sh restart')
+    os.system('./wgd.sh restart')
 
 
-# Update configuration sorting
 @app.route('/update_dashboard_sort', methods=['POST'])
 def update_dashbaord_sort():
-    """Configuration Page Related
+    """
+    Update configuration sorting
+    @return: Boolean
     """
 
     config = get_dashboard_conf()
@@ -944,10 +943,10 @@ def update_dashbaord_sort():
 # Update configuration refresh interval
 @app.route('/update_dashboard_refresh_interval', methods=['POST'])
 def update_dashboard_refresh_interval():
-    """Change the refresh time.
-
-    :return: Return text with result
-    :rtype: str
+    """
+    Change the refresh time.
+    @return: Return text with result
+    @rtype: str
     """
 
     preset_interval = ["5000", "10000", "30000", "60000"]
@@ -964,12 +963,11 @@ def update_dashboard_refresh_interval():
 # Configuration Page
 @app.route('/configuration/<config_name>', methods=['GET'])
 def configuration(config_name):
-    """Show wireguard interface view.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: TODO
-    :rtype: TODO
+    """
+    Show wireguard interface view.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Template
     """
 
     config = get_dashboard_conf()
@@ -1004,12 +1002,11 @@ def configuration(config_name):
 # Get configuration details
 @app.route('/get_config/<config_name>', methods=['GET'])
 def get_conf(config_name):
-    """Get configuration setting of wireguard interface.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: TODO
-    :rtype: TODO
+    """
+    Get configuration setting of wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: TODO
     """
 
     config_interface = read_conf_file_interface(config_name)
@@ -1050,12 +1047,11 @@ def get_conf(config_name):
 # Turn on / off a configuration
 @app.route('/switch/<config_name>', methods=['GET'])
 def switch(config_name):
-    """On/off the wireguard interface.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: TODO
-    :rtype: TODO
+    """
+    On/off the wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: redirects
     """
 
     status = get_conf_status(config_name)
@@ -1078,6 +1074,11 @@ def switch(config_name):
 
 @app.route('/add_peer_bulk/<config_name>', methods=['POST'])
 def add_peer_bulk(config_name):
+    """
+    Add peers by bulk
+    @param config_name: Configuration Name
+    @return: String
+    """
     data = request.get_json()
     keys = data['keys']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
@@ -1138,9 +1139,13 @@ def add_peer_bulk(config_name):
         return exc.output.strip()
 
 
-# Add peer
 @app.route('/add_peer/<config_name>', methods=['POST'])
 def add_peer(config_name):
+    """
+    Add Peers
+    @param config_name: configuration name
+    @return: string
+    """
     data = request.get_json()
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']
@@ -1172,7 +1177,6 @@ def add_peer(config_name):
         if enable_preshared_key:
             now = str(datetime.now().strftime("%m%d%Y%H%M%S"))
             f_name = now + "_tmp_psk.txt"
-            print(f_name)
             f = open(f_name, "w+")
             f.write(preshared_key)
             f.close()
@@ -1192,15 +1196,14 @@ def add_peer(config_name):
         return exc.output.strip()
 
 
-# Remove peer
 @app.route('/remove_peer/<config_name>', methods=['POST'])
 def remove_peer(config_name):
-    """Remove peer.
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return result of action or recommendations
-    :rtype: str
+    """
+    Remove peer.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return result of action or recommendations
+    @rtype: str
     """
 
     if get_conf_status(config_name) == "stopped":
@@ -1231,15 +1234,14 @@ def remove_peer(config_name):
         return "true"
 
 
-# Save peer settings
 @app.route('/save_peer_setting/<config_name>', methods=['POST'])
 def save_peer_setting(config_name):
-    """Save peer configuration.
+    """
+    Save peer configuration.
 
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return status of action and text with recommendations
-    :rtype: TODO
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return status of action and text with recommendations
     """
 
     data = request.get_json()
@@ -1296,12 +1298,12 @@ def save_peer_setting(config_name):
 # Get peer settings
 @app.route('/get_peer_data/<config_name>', methods=['POST'])
 def get_peer_name(config_name):
-    """Get peer settings.
+    """
+    Get peer settings.
 
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return settings of peer
-    :rtype: TODO
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return settings of peer
     """
 
     data = request.get_json()
@@ -1321,41 +1323,14 @@ def available_ips(config_name):
     return jsonify(f_available_ips(config_name))
 
 
-# Generate a private key
-@app.route('/generate_peer', methods=['GET'])
-def generate_peer():
-    """Generate the private key for peer.
-
-    :return: Return dict with private, public and preshared keys
-    :rtype: TODO
-    """
-
-    return jsonify(gen_private_key())
-
-
-# Generate a public key from a private key
-@app.route('/generate_public_key', methods=['POST'])
-def generate_public_key():
-    """Generate the public key.
-
-    :return: Return dict with public key or error message
-    :rtype: TODO
-    """
-
-    data = request.get_json()
-    private_key = data['private_key']
-    return jsonify(gen_public_key(private_key))
-
-
 # Check if both key match
 @app.route('/check_key_match/<config_name>', methods=['POST'])
 def check_key_match(config_name):
-    """TODO
-
-    :param config_name: Name of WG interface
-    :type config_name: str
-    :return: Return dictionary with status
-    :rtype: TODO
+    """
+    Check key matches
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: Return dictionary with status
     """
 
     data = request.get_json()
@@ -1366,6 +1341,11 @@ def check_key_match(config_name):
 
 @app.route("/qrcode/<config_name>", methods=['GET'])
 def generate_qrcode(config_name):
+    """
+    Generate QRCode
+    @param config_name: Configuration Name
+    @return: Template containing QRcode img
+    """
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM "
@@ -1396,9 +1376,13 @@ def generate_qrcode(config_name):
         return redirect("/configuration/" + config_name)
 
 
-# Download all configuration file
 @app.route('/download_all/<config_name>', methods=['GET'])
 def download_all(config_name):
+    """
+    Download all configuration
+    @param config_name: Configuration Name
+    @return: JSON Object
+    """
     get_peer = g.cur.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
         + config_name + " WHERE private_key != ''").fetchall()
@@ -1445,6 +1429,11 @@ def download_all(config_name):
 # Download configuration file
 @app.route('/download/<config_name>', methods=['GET'])
 def download(config_name):
+    """
+    Download one configuration
+    @param config_name: Configuration name
+    @return: JSON object
+    """
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
@@ -1491,15 +1480,15 @@ def download(config_name):
     return jsonify({"status": False, "filename": "", "content": ""})
 
 
-# Switch peer display mode
 @app.route('/switch_display_mode/<mode>', methods=['GET'])
 def switch_display_mode(mode):
-    """Change display view style.
+    """
+    Change display view style.
 
-    :param mode: Mode name
-    :type mode: str
-    :return: Return text with result
-    :rtype: str
+    @param mode: Mode name
+    @type mode: str
+    @return: Return text with result
+    @rtype: str
     """
 
     if mode in ['list', 'grid']:
@@ -1519,10 +1508,11 @@ Dashboard Tools Related
 # Get all IP for ping
 @app.route('/get_ping_ip', methods=['POST'])
 def get_ping_ip():
-    """Get ips for network testing.
+    # TODO: convert return to json object
 
-    :return: TODO
-    :rtype: TODO
+    """
+    Get ips for network testing.
+    @return: HTML containing a list of IPs
     """
 
     config = request.form['config']
@@ -1545,10 +1535,10 @@ def get_ping_ip():
 # Ping IP
 @app.route('/ping_ip', methods=['POST'])
 def ping_ip():
-    """Execute ping command.
-
-    :return: Return text with result
-    :rtype: str
+    """
+    Execute ping command.
+    @return: Return text with result
+    @rtype: str
     """
 
     try:
@@ -1573,10 +1563,11 @@ def ping_ip():
 # Traceroute IP
 @app.route('/traceroute_ip', methods=['POST'])
 def traceroute_ip():
-    """Execute ping traceroute command.
+    """
+    Execute ping traceroute command.
 
-    :return: Return text with result
-    :rtype: str
+    @return: Return text with result
+    @rtype: str
     """
 
     try:
@@ -1600,21 +1591,22 @@ Dashboard Initialization
 
 
 def init_dashboard():
-    """Create dashboard default configuration.
+    """
+    Create dashboard default configuration.
     """
 
     # Set Default INI File
     if not os.path.isfile(DASHBOARD_CONF):
         open(DASHBOARD_CONF, "w+").close()
     config = get_dashboard_conf()
-    # Defualt dashboard account setting
+    # Default dashboard account setting
     if "Account" not in config:
         config['Account'] = {}
     if "username" not in config['Account']:
         config['Account']['username'] = 'admin'
     if "password" not in config['Account']:
         config['Account']['password'] = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
-    # Defualt dashboard server setting
+    # Default dashboard server setting
     if "Server" not in config:
         config['Server'] = {}
     if 'wg_conf_path' not in config['Server']:
@@ -1651,24 +1643,28 @@ def init_dashboard():
 
 
 def check_update():
-    """Dashboard check update
+    """
+    Dashboard check update
 
-    :return: Retunt text with result
-    :rtype: str
+    @return: Retunt text with result
+    @rtype: str
     """
     config = get_dashboard_conf()
-    data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases").read()
-    output = json.loads(data)
-    release = []
-    for i in output:
-        if not i["prerelease"]:
-            release.append(i)
-    if config.get("Server", "version") == release[0]["tag_name"]:
-        result = "false"
-    else:
-        result = "true"
+    try:
+        data = urllib.request.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases").read()
+        output = json.loads(data)
+        release = []
+        for i in output:
+            if not i["prerelease"]:
+                release.append(i)
+        if config.get("Server", "version") == release[0]["tag_name"]:
+            result = "false"
+        else:
+            result = "true"
 
-    return result
+        return result
+    except urllib.error.HTTPError:
+        return "false"
 
 
 """

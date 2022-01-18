@@ -16,11 +16,10 @@
                 <div class="login-box" style="margin: auto !important;">
                     <h1 class="text-center">Sign In</h1>
                     <form style="margin-left: auto !important; margin-right: auto !important; max-width: 500px;" action="/auth" method="post">
-                        {% if message != ""%}
-                            <div class="alert alert-danger" role="alert">
-                                {{ message }}
-                            </div>
+                        {% if message != "" %}
+                            <div class="alert alert-warning" role="alert">You need to sign in first</div>
                         {% endif %}
+                        <div class="alert alert-danger d-none" role="alert"></div>
                         <div class="form-group">
                             <label for="username" class="text-left" style="font-size: 1rem"><i class="bi bi-person-circle"></i> Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>
@@ -37,20 +36,43 @@
     </body>
 {% include "footer.html" %}
 <script>
-    $("button").on("click", function(){
+    $("button").on("click", function(e){
         let req = $("input[required]");
         let check = true
         for (let i = 0; i < req.length; i++){
             if ($(req[i]).val().length === 0){
                 $("button").html("Sign In");
                 check = false;
+                $("input[required]").addClass("is-invalid");
                 break;
             }
         }
         if (check){
-            $(this).html("Signing In...");
+            e.preventDefault();
+            $(this).html("Signing In...").attr("disabled", "disabled");
+            $.ajax({
+                url: "/auth",
+                method: "POST",
+                headers:{"Content-Type": "application/json"},
+                data: JSON.stringify({
+                    "username": $("#username").val(),
+                    "password": $("#password").val()
+                })
+            }).done(function(res){
+                if (res.status === true){
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get("redirect")){
+                        window.location.replace(urlParams.get("redirect"))
+                    }else{
+                        window.location.replace("/");
+                    }
+                }else{
+                    $(".alert").html(res.msg).removeClass("d-none");
+                    $("button").html("Sign In").removeAttr("disabled");
+                    $("input[required]").addClass("is-invalid");
+                }
+            });
         }
-
-    })
+    });
 </script>
 </html>

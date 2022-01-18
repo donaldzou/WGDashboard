@@ -18,16 +18,19 @@
 
 - 🎉  **New Features**
   - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
+  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart: **
   - **Add Peers by Bulk: ** User can add peers by bulk, just simply set the amount and click add.
   - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
   - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
   - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
-
+  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
+  
 - 🪚  **Bug Fixed**
   - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
   - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ ikidd]
   - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @ pgalonza]
   - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
+  - **And many other bugs provided by our beloved users** :heart:
 - **🧐  Other Changes**
   - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
   - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
@@ -35,11 +38,14 @@
   - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
   - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
 
-
 *And many other small changes for performance and bug fixes! :laughing:*
 
+>  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart: 
+
 <hr>
+
 ## Table of Content
+
 
 - [💡  Features](#-features)
 - [📝  Requirement](#-requirement)
@@ -332,11 +338,18 @@ Endpoint = 0.0.0.0:51820
 
 ## ❓ How to update the dashboard?
 
+#### **Please note for user who is using `v2.3.1` or below**
+
+- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
+
+<hr>
+
 1. Change your directory to `wgdashboard` 
+    
     ```shell
     cd wgdashboard
     ```
-
+    
 2. Update the dashboard
     ```shell
     git pull https://github.com/donaldzou/WGDashboard.git v3.0 --force
