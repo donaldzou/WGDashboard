@@ -901,7 +901,8 @@ def update_app_ip_port():
     config.set("Server", "app_port", request.form['app_port'])
     set_dashboard_conf(config)
     config.clear()
-    os.system('./wgd.sh restart')
+    subprocess.Popen('bash wgd.sh restart', shell=True)
+    return ""
 
 
 # Update WireGuard configuration file path
@@ -918,7 +919,7 @@ def update_wg_conf_path():
     config.clear()
     session['message'] = "WireGuard Configuration Path Update Successfully!"
     session['message_status'] = "success"
-    os.system('./wgd.sh restart')
+    subprocess.Popen('bash wgd.sh restart', shell=True)
 
 
 @app.route('/update_dashboard_sort', methods=['POST'])

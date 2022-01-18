@@ -192,7 +192,7 @@ if [ "$#" != 1 ];
            printf "%s\n" "$dashes"
            stop_wgd
            printf "| WGDashboard is stopped.                                  |\n"
-           sleep 2
+           sleep 4
            start_wgd
         else
           start_wgd

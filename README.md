@@ -357,6 +357,16 @@ Endpoint = 0.0.0.0:51820
 
 Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
+## 🥘 Experimental Functions
+
+#### Progressive Web App (PWA)
+
+With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
+
+<img src="img/PWA.gif"/>
+
+
+
 ## 🔍 Screenshot
 
 ![Sign In Page](img/SignIn.png)
