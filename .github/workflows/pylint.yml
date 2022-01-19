@@ -21,4 +21,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint `ls src |grep .py$|xargs`
+        pylint $(find src -name "*.py" | xargs)
