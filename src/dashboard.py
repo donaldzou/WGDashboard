@@ -25,6 +25,8 @@ import ifcfg
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
+# TESTING
+from flask_socketio import SocketIO
 
 # Import other python files
 from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint, \
@@ -49,7 +51,7 @@ app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Enable QR Code Generator
 QRcode(app)
-
+socketio = SocketIO(app)
 
 # TODO: use class and object oriented programming
 
@@ -1001,17 +1003,26 @@ def configuration(config_name):
 
 
 # Get configuration details
-@app.route('/get_config/<config_name>', methods=['GET'])
-def get_conf(config_name):
+@socketio.on("get_config")
+# @app.route('/get_config/<config_name>', methods=['GET'])
+def get_conf(data):
     """
     Get configuration setting of wireguard interface.
     @param config_name: Name of WG interface
     @type config_name: str
     @return: TODO
     """
+    if getattr(g, 'db', None) is None:
+        g.db = connect_db()
+        g.cur = g.db.cursor()
+    print(data)
+    config_name = data['config']
+    print(config_name)
 
     config_interface = read_conf_file_interface(config_name)
-    search = request.args.get('search')
+    search = data['search']
+    print(search)
+    # search = request.args.get('search')
     if len(search) == 0:
         search = ""
     search = urllib.parse.unquote(search)
@@ -1042,7 +1053,8 @@ def get_conf(config_name):
     else:
         conf_data['checked'] = "checked"
     config.clear()
-    return jsonify(conf_data)
+    socketio.emit("get_config", conf_data, json=True)
+    # return jsonify(conf_data)
 
 
 # Turn on / off a configuration
@@ -1714,4 +1726,5 @@ if __name__ == "__main__":
     app_port = config.get("Server", "app_port")
     WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
-    app.run(host=app_ip, debug=False, port=app_port)
+    socketio.run(app, host=app_ip, debug=False, port=app_port)
+    # app.run(host=app_ip, debug=False, port=app_port)

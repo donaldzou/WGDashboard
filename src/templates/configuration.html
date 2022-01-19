@@ -410,7 +410,7 @@
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
-<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
+<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script><script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
 <script>
     /* global peers */
@@ -419,8 +419,16 @@
     let conf_name = "{{ conf_data['name'] }}"
     let peers = [];
     $(".sb-"+conf_name+"-url").addClass("active");
+    let socket = io();
 	$(function(){
-		configurations.loadPeers($('#search_peer_textbox').val());
+        socket.on('connect', function() {
+            configurations.loadPeers($('#search_peer_textbox').val());
+        });
+        socket.on('get_config', function(res){
+            window.console.log(res);
+            configurations.parsePeers(res);
+        });
+
 	});
 </script>
 </html>	

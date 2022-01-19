@@ -338,29 +338,56 @@
      * Load Peers from server to configuration page
      * @param searchString
      */
+    let time = 0;
+    let count = 0;
+
+    let d1 = new Date();
     function loadPeers(searchString){
+        d1 = new Date();
         startProgressBar();
-        let d1 = new Date();
-        $.ajax({
-            method: "GET",
-            url: `/get_config/${conf_name}?search=${encodeURIComponent(searchString)}`,
-            headers:{"Content-Type": "application/json"}
-        }).done(function(response){
-            removeNoResponding();
-            peers = response.peer_data;
-            configurationAlert(response);
-            configurationHeader(response);
-            configurationPeers(response);
-            $(".dot.dot-running").attr("title","Peer Connected").tooltip();
-            $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
-            $("i[data-toggle='tooltip']").tooltip();
-            endProgressBar();
-            let d2 = new Date();
-            let seconds = (d2 - d1);
-            $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
-        }).fail(function(){
-            noResponding();
-        });
+        socket.emit('get_config', {"config": conf_name, "search": searchString});
+
+        // let d1 = new Date();
+        // $.ajax({
+        //     method: "GET",
+        //     url: `/get_config/${conf_name}?search=${encodeURIComponent(searchString)}`,
+        //     headers:{"Content-Type": "application/json"}
+        // }).done(function(response){
+        //     removeNoResponding();
+        //     peers = response.peer_data;
+        //     configurationAlert(response);
+        //     configurationHeader(response);
+        //     configurationPeers(response);
+        //     $(".dot.dot-running").attr("title","Peer Connected").tooltip();
+        //     $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
+        //     $("i[data-toggle='tooltip']").tooltip();
+        //     endProgressBar();
+        //     let d2 = new Date();
+        //     let seconds = (d2 - d1);
+        //     $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
+        // }).fail(function(){
+        //     noResponding();
+        // });
+    }
+
+    function parsePeers(response){
+        let d2 = new Date();
+        let seconds = (d2 - d1);
+        time += seconds
+        count += 1
+        window.console.log(`Average time: ${time/count}ms`);
+        $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
+        removeNoResponding();
+        peers = response.peer_data;
+        configurationAlert(response);
+        configurationHeader(response);
+        configurationPeers(response);
+        $(".dot.dot-running").attr("title","Peer Connected").tooltip();
+        $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
+        $("i[data-toggle='tooltip']").tooltip();
+        endProgressBar();
+
+
     }
 
     /**
@@ -502,7 +529,7 @@
         loadPeers: (searchString) => { loadPeers(searchString); },
         addPeersByBulk: () => { addPeersByBulk(); },
         deletePeers: (config, peers_ids) => { deletePeers(config, peers_ids); },
-
+        parsePeers: (response) => { parsePeers(response); },
 
         getAvailableIps: () => { getAvailableIps(); },
         generateKeyPair: () => { generate_key(); },
