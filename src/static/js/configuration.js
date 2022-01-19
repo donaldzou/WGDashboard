@@ -340,6 +340,7 @@
      */
     function loadPeers(searchString){
         startProgressBar();
+        let d1 = new Date();
         $.ajax({
             method: "GET",
             url: `/get_config/${conf_name}?search=${encodeURIComponent(searchString)}`,
@@ -354,6 +355,9 @@
             $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
             $("i[data-toggle='tooltip']").tooltip();
             endProgressBar();
+            let d2 = new Date();
+            let seconds = (d2 - d1);
+            $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
         }).fail(function(){
             noResponding();
         });
