@@ -21,4 +21,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(find src -name "*.py" | xargs)
+        pylint $(find src -name "*.py" | xargs) --disable=line-too-long

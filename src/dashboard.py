@@ -224,10 +224,10 @@ def get_latest_handshake(config_name):
             status = "stopped"
         if int(data_usage[count + 1]) > 0:
             g.cur.execute("UPDATE %s SET latest_handshake = '%s', status = '%s' WHERE id='%s'"
-                          % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
+            % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
         else:
             g.cur.execute("UPDATE %s SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
-                          % (config_name, status, data_usage[count]))
+            % (config_name, status, data_usage[count]))
         count += 2
 
 
