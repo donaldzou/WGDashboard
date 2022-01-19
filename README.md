@@ -1,18 +1,8 @@
-<hr>
-
-> Hi! I'm planning the next major update for this project, please let me know if you have any suggestions or feature requests ;) You can create an issue with the "Feature request" template. Cheers!
-
-### Help Wanted
-
-> If anyone know a better way to distribute releases of python application other than GitHub, please let me know in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/103">#103</a>!
-
-> Please provide your OS name and version if you can run the dashboard on it perfectly in <a href="https://github.com/donaldzou/wireguard-dashboard/issues/31">#31</a>, since I only tested on Ubuntu. Thank you!
-
-<hr>
 <p align="center">
   <img alt="WGDashboard" src="img/logo.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
+
 
 <p align="center">
   <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
@@ -24,26 +14,41 @@
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 <p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
 
-## 📣 What's New: v2.3
+## 📣 What's New: v3.0
 
 - 🎉  **New Features**
-  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
-  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
+  - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
+  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
+  - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
+  - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
+  - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
+  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
+  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
+  - **Added Some [🥘 Experimental Functions](#-experimental-functions)** 
+  
 - 🪚  **Bug Fixed**
-  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
-  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
-  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
-  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
-  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
+  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
+  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
+  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
+  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
+  - **And many other bugs provided by our beloved users** :heart:
 - **🧐  Other Changes**
-  - Moved Add Peer Button into the right bottom corner.
+  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
+  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
+  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
+  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
+  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
 
+*And many other small changes for performance and bug fixes! :laughing:*
 
+>  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
+
+**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
 
 <hr>
 
-
 ## Table of Content
+
 
 - [💡  Features](#-features)
 - [📝  Requirement](#-requirement)
@@ -55,6 +60,7 @@
   - [Dashboard Configuration file](#dashboard-configuration-file)
   - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
 - [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
+- [🥘 Experimental Functions](#-experimental-functions)
 - [🔍  Screenshot](#-screenshot)
 - [⏰  Changelog](#--changelog)
 - [🛒  Dependencies](#-dependencies)
@@ -103,11 +109,13 @@
 
 - Python 3.7+ & Pip3
 
+- Browser support CSS3 and ES6
+
 ## 🛠 Install
 1. Download WGDashboard
 
    ```shell
-   git clone -b v2.3.1 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -280,22 +288,30 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
 #### Dashboard Configuration file
 
-Since version 2.0, WGDashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following config:
+Since version 2.0, WGDashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following configurations:
 
-|                 | Description                                                  | Default                  | Available in Setting |
-| --------------- | ------------------------------------------------------------ | ------------------------ | -------------------- |
-| **`[Account]`** |                                                              |                          |                      |
-| `username`      | Dashboard login username                                     | `admin`                  | Yes                  |
-| `password`      | Password, will be hash with SHA256                           | `admin` hashed in SHA256 | Yes                  |
-| **`[Server]`**  |                                                              |                          |                      |
-| `wg_conf_path`  | The path of all the Wireguard configurations                 | `/etc/wireguard`         | Yes                  |
-| `app_ip`        | IP address the dashboard will run with                       | `0.0.0.0`                | Yes                  |
-| `app_port`      | Port the the dashboard will run with                         | `10086`                  | Yes                  |
-| `auth_req`      | Does the dashboard need authentication to access             | `true`                   | No                   |
-|                 | If `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. |                          |                      |
-| `version`       | Dashboard Version                                            | `v2.2`                   | No                   |
-
-**Except `auth_req` due to security consideration.**
+|                              | Description                                                  | Default                                              | Edit Available |
+| ---------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- | -------------- |
+| **`[Account]`**              | *Configuration on account*                                   |                                                      |                |
+| `username`                   | Dashboard login username                                     | `admin`                                              | Yes            |
+| `password`                   | Password, will be hash with SHA256                           | `admin` hashed in SHA256                             | Yes            |
+|                              |                                                              |                                                      |                |
+| **`[Server]`**               | *Configuration on dashboard*                                 |                                                      |                |
+| `wg_conf_path`               | The path of all the Wireguard configurations                 | `/etc/wireguard`                                     | Yes            |
+| `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
+| `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
+| `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
+| `version`                    | Dashboard Version                                            | `v3.0`                                               | **No**         |
+| `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
+| `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
+|                              |                                                              |                                                      |                |
+| **`[Peers]`**                | *Default Settings on a new peer*                             |                                                      |                |
+| `peer_global_dns`            | DNS Server                                                   | `1.1.1.1`                                            | Yes            |
+| `peer_endpoint_allowed_ip`   | Endpoint Allowed IP                                          | `0.0.0.0/0`                                          | Yes            |
+| `peer_display_mode`          | How peer will display                                        | `grid`                                               | Yes            |
+| `remote_endpoint`            | Remote Endpoint (i.e where your peers will connect to)       | *depends on your server's default network interface* | Yes            |
+| `peer_mtu`                   | Maximum Transmit Unit                                        | `1420`                                               |                |
+| `peer_keep_alive`            | Keep Alive                                                   | `21`                                                 | Yes            |
 
 #### Generating QR code and peer configuration file (.conf)
 
@@ -326,14 +342,41 @@ Endpoint = 0.0.0.0:51820
 
 ## ❓ How to update the dashboard?
 
-1. Change your directory to `wireguard-dashboard` 
+#### **Please note for user who is using `v2.3.1` or below**
+
+- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
+
+<hr>
+
+1. Change your directory to `wgdashboard` 
+   
     ```shell
-    cd wireguard-dashboard/src
+    cd wgdashboard
     ```
+    
 2. Update the dashboard
     ```shell
-    sudo ./wgd.sh update
+    git pull https://github.com/donaldzou/WGDashboard.git v3.0 --force
     ```
+
+3. Install
+
+   ```shell
+   ./wgd.sh install
+   ```
+
+Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
+
+## 🥘 Experimental Functions
+
+#### Progressive Web App (PWA) for WGDashboard
+
+- With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
+
+<img src="img/PWA.gif"/>
+
+
+
 ## 🔍 Screenshot
 
 ![Sign In Page](img/SignIn.png)
@@ -346,7 +389,7 @@ Endpoint = 0.0.0.0:51820
 
 ![Edit Peer](img/EditPeer.png)
 
-![Delete Peer](img/DeletePeer.png)
+![Delete Peer](img/DeleteBulk.png)
 
 ![Dashboard Setting](img/DashboardSetting.png)
 
@@ -354,9 +397,25 @@ Endpoint = 0.0.0.0:51820
 
 ![Traceroute](img/Traceroute.png)
 
-
-
 ## ⏰  Changelog
+
+#### v2.3.1 - Sep 8, 2021
+
+- Updated dashboard's name to **WGDashboard**!!
+
+#### v2.3 - Sep 8, 2021
+
+- 🎉  **New Features**
+  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
+  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
+- 🪚  **Bug Fixed**
+  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
+  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
+  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
+  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
+  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
+- **🧐  Other Changes**
+  - Moved Add Peer Button into the right bottom corner.
 
 #### v2.2.1 - Aug 16, 2021
 
@@ -425,7 +484,6 @@ Bug Fixed:
   - [jQuery](https://jquery.com) `v3.5.1`
 - Python
   - [Flask](https://pypi.org/project/Flask/) `v2.0.1`
-  - [TinyDB](https://pypi.org/project/tinydb/) `v4.3.0`
   - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
   - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
   - [flask-qrcode](https://pypi.org/project/Flask-QRcode/) `v3.0.0`

@@ -1,4 +1,5 @@
-<html>
+<!-- index.html - < WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]-->
+<html lang="en">
 {% with %}
     {% set title="Home" %}
     {% include "header.html"%}
@@ -9,7 +10,16 @@
 	<div class="container-fluid">
         {% include "sidebar.html" %}
 		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
-            <h1 class="pb-4 mt-4">Home</h1>
+            <div style="display: flex; flex-direction: row; align-items: center;">
+                <h1 class="pb-4 mt-4">Home</h1>
+            </div>
+            {% if msg != "" %}
+                <div class="alert alert-danger" role="alert">
+                    Configuration toggle failed. Please check the following error message:
+                </div>
+                <pre class="index-alert"><code>{{ msg }}</code></pre>
+            {% endif %}
+
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
@@ -20,7 +30,7 @@
 							<div class="col card-col">
 								<small class="text-muted"><strong>CONFIGURATION</strong></small>
 								<a href="/configuration/{{i['conf']}}" class="conf_link">
-									<h6 class="card-title" style="margin:0 !important;">{{i['conf']}}</h6>
+									<h6 class="card-title" style="margin:0 !important;"><samp>{{i['conf']}}</samp></h6>
 								</a>
 							</div>
 							<div class="col card-col">
@@ -29,7 +39,7 @@
 							</div>
 							<div class="col-md card-col">
 								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
-								<h6 style="text-transform: uppercase; margin:0 !important;"><samp>{{i['public_key']}}</samp></h6>
+								<h6 style="margin:0 !important;"><samp>{{i['public_key']}}</samp></h6>
 							</div>
 							<div class="col-md index-switch">
                                 {% if i['checked'] == "checked" %}

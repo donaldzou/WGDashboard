@@ -78,3 +78,4 @@ def check_DNS(dns):
 def check_remote_endpoint(address):
     return (check_IP(address) or regex_match("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]",
                                              address))
+

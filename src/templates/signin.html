@@ -1,34 +1,33 @@
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>WGDashboard | Login</title>
-        <link rel="icon" href="{{ url_for('static',filename='logo.png') }}"/>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dashboard.css') }}">
-    </head>
+    {% with title="Sign In"%}
+        {% include "header.html"%}
+    {% endwith %}
+    <style>
+        .login-container-fluid{
+            display: flex;
+            height: calc( 100% - 240px );
+            align-items: center;
+        }
+    </style>
     <body>
         {% include "navbar.html" %}
-        <div class="container-fluid">
-
+        <div class="container-fluid login-container-fluid">
             <main role="main" class="container login-container">
                 <div class="login-box" style="margin: auto !important;">
                     <h1 class="text-center">Sign In</h1>
-
                     <form style="margin-left: auto !important; margin-right: auto !important; max-width: 500px;" action="/auth" method="post">
-                        {% if message != ""%}
-                            <div class="alert alert-danger" role="alert">
-                                {{ message }}
-                            </div>
+                        {% if message != "" %}
+                            <div class="alert alert-warning" role="alert">You need to sign in first</div>
                         {% endif %}
+                        <div class="alert alert-danger d-none" role="alert"></div>
                         <div class="form-group">
-                        <label for="username" class="text-left">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                      </div>
-                      <div class="form-group">
-                        <label for="password" class="text-left">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                      </div>
+                            <label for="username" class="text-left" style="font-size: 1rem"><i class="bi bi-person-circle"></i> Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="text-left" style="font-size: 1rem"><i class="bi bi-key-fill"></i> Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
                       <button type="submit" class="btn btn-dark" style="width: 100%;">Sign In</button>
                     </form>
                 </div>
@@ -37,8 +36,43 @@
     </body>
 {% include "footer.html" %}
 <script>
-    $("button").click(function(){
-        $(this).html("Signing In...")
-    })
+    $("button").on("click", function(e){
+        let req = $("input[required]");
+        let check = true
+        for (let i = 0; i < req.length; i++){
+            if ($(req[i]).val().length === 0){
+                $("button").html("Sign In");
+                check = false;
+                $("input[required]").addClass("is-invalid");
+                break;
+            }
+        }
+        if (check){
+            e.preventDefault();
+            $(this).html("Signing In...").attr("disabled", "disabled");
+            $.ajax({
+                url: "/auth",
+                method: "POST",
+                headers:{"Content-Type": "application/json"},
+                data: JSON.stringify({
+                    "username": $("#username").val(),
+                    "password": $("#password").val()
+                })
+            }).done(function(res){
+                if (res.status === true){
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get("redirect")){
+                        window.location.replace(urlParams.get("redirect"))
+                    }else{
+                        window.location.replace("/");
+                    }
+                }else{
+                    $(".alert").html(res.msg).removeClass("d-none");
+                    $("button").html("Sign In").removeAttr("disabled");
+                    $("input[required]").addClass("is-invalid");
+                }
+            });
+        }
+    });
 </script>
 </html>
