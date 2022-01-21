@@ -338,8 +338,12 @@
      * Load Peers from server to configuration page
      * @param searchString
      */
+    let d1 = new Date();
+    let time = 0;
+    let count = 0;
     function loadPeers(searchString){
         startProgressBar();
+        d1 = new Date();
         $.ajax({
             method: "GET",
             url: `/get_config/${conf_name}?search=${encodeURIComponent(searchString)}`,
@@ -354,6 +358,12 @@
             $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
             $("i[data-toggle='tooltip']").tooltip();
             endProgressBar();
+            let d2 = new Date();
+            let seconds = (d2 - d1);
+            time += seconds;
+            count += 1;
+            console.log(`Average ${time/count}ms`);
+            $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
         }).fail(function(){
             noResponding();
         });

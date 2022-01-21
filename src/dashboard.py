@@ -66,9 +66,9 @@ def get_dashboard_conf():
     Get dashboard configuration
     @return: configparser.ConfigParser
     """
-    config = configparser.ConfigParser(strict=False)
-    config.read(DASHBOARD_CONF)
-    return config
+    r_config = configparser.ConfigParser(strict=False)
+    r_config.read(DASHBOARD_CONF)
+    return r_config
 
 
 def set_dashboard_conf(config):
@@ -190,7 +190,7 @@ def read_conf_file(config_name):
                 conf_peer_data["Peers"].append({})
             elif peer > -1:
                 if len(i) > 0:
-                    tmp = re.split('\s*=\s*', i, 1)
+                    tmp = re.split(r'\s*=\s*', i, 1)
                     if len(tmp) == 2:
                         conf_peer_data["Peers"][peer][tmp[0]] = tmp[1]
 
@@ -224,10 +224,10 @@ def get_latest_handshake(config_name):
             status = "stopped"
         if int(data_usage[count + 1]) > 0:
             g.cur.execute("UPDATE %s SET latest_handshake = '%s', status = '%s' WHERE id='%s'"
-                          % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
+            % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
         else:
             g.cur.execute("UPDATE %s SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
-                          % (config_name, status, data_usage[count]))
+            % (config_name, status, data_usage[count]))
         count += 2
 
 
