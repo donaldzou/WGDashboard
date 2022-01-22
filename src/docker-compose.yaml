@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+
+  web:
+    build: 
+      context: .
+    command:   python dashboard.py
+    restart: unless-stopped 
+    ports:
+      - 10086:10086
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1  
