@@ -1,6 +1,7 @@
 FROM python:3.10.2-alpine3.15
 
-run  apk apk --update-cache upgrade && add --no-cache gcc g++ libffi-dev  jpeg-dev zlib-dev libjpeg  wireguard-tools   iptables ip6tables inotify-tools
+RUN  apk  --update-cache upgrade && apk add --no-cache gcc g++ libffi-dev  jpeg-dev zlib-dev libjpeg  wireguard-tools   iptables ip6tables inotify-tools \
+    && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /etc/wireguard/
 
