@@ -10,7 +10,7 @@ RUN wg genkey |  tee /etc/wireguard/privatekey | wg pubkey |  tee /etc/wireguard
 
 
 
-RUN  cd /etc/wireguard/ && echo "[Interface]" >> wg0.conf &&  echo -n "PrivateKey = " >> wg0.conf && cat privatekey >> wg0.conf   && cat privatekey | wg pubkey >> wg0.conf \
+RUN  cd /etc/wireguard/ && echo "[Interface]" >> wg0.conf &&  echo -n "PrivateKey = " >> wg0.conf && cat privatekey >> wg0.conf  \
     && echo  "ListenPort = 51820" >> wg0.conf && echo  "Address = 10.1.1.1/32" >> wg0.conf  && chmod 700 wg0.conf
 
 COPY . /opt/WGDashboard/src

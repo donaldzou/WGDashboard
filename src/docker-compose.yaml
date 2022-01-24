@@ -4,7 +4,12 @@ services:
   web:
     build: 
       context: .
+    container_name: WGDashboard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE  
     command:   python dashboard.py
+    #command:  gunicorn --bind 0.0.0.0:10086  dashboard:app
     restart: unless-stopped 
     ports:
       - 10086:10086
