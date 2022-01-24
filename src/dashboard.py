@@ -30,6 +30,9 @@ from icmplib import ping, traceroute
 from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint, \
     check_IP_with_range, clean_IP_with_range
 
+from util import mongodb
+
+
 # Dashboard Version
 DASHBOARD_VERSION = 'v3.0.3'
 # WireGuard's configuration path
@@ -1650,6 +1653,10 @@ def interface(config_name):
 """
 Dashboard Initialization
 """
+
+
+class init_dashboards():
+    pass
 
 
 def init_dashboard():
