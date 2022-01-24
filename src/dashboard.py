@@ -31,7 +31,7 @@ from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoin
     check_IP_with_range, clean_IP_with_range
 
 # Dashboard Version
-DASHBOARD_VERSION = 'v3.0'
+DASHBOARD_VERSION = 'v3.0.3'
 # WireGuard's configuration path
 WG_CONF_PATH = None
 # Dashboard Config Name
@@ -1705,6 +1705,7 @@ def get_host_bind():
 
 
 if __name__ == "__main__":
+    init_dashboard()
     UPDATE = check_update()
     config = configparser.ConfigParser(strict=False)
     config.read('wg-dashboard.ini')
