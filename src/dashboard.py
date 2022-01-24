@@ -1586,6 +1586,67 @@ def traceroute_ip():
         return "Error"
 
 
+# api  
+
+# /api/v1.0/get_config/wg0?search=
+@app.route('/api/v1.0/get_peer_data/<config_name>', methods=['GET'])
+def get_peer_data(config_name):
+    data = request.get_json()
+    peer_id = data['id']
+    result = g.cur.execute(
+        "SELECT name, allowed_ip, DNS, private_key, endpoint_allowed_ip, mtu, keepalive, preshared_key FROM "
+        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+    data = {"name": result[0][0], "allowed_ip": result[0][1], "DNS": result[0][2],
+            "private_key": result[0][3], "endpoint_allowed_ip": result[0][4],
+            "mtu": result[0][5], "keep_alive": result[0][6], "preshared_key": result[0][7]}
+    print(data)
+    return jsonify(data)
+
+# Configuration api
+@app.route('/api/v1.0/get_config/<config_name>', methods=['GET'])
+def interface(config_name):
+    """
+    Get configuration setting of wireguard interface.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @return: TODO
+    """
+
+    config_interface = read_conf_file_interface(config_name)
+    search = request.args.get('search')
+    if len(search) == 0:
+        search = ""
+    search = urllib.parse.unquote(search)
+    config = get_dashboard_conf()
+    sort = config.get("Server", "dashboard_sort")
+    peer_display_mode = config.get("Peers", "peer_display_mode")
+    wg_ip = config.get("Peers", "remote_endpoint")
+    if "Address" not in config_interface:
+        conf_address = "N/A"
+    else:
+        conf_address = config_interface['Address']
+    conf_data = {
+        "peer_data": get_peers(config_name, search, sort),
+        "name": config_name,
+        "status": get_conf_status(config_name),
+        "total_data_usage": get_conf_total_data(config_name),
+        "public_key": get_conf_pub_key(config_name),
+        "listen_port": get_conf_listen_port(config_name),
+        "running_peer": get_conf_running_peer_number(config_name),
+        "conf_address": conf_address,
+        "wg_ip": wg_ip,
+        "sort_tag": sort,
+        "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
+        "peer_display_mode": peer_display_mode
+    }
+    if conf_data['status'] == "stopped":
+        conf_data['checked'] = "nope"
+    else:
+        conf_data['checked'] = "checked"
+    config.clear()
+    return jsonify(conf_data)
+
+
 """
 Dashboard Initialization
 """
