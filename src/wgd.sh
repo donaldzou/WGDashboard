@@ -33,6 +33,7 @@ help () {
 }
 
 _check_and_set_venv(){
+    # This function will not be using in v3.0
     # deb/ubuntu users: might need a 'apt install python3.8-venv'
     # set up the local environment
     APP_ROOT=`pwd`
