@@ -347,6 +347,7 @@ Endpoint = 0.0.0.0:51820
 - For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
 
 <hr>
+
 #### Update Method 1 (For `v3.0` or above)
 
 1. Change your directory to `wgdashboard/src`
