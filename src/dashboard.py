@@ -250,15 +250,20 @@ def get_transfer(config_name):
     data_usage = final
     for i in range(len(data_usage)):
         cur_i = g.cur.execute(
-            "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id='%s'"
+            "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status, transfer_ts, rx, tx FROM %s WHERE id='%s'"
             % (config_name, data_usage[i][0])).fetchall()
         if len(cur_i) > 0:
             total_sent = cur_i[0][1]
             total_receive = cur_i[0][0]
             cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
             cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
+            last_sent, last_receive = total_sent, total_receive
+            ts, last_ts = time.time(), cur_i[0][5]
+            rx, tx = cur_i[0][6], cur_i[0][7]
             if cur_i[0][4] == "running":
                 if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
+                    rx = (cur_total_receive - total_receive) / (ts - last_ts)
+                    tx = (cur_total_sent - total_sent) / (ts - last_ts)
                     total_sent = cur_total_sent
                     total_receive = cur_total_receive
                 else:
@@ -269,9 +274,9 @@ def get_transfer(config_name):
                                    round(cumulative_sent + cumulative_receive, 4), data_usage[i][0]))
                     total_sent = 0
                     total_receive = 0
-                g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
+                g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f, transfer_ts = %f, rx = %f, tx = %f WHERE id = '%s'" %
                               (config_name, round(total_receive, 4), round(total_sent, 4),
-                               round(total_receive + total_sent, 4), data_usage[i][0]))
+                               round(total_receive + total_sent, 4), ts, rx, tx, data_usage[i][0]))
 
 
 def get_endpoint(config_name):
@@ -341,7 +346,10 @@ def get_all_peers_data(config_name):
                     "mtu": config.get("Peers", "peer_mtu"),
                     "keepalive": config.get("Peers", "peer_keep_alive"),
                     "remote_endpoint": config.get("Peers", "remote_endpoint"),
-                    "preshared_key": ""
+                    "preshared_key": "",
+                    "transfer_ts": time.time(),
+                    "rx": 0,
+                    "tx": 0
                 }
                 if "PresharedKey" in conf_peer_data['Peers'][i].keys():
                     new_data["preshared_key"] = conf_peer_data['Peers'][i]["PresharedKey"]
@@ -349,7 +357,7 @@ def get_all_peers_data(config_name):
                 INSERT INTO {config_name} 
                     VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
                     :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
-                    :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                    :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key, :transfer_ts, :rx, :tx);
                 """
                 g.cur.execute(sql, new_data)
         else:
@@ -487,12 +495,13 @@ def get_conf_list():
             i = i.replace('.conf', '')
             create_table = f"""
                 CREATE TABLE IF NOT EXISTS {i} (
-                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL,
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
                     status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
                     keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL, 
+                    transfer_ts FLOAT NULL, rx FLOAT NULL, tx FLOAT NULL,
                     PRIMARY KEY (id)
                 )
             """
