@@ -16,3 +16,4 @@ log/**
 release/*
 src/db/wgdashboard.db
 .jshintrc
+src/log/*.log
