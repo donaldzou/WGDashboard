@@ -347,11 +347,29 @@ Endpoint = 0.0.0.0:51820
 - For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
 
 <hr>
+#### Update Method 1 (For `v3.0` or above)
+
+1. Change your directory to `wgdashboard/src`
+
+   ```bash
+   cd wgdashboard/src
+   ```
+
+2. Update the dashboard with the following
+
+   ```bash
+   ./wgd.sh update
+   ```
+
+   > If this doesn't work, please use the method below. Sorry about that :(
+
+#### Update Method 2
+
 
 1. Change your directory to `wgdashboard` 
    
     ```shell
-    cd wgdashboard
+    cd wgdashboard/src
     ```
     
 2. Update the dashboard
@@ -364,6 +382,8 @@ Endpoint = 0.0.0.0:51820
    ```shell
    ./wgd.sh install
    ```
+
+
 
 Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
