@@ -17,3 +17,4 @@ release/*
 src/db/wgdashboard.db
 .jshintrc
 src/log/*.log
+src/gunicorn.pid
