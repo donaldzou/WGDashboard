@@ -115,7 +115,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.3 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0.4 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -301,7 +301,7 @@ Since version 2.0, WGDashboard will be using a configuration file called `wg-das
 | `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
 | `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
 | `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
-| `version`                    | Dashboard Version                                            | `v3.0.3`                                             | **No**         |
+| `version`                    | Dashboard Version                                            | `v3.0.4`                                             | **No**         |
 | `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
 | `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
 |                              |                                                              |                                                      |                |
@@ -375,7 +375,7 @@ Endpoint = 0.0.0.0:51820
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0.3 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v3.0.4 --force
     ```
 
 3. Install
