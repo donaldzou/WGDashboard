@@ -37,18 +37,20 @@
 {% include "footer.html" %}
 <script>
     $("button").on("click", function(e){
-        let req = $("input[required]");
+        e.preventDefault();
+        let $password = $("#password");
+        let $username = $("#username");
+        let req = [$password, $username];
         let check = true
         for (let i = 0; i < req.length; i++){
             if ($(req[i]).val().length === 0){
                 $("button").html("Sign In");
                 check = false;
-                $("input[required]").addClass("is-invalid");
+                $(req[i]).addClass("is-invalid");
                 break;
             }
         }
         if (check){
-            e.preventDefault();
             $(this).html("Signing In...").attr("disabled", "disabled");
             $.ajax({
                 url: "/auth",

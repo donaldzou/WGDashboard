@@ -115,7 +115,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.3 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0.5 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -301,7 +301,7 @@ Since version 2.0, WGDashboard will be using a configuration file called `wg-das
 | `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
 | `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
 | `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
-| `version`                    | Dashboard Version                                            | `v3.0.3`                                             | **No**         |
+| `version`                    | Dashboard Version                                            | `v3.0.5`                                             | **No**         |
 | `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
 | `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
 |                              |                                                              |                                                      |                |
@@ -348,15 +348,34 @@ Endpoint = 0.0.0.0:51820
 
 <hr>
 
+#### Update Method 1 (For `v3.0` or above)
+
+1. Change your directory to `wgdashboard/src`
+
+   ```bash
+   cd wgdashboard/src
+   ```
+
+2. Update the dashboard with the following
+
+   ```bash
+   ./wgd.sh update
+   ```
+
+   > If this doesn't work, please use the method below. Sorry about that :(
+
+#### Update Method 2
+
+
 1. Change your directory to `wgdashboard` 
    
     ```shell
-    cd wgdashboard
+    cd wgdashboard/src
     ```
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0.3 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v3.0.5 --force
     ```
 
 3. Install
@@ -364,6 +383,8 @@ Endpoint = 0.0.0.0:51820
    ```shell
    ./wgd.sh install
    ```
+
+
 
 Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
