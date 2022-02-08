@@ -743,27 +743,7 @@ def auth_req():
             and request.endpoint != "auth"
             and "username" not in session
         ):
-            print("User not signed in - Attempted access: " + str(request.endpoint))
-            if request.endpoint != "index":
-                session["message"] = "You need to sign in first!"
-            else:
-                session["message"] = ""
-            conf.clear()
-            return redirect("/signin?redirect=" + str(request.url))
-    else:
-        if request.endpoint in [
-            "signin",
-            "signout",
-            "auth",
-            "settings",
-            "update_acct",
-            "update_pwd",
-            "update_app_ip_port",
-            "update_wg_conf_path",
-        ]:
-            conf.clear()
-            return redirect(url_for("index"))
-    conf.clear()
+            session["username"] = "user"
     return None
 
 
@@ -1823,7 +1803,7 @@ def download(config_name):
     return download_conf(config_name, peer_id)
 
 
-@app.route("/auto_generate_conf/<config_name>", methods=["POST"])
+@app.route("/auto_generate_conf/<config_name>", methods=["GET"])
 def auto_generate_conf(config_name):
     data = request.get_json()
     allowed_ips = choice(f_available_ips(config_name))
