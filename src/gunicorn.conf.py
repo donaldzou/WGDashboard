@@ -1,7 +1,8 @@
 import multiprocessing
 import dashboard
 
-app_host, app_port = dashboard.get_host_bind()
+app_host = "localhost"
+app_port = 8000
 
 worker_class = 'gthread'
 workers = multiprocessing.cpu_count() * 2 + 1
