@@ -1785,11 +1785,8 @@ def download_conf(config_name, peer_id):
                 + str(keepalive)
                 + psk
             )
-
-            return jsonify(
-                {"status": True, "filename": f"{filename}.conf", "content": return_data}
-            )
-    return jsonify({"status": False, "filename": "", "content": ""})
+            return return_data
+    return ''
 
 
 @app.route("/download/<config_name>", methods=["GET"])
