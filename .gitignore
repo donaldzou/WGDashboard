@@ -1,5 +1,4 @@
-.vscode/sftp.json
-src/.vscode/sftp.json
+.vscode
 .DS_Store
 .idea
 src/db
