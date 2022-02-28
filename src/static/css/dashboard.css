@@ -122,7 +122,7 @@ body {
     height: 10px;
     border-radius: 50px;
     display: inline-block;
-    margin-left: 10px;
+    margin-left: auto !important;
 }
 
 .dot-running{
@@ -231,9 +231,17 @@ body {
     background: white;
 }
 
-/*.peer_data_group{*/
-/*  text-align: right;*/
-/*}*/
+.peer_data_group{
+    text-align: right;
+    display: flex;
+    margin-bottom: 0.5rem
+}
+
+.peer_data_group p{
+    text-transform: uppercase;
+    margin-bottom: 0;
+    margin-right: 1rem
+}
 
 @media (max-width: 768px) {
     .peer_data_group{
@@ -548,4 +556,18 @@ pre.index-alert{
     border-radius: .25rem;
     margin-top: 1rem;
     color: white;
+}
+
+.peerNameCol{
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.2rem
+}
+
+.peerName{
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.peerLightContainer{
+    text-transform: uppercase; margin: 0; margin-left: auto !important;
 }

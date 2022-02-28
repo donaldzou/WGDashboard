@@ -96,11 +96,19 @@
                 total_s += peer.cumu_sent;
                 let spliter = '<div class="w-100"></div>';
                 let peer_name =
-                    '<div class="col-sm display" style="display: flex; align-items: center; margin-bottom: 0.2rem">' +
-                        '<h5 style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">'+ (peer.name === "" ? "Untitled" : peer.name) +'</h5>' +
-                        '<h6 style="text-transform: uppercase; margin: 0; margin-left: auto !important;"><span class="dot dot-'+peer.status+'" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left" title="Peer Connected"></span></h6>' +
-                    '</div>';
-                let peer_transfer = '<div class="col-12 peer_data_group" style="text-align: right; display: flex; margin-bottom: 0.5rem"><p class="text-primary" style="text-transform: uppercase; margin-bottom: 0; margin-right: 1rem"><small><i class="bi bi-arrow-down-right"></i> '+ roundN(peer.total_receive + total_r, 4) +' GB</small></p> <p class="text-success" style="text-transform: uppercase; margin-bottom: 0"><small><i class="bi bi-arrow-up-right"></i> '+ roundN(peer.total_sent + total_s, 4) +' GB</small></p> </div>';
+                    `<div class="col-sm peerNameCol">
+                        <h5 class="peerName">${peer.name === "" ? "Untitled" : peer.name}</h5>
+                        <h6 class="peerLightContainer"><span class="dot dot-${peer.status}" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left"></span></h6>
+                     </div>`;
+                let peer_transfer =
+                    `<div class="col-12 peer_data_group" style="">
+                        <p class="text-primary" style="">
+                            <small><i class="bi bi-arrow-down-right"></i> ${roundN(peer.total_receive + total_r, 4)} GB</small>
+                        </p>
+                        <p class="text-success">
+                            <small><i class="bi bi-arrow-up-right"></i> ${roundN(peer.total_sent + total_s, 4)} GB</small>
+                        </p>
+                    </div>`;
                 let peer_key = '<div class="col-sm"><small class="text-muted" style="display: flex"><strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small> <h6><samp class="ml-auto key">'+peer.id+'</samp></h6></div>';
                 let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">'+peer.allowed_ip+'</h6></div>';
                 let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">'+peer.latest_handshake+'</h6> </div>';
