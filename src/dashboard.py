@@ -679,7 +679,7 @@ def signin():
     if "message" in session:
         message = session['message']
         session.pop("message")
-    return render_template('signin.html', message=message)
+    return render_template('signin.html', message=message, version=DASHBOARD_VERSION)
 
 
 # Sign Out
