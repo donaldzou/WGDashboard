@@ -1,5 +1,6 @@
 body {
     font-size: .875rem;
+    /*font-family: 'Poppins', sans-serif;*/
 }
 
 .feather {
@@ -407,7 +408,25 @@ main{
 
 .btn{
     border-radius: 8px;
+    /*padding: 0.6rem 0.9em;*/
 }
+
+#username, #password{
+    padding: 0.6rem calc( 0.9rem + 32px );
+    height: inherit;
+}
+
+label[for="username"], label[for="password"]{
+    font-size: 1rem;
+    margin: 0 !important;
+    transform: translateY(30px) translateX(16px);
+    padding: 0;
+}
+
+/*label[for="password"]{*/
+/*    transform: translateY(32px) translateX(16px);*/
+/*}*/
+
 
 .modal-content{
     border-radius: 10px;

@@ -171,6 +171,17 @@
 		return String.fromCharCode.apply(null, base64);
 	}
 
+	function base64ToKey(base64) {
+		let binary_string = window.atob(base64);
+		let len = binary_string.length;
+		let bytes = new Uint8Array(len);
+		for (let i = 0; i < len; i++) {
+			bytes[i] = binary_string.charCodeAt(i);
+		}
+		let uint8 = new Uint8Array(bytes.buffer);
+		return uint8;
+	}
+
 	function putU32(b, n)
 	{
 		b.push(n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff);
@@ -282,7 +293,8 @@
 			};
 		},
 		generatePublicKey: function (privateKey){
-			return keyToBase64(generatePublicKey(privateKey))
+			privateKey = base64ToKey(privateKey);
+			return keyToBase64(generatePublicKey(privateKey));
 		},
 
 		generateZipFiles: function(res){

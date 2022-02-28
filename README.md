@@ -10,6 +10,7 @@
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
   <a href="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6"><img src="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6.svg" alt="wakatime"></a>
+  <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 <p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
@@ -115,7 +116,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0.5 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -301,7 +302,7 @@ Since version 2.0, WGDashboard will be using a configuration file called `wg-das
 | `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
 | `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
 | `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
-| `version`                    | Dashboard Version                                            | `v3.0`                                               | **No**         |
+| `version`                    | Dashboard Version                                            | `v3.0.5`                                             | **No**         |
 | `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
 | `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
 |                              |                                                              |                                                      |                |
@@ -348,15 +349,34 @@ Endpoint = 0.0.0.0:51820
 
 <hr>
 
+#### Update Method 1 (For `v3.0` or above)
+
+1. Change your directory to `wgdashboard/src`
+
+   ```bash
+   cd wgdashboard/src
+   ```
+
+2. Update the dashboard with the following
+
+   ```bash
+   ./wgd.sh update
+   ```
+
+   > If this doesn't work, please use the method below. Sorry about that :(
+
+#### Update Method 2
+
+
 1. Change your directory to `wgdashboard` 
    
     ```shell
-    cd wgdashboard
+    cd wgdashboard/src
     ```
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v3.0.5 --force
     ```
 
 3. Install
@@ -364,6 +384,8 @@ Endpoint = 0.0.0.0:51820
    ```shell
    ./wgd.sh install
    ```
+
+
 
 Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
