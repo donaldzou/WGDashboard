@@ -9,6 +9,10 @@ body {
     vertical-align: text-bottom;
 }
 
+.btn-primary{
+    font-weight: bold;
+}
+
 /*
  * Sidebar
  */
@@ -22,12 +26,6 @@ body {
     padding: 48px 0 0; /* Height of navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
-
-/*@media (max-width: 767.98px) {*/
-/*  .sidebar {*/
-/*    top: 5rem;*/
-/*  }*/
-/*}*/
 
 .sidebar-sticky {
     position: relative;
@@ -369,6 +367,7 @@ main{
         transform: rotate(360deg);
     }
 }
+
 .rotating::before {
     -webkit-animation: rotating 0.75s linear infinite;
     -moz-animation: rotating 0.75s linear infinite;
@@ -385,7 +384,7 @@ main{
     cursor: pointer;
 }
 
-#peer_private_key_textbox, #private_key, #public_key{
+#peer_private_key_textbox, #private_key, #public_key, #peer_preshared_key_textbox{
     font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
 }
 
@@ -570,4 +569,32 @@ pre.index-alert{
 
 .peerLightContainer{
     text-transform: uppercase; margin: 0; margin-left: auto !important;
+}
+
+.conf_card .dot, .info .dot {
+    transform: translateX(10px);
+}
+
+#config_body{
+    transition: 0.3s ease-in-out;
+}
+
+#config_body.firstLoading{
+    opacity: 0.2;
+}
+
+.chartTitle{
+    display: flex;
+}
+
+.chartControl{
+   margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.chartTitle h6{
+    margin-bottom: 0;
+    line-height: 1;
+    margin-right: 0.5rem;
 }

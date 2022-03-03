@@ -50,6 +50,29 @@
         }
     }
 
+    let firstLoading = true;
+    $(".nav-conf-link").on("click", function(e){
+        if(socket.connected){
+            e.preventDefault();
+            firstLoading = true;
+            $("#config_body").addClass("firstLoading");
+
+            conf_name = $(this).data("conf-id");
+            configurations.loadPeers($('#search_peer_textbox').val());
+
+            $(".nav-conf-link").removeClass("active");
+            $(`.sb-${conf_name}-url`).addClass("active");
+
+            window.history.pushState(null,null,`/configuration/${conf_name}`);
+            $("title").text(`${conf_name} | WGDashboard`);
+
+            totalDataUsageChartObj.data.labels = [];
+            totalDataUsageChartObj.data.datasets[0].data = [];
+            totalDataUsageChartObj.data.datasets[1].data = [];
+            totalDataUsageChartObj.update();
+        }
+    });
+
     /**
      * Parse all responded information onto the configuration header
      * @param response
@@ -61,6 +84,45 @@
         }else{
             $conf_status_btn.innerHTML = `<a href="#" id="${response.name}" ${response.checked} class="switch text-primary"><i class="bi bi-toggle2-off"></i> OFF</a>`;
         }
+
+        if (response.running_peer > 0){
+            let d = new Date();
+            let time = d.toLocaleString("en-us",
+                {hour: '2-digit', minute: '2-digit', second: "2-digit", hourCycle: 'h23'});
+            totalDataUsageChartObj.data.labels.push(`${time}`);
+
+            if (totalDataUsageChartObj.data.datasets[0].data.length === 0){
+                totalDataUsageChartObj.data.datasets[1].lastData = response.total_data_usage[2];
+                totalDataUsageChartObj.data.datasets[0].lastData = response.total_data_usage[1];
+                totalDataUsageChartObj.data.datasets[0].data.push(0);
+                totalDataUsageChartObj.data.datasets[1].data.push(0);
+            }else{
+                if (totalDataUsageChartObj.data.datasets[0].data.length === 50 && totalDataUsageChartObj.data.datasets[1].data.length === 50){
+                    totalDataUsageChartObj.data.labels.shift();
+                    totalDataUsageChartObj.data.datasets[0].data.shift();
+                    totalDataUsageChartObj.data.datasets[1].data.shift();
+                }
+
+                let newTotalReceive = response.total_data_usage[2] - totalDataUsageChartObj.data.datasets[1].lastData;
+                let newTotalSent = response.total_data_usage[1] - totalDataUsageChartObj.data.datasets[0].lastData;
+                let k = 0;
+                if (chartUnit === "MB"){
+                    k = 1024;
+                }
+                else if (chartUnit === "KB"){
+                    k = 1048576;
+                }else{
+                    k = 1;
+                }
+                totalDataUsageChartObj.data.datasets[1].data.push(newTotalReceive*k);
+                totalDataUsageChartObj.data.datasets[0].data.push(newTotalSent*k);
+                totalDataUsageChartObj.data.datasets[0].lastData = response.total_data_usage[1];
+                totalDataUsageChartObj.data.datasets[1].lastData = response.total_data_usage[2];
+            }
+
+            totalDataUsageChartObj.update();
+        }
+
         $conf_status_btn.classList.remove("info_loading");
         document.querySelectorAll("#sort_by_dropdown option").forEach(ele => ele.removeAttribute("selected"));
         document.querySelector(`#sort_by_dropdown option[value="${response.sort_tag}"]`).setAttribute("selected", "selected");
@@ -164,7 +226,7 @@
         let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
         if ($new_add_amount.val() > 0 && !$new_add_amount.hasClass("is-invalid")){
             if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
-                let conf = $add_peer.getAttribute('conf_id');
+                let conf = conf_name;
                 let keys = [];
                 for (let i = 0; i < $new_add_amount.val(); i++) {
                     keys.push(window.wireguard.generateKeypair());
@@ -262,12 +324,13 @@
     /**
      * Handle when the server is not responding
      */
-    function noResponding(){
+    function noResponding(message = "Opps! <br> I can't connect to the server."){
         document.querySelectorAll(".no-response").forEach(ele => ele.classList.add("active"));
         setTimeout(function (){
             document.querySelectorAll(".no-response").forEach(ele => ele.classList.add("show"));
             document.querySelector("#right_body").classList.add("no-responding");
             document.querySelector(".navbar").classList.add("no-responding");
+            document.querySelector(".no-response .container h4").innerHTML = message;
         },10);
     }
 
@@ -349,53 +412,38 @@
     let time = 0;
     let count = 0;
 
+
     let d1 = new Date();
     function loadPeers(searchString){
         d1 = new Date();
-        startProgressBar();
         socket.emit('get_config', {"config": conf_name, "search": searchString});
-
-        // let d1 = new Date();
-        // $.ajax({
-        //     method: "GET",
-        //     url: `/get_config/${conf_name}?search=${encodeURIComponent(searchString)}`,
-        //     headers:{"Content-Type": "application/json"}
-        // }).done(function(response){
-        //     removeNoResponding();
-        //     peers = response.peer_data;
-        //     configurationAlert(response);
-        //     configurationHeader(response);
-        //     configurationPeers(response);
-        //     $(".dot.dot-running").attr("title","Peer Connected").tooltip();
-        //     $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
-        //     $("i[data-toggle='tooltip']").tooltip();
-        //     endProgressBar();
-        //     let d2 = new Date();
-        //     let seconds = (d2 - d1);
-        //     $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
-        // }).fail(function(){
-        //     noResponding();
-        // });
     }
 
     function parsePeers(response){
-        let d2 = new Date();
-        let seconds = (d2 - d1);
-        time += seconds
-        count += 1
-        window.console.log(`Average time: ${time/count}ms`);
-        $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
-        removeNoResponding();
-        peers = response.peer_data;
-        configurationAlert(response);
-        configurationHeader(response);
-        configurationPeers(response);
-        $(".dot.dot-running").attr("title","Peer Connected").tooltip();
-        $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
-        $("i[data-toggle='tooltip']").tooltip();
-        endProgressBar();
-
-
+        if (response.status){
+            let d2 = new Date();
+            let seconds = (d2 - d1);
+            time += seconds;
+            count += 1;
+            window.console.log(`Average time: ${time/count}ms`);
+            $("#peer_loading_time").html(`Peer Loading Time: ${seconds}ms`);
+            removeNoResponding();
+            peers = response.data.peer_data;
+            configurationAlert(response.data);
+            configurationHeader(response.data);
+            configurationPeers(response.data);
+            $(".dot.dot-running").attr("title","Peer Connected").tooltip();
+            $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
+            $("i[data-toggle='tooltip']").tooltip();
+            $("#conf_name").text(conf_name);
+            if (firstLoading){
+                firstLoading = false;
+                $("#config_body").removeClass("firstLoading");
+            }
+        }else{
+            noResponding(response.message);
+            removeConfigurationInterval();
+        }
     }
 
     /**
@@ -513,16 +561,21 @@
      */
     function getAvailableIps(){
         $.ajax({
-            "url": `/available_ips/${$add_peer.getAttribute("conf_id")}`,
+            "url": `/available_ips/${conf_name}`,
             "method": "GET",
         }).done(function (res) {
-            available_ips = res;
-            let $list_group = document.querySelector("#available_ip_modal .modal-body .list-group");
-            $list_group.innerHTML = "";
-            document.querySelector("#allowed_ips").value = available_ips[0];
-            available_ips.forEach((ip) =>
-                $list_group.innerHTML +=
-                    `<a class="list-group-item list-group-item-action available-ip-item" style="cursor: pointer" data-ip="${ip}">${ip}</a>`);
+            if (res.status === true){
+                available_ips = res.data;
+                let $list_group = document.querySelector("#available_ip_modal .modal-body .list-group");
+                $list_group.innerHTML = "";
+                document.querySelector("#allowed_ips").value = available_ips[0];
+                available_ips.forEach((ip) =>
+                    $list_group.innerHTML +=
+                        `<a class="list-group-item list-group-item-action available-ip-item" style="cursor: pointer" data-ip="${ip}">${ip}</a>`);
+            }else{
+                document.querySelector("#allowed_ips").value = res.message;
+                document.querySelector("#search_available_ip").setAttribute("disabled", "disabled");
+            }
         });
     }
 
@@ -533,6 +586,7 @@
         ipModal: () => { return ipModal; },
         qrcodeModal: () => { return qrcodeModal; },
         settingModal: () => { return settingModal; },
+        configurationTimeout: () => { return configuration_timeout;},
 
         loadPeers: (searchString) => { loadPeers(searchString); },
         addPeersByBulk: () => { addPeersByBulk(); },
@@ -663,7 +717,7 @@ $add_peer.addEventListener("click",function(){
         $add_peer.setAttribute("disabled","disabled");
         $add_peer.innerHTML = "Adding...";
         if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
-            let conf = $add_peer.getAttribute('conf_id');
+            let conf = conf_name;
             let data_list = [$private_key, $allowed_ips, $new_add_name, $new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
             data_list.forEach((ele) => ele.attr("disabled", "disabled"));
             $.ajax({
@@ -739,7 +793,7 @@ $("#new_add_amount").on("keyup", function(){
  * Handle when user toggled add peers by bulk
  */
 $("#bulk_add").on("change", function (){
-    let hide = $(".non-bulk").find("input");
+    let hide = $(".non-bulk");
     let amount = $("#new_add_amount");
     if ($(this).prop("checked") === true){
         for(let i = 0; i < hide.length; i++){
@@ -854,7 +908,7 @@ $body.on("click", ".btn-qrcode-peer", function (){
  */
 $body.on("click", ".btn-delete-peer", function(){
     let peer_id = $(this).attr("id");
-    $("#delete_peer").attr("peer_id", peer_id);
+    $("#delete_peer").data("peer-id", peer_id);
     window.configurations.deleteModal().toggle();
 });
 
@@ -864,9 +918,8 @@ $body.on("click", ".btn-delete-peer", function(){
 $("#delete_peer").on("click",function(){
     $(this).attr("disabled","disabled");
     $(this).html("Deleting...");
-    let peer_id = $(this).attr("peer_id");
-    let config = $(this).attr("conf_id");
-    let peer_ids = [peer_id];
+    let config = conf_name;
+    let peer_ids = [$(this).data("peer-id")];
     window.configurations.deletePeers(config, peer_ids);
 });
 
@@ -880,12 +933,12 @@ $("#delete_peer").on("click",function(){
  * Handle when setting button got clicked for each peer
  */
 $body.on("click", ".btn-setting-peer", function(){
-    window.configurations.startProgressBar();
+    // window.configurations.startProgressBar();
     let peer_id = $(this).attr("id");
     $("#save_peer_setting").attr("peer_id", peer_id);
     $.ajax({
         method: "POST",
-        url: "/get_peer_data/"+$("#setting_modal").attr("conf_id"),
+        url: "/get_peer_data/"+conf_name,
         headers:{
             "Content-Type": "application/json"
         },
@@ -921,7 +974,7 @@ $("#peer_private_key_textbox").on("change",function(){
     let $save_peer_setting = $("#save_peer_setting");
     if ($(this).val().length > 0){
         $.ajax({
-            "url": "/check_key_match/"+$save_peer_setting.attr("conf_id"),
+            "url": "/check_key_match/"+conf_name,
             "method": "POST",
             "headers":{"Content-Type": "application/json"},
             "data": JSON.stringify({
@@ -1233,7 +1286,7 @@ $("#confirm_delete_bulk_peers").on("click", function(){
                 btn.attr("disabled", "disabled");
                 let ips = [];
                 $selected_peer_list.childNodes.forEach((ele) => ips.push(ele.dataset.id));
-                window.configurations.deletePeers(btn.data("conf"), ips);
+                window.configurations.deletePeers(conf_name, ips);
                 clearInterval(confirm_delete_bulk_peers_interval);
                 confirm_delete_bulk_peers_interval = undefined;
             }
@@ -1289,7 +1342,7 @@ $body.on("click", ".btn-download-peer", function(e){
  */
 $("#download_all_peers").on("click", function(){
     $.ajax({
-        "url": $(this).data("url"),
+        "url": `/download_all/${conf_name}`,
         "method": "GET",
         success: function(res){
             if (res.peers.length > 0){

@@ -74,6 +74,24 @@
                     </div>
                 </div>
                 <hr>
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="chartTitle">
+                            <h6>Data Usage / Refresh Interval</h6>
+                            <div class="chartControl" style="margin-left: auto">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-primary btn-sm switchUnit active" data-unit="GB">GB</button>
+                                    <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="MB">MB</button>
+                                    <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="KB">KB</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 100%; max-height: 300px">
+                            <canvas id="myChart" width="100" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <hr>
                 <div class="button-div mb-3">
                     <div class="row">
                         <div class="col-sm">
@@ -154,35 +172,35 @@
 						</button>
 					</div>
 					<form id="add_peer_form">
-                        <div class="form-group non-bulk">
+                        <div class="form-group">
                             <div>
                                 <label for="private_key">Private Key</label>
                             </div>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="private_key" aria-describedby="private_key">
+                                <input type="text" class="form-control non-bulk" id="private_key" aria-describedby="private_key">
                                 <div class="input-group-append">
-                                   <button type="button" class="btn btn-danger" id="re_generate_key" data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i class="bi bi-arrow-repeat"></i></button>
+                                   <button type="button" class="btn btn-danger non-bulk" id="re_generate_key" data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i class="bi bi-arrow-repeat"></i></button>
                                 </div>
                             </div>
                         </div>
-						<div class="form-group non-bulk">
+						<div class="form-group">
 							<label for="public_key">Public Key <code>(Required)</code></label>
-							<input type="text" class="form-control" id="public_key" aria-describedby="public_key" disabled>
+							<input type="text" class="form-control non-bulk" id="public_key" aria-describedby="public_key" disabled>
 						</div>
                         <div class="row">
-                            <div class="col-sm-6 non-bulk">
+                            <div class="col-sm-6">
                                  <div class="form-group">
                                     <label for="new_add_name">Name</label>
-                                    <input type="text" class="form-control" id="new_add_name">
+                                    <input type="text" class="form-control non-bulk" id="new_add_name">
                                 </div>
                             </div>
-                            <div class="col-sm-6 non-bulk">
+                            <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="allowed_ips">Allowed IPs <code>(Required)</code></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" id="allowed_ips">
+                                        <input type="text" class="form-control non-bulk" id="allowed_ips">
                                         <div class="input-group-append">
-                                            <button type="button" class="btn btn-primary" id="search_available_ip" data-toggle="tooltip" data-placement="top" title="Search Available IPs">
+                                            <button type="button" class="btn btn-primary non-bulk" id="search_available_ip" data-toggle="tooltip" data-placement="top" title="Search Available IPs">
                                                 <i class="bi bi-search"></i>
                                             </button>
                                         </div>
@@ -281,7 +299,6 @@
                         <input type="text" class="form-control" id="peer_preshared_key_textbox">
                     </div>
                     <hr>
-
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="mb-3">
@@ -418,17 +435,102 @@
     let load_interval = 0;
     let conf_name = "{{ conf_data['name'] }}"
     let peers = [];
-    $(".sb-"+conf_name+"-url").addClass("active");
+    $(`.sb-${conf_name}-url`).addClass("active");
     let socket = io();
-	$(function(){
-        socket.on('connect', function() {
-            configurations.loadPeers($('#search_peer_textbox').val());
-        });
-        socket.on('get_config', function(res){
-            window.console.log(res);
-            configurations.parsePeers(res);
-        });
+    socket.on('connect', function() {
+        configurations.loadPeers($('#search_peer_textbox').val());
+    });
+    socket.on('get_config', function(res){
+        window.console.log(res);
+        configurations.parsePeers(res);
+    });
 
-	});
+    let chartUnit = $(".switchUnit.active").data('unit');
+    const totalDataUsageChart = document.getElementById('myChart').getContext('2d');
+    const totalDataUsageChartObj = new Chart(totalDataUsageChart, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                label: 'Total Sent',
+                data: [],
+                fill: false,
+                borderColor: '#28a745',
+                tension: 0.1,
+                borderWidth: 1
+            },{
+                label: 'Total Received',
+                data: [],
+                fill: false,
+                borderColor: '#007bff',
+                tension: 0.1,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive:false,
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return `${value} ${chartUnit}`
+                        }
+                    }
+                }
+            }
+        }
+    });
+    $("#myChart").css("width", "100%");
+    totalDataUsageChartObj.width = $("#myChart").parent().width();
+    totalDataUsageChartObj.resize();
+    $(window).on("resize", function() {
+         totalDataUsageChartObj.width = $("#myChart").parent().width();
+         totalDataUsageChartObj.resize();
+    });
+
+
+
+    let mul = 1;
+    $(".switchUnit").on("click", function(){
+        $(".switchUnit").removeClass("active");
+        $(this).addClass("active");
+        if ($(this).data('unit') !== chartUnit){
+            switch ($(this).data('unit')) {
+                case "GB":
+                    if (chartUnit === "MB"){
+                        mul = 1/1024;
+                    }
+                    if (chartUnit === "KB"){
+                        mul = 1/1048576;
+                    }
+                    break;
+                case "MB":
+                    if (chartUnit === "GB"){
+                        mul = 1024
+                    }
+                    if (chartUnit === "KB"){
+                        mul = 1/1024
+                    }
+                    break;
+                case "KB":
+                   if (chartUnit === "GB"){
+                        mul = 1048576
+                    }
+                    if (chartUnit === "MB"){
+                        mul = 1024
+                    }
+                    break;
+                default:
+                    break;
+            }
+            chartUnit = $(this).data('unit');
+            totalDataUsageChartObj.data.datasets[0].data = totalDataUsageChartObj.data.datasets[0].data.map(x => x * mul);
+            totalDataUsageChartObj.data.datasets[1].data = totalDataUsageChartObj.data.datasets[1].data.map(x => x * mul);
+
+            totalDataUsageChartObj.update();
+        }
+
+    })
 </script>
 </html>	

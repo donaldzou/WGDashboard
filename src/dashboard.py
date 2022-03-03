@@ -120,7 +120,7 @@ def get_conf_running_peer_number(config_name):
         data_usage = subprocess.check_output(f"wg show {config_name} latest-handshakes",
                                              shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
-        return "stopped"
+        return 0
     data_usage = data_usage.decode("UTF-8").split()
     count = 0
     now = datetime.now()
@@ -143,16 +143,19 @@ def read_conf_file_interface(config_name):
     """
 
     conf_location = WG_CONF_PATH + "/" + config_name + ".conf"
-    with open(conf_location, 'r', encoding='utf-8') as file_object:
-        file = file_object.read().split("\n")
-        data = {}
-        for i in file:
-            if not regex_match("#(.*)", i):
-                if len(i) > 0:
-                    if i != "[Interface]":
-                        tmp = re.split(r'\s*=\s*', i, 1)
-                        if len(tmp) == 2:
-                            data[tmp[0]] = tmp[1]
+    try:
+        with open(conf_location, 'r', encoding='utf-8') as file_object:
+            file = file_object.read().split("\n")
+            data = {}
+            for i in file:
+                if not regex_match("#(.*)", i):
+                    if len(i) > 0:
+                        if i != "[Interface]":
+                            tmp = re.split(r'\s*=\s*', i, 1)
+                            if len(tmp) == 2:
+                                data[tmp[0]] = tmp[1]
+    except FileNotFoundError as e:
+        return {}
     return data
 
 
@@ -1013,49 +1016,59 @@ def get_conf(data):
     @type config_name: str
     @return: TODO
     """
+    result = {
+        "status": True,
+        "message": "",
+        "data": {}
+    }
+    if not session:
+        result["status"] = False
+        result["message"] = "Oops! <br> You're not signed in. Please refresh your page."
+        socketio.emit("get_config", result, json=True)
+        return
+
     if getattr(g, 'db', None) is None:
         g.db = connect_db()
         g.cur = g.db.cursor()
-    print(data)
     config_name = data['config']
-    print(config_name)
-
     config_interface = read_conf_file_interface(config_name)
-    search = data['search']
-    print(search)
-    # search = request.args.get('search')
-    if len(search) == 0:
-        search = ""
-    search = urllib.parse.unquote(search)
-    config = get_dashboard_conf()
-    sort = config.get("Server", "dashboard_sort")
-    peer_display_mode = config.get("Peers", "peer_display_mode")
-    wg_ip = config.get("Peers", "remote_endpoint")
-    if "Address" not in config_interface:
-        conf_address = "N/A"
+
+    if config_interface != {}:
+        search = data['search']
+        if len(search) == 0:
+            search = ""
+        search = urllib.parse.unquote(search)
+        config = get_dashboard_conf()
+        sort = config.get("Server", "dashboard_sort")
+        peer_display_mode = config.get("Peers", "peer_display_mode")
+        wg_ip = config.get("Peers", "remote_endpoint")
+        if "Address" not in config_interface:
+            conf_address = "N/A"
+        else:
+            conf_address = config_interface['Address']
+        result['data'] = {
+            "peer_data": get_peers(config_name, search, sort),
+            "name": config_name,
+            "status": get_conf_status(config_name),
+            "total_data_usage": get_conf_total_data(config_name),
+            "public_key": get_conf_pub_key(config_name),
+            "listen_port": get_conf_listen_port(config_name),
+            "running_peer": get_conf_running_peer_number(config_name),
+            "conf_address": conf_address,
+            "wg_ip": wg_ip,
+            "sort_tag": sort,
+            "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
+            "peer_display_mode": peer_display_mode
+        }
+        if result['data']['status'] == "stopped":
+            result['data']['checked'] = "nope"
+        else:
+            result['data']['checked'] = "checked"
+        config.clear()
     else:
-        conf_address = config_interface['Address']
-    conf_data = {
-        "peer_data": get_peers(config_name, search, sort),
-        "name": config_name,
-        "status": get_conf_status(config_name),
-        "total_data_usage": get_conf_total_data(config_name),
-        "public_key": get_conf_pub_key(config_name),
-        "listen_port": get_conf_listen_port(config_name),
-        "running_peer": get_conf_running_peer_number(config_name),
-        "conf_address": conf_address,
-        "wg_ip": wg_ip,
-        "sort_tag": sort,
-        "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
-        "peer_display_mode": peer_display_mode
-    }
-    if conf_data['status'] == "stopped":
-        conf_data['checked'] = "nope"
-    else:
-        conf_data['checked'] = "checked"
-    config.clear()
-    socketio.emit("get_config", conf_data, json=True)
-    # return jsonify(conf_data)
+        result['status'] = False
+        result['message'] = "I cannot find this configuration. <br> Please refresh and try again"
+    socketio.emit("get_config", result, json=True)
 
 
 # Turn on / off a configuration
@@ -1334,7 +1347,11 @@ def get_peer_name(config_name):
 # Return available IPs
 @app.route('/available_ips/<config_name>', methods=['GET'])
 def available_ips(config_name):
-    return jsonify(f_available_ips(config_name))
+    result = {"status": True, "message":"", "data": f_available_ips(config_name)}
+    if len(result["data"]) == 0:
+        result['status'] = False
+        result['message'] = f"No more available IP for {config_name}."
+    return jsonify(result)
 
 
 # Check if both key match
