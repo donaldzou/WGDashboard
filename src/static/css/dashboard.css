@@ -598,3 +598,25 @@ pre.index-alert{
     line-height: 1;
     margin-right: 0.5rem;
 }
+
+.chartContainer.fullScreen{
+    position: fixed;
+    z-index: 9999;
+    background-color: white;
+    top: 0;
+    left: 0;
+    width: calc( 100% + 15px );
+    height: 100%;
+    padding: 32px;
+}
+
+.chartContainer.fullScreen .col-sm{
+    padding-right: 0;
+    height: 100%;
+}
+
+.chartContainer.fullScreen .chartCanvasContainer{
+    width: 100%;
+    height: calc( 100% - 47px ) !important;
+    max-height: calc( 100% - 47px ) !important;
+}

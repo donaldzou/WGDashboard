@@ -4,3 +4,4 @@ icmplib
 flask-qrcode
 gunicorn
 certbot
+flask-socketio

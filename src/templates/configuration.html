@@ -74,7 +74,7 @@
                     </div>
                 </div>
                 <hr>
-                <div class="row">
+                <div class="row chartContainer">
                     <div class="col-sm">
                         <div class="chartTitle">
                             <h6>Data Usage / Refresh Interval</h6>
@@ -83,10 +83,11 @@
                                     <button class="btn btn-outline-primary btn-sm switchUnit active" data-unit="GB">GB</button>
                                     <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="MB">MB</button>
                                     <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="KB">KB</button>
+                                    <button class="btn btn-outline-primary btn-sm fullScreen"><i class="bi bi-fullscreen"></i></button>
                                 </div>
                             </div>
                         </div>
-                        <div style="width: 100%; max-height: 300px">
+                        <div class="chartCanvasContainer" style="width: 100%; height: 300px">
                             <canvas id="myChart" width="100" height="100"></canvas>
                         </div>
                     </div>
@@ -453,28 +454,43 @@
             labels: [],
             datasets: [
                 {
-                label: 'Total Sent',
-                data: [],
-                fill: false,
-                borderColor: '#28a745',
-                tension: 0.1,
-                borderWidth: 1
-            },{
-                label: 'Total Received',
-                data: [],
-                fill: false,
-                borderColor: '#007bff',
-                tension: 0.1,
-                borderWidth: 1
-            }]
+                    label: 'Data Sent',
+                    data: [],
+                    stroke: '#FFFFFF',
+                    borderColor: '#28a745',
+                    tension: 0.1,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Data Received',
+                    data: [],
+                    stroke: '#FFFFFF',
+                    borderColor: '#007bff',
+                    tension: 0.1,
+                    borderWidth: 2
+                }
+            ]
         },
         options: {
+            maintainAspectRatio: false,
+            showScale: false,
             responsive:false,
             scales: {
                 y: {
+                    min: 0,
                     ticks: {
+                        min: 0,
                         callback: function(value, index, ticks) {
                             return `${value} ${chartUnit}`
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y} ${chartUnit}`
                         }
                     }
                 }
@@ -485,10 +501,13 @@
     totalDataUsageChartObj.width = $("#myChart").parent().width();
     totalDataUsageChartObj.resize();
     $(window).on("resize", function() {
-         totalDataUsageChartObj.width = $("#myChart").parent().width();
          totalDataUsageChartObj.resize();
     });
 
+    $(".fullScreen").on("click", function(){
+        $(".chartContainer").addClass("fullScreen");
+        totalDataUsageChartObj.resize();
+    });
 
 
     let mul = 1;
@@ -527,7 +546,6 @@
             chartUnit = $(this).data('unit');
             totalDataUsageChartObj.data.datasets[0].data = totalDataUsageChartObj.data.datasets[0].data.map(x => x * mul);
             totalDataUsageChartObj.data.datasets[1].data = totalDataUsageChartObj.data.datasets[1].data.map(x => x * mul);
-
             totalDataUsageChartObj.update();
         }
 
