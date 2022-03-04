@@ -1744,5 +1744,5 @@ if __name__ == "__main__":
     app_port = config.get("Server", "app_port")
     WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
-    socketio.run(app, host=app_ip, debug=False, port=app_port)
+    socketio.run(app, host=app_ip, debug=False, port=int(app_port))
     # app.run(host=app_ip, debug=False, port=app_port)
