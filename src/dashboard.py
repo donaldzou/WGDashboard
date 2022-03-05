@@ -1007,9 +1007,9 @@ def configuration(config_name):
 
 
 # Get configuration details
-@socketio.on("get_config")
-# @app.route('/get_config/<config_name>', methods=['GET'])
-def get_conf(data):
+# @socketio.on("get_config")
+@app.route('/get_config/<config_name>', methods=['GET'])
+def get_conf(config_name):
     """
     Get configuration setting of wireguard interface.
     @param config_name: Name of WG interface
@@ -1024,17 +1024,15 @@ def get_conf(data):
     if not session:
         result["status"] = False
         result["message"] = "Oops! <br> You're not signed in. Please refresh your page."
-        socketio.emit("get_config", result, json=True)
-        return
+        return jsonify(result)
 
     if getattr(g, 'db', None) is None:
         g.db = connect_db()
         g.cur = g.db.cursor()
-    config_name = data['config']
     config_interface = read_conf_file_interface(config_name)
 
     if config_interface != {}:
-        search = data['search']
+        search = request.args.get('search')
         if len(search) == 0:
             search = ""
         search = urllib.parse.unquote(search)
@@ -1068,7 +1066,8 @@ def get_conf(data):
     else:
         result['status'] = False
         result['message'] = "I cannot find this configuration. <br> Please refresh and try again"
-    socketio.emit("get_config", result, json=True)
+    config.clear()
+    return jsonify(result)
 
 
 # Turn on / off a configuration
@@ -1716,6 +1715,7 @@ def run_dashboard():
     global WG_CONF_PATH
     WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
+
     return app
 
 

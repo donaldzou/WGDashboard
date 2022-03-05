@@ -14,9 +14,7 @@
 	<div class="container-fluid" id="right_body">
 		{% include "sidebar.html" %}
         <div class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
-            <div class="form-group">
-                <input type="text" class="form-control" id="search_peer_textbox" placeholder="Search Peer..." value="">
-            </div>
+
         </div>
 		<div id="config_body">
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
@@ -88,7 +86,7 @@
                             </div>
                         </div>
                         <div class="chartCanvasContainer" style="width: 100%; height: 300px">
-                            <canvas id="myChart" width="100" height="100"></canvas>
+                            <canvas id="totalDataUsageChartObj" width="100" height="100"></canvas>
                         </div>
                     </div>
                 </div>
@@ -96,14 +94,27 @@
                 <div class="button-div mb-3">
                     <div class="row">
                         <div class="col-sm">
-                             <div class="form-group">
-                                <label for="sort_by_dropdown"><small class="text-muted">Sort Peers By</small></label>
-                                <select class="form-control" id="sort_by_dropdown">
-                                    <option value="status">Status</option>
-                                    <option value="name">Name</option>
-                                    <option value="allowed_ip">Allowed IP</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-sm">
+                                    <div class="form-group">
+                                         <label for="search_peer_textbox"><small class="text-muted">Search Peers</small></label>
+                                        <input type="text" class="form-control" id="search_peer_textbox" placeholder="Enter Peer's Name" value="">
+                                    </div>
+                                </div>
+                                <div class="col-sm">
+                                    <div class="form-group">
+                                        <label for="sort_by_dropdown"><small class="text-muted">Sort Peers By</small></label>
+                                        <select class="form-control" id="sort_by_dropdown">
+                                            <option value="status">Status</option>
+                                            <option value="name">Name</option>
+                                            <option value="allowed_ip">Allowed IP</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+
+
+
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
@@ -428,127 +439,10 @@
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
-<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script><script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
-<script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 <script>
-    /* global peers */
-    let load_timeout;
-    let load_interval = 0;
-    let conf_name = "{{ conf_data['name'] }}"
-    let peers = [];
-    $(`.sb-${conf_name}-url`).addClass("active");
-    let socket = io();
-    socket.on('connect', function() {
-        configurations.loadPeers($('#search_peer_textbox').val());
-    });
-    socket.on('get_config', function(res){
-        window.console.log(res);
-        configurations.parsePeers(res);
-    });
-
-    let chartUnit = $(".switchUnit.active").data('unit');
-    const totalDataUsageChart = document.getElementById('myChart').getContext('2d');
-    const totalDataUsageChartObj = new Chart(totalDataUsageChart, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Data Sent',
-                    data: [],
-                    stroke: '#FFFFFF',
-                    borderColor: '#28a745',
-                    tension: 0.1,
-                    borderWidth: 2
-                },
-                {
-                    label: 'Data Received',
-                    data: [],
-                    stroke: '#FFFFFF',
-                    borderColor: '#007bff',
-                    tension: 0.1,
-                    borderWidth: 2
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false,
-            showScale: false,
-            responsive:false,
-            scales: {
-                y: {
-                    min: 0,
-                    ticks: {
-                        min: 0,
-                        callback: function(value, index, ticks) {
-                            return `${value} ${chartUnit}`
-                        }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.dataset.label}: ${context.parsed.y} ${chartUnit}`
-                        }
-                    }
-                }
-            }
-        }
-    });
-    $("#myChart").css("width", "100%");
-    totalDataUsageChartObj.width = $("#myChart").parent().width();
-    totalDataUsageChartObj.resize();
-    $(window).on("resize", function() {
-         totalDataUsageChartObj.resize();
-    });
-
-    $(".fullScreen").on("click", function(){
-        $(".chartContainer").addClass("fullScreen");
-        totalDataUsageChartObj.resize();
-    });
-
-
-    let mul = 1;
-    $(".switchUnit").on("click", function(){
-        $(".switchUnit").removeClass("active");
-        $(this).addClass("active");
-        if ($(this).data('unit') !== chartUnit){
-            switch ($(this).data('unit')) {
-                case "GB":
-                    if (chartUnit === "MB"){
-                        mul = 1/1024;
-                    }
-                    if (chartUnit === "KB"){
-                        mul = 1/1048576;
-                    }
-                    break;
-                case "MB":
-                    if (chartUnit === "GB"){
-                        mul = 1024
-                    }
-                    if (chartUnit === "KB"){
-                        mul = 1/1024
-                    }
-                    break;
-                case "KB":
-                   if (chartUnit === "GB"){
-                        mul = 1048576
-                    }
-                    if (chartUnit === "MB"){
-                        mul = 1024
-                    }
-                    break;
-                default:
-                    break;
-            }
-            chartUnit = $(this).data('unit');
-            totalDataUsageChartObj.data.datasets[0].data = totalDataUsageChartObj.data.datasets[0].data.map(x => x * mul);
-            totalDataUsageChartObj.data.datasets[1].data = totalDataUsageChartObj.data.datasets[1].data.map(x => x * mul);
-            totalDataUsageChartObj.update();
-        }
-
-    })
+    configurations.setConfigurationName("{{ conf_data['name'] }}");
+    configurations.setActiveConfigurationName();
+    configurations.loadPeers($('#search_peer_textbox').val());
 </script>
 </html>	

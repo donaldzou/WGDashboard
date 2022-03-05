@@ -198,6 +198,10 @@ body {
     color: #dc3545;
 }
 
+.btn-lock-peer:hover{
+    color: #6c757d;
+}
+
 .btn-setting-peer:hover{
     color:#007bff
 }

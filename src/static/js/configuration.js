@@ -3,13 +3,14 @@
  * Under Apache-2.0 License
  */
 
-(function(){
-    /* global peers */
-    /* global conf_name */
 
+
+(function(){
     /**
      * Definitions
      */
+    let peers = [];
+    let configuration_name;
     let configuration_interval;
     let configuration_timeout = 0;
     let $progress_bar = $(".progress-bar");
@@ -25,6 +26,123 @@
     let deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), bootstrapModalConfig);
     $("[data-toggle='tooltip']").tooltip();
     $("[data-toggle='popover']").popover();
+
+    /**
+     * Chart!!!!!!
+     * @type {any}
+     */
+
+    let chartUnit = $(".switchUnit.active").data('unit');
+    const totalDataUsageChart = document.getElementById('totalDataUsageChartObj').getContext('2d');
+    const totalDataUsageChartObj = new Chart(totalDataUsageChart, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Data Sent',
+                    data: [],
+                    stroke: '#FFFFFF',
+                    borderColor: '#28a745',
+                    tension: 0.1,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Data Received',
+                    data: [],
+                    stroke: '#FFFFFF',
+                    borderColor: '#007bff',
+                    tension: 0.1,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            showScale: false,
+            responsive:false,
+            scales: {
+                y: {
+                    min: 0,
+                    ticks: {
+                        min: 0,
+                        callback: function(value, index, ticks) {
+                            return `${value} ${chartUnit}`;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y} ${chartUnit}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    let $totalDataUsageChartObj = $("#totalDataUsageChartObj");
+    $totalDataUsageChartObj.css("width", "100%");
+    totalDataUsageChartObj.width = $totalDataUsageChartObj.parent().width();
+    totalDataUsageChartObj.resize();
+    $(window).on("resize", function() {
+         totalDataUsageChartObj.resize();
+    });
+
+    $(".fullScreen").on("click", function(){
+        let $chartContainer = $(".chartContainer");
+        if ($chartContainer.hasClass("fullScreen")){
+            $(this).children().removeClass("bi-fullscreen-exit").addClass("bi-fullscreen");
+            $chartContainer.removeClass("fullScreen");
+        }else{
+            $(this).children().removeClass("bi-fullscreen").addClass("bi-fullscreen-exit");
+            $chartContainer.addClass("fullScreen");
+        }
+        totalDataUsageChartObj.resize();
+    });
+
+    let mul = 1;
+    $(".switchUnit").on("click", function(){
+        $(".switchUnit").removeClass("active");
+        $(this).addClass("active");
+        if ($(this).data('unit') !== chartUnit){
+            switch ($(this).data('unit')) {
+                case "GB":
+                    if (chartUnit === "MB"){
+                        mul = 1/1024;
+                    }
+                    if (chartUnit === "KB"){
+                        mul = 1/1048576;
+                    }
+                    break;
+                case "MB":
+                    if (chartUnit === "GB"){
+                        mul = 1024
+                    }
+                    if (chartUnit === "KB"){
+                        mul = 1/1024
+                    }
+                    break;
+                case "KB":
+                   if (chartUnit === "GB"){
+                        mul = 1048576
+                    }
+                    if (chartUnit === "MB"){
+                        mul = 1024
+                    }
+                    break;
+                default:
+                    break;
+            }
+            chartUnit = $(this).data('unit');
+            totalDataUsageChartObj.data.datasets[0].data = totalDataUsageChartObj.data.datasets[0].data.map(x => x * mul);
+            totalDataUsageChartObj.data.datasets[1].data = totalDataUsageChartObj.data.datasets[1].data.map(x => x * mul);
+            totalDataUsageChartObj.update();
+        }
+    });
 
 
     /**
@@ -50,26 +168,28 @@
         }
     }
 
+    function setActiveConfigurationName(){
+        $(".nav-conf-link").removeClass("active");
+        $(`.sb-${configuration_name}-url`).addClass("active");
+    }
+
     let firstLoading = true;
     $(".nav-conf-link").on("click", function(e){
-        if(socket.connected){
-            e.preventDefault();
+        e.preventDefault();
+        if (configuration_name !== $(this).data("conf-id")){
             firstLoading = true;
             $("#config_body").addClass("firstLoading");
+            configuration_name = $(this).data("conf-id");
+            if(loadPeers($('#search_peer_textbox').val())){
+                setActiveConfigurationName();
+                window.history.pushState(null,null,`/configuration/${configuration_name}`);
+                $("title").text(`${configuration_name} | WGDashboard`);
 
-            conf_name = $(this).data("conf-id");
-            configurations.loadPeers($('#search_peer_textbox').val());
-
-            $(".nav-conf-link").removeClass("active");
-            $(`.sb-${conf_name}-url`).addClass("active");
-
-            window.history.pushState(null,null,`/configuration/${conf_name}`);
-            $("title").text(`${conf_name} | WGDashboard`);
-
-            totalDataUsageChartObj.data.labels = [];
-            totalDataUsageChartObj.data.datasets[0].data = [];
-            totalDataUsageChartObj.data.datasets[1].data = [];
-            totalDataUsageChartObj.update();
+                totalDataUsageChartObj.data.labels = [];
+                totalDataUsageChartObj.data.datasets[0].data = [];
+                totalDataUsageChartObj.data.datasets[1].data = [];
+                totalDataUsageChartObj.update();
+            }
         }
     });
 
@@ -123,6 +243,7 @@
             totalDataUsageChartObj.update();
         }
 
+        document.querySelector("#conf_name").textContent = configuration_name;
         $conf_status_btn.classList.remove("info_loading");
         document.querySelectorAll("#sort_by_dropdown option").forEach(ele => ele.removeAttribute("selected"));
         document.querySelector(`#sort_by_dropdown option[value="${response.sort_tag}"]`).setAttribute("selected", "selected");
@@ -175,7 +296,19 @@
                 let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">'+peer.allowed_ip+'</h6></div>';
                 let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">'+peer.latest_handshake+'</h6> </div>';
                 let peer_endpoint = '<div class="col-sm"><small class="text-muted"><strong>END POINT</strong></small><h6 style="text-transform: uppercase;">'+peer.endpoint+'</h6></div>';
-                let peer_control = '<div class="col-sm"><hr><div class="button-group" style="display:flex"><button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="'+peer.id+'" data-toggle="modal"><i class="bi bi-gear-fill" data-toggle="tooltip" data-placement="bottom" title="Peer Settings"></i></button> <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="'+peer.id+'" data-toggle="modal"><i class="bi bi-x-circle-fill" data-toggle="tooltip" data-placement="bottom" title="Delete Peer"></i></button>';
+                let peer_control = `
+                    <div class="col-sm">
+                        <hr>
+                        <div class="button-group" style="display:flex">
+                            <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" id="${peer.id}" data-toggle="modal">
+                                <i class="bi bi-gear-fill" data-toggle="tooltip" data-placement="bottom" title="Peer Settings"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-delete-peer btn-control" id="${peer.id}" data-toggle="modal">
+                                <i class="bi bi-x-circle-fill" data-toggle="tooltip" data-placement="bottom" title="Delete Peer"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lock-peer btn-control" id="${peer.id}" data-toggle="modal">
+                                <i class="bi bi-lock-fill" data-toggle="tooltip" data-placement="bottom" title=""></i>
+                            </button>`;
                 if (peer.private_key !== ""){
                     peer_control += '<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline"><button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="/qrcode/'+response.name+'?id='+encodeURIComponent(peer.id)+'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></button><a href="/download/'+response.name+'?id='+encodeURIComponent(peer.id)+'" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a></div>';
                 }
@@ -226,7 +359,7 @@
         let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
         if ($new_add_amount.val() > 0 && !$new_add_amount.hasClass("is-invalid")){
             if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
-                let conf = conf_name;
+                let conf = configuration_name;
                 let keys = [];
                 for (let i = 0; i < $new_add_amount.val(); i++) {
                     keys.push(window.wireguard.generateKeypair());
@@ -411,12 +544,22 @@
      */
     let time = 0;
     let count = 0;
-
-
     let d1 = new Date();
     function loadPeers(searchString){
         d1 = new Date();
-        socket.emit('get_config', {"config": conf_name, "search": searchString});
+        let good = true;
+        $.ajax({
+            method: "GET",
+            url: `/get_config/${configuration_name}?search=${encodeURIComponent(searchString)}`,
+            headers:{"Content-Type": "application/json"}
+        }).done(function(response){
+            console.log(response);
+            parsePeers(response);
+        }).fail(function(){
+            noResponding();
+            good = false
+        });
+        return good;
     }
 
     function parsePeers(response){
@@ -435,7 +578,7 @@
             $(".dot.dot-running").attr("title","Peer Connected").tooltip();
             $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
             $("i[data-toggle='tooltip']").tooltip();
-            $("#conf_name").text(conf_name);
+            $("#configuration_name").text(configuration_name);
             if (firstLoading){
                 firstLoading = false;
                 $("#config_body").removeClass("firstLoading");
@@ -561,7 +704,7 @@
      */
     function getAvailableIps(){
         $.ajax({
-            "url": `/available_ips/${conf_name}`,
+            "url": `/available_ips/${configuration_name}`,
             "method": "GET",
         }).done(function (res) {
             if (res.status === true){
@@ -593,6 +736,9 @@
         deletePeers: (config, peers_ids) => { deletePeers(config, peers_ids); },
         parsePeers: (response) => { parsePeers(response); },
 
+        setConfigurationName: (confName) => { configuration_name = confName;},
+        getConfigurationName: () => { return configuration_name; },
+        setActiveConfigurationName: () => { setActiveConfigurationName(); },
         getAvailableIps: () => { getAvailableIps(); },
         generateKeyPair: () => { generate_key(); },
         showToast: (message) => { showToast(message); },
@@ -717,7 +863,7 @@ $add_peer.addEventListener("click",function(){
         $add_peer.setAttribute("disabled","disabled");
         $add_peer.innerHTML = "Adding...";
         if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
-            let conf = conf_name;
+            let conf = window.configurations.getConfigurationName();
             let data_list = [$private_key, $allowed_ips, $new_add_name, $new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
             data_list.forEach((ele) => ele.attr("disabled", "disabled"));
             $.ajax({
@@ -912,13 +1058,26 @@ $body.on("click", ".btn-delete-peer", function(){
     window.configurations.deleteModal().toggle();
 });
 
+$body.on("click", ".btn-lock-peer", function(){
+    let $lockGlyph = "bi-lock-fill";
+    let $unlockGlyph = "bi-unlock-fill";
+
+    if ($(this).children().hasClass($lockGlyph)){
+        $(this).children().removeClass($lockGlyph).addClass($unlockGlyph);
+        $(this).children().tooltip('hide').attr('data-original-title', 'Lock Peer').tooltip('show');
+    }else{
+        $(this).children().removeClass($unlockGlyph).addClass($lockGlyph);
+        $(this).children().tooltip('hide').attr('data-original-title', 'Unlock Peer').tooltip('show');
+    }
+});
+
 /**
  * When the confirm delete button clicked
  */
 $("#delete_peer").on("click",function(){
     $(this).attr("disabled","disabled");
     $(this).html("Deleting...");
-    let config = conf_name;
+    let config = window.configurations.getConfigurationName();
     let peer_ids = [$(this).data("peer-id")];
     window.configurations.deletePeers(config, peer_ids);
 });
@@ -938,7 +1097,7 @@ $body.on("click", ".btn-setting-peer", function(){
     $("#save_peer_setting").attr("peer_id", peer_id);
     $.ajax({
         method: "POST",
-        url: "/get_peer_data/"+conf_name,
+        url: "/get_peer_data/"+window.configurations.getConfigurationName(),
         headers:{
             "Content-Type": "application/json"
         },
@@ -974,7 +1133,7 @@ $("#peer_private_key_textbox").on("change",function(){
     let $save_peer_setting = $("#save_peer_setting");
     if ($(this).val().length > 0){
         $.ajax({
-            "url": "/check_key_match/"+conf_name,
+            "url": "/check_key_match/"+window.configurations.getConfigurationName(),
             "method": "POST",
             "headers":{"Content-Type": "application/json"},
             "data": JSON.stringify({
@@ -1286,7 +1445,7 @@ $("#confirm_delete_bulk_peers").on("click", function(){
                 btn.attr("disabled", "disabled");
                 let ips = [];
                 $selected_peer_list.childNodes.forEach((ele) => ips.push(ele.dataset.id));
-                window.configurations.deletePeers(conf_name, ips);
+                window.configurations.deletePeers(window.configurations.getConfigurationName(), ips);
                 clearInterval(confirm_delete_bulk_peers_interval);
                 confirm_delete_bulk_peers_interval = undefined;
             }
@@ -1342,7 +1501,7 @@ $body.on("click", ".btn-download-peer", function(e){
  */
 $("#download_all_peers").on("click", function(){
     $.ajax({
-        "url": `/download_all/${conf_name}`,
+        "url": `/download_all/${window.configurations.getConfigurationName()}`,
         "method": "GET",
         success: function(res){
             if (res.peers.length > 0){
