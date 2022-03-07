@@ -9,10 +9,25 @@
     /**
      * Definitions
      */
+
     let peers = [];
     let configuration_name;
     let configuration_interval;
-    let configuration_timeout = 0;
+    let configuration_timeout = window.localStorage.getItem("configurationTimeout");
+    if (configuration_timeout === null || !["5000", "10000", "30000", "60000"].includes(configuration_timeout)){
+        window.localStorage.setItem("configurationTimeout", "10000");
+        configuration_timeout = window.localStorage.getItem("configurationTimeout");
+    }
+    document.querySelector(`button[data-refresh-interval="${configuration_timeout}"]`).classList.add("active");
+
+    let display_mode = window.localStorage.getItem("displayMode");
+    if (display_mode === null || !["grid", "list"].includes(display_mode)){
+        window.localStorage.setItem("displayMode", "grid");
+        display_mode = "grid";
+    }
+    document.querySelectorAll(".display-btn-group button").forEach(ele => ele.classList.remove("active"));
+    document.querySelector(`button[data-display-mode="${display_mode}"]`).classList.add("active");
+
     let $progress_bar = $(".progress-bar");
     let bootstrapModalConfig = {
         keyboard: false,
@@ -31,8 +46,18 @@
      * Chart!!!!!!
      * @type {any}
      */
+    let chartUnit = window.localStorage.chartUnit;
+    let chartUnitAvailable = ["GB", "MB", "KB"];
+    
+    if (chartUnit === null || !chartUnitAvailable.includes(chartUnit)){
+        window.localStorage.setItem("chartUnit", "GB");
+        $('.switchUnit[data-unit="GB"]').addClass("active");
+    }else{
+        $(`.switchUnit[data-unit="${chartUnit}"]`).addClass("active");
+    }
+    chartUnit = window.localStorage.getItem("chartUnit");
 
-    let chartUnit = $(".switchUnit.active").data('unit');
+
     const totalDataUsageChart = document.getElementById('totalDataUsageChartObj').getContext('2d');
     const totalDataUsageChartObj = new Chart(totalDataUsageChart, {
         type: 'line',
@@ -120,23 +145,24 @@
                     break;
                 case "MB":
                     if (chartUnit === "GB"){
-                        mul = 1024
+                        mul = 1024;
                     }
                     if (chartUnit === "KB"){
-                        mul = 1/1024
+                        mul = 1/1024;
                     }
                     break;
                 case "KB":
                    if (chartUnit === "GB"){
-                        mul = 1048576
+                        mul = 1048576;
                     }
                     if (chartUnit === "MB"){
-                        mul = 1024
+                        mul = 1024;
                     }
                     break;
                 default:
                     break;
             }
+            window.localStorage.setItem("chartUnit", $(this).data('unit'));
             chartUnit = $(this).data('unit');
             totalDataUsageChartObj.data.datasets[0].data = totalDataUsageChartObj.data.datasets[0].data.map(x => x * mul);
             totalDataUsageChartObj.data.datasets[1].data = totalDataUsageChartObj.data.datasets[1].data.map(x => x * mul);
@@ -247,10 +273,8 @@
         $conf_status_btn.classList.remove("info_loading");
         document.querySelectorAll("#sort_by_dropdown option").forEach(ele => ele.removeAttribute("selected"));
         document.querySelector(`#sort_by_dropdown option[value="${response.sort_tag}"]`).setAttribute("selected", "selected");
-        document.querySelectorAll(".interval-btn-group button").forEach(ele => ele.classList.remove("active"));
-        document.querySelector(`button[data-refresh-interval="${response.dashboard_refresh_interval}"]`).classList.add("active");
-        document.querySelectorAll(".display-btn-group button").forEach(ele => ele.classList.remove("active"));
-        document.querySelector(`button[data-display-mode="${response.peer_display_mode}"]`).classList.add("active");
+        // document.querySelectorAll(".interval-btn-group button").forEach(ele => ele.classList.remove("active"));
+        // document.querySelector(`button[data-refresh-interval="${response.dashboard_refresh_interval}"]`).classList.add("active");
         document.querySelector("#conf_status").innerHTML = `${response.status}<span class="dot dot-${response.status}"></span>`;
         document.querySelector("#conf_connected_peers").innerHTML = response.running_peer;
         document.querySelector("#conf_total_data_usage").innerHTML = `${response.total_data_usage[0]} GB`;
@@ -271,7 +295,7 @@
         if (response.peer_data.length === 0){
             document.querySelector(".peer_list").innerHTML = `<div class="col-12" style="text-align: center; margin-top: 1.5rem"><h3 class="text-muted">Oops! No peers found ‘︿’</h3></div>`;
         }else{
-            let display_mode = response.peer_display_mode === "list" ? "col-12" : "col-sm-6 col-lg-4";
+            let mode = display_mode === "list" ? "col-12" : "col-sm-6 col-lg-4";
             response.peer_data.forEach(function(peer){
                 let total_r = 0;
                 let total_s = 0;
@@ -313,7 +337,7 @@
                     peer_control += '<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline"><button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="/qrcode/'+response.name+'?id='+encodeURIComponent(peer.id)+'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></button><a href="/download/'+response.name+'?id='+encodeURIComponent(peer.id)+'" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a></div>';
                 }
                 peer_control += '</div>';
-                let html = '<div class="'+display_mode+'" data-id="'+peer.id+'">' +
+                let html = '<div class="'+mode+'" data-id="'+peer.id+'">' +
                                 '<div class="card mb-3 card-'+peer.status+'">' +
                                     '<div class="card-body">' +
                                      '<div class="row">' +
@@ -334,9 +358,7 @@
                 result += html;
             });
             document.querySelector(".peer_list").innerHTML = result;
-            if (response.dashboard_refresh_interval !== configuration_timeout){
-                configuration_timeout = response.dashboard_refresh_interval;
-                removeConfigurationInterval();
+            if (configuration_interval === undefined){
                 setConfigurationInterval();
             }
         }
@@ -557,7 +579,7 @@
             parsePeers(response);
         }).fail(function(){
             noResponding();
-            good = false
+            good = false;
         });
         return good;
     }
@@ -575,6 +597,7 @@
             configurationAlert(response.data);
             configurationHeader(response.data);
             configurationPeers(response.data);
+
             $(".dot.dot-running").attr("title","Peer Connected").tooltip();
             $(".dot.dot-stopped").attr("title","Peer Disconnected").tooltip();
             $("i[data-toggle='tooltip']").tooltip();
@@ -615,17 +638,12 @@
      * @param res
      * @param interval
      */
-    function updateRefreshInterval(res, interval) {
-        if (res === "true"){
-            configuration_timeout = interval;
-            removeConfigurationInterval();
-            setConfigurationInterval();
-            showToast("Refresh Interval set to "+Math.round(interval/1000)+" seconds");
-        }else{
-            $(".interval-btn-group button").removeClass("active");
-            $('.interval-btn-group button[data-refresh-interval="'+configuration_timeout+'"]').addClass("active");
-            showToast("Refresh Interval set unsuccessful");
-        }
+    function updateRefreshInterval(interval) {
+        configuration_timeout = interval;
+        window.localStorage.setItem("configurationTimeout", configuration_timeout.toString());
+        removeConfigurationInterval();
+        setConfigurationInterval();
+        showToast("Refresh Interval set to "+Math.round(interval/1000)+" seconds");
     }
 
     /**
@@ -730,6 +748,7 @@
         qrcodeModal: () => { return qrcodeModal; },
         settingModal: () => { return settingModal; },
         configurationTimeout: () => { return configuration_timeout;},
+        updateDisplayMode: () => { display_mode = window.localStorage.getItem("displayMode")},
 
         loadPeers: (searchString) => { loadPeers(searchString); },
         addPeersByBulk: () => { addPeersByBulk(); },
@@ -742,7 +761,7 @@
         getAvailableIps: () => { getAvailableIps(); },
         generateKeyPair: () => { generate_key(); },
         showToast: (message) => { showToast(message); },
-        updateRefreshInterval: (res, interval) => { updateRefreshInterval(res, interval); },
+        updateRefreshInterval: (interval) => { updateRefreshInterval(interval); },
         copyToClipboard: (element) => { copyToClipboard(element); },
         toggleDeleteByBulkIP: (element) => { toggleBulkIP(element); },
         downloadOneConfig: (conf) => { download_one_config(conf); },
@@ -1284,14 +1303,20 @@ $body.on("click", ".update_interval", function(){
     let _new = $(this);
     _new.addClass("active");
     let interval = $(this).data("refresh-interval");
-    $.ajax({
-        method:"POST",
-        data: "interval="+$(this).data("refresh-interval"),
-        url: "/update_dashboard_refresh_interval",
-        success: function (res){
-            window.configurations.updateRefreshInterval(res, interval);
-        }
-    });
+    if ([5000, 10000, 30000, 60000].includes(interval)){
+        window.configurations.updateRefreshInterval(interval);
+    }
+
+
+
+    // $.ajax({
+    //     method:"POST",
+    //     data: "interval="+$(this).data("refresh-interval"),
+    //     url: "/update_dashboard_refresh_interval",
+    //     success: function (res){
+    //         window.configurations.updateRefreshInterval(res, interval);
+    //     }
+    // });
 });
 
 /**
@@ -1307,26 +1332,19 @@ $body.on("click", ".refresh", function (){
 $body.on("click", ".display_mode", function(){
     $(".display-btn-group button").removeClass("active");
     $(this).addClass("active");
-    let display_mode = $(this).data("display-mode");
-    $.ajax({
-        method:"GET",
-        url: "/switch_display_mode/"+$(this).data("display-mode"),
-        success: function (res){
-           if (res === "true"){
-                if (display_mode === "list"){
-                Array($(".peer_list").children()).forEach(function(child){
-                    $(child).removeClass().addClass("col-12");
-                });
-                window.configurations.showToast("Displaying as List");
-            }else{
-               Array($(".peer_list").children()).forEach(function(child){
-                    $(child).removeClass().addClass("col-sm-6 col-lg-4");
-               });
-               window.configurations.showToast("Displaying as Grids");
-            }
-           }
-        }
-    });
+    window.localStorage.setItem("displayMode", $(this).data("display-mode"));
+    window.configurations.updateDisplayMode();
+    if ($(this).data("display-mode") === "list"){
+        Array($(".peer_list").children()).forEach(function(child){
+            $(child).removeClass().addClass("col-12");
+        });
+        window.configurations.showToast("Displaying as List");
+    }else{
+        Array($(".peer_list").children()).forEach(function(child){
+            $(child).removeClass().addClass("col-sm-6 col-lg-4");
+       });
+       window.configurations.showToast("Displaying as Grids");
+    }
 });
 
 
