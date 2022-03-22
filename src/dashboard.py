@@ -674,7 +674,11 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            return redirect("/signin?redirect=" + str(request.url))
+
+            redirectURL = str(request.url)
+            redirectURL = redirectURL.replace("http://", "")
+            redirectURL = redirectURL.replace("https://", "")
+            return redirect("/signin?redirect=" + redirectURL)
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
                                 'update_app_ip_port', 'update_wg_conf_path']:
@@ -1533,7 +1537,6 @@ def switch_display_mode(mode):
 @app.route('/api/togglePeerAccess', methods=['POST'])
 def togglePeerAccess():
     data = request.get_json()
-    print(data['peerID'])
     returnData = {"status": True, "reason": ""}
     required = ['peerID', 'config']
     if checkJSONAllParameter(required, data):
@@ -1572,7 +1575,26 @@ def togglePeerAccess():
 
     return jsonify(returnData)
 
-
+@app.route('/api/addConfigurationAddressCheck', methods=['POST'])
+def addConfigurationAddressCheck():
+    data = request.get_json()
+    returnData = {"status": True, "reason": ""}
+    required = ['address']
+    if checkJSONAllParameter(required, data):
+        try:
+            ips = list(ipaddress.ip_network(data['address'], False).hosts())
+            amount = len(ips) - 1
+            if amount >= 1:
+                returnData = {"status": True, "reason":"", "data":f"Total of {amount} IPs"}
+            else:
+                returnData = {"status": True, "reason":"", "data":f"0 IP available for peers"}
+        
+        except ValueError as e:
+            returnData = {"status": False, "reason": str(e)}
+    else:
+        returnData = {"status": False, "reason": "Please provide all required parameters."}
+    return jsonify(returnData)
+        
 
 """
 Dashboard Tools Related
@@ -1789,5 +1811,4 @@ if __name__ == "__main__":
     app_port = config.get("Server", "app_port")
     WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
-    socketio.run(app, host=app_ip, debug=False, port=int(app_port))
-    # app.run(host=app_ip, debug=False, port=app_port)
+    app.run(host=app_ip, debug=False, port=app_port)

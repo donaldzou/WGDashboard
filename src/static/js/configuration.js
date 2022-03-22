@@ -4,12 +4,11 @@
  */
 
 
-
+let peers = [];
 (function() {
     /**
      * Definitions
-     */
-    let peers = [];
+     */    
     let configuration_name;
     let configuration_interval;
     let configuration_timeout = window.localStorage.getItem("configurationTimeout");

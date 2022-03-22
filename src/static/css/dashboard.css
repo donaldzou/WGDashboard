@@ -3,6 +3,10 @@ body {
     /*font-family: 'Poppins', sans-serif;*/
 }
 
+.codeFont{
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 .feather {
     width: 16px;
     height: 16px;
@@ -307,7 +311,7 @@ main {
     right: 0;
     box-shadow: 0 10px 20px rgb(0 0 0 / 19%), 0 6px 6px rgb(0 0 0 / 23%);
     border-radius: 10px;
-    min-width: 200px;
+    min-width: 250px;
     display: none;
     transform: translateY(-30px);
     opacity: 0;
@@ -760,4 +764,12 @@ pre.index-alert {
     height: 4px;
     background-color: #007bff;
     border-bottom-left-radius: .25rem;
+}
+
+.addConfigurationAvailableIPs{
+    margin-bottom: 0;
+}
+
+.input-feedback{
+    display: none;
 }

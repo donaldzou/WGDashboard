@@ -63,81 +63,111 @@
 			{%endfor%}
 		</main>
 	</div>
-	<div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;">
-		
-  </div>
-{% include "tools.html" %}
-</body>
-{% include "footer.html" %}
-<script>
-	let numberToast = 0;
-
-
-	function showToast(msg){
-		$(".toastContainer").append(
-			`<div id="${numberToast}-toast" class="toast hide" role="alert" data-delay="5000">
-				<div class="toast-header">
-					<strong class="mr-auto">WGDashboard</strong>
-					<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+	<div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;"></div>
+	<div class="btn-manage-group">
+		<button type="button" class="btn btn-primary add_btn" id="toggleAddConfiguration"><i class="bi bi-plus-circle-fill"></i></button>
+	</div>
+	<div class="modal fade" id="addConfigurationModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+		aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Add New Configuration</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<div class="toast-body">${msg}</div>
-				<div class="toast-progressbar"></div>
-			</div>` )
-		$(`#${numberToast}-toast`).toast('show');
-        $(`#${numberToast}-toast .toast-body`).html(msg);
-		$(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
-		$(`#${numberToast}-toast .toast-progressbar`).css("width", "0px");
-		numberToast++;
-	}
-
-
-	$(".toggle--switch").on("change", function(){
-		$(this).addClass("waiting").attr("disabled", "disabled");
-		let id = $(this).data("conf-id");
-		let status = $(this).prop("checked");
-		let ele = $(this);
-		let label = $(this).siblings("label");
-		$.ajax({
-			url: `/switch/${id}`
-		}).done(function(res){
-			let dot = $(`div[data-conf-id="${id}"] .dot`);
-			console.log();
-			if (res){
-				if (status){
-					dot.removeClass("dot-stopped").addClass("dot-running");
-					dot.siblings().text("Running");
-					showToast(`${id} is running.`)
-				}else{
-					dot.removeClass("dot-running").addClass("dot-stopped");
-					showToast(`${id} is stopped.`)
-				}
-				ele.removeClass("waiting");
-				ele.removeAttr("disabled");
-			}else{
-				if (status){
-					$(this).prop("checked", false)
-				}else{
-					$(this).prop("checked", true)
-				}
-			}
-			
-		})
-	});
-
-
-	$('.switch').on("click", function() {
-	    $(this).siblings($(".spinner-border")).css("display", "inline-block")
-	    $(this).remove()
-		location.replace("/switch/"+$(this).attr('id'))
-    });
-	$(".sb-home-url").addClass("active");
-
-    $(".card-body").on("click", function(handle){
-        if ($(handle.target).attr("class") !== "toggleLabel" && $(handle.target).attr("class") !== "toggle--switch") {
-            window.open($(this).find("a").attr("href"), "_self");
-        }
-    });
-</script>
+				<div class="modal-body">
+					<div id="addCconfigurationAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						  <span aria-hidden="true">&times;</span>
+						</button>
+                        <div class="alert-body"></div>
+					</div>
+					<form id="add_peer_form">
+                        <div class="form-group">
+                            <div>
+                                <label for="addConfigurationPrivateKey">Private Key</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control codeFont" id="addConfigurationPrivateKey" aria-describedby="addConfigurationPrivateKey">
+                                <div class="input-group-append">
+                                   <button type="button" class="btn btn-danger" id="reGeneratePrivateKey" data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i class="bi bi-arrow-repeat"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label for="addConfigurationPublicKey">Public Key</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control codeFont" id="addConfigurationPublicKey" aria-describedby="addConfigurationPublicKey" disabled>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="form-group">
+                                    <label for="addConfigurationName">Configuration Name <code>(Required)</code></label>
+                                    <input type="text" class="form-control" id="addConfigurationName">
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="form-group">
+                                    <label for="addConfigurationListenPort">Listen Port <code>(Required)</code></label>
+                                    <input type="number" class="form-control codeFont" id="addConfigurationListenPort">
+                                </div>
+                            </div>
+                        </div>
+						<div class="row">
+							<div class="col-sm">
+								<div class="form-group">
+									<label for="addConfigurationAddress">Address <code>(Required)</code></label>
+									<input type="text" class="form-control codeFont" id="addConfigurationAddress" placeholder="Ex: 192.168.0.1/24">
+                                    <div id="addConfigurationAddressFeedback" class="input-feedback">
+                                        Please provide a valid city.
+                                    </div>
+                                </div>
+							</div>
+							<div class="col-sm">
+								<div class="form-group">
+									<label for="">Available IPs for peers</label>
+									<p class="addConfigurationAvailableIPs">N/A</p>
+								</div>
+							</div>
+						</div>
+						
+                        <hr>
+                        <div class="form-group">
+                            <label for="addConfigurationPreUp">PreUp</label>
+                            <input type="text" class="form-control codeFont" id="addConfigurationPreUp">
+                        </div>
+                        <div class="form-group">
+                            <label for="addConfigurationPreDown">PreDown</label>
+                            <input type="text" class="form-control codeFont" id="addConfigurationPreDown">
+                        </div>
+                        <div class="form-group">
+                            <label for="addConfigurationPostUp">PostUp</label>
+                            <input type="text" class="form-control codeFont" id="addConfigurationPostUp">
+                        </div>
+                        <div class="form-group">
+                            <label for="addConfigurationPostDown">PostDown</label>
+                            <input type="text" class="form-control codeFont" id="addConfigurationPostDown">
+                        </div>
+                        
+                        
+                
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="add_configuration">Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{% include "tools.html" %}
+</body>
+{% include "footer.html" %}
+<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/index.js') }}"></script>
 </html>
