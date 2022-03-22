@@ -27,9 +27,10 @@
                         </div>
                         <div class="col">
                             <small class="text-muted"><strong>SWITCH</strong></small><br>
-                            <div id="conf_status_btn" class="info_loading"></div>
-                            <div class="spinner-border text-primary" role="status" style="display: none; margin-top: 10px">
-                                <span class="sr-only">Loading...</span>
+                            <!-- <div id="conf_status_btn" class="info_loading"></div> -->
+                            <div id="switch" class="info_loading">
+                                <input type="checkbox" class="toggle--switch" id="switch">
+                                <label for="switch" class="toggleLabel"></label>
                             </div>
                         </div>
                         <div class="w-100"></div>
@@ -424,8 +425,8 @@
 			</div>
 		</div>
 	</div>
-    <div class="position-fixed top-0 right-0 p-3" style="z-index: 5; right: 0; top: 50px;">
-          <div id="alertToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
+    <div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;">
+          <!-- <div id="alertToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
             <div class="toast-header">
                   <strong class="mr-auto">WGDashboard</strong>
                   <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
@@ -434,12 +435,13 @@
             </div>
             <div class="toast-body">
             </div>
-          </div>
+          </div> -->
     </div>
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
 <script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
+<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script>
     configurations.setConfigurationName("{{ conf_data['name'] }}");
     configurations.setActiveConfigurationName();

@@ -28,8 +28,7 @@ from icmplib import ping, traceroute
 from flask_socketio import SocketIO
 
 # Import other python files
-from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoint, \
-    check_IP_with_range, clean_IP_with_range
+from util import *
 
 # Dashboard Version
 DASHBOARD_VERSION = 'v3.0.5'
@@ -375,6 +374,12 @@ def get_all_peers_data(config_name):
     get_endpoint(config_name)
     get_allowed_ip(conf_peer_data, config_name)
 
+def getLockAccessPeers(config_name):
+    col = g.cur.execute(f"PRAGMA table_info({config_name}_restrict_access)").fetchall()
+    col = [a[1] for a in col]
+    data = g.cur.execute(f"SELECT * FROM {config_name}_restrict_access").fetchall()
+    result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
+    return result
 
 def get_peers(config_name, search, sort_t):
     """
@@ -499,7 +504,19 @@ def get_conf_list():
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
                     status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
-                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+            """
+            g.cur.execute(create_table)
+            create_table = f"""
+                CREATE TABLE IF NOT EXISTS {i}_restrict_access (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
                     PRIMARY KEY (id)
                 )
             """
@@ -619,7 +636,6 @@ def f_available_ips(config_name):
 """
 Flask Functions
 """
-
 
 @app.teardown_request
 def close_DB(exception):
@@ -1056,7 +1072,8 @@ def get_conf(config_name):
             "wg_ip": wg_ip,
             "sort_tag": sort,
             "dashboard_refresh_interval": int(config.get("Server", "dashboard_refresh_interval")),
-            "peer_display_mode": peer_display_mode
+            "peer_display_mode": peer_display_mode,
+            "lock_access_peers": getLockAccessPeers(config_name)
         }
         if result['data']['status'] == "stopped":
             result['data']['checked'] = "nope"
@@ -1087,16 +1104,15 @@ def switch(config_name):
                                             shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return redirect('/')
+            return jsonify({"status": False, "reason":"Can't stop peer"})
     elif status == "stopped":
         try:
             subprocess.check_output("wg-quick up " + config_name,
                                     shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return redirect('/')
-    return redirect(request.referrer)
-
+            return jsonify({"status": False, "reason":"Can't turn on peer"})
+    return jsonify({"status": True, "reason":""})
 
 @app.route('/add_peer_bulk/<config_name>', methods=['POST'])
 def add_peer_bulk(config_name):
@@ -1240,24 +1256,7 @@ def remove_peer(config_name):
     if not isinstance(keys, list):
         return config_name + " is not running."
     else:
-        sql_command = []
-        wg_command = ["wg", "set", config_name]
-        for delete_key in delete_keys:
-            if delete_key not in keys:
-                return "This key does not exist"
-            sql_command.append("DELETE FROM " + config_name + " WHERE id = '" + delete_key + "';")
-            wg_command.append("peer")
-            wg_command.append(delete_key)
-            wg_command.append("remove")
-        try:
-            remove_wg = subprocess.check_output(" ".join(wg_command),
-                                                shell=True, stderr=subprocess.STDOUT)
-            save_wg = subprocess.check_output(f"wg-quick save {config_name}", shell=True, stderr=subprocess.STDOUT)
-            g.cur.executescript(' '.join(sql_command))
-            g.db.commit()
-        except subprocess.CalledProcessError as exc:
-            return exc.output.strip()
-        return "true"
+        return deletePeers(config_name, delete_keys, g.cur, g.db)
 
 
 @app.route('/save_peer_setting/<config_name>', methods=['POST'])
@@ -1530,6 +1529,51 @@ def switch_display_mode(mode):
     return "false"
 
 
+# APIs
+@app.route('/api/togglePeerAccess', methods=['POST'])
+def togglePeerAccess():
+    data = request.get_json()
+    print(data['peerID'])
+    returnData = {"status": True, "reason": ""}
+    required = ['peerID', 'config']
+    if checkJSONAllParameter(required, data):
+        checkUnlock = g.cur.execute(f"SELECT * FROM {data['config']} WHERE id='{data['peerID']}'").fetchone()
+        if checkUnlock:
+            moveUnlockToLock = g.cur.execute(f"INSERT INTO {data['config']}_restrict_access SELECT * FROM {data['config']} WHERE id = '{data['peerID']}'")
+            if g.cur.rowcount == 1:
+                print(g.cur.rowcount)
+                print(deletePeers(data['config'], [data['peerID']], g.cur, g.db))
+        else:
+            moveLockToUnlock = g.cur.execute(f"SELECT * FROM {data['config']}_restrict_access WHERE id='{data['peerID']}'").fetchone()
+            try:
+                if len(moveLockToUnlock[-1]) == 0:
+                    status = subprocess.check_output(f"wg set {data['config']} peer {moveLockToUnlock[0]} allowed-ips {moveLockToUnlock[11]}",
+                                                shell=True, stderr=subprocess.STDOUT)
+                else:
+                    now = str(datetime.now().strftime("%m%d%Y%H%M%S"))
+                    f_name = now + "_tmp_psk.txt"
+                    f = open(f_name, "w+")
+                    f.write(moveLockToUnlock[-1])
+                    f.close()
+                    subprocess.check_output(f"wg set {data['config']} peer {moveLockToUnlock[0]} allowed-ips {moveLockToUnlock[11]} preshared-key {f_name}",
+                                                shell=True, stderr=subprocess.STDOUT)
+                    os.remove(f_name)
+                status = subprocess.check_output(f"wg-quick save {data['config']}", shell=True, stderr=subprocess.STDOUT)
+                g.cur.execute(f"INSERT INTO {data['config']} SELECT * FROM {data['config']}_restrict_access WHERE id = '{data['peerID']}'")
+                if g.cur.rowcount == 1:
+                    g.cur.execute(f"DELETE FROM {data['config']}_restrict_access WHERE id = '{data['peerID']}'")
+                    
+            except subprocess.CalledProcessError as exc:
+                returnData["status"] = False
+                returnData["reason"] = exc.output.strip()
+    else:
+        returnData["status"] = False
+        returnData["reason"] = "Please provide all required parameters."
+
+    return jsonify(returnData)
+
+
+
 """
 Dashboard Tools Related
 """
@@ -1624,6 +1668,7 @@ def init_dashboard():
     """
     Create dashboard default configuration.
     """
+    
 
     # Set Default INI File
     if not os.path.isfile(DASHBOARD_CONF):

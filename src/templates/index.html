@@ -23,8 +23,10 @@
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
+			
+			
 			{% for i in conf%}
-				<div class="card mt-3 conf_card">
+				<div class="card mt-3 conf_card" data-conf-id="{{i['conf']}}">
 					<div class="card-body">
 						<div class="row">
 							<div class="col card-col">
@@ -35,21 +37,25 @@
 							</div>
 							<div class="col card-col">
 								<small class="text-muted"><strong>STATUS</strong></small>
-								<h6 style="text-transform: uppercase; margin:0 !important;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>
+								<h6 style="text-transform: uppercase; margin:0 !important;"><span>{{i['status']}}</span><span class="dot dot-{{i['status']}}"></span></h6>
 							</div>
-							<div class="col-md card-col">
+							<div class="col-sm card-col">
 								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
 								<h6 style="margin:0 !important;"><samp>{{i['public_key']}}</samp></h6>
 							</div>
-							<div class="col-md index-switch">
-                                {% if i['checked'] == "checked" %}
-                                    <a href="#" id="{{i['conf']}}" {{i['checked']}} class="switch text-primary tt"><i class="bi bi-toggle2-on"></i></a>
+							<div class="col-sm index-switch">
+								<div class="switch-test">
+									<input type="checkbox" class="toggle--switch" id="{{i['conf']}}-switch" {{i['checked']}} data-conf-id="{{i['conf']}}">
+									<label for="{{i['conf']}}-switch" class="toggleLabel"></label>
+								</div>
+                                <!-- {% if i['checked'] == "checked" %}
+                                    <a href="#" id="{{i['conf']}}"  class="switch text-primary tt"><i class="bi bi-toggle2-on"></i></a>
                                 {% else %}
                                     <a href="#" id="{{i['conf']}}" {{i['checked']}} class="switch text-secondary"><i class="bi bi-toggle2-off"></i></a>
-                                {% endif %}
-                                <div class="spinner-border text-primary" role="status" style="display: none">
+                                {% endif %} -->
+                                <!-- <div class="spinner-border text-primary" role="status" style="display: none">
                                     <span class="sr-only">Loading...</span>
-                                </div>
+                                </div> -->
 							</div>
 						</div>
 					</div>
@@ -57,10 +63,69 @@
 			{%endfor%}
 		</main>
 	</div>
+	<div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;">
+		
+  </div>
 {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
 <script>
+	let numberToast = 0;
+
+
+	function showToast(msg){
+		$(".toastContainer").append(
+			`<div id="${numberToast}-toast" class="toast hide" role="alert" data-delay="5000">
+				<div class="toast-header">
+					<strong class="mr-auto">WGDashboard</strong>
+					<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="toast-body">${msg}</div>
+				<div class="toast-progressbar"></div>
+			</div>` )
+		$(`#${numberToast}-toast`).toast('show');
+        $(`#${numberToast}-toast .toast-body`).html(msg);
+		$(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
+		$(`#${numberToast}-toast .toast-progressbar`).css("width", "0px");
+		numberToast++;
+	}
+
+
+	$(".toggle--switch").on("change", function(){
+		$(this).addClass("waiting").attr("disabled", "disabled");
+		let id = $(this).data("conf-id");
+		let status = $(this).prop("checked");
+		let ele = $(this);
+		let label = $(this).siblings("label");
+		$.ajax({
+			url: `/switch/${id}`
+		}).done(function(res){
+			let dot = $(`div[data-conf-id="${id}"] .dot`);
+			console.log();
+			if (res){
+				if (status){
+					dot.removeClass("dot-stopped").addClass("dot-running");
+					dot.siblings().text("Running");
+					showToast(`${id} is running.`)
+				}else{
+					dot.removeClass("dot-running").addClass("dot-stopped");
+					showToast(`${id} is stopped.`)
+				}
+				ele.removeClass("waiting");
+				ele.removeAttr("disabled");
+			}else{
+				if (status){
+					$(this).prop("checked", false)
+				}else{
+					$(this).prop("checked", true)
+				}
+			}
+			
+		})
+	});
+
 
 	$('.switch').on("click", function() {
 	    $(this).siblings($(".spinner-border")).css("display", "inline-block")
@@ -70,7 +135,7 @@
 	$(".sb-home-url").addClass("active");
 
     $(".card-body").on("click", function(handle){
-        if ($(handle.target).attr("class") !== "bi bi-toggle2-off" && $(handle.target).attr("class") !== "bi bi-toggle2-on") {
+        if ($(handle.target).attr("class") !== "toggleLabel" && $(handle.target).attr("class") !== "toggle--switch") {
             window.open($(this).find("a").attr("href"), "_self");
         }
     });
