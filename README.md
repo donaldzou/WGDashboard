@@ -361,6 +361,7 @@ Endpoint = 0.0.0.0:51820
 
    ```bash
    ./wgd.sh update
+   chmod +x ./wgd.sh
    ```
 
    > If this doesn't work, please use the method below. Sorry about that :(
