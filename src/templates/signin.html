@@ -67,7 +67,11 @@
                 if (res.status === true){
                     const urlParams = new URLSearchParams(window.location.search);
                     if (urlParams.get("redirect")){
-                        window.location.replace(urlParams.get("redirect"))
+                        if (document.URL.substring(0, 5) == "http:"){
+                            window.location.replace(`http://${urlParams.get("redirect")}`)
+                        }else if (document.URL.substring(0, 5) == "https"){
+                            window.location.replace(`https://${urlParams.get("redirect")}`)
+                        }
                     }else{
                         window.location.replace("/");
                     }

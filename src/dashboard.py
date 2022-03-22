@@ -653,7 +653,10 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            return redirect("/signin?redirect=" + str(request.url))
+            redirectURL = str(request.url)
+            redirectURL = redirectURL.replace("http://", "")
+            redirectURL = redirectURL.replace("https://", "")
+            return redirect("/signin?redirect=" + redirectURL)
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
                                 'update_app_ip_port', 'update_wg_conf_path']:
