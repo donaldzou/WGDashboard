@@ -104,9 +104,10 @@ def deletePeers(config_name, delete_keys, cur, db):
 
 def checkJSONAllParameter(required, data):
     if len(data) == 0:
-        print("length 0")
         return False
     for i in required:
         if i not in list(data.keys()):
             return False
     return True
+
+

@@ -773,3 +773,18 @@ pre.index-alert {
 .input-feedback{
     display: none;
 }
+
+#addConfigurationModal label{
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+#addConfigurationModal label a{
+    margin-left: auto !important;
+}
+
+#reGeneratePrivateKey{
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}

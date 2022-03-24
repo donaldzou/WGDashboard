@@ -31,7 +31,7 @@ from flask_socketio import SocketIO
 from util import *
 
 # Dashboard Version
-DASHBOARD_VERSION = 'v3.0.5'
+DASHBOARD_VERSION = 'v3.1'
 
 # WireGuard's configuration path
 WG_CONF_PATH = None
@@ -57,6 +57,7 @@ QRcode(app)
 socketio = SocketIO(app)
 
 # TODO: use class and object oriented programming
+
 
 def connect_db():
     """
@@ -521,7 +522,7 @@ def get_conf_list():
                 )
             """
             g.cur.execute(create_table)
-            temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
+            temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i), "port": get_conf_listen_port(i)}
             if temp['status'] == "running":
                 temp['checked'] = 'checked'
             else:
@@ -731,6 +732,7 @@ def auth():
     if password.hexdigest() == config["Account"]["password"] \
             and data['username'] == config["Account"]["username"]:
         session['username'] = data['username']
+        session.permanent = True
         config.clear()
         return jsonify({"status": True, "msg": ""})
     config.clear()
@@ -1107,15 +1109,15 @@ def switch(config_name):
             check = subprocess.check_output("wg-quick down " + config_name,
                                             shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
-            session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return jsonify({"status": False, "reason":"Can't stop peer"})
+            # session["switch_msg"] = exc.output.strip().decode("utf-8")
+            return jsonify({"status": False, "reason":"Can't stop peer", "message": str(exc.output.strip().decode("utf-8"))})
     elif status == "stopped":
         try:
             subprocess.check_output("wg-quick up " + config_name,
                                     shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
-            session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return jsonify({"status": False, "reason":"Can't turn on peer"})
+            # session["switch_msg"] = exc.output.strip().decode("utf-8")
+            return jsonify({"status": False, "reason":"Can't turn on peer", "message": str(exc.output.strip().decode("utf-8"))})
     return jsonify({"status": True, "reason":""})
 
 @app.route('/add_peer_bulk/<config_name>', methods=['POST'])
@@ -1534,45 +1536,18 @@ def switch_display_mode(mode):
 
 
 # APIs
+import api
+
+
 @app.route('/api/togglePeerAccess', methods=['POST'])
 def togglePeerAccess():
     data = request.get_json()
     returnData = {"status": True, "reason": ""}
     required = ['peerID', 'config']
     if checkJSONAllParameter(required, data):
-        checkUnlock = g.cur.execute(f"SELECT * FROM {data['config']} WHERE id='{data['peerID']}'").fetchone()
-        if checkUnlock:
-            moveUnlockToLock = g.cur.execute(f"INSERT INTO {data['config']}_restrict_access SELECT * FROM {data['config']} WHERE id = '{data['peerID']}'")
-            if g.cur.rowcount == 1:
-                print(g.cur.rowcount)
-                print(deletePeers(data['config'], [data['peerID']], g.cur, g.db))
-        else:
-            moveLockToUnlock = g.cur.execute(f"SELECT * FROM {data['config']}_restrict_access WHERE id='{data['peerID']}'").fetchone()
-            try:
-                if len(moveLockToUnlock[-1]) == 0:
-                    status = subprocess.check_output(f"wg set {data['config']} peer {moveLockToUnlock[0]} allowed-ips {moveLockToUnlock[11]}",
-                                                shell=True, stderr=subprocess.STDOUT)
-                else:
-                    now = str(datetime.now().strftime("%m%d%Y%H%M%S"))
-                    f_name = now + "_tmp_psk.txt"
-                    f = open(f_name, "w+")
-                    f.write(moveLockToUnlock[-1])
-                    f.close()
-                    subprocess.check_output(f"wg set {data['config']} peer {moveLockToUnlock[0]} allowed-ips {moveLockToUnlock[11]} preshared-key {f_name}",
-                                                shell=True, stderr=subprocess.STDOUT)
-                    os.remove(f_name)
-                status = subprocess.check_output(f"wg-quick save {data['config']}", shell=True, stderr=subprocess.STDOUT)
-                g.cur.execute(f"INSERT INTO {data['config']} SELECT * FROM {data['config']}_restrict_access WHERE id = '{data['peerID']}'")
-                if g.cur.rowcount == 1:
-                    g.cur.execute(f"DELETE FROM {data['config']}_restrict_access WHERE id = '{data['peerID']}'")
-                    
-            except subprocess.CalledProcessError as exc:
-                returnData["status"] = False
-                returnData["reason"] = exc.output.strip()
+        returnData = api.togglePeerAccess(data, g)
     else:
-        returnData["status"] = False
-        returnData["reason"] = "Please provide all required parameters."
-
+        return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
 
 @app.route('/api/addConfigurationAddressCheck', methods=['POST'])
@@ -1581,20 +1556,52 @@ def addConfigurationAddressCheck():
     returnData = {"status": True, "reason": ""}
     required = ['address']
     if checkJSONAllParameter(required, data):
-        try:
-            ips = list(ipaddress.ip_network(data['address'], False).hosts())
-            amount = len(ips) - 1
-            if amount >= 1:
-                returnData = {"status": True, "reason":"", "data":f"Total of {amount} IPs"}
-            else:
-                returnData = {"status": True, "reason":"", "data":f"0 IP available for peers"}
-        
-        except ValueError as e:
-            returnData = {"status": False, "reason": str(e)}
+        returnData = api.addConfiguration.AddressCheck(data)
     else:
-        returnData = {"status": False, "reason": "Please provide all required parameters."}
+        return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
-        
+
+@app.route('/api/addConfigurationPortCheck', methods=['POST'])
+def addConfigurationPortCheck():
+    data = request.get_json()
+    returnData = {"status": True, "reason": ""}
+    required = ['port']
+    if checkJSONAllParameter(required, data):
+        returnData = api.addConfiguration.PortCheck(data, get_conf_list())
+    else:
+        return jsonify(api.notEnoughParameter)
+    return jsonify(returnData)
+
+@app.route('/api/addConfigurationNameCheck', methods=['POST'])
+def addConfigurationNameCheck():
+    data = request.get_json()
+    returnData = {"status": True, "reason": ""}
+    required = ['name']
+    if checkJSONAllParameter(required, data):
+        returnData = api.addConfiguration.NameCheck(data, get_conf_list())
+    else:
+        return jsonify(api.notEnoughParameter)
+    return jsonify(returnData)
+
+@app.route('/api/addConfiguration', methods=["POST"])
+def addConfiguration():
+    data = request.get_json()
+    returnData = {"status": True, "reason": ""}
+    required = ['addConfigurationPrivateKey', 'addConfigurationName', 'addConfigurationListenPort', 
+                'addConfigurationAddress', 'addConfigurationPreUp', 'addConfigurationPreDown', 
+                'addConfigurationPostUp', 'addConfigurationPostDown']
+    needFilled = ['addConfigurationPrivateKey', 'addConfigurationName', 'addConfigurationListenPort', 
+                'addConfigurationAddress']
+    if not checkJSONAllParameter(needFilled, data):
+        return jsonify(api.notEnoughParameter)
+    for i in required:
+        if i not in data.keys():
+            return jsonify(api.notEnoughParameter)
+
+    returnData = api.addConfiguration.addConfiguration(data, get_conf_list(), WG_CONF_PATH)
+    return jsonify(returnData)
+    
+
 
 """
 Dashboard Tools Related

@@ -1,8 +1,21 @@
 let numberToast = 0;
-let addConfigurationModal = new bootstrap.Modal(document.getElementById('addConfigurationModal'), {
+let emptyInputFeedback = "Can't leave empty";
+$('[data-toggle="tooltip"]').tooltip()
+let $add_configuration = $("#add_configuration");
+
+let addConfigurationModal = $("#addConfigurationModal");
+
+addConfigurationModal.modal({
     keyboard: false,
-    backdrop: 'static'
+    backdrop: 'static',
+    show: false
 });
+
+addConfigurationModal.on("hidden.bs.modal", function(){
+    $("#add_configuration_form").trigger("reset");
+    $("#add_configuration_form input").removeClass("is-valid").removeClass("is-invalid");
+    $(".addConfigurationAvailableIPs").text("N/A");
+})
 
 function showToast(msg){
     $(".toastContainer").append(
@@ -34,35 +47,32 @@ $(".toggle--switch").on("change", function(){
     }).done(function(res){
         let dot = $(`div[data-conf-id="${id}"] .dot`);
         console.log();
-        if (res){
+        if (res.status){
             if (status){
                 dot.removeClass("dot-stopped").addClass("dot-running");
                 dot.siblings().text("Running");
-                showToast(`${id} is running.`)
+                showToast(`${id} is running.`);
             }else{
                 dot.removeClass("dot-running").addClass("dot-stopped");
-                showToast(`${id} is stopped.`)
+                showToast(`${id} is stopped.`);
             }
-            ele.removeClass("waiting");
-            ele.removeAttr("disabled");
         }else{
+            // $(".index-alert").removeClass("d-none");
+            // $(".index-alert-full code").text(res.message);
+            ele.parents().children(".card-message").html(`<pre class="index-alert">Configuration toggle failed. Please check the following error message:<br><code>${res.message}</code></pre>`)
+
+
             if (status){
-                $(this).prop("checked", false)
+                ele.prop("checked", false)
             }else{
-                $(this).prop("checked", true)
+                ele.prop("checked", true)
             }
         }
-        
+        ele.removeClass("waiting").removeAttr("disabled");
     })
 });
 
-$('.switch').on("click", function() {
-    $(this).siblings($(".spinner-border")).css("display", "inline-block")
-    $(this).remove()
-    location.replace("/switch/"+$(this).attr('id'))
-});
 $(".sb-home-url").addClass("active");
-
 $(".card-body").on("click", function(handle){
     if ($(handle.target).attr("class") !== "toggleLabel" && $(handle.target).attr("class") !== "toggle--switch") {
         window.open($(this).find("a").attr("href"), "_self");
@@ -71,8 +81,7 @@ $(".card-body").on("click", function(handle){
 
 function genKeyPair(){
     let keyPair = window.wireguard.generateKeypair(); 
-    $("#addConfigurationPrivateKey").val(keyPair.privateKey);
-    $("#addConfigurationPublicKey").attr("disabled", "disabled").val(keyPair.publicKey);
+    $("#addConfigurationPrivateKey").val(keyPair.privateKey).data("checked", true);
 }
 
 $("#reGeneratePrivateKey").on("click", function() {
@@ -80,39 +89,168 @@ $("#reGeneratePrivateKey").on("click", function() {
 });
 
 $("#toggleAddConfiguration").on("click", function(){
-    addConfigurationModal.toggle();
+    addConfigurationModal.modal('toggle');
     genKeyPair()
 }); 
 
 $("#addConfigurationPrivateKey").on("change", function() {
-    let $publicKey = $("#addConfigurationPublicKey");
-    if ($(this).val().length === 44) {
-        $publicKey.attr("disabled", "disabled").val(window.wireguard.generatePublicKey($(this).val()));
-    } else {
-        $publicKey.removeAttr("disabled").val("");
+    $privateKey = $(this);
+    $privateKeyFeedback = $("#addConfigurationPrivateKeyFeedback");
+    if ($privateKey.val().length != 44){
+        invalidInput($privateKey, $privateKeyFeedback, "Invalid length");
+    }else{
+        validInput($privateKey);
     }
 });
 
-$("#addConfigurationAddress").on("change", function(){
-    let address = $("#addConfigurationAddress");
-    let addressFeedback = $("#addConfigurationAddressFeedback");
-    let availableIPs = $(".addConfigurationAvailableIPs");
+function ajaxPostJSON(url, data, doneFunc){
     $.ajax({
-        url: "/api/addConfigurationAddressCheck",
+        url: url,
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        data: JSON.stringify({
-            "address": $(this).val()
-        })
-    }).done(function(res){
-        console.log(res)
-        if (res.status){
-            availableIPs.html(`<strong>${res.data}</strong>`);
-            address.removeClass("is-invalid").addClass("is-valid");
-        }else{
-            address.addClass("is-invalid");
-            addressFeedback.addClass("invalid-feedback").text(res.reason);
-            availableIPs.html(`N/A`);
+        data: JSON.stringify(data),
+        headers: {"Content-Type": "application/json"}
+    }).done(function (res) { 
+        doneFunc(res);
+    });
+}
+function validInput(input){
+    input.removeClass("is-invalid").addClass("is-valid").removeAttr("disabled").data("checked", true);
+}
+function invalidInput(input, feedback, text){
+    input.removeClass("is-valid").addClass("is-invalid").removeAttr("disabled").data("checked", false);
+    feedback.addClass("invalid-feedback").text(text);
+}
+
+function checkPort($this){
+    let port = $this;
+    port.attr("disabled", "disabled");
+    let portFeedback = $("#addConfigurationListenPortFeedback");
+    if (port.val().length == 0){
+        invalidInput(port, portFeedback, emptyInputFeedback)
+    }else{
+        function done(res){
+            if(res.status){
+                validInput(port);
+            }else{
+                invalidInput(port, portFeedback, res.reason)
+            }
         }
-    })
+        ajaxPostJSON('/api/addConfigurationPortCheck', {"port": port.val()}, done);
+    }
+}
+$("#addConfigurationListenPort").on("change", function(){
+    checkPort($(this));
+})
+
+function checkAddress($this){
+    let address = $this;
+    address.attr("disabled", "disabled");
+    let availableIPs = $(".addConfigurationAvailableIPs");
+    let addressFeedback = $("#addConfigurationAddressFeedback");
+    if (address.val().length == 0){
+        invalidInput(address, addressFeedback, emptyInputFeedback);
+        availableIPs.html(`N/A`);
+    }else{
+        function done(res){
+            if (res.status){
+                availableIPs.html(`<strong>${res.data}</strong>`);
+                validInput(address);
+            }else{
+                invalidInput(address, addressFeedback, res.reason);
+                availableIPs.html(`N/A`);
+            }
+        }
+        ajaxPostJSON("/api/addConfigurationAddressCheck", {"address": address.val()}, done)
+    }
+}
+$("#addConfigurationAddress").on("change", function(){
+    checkAddress($(this));
+});
+
+
+function checkName($this){
+    let name = $this;
+    let nameFeedback = $("#addConfigurationNameFeedback");
+    name.val(name.val().replace(/\s/g,'')).attr("disabled", "disabled");
+    if (name.val().length === 0){
+        invalidInput(name, nameFeedback, emptyInputFeedback)
+    }else{
+        function done(res){
+            if (res.status){
+                validInput(name);
+            }else{
+                invalidInput(name, nameFeedback, res.reason);
+            }
+        }
+        ajaxPostJSON("/api/addConfigurationNameCheck", {"name": name.val()}, done);
+    }
+}
+$("#addConfigurationName").on("change", function(){
+    checkName($(this));
+});
+
+
+
+
+
+$("#addConfigurationBtn").on("click", function(){
+    let btn = $(this);
+    let input = $("#add_configuration_form input");
+    let filled = true;
+    for (let i = 0; i < input.length; i++){
+        let $i = $(input[i]);
+        if ($i.attr("required") != undefined){
+            if ($i.val().length == 0 && $i.attr("name") !== "addConfigurationPrivateKey"){
+                invalidInput($i, $i.siblings(".input-feedback"), emptyInputFeedback);
+                filled = false;
+            }
+            if ($i.val().length != 44 && $i.attr("name") == "addConfigurationPrivateKey"){
+                invalidInput($i, $i.siblings(".input-feedback"), "Invalid length");
+                filled = false;
+            }
+            if (!$i.data("checked")){
+                filled = false;
+            }
+        }  
+    }
+    if (filled){
+        $("#addConfigurationModal .modal-footer .btn").hide();
+        $(".addConfigurationStatus").removeClass("d-none").html(`<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> Adding peers`)
+        let data = {};
+        let q = [];
+        for (let i = 0; i < input.length; i++){
+            let $i = $(input[i]);
+            data[$i.attr("name")] = $i.val();
+            q.push($i.attr("name"))
+        }
+        function done(res){
+            let name = res.data;
+            if (res.status){
+                setTimeout(() => {
+                    
+                    $(".addConfigurationStatus").html(`<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> Toggling ${res.data}`)
+                    $.ajax({
+                        url: `/switch/${name}`
+                    }).done(function(res){
+                        if (res.status){
+                            $(".addConfigurationStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> ${name} toggled! Refresh in 5 seconds.`);
+                            setTimeout(() => {
+                                $(".addConfigurationStatus").text("Refeshing...")
+                                location.reload();
+                            }, 5000);
+                        }else{
+                            $(".addConfigurationStatus").removeClass("text-primary").addClass("text-danger").html(`<i class="bi bi-x-circle-fill"></i> ${name} toggle failed.`)
+                            $("#addCconfigurationAlert").removeClass("d-none").children(".alert-body").text(res.reason);
+                            $("#addCconfigurationAlertMessage").removeClass("d-none").text(res.message);
+                        }
+                    })
+                }, 500);
+                
+            }else{
+                $(".addConfigurationStatus").removeClass("text-primary").addClass("text-danger").html(`<i class="bi bi-x-circle-fill"></i> ${name} adding failed.`)
+                $("#addCconfigurationAlert").removeClass("d-none").children(".alert-body").text(res.reason);
+            }
+        }
+        ajaxPostJSON("/api/addConfiguration", data, done);
+    }
 });
