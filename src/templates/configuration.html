@@ -19,7 +19,9 @@
 		<div id="config_body">
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
                 <div class="info mt-4">
-                    <div id="config_info_alert"></div>
+                    <div>
+                        <pre class="index-alert d-none" style="margin-bottom: 1rem;"></pre>
+                    </div>
                     <div class="row">
                         <div class="col">
                             <small class="text-muted"><strong>CONFIGURATION</strong></small>
@@ -29,8 +31,8 @@
                             <small class="text-muted"><strong>SWITCH</strong></small><br>
                             <!-- <div id="conf_status_btn" class="info_loading"></div> -->
                             <div id="switch" class="info_loading">
-                                <input type="checkbox" class="toggle--switch" id="switch">
-                                <label for="switch" class="toggleLabel"></label>
+                                <input type="checkbox" class="toggle--switch" id="toggle--switch">
+                                <label for="toggle--switch" class="toggleLabel"></label>
                             </div>
                         </div>
                         <div class="w-100"></div>
@@ -142,9 +144,11 @@
                             <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill" style=""></i></button>
                             <button type="button" class="btn btn-secondary setting_btn"><i class="bi bi-three-dots"></i></button>
                             <div class="setting_btn_menu">
-                                <a class="text-primary" id="configuration_setting"><i class="bi bi-gear-fill"></i> Configration Settings</a>
                                 <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i> Delete Peers</a>
                                 <a class="text-info" id="download_all_peers" data-url="/download_all/{{conf_data['name']}}"><i class="bi bi-cloud-download-fill"></i> Download All Peers</a>
+                                <hr>
+                                <a class="text-primary" id="configuration_setting"><i class="bi bi-gear-fill"></i> Configration Settings</a>
+                                <a class="text-danger" id="configuration_delete"><i class="bi bi-trash3-fill"></i> Delete Configuration</a>
                             </div>
                         </div>
 
@@ -258,6 +262,29 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="button" class="btn btn-primary" id="save_peer" conf_id={{conf_data['name']}}>Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="modal fade" id="configuration_delete_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+		aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this configuration?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div id="remove_configuration_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+
+					</div>
+					<p style="margin: 0">This action is not reversible. The configuration will get toggle off, and delete from database and from the configuration folder.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+					<button type="button" class="btn btn-danger" id="sure_delete_configuration">Yes</button>
 				</div>
 			</div>
 		</div>
@@ -426,18 +453,7 @@
 			</div>
 		</div>
 	</div>
-    <div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;">
-          <!-- <div id="alertToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
-            <div class="toast-header">
-                  <strong class="mr-auto">WGDashboard</strong>
-                  <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-            </div>
-            <div class="toast-body">
-            </div>
-          </div> -->
-    </div>
+    <div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;"></div>
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}

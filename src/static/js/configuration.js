@@ -3,7 +3,6 @@
  * Under Apache-2.0 License
  */
 
-
 let peers = [];
 (function() {
     /**
@@ -37,6 +36,7 @@ let peers = [];
     let qrcodeModal = new bootstrap.Modal(document.getElementById('qrcode_modal'), bootstrapModalConfig);
     let settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), bootstrapModalConfig);
     let deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), bootstrapModalConfig);
+    let configurationDeleteModal = new bootstrap.Modal(document.getElementById('configuration_delete_modal'), bootstrapModalConfig);
     $("[data-toggle='tooltip']").tooltip();
     $("[data-toggle='popover']").popover();
 
@@ -207,7 +207,7 @@ let peers = [];
                 setActiveConfigurationName();
                 window.history.pushState(null, null, `/configuration/${configuration_name}`);
                 $("title").text(`${configuration_name} | WGDashboard`);
-
+                $(".index-alert").addClass("d-none").text(``);
                 totalDataUsageChartObj.data.labels = [];
                 totalDataUsageChartObj.data.datasets[0].data = [];
                 totalDataUsageChartObj.data.datasets[1].data = [];
@@ -667,7 +667,7 @@ let peers = [];
     }
 
     function removeAllTooltips(){
-        $(".tooltip").remove()
+        $(".tooltip").remove();
     }
 
     function toggleAccess(peerID){
@@ -828,21 +828,30 @@ let peers = [];
         });
     }
 
+
+
+    function deleteConfiguration(){
+
+    }
+
     window.configurations = {
         addModal: () => { return addModal; },
         deleteBulkModal: () => { return deleteBulkModal; },
         deleteModal: () => { return deleteModal; },
+        configurationDeleteModal: () => { return configurationDeleteModal; },
         ipModal: () => { return ipModal; },
         qrcodeModal: () => { return qrcodeModal; },
         settingModal: () => { return settingModal; },
         configurationTimeout: () => { return configuration_timeout; },
-        updateDisplayMode: () => { display_mode = window.localStorage.getItem("displayMode") },
+        updateDisplayMode: () => { display_mode = window.localStorage.getItem("displayMode"); },
+        removeConfigurationInterval: () => { removeConfigurationInterval(); },
 
         loadPeers: (searchString) => { loadPeers(searchString); },
         addPeersByBulk: () => { addPeersByBulk(); },
         deletePeers: (config, peers_ids) => { deletePeers(config, peers_ids); },
+        deleteConfiguration: () => { deleteConfiguration() },
         parsePeers: (response) => { parsePeers(response); },
-        toggleAccess: (peerID) => { toggleAccess(peerID) },
+        toggleAccess: (peerID) => { toggleAccess(peerID); },
 
 
         setConfigurationName: (confName) => { configuration_name = confName; },
@@ -867,6 +876,40 @@ let $body = $("body");
 let available_ips = [];
 let $add_peer = document.getElementById("save_peer");
 
+$("#configuration_delete").on("click", function(){
+    window.configurations.configurationDeleteModal().toggle();
+});
+
+function ajaxPostJSON(url, data, doneFunc){
+    $.ajax({
+        url: url,
+        method: "POST",
+        data: JSON.stringify(data),
+        headers: {"Content-Type": "application/json"}
+    }).done(function (res) { 
+        doneFunc(res);
+    });
+}
+
+$("#sure_delete_configuration").on("click", function () {
+    window.configurations.removeConfigurationInterval();
+    let ele = $(this)
+    ele.attr("disabled", "disabled");
+    function done(res){
+        if (res.status){
+            $('#configuration_delete_modal button[data-dismiss="modal"]').remove();
+            ele.text("Delete Successful! Redirecting in 5 seconds.");
+            setTimeout(function(){
+                window.location.replace('/');
+            }, 5000)
+        }else{
+            $("#remove_configuration_alert").removeClass("d-none").text(res.reason);
+        }
+    }
+    ajaxPostJSON("/api/deleteConfiguration", {"name": window.configurations.getConfigurationName()}, done);
+});
+
+
 /**
  * ==========
  * Add peers
@@ -883,7 +926,8 @@ document.querySelector(".add_btn").addEventListener("click", () => {
 /**
  * When configuration switch got click
  */
-$(".toggle--switch").on("click", function(){
+$(".toggle--switch").on("change", function(){
+    console.log('lol')
     $(this).addClass("waiting").attr("disabled", "disabled");
     let id = window.configurations.getConfigurationName();
     let status = $(this).prop("checked");
@@ -891,22 +935,23 @@ $(".toggle--switch").on("click", function(){
     $.ajax({
         url: `/switch/${id}`
     }).done(function(res){
-        console.log();
-        if (res){
+        if (res.status){
             if (status){
                 window.configurations.showToast(`${id} is running.`)
             }else{
                 window.configurations.showToast(`${id} is stopped.`)
             }
-            ele.removeClass("waiting");
-            ele.removeAttr("disabled");
         }else{
             if (status){
-                $(this).prop("checked", false)
+                ele.prop("checked", false)
             }else{
-                $(this).prop("checked", true)
+                ele.prop("checked", true)
             }
+            window.configurations.showToast(res.reason);
+            $(".index-alert").removeClass("d-none").text(`Configuration toggle failed. Please check the following error message:\n${res.message}`);
         }
+        ele.removeClass("waiting");
+        ele.removeAttr("disabled");
         window.configurations.loadPeers($('#search_peer_textbox').val())
     });
 

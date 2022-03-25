@@ -15,7 +15,7 @@ addConfigurationModal.on("hidden.bs.modal", function(){
     $("#add_configuration_form").trigger("reset");
     $("#add_configuration_form input").removeClass("is-valid").removeClass("is-invalid");
     $(".addConfigurationAvailableIPs").text("N/A");
-})
+});
 
 function showToast(msg){
     $(".toastContainer").append(
@@ -28,7 +28,7 @@ function showToast(msg){
             </div>
             <div class="toast-body">${msg}</div>
             <div class="toast-progressbar"></div>
-        </div>` )
+        </div>` );
     $(`#${numberToast}-toast`).toast('show');
     $(`#${numberToast}-toast .toast-body`).html(msg);
     $(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
@@ -46,7 +46,6 @@ $(".toggle--switch").on("change", function(){
         url: `/switch/${id}`
     }).done(function(res){
         let dot = $(`div[data-conf-id="${id}"] .dot`);
-        console.log();
         if (res.status){
             if (status){
                 dot.removeClass("dot-stopped").addClass("dot-running");
@@ -57,11 +56,7 @@ $(".toggle--switch").on("change", function(){
                 showToast(`${id} is stopped.`);
             }
         }else{
-            // $(".index-alert").removeClass("d-none");
-            // $(".index-alert-full code").text(res.message);
             ele.parents().children(".card-message").html(`<pre class="index-alert">Configuration toggle failed. Please check the following error message:<br><code>${res.message}</code></pre>`)
-
-
             if (status){
                 ele.prop("checked", false)
             }else{
@@ -113,6 +108,7 @@ function ajaxPostJSON(url, data, doneFunc){
         doneFunc(res);
     });
 }
+
 function validInput(input){
     input.removeClass("is-invalid").addClass("is-valid").removeAttr("disabled").data("checked", true);
 }
@@ -215,42 +211,40 @@ $("#addConfigurationBtn").on("click", function(){
     }
     if (filled){
         $("#addConfigurationModal .modal-footer .btn").hide();
-        $(".addConfigurationStatus").removeClass("d-none").html(`<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> Adding peers`)
+        $(".addConfigurationStatus").removeClass("d-none");
         let data = {};
         let q = [];
         for (let i = 0; i < input.length; i++){
             let $i = $(input[i]);
             data[$i.attr("name")] = $i.val();
-            q.push($i.attr("name"))
+            q.push($i.attr("name"));
         }
-        function done(res){
+        let done = (res) => {
             let name = res.data;
+            $(".addConfigurationAddStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> ${name} added successfully.`);
             if (res.status){
                 setTimeout(() => {
-                    
-                    $(".addConfigurationStatus").html(`<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> Toggling ${res.data}`)
+                    $(".addConfigurationToggleStatus").removeClass("waiting").html(`<div class="spinner-border spinner-border-sm" role="status"></div> Toggle Configuration`)
                     $.ajax({
                         url: `/switch/${name}`
                     }).done(function(res){
                         if (res.status){
-                            $(".addConfigurationStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> ${name} toggled! Refresh in 5 seconds.`);
+                            $(".addConfigurationToggleStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> Toggle Successfully. Refresh in 5 seconds.`);
                             setTimeout(() => {
-                                $(".addConfigurationStatus").text("Refeshing...")
+                                $(".addConfigurationToggleStatus").text("Refeshing...")
                                 location.reload();
                             }, 5000);
                         }else{
-                            $(".addConfigurationStatus").removeClass("text-primary").addClass("text-danger").html(`<i class="bi bi-x-circle-fill"></i> ${name} toggle failed.`)
-                            $("#addCconfigurationAlert").removeClass("d-none").children(".alert-body").text(res.reason);
-                            $("#addCconfigurationAlertMessage").removeClass("d-none").text(res.message);
+                            $(".addConfigurationToggleStatus").removeClass("text-primary").addClass("text-danger").html(`<i class="bi bi-x-circle-fill"></i> ${name} toggle failed.`)
+                            $("#addCconfigurationAlertMessage").removeClass("d-none").html(`${name} toggle failed. Please check the following error message:<br>${res.message}`);
                         }
-                    })
+                    });
                 }, 500);
-                
             }else{
                 $(".addConfigurationStatus").removeClass("text-primary").addClass("text-danger").html(`<i class="bi bi-x-circle-fill"></i> ${name} adding failed.`)
                 $("#addCconfigurationAlert").removeClass("d-none").children(".alert-body").text(res.reason);
             }
-        }
+        };
         ajaxPostJSON("/api/addConfiguration", data, done);
     }
 });

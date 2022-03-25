@@ -27,8 +27,8 @@
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
-			
-			
+
+
 			{% for i in conf%}
 				<div class="card mt-3 conf_card" data-conf-id="{{i['conf']}}">
 					<div class="card-body">
@@ -56,7 +56,7 @@
 						</div>
                         <div class="card-message"></div>
 					</div>
-                    
+
 				</div>
 			{%endfor%}
 		</main>
@@ -77,9 +77,6 @@
 				</div>
 				<div class="modal-body">
 					<div id="addCconfigurationAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						  <span aria-hidden="true">&times;</span>
-						</button>
                         <div class="alert-body"></div>
 					</div>
                     <pre id="addCconfigurationAlertMessage" class="index-alert d-none"></pre>
@@ -152,7 +149,13 @@
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					<button type="button" class="btn btn-primary" id="addConfigurationBtn">Add</button>
-                    <p class="text-primary addConfigurationStatus d-none"></p>
+                    <div class="text-primary addConfigurationStatus addConfigurationAddStatus d-none">
+						<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div>
+						Add Configuration
+					</div>
+					<div class="text-primary addConfigurationStatus addConfigurationToggleStatus d-none waiting">
+						<i class="bi bi-circle"></i> Toggle Configuration
+					</div>
 				</div>
 			</div>
 		</div>
@@ -162,4 +165,5 @@
 {% include "footer.html" %}
 <script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/index.js') }}"></script>
+
 </html>

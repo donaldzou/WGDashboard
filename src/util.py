@@ -106,7 +106,7 @@ def checkJSONAllParameter(required, data):
     if len(data) == 0:
         return False
     for i in required:
-        if i not in list(data.keys()):
+        if i not in list(data.keys()) or len(data[i]) == 0:
             return False
     return True
 

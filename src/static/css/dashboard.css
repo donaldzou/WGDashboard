@@ -272,7 +272,6 @@ body {
 }
 
 .index-switch {
-    text-align: right;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -671,7 +670,7 @@ pre.index-alert {
 }
 
 #switch{
-    transition: all 350ms ease-in;
+    transition: all 200ms ease-in;
 }
 
 .toggle--switch{
@@ -686,7 +685,7 @@ pre.index-alert {
     position: relative;
     border: 2px solid #6c757d8c;
     border-radius: 100px;
-    transition: all 350ms ease-in;
+    transition: all 200ms ease-in;
     cursor: pointer;
     margin: 0;
 }
@@ -706,9 +705,14 @@ pre.index-alert {
     animation-name: off;
     animation-duration: 350ms;
     animation-fill-mode: forwards;
-    transition: all 350ms ease-in;
+    transition: all 200ms ease-in;
     cursor: pointer;
 }
+
+.toggleLabel:hover::before{
+    filter: brightness(1.2);
+}
+
 
 .toggle--switch:checked + .toggleLabel{
     background-color: #007bff17 !important;
@@ -788,3 +792,11 @@ pre.index-alert {
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 }
+
+.addConfigurationToggleStatus.waiting{
+    opacity: 0.5;
+}
+
+/*.conf_card .card-body .row .card-col{*/
+/*    margin-bottom: 0.5rem;*/
+/*}*/

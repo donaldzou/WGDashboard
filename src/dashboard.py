@@ -1011,7 +1011,7 @@ def configuration(config_name):
         conf_data['checked'] = "checked"
     config_list = get_conf_list()
     if config_name not in [conf['conf'] for conf in config_list]:
-        return render_template('index.html', conf=get_conf_list())
+        return redirect('/')
 
     refresh_interval = int(config.get("Server", "dashboard_refresh_interval"))
     dns_address = config.get("Peers", "peer_global_DNS")
@@ -1110,14 +1110,14 @@ def switch(config_name):
                                             shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             # session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return jsonify({"status": False, "reason":"Can't stop peer", "message": str(exc.output.strip().decode("utf-8"))})
+            return jsonify({"status": False, "reason":"Can't stop configuration", "message": str(exc.output.strip().decode("utf-8"))})
     elif status == "stopped":
         try:
             subprocess.check_output("wg-quick up " + config_name,
                                     shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             # session["switch_msg"] = exc.output.strip().decode("utf-8")
-            return jsonify({"status": False, "reason":"Can't turn on peer", "message": str(exc.output.strip().decode("utf-8"))})
+            return jsonify({"status": False, "reason":"Can't turn on configuration", "message": str(exc.output.strip().decode("utf-8"))})
     return jsonify({"status": True, "reason":""})
 
 @app.route('/add_peer_bulk/<config_name>', methods=['POST'])
@@ -1556,7 +1556,7 @@ def addConfigurationAddressCheck():
     returnData = {"status": True, "reason": ""}
     required = ['address']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.AddressCheck(data)
+        returnData = api.addConfiguration.AddressCheck(api.addConfiguration, data)
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1567,7 +1567,7 @@ def addConfigurationPortCheck():
     returnData = {"status": True, "reason": ""}
     required = ['port']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.PortCheck(data, get_conf_list())
+        returnData = api.addConfiguration.PortCheck(api.addConfiguration, data, get_conf_list())
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1578,7 +1578,7 @@ def addConfigurationNameCheck():
     returnData = {"status": True, "reason": ""}
     required = ['name']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.NameCheck(data, get_conf_list())
+        returnData = api.addConfiguration.NameCheck(api.addConfiguration, data, get_conf_list())
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1597,11 +1597,36 @@ def addConfiguration():
     for i in required:
         if i not in data.keys():
             return jsonify(api.notEnoughParameter)
+    config = get_conf_list()
+    nameCheck = api.addConfiguration.NameCheck(api.addConfiguration, {"name": data['addConfigurationName']}, config)
+    if not nameCheck['status']:
+        return nameCheck
 
-    returnData = api.addConfiguration.addConfiguration(data, get_conf_list(), WG_CONF_PATH)
+    portCheck = api.addConfiguration.PortCheck(api.addConfiguration, {"port": data['addConfigurationListenPort']}, config)
+    if not portCheck['status']:
+        return portCheck
+
+    addressCheck = api.addConfiguration.AddressCheck(api.addConfiguration, {"address": data['addConfigurationAddress']})
+    if not addressCheck['status']:
+        return addressCheck
+
+    returnData = api.addConfiguration.addConfiguration(api.addConfiguration, data, config, WG_CONF_PATH)
     return jsonify(returnData)
-    
 
+@app.route('/api/deleteConfiguration', methods=['POST'])
+def deleteConfiguration():
+    data = request.get_json()
+    returnData = {"status": True, "reason": "", "data":""}
+    required = ['name']
+    if not checkJSONAllParameter(required, data):
+        return jsonify(api.notEnoughParameter)
+
+    returnData = api.addConfiguration.deleteConfiguration(api.addConfiguration, data, get_conf_list(), g, WG_CONF_PATH)
+
+
+
+
+    return returnData
 
 """
 Dashboard Tools Related
