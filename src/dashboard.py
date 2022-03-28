@@ -52,7 +52,6 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Enable QR Code Generator
 QRcode(app)
-socketio = SocketIO(app)
 
 # TODO: use class and object oriented programming
 
