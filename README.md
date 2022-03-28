@@ -3,6 +3,7 @@ If anyone would love to try out the beta version of v3.1, you can do the followi
 ```
 git clone -b hmm-what-about-socket https://github.com/donaldzou/WGDashboard.git wgdashboard
 ```
+> Please note that I still do push on this branch, and it might crash or not finish yet on some functionality ;)
 ##### Known issue on WGDashboard
 - [IPv6 in WireGuard might not fully support.](https://github.com/donaldzou/WGDashboard/issues/167)
 <hr>
