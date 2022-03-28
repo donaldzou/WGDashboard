@@ -24,8 +24,6 @@ import ifcfg
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
-# TESTING
-from flask_socketio import SocketIO
 
 # Import other python files
 from util import *
