@@ -66,6 +66,9 @@ class addConfiguration:
         for i in configs:
             if i['port'] == port:
                 return {"status": False, "reason": f"{port} used by {i['conf']}."}
+        checkSystem = subprocess.run(f'ss -tulpn | grep :{port} > /dev/null', shell=True)
+        if checkSystem.returncode != 1:
+            return {"status": False, "reason": f"Port {port} used by other process in your system."}
         return good
 
     def NameCheck(self, data, configs):

@@ -607,19 +607,32 @@ def f_available_ips(config_name):
     """
     config_interface = read_conf_file_interface(config_name)
     if "Address" in config_interface:
+        available = []
         existed = []
         conf_address = config_interface['Address']
         address = conf_address.split(',')
         for i in address:
             add, sub = i.split("/")
-            existed.append(ipaddress.ip_address(add))
+            existed.append(ipaddress.ip_address(add.replace(" ", "")))
         peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
         for i in peers:
             add = i[0].split(",")
             for k in add:
                 a, s = k.split("/")
                 existed.append(ipaddress.ip_address(a.strip()))
-        available = list(ipaddress.ip_network(address[0], False).hosts())
+        count = 0
+        for i in address:
+            tmpIP = ipaddress.ip_network(i.replace(" ", ""), False)
+            if tmpIP.version == 6:
+                for i in tmpIP.hosts():
+                    if i not in existed:
+                        available.append(i)
+                        count += 1
+                    if count > 100:
+                        break
+            else:
+                available = available + list(tmpIP.hosts())
+
         for i in existed:
             try:
                 available.remove(i)
