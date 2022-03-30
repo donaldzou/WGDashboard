@@ -303,11 +303,15 @@ let peers = [];
                 let total_s = 0;
                 total_r += peer.cumu_receive;
                 total_s += peer.cumu_sent;
+                
+            
                 let spliter = '<div class="w-100"></div>';
                 let peer_name =
                     `<div class="col-sm peerNameCol">
                         <h5 class="peerName">${peer.name === "" ? "Untitled" : peer.name}</h5>
-                        <h6 class="peerLightContainer"><span class="dot dot-${peer.status}" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left"></span></h6>
+                        <h6 class="peerLightContainer">
+                            <span class="dot dot-${peer.status}" style="margin-left: auto !important;" data-toggle="tooltip" data-placement="left"></span>
+                        </h6>
                      </div>`;
                 let peer_transfer =
                     `<div class="col-12 peer_data_group" style="">
@@ -318,10 +322,31 @@ let peers = [];
                             <small><i class="bi bi-arrow-up-right"></i> ${roundN(peer.total_sent + total_s, 4)} GB</small>
                         </p>
                     </div>`;
-                let peer_key = '<div class="col-sm"><small class="text-muted" style="display: flex"><strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small> <h6><samp class="ml-auto key">' + peer.id + '</samp></h6></div>';
-                let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">' + peer.allowed_ip + '</h6></div>';
-                let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">' + peer.latest_handshake + '</h6> </div>';
-                let peer_endpoint = '<div class="col-sm"><small class="text-muted"><strong>END POINT</strong></small><h6 style="text-transform: uppercase;">' + peer.endpoint + '</h6></div>';
+                let peer_key = 
+                    `<div class="col-sm">
+                        <small class="text-muted" style="display: flex">
+                            <strong>PEER</strong>
+                            <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong>
+                        </small>
+                        <h6><samp class="ml-auto key">${peer.id}</samp></h6>
+                    </div>`;
+                let peer_allowed_ip = `
+                    <div class="col-sm">
+                        <small class="text-muted">
+                            <strong>ALLOWED IP</strong>
+                        </small>
+                        <h6 style="text-transform: uppercase;">${peer.allowed_ip}</h6>
+                    </div>`;
+                let peer_latest_handshake = 
+                    `<div class="col-sm">
+                        <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
+                        <h6 style="text-transform: uppercase;">${peer.latest_handshake}</h6>
+                    </div>`;
+                let peer_endpoint = 
+                    `<div class="col-sm">
+                        <small class="text-muted"><strong>END POINT</strong></small>
+                        <h6 style="text-transform: uppercase;">${peer.endpoint}</h6>
+                    </div>`;
                 let peer_control = `
                     <div class="col-sm">
                         <hr>
@@ -336,27 +361,31 @@ let peers = [];
                                 <i class="bi bi-ethernet" data-toggle="tooltip" data-placement="bottom" data-original-title='Peer enabled. Click to disable peer.' data-peer-name="${peer.name}"></i>
                             </button>`;
                 if (peer.private_key !== "") {
-                    peer_control += '<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline"><button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="/qrcode/' + response.name + '?id=' + encodeURIComponent(peer.id) + '"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg></button><a href="/download/' + response.name + '?id=' + encodeURIComponent(peer.id) + '" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a></div>';
+                    peer_control += 
+                        `<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
+                            <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="/qrcode/${response.name}?id=${encodeURIComponent(peer.id)}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
+                            </button>
+                            <a href="/download/${response.name}?id=${encodeURIComponent(peer.id)}" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a>
+                        </div>`;
                 }
-                peer_control += '</div>';
-                let html = '<div class="' + mode + '" data-id="' + peer.id + '">' +
-                    '<div class="card mb-3 card-' + peer.status + '">' +
-                    '<div class="card-body">' +
-                    '<div class="row">' +
-                    peer_name +
-                    spliter +
-                    peer_transfer +
-                    peer_key +
-                    peer_allowed_ip +
-                    peer_latest_handshake +
-                    spliter +
-                    peer_endpoint +
-                    spliter +
-                    peer_control +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div></div>';
+                peer_control += '</div></div>';
+                let html = 
+                    `<div class="${mode}" data-id="${peer.id}">
+                        <div class="card mb-3 card-${peer.status}">
+                            <div class="card-body">
+                                <div class="row">` +
+                                    peer_name +
+                                    spliter +
+                                    peer_transfer +
+                                    peer_key +
+                                    peer_allowed_ip +
+                                    peer_latest_handshake +
+                                    spliter +
+                                    peer_endpoint +
+                                    spliter +
+                                    peer_control +
+                    `</div></div></div></div>`;
                 result += html;
             });
             response.lock_access_peers.forEach(function(peer) {
