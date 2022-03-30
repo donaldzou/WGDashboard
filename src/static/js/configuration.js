@@ -408,10 +408,28 @@ let peers = [];
                             <small><i class="bi bi-arrow-up-right"></i> ${roundN(peer.total_sent + total_s, 4)} GB</small>
                         </p>
                     </div>`;
-                let peer_key = '<div class="col-sm"><small class="text-muted" style="display: flex"><strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong></small> <h6><samp class="ml-auto key">' + peer.id + '</samp></h6></div>';
-                let peer_allowed_ip = '<div class="col-sm"><small class="text-muted"><strong>ALLOWED IP</strong></small><h6 style="text-transform: uppercase;">' + peer.allowed_ip + '</h6></div>';
-                let peer_latest_handshake = '<div class="col-sm"> <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small> <h6 style="text-transform: uppercase;">' + peer.latest_handshake + '</h6> </div>';
-                let peer_endpoint = '<div class="col-sm"><small class="text-muted"><strong>END POINT</strong></small><h6 style="text-transform: uppercase;">' + peer.endpoint + '</h6></div>';
+                let peer_key = 
+                    `<div class="col-sm">
+                        <small class="text-muted" style="display: flex">
+                            <strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong>
+                        </small>
+                        <h6><samp class="ml-auto key">${peer.id}/samp></h6>
+                    </div>`;
+                let peer_allowed_ip = 
+                    `<div class="col-sm">
+                        <small class="text-muted"><strong>ALLOWED IP</strong></small>
+                        <h6 style="text-transform: uppercase;">${peer.allowed_ip}</h6>
+                    </div>`;
+                let peer_latest_handshake = 
+                    `<div class="col-sm">
+                        <small class="text-muted"><strong>LATEST HANDSHAKE</strong></small>
+                        <h6 style="text-transform: uppercase;">${peer.latest_handshake}</h6>
+                    </div>`;
+                let peer_endpoint = 
+                    `<div class="col-sm">
+                        <small class="text-muted"><strong>END POINT</strong></small>
+                        <h6 style="text-transform: uppercase;">${peer.endpoint}</h6>
+                    </div>`;
                 let peer_control = `
                     <div class="col-sm">
                         <hr>
