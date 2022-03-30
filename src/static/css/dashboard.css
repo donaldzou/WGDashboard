@@ -449,14 +449,14 @@ main {
     /*padding: 0.6rem 0.9em;*/
 }
 
-#username,
-#password {
+.login-box #username,
+.login-box #password {
     padding: 0.6rem calc( 0.9rem + 32px);
     height: inherit;
 }
 
-label[for="username"],
-label[for="password"] {
+.login-box label[for="username"],
+.login-box label[for="password"] {
     font-size: 1rem;
     margin: 0 !important;
     transform: translateY(30px) translateX(16px);
