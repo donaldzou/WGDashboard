@@ -1,0 +1,18 @@
+version: "3.5"
+
+services:
+  web:
+    build: 
+      context: ./
+      dockerfile: ./Dockerfile
+    cap_add: 
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped 
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./src:/opt/wgdashboard
+      - ./config:/etc/wireguard
+    ports:
+      - 10086:10086
+      - 51820:51820/udp
