@@ -1,4 +1,6 @@
 import ipaddress, subprocess, datetime, os, util
+
+from flask import jsonify
 from util import *
 
 notEnoughParameter = {"status": False, "reason": "Please provide all required parameters."}
@@ -41,6 +43,29 @@ def togglePeerAccess(data, g):
             return {"status": False, "reason": str(exc.output.strip())}
     return good
 
+class managePeer:
+    def getPeerDataUsage(self, data, cur):
+        interval = {
+            "30min": (60 * 30) / 30,
+             "1h": (60 * 60) / 30, 
+             "6h": (60 * 60 * 6) / 30, 
+             "24h": (60 * 60 * 24) / 30, 
+             "all": ""
+        }
+        if data['interval'] not in interval.keys():
+            return {"status": False, "reason": "Invalid interval."}
+        intv = ""
+        if data['interval'] != "all":
+            intv = f" LIMIT {int(interval[data['interval']])}"
+        timeData = cur.execute(f"SELECT total_receive, total_sent, time FROM wg0_transfer WHERE id='{data['peerID']}' ORDER BY time DESC{intv};")
+        chartData = []
+        for i in timeData:
+            chartData.append({
+                "total_receive": i[0],
+                "total_sent": i[1],
+                "time": i[2]
+            })
+        return {"status": True, "reason": "", "data": chartData}
 
 class addConfiguration:
     def AddressCheck(self, data):

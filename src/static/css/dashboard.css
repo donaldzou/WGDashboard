@@ -169,7 +169,8 @@ body {
 
 .btn-control {
     border: none !important;
-    padding: 0 1rem 0 0;
+    padding: 0;
+    margin: 0 1rem 0 0;
 }
 
 .btn-control:active,
@@ -221,9 +222,13 @@ body {
     color: #6c757d
 }
 
-.btn-setting-peer:hover {
+.btn-control.btn-outline-primary:hover{
     color: #007bff
 }
+
+/* .btn-setting-peer:hover {
+    color: #007bff
+} */
 
 .btn-download-peer:hover {
     color: #17a2b8;
@@ -800,3 +805,27 @@ pre.index-alert {
 /*.conf_card .card-body .row .card-col{*/
 /*    margin-bottom: 0.5rem;*/
 /*}*/
+
+.peerDataUsageChartContainer{
+    min-height: 50vh;
+    width: 100%;
+}
+
+.peerDataUsageChartControl{
+    display: block !important;
+    margin: 0;
+}
+
+.peerDataUsageChartControl .switchUnit{
+    width: 33.3%;
+}
+
+.peerDataUsageChartControl .switchTimePeriod{
+    width: 25%;
+}
+
+@media (min-width: 1200px){
+    #peerDataUsage .modal-xl {
+        max-width: 95vw;
+    }
+}

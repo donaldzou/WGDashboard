@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         <div class="btn-manage-group">
-                            <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill" style=""></i></button>
+                            <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill"></i></button>
                             <button type="button" class="btn btn-secondary setting_btn"><i class="bi bi-three-dots"></i></button>
                             <div class="setting_btn_menu">
                                 <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i> Delete Peers</a>
@@ -154,6 +154,46 @@
         </div>
 	</div>
 
+    <div class="modal fade" id="peerDataUsage">
+		<div class="modal-dialog modal-dialog-centered modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Data Usage</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+                   <div class="row">
+                        <div class="chartControl peerDataUsageChartControl col-sm">
+                            <label><small class="text-muted">Data Unit Size</small></label><br>
+                            <div class="btn-group" role="group" style="width: 100%;">
+                                <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="GB">GB</button>
+                                <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="MB">MB</button>
+                                <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="KB">KB</button>
+                            </div>
+                        </div>
+                        <div class="chartControl peerDataUsageChartControl col-sm">
+                            <label><small class="text-muted">Time Period</small></label><br>
+                            <div class="btn-group" role="group" style="width: 100%;">
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="30min">30 min</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="1h">1hr</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="6h">6hrs</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="24h">24hrs</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="all">All</button>
+                            </div>
+                        </div>
+                   </div> 
+                   <hr>
+
+                    
+                    <div class="peerDataUsageChartContainer">
+                        <canvas id="peerDataUsageChartObj"></canvas>
+                    </div>
+                    
+                    
+				</div>
+			</div>
+		</div>
+	</div>
 	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg">
@@ -452,6 +492,7 @@
 </body>
 {% include "footer.html" %}
 <script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
+<script src="{{ url_for('static',filename='js/configurationTool.js') }}"></script>
 <script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
 <script>
     configurations.setConfigurationName("{{ conf_data['name'] }}");

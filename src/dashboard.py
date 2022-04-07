@@ -1569,6 +1569,16 @@ def switch_display_mode(mode):
 # APIs
 import api
 
+@app.route('/api/getPeerDataUsage', methods=['POST'])
+def getPeerDataUsage():
+    data = request.get_json()
+    returnData = {"status": True, "reason": ""}
+    required = ['peerID', 'config', 'interval']
+    if checkJSONAllParameter(required, data):
+        returnData = api.managePeer.getPeerDataUsage(api.managePeer, data, g.cur)
+    else:
+        return jsonify(api.notEnoughParameter)
+    return jsonify(returnData)
 
 @app.route('/api/togglePeerAccess', methods=['POST'])
 def togglePeerAccess():
@@ -1751,7 +1761,7 @@ def goodbye():
     global bgThread
     stop_thread = True
     
-    print("Exiting Python Script!")
+    print("Stopping background thread")
 
 def get_all_transfer_thread():
     print("waiting 15 sec ")
@@ -1762,8 +1772,9 @@ def get_all_transfer_thread():
         db = connect_db()
         cur = db.cursor()
         while True:
-            if stop_thread:
-                break
+            print(stop_thread)
+            # if stop_thread:
+            #     break
             conf = []
             for i in os.listdir(WG_CONF_PATH):
                 if regex_match("^(.{1,}).(conf)$", i):
@@ -1809,10 +1820,6 @@ def get_all_transfer_thread():
                     conf.append(temp)
             if len(conf) > 0:
                 conf = sorted(conf, key=itemgetter('conf'))
-
-
-            print("adding...........")
-            # l = get_conf_list()
             for i in conf:
                 print(i['conf'])
                 config_name = i['conf']
@@ -1833,15 +1840,12 @@ def get_all_transfer_thread():
                             total_receive = cur_i[0][0]
                             cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
                             cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
-                            # if cur_i[0][4] == "running":
                             cumulative_receive = cur_i[0][2] + total_receive
                             cumulative_sent = cur_i[0][3] + total_sent
                             if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
                                 total_sent = cur_total_sent
                                 total_receive = cur_total_receive
                             else:
-                                # cumulative_receive = cur_i[0][2] + total_receive
-                                # cumulative_sent = cur_i[0][3] + total_sent
                                 cur.execute("UPDATE %s SET cumu_receive = %f, cumu_sent = %f, cumu_data = %f WHERE id = '%s'" %
                                                 (config_name, round(cumulative_receive, 4), round(cumulative_sent, 4),
                                                 round(cumulative_sent + cumulative_receive, 4), data_usage[i][0]))
@@ -1857,11 +1861,10 @@ def get_all_transfer_thread():
                             VALUES ('{data_usage[i][0]}', {round(total_receive, 4)}, {round(total_sent, 4)}, {round(total_receive + total_sent, 4)},{round(cumulative_receive, 4)}, {round(cumulative_sent, 4)},
                                                 {round(cumulative_sent + cumulative_receive, 4)}, '{now_string}')
                             ''')
-                            # get_transfer(i['conf'])
                             db.commit()
                 except subprocess.CalledProcessError:
-                    print(i['conf'] + " stopped")
-            time.sleep(15)
+                    pass
+            time.sleep(30)
     except KeyboardInterrupt:
         return True
 """
@@ -1973,8 +1976,6 @@ def run_dashboard():
 """
 Get host and port for web-server
 """
-
-
 def get_host_bind():
     init_dashboard()
     config = configparser.ConfigParser(strict=False)
@@ -1982,7 +1983,6 @@ def get_host_bind():
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
     return app_ip, app_port
-
 
 if __name__ == "__main__":
     init_dashboard()
@@ -1998,7 +1998,8 @@ if __name__ == "__main__":
     global bgThread
     global stop_thread
     stop_thread = False
-
     bgThread = threading.Thread(target=get_all_transfer_thread)
+    bgThread.daemon = True
     bgThread.start()
+
     app.run(host=app_ip, debug=False, port=app_port)
