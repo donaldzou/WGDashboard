@@ -1,7 +1,7 @@
 ##### Beta testing on v3.1
 If anyone would love to try out the beta version of v3.1, you can do the following. Let me know if you encountered any issues. ;)
 ```
-git clone -b hmm-what-about-socket https://github.com/donaldzou/WGDashboard.git wgdashboard
+git clone -b v3.1-dev https://github.com/donaldzou/WGDashboard.git wgdashboard
 ```
 > Please note that I still do push on this branch, and it might crash or not finish yet on some functionality ;)
 ##### Known issue on WGDashboard `v3.0 - v3.0.6`
