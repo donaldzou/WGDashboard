@@ -1,7 +1,8 @@
 version: "3.5"
 
 services:
-  web:
+  wgdashboard:
+    image: donaldzou/wgdashboard
     build: 
       context: ./
       dockerfile: ./Dockerfile

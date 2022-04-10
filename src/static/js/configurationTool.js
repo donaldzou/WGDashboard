@@ -48,6 +48,10 @@ $("#sure_delete_configuration").on("click", function () {
 
 function loadPeerDataUsageChartDone(res){
     if (res.status === true){
+        let t = new Date();
+        let string = `${t.getDate()}/${t.getMonth()}/${t.getFullYear()} ${t.getHours() > 10 ? t.getHours():`0${t.getHours()}`}:${t.getMinutes() > 10 ? t.getMinutes():`0${t.getMinutes()}`}:${t.getSeconds() > 10 ? t.getSeconds():`0${t.getSeconds()}`}`;
+        $(".peerDataUsageUpdateTime").html(`Updated on: ${string}`);
+
         configurations.peerDataUsageChartObj().data.labels = [];
         configurations.peerDataUsageChartObj().data.datasets[0].data = [];
         configurations.peerDataUsageChartObj().data.datasets[1].data = [];
@@ -74,16 +78,26 @@ function loadPeerDataUsageChartDone(res){
     }
 }
 
+let peerDataUsageInterval;
 
 $body.on("click", ".btn-data-usage-peer", function(){
     configurations.peerDataUsageChartObj().data.peerID = $(this).data("peer-id");
     configurations.peerDataUsageModal().toggle();
-    ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID": $(this).data("peer-id"), "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
+    peerDataUsageInterval = setInterval(function(){
+        ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
+    }, 30000);
+    ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
 });
+
+
+
+
+
 
 $('#peerDataUsage').on('shown.bs.modal', function() {
     configurations.peerDataUsageChartObj().resize();
 }).on('hidden.bs.modal', function() {
+    clearInterval(peerDataUsageInterval);
     configurations.peerDataUsageChartObj().data.peerID = "";
     configurations.peerDataUsageChartObj().data.labels = [];
     configurations.peerDataUsageChartObj().data.datasets[0].data = [];

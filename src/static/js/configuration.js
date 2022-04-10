@@ -446,7 +446,7 @@ let peers = [];
                     </div>`;
                 let peer_control = `
                     <div class="col-sm">
-                        <hr>
+                        <hr style="margin: 1rem -20px;">
                         <div class="button-group" style="display:flex">
                             <button type="button" class="btn btn-outline-primary btn-setting-peer btn-control" data-peer-id="${peer.id}" data-toggle="modal">
                                 <i class="bi bi-gear-fill" data-toggle="tooltip" data-placement="bottom" title="Peer Settings"></i>
@@ -533,7 +533,7 @@ let peers = [];
                     </div>`;
                 let peer_control = `
                     <div class="col-sm">
-                        <hr>
+                        <hr style="margin: 1rem -20px;">
                         <div class="button-group" style="display:flex; align-items: center;">
                             <button type="button" class="btn btn-outline-success btn-lock-peer btn-control lock" data-peer-id="${peer.id}" data-toggle="modal">
                                 <i class="bi bi-ethernet" data-toggle="tooltip" data-placement="bottom" data-original-title='Peer disabled. Click to enable peer.' data-peer-name="${peer.name}"></i>

@@ -1,8 +1,9 @@
 <!-- configuration.html - < WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]-->
 <html lang="en">
 {% with title=title%}
-    {% include "header.html"%}
+{% include "header.html"%}
 {% endwith %}
+
 <body>
     <div class="no-response">
         <div class="container">
@@ -10,10 +11,10 @@
             <h4 class="text-white">Oops!<br>I can't connect to the server.</h4>
         </div>
     </div>
-	{% include "navbar.html" %}
-	<div class="container-fluid" id="right_body">
-		{% include "sidebar.html" %}
-		<div id="config_body">
+    {% include "navbar.html" %}
+    <div class="container-fluid" id="right_body">
+        {% include "sidebar.html" %}
+        <div id="config_body">
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4 mb-4">
                 <div class="info mt-4">
                     <div>
@@ -47,7 +48,8 @@
                         </div>
                         <div class="col-sm">
                             <small class="text-muted"><strong>TOTAL RECEIVED</strong></small>
-                            <h6 style="text-transform: uppercase;" id="conf_total_data_received" class="info_loading"></h6>
+                            <h6 style="text-transform: uppercase;" id="conf_total_data_received" class="info_loading">
+                            </h6>
                         </div>
                         <div class="col-sm">
                             <small class="text-muted"><strong>TOTAL SENT</strong></small>
@@ -57,17 +59,20 @@
                         <div class="col-sm">
                             <small class="text-muted">
                                 <strong>PUBLIC KEY</strong>
-                                <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong>
+                                <strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out"
+                                    class="text-primary">CLICK TO COPY</strong>
                             </small>
                             <h6 class="info_loading"><samp class="key" id="conf_public_key"></samp></h6>
                         </div>
                         <div class="col-sm">
                             <small class="text-muted"><strong>LISTEN PORT</strong></small>
-                            <h6 style="text-transform: uppercase;" class="info_loading"><samp id="conf_listen_port"></samp></h6>
+                            <h6 style="text-transform: uppercase;" class="info_loading"><samp
+                                    id="conf_listen_port"></samp></h6>
                         </div>
-                         <div class="col-sm">
+                        <div class="col-sm">
                             <small class="text-muted"><strong>ADDRESS</strong></small>
-                            <h6 style="text-transform: uppercase;" class="info_loading"><samp id="conf_address"></samp></h6>
+                            <h6 style="text-transform: uppercase;" class="info_loading"><samp id="conf_address"></samp>
+                            </h6>
                         </div>
                     </div>
                 </div>
@@ -81,7 +86,8 @@
                                     <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="GB">GB</button>
                                     <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="MB">MB</button>
                                     <button class="btn btn-outline-primary btn-sm switchUnit" data-unit="KB">KB</button>
-                                    <button class="btn btn-outline-primary btn-sm fullScreen"><i class="bi bi-fullscreen"></i></button>
+                                    <button class="btn btn-outline-primary btn-sm fullScreen"><i
+                                            class="bi bi-fullscreen"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -97,13 +103,16 @@
                             <div class="row">
                                 <div class="col-md">
                                     <div class="form-group">
-                                         <label for="search_peer_textbox"><small class="text-muted">Search Peers</small></label>
-                                        <input type="text" class="form-control" id="search_peer_textbox" placeholder="Enter Peer's Name" value="">
+                                        <label for="search_peer_textbox"><small class="text-muted">Search
+                                                Peers</small></label>
+                                        <input type="text" class="form-control" id="search_peer_textbox"
+                                            placeholder="Enter Peer's Name" value="">
                                     </div>
                                 </div>
                                 <div class="col-md">
                                     <div class="form-group">
-                                        <label for="sort_by_dropdown"><small class="text-muted">Sort Peers By</small></label>
+                                        <label for="sort_by_dropdown"><small class="text-muted">Sort Peers
+                                                By</small></label>
                                         <select class="form-control" id="sort_by_dropdown">
                                             <option value="status">Status</option>
                                             <option value="name">Name</option>
@@ -117,11 +126,22 @@
                             <div class="form-group">
                                 <label><small class="text-muted">Refresh Interval</small></label><br>
                                 <div class="btn-group interval-btn-group" role="group" style="width: 100%">
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary btn-group-label refresh" data-toggle="tooltip" data-placement="bottom" title="Refresh Peers"><i class="bi bi-arrow-repeat"></i></button>
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval" data-refresh-interval="5000">5s</button>
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval" data-refresh-interval="10000">10s</button>
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval" data-refresh-interval="30000">30s</button>
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary update_interval" data-refresh-interval="60000">1m</button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary btn-group-label refresh" data-toggle="tooltip"
+                                        data-placement="bottom" title="Refresh Peers"><i
+                                            class="bi bi-arrow-repeat"></i></button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary update_interval"
+                                        data-refresh-interval="5000">5s</button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary update_interval"
+                                        data-refresh-interval="10000">10s</button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary update_interval"
+                                        data-refresh-interval="30000">30s</button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary update_interval"
+                                        data-refresh-interval="60000">1m</button>
                                 </div>
                             </div>
                         </div>
@@ -129,20 +149,31 @@
                             <div class="form-group">
                                 <label><small class="text-muted">Display Mode</small></label><br>
                                 <div class="btn-group display-btn-group" role="group" style="width: 100%">
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary display_mode" data-display-mode="grid"><i class="bi bi-grid-fill" style="font-size: 1.5rem;"></i></button>
-                                    <button style="width: 20%" type="button" class="btn btn-outline-primary display_mode" data-display-mode="list"><i class="bi bi-list" style="font-size: 1.5rem;"></i></button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary display_mode" data-display-mode="grid"><i
+                                            class="bi bi-grid-fill" style="font-size: 1.5rem;"></i></button>
+                                    <button style="width: 20%" type="button"
+                                        class="btn btn-outline-primary display_mode" data-display-mode="list"><i
+                                            class="bi bi-list" style="font-size: 1.5rem;"></i></button>
                                 </div>
                             </div>
                         </div>
                         <div class="btn-manage-group">
-                            <button type="button" class="btn btn-primary add_btn"><i class="bi bi-plus-circle-fill"></i></button>
-                            <button type="button" class="btn btn-secondary setting_btn"><i class="bi bi-three-dots"></i></button>
+                            <button type="button" class="btn btn-primary add_btn"><i
+                                    class="bi bi-plus-circle-fill"></i></button>
+                            <button type="button" class="btn btn-secondary setting_btn"><i
+                                    class="bi bi-three-dots"></i></button>
                             <div class="setting_btn_menu">
-                                <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i> Delete Peers</a>
-                                <a class="text-info" id="download_all_peers" data-url="/download_all/{{conf_data['name']}}"><i class="bi bi-cloud-download-fill"></i> Download All Peers</a>
+                                <a class="text-danger" id="delete_peers_by_bulk_btn"><i class="bi bi-trash-fill"></i>
+                                    Delete Peers</a>
+                                <a class="text-info" id="download_all_peers"
+                                    data-url="/download_all/{{conf_data['name']}}"><i
+                                        class="bi bi-cloud-download-fill"></i> Download All Peers</a>
                                 <hr>
-                                <a class="text-primary" id="configuration_setting"><i class="bi bi-gear-fill"></i> Configration Settings</a>
-                                <a class="text-danger" id="configuration_delete"><i class="bi bi-trash3-fill"></i> Delete Configuration</a>
+                                <a class="text-primary" id="configuration_setting"><i class="bi bi-gear-fill"></i>
+                                    Configration Settings</a>
+                                <a class="text-danger" id="configuration_delete"><i class="bi bi-trash3-fill"></i>
+                                    Delete Configuration</a>
                             </div>
                         </div>
 
@@ -152,17 +183,18 @@
                 <small id="peer_loading_time" class="text-muted"></small>
             </main>
         </div>
-	</div>
+    </div>
 
     <div class="modal fade" id="peerDataUsage">
-		<div class="modal-dialog modal-dialog-centered modal-xl">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Data Usage</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				</div>
-				<div class="modal-body">
-                   <div class="row">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Data Usage</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
                         <div class="chartControl peerDataUsageChartControl col-sm">
                             <label><small class="text-muted">Data Unit Size</small></label><br>
                             <div class="btn-group" role="group" style="width: 100%;">
@@ -174,74 +206,87 @@
                         <div class="chartControl peerDataUsageChartControl col-sm">
                             <label><small class="text-muted">Time Period</small></label><br>
                             <div class="btn-group" role="group" style="width: 100%;">
-                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="30min">30 min</button>
-                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="1h">1hr</button>
-                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="6h">6hrs</button>
-                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="24h">24hrs</button>
-                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="all">All</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod" data-time="30min">30
+                                    min</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod"
+                                    data-time="1h">1hr</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod"
+                                    data-time="6h">6hrs</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod"
+                                    data-time="24h">24hrs</button>
+                                <button class="btn btn-outline-primary btn-sm switchTimePeriod"
+                                    data-time="all">All</button>
                             </div>
                         </div>
-                   </div> 
-                   <hr>
+                    </div>
+                    <hr>
+                    <small class="text-muted peerDataUsageUpdateTime" style="position: absolute; right: 1rem;">2023</small>
 
-                    
                     <div class="peerDataUsageChartContainer">
                         <canvas id="peerDataUsageChartObj"></canvas>
                     </div>
-                    
-                    
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-		aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Add New Peer</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="add_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add New Peer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
                     <div>
                         <div class="custom-control custom-switch" style="margin-bottom: 1rem">
                             <input class="custom-control-input" type="checkbox" id="bulk_add">
-                            <label class="custom-control-label" for="bulk_add"><strong>Add Peers by bulk</strong></label>
-                            <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body" data-toggle="popover" data-placement="right" data-trigger="click" data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
+                            <label class="custom-control-label" for="bulk_add"><strong>Add Peers by
+                                    bulk</strong></label>
+                            <i class="bi bi-question-circle-fill" style="cursor: pointer" data-container="body"
+                                data-toggle="popover" data-placement="right" data-trigger="click"
+                                data-content="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></i>
                         </div>
                         <div class="form-group" style="margin: 0">
-                            <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount" disabled>
+                            <input type="number" class="form-control" id="new_add_amount" min="1" placeholder="Amount"
+                                disabled>
                             <div id="bulk_amount_validation" class="invalid-feedback"></div>
                         </div>
 
                     </div>
                     <hr>
-					<div id="add_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						  <span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<form id="add_peer_form">
+                    <div id="add_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="add_peer_form">
                         <div class="form-group">
                             <div>
                                 <label for="private_key">Private Key</label>
                             </div>
                             <div class="input-group">
-                                <input type="text" class="form-control non-bulk" id="private_key" aria-describedby="private_key">
+                                <input type="text" class="form-control non-bulk" id="private_key"
+                                    aria-describedby="private_key">
                                 <div class="input-group-append">
-                                   <button type="button" class="btn btn-danger non-bulk" id="re_generate_key" data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i class="bi bi-arrow-repeat"></i></button>
+                                    <button type="button" class="btn btn-danger non-bulk" id="re_generate_key"
+                                        data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i
+                                            class="bi bi-arrow-repeat"></i></button>
                                 </div>
                             </div>
                         </div>
-						<div class="form-group">
-							<label for="public_key">Public Key <code>(Required)</code></label>
-							<input type="text" class="form-control non-bulk" id="public_key" aria-describedby="public_key" disabled>
-						</div>
+                        <div class="form-group">
+                            <label for="public_key">Public Key <code>(Required)</code></label>
+                            <input type="text" class="form-control non-bulk" id="public_key"
+                                aria-describedby="public_key" disabled>
+                        </div>
                         <div class="row">
                             <div class="col-sm-6">
-                                 <div class="form-group">
+                                <div class="form-group">
                                     <label for="new_add_name">Name</label>
                                     <input type="text" class="form-control non-bulk" id="new_add_name">
                                 </div>
@@ -252,121 +297,136 @@
                                     <div class="input-group">
                                         <input type="text" class="form-control non-bulk" id="allowed_ips">
                                         <div class="input-group-append">
-                                            <button type="button" class="btn btn-primary non-bulk" id="search_available_ip" data-toggle="tooltip" data-placement="top" title="Search Available IPs">
+                                            <button type="button" class="btn btn-primary non-bulk"
+                                                id="search_available_ip" data-toggle="tooltip" data-placement="top"
+                                                title="Search Available IPs">
                                                 <i class="bi bi-search"></i>
                                             </button>
                                         </div>
                                     </div>
-                                    <p style="position: absolute; top: 4px; right: 1rem;" class="text-success" id="allowed_ips_indicator"></p>
+                                    <p style="position: absolute; top: 4px; right: 1rem;" class="text-success"
+                                        id="allowed_ips_indicator"></p>
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                 <div class="form-group">
+                                <div class="form-group">
                                     <label for="new_add_DNS">DNS <code>(Required)</code></label>
                                     <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                 <div class="form-group">
-                                    <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs <code>(Required)</code></label>
-                                    <input type="text" class="form-control" id="new_add_endpoint_allowed_ip" value="{{ endpoint_allowed_ip }}">
+                                <div class="form-group">
+                                    <label for="new_add_endpoint_allowed_ip">Endpoint Allowed IPs
+                                        <code>(Required)</code></label>
+                                    <input type="text" class="form-control" id="new_add_endpoint_allowed_ip"
+                                        value="{{ endpoint_allowed_ip }}">
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                 <div class="form-group">
+                                <div class="form-group">
                                     <label for="new_add_MTU">MTU</label>
                                     <input type="text" class="form-control" id="new_add_MTU" value="{{ mtu }}">
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                 <div class="form-group">
+                                <div class="form-group">
                                     <label for="new_add_keep_alive">Persistent keepalive</label>
-                                    <input type="text" class="form-control" id="new_add_keep_alive" value="{{ keep_alive }}">
-                                 </div>
+                                    <input type="text" class="form-control" id="new_add_keep_alive"
+                                        value="{{ keep_alive }}">
+                                </div>
                             </div>
                             <div class="col-sm">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="enable_preshare_key" name="enable_preshare_key" value="enable_psk">
+                                    <input class="form-check-input" type="checkbox" id="enable_preshare_key"
+                                        name="enable_preshare_key" value="enable_psk">
                                     <label class="form-check-label" for="enable_preshare_key">Use Pre-shared Key</label>
                                 </div>
                             </div>
                         </div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="save_peer" conf_id={{conf_data['name']}}>Add</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save_peer"
+                        conf_id={{conf_data['name']}}>Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="configuration_delete_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-		aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this configuration?</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div id="remove_configuration_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this configuration?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="remove_configuration_alert" class="alert alert-danger alert-dismissible fade show d-none"
+                        role="alert">
 
-					</div>
-					<p style="margin: 0">This action is not reversible. The configuration will get toggle off, and delete from database and from the configuration folder.</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-					<button type="button" class="btn btn-danger" id="sure_delete_configuration">Yes</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade" id="delete_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-		aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this peer?</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div id="remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						  <span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<h6 style="margin: 0">This action is not reversible.</h6>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-					<button type="button" class="btn btn-danger" id="delete_peer" conf_id={{conf_data['name']}} peer_id="">Yes</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </div>
+                    <p style="margin: 0">This action is not reversible. The configuration will get toggle off, and
+                        delete from database and from the configuration folder.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="sure_delete_configuration">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="delete_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Are you sure to delete this peer?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none"
+                        role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <h6 style="margin: 0">This action is not reversible.</h6>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="delete_peer" conf_id={{conf_data['name']}}
+                        peer_id="">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="setting_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-		aria-labelledby="staticBackdropLabel" aria-hidden="true" conf_id={{conf_data['name']}} peer_id="">
-		<div class="modal-dialog modal-dialog-centered modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title peer_name"></h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-                    <div id="setting_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						  <span aria-hidden="true">&times;</span>
-						</button>
-					</div>
+        aria-labelledby="staticBackdropLabel" aria-hidden="true" conf_id={{conf_data['name']}} peer_id="">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title peer_name"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="setting_peer_alert" class="alert alert-danger alert-dismissible fade show d-none"
+                        role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
                     <div class="mb-3">
-                        <label for="peer_private_key_textbox" class="form-label">Private Key <code>(Required for QR Code and download)</code></label>
-                        <input type="password" class="form-control" id="peer_private_key_textbox" style="padding-right: 40px">
+                        <label for="peer_private_key_textbox" class="form-label">Private Key
+                            <code>(Required for QR Code and download)</code></label>
+                        <input type="password" class="form-control" id="peer_private_key_textbox"
+                            style="padding-right: 40px">
                         <a class="peer_private_key_textbox_switch"><i class="bi bi-eye-fill"></i></a>
                     </div>
                     <div>
@@ -377,69 +437,72 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_name_textbox" class="form-label">Name</label>
-                              <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
+                                <label for="peer_name_textbox" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="peer_name_textbox" placeholder="">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs <code>(Required)</code></label>
-                              <input type="text" class="form-control" id="peer_allowed_ip_textbox">
+                                <label for="peer_allowed_ip_textbox" class="form-label">Allowed IPs
+                                    <code>(Required)</code></label>
+                                <input type="text" class="form-control" id="peer_allowed_ip_textbox">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
-                              <input type="text" class="form-control" id="peer_DNS_textbox">
+                                <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
+                                <input type="text" class="form-control" id="peer_DNS_textbox">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs <code>(Required)</code></label>
-                              <input type="text" class="form-control" id="peer_endpoint_allowed_ips">
+                                <label for="peer_endpoint_allowed_ips" class="form-label">Endpoint Allowed IPs
+                                    <code>(Required)</code></label>
+                                <input type="text" class="form-control" id="peer_endpoint_allowed_ips">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_mtu" class="form-label">MTU</label>
-                              <input type="text" class="form-control" id="peer_mtu">
+                                <label for="peer_mtu" class="form-label">MTU</label>
+                                <input type="text" class="form-control" id="peer_mtu">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_keep_alive" class="form-label">Persistent Keepalive</label>
-                              <input type="text" class="form-control" id="peer_keep_alive">
+                                <label for="peer_keep_alive" class="form-label">Persistent Keepalive</label>
+                                <input type="text" class="form-control" id="peer_keep_alive">
                             </div>
                         </div>
                     </div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="save_peer_setting" conf_id={{conf_data['name']}} peer_id="">Save</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save_peer_setting" conf_id={{conf_data['name']}}
+                        peer_id="">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="available_ip_modal" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Select available IP</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
+                    <h5 class="modal-title" id="staticBackdropLabel">Select available IP</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <div class="selected_ip" style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        <small class="text-muted"><strong>SELECTED IP (CLICK TO REMOVE)</strong></small>
-                        <div id="selected_ip_list"></div>
+                    <small class="text-muted"><strong>SELECTED IP (CLICK TO REMOVE)</strong></small>
+                    <div id="selected_ip_list"></div>
                 </div>
                 <div class="modal-body" style="max-height: 400px; overflow-y: scroll;">
                     <div class="list-group"></div>
                 </div>
                 <div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="confirm_ip">Confirm</button>
-				</div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm_ip">Confirm</button>
+                </div>
             </div>
         </div>
     </div>
@@ -447,46 +510,49 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Select Peers to Delete</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-                <div id="bulk_remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="margin: 1rem">
+                    <h5 class="modal-title" id="staticBackdropLabel">Select Peers to Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="bulk_remove_peer_alert" class="alert alert-danger alert-dismissible fade show d-none"
+                    role="alert" style="margin: 1rem">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="selected_peers" style="padding: 1rem; border-bottom: 1px solid #dee2e6;">
-                        <small class="text-muted"><strong>SELECTED PEERS (CLICK TO REMOVE)</strong></small>
-                        <div id="selected_peer_list"></div>
+                    <small class="text-muted"><strong>SELECTED PEERS (CLICK TO REMOVE)</strong></small>
+                    <div id="selected_peer_list"></div>
                 </div>
                 <div class="modal-body" style="max-height: 400px; overflow-y: scroll;">
                     <div class="list-group"></div>
                 </div>
                 <div class="modal-footer">
-                    <a class="text-danger" id="select_all_delete_bulk_peers" style="cursor: pointer; margin-right: auto;"><small><strong>SELECT ALL</strong></small></a>
-					<button type="button" class="btn btn-danger" id="confirm_delete_bulk_peers" disabled data-conf="{{conf_data['name']}}">Delete</button>
-				</div>
+                    <a class="text-danger" id="select_all_delete_bulk_peers"
+                        style="cursor: pointer; margin-right: auto;"><small><strong>SELECT ALL</strong></small></a>
+                    <button type="button" class="btn btn-danger" id="confirm_delete_bulk_peers" disabled
+                        data-conf="{{conf_data['name']}}">Delete</button>
+                </div>
             </div>
         </div>
     </div>
     <div class="modal fade" id="qrcode_modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-		aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">QR Code</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">QR Code</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
                     <img id="qrcode_img" style="width: 100%">
-				</div>
-			</div>
-		</div>
-	</div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;"></div>
     {% include "tools.html" %}
 </body>
@@ -499,4 +565,5 @@
     configurations.setActiveConfigurationName();
     configurations.loadPeers($('#search_peer_textbox').val());
 </script>
-</html>	
+
+</html>

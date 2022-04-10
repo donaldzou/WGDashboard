@@ -1,5 +1,5 @@
 import ipaddress, subprocess, datetime, os, util
-
+from datetime import datetime, timedelta
 from flask import jsonify
 from util import *
 
@@ -45,19 +45,22 @@ def togglePeerAccess(data, g):
 
 class managePeer:
     def getPeerDataUsage(self, data, cur):
+        now = datetime.now()
+        now_string = now.strftime("%d/%m/%Y %H:%M:%S")
         interval = {
-            "30min": (60 * 30) / 30,
-             "1h": (60 * 60) / 30, 
-             "6h": (60 * 60 * 6) / 30, 
-             "24h": (60 * 60 * 24) / 30, 
+            "30min": now - timedelta(hours=0, minutes=30),
+             "1h": now - timedelta(hours=1, minutes=0), 
+             "6h": now - timedelta(hours=6, minutes=0), 
+             "24h": now - timedelta(hours=24, minutes=0), 
              "all": ""
         }
         if data['interval'] not in interval.keys():
             return {"status": False, "reason": "Invalid interval."}
         intv = ""
         if data['interval'] != "all":
-            intv = f" LIMIT {int(interval[data['interval']])}"
-        timeData = cur.execute(f"SELECT total_receive, total_sent, time FROM wg0_transfer WHERE id='{data['peerID']}' ORDER BY time DESC{intv};")
+            t = interval[data['interval']].strftime("%d/%m/%Y %H:%M:%S")
+            intv = f" AND time >= '{t}'"
+        timeData = cur.execute(f"SELECT total_receive, total_sent, time FROM wg0_transfer WHERE id='{data['peerID']}' {intv} ORDER BY time DESC;")
         chartData = []
         for i in timeData:
             chartData.append({
