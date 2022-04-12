@@ -50,7 +50,7 @@ body {
     }
 }
 
-.sidebar .nav-link {
+.sidebar .nav-link, .bottomNavContainer .nav-link{
     font-weight: 500;
     color: #333;
     transition: 0.2s cubic-bezier(0.82, -0.07, 0, 1.01);
@@ -66,7 +66,7 @@ body {
     color: #999;
 }
 
-.sidebar .nav-link.active {
+.sidebar .nav-link.active, .bottomNavContainer .nav-link.active {
     color: #007bff;
 }
 
@@ -632,6 +632,7 @@ pre.index-alert {
     transition: 0.3s ease-in-out;
 }
 
+
 #config_body.firstLoading {
     opacity: 0.2;
 }
@@ -828,4 +829,89 @@ pre.index-alert {
     #peerDataUsage .modal-xl {
         max-width: 95vw;
     }
+}
+
+.bottom{
+    display: none;
+}
+
+
+@media (max-width: 768px){
+    .bottom{
+        display: block;
+    }
+
+    .btn-manage-group{
+        bottom: calc( 3rem + 40px + env(safe-area-inset-bottom, 5px));
+    }
+
+    main{
+        padding-bottom: calc( 3rem + 40px + env(safe-area-inset-bottom, 5px));
+    }
+}
+
+
+.bottomNavContainer{
+    display: flex;
+    color: #333;
+    padding-bottom: env(safe-area-inset-bottom, 5px);
+    box-shadow: inset 0 1px 0 rgb(0 0 0 / 10%);
+}
+
+.bottomNavButton{
+    width: 25vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0.7rem 0;
+    color: rgba(51, 51, 51, 0.5);
+    cursor: pointer;
+    transition: all ease-in 0.2s;
+}
+
+.bottomNavButton.active{
+    color: #333;
+}
+
+.bottomNavButton i{
+    font-size: 1.2rem;
+}
+
+.bottomNavButton .subNav{
+    width: 100vw;
+    position: absolute;
+    z-index: 10000;
+    bottom: 0;
+    left: 0;
+    background-color: #272b30;
+    display: none;
+    animation-duration: 400ms;
+    padding-bottom: env(safe-area-inset-bottom, 5px);
+}
+
+.bottomNavButton .subNav.active{
+    display: block;
+}
+
+
+.bottomNavButton .subNav .nav .nav-item .nav-link{
+    padding: 0.7rem 1rem;
+}
+
+.bottomNavWrapper{
+    height: 100%;
+    width: 100%;
+    background-color: #000000a1;
+    position: fixed;
+    z-index: 1030;
+    display: none;
+    left: 0;
+}
+
+.bottomNavWrapper.active{
+    display: block;
+}
+
+.sb-update-url .dot-running{
+    transform: translateX(10px);
 }

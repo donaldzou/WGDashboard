@@ -8,6 +8,7 @@ let peers = [];
     /**
      * Definitions
      */
+    $(".bottomNavConfigs").addClass("active")
     let configuration_name;
     let configuration_interval;
     let configuration_timeout = window.localStorage.getItem("configurationTimeout");

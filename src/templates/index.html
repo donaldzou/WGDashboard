@@ -27,9 +27,7 @@
             {% if conf == [] %}
                 <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
             {% endif %}
-
-
-			{% for i in conf%}
+			{% for i in conf %}
 				<div class="card mt-3 conf_card" data-conf-id="{{i['conf']}}">
 					<div class="card-body">
 						<div class="row">
@@ -56,7 +54,6 @@
 						</div>
                         <div class="card-message"></div>
 					</div>
-
 				</div>
 			{%endfor%}
 		</main>

@@ -4,6 +4,8 @@ $('[data-toggle="tooltip"]').tooltip()
 let $add_configuration = $("#add_configuration");
 
 let addConfigurationModal = $("#addConfigurationModal");
+$(".bottomNavHome").addClass("active");
+
 
 addConfigurationModal.modal({
     keyboard: false,

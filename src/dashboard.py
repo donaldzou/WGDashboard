@@ -55,6 +55,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 QRcode(app)
 
 # TODO: use class and object oriented programming
+updateInfo = {}
 
 
 def connect_db():
@@ -693,6 +694,7 @@ def auth_req():
     conf = get_dashboard_conf()
     req = conf.get("Server", "auth_req")
     session['update'] = UPDATE
+    session['updateInfo'] = updateInfo
     session['dashboard_version'] = DASHBOARD_VERSION
     if req == "true":
         if '/static/' not in request.path and \
@@ -1940,11 +1942,13 @@ def check_update():
         for i in output:
             if not i["prerelease"]:
                 release.append(i)
+                global updateInfo
+                updateInfo = i
+                break
         if config.get("Server", "version") == release[0]["tag_name"]:
             result = "false"
         else:
             result = "true"
-
         return result
     except urllib.error.HTTPError:
         return "false"
