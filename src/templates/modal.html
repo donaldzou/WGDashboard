@@ -355,3 +355,108 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="editConfigurationModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Edit Configuration</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addCconfigurationAlert" class="alert alert-danger alert-dismissible fade show d-none"
+                    role="alert">
+                    <div class="alert-body"></div>
+                </div>
+                <pre id="addCconfigurationAlertMessage" class="index-alert d-none"></pre>
+                <form id="add_configuration_form">
+                    <div class="form-group">
+                        <div>
+                            <label for="editConfigurationPrivateKey">Private Key <code>*</code></label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control codeFont" id="editConfigurationPrivateKey"
+                                name="editConfigurationPrivateKey" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-danger" id="reGeneratePrivateKey"
+                                    data-toggle="tooltip" data-placement="top" title="Regenerate Key"><i
+                                        class="bi bi-arrow-repeat"></i></button>
+                            </div>
+                            <div id="editConfigurationPrivateKeyFeedback" class="input-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="editConfigurationName">Configuration Name <code>*</code></label>
+                                <input type="text" class="form-control" id="editConfigurationName"
+                                    name="editConfigurationName" required>
+                                <div id="editConfigurationNameFeedback" class="input-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="editConfigurationListenPort">Listen Port <code>*</code></label>
+                                <input type="number" class="form-control codeFont" id="editConfigurationListenPort"
+                                    name="editConfigurationListenPort" required>
+                                <div id="editConfigurationListenPortFeedback" class="input-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="editConfigurationAddress">Address <code>*</code>
+
+                                </label>
+                                <input type="text" class="form-control codeFont" id="editConfigurationAddress"
+                                    placeholder="Ex: 192.168.0.1/24" name="editConfigurationAddress" required>
+                                <div id="editConfigurationAddressFeedback" class="input-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for=""># of available IPs</label>
+                                <p class="editConfigurationAvailableIPs">N/A</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label for="editConfigurationPreUp">PreUp</label>
+                        <input type="text" class="form-control codeFont" id="editConfigurationPreUp"
+                            name="editConfigurationPreUp">
+                    </div>
+                    <div class="form-group">
+                        <label for="editConfigurationPreDown">PreDown</label>
+                        <input type="text" class="form-control codeFont" id="editConfigurationPreDown"
+                            name="editConfigurationPreDown">
+                    </div>
+                    <div class="form-group">
+                        <label for="editConfigurationPostUp">PostUp</label>
+                        <input type="text" class="form-control codeFont" id="editConfigurationPostUp"
+                            name="editConfigurationPostUp">
+                    </div>
+                    <div class="form-group">
+                        <label for="editConfigurationPostDown">PostDown</label>
+                        <input type="text" class="form-control codeFont" id="editConfigurationPostDown"
+                            name="editConfigurationPostDown">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="editConfigurationBtn">Add</button>
+                <div class="text-primary editConfigurationStatus editConfigurationAddStatus d-none">
+                    <div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span>
+                    </div>
+                    Editing Configuration
+                </div>
+                <div class="text-primary editConfigurationStatus editConfigurationToggleStatus d-none waiting">
+                    <i class="bi bi-circle"></i> Toggle Configuration
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

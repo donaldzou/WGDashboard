@@ -8,7 +8,7 @@ let peers = [];
     /**
      * Definitions
      */
-    $(".bottomNavConfigs").addClass("active")
+    $(".bottomNavConfigs").addClass("active");
     let configuration_name;
     let configuration_interval;
     let configuration_timeout = window.localStorage.getItem("configurationTimeout");
@@ -38,6 +38,7 @@ let peers = [];
     let settingModal = new bootstrap.Modal(document.getElementById('setting_modal'), bootstrapModalConfig);
     let deleteModal = new bootstrap.Modal(document.getElementById('delete_modal'), bootstrapModalConfig);
     let configurationDeleteModal = new bootstrap.Modal(document.getElementById('configuration_delete_modal'), bootstrapModalConfig);
+    let configurationEditModal = new bootstrap.Modal(document.getElementById('editConfigurationModal'), bootstrapModalConfig);
     let peerDataUsageModal = new bootstrap.Modal(document.getElementById('peerDataUsage'), bootstrapModalConfig);
     $("[data-toggle='tooltip']").tooltip();
     $("[data-toggle='popover']").popover();
@@ -977,6 +978,13 @@ let peers = [];
         });
     }
 
+    function getConfigurationDetails() {
+        function done(res){
+            console.log(res);
+        }
+        ajaxGetJSON(`/api/getConfigurationInfo?configName=${configuration_name}`, done)
+    }
+
     configurations = {
         peerDataUsageChartObj: () => { return peerDataUsageChartObj },
         peerDataUsageModal: () => { return peerDataUsageModal },
@@ -987,6 +995,7 @@ let peers = [];
         ipModal: () => { return ipModal; },
         qrcodeModal: () => { return qrcodeModal; },
         settingModal: () => { return settingModal; },
+        configurationEditModal: () => { return configurationEditModal; },
         configurationTimeout: () => { return configuration_timeout; },
         updateDisplayMode: () => { display_mode = window.localStorage.getItem("displayMode"); },
         removeConfigurationInterval: () => { removeConfigurationInterval(); },
@@ -998,7 +1007,7 @@ let peers = [];
         parsePeers: (response) => { parsePeers(response); },
         toggleAccess: (peerID) => { toggleAccess(peerID); },
 
-
+        getConfigurationDetails: () => { getConfigurationDetails() },
         setConfigurationName: (confName) => { configuration_name = confName; },
         getConfigurationName: () => { return configuration_name; },
         setActiveConfigurationName: () => { setActiveConfigurationName(); },

@@ -1,5 +1,3 @@
-
-
 let $body = $("body");
 let available_ips = [];
 let $add_peer = document.getElementById("save_peer");
@@ -89,11 +87,6 @@ $body.on("click", ".btn-data-usage-peer", function(){
     ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
 });
 
-
-
-
-
-
 $('#peerDataUsage').on('shown.bs.modal', function() {
     configurations.peerDataUsageChartObj().resize();
 }).on('hidden.bs.modal', function() {
@@ -115,6 +108,17 @@ $(".switchTimePeriod").on("click", function(){
     }
     
 })
+
+
+/**
+ * Edit Configuration
+ */
+
+$editConfiguration = $("#edit_configuration");
+$editConfiguration.on("click", function(){
+    configurations.getConfigurationDetails();
+    configurations.configurationEditModal().toggle();
+});
 
 
 /**

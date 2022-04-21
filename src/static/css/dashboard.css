@@ -173,6 +173,10 @@ body {
     margin: 0 1rem 0 0;
 }
 
+.btn-control:hover{
+    background-color: transparent !important;
+}
+
 .btn-control:active,
 .btn-control:focus {
     background-color: transparent !important;
@@ -914,4 +918,8 @@ pre.index-alert {
 
 .sb-update-url .dot-running{
     transform: translateX(10px);
+}
+
+.list-group-item{
+    transition: all 0.1s ease-in;
 }

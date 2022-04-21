@@ -2,9 +2,14 @@ import ipaddress, subprocess, datetime, os, util
 from datetime import datetime, timedelta
 from flask import jsonify
 from util import *
+import configparser
 
 notEnoughParameter = {"status": False, "reason": "Please provide all required parameters."}
 good = {"status": True, "reason": ""}
+
+def ret(status=True, reason="", data=""):
+    return {"status": status, "reason": reason, "data": data}
+
 
 
 def togglePeerAccess(data, g):
@@ -70,7 +75,7 @@ class managePeer:
             })
         return {"status": True, "reason": "", "data": chartData}
 
-class addConfiguration:
+class manageConfiguration:
     def AddressCheck(self, data):
         address = data['address']
         address = address.replace(" ", "")
@@ -166,3 +171,14 @@ class addConfiguration:
                 return {"status": False, "reason": "Can't delete peer", "data": str(e)}
 
             return good
+
+    def getConfigurationInfo(self, configName, WG_CONF_PATH):
+        conf = configparser.ConfigParser(strict=False)
+        try:
+            with open(f'{WG_CONF_PATH}/{configName}.conf', 'r'):
+                conf.read(f'{WG_CONF_PATH}/{configName}.conf')
+                if not conf.has_section("Interface"):
+                    return ret(status=False, reason="No [Interface] in configuration file")
+                return ret(data=dict(conf['Interface']))
+        except FileNotFoundError as err:
+            return ret(status=False, reason=str(err))

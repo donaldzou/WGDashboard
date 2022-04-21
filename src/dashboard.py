@@ -3,6 +3,7 @@
 Under Apache-2.0 License
 """
 
+from crypt import methods
 import sqlite3
 import configparser
 import hashlib
@@ -1599,7 +1600,7 @@ def addConfigurationAddressCheck():
     returnData = {"status": True, "reason": ""}
     required = ['address']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.AddressCheck(api.addConfiguration, data)
+        returnData = api.manageConfiguration.AddressCheck(api.manageConfiguration, data)
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1610,7 +1611,7 @@ def addConfigurationPortCheck():
     returnData = {"status": True, "reason": ""}
     required = ['port']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.PortCheck(api.addConfiguration, data, get_conf_list())
+        returnData = api.manageConfiguration.PortCheck(api.manageConfiguration, data, get_conf_list())
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1621,7 +1622,7 @@ def addConfigurationNameCheck():
     returnData = {"status": True, "reason": ""}
     required = ['name']
     if checkJSONAllParameter(required, data):
-        returnData = api.addConfiguration.NameCheck(api.addConfiguration, data, get_conf_list())
+        returnData = api.manageConfiguration.NameCheck(api.manageConfiguration, data, get_conf_list())
     else:
         return jsonify(api.notEnoughParameter)
     return jsonify(returnData)
@@ -1641,35 +1642,39 @@ def addConfiguration():
         if i not in data.keys():
             return jsonify(api.notEnoughParameter)
     config = get_conf_list()
-    nameCheck = api.addConfiguration.NameCheck(api.addConfiguration, {"name": data['addConfigurationName']}, config)
+    nameCheck = api.manageConfiguration.NameCheck(api.manageConfiguration, {"name": data['addConfigurationName']}, config)
     if not nameCheck['status']:
         return nameCheck
 
-    portCheck = api.addConfiguration.PortCheck(api.addConfiguration, {"port": data['addConfigurationListenPort']}, config)
+    portCheck = api.manageConfiguration.PortCheck(api.manageConfiguration, {"port": data['addConfigurationListenPort']}, config)
     if not portCheck['status']:
         return portCheck
 
-    addressCheck = api.addConfiguration.AddressCheck(api.addConfiguration, {"address": data['addConfigurationAddress']})
+    addressCheck = api.manageConfiguration.AddressCheck(api.manageConfiguration, {"address": data['addConfigurationAddress']})
     if not addressCheck['status']:
         return addressCheck
 
-    returnData = api.addConfiguration.addConfiguration(api.addConfiguration, data, config, WG_CONF_PATH)
+    returnData = api.manageConfiguration.addConfiguration(api.manageConfiguration, data, config, WG_CONF_PATH)
     return jsonify(returnData)
 
 @app.route('/api/deleteConfiguration', methods=['POST'])
 def deleteConfiguration():
     data = request.get_json()
-    returnData = {"status": True, "reason": "", "data":""}
     required = ['name']
     if not checkJSONAllParameter(required, data):
         return jsonify(api.notEnoughParameter)
-
-    returnData = api.addConfiguration.deleteConfiguration(api.addConfiguration, data, get_conf_list(), g, WG_CONF_PATH)
-
-
-
-
+    returnData = api.manageConfiguration.deleteConfiguration(api.manageConfiguration, data, get_conf_list(), g, WG_CONF_PATH)
     return returnData
+
+@app.route('/api/getConfigurationInfo', methods=['GET'])
+def getConfigurationInfo():
+    data = request.args.to_dict()
+    required = ['configName']
+    if not checkJSONAllParameter(required, data):
+        return jsonify(api.notEnoughParameter)
+    else:
+        return api.manageConfiguration.getConfigurationInfo(api.manageConfiguration, data['configName'], WG_CONF_PATH)
+        
 
 """
 Dashboard Tools Related

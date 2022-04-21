@@ -1,0 +1,123 @@
+:root{
+    --blue: #3f9eff;
+    --dark1: #1C1C1E;
+    --dark2: #232323;
+    --dark3: #3f3f3f;
+}
+
+a{
+    color: var(--blue);
+}
+
+body{
+    background-color: var(--dark1);
+    color: #ffffff;
+}
+
+hr{
+    border-top: 1px solid rgb(255 255 255 / 10%);
+}
+
+/* Color */
+
+.bg-dark{
+    background-color: #232323!important;
+}
+
+.text-primary{
+    color: var(--blue) !important;
+}
+
+/* Form Related */
+
+.form-control{
+    color: #ffffff;
+    background-color: #232323;
+    border: 1px solid #686868;
+}
+
+.form-control:focus {
+    color: #ffffff;
+    background-color: #232323;
+    border-color: #686868;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.50);
+}
+
+.form-control:disabled, .form-control[readonly]{
+    background-color: #525252;
+    opacity: 1;
+    color: #a5a5a5;
+}
+
+.custom-control-label::before{
+    background-color: transparent;
+}
+
+/* Side Bar */
+
+.sidebar{
+    background-color: #232323 !important;
+}
+
+.sidebar .nav-link, .bottomNavContainer .nav-link{
+    color: #dddddd;
+}
+
+.sidebar .nav-link.active, .bottomNavContainer .nav-link.active{
+    color: var(--blue) !important;
+}
+
+.nav-link:hover{
+    background-color: #3f3f3f;
+}
+
+.card{
+    background-color: #232323;
+}
+
+
+/* Button Related */
+
+.btn-outline-primary{
+    color: var(--blue);
+    border-color: var(--blue);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--blue);
+    border-color: var(--blue);
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled).active, .btn-outline-primary:not(:disabled):not(.disabled):active, .show>.btn-outline-primary.dropdown-toggle{
+    background-color: var(--blue);
+    border-color: var(--blue);
+}
+
+
+/* Configuration Card (index.html) */
+.conf_card:hover{
+    border-color: var(--blue);
+}
+
+/* Modal */
+.modal-content{
+    background-color: var(--dark1);
+}
+
+.modal-header, .modal-footer{
+    border-color:rgb(255 255 255 / 10%);;
+}
+
+/* List Group Item */
+.list-group-item{
+    background-color: var(--dark2);
+    color: white;
+}
+
+.list-group-item:hover{
+    color: white;
+    background-color: var(--dark3);
+    border-color: var(--dark3);
+}
