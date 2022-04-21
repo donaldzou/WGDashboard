@@ -1,0 +1,365 @@
+$grey-100: #1e1e1e;
+$grey-200: #222222;
+$grey-300: #242424;
+$grey-400: #272727;
+$grey-500: #2c2c2c;
+$grey-600: #2e2e2e;
+$grey-700: #333333;
+$grey-800: #383838;
+$grey-900: #424242;
+
+$green-400: hsl(120deg, 30%, 40%);
+$green-500: hsl(120deg, 30%, 50%);
+
+$red-400: hsl(0deg, 60%, 50%);
+$red-500: hsl(0deg, 60%, 60%);
+
+$blue-400: hsl(235deg, 60%, 50%);
+$blue-500: hsl(235deg, 60%, 60%);
+
+$cyan-400: hsl(190deg, 60%, 50%);
+$cyan-500: hsl(190deg, 60%, 60%);
+
+$magenta-500: hsl(315deg, 60%, 60%);
+
+$text-100: hsl(0deg, 0%, 90%);
+$text-200: hsl(0deg, 0%, 80%);
+$text-300: hsl(0deg, 0%, 70%);
+$text-400: hsl(0deg, 0%, 60%);
+$text-500: hsl(0deg, 0%, 50%);
+
+:root {
+  --green: #{$green-500} !important;
+  --blue: #{$blue-500} !important;
+  --red: #{$red-500} !important;
+  --magenta: #{$magenta-500} !important;
+}
+
+body {
+  background: $grey-200;
+  color: $text-200;
+}
+
+.btn-primary {
+  color: $text-100 !important;
+  border-color: $blue-500 !important;
+  background: $blue-500 !important;
+
+  &:hover {
+    background-color: $blue-400 !important;
+    border-color: $blue-400 !important;
+  }
+}
+
+.btn-outline-primary {
+  color: $blue-500 !important;
+  border-color: $blue-500 !important;
+  background: transparent !important;
+
+  &:hover,
+  &.active {
+    color: $text-100 !important;
+  }
+
+  &.active {
+    background-color: $blue-500 !important;
+    border-color: $blue-500 !important;
+  }
+
+  &:hover {
+    background-color: $blue-400 !important;
+    border-color: $blue-400 !important;
+  }
+}
+
+.btn-success {
+  color: $text-100 !important;
+  border-color: $green-500 !important;
+  background: $green-500 !important;
+
+  &:hover {
+    background-color: $green-400 !important;
+    border-color: $green-400 !important;
+  }
+}
+
+.btn-outline-success {
+  color: $green-500 !important;
+  border-color: $green-500 !important;
+  background: transparent !important;
+
+  &:hover,
+  &.active {
+    color: $text-100 !important;
+  }
+
+  &.active {
+    background-color: $green-500 !important;
+    border-color: $green-500 !important;
+  }
+
+  &:hover {
+    background-color: $green-400 !important;
+    border-color: $green-400 !important;
+  }
+}
+
+.btn-danger {
+  color: $text-100 !important;
+  border-color: $red-500 !important;
+  background: $red-500 !important;
+
+  &:hover {
+    background-color: $red-400 !important;
+    border-color: $red-400 !important;
+  }
+}
+
+.btn-outline-danger {
+  color: $red-500 !important;
+  border-color: $red-500 !important;
+  background: transparent !important;
+
+  &:hover,
+  &.active {
+    color: $text-100 !important;
+  }
+
+  &.active {
+    background-color: $red-500 !important;
+    border-color: $red-500 !important;
+  }
+
+  &:hover {
+    background-color: $red-400 !important;
+    border-color: $red-400 !important;
+  }
+}
+
+.btn-secondary {
+  color: $text-100 !important;
+  border-color: $grey-900 !important;
+  background: $grey-900 !important;
+
+  &:hover {
+    background-color: $grey-800 !important;
+    border-color: $grey-800 !important;
+  }
+}
+
+.btn-outline-secondary {
+  color: $grey-900 !important;
+  border-color: $grey-900 !important;
+  background: transparent !important;
+
+  &:hover,
+  &.active {
+    color: $text-100 !important;
+  }
+
+  &.active {
+    background-color: $grey-900 !important;
+    border-color: $grey-900 !important;
+  }
+
+  &:hover {
+    background-color: $grey-800 !important;
+    border-color: $grey-800 !important;
+  }
+}
+
+.btn-control {
+  &.btn-lock-peer.lock {
+    color: $red-500 !important;
+    &:hover {
+      color: $red-400 !important;
+    }
+  }
+
+  &:hover {
+    background-color: transparent !important;
+
+    &.btn-outline-primary {
+      color: $blue-400 !important;
+    }
+
+    &.btn-outline-success {
+      color: $green-400 !important;
+    }
+
+    &.btn-outline-danger {
+      color: $red-400 !important;
+    }
+
+    &.btn-outline-secondary {
+      color: $grey-800 !important;
+    }
+  }
+}
+
+.form-control {
+  background: $grey-400 !important;
+  border-color: transparent !important;
+  color: $text-200 !important;
+}
+
+.card .form-control {
+  background: $grey-500 !important;
+}
+
+.sidebar .nav-link,
+.bottomNavContainer .nav-link {
+  color: $text-200;
+
+  &:hover {
+    background: $grey-200;
+  }
+}
+
+nav#sidebarMenu.col-md-3.col-lg-2.d-md-block.bg-light.sidebar.collapse,
+.navbar-brand,
+.bg-dark {
+  background-color: $grey-100 !important;
+  background: $grey-100 !important;
+}
+
+.card {
+  background: $grey-400;
+}
+
+.text-muted {
+  color: $text-500 !important;
+}
+
+.text-danger {
+  color: $red-500 !important;
+}
+
+.text-success {
+  color: $green-500 !important;
+}
+
+.text-primary {
+  color: $blue-500 !important;
+}
+
+.text-info {
+  color: $cyan-500 !important;
+}
+
+a.text-success:focus,
+a.text-success:hover {
+  color: $green-400 !important;
+}
+
+a.text-danger:focus,
+a.text-danger:hover {
+  color: $red-400 !important;
+}
+
+a.text-info:focus,
+a.text-info:hover {
+  color: $cyan-400 !important;
+}
+
+.dot-running {
+  background-color: $green-500 !important;
+}
+
+.card-running {
+  border-color: $green-500;
+}
+
+.toggle--switch:checked + .toggleLabel::before {
+  background-color: $blue-500 !important;
+}
+.toggle--switch:checked + .toggleLabel {
+  background-color: mix($blue-500, #000f) !important;
+  border-color: $blue-500 !important;
+}
+
+.sidebar .nav-link.active,
+.bottomNavContainer .nav-link.active {
+  color: $blue-500 !important;
+}
+
+hr {
+  border-color: $grey-600;
+}
+
+.modal-content {
+  background-color: $grey-200;
+}
+
+.modal-header,
+.modal-footer {
+  background-color: $grey-100;
+  border-color: $grey-600;
+}
+
+code {
+  color: $magenta-500;
+}
+
+.close {
+  color: $text-200;
+  text-shadow: none;
+
+  &:hover {
+    color: $text-300;
+  }
+}
+
+.chartContainer.fullScreen {
+  background-color: $grey-200 !important;
+}
+
+.popover {
+  background-color: $grey-700 !important;
+  border: none !important;
+}
+
+.popover-body {
+  color: $text-200 !important;
+}
+
+div.toast {
+  background-color: $grey-900 !important;
+
+  div.toast-header {
+    background-color: $grey-700 !important;
+    color: $text-200 !important;
+    border-bottom-color: $grey-900 !important;
+  }
+
+  div.toast-body {
+    background-color: $grey-800 !important;
+    color: $text-200 !important;
+  }
+
+  div.toast-progressbar {
+    background-color: $blue-500 !important;
+  }
+}
+
+.bs-popover-auto[x-placement^="right"] > .arrow::after,
+.bs-popover-right > .arrow::after {
+  border-right-color: $grey-700 !important;
+}
+
+.btn-manage-group .setting_btn_menu {
+  background-color: $grey-500 !important;
+}
+
+.setting_btn_menu a:hover {
+  background-color: $grey-700 !important;
+}
+
+.table {
+  color: $text-200 !important;
+
+  th,
+  td {
+    border-color: $grey-700 !important;
+  }
+}
