@@ -7,6 +7,7 @@ $grey-600: #2e2e2e;
 $grey-700: #333333;
 $grey-800: #383838;
 $grey-900: #424242;
+$grey-1000: #777777;
 
 $green-400: hsl(120deg, 30%, 40%);
 $green-500: hsl(120deg, 30%, 50%);
@@ -16,6 +17,7 @@ $red-500: hsl(0deg, 60%, 60%);
 
 $blue-400: hsl(235deg, 60%, 50%);
 $blue-500: hsl(235deg, 60%, 60%);
+$blue-400-clear: rgba(51, 64, 204, 0.25);
 
 $cyan-400: hsl(190deg, 60%, 50%);
 $cyan-500: hsl(190deg, 60%, 60%);
@@ -198,9 +200,13 @@ body {
 }
 
 .form-control {
-  background: $grey-400 !important;
+  background-color: $grey-400 !important;
   border-color: transparent !important;
   color: $text-200 !important;
+}
+
+.form-control:disabled{
+  color: $grey-1000 !important;
 }
 
 .card .form-control {
@@ -362,4 +368,9 @@ div.toast {
   td {
     border-color: $grey-700 !important;
   }
+}
+
+
+.btn-outline-primary.focus, .btn-outline-primary:focus, .btn-primary.focus, .btn-primary:focus{
+  box-shadow: 0 0 0 0.2rem rgb(144 153 255 / 29%) !important;
 }

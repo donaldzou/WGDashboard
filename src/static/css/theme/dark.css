@@ -141,9 +141,13 @@ body {
 }
 
 .form-control {
-  background: #272727 !important;
+  background-color: #272727 !important;
   border-color: transparent !important;
   color: hsl(0deg, 0%, 80%) !important;
+}
+
+.form-control:disabled {
+  color: #777777 !important;
 }
 
 .card .form-control {
@@ -301,6 +305,10 @@ div.toast div.toast-progressbar {
 .table th,
 .table td {
   border-color: #333333 !important;
+}
+
+.btn-outline-primary.focus, .btn-outline-primary:focus, .btn-primary.focus, .btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(144, 153, 255, 0.29) !important;
 }
 
 /*# sourceMappingURL=dark.css.map */
