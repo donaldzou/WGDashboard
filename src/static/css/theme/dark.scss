@@ -42,6 +42,7 @@ body {
   color: $text-200;
 }
 
+
 .btn-primary {
   color: $text-100 !important;
   border-color: $blue-500 !important;
@@ -200,7 +201,7 @@ body {
 }
 
 .form-control {
-  background-color: $grey-400 !important;
+  background-color: $grey-500 !important;
   border-color: transparent !important;
   color: $text-200 !important;
 }
@@ -211,6 +212,15 @@ body {
 
 .card .form-control {
   background: $grey-500 !important;
+}
+
+.conf_card{
+  a{
+    color: $blue-500;
+  }
+  &:hover{
+    border-color: $blue-500;
+  }
 }
 
 .sidebar .nav-link,
@@ -373,4 +383,23 @@ div.toast {
 
 .btn-outline-primary.focus, .btn-outline-primary:focus, .btn-primary.focus, .btn-primary:focus{
   box-shadow: 0 0 0 0.2rem rgb(144 153 255 / 29%) !important;
+}
+
+.bottomNav{
+  &{
+    background-color: $grey-400 !important;
+  }
+
+  .bottomNavButton{
+    &{
+      color: $text-400;
+    }
+  }
+  .bottomNavButton.active{
+    color: $blue-500 !important;
+  }
+}
+
+.subNav{
+  background-color: $grey-400 !important;
 }

@@ -141,7 +141,7 @@ body {
 }
 
 .form-control {
-  background-color: #272727 !important;
+  background-color: #2c2c2c !important;
   border-color: transparent !important;
   color: hsl(0deg, 0%, 80%) !important;
 }
@@ -152,6 +152,13 @@ body {
 
 .card .form-control {
   background: #2c2c2c !important;
+}
+
+.conf_card a {
+  color: hsl(235deg, 60%, 60%);
+}
+.conf_card:hover {
+  border-color: hsl(235deg, 60%, 60%);
 }
 
 .sidebar .nav-link,
@@ -309,6 +316,20 @@ div.toast div.toast-progressbar {
 
 .btn-outline-primary.focus, .btn-outline-primary:focus, .btn-primary.focus, .btn-primary:focus {
   box-shadow: 0 0 0 0.2rem rgba(144, 153, 255, 0.29) !important;
+}
+
+.bottomNav {
+  background-color: #272727 !important;
+}
+.bottomNav .bottomNavButton {
+  color: hsl(0deg, 0%, 60%);
+}
+.bottomNav .bottomNavButton.active {
+  color: hsl(235deg, 60%, 60%) !important;
+}
+
+.subNav {
+  background-color: #272727 !important;
 }
 
 /*# sourceMappingURL=dark.css.map */
