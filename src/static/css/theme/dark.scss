@@ -86,6 +86,62 @@ body {
   }
 }
 
+.list-group-item{
+  background-color: $grey-400;
+  border-color: $grey-400;
+  color: white;
+
+  &:hover{
+    background-color: $grey-700;
+    border-color: $grey-700;
+    color: white;
+  }
+}
+
+
+
+.delete-peer-bulk-badge.badge-danger{
+  background-color: $red-500;
+  &:hover{
+    background-color: $red-400;
+  }
+}
+
+#delete_bulk_modal{
+  .list-group{
+    a.active{
+      background-color: $red-500;
+      border: $red-500;
+
+      &:hover{
+        background-color: $red-400;
+        border: $red-400;
+      }
+    }
+  }
+}
+
+#available_ip_modal{
+  .list-group{
+    a.active{
+      background-color: $blue-500;
+      border: $blue-500;
+      
+      &:hover{
+        background-color: $blue-400;
+        border: $blue-400;
+      }
+    }
+  }
+}
+
+.available-ip-badge.badge-primary{
+  background-color: $blue-500;
+  &:hover{
+    background-color: $blue-400;
+  }
+}
+
 .btn-outline-success {
   color: $green-500 !important;
   border-color: $green-500 !important;
@@ -395,11 +451,19 @@ div.toast {
       color: $text-400;
     }
   }
+
   .bottomNavButton.active{
     color: $blue-500 !important;
   }
+
+  .subNav{
+    background-color: $grey-400 !important;
+  }
+  
 }
 
-.subNav{
-  background-color: $grey-400 !important;
+.key:hover{
+  color: $blue-500;
 }
+
+

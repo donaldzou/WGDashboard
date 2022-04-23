@@ -182,3 +182,13 @@ class manageConfiguration:
                 return ret(data=dict(conf['Interface']))
         except FileNotFoundError as err:
             return ret(status=False, reason=str(err))
+
+
+class settings:
+    def setTheme(self, theme, config, setConfig):
+        themes = ['light', 'dark']
+        if theme not in themes: 
+            return ret(status=False, reason="Theme does not exist")
+        config['Server']['dashboard_theme'] = theme
+        setConfig(config)
+        return ret()

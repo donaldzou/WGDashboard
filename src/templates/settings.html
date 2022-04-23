@@ -16,6 +16,26 @@
             {% endif %}
             <h1 class="">Settings</h1>
             <hr>
+            <div class="card mb-3">
+                <h6 class="card-header">Dashboard Theme</h6>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <button class='btn btn-outline-primary theme-switch-btn {% if session["theme"] == "light" %} {{ "active" }} {% endif %}' data-theme="light">
+                                <i class="bi bi-sun-fill"></i>
+                                Light
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class='btn btn-outline-primary theme-switch-btn {% if session["theme"] == "dark" %} {{ "active" }} {% endif %}' data-theme="dark">
+                                <i class="bi bi-moon-fill"></i>
+                                Dark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
             {% if required_auth == "true" %}
                 <div class="card mb-3">
                     <h6 class="card-header">Peer Default Settings</h6>
@@ -200,6 +220,30 @@
     });
 
     $(".bottomNavSettings").addClass("active");
+
+
+    $(".theme-switch-btn").on("click", function(){
+        if (!$(this).hasClass("active")){
+            let theme = $(this).data("theme");
+            $(".theme-switch-btn").removeClass("active");
+            $(this).addClass("active");
+            $.ajax({
+                method: "POST",
+                url: "/api/settings/setTheme",
+                headers: {"Content-Type": "application/json"},
+                data: JSON.stringify({"theme": theme})
+            }).done(function(res){
+                if (res.status == true){
+                    if (theme == "light"){
+                        $("#darkThemeCSS").remove();
+                    }else{
+                        $("head").append('<link rel="stylesheet" type="text/css" href="/static/css/theme/dark.min.css" id="darkThemeCSS">');
+                    }
+                }
+            });
+        }
+    });
+
 
 </script>
 </html>

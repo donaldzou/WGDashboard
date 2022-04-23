@@ -694,6 +694,7 @@ def auth_req():
         g.cur = g.db.cursor()
     conf = get_dashboard_conf()
     req = conf.get("Server", "auth_req")
+    session['theme'] = conf.get("Server", "dashboard_theme")
     session['update'] = UPDATE
     session['updateInfo'] = updateInfo
     session['dashboard_version'] = DASHBOARD_VERSION
@@ -1571,6 +1572,7 @@ def switch_display_mode(mode):
 
 # APIs
 import api
+# TODO: Add configuration prefix to all configuration API
 
 @app.route('/api/getPeerDataUsage', methods=['POST'])
 def getPeerDataUsage():
@@ -1674,6 +1676,17 @@ def getConfigurationInfo():
         return jsonify(api.notEnoughParameter)
     else:
         return api.manageConfiguration.getConfigurationInfo(api.manageConfiguration, data['configName'], WG_CONF_PATH)
+
+@app.route('/api/settings/setTheme', methods=['POST'])
+def setTheme():
+    data = request.get_json()
+    required = ['theme']
+    if not checkJSONAllParameter(required, data):
+        return jsonify(api.notEnoughParameter)
+    else:
+        return api.settings.setTheme(api.settings, data['theme'], get_dashboard_conf(), set_dashboard_conf)
+
+
         
 
 """
@@ -1913,6 +1926,8 @@ def init_dashboard():
         config['Server']['dashboard_refresh_interval'] = '60000'
     if 'dashboard_sort' not in config['Server']:
         config['Server']['dashboard_sort'] = 'status'
+    if 'dashboard_theme' not in config['Server']:
+        config['Server']['dashboard_theme'] = 'light'
     # Default dashboard peers setting
     if "Peers" not in config:
         config['Peers'] = {}

@@ -47,6 +47,49 @@ body {
   border-color: hsl(120deg, 30%, 40%) !important;
 }
 
+.list-group-item {
+  background-color: #272727;
+  border-color: #272727;
+  color: white;
+}
+.list-group-item:hover {
+  background-color: #333333;
+  border-color: #333333;
+  color: white;
+}
+
+.delete-peer-bulk-badge.badge-danger {
+  background-color: hsl(0deg, 60%, 60%);
+}
+.delete-peer-bulk-badge.badge-danger:hover {
+  background-color: hsl(0deg, 60%, 50%);
+}
+
+#delete_bulk_modal .list-group a.active {
+  background-color: hsl(0deg, 60%, 60%);
+  border: hsl(0deg, 60%, 60%);
+}
+#delete_bulk_modal .list-group a.active:hover {
+  background-color: hsl(0deg, 60%, 50%);
+  border: hsl(0deg, 60%, 50%);
+}
+
+#available_ip_modal .list-group a.active {
+  background-color: hsl(235deg, 60%, 60%);
+  border: hsl(235deg, 60%, 60%);
+}
+#available_ip_modal .list-group a.active:hover {
+  background-color: hsl(235deg, 60%, 50%);
+  border: hsl(235deg, 60%, 50%);
+}
+
+.available-ip-badge.badge-primary {
+  background-color: hsl(235deg, 60%, 60%);
+}
+.available-ip-badge.badge-primary:hover {
+  background-color: hsl(235deg, 60%, 50%);
+}
+
 .btn-outline-success {
   color: hsl(120deg, 30%, 50%) !important;
   border-color: hsl(120deg, 30%, 50%) !important;
@@ -327,9 +370,12 @@ div.toast div.toast-progressbar {
 .bottomNav .bottomNavButton.active {
   color: hsl(235deg, 60%, 60%) !important;
 }
-
-.subNav {
+.bottomNav .subNav {
   background-color: #272727 !important;
+}
+
+.key:hover {
+  color: hsl(235deg, 60%, 60%);
 }
 
 /*# sourceMappingURL=dark.css.map */

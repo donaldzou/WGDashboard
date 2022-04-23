@@ -923,3 +923,7 @@ pre.index-alert {
 .list-group-item{
     transition: all 0.1s ease-in;
 }
+
+.theme-switch-btn{
+    width: 100%;
+}

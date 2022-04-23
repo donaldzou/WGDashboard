@@ -3,11 +3,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>{{ title }} | WGDashboard</title>
     <link rel="manifest" href="{{ url_for('static',filename='json/manifest.json') }}">
-
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="e">
-    <meta name="apple-mobile-web-app-title" content="e">
+    <meta name="application-name" content="WGDashboard">
+    <meta name="apple-mobile-web-app-title" content="WGDashboard">
     <meta name="msapplication-starturl" content="/">
     <link rel="apple-touch-icon" sizes="192x192" href="{{ url_for('static',filename='img/192x192ios.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -15,7 +14,9 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dashboard.css') }}">
     <!-- THEME APPLY HERE -->
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/theme/dark.min.css') }}">
+    {% if session["theme"] == "dark" %} 
+        <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='css/theme/dark.min.css') }}" id="darkThemeCSS">
+    {% endif %}
     <!-- THEME APPLY HERE -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js" integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

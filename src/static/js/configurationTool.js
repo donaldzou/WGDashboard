@@ -55,24 +55,26 @@ function loadPeerDataUsageChartDone(res){
         configurations.peerDataUsageChartObj().data.datasets[1].data = [];
         console.log(res);
         let data = res.data;
-        configurations.peerDataUsageChartObj().data.labels.push(data[data.length - 1].time);
-        configurations.peerDataUsageChartObj().data.datasets[0].data.push(0);
-        configurations.peerDataUsageChartObj().data.datasets[1].data.push(0);
-    
-        configurations.peerDataUsageChartObj().data.datasets[0].lastData = data[data.length - 1].total_sent
-        configurations.peerDataUsageChartObj().data.datasets[1].lastData = data[data.length - 1].total_receive
-    
-    
-        for(let i = data.length - 2; i >= 0; i--){
-            let sent = data[i].total_sent - configurations.peerDataUsageChartObj().data.datasets[0].lastData;
-            let receive = data[i].total_receive - configurations.peerDataUsageChartObj().data.datasets[1].lastData;
-            configurations.peerDataUsageChartObj().data.datasets[0].data.push(sent);
-            configurations.peerDataUsageChartObj().data.datasets[1].data.push(receive);
-            configurations.peerDataUsageChartObj().data.labels.push(data[i].time);
-            configurations.peerDataUsageChartObj().data.datasets[0].lastData = data[i].total_sent;
-            configurations.peerDataUsageChartObj().data.datasets[1].lastData = data[i].total_receive;
+        if (data.length > 0){
+            configurations.peerDataUsageChartObj().data.labels.push(data[data.length - 1].time);
+            configurations.peerDataUsageChartObj().data.datasets[0].data.push(0);
+            configurations.peerDataUsageChartObj().data.datasets[1].data.push(0);
+        
+            configurations.peerDataUsageChartObj().data.datasets[0].lastData = data[data.length - 1].total_sent
+            configurations.peerDataUsageChartObj().data.datasets[1].lastData = data[data.length - 1].total_receive
+        
+        
+            for(let i = data.length - 2; i >= 0; i--){
+                let sent = data[i].total_sent - configurations.peerDataUsageChartObj().data.datasets[0].lastData;
+                let receive = data[i].total_receive - configurations.peerDataUsageChartObj().data.datasets[1].lastData;
+                configurations.peerDataUsageChartObj().data.datasets[0].data.push(sent);
+                configurations.peerDataUsageChartObj().data.datasets[1].data.push(receive);
+                configurations.peerDataUsageChartObj().data.labels.push(data[i].time);
+                configurations.peerDataUsageChartObj().data.datasets[0].lastData = data[i].total_sent;
+                configurations.peerDataUsageChartObj().data.datasets[1].lastData = data[i].total_receive;
+            }
+            configurations.peerDataUsageChartObj().update();
         }
-        configurations.peerDataUsageChartObj().update();
     }
 }
 
