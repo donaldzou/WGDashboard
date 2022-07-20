@@ -1,22 +1,23 @@
 <html>
 {% with %}
-    {% set title="Settings" %}
-    {% include "header.html" %}
+{% set title="Settings" %}
+{% include "header.html" %}
 {% endwith %}
+
 <body>
-{% include "navbar.html" %}
-<div class="container-fluid">
-    {% include "sidebar.html" %}
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-        <div class="setting-container mt-4">
-            {% if message != "" %}
+    {% include "navbar.html" %}
+    <div class="container-fluid">
+        {% include "sidebar.html" %}
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <div class="setting-container mt-4">
+                {% if message != "" %}
                 <div class="alert alert-{{ status }}" role="alert">
                     {{ message }}
                 </div>
-            {% endif %}
-            <h1 class="">Settings</h1>
-            <hr>
-            {% if required_auth == "true" %}
+                {% endif %}
+                <h1 class="">Settings</h1>
+                <hr>
+                {% if required_auth == "true" %}
                 <div class="card mb-3">
                     <h6 class="card-header">Peer Default Settings</h6>
                     <div class="card-body">
@@ -26,32 +27,30 @@
                                     <div class="col-sm-6">
                                         <label for="peer_global_DNS">DNS</label>
                                         <input type="text" class="form-control mb-4" id="peer_global_DNS"
-                                               name="peer_global_DNS"
-                                               value="{{ peer_global_DNS }}" required>
+                                            name="peer_global_DNS" value="{{ peer_global_DNS }}" required>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="peer_endpoint_allowed_ip">Peer Endpoint Allowed IPs</label>
+                                        <label for="peer_endpoint_allowed_ips">Peer Endpoint Allowed IPs</label>
                                         <input type="text" class="form-control mb-4" id="peer_endpoint_allowed_ip"
-                                               name="peer_endpoint_allowed_ip"
-                                               value="{{ peer_endpoint_allowed_ip }}" required>
+                                            name="peer_endpoint_allowed_ips" value="{{ peer_endpoint_allowed_ips }}"
+                                            required>
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="peer_mtu">MTU</label>
-                                        <input type="text" class="form-control mb-4" id="peer_mtu"
-                                               name="peer_mtu"
-                                               value="{{ peer_mtu }}">
+                                        <input type="text" class="form-control mb-4" id="peer_mtu" name="peer_mtu"
+                                            value="{{ peer_mtu }}">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="peer_keep_alive">Persistent Keepalive</label>
                                         <input type="text" class="form-control mb-4" id="peer_keep_alive"
-                                               name="peer_keep_alive"
-                                               value="{{ peer_keepalive }}">
+                                            name="peer_keep_alive" value="{{ peer_keepalive }}">
                                     </div>
                                     <div class="col-sm-12">
-                                        <label for="peer_remote_endpoint"><strong>Peer Remote Endpoint (This will be change globally, and will be apply to all peer's QR code and configuration file.)</strong></label>
+                                        <label for="peer_remote_endpoint"><strong>Peer Remote Endpoint (This will be
+                                                change globally, and will be apply to all peer's QR code and
+                                                configuration file.)</strong></label>
                                         <input type="text" class="form-control mb-4" id="peer_remote_endpoint"
-                                               name="peer_remote_endpoint"
-                                               value="{{ peer_remote_endpoint }}" required>
+                                            name="peer_remote_endpoint" value="{{ peer_remote_endpoint }}" required>
                                     </div>
                                 </div>
                                 <button class="btn btn-success" type="submit">Update Peer Default Settings</button>
@@ -67,8 +66,9 @@
                             <div class="form-group">
                                 <label for="wg_conf_path">Path</label>
                                 <input type="text" class="form-control mb-2" id="wg_conf_path" name="wg_conf_path"
-                                       value="{{ wg_conf_path }}">
-                                <p class="text-muted">Remember to remove <code>/</code> at the end of your path. e.g <code>/etc/wireguard</code>
+                                    value="{{ wg_conf_path }}">
+                                <p class="text-muted">Remember to remove <code>/</code> at the end of your path. e.g
+                                    <code>/etc/wireguard</code>
                                 </p>
                                 <button class="btn btn-danger change_path">Update Path & Restart Dashboard</button>
                             </div>
@@ -83,7 +83,7 @@
                             <div class="form-group">
                                 <label for="username">Username</label>
                                 <input type="text" class="form-control mb-4" id="username" name="username"
-                                       value="{{ session['username'] }}" required>
+                                    value="{{ session['username'] }}" required>
                                 <button type="submit" class="btn btn-danger">Update Account</button>
                             </div>
                         </form>
@@ -106,61 +106,65 @@
                         </form>
                     </div>
                 </div>
-            {% endif %}
-            <div class="card">
-                <h6 class="card-header">Dashboard Configuration</h6>
-                <div class="card-body">
-                    <form action="/update_app_ip_port" method="post" class="update_app_ip_port">
-                        <div class="form-group">
-                            <div class="row">
-                                <div class="col-sm">
-                                    <label for="app_ip">Dashboard IP</label>
-                                    <input type="text" class="form-control mb-2" id="app_ip" name="app_ip" value="{{ app_ip }}">
-                                    <p><small class="text-danger mb-4">0.0.0.0 means it can be access by anyone with your server
-                                        IP Address.</small></p>
+                {% endif %}
+                <div class="card">
+                    <h6 class="card-header">Dashboard Configuration</h6>
+                    <div class="card-body">
+                        <form action="/update_app_ip_port" method="post" class="update_app_ip_port">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label for="app_ip">Dashboard IP</label>
+                                        <input type="text" class="form-control mb-2" id="app_ip" name="app_ip"
+                                            value="{{ app_ip }}">
+                                        <p><small class="text-danger mb-4">0.0.0.0 means it can be access by anyone with
+                                                your server
+                                                IP Address.</small></p>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label for="app_port">Dashboard Port</label>
+                                        <input type="text" class="form-control mb-4" id="app_port" name="app_port"
+                                            value="{{ app_port }}">
+                                    </div>
                                 </div>
-                                <div class="col-sm">
-                                    <label for="app_port">Dashboard Port</label>
-                                    <input type="text" class="form-control mb-4" id="app_port" name="app_port"
-                                           value="{{ app_port }}">
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-danger confirm_modal" data-toggle="modal"
+                                <button type="button" class="btn btn-danger confirm_modal" data-toggle="modal"
                                     data-target="#confirmModal">Update Configuration & Restart Dashboard
-                            </button>
-                        </div>
-                    </form>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-    <!-- Modal -->
-    <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Confirm Dashboard Configuration</h5>
-                </div>
-                <div class="modal-body">
-                    <small>Dashboard Original IP</small>
-                    <p>{{ app_ip }}</p>
-                    <small style="font-weight: bold" class="text-bold">Dashboard New IP</small>
-                    <p class="app_new_ip text-bold text-danger" style="font-weight: bold"></p>
-                    <small>Dashboard Original Port</small>
-                    <p>{{ app_port }}</p>
-                    <small style="font-weight: bold" class="text-bold">Dashboard New Port</small>
-                    <p class="app_new_port text-bold text-danger" style="font-weight: bold"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary cancel_restart" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger confirm_restart">Confirm & Restart Dashboard</button>
+        </main>
+        <!-- Modal -->
+        <div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Confirm Dashboard Configuration</h5>
+                    </div>
+                    <div class="modal-body">
+                        <small>Dashboard Original IP</small>
+                        <p>{{ app_ip }}</p>
+                        <small style="font-weight: bold" class="text-bold">Dashboard New IP</small>
+                        <p class="app_new_ip text-bold text-danger" style="font-weight: bold"></p>
+                        <small>Dashboard Original Port</small>
+                        <p>{{ app_port }}</p>
+                        <small style="font-weight: bold" class="text-bold">Dashboard New Port</small>
+                        <p class="app_new_port text-bold text-danger" style="font-weight: bold"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary cancel_restart"
+                            data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger confirm_restart">Confirm & Restart
+                            Dashboard</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% include "tools.html" %}
+    {% include "tools.html" %}
 </body>
 
 {% include "footer.html" %}
@@ -201,4 +205,5 @@
     });
 
 </script>
+
 </html>

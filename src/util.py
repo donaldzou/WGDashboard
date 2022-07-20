@@ -14,16 +14,21 @@ Helper Functions
 """
 
 
-def adapt_for_rest(x):
-    x["allowed_ip"] = x.pop("allowed_ips")
-    x["endpoint_allowed_ip"] = x.pop("endpoint_allowed_ips")
-    for i in ["latest_handshake", "endpoint", "allowed_ip"]:
-        if not x[i]:
-            x[i] = "N/A"
-    return x
+def get_interface_file_path(interface_name: str, base_dir: str) -> str:
+    return os.path.join(base_dir, f"{interface_name}.conf")
 
 
-def connect_db(dashboard_configuration_dir):
+def adapt_for_rest(peer_dict: dict) -> dict:
+    """
+    Renames necessary entries and replaces falsy values. Returns the modified dict.
+    """
+    for i in ["latest_handshake", "endpoint", "allowed_ips"]:
+        if not peer_dict[i]:
+            peer_dict[i] = "(None)"
+    return peer_dict
+
+
+def connect_db(dashboard_configuration_dir: str):
     """
     Connect to the database
     @return: sqlite3.Connection
@@ -35,7 +40,7 @@ def connect_db(dashboard_configuration_dir):
     return con
 
 
-def read_dashboard_conf(dashboard_conf_file_path):
+def read_dashboard_conf(dashboard_conf_file_path: str):
     """
     Get dashboard configuration
     @return: configparser.ConfigParser
@@ -45,7 +50,7 @@ def read_dashboard_conf(dashboard_conf_file_path):
     return r_config
 
 
-def write_dashboard_conf(config, dashboard_conf_file_path):
+def write_dashboard_conf(config: str, dashboard_conf_file_path: str):
     """
     Write to configuration
     @param config: Input configuration
@@ -54,7 +59,9 @@ def write_dashboard_conf(config, dashboard_conf_file_path):
         config.write(conf_object)
 
 
-def wg_peer_data_to_db(interface_name, wg_conf_dir, dashboard_conf_file_path):
+def wg_peer_data_to_db(
+    interface_name: str, wg_conf_dir: str, dashboard_conf_file_path: str
+):
     """
     Look for new peers from WireGuard
     @param interface_name: Configuration name
@@ -110,9 +117,7 @@ def wg_peer_data_to_db(interface_name, wg_conf_dir, dashboard_conf_file_path):
     handshakes = wg.get_interface_peers_latest_handshakes(interface_name)
     transfers = wg.get_interface_peers_net_stats(interface_name)
     endpoints = wg.get_interface_peers_endpoints(interface_name)
-    allowed_ips = wg.get_interface_peers_allowed_ips(
-        interface_and_peer_data, interface_name
-    )
+    allowed_ips = wg.get_interface_peers_allowed_ips(interface_and_peer_data)
     keys = set()
     for x in [handshakes, transfers, endpoints, allowed_ips]:
         keys.update(x.keys())
@@ -127,7 +132,11 @@ def wg_peer_data_to_db(interface_name, wg_conf_dir, dashboard_conf_file_path):
 
 
 def update_db_and_get_peers(
-    interface_name, search, sort_t, wg_conf_dir, dashboard_conf_file_path
+    interface_name: str,
+    search: str,
+    sort_t: str,
+    wg_conf_dir: str,
+    dashboard_conf_file_path: str,
 ):
     """
     Get all peers.
@@ -162,7 +171,7 @@ def update_db_and_get_peers(
     return result
 
 
-def get_conf_list(wg_conf_dir):
+def get_conf_list(wg_conf_dir: str):
     """Get all wireguard interfaces with status.
     @return: Return a list of dicts with interfaces and its statuses
     @rtype: list
@@ -188,7 +197,7 @@ def get_conf_list(wg_conf_dir):
     return conf
 
 
-def f_check_key_match(private_key, public_key, interface_name):
+def f_check_key_match(private_key: str, public_key: str, interface_name: str):
     """
     Check if private key and public key match
     @param private_key: Private key
@@ -216,7 +225,7 @@ def f_check_key_match(private_key, public_key, interface_name):
             return {"status": "success"}
 
 
-def check_repeat_allowed_ips(public_key, ip, interface_name):
+def check_repeat_allowed_ips(public_key: str, ip: str, interface_name: str):
     """
     Check if there are repeated IPs
     @param public_key: Public key of the peer
@@ -238,7 +247,7 @@ def check_repeat_allowed_ips(public_key, ip, interface_name):
             return {"status": "success"}
 
 
-def f_available_ips(interface_name, wg_conf_dir):
+def f_available_ips(interface_name: str, wg_conf_dir: str):
     """
     Get a list of available IPs
     @param interface_name: Configuration Name
@@ -289,7 +298,7 @@ def ensure_subnet(ipv4: str, default_subnet: str = "24") -> str:
 
 
 # Regex Match
-def regex_match(regex, text):
+def regex_match(regex: str, text: str):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
 

@@ -286,9 +286,9 @@ def update_peer_default_config():
 
     config = g.conf
     if (
-        len(request.form["peer_endpoint_allowed_ips"]) == 0
-        or len(request.form["peer_global_DNS"]) == 0
-        or len(request.form["peer_remote_endpoint"]) == 0
+        not (request.form["peer_endpoint_allowed_ips"])
+        or not (request.form["peer_global_DNS"])
+        or not (request.form["peer_remote_endpoint"])
     ):
         session["message"] = "Please fill in all required boxes."
         session["message_status"] = "danger"

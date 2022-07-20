@@ -7,15 +7,21 @@ import db
 import os
 import ifcfg
 import re
+import util
 
 
 def _is_comment_line(line: str) -> bool:
-    """Returns true if the passed string is a comment"""
+    """
+    Returns true if the passed string is a comment in an INI style file.
+    """
     line = line.strip()
     return line.startswith("#") or line.startswith(";")
 
 
-def _parse_peer_or_interface(lines, i, limit):
+def _parse_peer_or_interface(lines: list[str], i: int, limit: int) -> dict:
+    """
+    Parses a [Peer] or [Interface] section of an interface config file into a `dict`.
+    """
     data = {}
     while i < limit:
         line = lines[i].strip()
@@ -30,23 +36,32 @@ def _parse_peer_or_interface(lines, i, limit):
 
 
 def set_peer_options(
-    interface_name, public_key, allowed_ips, preshared_key_filename=None
+    interface_name: str,
+    public_key: str,
+    allowed_ips: str,
+    preshared_key_filename: str = None,
 ):
+    """
+    Sets the given options for the specified `interface_name` and peer (`public_key`)
+    """
     if preshared_key_filename:
-        status = subprocess.check_output(
+        subprocess.check_output(
             f"wg set {interface_name} peer {public_key} allowed-ips {allowed_ips} preshared-key {preshared_key_filename}",
             shell=True,
             stderr=subprocess.STDOUT,
         )
     else:
-        status = subprocess.check_output(
+        subprocess.check_output(
             f"wg set {interface_name} peer {public_key} allowed-ips {allowed_ips}",
             shell=True,
             stderr=subprocess.STDOUT,
         )
 
 
-def remove_peer_from_interface(interface_name, public_key):
+def remove_peer_from_interface(interface_name: str, public_key: str):
+    """
+    Removes the specified peer (`public_key`) from `interface_name`
+    """
     subprocess.check_output(
         f"wg set {interface_name} peer {public_key} remove",
         shell=True,
@@ -54,7 +69,7 @@ def remove_peer_from_interface(interface_name, public_key):
     )
 
 
-def get_interface_listen_port(interface_name, base_dir):
+def get_interface_listen_port(interface_name: str, base_dir: str) -> str:
     """
     Get listen port number.
     @param interface_name: Name of WG interface
@@ -80,7 +95,7 @@ def get_interface_listen_port(interface_name, base_dir):
     return port
 
 
-def get_interface_public_key(interface_name, base_dir):
+def get_interface_public_key(interface_name: str, base_dir: str) -> str:
     """
     Get public key for configuration.
     @param interface_name: Name of WG interface
@@ -122,7 +137,7 @@ def get_interface_total_net_stats(interface_name):
     return [total, upload_total, download_total]
 
 
-def get_interface_status(interface_name):
+def get_interface_status(interface_name: str) -> str:
     """
     Check if the configuration is running or not
     @param interface_name:
@@ -206,7 +221,7 @@ def read_interface_config_file(interface_name: str, base_dir: str) -> dict:
     """
     app.logger.debug(f"read_conf_file({interface_name})")
 
-    config_file = os.path.join(base_dir, f"{interface_name}.conf")
+    config_file = util.get_interface_file_path(interface_name, base_dir)
     with open(config_file, "r", encoding="utf-8") as file_object:
         file = list(file_object.readlines())
     result = {"Interface": {}, "Peers": []}
@@ -229,7 +244,10 @@ def read_interface_config_file(interface_name: str, base_dir: str) -> dict:
 
 
 def switch_interface(interface_name: str, base_dir: str):
-    config_file = os.path.join(base_dir, f"{interface_name}.conf")
+    """
+    Switches `interface_name` around (up if it is down, down if it is up)
+    """
+    config_file = util.get_interface_file_path(interface_name, base_dir)
     status = get_interface_status(interface_name)
     if status == "running":
         check = subprocess.check_output(
@@ -242,14 +260,20 @@ def switch_interface(interface_name: str, base_dir: str):
 
 
 def enable_interface(interface_name: str, base_dir: str):
-    config_file = os.path.join(base_dir, f"{interface_name}.conf")
+    """
+    Brings `interface_name` up (enables it)
+    """
+    config_file = util.get_interface_file_path(interface_name, base_dir)
     check = subprocess.check_output(
         "wg-quick up " + config_file, shell=True, stderr=subprocess.STDOUT
     )
 
 
 def disable_interface(interface_name: str, base_dir: str):
-    config_file = os.path.join(base_dir, f"{interface_name}.conf")
+    """
+    Brings `interface_name` down (disables it)
+    """
+    config_file = util.get_interface_file_path(interface_name, base_dir)
     check = subprocess.check_output(
         "wg-quick down " + config_file, shell=True, stderr=subprocess.STDOUT
     )
@@ -297,7 +321,7 @@ def get_interface_peers_latest_handshakes(interface_name) -> dict:
     return result
 
 
-def get_interface_peers_net_stats(interface_name) -> dict:
+def get_interface_peers_net_stats(interface_name: str) -> dict:
     """
     Get transfer from all peers of a configuration
     @param interface_name: Configuration name
@@ -354,14 +378,17 @@ def get_interface_peers_net_stats(interface_name) -> dict:
     return result
 
 
-def quick_save_interface_config(interface_name, base_dir):
-    config_file = os.path.join(base_dir, f"{interface_name}.conf")
+def quick_save_interface_config(interface_name: str, base_dir: str):
+    """
+    Executes `wg-quick save` for `interface_name`
+    """
+    config_file = util.get_interface_file_path(interface_name, base_dir)
     status = subprocess.check_output(
         "wg-quick save " + config_file, shell=True, stderr=subprocess.STDOUT
     )
 
 
-def gen_public_key(private_key):
+def gen_public_key(private_key: str):
     """Generate the public key.
 
     @param private_key: Private key
@@ -390,7 +417,7 @@ def gen_public_key(private_key):
         }
 
 
-def get_interface_peers_endpoints(interface_name) -> dict:
+def get_interface_peers_endpoints(interface_name: str) -> dict:
     """
     Get endpoint from all peers of a configuration
     @param interface_name: Configuration name
@@ -414,7 +441,7 @@ def get_interface_peers_endpoints(interface_name) -> dict:
     return result
 
 
-def get_interface_peers_allowed_ips(conf_peer_data, interface_name) -> dict:
+def get_interface_peers_allowed_ips(conf_peer_data: str) -> dict:
     """
     Get allowed ips from all peers of a configuration
     @param conf_peer_data: Configuration peer data

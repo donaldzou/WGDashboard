@@ -322,7 +322,7 @@ def add_peer(interface_name):
     data = request.get_json()
     public_key = data["public_key"]
     allowed_ips = data["allowed_ips"]
-    endpoint_allowed_ips = data["endpoint_allowed_ip"]
+    endpoint_allowed_ips = data["endpoint_allowed_ips"]
     dns_addresses = data["DNS"]
     enable_preshared_key = data["enable_preshared_key"]
     preshared_key = data["preshared_key"]
@@ -398,7 +398,7 @@ def save_peer_setting(interface_name):
     private_key = data["private_key"]
     dns_addresses = data["DNS"]
     allowed_ips = data["allowed_ips"]
-    endpoint_allowed_ips = data["endpoint_allowed_ip"]
+    endpoint_allowed_ips = data["endpoint_allowed_ips"]
     preshared_key = data["preshared_key"]
     db_peer = db.get_peer_by_id(interface_name, id)
     if db_peer:
@@ -624,7 +624,7 @@ def add_peer_bulk(interface_name):
 
     data = request.get_json()
     keys = data["keys"]
-    endpoint_allowed_ips = data["endpoint_allowed_ip"]
+    endpoint_allowed_ips = data["endpoint_allowed_ips"]
     dns_addresses = data["DNS"]
     enable_preshared_key = data["enable_preshared_key"]
     amount = data["amount"]
