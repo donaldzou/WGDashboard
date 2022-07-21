@@ -618,12 +618,11 @@ def check_update(config):
         for i in output:
             if not i["prerelease"]:
                 release.append(i)
-        if config.get("Server", "version") == release[0]["tag_name"]:
-            result = "false"
-        else:
-            result = "true"
 
-        return result
+        if config["Server"]["version"] > release[0]["tag_name"]:
+            return "true"
+
+        return "false"
     except urllib.error.HTTPError:
         return "false"
 
@@ -635,7 +634,7 @@ Configure DashBoard before start web-server
 
 def run_dashboard():
     global UPDATE
-    config = util.read_dashboard_conf(DASHBOARD_CONF_FILE)
+    config = read_and_update_config_file()
     UPDATE = check_update(config)
     # global app_ip
     app_ip = config.get("Server", "app_ip")
@@ -661,13 +660,4 @@ def get_host_bind():
 
 
 if __name__ == "__main__":
-    # UPDATE = check_update()
-    # config = util.read_dashboard_conf(DASHBOARD_CONF_FILE)
-    # # global app_ip
-    # app_ip = config.get("Server", "app_ip")
-    # # global app_port
-    # app_port = config.get("Server", "app_port")
-    # WG_CONF_PATH = config.get("Server", "wg_conf_path")
-    # config.clear()
-    # app.run(host=app_ip, debug=False, port=app_port)
     run_dashboard()
