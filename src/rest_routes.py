@@ -608,19 +608,24 @@ def register_routes(app):
         data = request.get_json()
         delete_keys = data["peer_ids"]
         keys = wg.get_interface_peer_public_keys(interface_name)
+        n_peers = len(delete_keys)
         if not isinstance(keys, list):
             return interface_name + " is not running."
-        else:
-            for id in delete_keys:
-                if id not in keys:
-                    return "This key does not exist"
+
+        for id in delete_keys:
+            try:
                 db.delete_peer(interface_name, id)
+            except:
+                if n_peers == 1:
+                    return "Peer does not exist."
+            if id in keys:
                 try:
                     wg.remove_peer_from_interface(interface_name, id)
                     wg.quick_save_interface_config(interface_name, g.WG_CONF_PATH)
                 except subprocess.CalledProcessError as exc:
-                    return exc.output.strip()
-                return "true"
+                    if n_peers == 1:
+                        return "Peer does not exist."
+        return "true"
 
     @app.route("/add_peer_bulk/<interface_name>", methods=["POST"])
     def add_peer_bulk(interface_name):
