@@ -1,5 +1,4 @@
 from dashboard import app
-from flask import g
 import subprocess
 from datetime import datetime, timedelta
 import configparser

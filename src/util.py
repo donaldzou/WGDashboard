@@ -55,8 +55,8 @@ def write_dashboard_conf(config: str, dashboard_conf_file_path: str):
     Write to configuration
     @param config: Input configuration
     """
-    with open(dashboard_conf_file_path, "w", encoding="utf-8") as conf_object:
-        config.write(conf_object)
+    with open(dashboard_conf_file_path, "w", encoding="utf-8") as f:
+        config.write(f)
 
 
 def wg_peer_data_to_db(
