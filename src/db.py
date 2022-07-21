@@ -1,5 +1,5 @@
 from flask import g
-from __main__ import app
+from dashboard import app
 import sqlite3
 
 
@@ -129,7 +129,7 @@ def create_table_if_missing(interface_name: str):
     app.logger.debug(f"db.create_table_if_missing({interface_name})")
     create_table = f"""
         CREATE TABLE IF NOT EXISTS {interface_name} (
-            id VARCHAR NOT NULL PRIMARY KEY, private_key VARCHAR NULL UNIQUE, DNS VARCHAR NULL, 
+            id VARCHAR NOT NULL PRIMARY KEY, private_key VARCHAR NULL, DNS VARCHAR NULL, 
             endpoint_allowed_ips VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
             total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
             status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ips VARCHAR NULL, 
