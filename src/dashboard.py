@@ -56,8 +56,7 @@ QRcode(app)
 # (NB) It is important to import these after the app is created
 import wg, util, rest_routes
 
-
-# TODO: use class and object oriented programming
+rest_routes.register_routes(app)
 
 
 """

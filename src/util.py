@@ -5,7 +5,7 @@ import sqlite3
 import configparser
 import time
 import ipaddress
-from __main__ import app
+from dashboard import app
 from operator import itemgetter
 from flask import g
 
