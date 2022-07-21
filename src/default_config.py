@@ -1,5 +1,3 @@
-from configparser import ConfigParser
-
 dash_config = {
     "Account": {
         "username": "admin",
