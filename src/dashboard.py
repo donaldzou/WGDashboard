@@ -90,10 +90,9 @@ def auth_req():
     g.CONFIGURATION_PATH = CONFIGURATION_PATH
     g.cur = g.db.cursor()
     g.conf = read_and_update_config_file()
-    req = g.conf.get("Server", "auth_req")
     session["update"] = UPDATE
     session["dashboard_version"] = DASHBOARD_VERSION
-    if req == "true":
+    if g.conf["Server"]["auth_req"]:
         if (
             "/static/" not in request.path
             and request.endpoint != "signin"
