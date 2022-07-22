@@ -211,7 +211,6 @@ def settings():
         status = session["message_status"]
         session.pop("message")
         session.pop("message_status")
-    required_auth = config.get("Server", "auth_req")
     return render_template(
         "settings.html",
         conf=util.get_conf_list(WG_CONF_PATH),
@@ -219,7 +218,7 @@ def settings():
         status=status,
         app_ip=config.get("Server", "app_ip"),
         app_port=config.get("Server", "app_port"),
-        required_auth=required_auth,
+        required_auth=config.get("Server", "auth_req"),
         wg_conf_path=config.get("Server", "wg_conf_path"),
         peer_global_DNS=config.get("Peers", "peer_global_DNS"),
         peer_endpoint_allowed_ips=config.get("Peers", "peer_endpoint_allowed_ips"),

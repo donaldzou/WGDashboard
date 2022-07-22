@@ -17,7 +17,7 @@
                 {% endif %}
                 <h1 class="">Settings</h1>
                 <hr>
-                {% if required_auth == "true" %}
+                {% if required_auth %}
                 <div class="card mb-3">
                     <h6 class="card-header">Peer Default Settings</h6>
                     <div class="card-body">
@@ -30,9 +30,9 @@
                                             name="peer_global_DNS" value="{{ peer_global_DNS }}" required>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label for="peer_endpoint_allowed_ips">Peer Endpoint Allowed IPs</label>
+                                        <label for="peer_endpoint_allowed_ip">Peer Endpoint Allowed IPs</label>
                                         <input type="text" class="form-control mb-4" id="peer_endpoint_allowed_ip"
-                                            name="peer_endpoint_allowed_ips" value="{{ peer_endpoint_allowed_ips }}"
+                                            name="peer_endpoint_allowed_ip" value="{{ peer_endpoint_allowed_ip }}"
                                             required>
                                     </div>
                                     <div class="col-sm-6">
