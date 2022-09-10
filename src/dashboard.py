@@ -1682,7 +1682,7 @@ def run_dashboard():
     global UPDATE
     UPDATE = check_update()
     config = configparser.ConfigParser(strict=False)
-    config.read('wg-dashboard.ini')
+    config.read(DASHBOARD_CONF)
     # global app_ip
     app_ip = config.get("Server", "app_ip")
     # global app_port
@@ -1701,7 +1701,7 @@ Get host and port for web-server
 def get_host_bind():
     init_dashboard()
     config = configparser.ConfigParser(strict=False)
-    config.read('wg-dashboard.ini')
+    config.read(DASHBOARD_CONF)
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
     return app_ip, app_port
@@ -1711,7 +1711,7 @@ if __name__ == "__main__":
     init_dashboard()
     UPDATE = check_update()
     config = configparser.ConfigParser(strict=False)
-    config.read('wg-dashboard.ini')
+    config.read(DASHBOARD_CONF)
     # global app_ip
     app_ip = config.get("Server", "app_ip")
     # global app_port
