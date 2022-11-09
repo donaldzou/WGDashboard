@@ -1637,8 +1637,13 @@ def init_dashboard():
         config['Peers']['peer_endpoint_allowed_ip'] = '0.0.0.0/0'
     if 'peer_display_mode' not in config['Peers']:
         config['Peers']['peer_display_mode'] = 'grid'
-    if 'remote_endpoint' not in config['Peers']:
-        config['Peers']['remote_endpoint'] = ifcfg.default_interface()['inet']
+    if 'remote_endpoint' not in config['Peers']:        
+        try:
+            default_inet = ifcfg.default_interface()['inet']
+            config['Peers']['remote_endpoint'] = default_inet
+        except:
+            print("Default interface ip for remote endpoint not found!")
+            config['Peers']['remote_endpoint'] = str(input("Please enter remote endpoint: ")) #ifcfg.default_interface()['inet']
     if 'peer_MTU' not in config['Peers']:
         config['Peers']['peer_MTU'] = "1420"
     if 'peer_keep_alive' not in config['Peers']:
