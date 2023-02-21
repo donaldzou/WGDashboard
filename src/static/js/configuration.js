@@ -516,7 +516,7 @@ let peers = [];
                         <small class="text-muted" style="display: flex">
                             <strong>PEER</strong><strong style="margin-left: auto!important; opacity: 0; transition: 0.2s ease-in-out" class="text-primary">CLICK TO COPY</strong>
                         </small>
-                        <h6><samp class="ml-auto key">${peer.id}/samp></h6>
+                        <h6><samp class="ml-auto key">${peer.id}</samp></h6>
                     </div>`;
                 let peer_allowed_ip =
                     `<div class="col-sm">
