@@ -33,7 +33,7 @@
 						<div class="row">
 							<div class="col card-col">
 								<small class="text-muted"><strong>CONFIGURATION</strong></small>
-								<a href="/configuration/{{i['conf']}}" class="conf_link">
+								<a href="{{url_for('configuration', config_name = i['conf'])}}" class="conf_link">
 									<h6 class="card-title" style="margin:0 !important;"><samp>{{i['conf']}}</samp></h6>
 								</a>
 							</div>

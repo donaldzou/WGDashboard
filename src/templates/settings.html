@@ -40,7 +40,7 @@
                 <div class="card mb-3">
                     <h6 class="card-header">Peer Default Settings</h6>
                     <div class="card-body">
-                        <form action="/update_peer_default_config" method="post">
+                        <form action="{{url_for('update_peer_default_config')}}" method="post">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-6">
@@ -83,7 +83,7 @@
                 <div class="card mb-3">
                     <h6 class="card-header">WireGuard Configuration Path</h6>
                     <div class="card-body">
-                        <form action="/update_wg_conf_path" method="post" class="update_wg_conf_path">
+                        <form action="{{url_for('index')}}/update_wg_conf_path" method="post" class="update_wg_conf_path">
                             <div class="form-group">
                                 <label for="wg_conf_path">Path</label>
                                 <input type="text" class="form-control mb-2" id="wg_conf_path" name="wg_conf_path"
@@ -99,7 +99,7 @@
                 <div class="card mb-3">
                     <h6 class="card-header">Account</h6>
                     <div class="card-body">
-                        <form action="/update_acct" method="post">
+                        <form action="{{url_for('update_acct')}}" method="post">
                             <div class="form-group">
                                 <label for="username">Username</label>
                                 <input type="text" class="form-control mb-4" id="username" name="username"
@@ -113,7 +113,7 @@
                 <div class="card mb-3">
                     <h6 class="card-header">Security</h6>
                     <div class="card-body">
-                        <form action="/update_pwd" method="post">
+                        <form action="{{url_for('update_pwd')}}" method="post">
                             <div class="form-group">
                                 <label for="currentpass">Current Password</label>
                                 <input type="password" class="form-control mb-2" id="currentpass" name="currentpass">
@@ -130,7 +130,7 @@
             <div class="card">
                 <h6 class="card-header">Dashboard Configuration</h6>
                 <div class="card-body">
-                    <form action="/update_app_ip_port" method="post" class="update_app_ip_port">
+                    <form action="{{url_for('update_app_ip_port')}}" method="post" class="update_app_ip_port">
                         <div class="form-group">
                             <div class="row">
                                 <div class="col-sm">
@@ -194,8 +194,9 @@
     $(".confirm_restart").click(function () {
         $(".cancel_restart").remove()
         countdown = 7;
-        $.post('/update_app_ip_port', $('.update_app_ip_port').serialize())
-        url = $("#app_ip")[0].value + ":" + $("#app_port")[0].value;
+        $.post('{{url_for("update_app_ip_port")}}', $('.update_app_ip_port').serialize())
+        //url = $("#app_ip")[0].value + ":" + $("#app_port")[0].value;
+        url = '{{url_for("index")}}'
         $(".confirm_restart").attr("disabled", "disabled")
         setInterval(function () {
             if (countdown === 0) {
@@ -216,7 +217,7 @@
             $(".change_path").html("Redirecting you in " + countdown + " seconds.")
             countdown--;
         }, 1000)
-        $.post('/update_wg_conf_path', $('.update_wg_conf_path').serialize())
+        $.post('{{url_for("update_wg_conf_path")}}', $('.update_wg_conf_path').serialize())
     });
 
     $(".bottomNavSettings").addClass("active");
@@ -229,7 +230,7 @@
             $(this).addClass("active");
             $.ajax({
                 method: "POST",
-                url: "/api/settings/setTheme",
+                url: "{{url_for('index')}}/api/settings/setTheme",
                 headers: {"Content-Type": "application/json"},
                 data: JSON.stringify({"theme": theme})
             }).done(function(res){
@@ -237,7 +238,7 @@
                     if (theme == "light"){
                         $("#darkThemeCSS").remove();
                     }else{
-                        $("head").append('<link rel="stylesheet" type="text/css" href="/static/css/theme/dark.min.css" id="darkThemeCSS">');
+                        $("head").append('<link rel="stylesheet" type="text/css" href="{{url_for('static', filename = 'css/theme/dark.min.css')}}" id="darkThemeCSS">');
                     }
                 }
             });

@@ -1,7 +1,12 @@
 <head>
-<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>{{ title }} | WGDashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ title }} | WGDashboard</title>
+    <script>
+      window.wg_dashboard = {}
+      window.wg_dashboard.GLOBAL_PREFIX="{{url_for('index')}}";
+      var global_prefix = window.wg_dashboard.GLOBAL_PREFIX;
+    </script>
     <link rel="manifest" href="{{ url_for('static',filename='json/manifest.json') }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">

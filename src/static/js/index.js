@@ -45,7 +45,7 @@ $(".toggle--switch").on("change", function(){
     let ele = $(this);
     let label = $(this).siblings("label");
     $.ajax({
-        url: `/switch/${id}`
+        url: `switch/${id}`
     }).done(function(res){
         let dot = $(`div[data-conf-id="${id}"] .dot`);
         if (res.status){
@@ -133,7 +133,7 @@ function checkPort($this){
                 invalidInput(port, portFeedback, res.reason)
             }
         }
-        ajaxPostJSON('/api/addConfigurationPortCheck', {"port": port.val()}, done);
+        ajaxPostJSON('api/addConfigurationPortCheck', {"port": port.val()}, done);
     }
 }
 $("#addConfigurationListenPort").on("change", function(){
@@ -158,7 +158,7 @@ function checkAddress($this){
                 availableIPs.html(`N/A`);
             }
         }
-        ajaxPostJSON("/api/addConfigurationAddressCheck", {"address": address.val()}, done)
+        ajaxPostJSON("api/addConfigurationAddressCheck", {"address": address.val()}, done)
     }
 }
 $("#addConfigurationAddress").on("change", function(){
@@ -180,7 +180,7 @@ function checkName($this){
                 invalidInput(name, nameFeedback, res.reason);
             }
         }
-        ajaxPostJSON("/api/addConfigurationNameCheck", {"name": name.val()}, done);
+        ajaxPostJSON("api/addConfigurationNameCheck", {"name": name.val()}, done);
     }
 }
 $("#addConfigurationName").on("change", function(){
@@ -228,7 +228,7 @@ $("#addConfigurationBtn").on("click", function(){
                 setTimeout(() => {
                     $(".addConfigurationToggleStatus").removeClass("waiting").html(`<div class="spinner-border spinner-border-sm" role="status"></div> Toggle Configuration`)
                     $.ajax({
-                        url: `/switch/${name}`
+                        url: `switch/${name}`
                     }).done(function(res){
                         if (res.status){
                             $(".addConfigurationToggleStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> Toggle Successfully. Refresh in 5 seconds.`);
@@ -247,6 +247,6 @@ $("#addConfigurationBtn").on("click", function(){
                 $("#addCconfigurationAlert").removeClass("d-none").children(".alert-body").text(res.reason);
             }
         };
-        ajaxPostJSON("/api/addConfiguration", data, done);
+        ajaxPostJSON("api/addConfiguration", data, done);
     }
 });

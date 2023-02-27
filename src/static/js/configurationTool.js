@@ -41,7 +41,7 @@ $("#sure_delete_configuration").on("click", function () {
             $("#remove_configuration_alert").removeClass("d-none").text(res.reason);
         }
     }
-    ajaxPostJSON("/api/deleteConfiguration", {"name": configurations.getConfigurationName()}, done);
+    ajaxPostJSON(global_prefix + "api/deleteConfiguration", {"name": configurations.getConfigurationName()}, done);
 });
 
 function loadPeerDataUsageChartDone(res){
@@ -84,9 +84,9 @@ $body.on("click", ".btn-data-usage-peer", function(){
     configurations.peerDataUsageChartObj().data.peerID = $(this).data("peer-id");
     configurations.peerDataUsageModal().toggle();
     peerDataUsageInterval = setInterval(function(){
-        ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
+        ajaxPostJSON(global_prefix + "api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
     }, 30000);
-    ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
+    ajaxPostJSON(global_prefix + "api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID":  configurations.peerDataUsageChartObj().data.peerID, "interval": window.localStorage.getItem("peerTimePeriod")}, loadPeerDataUsageChartDone); 
 });
 
 $('#peerDataUsage').on('shown.bs.modal', function() {
@@ -105,7 +105,7 @@ $(".switchTimePeriod").on("click", function(){
     $(".switchTimePeriod").removeClass("active");
     $(this).addClass("active");
     if ($(this).data('time') !== peerTimePeriod){
-        ajaxPostJSON("/api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID": configurations.peerDataUsageChartObj().data.peerID, "interval": $(this).data('time')}, loadPeerDataUsageChartDone); 
+        ajaxPostJSON(global_prefix + "api/getPeerDataUsage", {"config": configurations.getConfigurationName(), "peerID": configurations.peerDataUsageChartObj().data.peerID, "interval": $(this).data('time')}, loadPeerDataUsageChartDone); 
         window.localStorage.peerTimePeriod = $(this).data('time');
     }
     

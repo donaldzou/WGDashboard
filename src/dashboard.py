@@ -510,8 +510,9 @@ def get_conf_list():
     for i in os.listdir(WG_CONF_PATH):
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
+            i = i.replace("-","_")
             create_table = f"""
-                CREATE TABLE IF NOT EXISTS {i} (
+                CREATE TABLE IF NOT EXISTS "{i}" (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
@@ -714,7 +715,7 @@ def auth_req():
             redirectURL = str(request.url)
             redirectURL = redirectURL.replace("http://", "")
             redirectURL = redirectURL.replace("https://", "")
-            return redirect("/signin?redirect=" + redirectURL)
+            return redirect(url_for("signin") + "?redirect=" + redirectURL)
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
                                 'update_app_ip_port', 'update_wg_conf_path']:
@@ -1046,7 +1047,7 @@ def configuration(config_name):
         conf_data['checked'] = "checked"
     config_list = get_conf_list()
     if config_name not in [conf['conf'] for conf in config_list]:
-        return redirect('/')
+        return redirect(url_for('/'))
 
     refresh_interval = int(config.get("Server", "dashboard_refresh_interval"))
     dns_address = config.get("Peers", "peer_global_DNS")
@@ -1124,7 +1125,7 @@ def get_conf(config_name):
     else:
         result['status'] = False
         result['message'] = "I cannot find this configuration. <br> Please refresh and try again"
-    config.clear()
+
     return jsonify(result)
 
 
@@ -1443,7 +1444,7 @@ def generate_qrcode(config_name):
                 result += "\nPresharedKey = " + preshared_key
             return render_template("qrcode.html", i=result)
     else:
-        return redirect("/configuration/" + config_name)
+        return redirect(url_for("configuration") + config_name)
 
 
 @app.route('/download_all/<config_name>', methods=['GET'])
@@ -1792,13 +1793,14 @@ def get_all_transfer_thread():
         db = connect_db()
         cur = db.cursor()
         while True:
-            print(stop_thread)
+            #print(stop_thread)
             # if stop_thread:
             #     break
             conf = []
             for i in os.listdir(WG_CONF_PATH):
                 if regex_match("^(.{1,}).(conf)$", i):
                     i = i.replace('.conf', '')
+                    i = i.replace("-","_")
                     create_table = f"""
                         CREATE TABLE IF NOT EXISTS {i} (
                             id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
@@ -2008,6 +2010,8 @@ def get_host_bind():
     app_port = config.get("Server", "app_port")
     return app_ip, app_port
 
+
+
 if __name__ == "__main__":
     init_dashboard()
     UPDATE = check_update()
@@ -2019,11 +2023,19 @@ if __name__ == "__main__":
     app_port = config.get("Server", "app_port")
     WG_CONF_PATH = config.get("Server", "wg_conf_path")
     config.clear()
-    global bgThread
     global stop_thread
     stop_thread = False
+    global bgThread
     bgThread = threading.Thread(target=get_all_transfer_thread)
     bgThread.daemon = True
     bgThread.start()
 
-    app.run(host=app_ip, debug=False, port=app_port)
+    scriptRoot = os.getenv('SCRIPT_NAME','')
+    print("boop")
+    if scriptRoot != '':
+      print("mounting on subpath")
+      from werkzeug.middleware.dispatcher import DispatcherMiddleware
+      app.wsgi_app = DispatcherMiddleware(None, { scriptRoot: app.wsgi_app })
+
+    app.run(host=app_ip, debug=True, port=app_port)
+

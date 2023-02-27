@@ -16,7 +16,7 @@
                 <div class="login-box" style="margin: auto !important;">
                     <h1 class="text-center">Sign in</h1>
                     <h5 class="text-center">to WGDashboard</h5>
-                    <form style="margin-left: auto !important; margin-right: auto !important; max-width: 500px;" action="/auth" method="post">
+                    <form style="margin-left: auto !important; margin-right: auto !important; max-width: 500px;" action="{{ url_for('auth') }}" method="post">
                         {% if message != "" %}
                             <div class="alert alert-warning" role="alert">You need to sign in first</div>
                         {% endif %}
@@ -56,7 +56,7 @@
         if (check){
             $(this).html("Signing In...").attr("disabled", "disabled");
             $.ajax({
-                url: "/auth",
+                url: "{{ url_for('auth') }}",
                 method: "POST",
                 headers:{"Content-Type": "application/json"},
                 data: JSON.stringify({

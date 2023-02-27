@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ARG WG_ADDRESS=$WG_ADDRESS
 
 RUN apt-get update && \
- apt-get install -y --no-install-recommends iproute2 wireguard-tools iptables nano net-tools python3 python3-pip python3-venv procps openresolv inotify-tools && \
+ apt-get install -y --no-install-recommends iproute2 wireguard-tools iptables nano net-tools python3 python3-pip python3-venv procps openresolv inotify-tools supervisor && \
  apt-get clean
 
 RUN mkdir -p /etc/wireguard/
@@ -18,11 +18,12 @@ RUN  cd / && echo "[Interface]" > wg0.conf && echo "SaveConfig = true" >> wg0.co
 COPY ./src /opt/wgdashboard_tmp
 RUN pip3 install -r /opt/wgdashboard_tmp/requirements.txt   --no-cache-dir
 RUN rm -rf /opt/wgdashboard_tmp
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod u+x /entrypoint.sh
+RUN mkdir /opt/logs
+COPY supervisor.conf /etc/supervisor/conf.d/supervisord.conf
 
-ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /opt/wgdashboard 
+CMD ["/usr/bin/supervisord"]
 
 EXPOSE 10086
 EXPOSE 51820/udp
+

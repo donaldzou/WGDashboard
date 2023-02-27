@@ -14,7 +14,7 @@
                     </h6>
                     <ul class="nav flex-column">
                         {% for i in conf%}
-                            <li class="nav-item"><a class="nav-link nav-conf-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}" data-conf-id="{{i['conf']}}"><samp>{{i['conf']}}</samp></a></li>
+                            <li class="nav-item"><a class="nav-link nav-conf-link sb-{{i['conf']}}-url" href="{{url_for('configuration', config_name=i['conf'])}}" data-conf-id="{{i['conf']}}"><samp>{{i['conf']}}</samp></a></li>
                         {%endfor%}
                     </ul>
                     <hr>
@@ -70,9 +70,9 @@
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="sidebar-sticky pt-3">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link sb-home-url" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link sb-home-url" href="{{url_for('index')}}">Home</a></li>
                     {% if "username" in session %}
-                        <li class="nav-item"><a class="nav-link sb-settings-url" href="/settings">Settings</a></li>
+                        <li class="nav-item"><a class="nav-link sb-settings-url" href="{{ url_for('settings') }}">Settings</a></li>
                     {% endif %}
                     {% if session['update'] == "true" %}
                     <li class="nav-item sb-update-li">
@@ -92,7 +92,7 @@
                 </h6>
                 <ul class="nav flex-column">
                     {% for i in conf%}
-                        <li class="nav-item"><a class="nav-link nav-conf-link sb-{{i['conf']}}-url" href="/configuration/{{i['conf']}}" data-conf-id="{{i['conf']}}"><samp>{{i['conf']}}</samp></a></li>
+                        <li class="nav-item"><a class="nav-link nav-conf-link sb-{{i['conf']}}-url" href="{{url_for('configuration', config_name=i['conf'])}}" data-conf-id="{{i['conf']}}"><samp>{{i['conf']}}</samp></a></li>
                     {%endfor%}
                 </ul>
                 <hr>
