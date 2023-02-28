@@ -65,7 +65,7 @@ class managePeer:
         if data['interval'] != "all":
             t = interval[data['interval']].strftime("%d/%m/%Y %H:%M:%S")
             intv = f" AND time >= '{t}'"
-        timeData = cur.execute(f"SELECT total_receive, total_sent, time FROM wg0_transfer WHERE id='{data['peerID']}' {intv} ORDER BY time DESC;")
+        timeData = cur.execute(f"SELECT total_receive, total_sent, time FROM {data['config']}_transfer WHERE id='{data['peerID']}' {intv} ORDER BY time DESC;")
         chartData = []
         for i in timeData:
             chartData.append({
@@ -113,11 +113,13 @@ class manageConfiguration:
         illegal_filename = ["(Space)", " ", ".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2",
                             "com3",
                             "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
-                            "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+                            "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn", "-"]
         for i in illegal_filename:
             name = name.replace(i, "")
         if len(name) == 0:
             return {"status": False, "reason": "Invalid name."}
+        if len(name) >= 15:
+            return {"status": False, "reason": "Interface names are capped at a length of 15 characters."}
         return good
 
     def addConfiguration(self, data, configs, WG_CONF_PATH):
