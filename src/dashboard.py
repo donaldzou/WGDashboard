@@ -1843,7 +1843,6 @@ def get_all_transfer_thread():
             if len(conf) > 0:
                 conf = sorted(conf, key=itemgetter('conf'))
             for i in conf:
-                print(i['conf'])
                 config_name = i['conf']
                 try:
                     data_usage = subprocess.check_output(f"wg show {config_name} transfer",
@@ -2031,9 +2030,7 @@ if __name__ == "__main__":
     bgThread.start()
 
     scriptRoot = os.getenv('SCRIPT_NAME','')
-    print("boop")
     if scriptRoot != '':
-      print("mounting on subpath")
       from werkzeug.middleware.dispatcher import DispatcherMiddleware
       app.wsgi_app = DispatcherMiddleware(None, { scriptRoot: app.wsgi_app })
 
