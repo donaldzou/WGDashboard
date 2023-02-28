@@ -594,7 +594,7 @@ let peers = [];
                 }
                 $.ajax({
                     method: "POST",
-                    url: "add_peer_bulk/" + conf,
+                    url: global_prefix + "add_peer_bulk/" + conf,
                     headers: {
                         "Content-Type": "application/json"
                     },
@@ -643,7 +643,7 @@ let peers = [];
     function deletePeers(config, peer_ids) {
         $.ajax({
             method: "POST",
-            url: "remove_peer/" + config,
+            url: global_prefix + "remove_peer/" + config,
             headers: {
                 "Content-Type": "application/json"
             },
@@ -961,7 +961,7 @@ let peers = [];
      */
     function getAvailableIps() {
         $.ajax({
-            "url": `available_ips/${configuration_name}`,
+            "url": `${global_prefix}available_ips/${configuration_name}`,
             "method": "GET",
         }).done(function (res) {
             if (res.status === true) {

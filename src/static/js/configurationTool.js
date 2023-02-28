@@ -146,7 +146,7 @@ $(".toggle--switch").on("change", function(){
     let status = $(this).prop("checked");
     let ele = $(this);
     $.ajax({
-        url: `/switch/${id}`
+        url: `${global_prefix}switch/${id}`
     }).done(function(res){
         if (res.status){
             if (status){
@@ -255,7 +255,7 @@ $add_peer.addEventListener("click", function() {
             data_list.forEach((ele) => ele.attr("disabled", "disabled"));
             $.ajax({
                 method: "POST",
-                url: "/add_peer/" + conf,
+                url: global_prefix + "add_peer/" + conf,
                 headers: {
                     "Content-Type": "application/json"
                 },

@@ -45,7 +45,7 @@ $(".toggle--switch").on("change", function(){
     let ele = $(this);
     let label = $(this).siblings("label");
     $.ajax({
-        url: `switch/${id}`
+        url: `${global_prefix}switch/${id}`
     }).done(function(res){
         let dot = $(`div[data-conf-id="${id}"] .dot`);
         if (res.status){
@@ -228,7 +228,7 @@ $("#addConfigurationBtn").on("click", function(){
                 setTimeout(() => {
                     $(".addConfigurationToggleStatus").removeClass("waiting").html(`<div class="spinner-border spinner-border-sm" role="status"></div> Toggle Configuration`)
                     $.ajax({
-                        url: `switch/${name}`
+                        url: `${global_prefix}switch/${name}`
                     }).done(function(res){
                         if (res.status){
                             $(".addConfigurationToggleStatus").removeClass("text-primary").addClass("text-success").html(`<i class="bi bi-check-circle-fill"></i> Toggle Successfully. Refresh in 5 seconds.`);
