@@ -35,7 +35,7 @@ $("#sure_delete_configuration").on("click", function () {
             $('#configuration_delete_modal button[data-dismiss="modal"]').remove();
             ele.text("Delete Successful! Redirecting in 5 seconds.");
             setTimeout(function(){
-                window.location.replace('/');
+                window.location.replace(global_prefix);
             }, 5000)
         }else{
             $("#remove_configuration_alert").removeClass("d-none").text(res.reason);
@@ -484,7 +484,7 @@ $body.on("click", ".btn-setting-peer", function() {
     $("#save_peer_setting").attr("peer_id", peer_id);
     $.ajax({
         method: "POST",
-        url: "/get_peer_data/" + configurations.getConfigurationName(),
+        url: global_prefix + "/get_peer_data/" + configurations.getConfigurationName(),
         headers: {
             "Content-Type": "application/json"
         },
@@ -560,7 +560,7 @@ $("#save_peer_setting").on("click", function() {
         data_list.forEach((ele) => ele.attr("disabled", "disabled"));
         $.ajax({
             method: "POST",
-            url: "/save_peer_setting/" + conf_id,
+            url: global_prefix+"/save_peer_setting/" + conf_id,
             headers: {
                 "Content-Type": "application/json"
             },
@@ -638,7 +638,7 @@ $body.on("change", "#sort_by_dropdown", function() {
         method: "POST",
         data: JSON.stringify({ 'sort': $("#sort_by_dropdown option:selected").val() }),
         headers: { "Content-Type": "application/json" },
-        url: "/update_dashboard_sort",
+        url: global_prefix + "/update_dashboard_sort",
         success: function() {
             configurations.loadPeers($('#search_peer_textbox').val());
         }

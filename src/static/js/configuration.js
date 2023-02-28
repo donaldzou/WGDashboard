@@ -467,10 +467,10 @@ let peers = [];
                 if (peer.private_key !== "") {
                     peer_control +=
                         `<div class="share_peer_btn_group" style="margin-left: auto !important; display: inline">
-                            <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="qrcode/${response.name}?id=${encodeURIComponent(peer.id)}">
+                            <button type="button" class="btn btn-outline-success btn-qrcode-peer btn-control" data-imgsrc="${global_prefix}qrcode/${response.name}?id=${encodeURIComponent(peer.id)}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 19px;" fill="#28a745"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>
                             </button>
-                            <a href="download/${response.name}?id=${encodeURIComponent(peer.id)}" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a>
+                            <a href="${global_prefix}download/${response.name}?id=${encodeURIComponent(peer.id)}" class="btn btn-outline-info btn-download-peer btn-control"><i class="bi bi-download"></i></a>
                         </div>`;
                 }
                 peer_control += '</div></div>';
