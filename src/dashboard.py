@@ -1497,19 +1497,13 @@ def download_all(config_name):
     return jsonify({"status": True, "peers": data, "filename": f"{config_name}.zip"})
 
 
-# Download configuration file
-@app.route('/download/<config_name>', methods=['GET'])
-def download(config_name):
-    """
-    Download one configuration
-    @param config_name: Configuration name
-    @return: JSON object
-    """
-    peer_id = request.args.get('id')
-    get_peer = g.cur.execute(
+def download_config(config_name, peer_id, db):
+    get_peer = db.execute(
         "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
         + config_name + " WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
+    global WG_CONF_PATH
+    WG_CONF_PATH = config.get("Server", "wg_conf_path")
     if len(get_peer) == 1:
         peer = get_peer[0]
         if peer[0] != "":
@@ -1547,9 +1541,20 @@ def download(config_name):
                           public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
                           endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
 
-            return jsonify({"status": True, "filename": f"{filename}.conf", "content": return_data})
-    return jsonify({"status": False, "filename": "", "content": ""})
+            return {"status": True, "filename": f"{filename}.conf", "content": return_data}
+    return {"status": False, "filename": "", "content": ""}
 
+
+# Download configuration file
+@app.route('/download/<config_name>', methods=['GET'])
+def download(config_name):
+    """
+    Download one configuration
+    @param config_name: Configuration name
+    @return: JSON object
+    """
+    peer_id = request.args.get('id')
+    return jsonify(download_config(config_name, peer_id, g.cur))
 
 @app.route('/switch_display_mode/<mode>', methods=['GET'])
 def switch_display_mode(mode):
@@ -1782,7 +1787,7 @@ def goodbye():
     global bgThread
     stop_thread = True
     
-    print("Stopping background thread")
+    #print("Stopping background thread")
 
 def get_all_transfer_thread():
     print("waiting 15 sec ")
