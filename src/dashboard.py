@@ -394,6 +394,26 @@ def getLockAccessPeers(config_name):
     result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     return result
 
+
+def _get_peers(cur, config_name):
+    """
+    Get all peers.
+    @param config_name: Name of WG interface
+    @type config_name: str
+    @param search: Search string
+    @type search: str
+    @param sort_t: Sorting tag
+    @type sort_t: str
+    @return: list
+    """
+    tic = time.perf_counter()
+    col = cur.execute("PRAGMA table_info(" + config_name + ")").fetchall()
+    col = [a[1] for a in col]
+    data = cur.execute("SELECT * FROM " + config_name).fetchall()
+    result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
+    return result
+
+
 def get_peers(config_name, search, sort_t):
     """
     Get all peers.
@@ -499,15 +519,18 @@ def get_conf_status(config_name):
     return "running" if config_name in ifconfig.keys() else "stopped"
 
 
-def get_conf_list():
+def _get_conf_list(conf_path, cur):
     """Get all wireguard interfaces with status.
 
     @return: Return a list of dicts with interfaces and its statuses
     @rtype: list
     """
+    global WG_CONF_PATH
+    if WG_CONF_PATH == None:
+        WG_CONF_PATH = conf_path
 
     conf = []
-    for i in os.listdir(WG_CONF_PATH):
+    for i in os.listdir(conf_path):
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             i = i.replace("-","_")
@@ -522,7 +545,7 @@ def get_conf_list():
                     PRIMARY KEY (id)
                 )
             """
-            g.cur.execute(create_table)
+            cur.execute(create_table)
             create_table = f"""
                 CREATE TABLE IF NOT EXISTS {i}_restrict_access (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
@@ -534,7 +557,7 @@ def get_conf_list():
                     PRIMARY KEY (id)
                 )
             """
-            g.cur.execute(create_table)
+            cur.execute(create_table)
             create_table = f"""
                 CREATE TABLE IF NOT EXISTS {i}_transfer (
                     id VARCHAR NOT NULL, total_receive FLOAT NULL, 
@@ -542,7 +565,7 @@ def get_conf_list():
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
                 )
             """
-            g.cur.execute(create_table)
+            cur.execute(create_table)
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i), "port": get_conf_listen_port(i)}
             if temp['status'] == "running":
                 temp['checked'] = 'checked'
@@ -553,6 +576,17 @@ def get_conf_list():
         conf = sorted(conf, key=itemgetter('conf'))
     return conf
 
+
+
+def get_conf_list():
+    """Get all wireguard interfaces with status.
+
+    @return: Return a list of dicts with interfaces and its statuses
+    @rtype: list
+    """
+
+    return _get_conf_list(WG_CONF_PATH,g.cur)
+    
 
 def gen_public_key(private_key):
     """Generate the public key.
