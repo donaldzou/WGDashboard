@@ -423,6 +423,17 @@ label[for="username"], label[for="password"]{
     padding: 0;
 }
 
+form[action="/update_acct"] label[for="username"] {
+    font-size: .875rem;
+    margin: 0 !important;
+    transform: unset;
+    padding: unset;
+}
+
+form[action="/update_acct"] #username {
+    padding: .375rem .75rem;
+}
+
 /*label[for="password"]{*/
 /*    transform: translateY(32px) translateX(16px);*/
 /*}*/
