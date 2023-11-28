@@ -10,6 +10,10 @@ body {
   color: hsl(0deg, 0%, 80%);
 }
 
+a.text-primary:focus, a.text-primary:hover {
+  color: hsl(235deg, 60%, 50%) !important;
+}
+
 .btn-primary {
   color: hsl(0deg, 0%, 90%) !important;
   border-color: hsl(235deg, 60%, 60%) !important;
@@ -332,8 +336,14 @@ div.toast div.toast-body {
   background-color: #383838 !important;
   color: hsl(0deg, 0%, 80%) !important;
 }
+div.toast div.toast-body.text-danger {
+  color: hsl(0deg, 60%, 60%) !important;
+}
 div.toast div.toast-progressbar {
   background-color: hsl(235deg, 60%, 60%) !important;
+}
+div.toast div.toast-progressbar.bg-danger {
+  background-color: hsl(0deg, 60%, 60%) !important;
 }
 
 .bs-popover-auto[x-placement^=right] > .arrow::after,

@@ -173,7 +173,8 @@ class manageConfiguration:
             return good
 
     def getConfigurationInfo(self, configName, WG_CONF_PATH):
-        conf = configparser.ConfigParser(strict=False)
+        conf = configparser.RawConfigParser(strict=False)
+        conf.optionxform = str
         try:
             with open(f'{WG_CONF_PATH}/{configName}.conf', 'r'):
                 conf.read(f'{WG_CONF_PATH}/{configName}.conf')
@@ -182,6 +183,55 @@ class manageConfiguration:
                 return ret(data=dict(conf['Interface']))
         except FileNotFoundError as err:
             return ret(status=False, reason=str(err))
+    
+    def saveConfiguration(self, data, WG_CONF_PATH, configs):
+        conf = configparser.RawConfigParser(strict=False)
+        conf.optionxform = str
+        configName = data['configurationName']
+        pc = manageConfiguration.PortCheck(self, {'port': data['ListenPort']}, configs)
+        if pc['status']:
+            try:
+                newData = []
+                with open(f'{WG_CONF_PATH}/{configName}.conf', 'r') as f:
+                    conf.read(f'{WG_CONF_PATH}/{configName}.conf')
+                    if not conf.has_section("Interface"):
+                        return ret(status=False, reason="No [Interface] in configuration file")
+                    l = ['ListenPort', 'PostUp', 'PostDown', 'PreUp', 'PreDown']
+                    for i in l:
+                        conf.set("Interface", i, data[i])
+                    conf.remove_section("Peer")
+                    newData = list(map(lambda x : f"{x[0]} = {x[1]}\n", list(conf.items("Interface"))))
+                    originalData = f.readlines()
+                    for i in range(len(originalData)):
+                        if originalData[i] == "[Peer]\n":
+                            originalData = originalData[i:]
+                            break
+                    newData.insert(0, "[Interface]\n")
+                    newData.append("\n")
+                    newData = newData + originalData
+                    conf.clear()
+                
+
+                try:
+                    check = subprocess.check_output("wg-quick down " + configName,
+                                                    shell=True, stderr=subprocess.STDOUT)
+                except subprocess.CalledProcessError as exc:
+                    pass
+                with open(f'{WG_CONF_PATH}/{configName}.conf', 'w') as f:
+                    for i in newData:
+                        f.write(i)
+                try:
+                    check = subprocess.check_output("wg-quick up " + configName,
+                                                    shell=True, stderr=subprocess.STDOUT)
+                except subprocess.CalledProcessError as exc:
+                    pass
+                return ret()
+            except FileNotFoundError as err:
+                return ret(status=False, reason=str(err))
+        else:
+            return pc
+
+        
 
 
 class settings:

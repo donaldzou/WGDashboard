@@ -65,3 +65,26 @@ $(".send_traceroute").on("click", function (){
         }
     });
 });
+let numberToast = 0;
+function showToast(msg, isDanger = false) {
+    $(".toastContainer").append(
+        `<div id="${numberToast}-toast" class="toast hide animate__animated animate__fadeInUp" role="alert" data-delay="5000">
+            <div class="toast-header">
+                <strong class="mr-auto">WGDashboard</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body ${isDanger ? 'text-danger':''}">${msg}</div>
+            <div class="toast-progressbar ${isDanger ? 'bg-danger':''}"></div>
+        </div>` )
+    $(`#${numberToast}-toast`).toast('show');
+    $(`#${numberToast}-toast .toast-body`).html(msg);
+    $(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
+    $(`#${numberToast}-toast .toast-progressbar`).css("width", "0px");
+    let i = numberToast;
+    setTimeout(function(){
+        $(`#${i}-toast`).removeClass("animate__fadeInUp").addClass("animate__fadeOutRight")
+    }, 4500)
+    numberToast++;
+}

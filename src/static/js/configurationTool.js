@@ -122,6 +122,35 @@ $editConfiguration.on("click", function(){
     configurations.configurationEditModal().toggle();
 });
 
+$saveConfiguration = $("#editConfigurationBtn");
+$saveConfiguration.on("click", function(){
+    $(this).html("Saving...")
+    $(this).siblings().hide();
+    $(this).attr("disabled", "disabled");
+
+    let data = {
+        "configurationName": configurations.getConfigurationName(),
+        "ListenPort": $("#editConfigurationListenPort").val(),
+        "PostUp": $("#editConfigurationPostUp").val(),
+        "PostDown": $("#editConfigurationPostDown").val(),
+        "PreDown": $("#editConfigurationPreDown").val(),
+        "PreUp": $("#editConfigurationPreUp").val(),
+    }
+    function done(res){
+        console.log(res);
+        $saveConfiguration.removeAttr("disabled");
+        if (res.status){
+            configurations.configurationEditModal().toggle();
+            configurations.loadPeers("");
+            showToast("Configuration saved");
+        }else{
+            showToast(res.reason);
+        }
+        $saveConfiguration.html("Save");
+        $saveConfiguration.siblings().show();
+    }
+    ajaxPostJSON("/api/saveConfiguration", data, done);
+})
 
 /**
  * ==========
@@ -150,9 +179,9 @@ $(".toggle--switch").on("change", function(){
     }).done(function(res){
         if (res.status){
             if (status){
-                configurations.showToast(`${id} is running.`)
+                showToast(`${id} is running.`)
             }else{
-                configurations.showToast(`${id} is stopped.`)
+                showToast(`${id} is stopped.`)
             }
         }else{
             if (status){
@@ -160,7 +189,7 @@ $(".toggle--switch").on("change", function(){
             }else{
                 ele.prop("checked", true)
             }
-            configurations.showToast(res.reason);
+            showToast(res.reason, true);
             $(".index-alert").removeClass("d-none").text(`Configuration toggle failed. Please check the following error message:\n${res.message}`);
         }
         ele.removeClass("waiting");
@@ -283,7 +312,7 @@ $add_peer.addEventListener("click", function() {
                         $("#add_peer_form").trigger("reset");
                         $add_peer.removeAttribute("disabled");
                         $add_peer.innerHTML = "Save";
-                        configurations.showToast("Add peer successful!");
+                        showToast("Add peer successful!");
                         configurations.addModal().toggle();
                     }
                 }
@@ -447,12 +476,12 @@ $body.on("click", ".btn-lock-peer", function() {
     configurations.toggleAccess($(this).data('peer-id'), configurations.getConfigurationName());
     if ($(this).hasClass("lock")) {
         console.log($(this).data("peer-name"))
-        configurations.showToast(`Enabled ${$(this).children().data("peer-name")}`)
+        showToast(`Enabled ${$(this).children().data("peer-name")}`)
         $(this).removeClass("lock")
         $(this).children().tooltip('hide').attr('data-original-title', 'Peer enabled. Click to disable peer.').tooltip('show');
     } else {
         // Currently unlocked
-        configurations.showToast(`Disabled ${$(this).children().data("peer-name")}`)
+        showToast(`Disabled ${$(this).children().data("peer-name")}`)
         $(this).addClass("lock");
         $(this).children().tooltip('hide').attr('data-original-title', 'Peer disabled. Click to enable peer.').tooltip('show');
     }
@@ -706,12 +735,12 @@ $body.on("click", ".display_mode", function() {
         Array($(".peer_list").children()).forEach(function(child) {
             $(child).removeClass().addClass("col-12");
         });
-        configurations.showToast("Displaying as List");
+        showToast("Displaying as List");
     } else {
         Array($(".peer_list").children()).forEach(function(child) {
             $(child).removeClass().addClass("col-sm-6 col-lg-4");
         });
-        configurations.showToast("Displaying as Grids");
+        showToast("Displaying as Grids");
     }
 });
 
@@ -891,9 +920,9 @@ $("#download_all_peers").on("click", function() {
         success: function(res) {
             if (res.peers.length > 0) {
                 window.wireguard.generateZipFiles(res);
-                configurations.showToast("Peers' zip file download successful!");
+                showToast("Peers' zip file download successful!");
             } else {
-                configurations.showToast("Oops! There are no peer can be download.");
+                showToast("Oops! There are no peer can be download.");
             }
         }
     });

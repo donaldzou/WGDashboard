@@ -184,7 +184,6 @@
             </main>
         </div>
     </div>
-
     {% include "modal.html" %}
     <div class="position-fixed top-0 right-0 p-3 toastContainer" style="z-index: 5; right: 0; top: 50px;"></div>
     {% include "tools.html" %}
@@ -192,7 +191,7 @@
 {% include "footer.html" %}
 <script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 <script src="{{ url_for('static',filename='js/configurationTool.js') }}"></script>
-<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/wireguard.js') }}"></script>
 <script>
     configurations.setConfigurationName("{{ conf_data['name'] }}");
     configurations.setActiveConfigurationName();

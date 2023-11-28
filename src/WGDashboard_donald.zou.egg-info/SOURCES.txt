@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/WGDashboard_donald.zou.egg-info/PKG-INFO
+src/WGDashboard_donald.zou.egg-info/SOURCES.txt
+src/WGDashboard_donald.zou.egg-info/dependency_links.txt
+src/WGDashboard_donald.zou.egg-info/top_level.txt

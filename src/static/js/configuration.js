@@ -618,7 +618,7 @@ let peers = [];
                             $("#add_peer_form").trigger("reset");
                             $add_peer.removeAttribute("disabled");
                             $add_peer.innerHTML = "Save";
-                            configurations.showToast($new_add_amount.val() + " peers added successful!");
+                            showToast($new_add_amount.val() + " peers added successful!");
                             configurations.addModal().toggle();
                         }
                     }
@@ -671,7 +671,7 @@ let peers = [];
                         configurations.deleteBulkModal().toggle();
                     }
                     configurations.loadPeers($('#search_peer_textbox').val());
-                    configurations.showToast(`Deleted ${peer_ids.length} peers`)
+                    showToast(`Deleted ${peer_ids.length} peers`)
                     $("#delete_peer").removeAttr("disabled").html("Delete");
                 }
             }
@@ -848,30 +848,6 @@ let peers = [];
     }
 
     /**
-     * Show toast
-     * @param msg
-     */
-    let numberToast = 0;
-    function showToast(msg) {
-        $(".toastContainer").append(
-            `<div id="${numberToast}-toast" class="toast hide" role="alert" data-delay="5000">
-				<div class="toast-header">
-					<strong class="mr-auto">WGDashboard</strong>
-					<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="toast-body">${msg}</div>
-				<div class="toast-progressbar"></div>
-			</div>` )
-        $(`#${numberToast}-toast`).toast('show');
-        $(`#${numberToast}-toast .toast-body`).html(msg);
-        $(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
-        $(`#${numberToast}-toast .toast-progressbar`).css("width", "0px");
-        numberToast++;
-    }
-
-    /**
      * Update peer's refresh interval
      * @param res
      * @param interval
@@ -980,7 +956,23 @@ let peers = [];
 
     function getConfigurationDetails() {
         function done(res){
-            console.log(res);
+            console.log(res.data);
+            $("#editConfigurationName").text(configuration_name);
+            $("#editConfigurationAddress").text(res.data.Address);
+            $("#editConfigurationPrivateKey").text(res.data.PrivateKey);
+            $("#editConfigurationListenPort").val(res.data.ListenPort);
+            if (res.data.PostUp){
+                $("#editConfigurationPostUp").val(res.data.PostUp)
+            }
+            if (res.data.PostDown){
+                $("#editConfigurationPostDown").val(res.data.PostDown)
+            }
+            if (res.data.PreUp){
+                $("#editConfigurationPreUp").val(res.data.PreUp)
+            }
+            if (res.data.PreDown){
+                $("#editConfigurationPreDown").val(res.data.PreDown)
+            }
         }
         ajaxGetJSON(`/api/getConfigurationInfo?configName=${configuration_name}`, done)
     }

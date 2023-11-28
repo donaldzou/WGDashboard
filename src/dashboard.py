@@ -1659,6 +1659,14 @@ def addConfiguration():
     returnData = api.manageConfiguration.addConfiguration(api.manageConfiguration, data, config, WG_CONF_PATH)
     return jsonify(returnData)
 
+@app.route('/api/saveConfiguration', methods=["POST"])
+def saveConfiguration():
+    data = request.get_json()
+    required = ['configurationName', 'ListenPort']
+    if not checkJSONAllParameter(required, data):
+        return jsonify(api.notEnoughParameter)
+    return api.manageConfiguration.saveConfiguration(api.manageConfiguration, data, WG_CONF_PATH, get_conf_list())
+
 @app.route('/api/deleteConfiguration', methods=['POST'])
 def deleteConfiguration():
     data = request.get_json()

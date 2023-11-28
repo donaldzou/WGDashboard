@@ -1,4 +1,3 @@
-let numberToast = 0;
 let emptyInputFeedback = "Can't leave empty";
 $('[data-toggle="tooltip"]').tooltip()
 let $add_configuration = $("#add_configuration");
@@ -18,25 +17,6 @@ addConfigurationModal.on("hidden.bs.modal", function(){
     $("#add_configuration_form input").removeClass("is-valid").removeClass("is-invalid");
     $(".addConfigurationAvailableIPs").text("N/A");
 });
-
-function showToast(msg){
-    $(".toastContainer").append(
-        `<div id="${numberToast}-toast" class="toast hide" role="alert" data-delay="5000">
-            <div class="toast-header">
-                <strong class="mr-auto">WGDashboard</strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">${msg}</div>
-            <div class="toast-progressbar"></div>
-        </div>` );
-    $(`#${numberToast}-toast`).toast('show');
-    $(`#${numberToast}-toast .toast-body`).html(msg);
-    $(`#${numberToast}-toast .toast-progressbar`).css("transition", `width ${$(`#${numberToast}-toast .toast-progressbar`).parent().data('delay')}ms cubic-bezier(0, 0, 0, 0)`);
-    $(`#${numberToast}-toast .toast-progressbar`).css("width", "0px");
-    numberToast++;
-}
 
 $(".toggle--switch").on("change", function(){
     $(this).addClass("waiting").attr("disabled", "disabled");
@@ -59,6 +39,7 @@ $(".toggle--switch").on("change", function(){
             }
         }else{
             ele.parents().children(".card-message").html(`<pre class="index-alert">Configuration toggle failed. Please check the following error message:<br><code>${res.message}</code></pre>`)
+            showToast(`${id} toggled failed.`, true);
             if (status){
                 ele.prop("checked", false)
             }else{
@@ -70,8 +51,18 @@ $(".toggle--switch").on("change", function(){
 });
 
 $(".sb-home-url").addClass("active");
+
 $(".card-body").on("click", function(handle){
     if ($(handle.target).attr("class") !== "toggleLabel" && $(handle.target).attr("class") !== "toggle--switch") {
+        let c = $(".card");
+        for (let i of c){
+            if (i != $(this).parent()[0]){
+                $(i).css("transition", "ease-in-out 0.3s").css("opacity", "0.5")
+            }
+        }
+        
+
+
         window.open($(this).find("a").attr("href"), "_self");
     }
 });

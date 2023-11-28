@@ -42,6 +42,9 @@ body {
   color: $text-200;
 }
 
+a.text-primary:focus, a.text-primary:hover{
+  color: $blue-400 !important;
+}
 
 .btn-primary {
   color: $text-100 !important;
@@ -409,8 +412,16 @@ div.toast {
     color: $text-200 !important;
   }
 
+  div.toast-body.text-danger{
+    color: $red-500 !important;
+  }
+
   div.toast-progressbar {
     background-color: $blue-500 !important;
+  }
+
+  div.toast-progressbar.bg-danger {
+    background-color: $red-500 !important;
   }
 }
 
