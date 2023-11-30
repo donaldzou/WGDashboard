@@ -689,6 +689,9 @@ def auth_req():
     Action before every request
     @return: Redirect
     """
+    return None
+    
+    
     if getattr(g, 'db', None) is None:
         g.db = connect_db()
         g.cur = g.db.cursor()
@@ -767,9 +770,13 @@ def auth():
     if password.hexdigest() == config["Account"]["password"] \
             and data['username'] == config["Account"]["username"]:
         session['username'] = data['username']
+        resp = Flask.make_response(jsonify({"status": True, "msg": ""}))
+
+
+        resp.set_cookie("auth", hashlib.sha256(f"{data['username']}{datetime.now()}".encode()).hexdigest())
         session.permanent = True
-        config.clear()
-        return jsonify({"status": True, "msg": ""})
+        config.clear(resp)
+        return 
     config.clear()
     return jsonify({"status": False, "msg": "Username or Password is incorrect."})
 
@@ -789,8 +796,8 @@ def index():
     if "switch_msg" in session:
         msg = session["switch_msg"]
         session.pop("switch_msg")
-
-    return render_template('index.html', conf=get_conf_list(), msg=msg)
+    return render_template('index_new.html')
+    # return render_template('index.html', conf=get_conf_list(), msg=msg)
 
 
 # Setting Page
