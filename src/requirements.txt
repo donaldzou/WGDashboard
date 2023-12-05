@@ -1,6 +1,7 @@
 Flask
 ifcfg
 icmplib
+bcrypt
 flask-qrcode
 gunicorn
 certbot
