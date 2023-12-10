@@ -15,4 +15,4 @@ log/**
 release/*
 src/db/wgdashboard.db
 .jshintrc
-./node_modules/*
+node_modules/
