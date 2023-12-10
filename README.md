@@ -101,7 +101,8 @@ git clone -b v3.1-dev https://github.com/donaldzou/WGDashboard.git wgdashboard
 - **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
 
   > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
-
+- Net Tools (`net-tools`) is installed.
+  - You can verify this by checking if `ifconfig` return a list of network interface. Such as `eth0`
 - Configuration files under **`/etc/wireguard`**, but please note the following sample
 
   ```ini
