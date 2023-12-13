@@ -490,10 +490,12 @@
             available_ips = res;
             let $list_group = document.querySelector("#available_ip_modal .modal-body .list-group");
             $list_group.innerHTML = "";
+            let tmp_str = "";
             document.querySelector("#allowed_ips").value = available_ips[0];
             available_ips.forEach((ip) =>
-                $list_group.innerHTML +=
+                tmp_str +=
                     `<a class="list-group-item list-group-item-action available-ip-item" style="cursor: pointer" data-ip="${ip}">${ip}</a>`);
+            $list_group.innerHTML = tmp_str;
         });
     }
 
