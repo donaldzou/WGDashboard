@@ -44,7 +44,15 @@ _check_and_set_venv(){
     . ${VIRTUAL_ENV}/bin/activate
 }
 
+function isRoot() {
+	if [ "${EUID}" -ne 0 ]; then
+		printf "| You need to run this script as root                      |\n"
+		exit 1
+	fi
+}
+
 install_wgd(){
+    isRoot
     printf "| Starting to install WGDashboard                          |\n"
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
@@ -59,11 +67,19 @@ install_wgd(){
       then mkdir "log"
     fi
     printf "| Upgrading pip                                            |\n"
-    python3 -m pip install -U pip > /dev/null 2>&1
+    if ! error=$( python3 -m pip install -U pip 2>&1); then
+      echo "$error"
+      printf "| Error occurred. WGDashboard installation abort         |\n"
+      exit 1
+    fi
     printf "| Installing latest Python dependencies                    |\n"
-    python3 -m pip install -U -r requirements.txt > /dev/null 2>&1
+    if ! error=$( python3 -m pip install -U -r requirements.txt 2>&1); then
+      echo "$error"
+      printf "| Error occurred. WGDashboard installation abort         |\n"
+      exit 1
+    fi
     printf "| WGDashboard installed successfully!                      |\n"
-    printf "| Enter ./wgd.sh start to start the dashboard              |\n"
+    printf "| Enter 'sudo ./wgd.sh start' to start the dashboard              |\n"
 }
 
 
@@ -98,9 +114,8 @@ gunicorn_start () {
     mkdir "log"
   fi
   d=$(date '+%Y%m%d%H%M%S')
-  if [[ $USER == root ]]; then
-    export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
-  fi
+
+  export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   gunicorn --access-logfile log/access_"$d".log \
   --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
   printf "| Log files is under log/                                  |\n"
@@ -112,10 +127,12 @@ gunicorn_stop () {
 }
 
 start_wgd () {
+    isRoot
     gunicorn_start
 }
 
 stop_wgd() {
+  isRoot
   if test -f "$PID_FILE"; then
     gunicorn_stop
   else
@@ -124,6 +141,7 @@ stop_wgd() {
 }
 
 start_wgd_debug() {
+  isRoot
   printf "%s\n" "$dashes"
   printf "| Starting WGDashboard in the foreground.                  |\n"
   python3 "$app_name"
@@ -145,9 +163,17 @@ update_wgd() {
     git stash > /dev/null 2>&1
     git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force >  /dev/null 2>&1
     printf "| Upgrading pip                                            |\n"
-    python3 -m pip install -U pip > /dev/null 2>&1
+    if ! error=$( python3 -m pip install -U pip 2>&1); then
+      echo "$error"
+      printf "| Error occurred. WGDashboard installation abort         |\n"
+      exit 1
+    fi
     printf "| Installing latest Python dependencies                    |\n"
-    python3 -m pip install -U -r requirements.txt > /dev/null 2>&1
+    if ! error=$( python3 -m pip install -U -r requirements.txt 2>&1); then
+      echo "$error"
+      printf "| Error occurred. WGDashboard installation abort         |\n"
+      exit 1
+    fi
     printf "| Update Successfully!                                     |\n"
     printf "%s\n" "$dashes"
     rm wgd.sh.old
