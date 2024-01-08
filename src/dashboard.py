@@ -224,10 +224,10 @@ def get_latest_handshake(config_name):
         else:
             status = "stopped"
         if int(data_usage[count + 1]) > 0:
-            g.cur.execute("UPDATE %s SET latest_handshake = '%s', status = '%s' WHERE id='%s'"
+            g.cur.execute("UPDATE '%s' SET latest_handshake = '%s', status = '%s' WHERE id='%s'"
             % (config_name, str(minus).split(".", maxsplit=1)[0], status, data_usage[count]))
         else:
-            g.cur.execute("UPDATE %s SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
+            g.cur.execute("UPDATE '%s' SET latest_handshake = '(None)', status = '%s' WHERE id='%s'"
             % (config_name, status, data_usage[count]))
         count += 2
 
@@ -251,7 +251,7 @@ def get_transfer(config_name):
     data_usage = final
     for i in range(len(data_usage)):
         cur_i = g.cur.execute(
-            "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id='%s'"
+            "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM '%s' WHERE id='%s'"
             % (config_name, data_usage[i][0])).fetchall()
         if len(cur_i) > 0:
             total_sent = cur_i[0][1]
@@ -265,12 +265,12 @@ def get_transfer(config_name):
                 else:
                     cumulative_receive = cur_i[0][2] + total_receive
                     cumulative_sent = cur_i[0][3] + total_sent
-                    g.cur.execute("UPDATE %s SET cumu_receive = %f, cumu_sent = %f, cumu_data = %f WHERE id = '%s'" %
+                    g.cur.execute("UPDATE '%s' SET cumu_receive = %f, cumu_sent = %f, cumu_data = %f WHERE id = '%s'" %
                                   (config_name, round(cumulative_receive, 4), round(cumulative_sent, 4),
                                    round(cumulative_sent + cumulative_receive, 4), data_usage[i][0]))
                     total_sent = 0
                     total_receive = 0
-                g.cur.execute("UPDATE %s SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
+                g.cur.execute("UPDATE '%s' SET total_receive = %f, total_sent = %f, total_data = %f WHERE id = '%s'" %
                               (config_name, round(total_receive, 4), round(total_sent, 4),
                                round(total_receive + total_sent, 4), data_usage[i][0]))
 
@@ -290,7 +290,7 @@ def get_endpoint(config_name):
     data_usage = data_usage.decode("UTF-8").split()
     count = 0
     for _ in range(int(len(data_usage) / 2)):
-        g.cur.execute("UPDATE " + config_name + " SET endpoint = '%s' WHERE id = '%s'"
+        g.cur.execute("UPDATE '" + config_name + "' SET endpoint = '%s' WHERE id = '%s'"
                       % (data_usage[count + 1], data_usage[count]))
         count += 2
 
@@ -305,7 +305,7 @@ def get_allowed_ip(conf_peer_data, config_name):
     """
     # Get allowed ip
     for i in conf_peer_data["Peers"]:
-        g.cur.execute("UPDATE " + config_name + " SET allowed_ip = '%s' WHERE id = '%s'"
+        g.cur.execute("UPDATE '" + config_name + "' SET allowed_ip = '%s' WHERE id = '%s'"
                       % (i.get('AllowedIPs', '(None)'), i["PublicKey"]))
 
 
@@ -321,7 +321,7 @@ def get_all_peers_data(config_name):
     for i in range(len(conf_peer_data['Peers'])):
         if "PublicKey" in conf_peer_data['Peers'][i].keys():
             result = g.cur.execute(
-                "SELECT * FROM %s WHERE id='%s'" % (config_name, conf_peer_data['Peers'][i]["PublicKey"])).fetchall()
+                "SELECT * FROM '%s' WHERE id='%s'" % (config_name, conf_peer_data['Peers'][i]["PublicKey"])).fetchall()
             if len(result) == 0:
                 new_data = {
                     "id": conf_peer_data['Peers'][i]['PublicKey'],
@@ -348,7 +348,7 @@ def get_all_peers_data(config_name):
                 if "PresharedKey" in conf_peer_data['Peers'][i].keys():
                     new_data["preshared_key"] = conf_peer_data['Peers'][i]["PresharedKey"]
                 sql = f"""
-                INSERT INTO {config_name} 
+                INSERT INTO '{config_name}' 
                     VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
                     :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
                     :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
@@ -360,11 +360,11 @@ def get_all_peers_data(config_name):
     for i in failed_index:
         conf_peer_data['Peers'].pop(i)
     # Remove peers no longer exist in WireGuard configuration file
-    db_key = list(map(lambda a: a[0], g.cur.execute("SELECT id FROM %s" % config_name)))
+    db_key = list(map(lambda a: a[0], g.cur.execute("SELECT id FROM '%s'" % config_name)))
     wg_key = list(map(lambda a: a['PublicKey'], conf_peer_data['Peers']))
     for i in db_key:
         if i not in wg_key:
-            g.cur.execute("DELETE FROM %s WHERE id = '%s'" % (config_name, i))
+            g.cur.execute("DELETE FROM '%s' WHERE id = '%s'" % (config_name, i))
     get_latest_handshake(config_name)
     get_transfer(config_name)
     get_endpoint(config_name)
@@ -383,14 +383,14 @@ def get_peers(config_name, search, sort_t):
     @return: list
     """
     tic = time.perf_counter()
-    col = g.cur.execute("PRAGMA table_info(" + config_name + ")").fetchall()
+    col = g.cur.execute("PRAGMA table_info('" + config_name + "')").fetchall()
     col = [a[1] for a in col]
     get_all_peers_data(config_name)
     if len(search) == 0:
-        data = g.cur.execute("SELECT * FROM " + config_name).fetchall()
+        data = g.cur.execute("SELECT * FROM '" + config_name + "'").fetchall()
         result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     else:
-        sql = "SELECT * FROM " + config_name + " WHERE name LIKE '%" + search + "%'"
+        sql = "SELECT * FROM '" + config_name + "' WHERE name LIKE '%" + search + "%'"
         data = g.cur.execute(sql).fetchall()
         result = [{col[i]: data[k][i] for i in range(len(col))} for k in range(len(data))]
     if sort_t == "allowed_ip":
@@ -452,7 +452,7 @@ def get_conf_total_data(config_name):
     @param config_name: Configuration name
     @return: list
     """
-    data = g.cur.execute("SELECT total_sent, total_receive, cumu_sent, cumu_receive FROM " + config_name)
+    data = g.cur.execute("SELECT total_sent, total_receive, cumu_sent, cumu_receive FROM '" + config_name + "'")
     upload_total = 0
     download_total = 0
     for i in data.fetchall():
@@ -488,7 +488,7 @@ def get_conf_list():
         if regex_match("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             create_table = f"""
-                CREATE TABLE IF NOT EXISTS {i} (
+                CREATE TABLE IF NOT EXISTS '%s' (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
@@ -498,7 +498,7 @@ def get_conf_list():
                     PRIMARY KEY (id)
                 )
             """
-            g.cur.execute(create_table)
+            g.cur.execute(create_table % i)
             temp = {"conf": i, "status": get_conf_status(i), "public_key": get_conf_pub_key(i)}
             if temp['status'] == "running":
                 temp['checked'] = 'checked'
@@ -550,7 +550,7 @@ def f_check_key_match(private_key, public_key, config_name):
     if result['status'] == 'failed':
         return result
     else:
-        sql = "SELECT * FROM " + config_name + " WHERE id = ?"
+        sql = "SELECT * FROM '" + config_name + "' WHERE id = ?"
         match = g.cur.execute(sql, (result['data'],)).fetchall()
         if len(match) != 1 or result['data'] != public_key:
             return {'status': 'failed', 'msg': 'Please check your private key, it does not match with the public key.'}
@@ -566,12 +566,12 @@ def check_repeat_allowed_ip(public_key, ip, config_name):
     @param config_name: configuration name
     @return: a JSON object
     """
-    peer = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE id = ?", (public_key,)).fetchone()
+    peer = g.cur.execute("SELECT COUNT(*) FROM '" + config_name + "' WHERE id = ?", (public_key,)).fetchone()
     if peer[0] != 1:
         return {'status': 'failed', 'msg': 'Peer does not exist'}
     else:
-        existed_ip = g.cur.execute("SELECT COUNT(*) FROM " +
-                                   config_name + " WHERE id != ? AND allowed_ip LIKE '" + ip + "/%'", (public_key,)) \
+        existed_ip = g.cur.execute("SELECT COUNT(*) FROM '" +
+                                   config_name + "' WHERE id != ? AND allowed_ip LIKE '" + ip + "/%'", (public_key,)) \
             .fetchone()
         if existed_ip[0] != 0:
             return {'status': 'failed', 'msg': "Allowed IP already taken by another peer."}
@@ -593,7 +593,7 @@ def f_available_ips(config_name):
         for i in address:
             add, sub = i.split("/")
             existed.append(ipaddress.ip_address(add))
-        peers = g.cur.execute("SELECT allowed_ip FROM " + config_name).fetchall()
+        peers = g.cur.execute("SELECT allowed_ip FROM '" + config_name + "'").fetchall()
         for i in peers:
             add = i[0].split(",")
             for k in add:
@@ -1125,7 +1125,7 @@ def add_peer_bulk(config_name):
             keys[i]['psk_file'] = ""
         wg_command.append("allowed-ips")
         wg_command.append(keys[i]['allowed_ips'])
-        update = ["UPDATE ", config_name, " SET name = '", keys[i]['name'],
+        update = ["UPDATE '", config_name, "' SET name = '", keys[i]['name'],
                   "', private_key = '", keys[i]['privateKey'], "', DNS = '", dns_addresses,
                   "', endpoint_allowed_ip = '", endpoint_allowed_ip, "' WHERE id = '", keys[i]['publicKey'], "'"]
         sql_command.append(update)
@@ -1166,7 +1166,7 @@ def add_peer(config_name):
     if public_key in keys:
         return "Public key already exist."
     check_dup_ip = g.cur.execute(
-        "SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip LIKE '" + allowed_ips + "/%'", ) \
+        "SELECT COUNT(*) FROM '" + config_name + "' WHERE allowed_ip LIKE '" + allowed_ips + "/%'", ) \
         .fetchone()
     if check_dup_ip[0] != 0:
         return "Allowed IP already taken by another peer."
@@ -1194,7 +1194,7 @@ def add_peer(config_name):
                                              shell=True, stderr=subprocess.STDOUT)
         status = subprocess.check_output("wg-quick save " + config_name, shell=True, stderr=subprocess.STDOUT)
         get_all_peers_data(config_name)
-        sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ? WHERE id = ?"
+        sql = "UPDATE '" + config_name + "' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ? WHERE id = ?"
         g.cur.execute(sql, (data['name'], data['private_key'], data['DNS'], endpoint_allowed_ip, public_key))
         return "true"
     except subprocess.CalledProcessError as exc:
@@ -1224,7 +1224,7 @@ def remove_peer(config_name):
         for delete_key in delete_keys:
             if delete_key not in keys:
                 return "This key does not exist"
-            sql_command.append("DELETE FROM " + config_name + " WHERE id = '" + delete_key + "';")
+            sql_command.append("DELETE FROM '" + config_name + "' WHERE id = '" + delete_key + "';")
             wg_command.append("peer")
             wg_command.append(delete_key)
             wg_command.append("remove")
@@ -1257,7 +1257,7 @@ def save_peer_setting(config_name):
     allowed_ip = data['allowed_ip']
     endpoint_allowed_ip = data['endpoint_allowed_ip']
     preshared_key = data['preshared_key']
-    check_peer_exist = g.cur.execute("SELECT COUNT(*) FROM " + config_name + " WHERE id = ?", (id,)).fetchone()
+    check_peer_exist = g.cur.execute("SELECT COUNT(*) FROM '" + config_name + "' WHERE id = ?", (id,)).fetchone()
     if check_peer_exist[0] == 1:
         check_ip = check_repeat_allowed_ip(id, allowed_ip, config_name)
         if not check_IP_with_range(endpoint_allowed_ip):
@@ -1290,7 +1290,7 @@ def save_peer_setting(config_name):
             subprocess.check_output(f'wg-quick save {config_name}', shell=True, stderr=subprocess.STDOUT)
             if change_ip.decode("UTF-8") != "":
                 return jsonify({"status": "failed", "msg": change_ip.decode("UTF-8")})
-            sql = "UPDATE " + config_name + " SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, keepalive = ?, preshared_key = ? WHERE id = ?"
+            sql = "UPDATE '" + config_name + "' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, keepalive = ?, preshared_key = ? WHERE id = ?"
             g.cur.execute(sql, (name, private_key, dns_addresses, endpoint_allowed_ip, data["MTU"],
                                 data["keep_alive"], preshared_key, id))
             return jsonify({"status": "success", "msg": ""})
@@ -1314,8 +1314,8 @@ def get_peer_name(config_name):
     data = request.get_json()
     peer_id = data['id']
     result = g.cur.execute(
-        "SELECT name, allowed_ip, DNS, private_key, endpoint_allowed_ip, mtu, keepalive, preshared_key FROM "
-        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+        "SELECT name, allowed_ip, DNS, private_key, endpoint_allowed_ip, mtu, keepalive, preshared_key FROM '"
+        + config_name + "' WHERE id = ?", (peer_id,)).fetchall()
     data = {"name": result[0][0], "allowed_ip": result[0][1], "DNS": result[0][2],
             "private_key": result[0][3], "endpoint_allowed_ip": result[0][4],
             "mtu": result[0][5], "keep_alive": result[0][6], "preshared_key": result[0][7]}
@@ -1353,8 +1353,8 @@ def generate_qrcode(config_name):
     """
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
-        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM "
-        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key FROM '"
+        + config_name + "' WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
@@ -1389,8 +1389,8 @@ def download_all(config_name):
     @return: JSON Object
     """
     get_peer = g.cur.execute(
-        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
-        + config_name + " WHERE private_key != ''").fetchall()
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM '"
+        + config_name + "' WHERE private_key != ''").fetchall()
     config = get_dashboard_conf()
     data = []
     public_key = get_conf_pub_key(config_name)
@@ -1441,8 +1441,8 @@ def download(config_name):
     """
     peer_id = request.args.get('id')
     get_peer = g.cur.execute(
-        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM "
-        + config_name + " WHERE id = ?", (peer_id,)).fetchall()
+        "SELECT private_key, allowed_ip, DNS, mtu, endpoint_allowed_ip, keepalive, preshared_key, name FROM '"
+        + config_name + "' WHERE id = ?", (peer_id,)).fetchall()
     config = get_dashboard_conf()
     if len(get_peer) == 1:
         peer = get_peer[0]
@@ -1521,7 +1521,7 @@ def get_ping_ip():
     """
 
     config = request.form['config']
-    peers = g.cur.execute("SELECT id, name, allowed_ip, endpoint FROM " + config).fetchall()
+    peers = g.cur.execute("SELECT id, name, allowed_ip, endpoint FROM '" + config + "'").fetchall()
     html = ""
     for i in peers:
         html += '<optgroup label="' + i[1] + ' - ' + i[0] + '">'
