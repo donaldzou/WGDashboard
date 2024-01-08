@@ -1802,7 +1802,7 @@ def get_all_transfer_thread():
     print("waiting 15 sec ")
     time.sleep(7)
     global stop_thread
-    # with app.app_context():
+    # with app1.app_context():
     try:
         db = connect_db()
         cur = db.cursor()

@@ -48,4 +48,4 @@ router.beforeEach((to, from, next) => {
 
 app.use(router);
 app.use(pinia)
-app.mount('#app');
+app.mount('#app1');

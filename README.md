@@ -263,7 +263,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
                 └─6602 /usr/bin/python3 /root/wgdashboard/src/dashboard.py
    
    Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "WGDashboard" (lazy loading)
+   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app1 "WGDashboard" (lazy loading)
    Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Environment: production
    Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
    Aug 03 22:31:27 ubuntu-wg python3[6602]:    Use a production WSGI server instead.
