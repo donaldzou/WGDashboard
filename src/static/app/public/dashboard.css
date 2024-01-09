@@ -1,9 +1,7 @@
-#app{
-    display: flex;
-    flex-direction: column;
+body {
+    font-size: .875rem;
+    /*font-family: 'Poppins', sans-serif;*/
 }
-
-
 
 .codeFont{
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

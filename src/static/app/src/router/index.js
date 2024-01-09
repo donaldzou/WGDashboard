@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import {cookie} from "../utilities/cookie.js";
 import Index from "@/views/index.vue"
 import Signin from "@/views/signin.vue";
+import ConfigurationList from "@/views/configurationList.vue";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -11,7 +12,13 @@ const router = createRouter({
       component: Index,
       meta: {
         requiresAuth: true
-      }
+      },
+      children: [
+        {
+          path: '',
+          component: ConfigurationList
+        }
+      ]
     },
     {
       path: '/signin', component: Signin
@@ -21,7 +28,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth){
-    if (cookie.getCookie("auth")){
+    if (cookie.getCookie("authToken")){
       next()
     }else{
       next("/signin")
@@ -30,5 +37,4 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
 export default router

@@ -288,9 +288,6 @@ def get_transfer(config_name):
             #                     {round(cumulative_sent + cumulative_receive, 4)}, '{now_string}')
             # ''')
             
-
-
-
 def get_endpoint(config_name):
     """
     Get endpoint from all peers of a configuration
@@ -310,8 +307,6 @@ def get_endpoint(config_name):
                       % (data_usage[count + 1], data_usage[count]))
         count += 2
 
-
-
 def get_allowed_ip(conf_peer_data, config_name):
     """
     Get allowed ips from all peers of a configuration
@@ -323,8 +318,6 @@ def get_allowed_ip(conf_peer_data, config_name):
     for i in conf_peer_data["Peers"]:
         g.cur.execute("UPDATE " + config_name + " SET allowed_ip = '%s' WHERE id = '%s'"
                       % (i.get('AllowedIPs', '(None)'), i["PublicKey"]))
-
-
 
 def get_all_peers_data(config_name):
     """
@@ -487,7 +480,6 @@ def get_conf_total_data(config_name):
     upload_total = round(upload_total, 4)
     download_total = round(download_total, 4)
     return [total, upload_total, download_total]
-
 
 def get_conf_status(config_name):
     """
@@ -690,9 +682,8 @@ def auth_req():
     @return: Redirect
     """
     return None
-    
-    
     if getattr(g, 'db', None) is None:
+        print('hi')
         g.db = connect_db()
         g.cur = g.db.cursor()
     conf = get_dashboard_conf()
@@ -781,6 +772,7 @@ def auth():
     return jsonify({"status": False, "msg": "Username or Password is incorrect."})
 
 
+
 """
 Index Page
 """
@@ -796,8 +788,8 @@ def index():
     if "switch_msg" in session:
         msg = session["switch_msg"]
         session.pop("switch_msg")
-    return render_template('index_new.html')
-    # return render_template('index.html', conf=get_conf_list(), msg=msg)
+    # return render_template('index_new.html')
+    return render_template('index.html', conf=get_conf_list(), msg=msg)
 
 
 # Setting Page
@@ -1787,6 +1779,37 @@ def traceroute_ip():
         return jsonify(returnjson)
     except Exception:
         return "Error"
+    
+### NEW API ROUTES
+
+@app.route('/api/authenticate', methods=['POST'])
+def api_auth():
+    """
+    Authentication request
+    @return: json object indicating verifying
+    """
+    data = request.get_json()
+    config = get_dashboard_conf()
+    password = hashlib.sha256(data['password'].encode())
+    if password.hexdigest() == config["Account"]["password"] \
+            and data['username'] == config["Account"]["username"]:
+        session['username'] = data['username']
+        resp = jsonify(ResponseObject(True))
+        resp.set_cookie("authToken", hashlib.sha256(f"{data['username']}{datetime.now()}".encode()).hexdigest())
+        session.permanent = True
+        config.clear()
+        return resp
+    
+    config.clear()
+    return jsonify(ResponseObject(False, "Username or password in incorrect."))
+
+
+def ResponseObject(status = True, message = None, data = None) -> dict:
+    return {
+        "status": status,
+        "message": message,
+        "data": data
+    }
 
 
 import atexit
@@ -1911,8 +1934,6 @@ def init_dashboard():
     """
     Create dashboard default configuration.
     """
-    
-
     # Set Default INI File
     if not os.path.isfile(DASHBOARD_CONF):
         open(DASHBOARD_CONF, "w+").close()
