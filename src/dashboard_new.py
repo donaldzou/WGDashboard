@@ -1,4 +1,3 @@
-from crypt import methods
 import sqlite3
 import configparser
 import hashlib
@@ -13,11 +12,16 @@ import re
 import urllib.parse
 import urllib.request
 import urllib.error
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+from json import JSONEncoder
 from operator import itemgetter
+
+import flask
 # PIP installed library
 import ifcfg
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
+from flask.json.provider import JSONProvider
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
 
@@ -25,8 +29,8 @@ from icmplib import ping, traceroute
 import threading
 
 from sqlalchemy.orm import mapped_column, declarative_base, Session
-from sqlalchemy import FLOAT, INT, VARCHAR, select, MetaData
-from sqlalchemy import create_engine
+from sqlalchemy import FLOAT, INT, VARCHAR, select, MetaData, DATETIME
+from sqlalchemy import create_engine, inspect
 
 DASHBOARD_VERSION = 'v3.1'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
@@ -51,6 +55,80 @@ QRcode(app)
 Classes
 '''
 Base = declarative_base()
+
+
+class CustomJsonEncoder(JSONProvider):
+    def dumps(self, obj, **kwargs):
+        if type(obj) == WireguardConfiguration:
+            return obj.toJSON()
+        return json.dumps(obj)
+
+    def loads(self, obj, **kwargs):
+        return json.loads(obj, **kwargs)
+
+
+app.json = CustomJsonEncoder(app)
+
+
+class WireguardConfiguration:
+    __parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
+    __parser.optionxform = str
+
+    Status: bool = False
+    Name: str = ""
+    PrivateKey: str = ""
+    PublicKey: str = ""
+    ListenPort: str = ""
+    Address: str = ""
+    DNS: str = ""
+    Table: str = ""
+    MTU: str = ""
+    PreUp: str = ""
+    PostUp: str = ""
+    PreDown: str = ""
+    PostDown: str = ""
+    SaveConfig: bool = False
+
+    class InvalidConfigurationFileException(Exception):
+        def __init__(self, m):
+            self.message = m
+
+        def __str__(self):
+            return self.message
+
+    def __init__(self, name):
+        self.Name = name
+        self.__parser.read(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+        sections = self.__parser.sections()
+        if "Interface" not in sections:
+            raise self.InvalidConfigurationFileException(
+                "[Interface] section not found in " + os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+        interfaceConfig = dict(self.__parser.items("Interface", True))
+        for i in dir(self):
+            if str(i) in interfaceConfig.keys():
+                if isinstance(getattr(self, i), bool):
+                    setattr(self, i, _strToBool(interfaceConfig[i]))
+                else:
+                    setattr(self, i, interfaceConfig[i])
+
+        if self.PrivateKey:
+            self.PublicKey = self.__getPublicKey()
+
+        # Create tables in database
+        inspector = inspect(engine)
+        existingTable = inspector.get_table_names()
+        if self.Name not in existingTable:
+            _createPeerModel(self.Name).__table__.create(engine)
+        if self.Name + "_restrict_access" not in existingTable:
+            _createRestrcitedPeerModel(self.Name).__table__.create(engine)
+        if self.Name + "_transfer" not in existingTable:
+            _createPeerTransferModel(self.Name).__table__.create(engine)
+
+    def __getPublicKey(self) -> str:
+        return subprocess.check_output(['wg', 'pubkey'], input=self.PrivateKey.encode()).decode().strip('\n')
+
+    def toJSON(self):
+        return self.__dict__
 
 
 class DashboardConfig:
@@ -113,19 +191,26 @@ class DashboardConfig:
         return True, self.__config[section][key]
 
 
-def ResponseObject(status=True, message=None, data=None) -> dict:
-    return {
+def ResponseObject(status=True, message=None, data=None) -> Flask.response_class:
+    response = Flask.make_response(app, {
         "status": status,
         "message": message,
         "data": data
-    }
+    })
+    response.content_type = "application/json"
+    return response
 
 
 DashboardConfig = DashboardConfig()
+WireguardConfigurations: [WireguardConfiguration] = []
 
 '''
 Private Functions
 '''
+
+
+def _strToBool(value: str) -> bool:
+    return value.lower() in ("yes", "true", "t", "1", 1)
 
 
 def _createPeerModel(wgConfigName):
@@ -154,23 +239,87 @@ def _createPeerModel(wgConfigName):
     return Peer
 
 
+def _createRestrcitedPeerModel(wgConfigName):
+    class PeerRestricted(Base):
+        __tablename__ = wgConfigName + "_restrict_access"
+        id = mapped_column(VARCHAR, primary_key=True)
+        private_key = mapped_column(VARCHAR)
+        DNS = mapped_column(VARCHAR)
+        endpoint_allowed_ip = mapped_column(VARCHAR)
+        name = mapped_column(VARCHAR)
+        total_receive = mapped_column(FLOAT)
+        total_sent = mapped_column(FLOAT)
+        total_data = mapped_column(FLOAT)
+        endpoint = mapped_column(VARCHAR)
+        status = mapped_column(VARCHAR)
+        latest_handshake = mapped_column(VARCHAR)
+        allowed_ip = mapped_column(VARCHAR)
+        cumu_receive = mapped_column(FLOAT)
+        cumu_sent = mapped_column(FLOAT)
+        cumu_data = mapped_column(FLOAT)
+        mtu = mapped_column(INT)
+        keepalive = mapped_column(INT)
+        remote_endpoint = mapped_column(VARCHAR)
+        preshared_key = mapped_column(VARCHAR)
+
+    return PeerRestricted
+
+
+def _createPeerTransferModel(wgConfigName):
+    class PeerTransfer(Base):
+        __tablename__ = wgConfigName + "_transfer"
+        id = mapped_column(VARCHAR, primary_key=True)
+        total_receive = mapped_column(FLOAT)
+        total_sent = mapped_column(FLOAT)
+        total_data = mapped_column(FLOAT)
+        cumu_receive = mapped_column(FLOAT)
+        cumu_sent = mapped_column(FLOAT)
+        cumu_data = mapped_column(FLOAT)
+        time = mapped_column(DATETIME)
+
+    return PeerTransfer
+
+
 def _regexMatch(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
 
 
-def _getConfigurationList():
-    conf = []
+def _getConfigurationList() -> [WireguardConfiguration]:
+    configurations = []
     for i in os.listdir(WG_CONF_PATH):
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
-            _createPeerModel(i).__table__.create(engine)
-            _createPeerModel(i + "_restrict_access").__table__.create(engine)
+            try:
+                configurations.append(WireguardConfiguration(i))
+            except WireguardConfiguration.InvalidConfigurationFileException as e:
+                print(f"{i} have an invalid configuration file.")
+    return configurations
 
 
 '''
 API Routes
 '''
+
+
+@app.before_request
+def auth_req():
+    authenticationRequired = _strToBool(DashboardConfig.GetConfig("Server", "auth_req")[1])
+    if authenticationRequired:
+        if ('/static/' not in request.path and "username" not in session and "/" != request.path
+                and "validateAuthentication" not in request.path and "authenticate" not in request.path):
+            resp = Flask.make_response(app, "Not Authorized" + request.path)
+            resp.status_code = 401
+            return resp
+
+
+@app.route('/api/validateAuthentication', methods=["GET"])
+def API_ValidateAuthentication():
+    token = request.cookies.get("authToken") + ""
+    if token == "" or "username" not in session or session["username"] != token:
+        return ResponseObject(False, "Invalid authentication")
+
+    return ResponseObject(True)
 
 
 @app.route('/api/authenticate', methods=['POST'])
@@ -180,18 +329,31 @@ def API_AuthenticateLogin():
     print()
     if password.hexdigest() == DashboardConfig.GetConfig("Account", "password")[1] \
             and data['username'] == DashboardConfig.GetConfig("Account", "username")[1]:
-        session['username'] = data['username']
-        resp = jsonify(ResponseObject(True))
-        resp.set_cookie("authToken",
-                        hashlib.sha256(f"{data['username']}{datetime.now()}".encode()).hexdigest())
+        authToken = hashlib.sha256(f"{data['username']}{datetime.now()}".encode()).hexdigest()
+        session['username'] = authToken
+        resp = ResponseObject(True, "")
+        resp.set_cookie("authToken", authToken)
         session.permanent = True
         return resp
-    return jsonify(ResponseObject(False, "Username or password is incorrect."))
+    return ResponseObject(False, "Username or password is incorrect.")
+
+
+@app.route('/api/getWireguardConfigurations', methods=["GET"])
+def API_getWireguardConfigurations():
+    pass
+
+
+@app.route('/api/getDashboardConfiguration', methods=["GET"])
+def API_getDashboardConfiguration():
+    pass
 
 
 if __name__ == "__main__":
     engine = create_engine("sqlite:///" + os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
+
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
-    _getConfigurationList()
+    _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
+    WireguardConfigurations = _getConfigurationList()
+
     app.run(host=app_ip, debug=False, port=app_port)

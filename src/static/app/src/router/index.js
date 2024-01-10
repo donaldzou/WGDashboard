@@ -3,6 +3,15 @@ import {cookie} from "../utilities/cookie.js";
 import Index from "@/views/index.vue"
 import Signin from "@/views/signin.vue";
 import ConfigurationList from "@/views/configurationList.vue";
+import {fetchGet} from "@/utilities/fetch.js";
+
+const checkAuth = async () => {
+  let result = false
+  await fetchGet("/api/validateAuthentication", {}, (res) => {
+    result = res.status
+  });
+  return result;
+}
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -26,9 +35,9 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth){
-    if (cookie.getCookie("authToken")){
+    if (cookie.getCookie("authToken") && await checkAuth()){
       next()
     }else{
       next("/signin")

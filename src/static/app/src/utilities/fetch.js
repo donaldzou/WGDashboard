@@ -1,6 +1,6 @@
 export const fetchGet = async (url, params=undefined, callback=undefined) => {
 	const urlSearchParams = new URLSearchParams(params);
-	await fetch(`${url}?${urlSearchParams.toString()}}`, {
+	await fetch(`${url}?${urlSearchParams.toString()}`, {
 		headers: {
 			"content-type": "application/json"
 		}
