@@ -17,3 +17,4 @@ src/db/wgdashboard.db
 .jshintrc
 node_modules/**
 */proxy.js
+src/static/app/proxy.js
