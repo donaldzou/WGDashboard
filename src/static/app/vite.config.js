@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
+import {proxy} from "./proxy.js";
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
@@ -15,7 +16,7 @@ export default defineConfig({
   },
   server:{
     proxy: {
-      '/api': 'http://178.128.231.4:10086'
+      '/api': proxy
     }
   }
 })
