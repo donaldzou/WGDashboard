@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from json import JSONEncoder
 from operator import itemgetter
+from typing import Dict, Any
 
 import flask
 # PIP installed library
@@ -114,6 +115,8 @@ class WireguardConfiguration:
         if self.PrivateKey:
             self.PublicKey = self.__getPublicKey()
 
+        self.Status = self.__getStatus()
+
         # Create tables in database
         inspector = inspect(engine)
         existingTable = inspector.get_table_names()
@@ -127,7 +130,11 @@ class WireguardConfiguration:
     def __getPublicKey(self) -> str:
         return subprocess.check_output(['wg', 'pubkey'], input=self.PrivateKey.encode()).decode().strip('\n')
 
+    def __getStatus(self) -> bool:
+        return self.Name in dict(ifcfg.interfaces().items()).keys()
+
     def toJSON(self):
+        self.Status = self.__getStatus()
         return self.__dict__
 
 
@@ -189,6 +196,14 @@ class DashboardConfig:
             return False, None
 
         return True, self.__config[section][key]
+
+    def toJSON(self) -> dict[str, dict[Any, Any]]:
+        the_dict = {}
+        for section in self.__config.sections():
+            the_dict[section] = {}
+            for key, val in self.__config.items(section):
+                the_dict[section][key] = val
+        return the_dict
 
 
 def ResponseObject(status=True, message=None, data=None) -> Flask.response_class:
@@ -340,12 +355,13 @@ def API_AuthenticateLogin():
 
 @app.route('/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
-    pass
+    WireguardConfigurations = _getConfigurationList()
+    return ResponseObject(data=[wc.toJSON() for wc in WireguardConfigurations])
 
 
 @app.route('/api/getDashboardConfiguration', methods=["GET"])
 def API_getDashboardConfiguration():
-    pass
+    return ResponseObject(data=DashboardConfig.toJSON())
 
 
 if __name__ == "__main__":
