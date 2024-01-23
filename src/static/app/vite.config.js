@@ -6,6 +6,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/static/app/dist",
   plugins: [
     vue(),
   ],
@@ -17,6 +18,15 @@ export default defineConfig({
   server:{
     proxy: {
       '/api': proxy
+    }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`
+      }
     }
   }
 })

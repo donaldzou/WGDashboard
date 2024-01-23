@@ -12,6 +12,8 @@
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.2",
     "pinia": "^2.1.7",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.1",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"
   },

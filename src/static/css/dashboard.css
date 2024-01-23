@@ -1,9 +1,6 @@
-#app{
-    display: flex;
-    flex-direction: column;
+::-webkit-scrollbar {
+    display: none;
 }
-
-
 
 .codeFont{
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -51,9 +48,55 @@
 /*        position: sticky;*/
 /*    }*/
 /*}*/
-[data-bs-theme="dark"].main{
+
+@property --brandColor1 {
+    syntax: '<color>';
+    initial-value: #009dff;
+    inherits: false;
+}
+
+@property --brandColor2 {
+    syntax: '<color>';
+    initial-value: #ff4a00;
+    inherits: false;
+}
+
+@property --degree{
+    syntax: '<percentage>';
+    initial-value: 0%;
+    inherits: false;
+}
+
+.dashboardLogo{
+    background: rgb(23,139,255);
+    background: linear-gradient(234deg, var(--brandColor1) var(--degree), var(--brandColor2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: --brandColor1 1s, --brandColor2 0.3s, --degree 1s !important;
+
+}
+
+.btn-brand{
+    /*background: rgb(23,139,255);*/
+    background: linear-gradient(234deg, var(--brandColor1) var(--degree), var(--brandColor2) 100%);
+    border: 0 !important;
+    transition: --brandColor1 1s, --brandColor2 1s, --degree 0.5s !important;
+}
+.btn-brand:hover, .dashboardLogo:hover{
+    --brandColor1: #009dff;
+    --brandColor2: #ff875b;
+    --degree: 30%;
+}
+
+.signInBtn.signedIn{
+    --degree: 100%;
+}
+
+[data-bs-theme="dark"].main, 
+#app:has(.main[data-bs-theme="dark"]){
     background-color: #1b1e21;
 }
+
 
 
 .sidebar .nav-link, .bottomNavContainer .nav-link{
@@ -474,18 +517,24 @@ main {
 }
 
 .login-box #username,
-.login-box #password {
+.login-box #password,
+.login-box #totp
+{
     padding: 0.6rem calc( 0.9rem + 32px);
     height: inherit;
 }
 
 .login-box label[for="username"],
-.login-box label[for="password"] {
+.login-box label[for="password"],
+.login-box label[for="totp"]
+
+{
     font-size: 1rem;
     margin: 0 !important;
     transform: translateY(2.1rem) translateX(1rem);
     padding: 0;
 }
+
 
 
 /*label[for="password"]{*/
@@ -642,10 +691,10 @@ pre.index-alert {
     margin-left: auto !important;
 }
 
-.conf_card .dot,
-.info .dot {
-    transform: translateX(10px);
-}
+/*.conf_card .dot,*/
+/*.info .dot {*/
+/*    transform: translateX(10px);*/
+/*}*/
 
 #config_body {
     transition: 0.3s ease-in-out;
@@ -946,4 +995,40 @@ pre.index-alert {
 
 .theme-switch-btn{
     width: 100%;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.3s ease-in-out;
+    /*position: absolute;*/
+    /*padding-top: 50px*/
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    transform: translateY(30px);
+    opacity: 0;
+}
+
+.fade2-enter-active,
+.fade2-leave-active {
+    transition: all 0.15s ease-in-out;
+}
+
+.fade2-enter-from{
+    transform: translateX(20px);
+    opacity: 0;
+}
+
+.fade2-leave-to {
+    transform: translateX(-20px);
+    opacity: 0;
+}
+
+.login-container-fluid{
+    height: calc(100% - 50px) !important;
+}
+
+.totp{
+    font-family: var(--bs-font-monospace);
 }

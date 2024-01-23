@@ -17,6 +17,10 @@ body {
     font-weight: bold;
 }
 
+.dashboardLogo{
+    background: -webkit-linear-gradient(#178bff, #ff4a00);
+}
+
 /*
  * Sidebar
  */
