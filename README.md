@@ -1,4 +1,4 @@
-> If anyone is interested in what I've been working on, you can check out the branch https://github.com/donaldzou/WGDashboard/tree/v.3.1-dev2023 :) Is still broken tho so don't run it yet LOL
+> If anyone is interested in what I've been working on, you can check out the branch https://github.com/donaldzou/WGDashboard/tree/v.3.1-dev2023 :) You can try it out with running dashboard_new.py ;)
 
 ##### Beta testing on v3.1
 If anyone would love to try out the beta version of v3.1, you can do the following. Let me know if you encountered any issues. ;)
