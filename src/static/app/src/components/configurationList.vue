@@ -17,9 +17,9 @@ export default {
 		<div class="container">
 			<div class="d-flex mb-4 ">
 				<h3 class="text-body">Wireguard Configurations</h3>
-				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-5">
-					<i class="bi bi-plus-circle-fill me-2"></i>
+				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-3">
 					Configuration
+					<i class="bi bi-plus-circle-fill ms-2"></i>
 				</RouterLink>
 			</div>
 			<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>

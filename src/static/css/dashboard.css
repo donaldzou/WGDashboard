@@ -61,35 +61,55 @@
     inherits: false;
 }
 
-@property --degree{
+@property --distance2{
     syntax: '<percentage>';
     initial-value: 0%;
     inherits: false;
 }
 
+@property --degree{
+    syntax: '<angle>';
+    initial-value: 234deg;
+    inherits: false;
+}
+
 .dashboardLogo{
     background: rgb(23,139,255);
-    background: linear-gradient(234deg, var(--brandColor1) var(--degree), var(--brandColor2) 100%);
+    background: linear-gradient(234deg, var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    transition: --brandColor1 1s, --brandColor2 0.3s, --degree 1s !important;
+    transition: --brandColor1 1s, --brandColor2 0.3s, --distance2 1s !important;
 
 }
 
 .btn-brand{
     /*background: rgb(23,139,255);*/
-    background: linear-gradient(234deg, var(--brandColor1) var(--degree), var(--brandColor2) 100%);
+    background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
     border: 0 !important;
-    transition: --brandColor1 1s, --brandColor2 1s, --degree 0.5s !important;
+    transition: --brandColor1 1s, --brandColor2 1s, --distance2 0.5s !important;
 }
+
+.btn-brand.loading{
+    animation: spin infinite forwards 3s linear;
+}
+
 .btn-brand:hover, .dashboardLogo:hover{
     --brandColor1: #009dff;
     --brandColor2: #ff875b;
-    --degree: 30%;
+    --distance2: 30%;
 }
 
 .signInBtn.signedIn{
-    --degree: 100%;
+    --distance2: 100%;
+}
+
+@keyframes spin {
+    0%{
+        --degree: 234deg;
+    }
+    100%{
+        --degree: 594deg;
+    }
 }
 
 [data-bs-theme="dark"].main, 

@@ -99,27 +99,31 @@ class WireguardConfiguration:
         def __str__(self):
             return self.message
 
-    def __init__(self, name):
-        self.Name = name
-        self.__parser.read(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
-        sections = self.__parser.sections()
-        if "Interface" not in sections:
-            raise self.InvalidConfigurationFileException(
-                "[Interface] section not found in " + os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
-        interfaceConfig = dict(self.__parser.items("Interface", True))
-        for i in dir(self):
-            if str(i) in interfaceConfig.keys():
-                if isinstance(getattr(self, i), bool):
-                    setattr(self, i, _strToBool(interfaceConfig[i]))
-                else:
-                    setattr(self, i, interfaceConfig[i])
+    def __init__(self, name: str = None):
+        if name is not None:
+            self.Name = name
+            self.__parser.read(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+            sections = self.__parser.sections()
+            if "Interface" not in sections:
+                raise self.InvalidConfigurationFileException(
+                    "[Interface] section not found in " + os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+            interfaceConfig = dict(self.__parser.items("Interface", True))
+            for i in dir(self):
+                if str(i) in interfaceConfig.keys():
+                    if isinstance(getattr(self, i), bool):
+                        setattr(self, i, _strToBool(interfaceConfig[i]))
+                    else:
+                        setattr(self, i, interfaceConfig[i])
 
-        if self.PrivateKey:
-            self.PublicKey = self.__getPublicKey()
+            if self.PrivateKey:
+                self.PublicKey = self.__getPublicKey()
 
-        self.Status = self.__getStatus()
+            self.Status = self.__getStatus()
 
-        # Create tables in database
+            # Create tables in database
+            self.__createDatabase()
+
+    def __createDatabase(self):
         inspector = inspect(engine)
         existingTable = inspector.get_table_names()
         if self.Name not in existingTable:
@@ -138,6 +142,9 @@ class WireguardConfiguration:
     def toJSON(self):
         self.Status = self.__getStatus()
         return self.__dict__
+
+    def newConfiguration(self):
+        pass
 
 
 def iPv46RegexCheck(ip):
@@ -447,7 +454,11 @@ def API_AuthenticateLogin():
         resp.set_cookie("authToken", authToken)
         session.permanent = True
         return resp
-    return ResponseObject(False, "Username, password or OTP is incorrect.")
+
+    if totpEnabled:
+        return ResponseObject(False, "Sorry, your username, password or OTP is incorrect.")
+    else:
+        return ResponseObject(False, "Sorry, your username or password is incorrect.")
 
 
 @app.route('/api/signout')
@@ -461,6 +472,28 @@ def API_SignOut():
 def API_getWireguardConfigurations():
     WireguardConfigurations = _getConfigurationList()
     return ResponseObject(data=[wc.toJSON() for wc in WireguardConfigurations])
+
+
+@app.route('/api/addWireguardConfiguration', methods=["POST"])
+def API_addWireguardConfiguration():
+    data = request.get_json()
+    keys = [
+        "ConfigurationName",
+        "Address",
+        "ListenPort",
+        "PrivateKey",
+        "PublicKey",
+        "PresharedKey",
+        "PreUp",
+        "PreDown",
+        "PostUp",
+        "PostDown",
+        "UsePreSharedKey"
+    ]
+    requiredKeys = [
+        "ConfigurationName", "Address", "ListenPort", "PrivateKey"
+    ]
+    
 
 
 @app.route('/api/getDashboardConfiguration', methods=["GET"])
