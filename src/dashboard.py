@@ -20,6 +20,7 @@ import urllib.error
 from datetime import datetime, timedelta
 from operator import itemgetter
 # PIP installed library
+import ifcfg
 import psutil
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
 from flask_qrcode import QRcode

@@ -1,4 +1,5 @@
 Flask
+ifcfg
 psutil
 icmplib
 flask-qrcode
