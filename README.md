@@ -568,7 +568,7 @@ Bug Fixed:
   - [jQuery](https://jquery.com) `v3.5.1`
 - Python
   - [Flask](https://pypi.org/project/Flask/) `v2.0.1`
-  - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
+  - [psutil](https://pypi.org/project/psutil/) `v5.9.8`
   - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
   - [flask-qrcode](https://pypi.org/project/Flask-QRcode/) `v3.0.0`
 
