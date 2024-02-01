@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from operator import itemgetter
 # PIP installed library
 import ifcfg
+import psutil
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
@@ -472,8 +473,8 @@ def get_conf_status(config_name):
     @param config_name:
     @return: Return a string indicate the running status
     """
-    ifconfig = dict(ifcfg.interfaces().items())
-    return "running" if config_name in ifconfig.keys() else "stopped"
+    addrs = psutil.net_if_addrs()
+    return "running" if config_name in addrs else "stopped"
 
 
 def get_conf_list():
