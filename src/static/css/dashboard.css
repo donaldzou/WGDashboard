@@ -603,7 +603,6 @@ main {
 
 .conf_card:hover {
     border-color: #007bff;
-    cursor: pointer;
 }
 
 .info_loading {
@@ -1051,4 +1050,31 @@ pre.index-alert {
 
 .totp{
     font-family: var(--bs-font-monospace);
+}
+
+.message-move, /* apply transition to moving elements */
+.message-enter-active,
+.message-leave-active {
+    transition: all 0.5s ease;
+}
+
+.message-enter-from,
+.message-leave-to {
+    filter: blur(2px);
+    opacity: 0;
+}
+
+.message-enter-from{
+    transform: translateY(-30px) scale(0.7);
+}
+
+.message-leave-to{
+    transform: translateY(30px);
+}
+
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.message-leave-active {
+    position: absolute;
 }

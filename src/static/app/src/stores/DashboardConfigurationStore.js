@@ -1,10 +1,11 @@
 import {defineStore} from "pinia";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
-import {cookie} from "@/utilities/cookie.js";
+import {v4} from "uuid";
 
 export const DashboardConfigurationStore = defineStore('DashboardConfigurationStore', {
 	state: () => ({
-		Configuration: undefined
+		Configuration: undefined,
+		Messages: []
 	}),
 	actions: {
 		async getConfiguration(){
@@ -23,6 +24,15 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			await fetchGet("/api/signout", {}, (res) => {
 				this.$router.go('/signin')
 			});
+		},
+		newMessage(from, content, type){
+			this.Messages.push({
+				id: v4(),
+				from: from,
+				content: content,
+				type: type,
+				show: true
+			})
 		}
 	}
 });

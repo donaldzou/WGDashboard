@@ -7,9 +7,7 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 	})
 		.then(x => x.json())
 		.then(x => callback ? callback(x) : undefined)
-		.catch(() => {
-			alert("Error occurred! Check console")
-		});
+		
 }
 
 export const fetchPost = async (url, body, callback) => {

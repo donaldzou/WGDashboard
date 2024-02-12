@@ -10,6 +10,7 @@ import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStor
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import Setup from "@/views/setup.vue";
 import NewConfiguration from "@/views/newConfiguration.vue";
+import Configuration from "@/views/configuration.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -44,6 +45,11 @@ const router = createRouter({
           name: "New Configuration",
           path: '/new_configuration',
           component: NewConfiguration
+        },
+        {
+          name: "Configuration",
+          path: '/configuration/:id',
+          component: Configuration
         }
       ]
     },

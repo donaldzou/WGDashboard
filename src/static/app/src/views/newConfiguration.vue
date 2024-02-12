@@ -2,6 +2,7 @@
 import {parse} from "cidr-tools";
 import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import {fetchPost} from "@/utilities/fetch.js";
 
 export default {
 	name: "newConfiguration",
@@ -21,10 +22,13 @@ export default {
 				PreUp: "",
 				PreDown: "",
 				PostUp: "",
-				PostDown: "",
-				UsePreSharedKey: false
+				PostDown: ""
 			},
-			numberOfAvailableIPs: "0"
+			numberOfAvailableIPs: "0",
+			error: false,
+			errorMessage: "",
+			success: false,
+			loading: false
 		}
 	},
 	created() {
@@ -36,14 +40,32 @@ export default {
 			this.newConfiguration.PrivateKey = wg.privateKey;
 			this.newConfiguration.PublicKey = wg.publicKey;
 			this.newConfiguration.PresharedKey = wg.presharedKey;
-		}	
+		},
+		async saveNewConfiguration(){
+			if (this.goodToSubmit){
+				this.loading = true;
+				await fetchPost("/api/addWireguardConfiguration", this.newConfiguration, async (res) => {
+					if (res.status){
+						this.success = true
+						await this.store.getConfigurations()
+						setTimeout(() => {
+							this.$router.push('/')
+						}, 1000)
+					}else{
+						this.error = true;
+						this.errorMessage = res.message;
+						document.querySelector(`#${res.data}`).classList.remove("is-valid")
+						document.querySelector(`#${res.data}`).classList.add("is-invalid")
+
+					}
+				})
+			}
+		}
 	},
 	computed: {
 		goodToSubmit(){
 			let requirements = ["ConfigurationName", "Address", "ListenPort", "PrivateKey"]
 			let elements = [...document.querySelectorAll("input[required]")];
-			
-			
 			return requirements.find(x => {
 				return this.newConfiguration[x].length === 0
 			}) === undefined && elements.find(x => {
@@ -115,19 +137,26 @@ export default {
 				<h3 class="text-body mb-0">New Configuration</h3>
 			</div>
 			
-			<form class="text-body d-flex flex-column gap-3">
+			<form class="text-body d-flex flex-column gap-3"
+				@submit="(e) => {e.preventDefault(); this.saveNewConfiguration();}"
+			>
 				<div class="card rounded-3 shadow">
 					<div class="card-header">Configuration Name</div>
 					<div class="card-body">
 						<input type="text" class="form-control" placeholder="ex. wg1" id="ConfigurationName" 
 						       v-model="this.newConfiguration.ConfigurationName"
+						       :disabled="this.loading"
 						       required>
 						<div class="invalid-feedback">
-							Configuration name is invalid. Possible reasons:
-							<ul class="mb-0">
-								<li>Configuration name already exist.</li>
-								<li>Configuration name can only contain 15 lower/uppercase alphabet, numbers, "_"(underscore), "="(equal), "+"(plus), "."(period/dot), "-"(dash/hyphen)</li>
-							</ul>
+							<div v-if="this.error">{{this.errorMessage}}</div>
+							<div v-else>
+								Configuration name is invalid. Possible reasons:
+								<ul class="mb-0">
+									<li>Configuration name already exist.</li>
+									<li>Configuration name can only contain 15 lower/uppercase alphabet, numbers, "_"(underscore), "="(equal), "+"(plus), "."(period/dot), "-"(dash/hyphen)</li>
+								</ul>
+							</div>
+							
 						</div>
 					</div>
 				</div>
@@ -138,6 +167,7 @@ export default {
 							<label class="text-muted fw-bold mb-1"><small>PRIVATE KEY</small></label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="PrivateKey" required
+								       :disabled="this.loading"
 								       v-model="this.newConfiguration.PrivateKey" disabled
 								>
 								<button class="btn btn-outline-primary" type="button"
@@ -148,24 +178,13 @@ export default {
 								</button>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-sm">
-								<label class="text-muted fw-bold mb-1"><small>PUBLIC KEY</small></label>
-								<input type="text" class="form-control" id="PublicKey"
-								       v-model="this.newConfiguration.PublicKey" disabled
-								>
-							</div>
-							<div class="col-sm" v-if="this.newConfiguration.UsePreSharedKey">
-								<label class="text-muted fw-bold mb-1"><small>PRE-SHARED KEY</small></label>
-								<input type="text" class="form-control" id="PresharedKey"
-								       v-model="this.newConfiguration.PresharedKey" disabled
-								>
-							</div>
+						<div>
+							<label class="text-muted fw-bold mb-1"><small>PUBLIC KEY</small></label>
+							<input type="text" class="form-control" id="PublicKey"
+							       v-model="this.newConfiguration.PublicKey" disabled
+							>
 						</div>
-						<div class="form-check form-switch mt-2">
-							<input class="form-check-input" type="checkbox" role="switch" id="UsePreSharedKey" v-model="this.newConfiguration.UsePreSharedKey">
-							<label class="form-check-label" for="UsePreSharedKey"><small>Use Pre-Shared Key?</small></label>
-						</div>
+						
 					</div>
 					
 				</div>
@@ -176,7 +195,14 @@ export default {
 						       min="1"
 						       max="65353"
 						       v-model="this.newConfiguration.ListenPort"
+						       :disabled="this.loading"
 						       required>
+						<div class="invalid-feedback">
+							<div v-if="this.error">{{this.errorMessage}}</div>
+							<div v-else>
+								Invalid port
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="card rounded-3 shadow">
@@ -188,9 +214,14 @@ export default {
 						<input type="text" class="form-control" 
 						       placeholder="Ex: 10.0.0.1/24" id="Address" 
 						       v-model="this.newConfiguration.Address"
+						       :disabled="this.loading"
 						       required>
 						<div class="invalid-feedback">
-							IP address & range is invalid.
+							<div v-if="this.error">{{this.errorMessage}}</div>
+							<div v-else>
+								IP address & range is invalid.
+							</div>
+							
 						</div>
 					</div>
 				</div>
@@ -237,10 +268,21 @@ export default {
 <!--					<i class="bi bi-save me-2"></i>-->
 <!--					Save-->
 <!--				</RouterLink>-->
-				<button class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto" :disabled="!this.goodToSubmit">
+				<button class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto"
+				        :disabled="!this.goodToSubmit">
+					<span v-if="this.success" class="d-flex w-100">
+						Success! <i class="bi bi-check-circle-fill ms-2"></i>
+					</span>
+					<span v-else-if="!this.loading" class="d-flex w-100">
+						Save Configuration <i class="bi bi-save-fill ms-2"></i>
+					</span>
+					<span v-else class="d-flex w-100 align-items-center">
+						Saving...
+						<span class="ms-2 spinner-border spinner-border-sm" role="status">
+<!--						  <span class="visually-hidden">Loading...</span>-->
+						</span>
+					</span>
 					
-					Save Configuration
-					<i class="bi bi-save-fill ms-2"></i>
 				</button>
 			</form>
 			
