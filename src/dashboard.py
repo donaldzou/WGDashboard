@@ -344,7 +344,7 @@ def get_all_peers_data(config_name):
                     "total_data": 0,
                     "endpoint": "N/A",
                     "status": "stopped",
-                    "latest_handshake": "N/A",
+                    "latest_handshake": "No Handshake",
                     "allowed_ip": "N/A",
                     "cumu_receive": 0,
                     "cumu_sent": 0,

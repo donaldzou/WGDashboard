@@ -27,6 +27,8 @@ import pyotp
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
 from flask.json.provider import JSONProvider
 from flask_qrcode import QRcode
+from json import JSONEncoder
+
 from icmplib import ping, traceroute
 
 # Import other python files
@@ -35,6 +37,7 @@ import threading
 from sqlalchemy.orm import mapped_column, declarative_base, Session
 from sqlalchemy import FLOAT, INT, VARCHAR, select, MetaData, DATETIME
 from sqlalchemy import create_engine, inspect
+from flask.json.provider import DefaultJSONProvider
 
 DASHBOARD_VERSION = 'v3.1'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
@@ -55,20 +58,31 @@ app.secret_key = secrets.token_urlsafe(32)
 # Enable QR Code Generator
 QRcode(app)
 
+
+class ModelEncoder(JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if hasattr(o, 'toJson'):
+            return o.toJson()
+        else:
+            return super(ModelEncoder, self).default(o)
+
+
 '''
 Classes
 '''
+
+
 # Base = declarative_base(class_registry=dict())
 
 
-class CustomJsonEncoder(JSONProvider):
-    def dumps(self, obj, **kwargs):
-        if type(obj) == WireguardConfiguration:
-            return obj.toJSON()
-        return json.dumps(obj)
+class CustomJsonEncoder(DefaultJSONProvider):
+    def __init__(self, app):
+        super().__init__(app)
 
-    def loads(self, obj, **kwargs):
-        return json.loads(obj, **kwargs)
+    def default(self, o):
+        if isinstance(o, WireguardConfiguration) or isinstance(o, Peer):
+            return o.toJson()
+        return super().default(self, o)
 
 
 app.json = CustomJsonEncoder(app)
@@ -100,11 +114,10 @@ class Peer:
         self.preshared_key = tableData["preshared_key"]
 
     def toJson(self):
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=4)
+        return self.__dict__
 
     def __repr__(self):
-        return self.toJson()
+        return str(self.toJson())
 
 
 class WireguardConfiguration:
@@ -178,7 +191,7 @@ class WireguardConfiguration:
 
             with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
                                    f"{self.Name}.conf"), "w+") as configFile:
-                print(self.__parser.sections())
+                # print(self.__parser.sections())
                 self.__parser.write(configFile)
 
         self.Peers = []
@@ -189,7 +202,7 @@ class WireguardConfiguration:
 
     def __createDatabase(self):
         existingTables = cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-        existingTables = itertools.chain(*existingTables)
+        existingTables = [t['name'] for t in existingTables]
         if self.Name not in existingTables:
             cursor.execute(
                 """
@@ -221,14 +234,28 @@ class WireguardConfiguration:
                 """ % self.Name
             )
             sqldb.commit()
-
         if f'{self.Name}_transfer' not in existingTables:
             cursor.execute(
                 """
                 CREATE TABLE %s_transfer (
-                    id VARCHAR NOT NULL, total_receive FLOAT NULL, 
+                    id VARCHAR NOT NULL, total_receive FLOAT NULL,
                     total_sent FLOAT NULL, total_data FLOAT NULL,
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
+                )
+                """ % self.Name
+            )
+            sqldb.commit()
+        if f'{self.Name}_deleted' not in existingTables:
+            cursor.execute(
+                """
+                CREATE TABLE %s_deleted (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
                 )
                 """ % self.Name
             )
@@ -242,6 +269,7 @@ class WireguardConfiguration:
         return self.Status
 
     def __getPeers(self):
+        self.Peers = []
         with open(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'), 'r') as configFile:
             p = []
             pCounter = -1
@@ -277,7 +305,7 @@ class WireguardConfiguration:
                                 "endpoint": "N/A",
                                 "status": "stopped",
                                 "latest_handshake": "N/A",
-                                "allowed_ip": "N/A",
+                                "allowed_ip": i.get("AllowedIPs", "N/A"),
                                 "cumu_receive": 0,
                                 "cumu_sent": 0,
                                 "cumu_data": 0,
@@ -296,11 +324,117 @@ class WireguardConfiguration:
                                 """ % self.Name
                                 , newPeer)
                             sqldb.commit()
+                            self.Peers.append(Peer(newPeer))
                         else:
+                            cursor.execute("UPDATE %s SET allowed_ip = ? WHERE id = ?" % self.Name,
+                                           (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
+                            sqldb.commit()
                             self.Peers.append(Peer(checkIfExist))
             except ValueError:
                 pass
-        print(self.Peers)
+
+    def __savePeers(self):
+        for i in self.Peers:
+            d = i.toJson()
+            sqldb.execute(
+                '''
+                UPDATE %s SET private_key = :private_key, 
+                    DNS = :DNS, endpoint_allowed_ip = :endpoint_allowed_ip, name = :name, 
+                    total_receive = :total_receive, total_sent = :total_sent, total_data = :total_data, 
+                    endpoint = :endpoint, status = :status, latest_handshake = :latest_handshake, 
+                    allowed_ip = :allowed_ip, cumu_receive = :cumu_receive, cumu_sent = :cumu_sent, 
+                    cumu_data = :cumu_data, mtu = :mtu, keepalive = :keepalive, 
+                    remote_endpoint = :remote_endpoint, preshared_key = :preshared_key WHERE id = :id
+                ''' % self.Name, d
+            )
+        sqldb.commit()
+
+    def getPeersLatestHandshake(self):
+        try:
+            latestHandshake = subprocess.check_output(f"wg show {self.Name} latest-handshakes",
+                                                      shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            return "stopped"
+        latestHandshake = latestHandshake.decode("UTF-8").split()
+        count = 0
+        now = datetime.now()
+        time_delta = timedelta(minutes=2)
+        for _ in range(int(len(latestHandshake) / 2)):
+            minus = now - datetime.fromtimestamp(int(latestHandshake[count + 1]))
+            if minus < time_delta:
+                status = "running"
+            else:
+                status = "stopped"
+            if int(latestHandshake[count + 1]) > 0:
+                sqldb.execute("UPDATE %s SET latest_handshake = ?, status = ? WHERE id= ?" % self.Name
+                              , (str(minus).split(".", maxsplit=1)[0], status, latestHandshake[count],))
+            else:
+                sqldb.execute("UPDATE %s SET latest_handshake = 'No Handshake', status = ? WHERE id= ?" % self.Name
+                              , (status, latestHandshake[count],))
+            sqldb.commit()
+            count += 2
+
+    def getPeersTransfer(self):
+        try:
+            data_usage = subprocess.check_output(f"wg show {self.Name} transfer",
+                                                 shell=True, stderr=subprocess.STDOUT)
+            data_usage = data_usage.decode("UTF-8").split("\n")
+            data_usage = [p.split("\t") for p in data_usage]
+            for i in range(len(data_usage)):
+                if len(data_usage[i]) == 3:
+                    cur_i = cursor.execute(
+                        "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id= ? "
+                        % self.Name, (data_usage[i][0],)).fetchone()
+                    if cur_i is not None:
+                        total_sent = cur_i['total_sent']
+                        total_receive = cur_i['total_receive']
+                        cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
+                        cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
+                        cumulative_receive = cur_i['cumu_receive'] + total_receive
+                        cumulative_sent = cur_i['cumu_sent'] + total_sent
+                        if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
+                            total_sent = cur_total_sent
+                            total_receive = cur_total_receive
+                        else:
+                            cursor.execute(
+                                "UPDATE %s SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
+                                self.Name, (round(cumulative_receive, 4), round(cumulative_sent, 4),
+                                            round(cumulative_sent + cumulative_receive, 4),
+                                            data_usage[i][0],))
+                            total_sent = 0
+                            total_receive = 0
+                        cursor.execute(
+                            "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
+                            % self.Name, (round(total_receive, 4), round(total_sent, 4),
+                                          round(total_receive + total_sent, 4), data_usage[i][0],))
+                        now = datetime.now()
+                        now_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                        cursor.execute(f'''
+                                    INSERT INTO %s_transfer
+                                        (id, total_receive, total_sent, total_data,
+                                        cumu_receive, cumu_sent, cumu_data, time)
+                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                ''' % self.Name, (data_usage[i][0], round(total_receive, 4), round(total_sent, 4),
+                                                  round(total_receive + total_sent, 4), round(cumulative_receive, 4),
+                                                  round(cumulative_sent, 4),
+                                                  round(cumulative_sent + cumulative_receive, 4), now_string,))
+                        sqldb.commit()
+        except Exception as e:
+            print("Error" + str(e))
+
+    def getPeersEndpoint(self):
+        try:
+            data_usage = subprocess.check_output(f"wg show {self.Name} endpoints",
+                                                 shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            return "stopped"
+        data_usage = data_usage.decode("UTF-8").split()
+        count = 0
+        for _ in range(int(len(data_usage) / 2)):
+            sqldb.execute("UPDATE %s SET endpoint = ? WHERE id = ?" % self.Name
+                          , (data_usage[count + 1], data_usage[count],))
+            sqldb.commit()
+            count += 2
 
     def toggleConfiguration(self) -> [bool, str]:
         self.getStatus()
@@ -320,7 +454,11 @@ class WireguardConfiguration:
         self.getStatus()
         return True, None
 
-    def toJSON(self):
+    def getPeers(self):
+        self.__getPeers()
+        return self.Peers
+
+    def toJson(self):
         self.Status = self.getStatus()
         return {
             "Status": self.Status,
@@ -478,7 +616,7 @@ class DashboardConfig:
 
         return True, self.__config[section][key]
 
-    def toJSON(self) -> dict[str, dict[Any, Any]]:
+    def toJson(self) -> dict[str, dict[Any, Any]]:
         the_dict = {}
 
         for section in self.__config.sections():
@@ -514,73 +652,6 @@ Private Functions
 
 def _strToBool(value: str) -> bool:
     return value.lower() in ("yes", "true", "t", "1", 1)
-
-
-# def _createPeerModel(wgConfigName):
-#     return type(wgConfigName, (Base,), {
-#         "id": mapped_column(VARCHAR, primary_key=True),
-#         "private_key": mapped_column(VARCHAR),
-#         "DNS": mapped_column(VARCHAR),
-#         "endpoint_allowed_ip": mapped_column(VARCHAR),
-#         "name": mapped_column(VARCHAR),
-#         "total_receive": mapped_column(FLOAT),
-#         "total_sent": mapped_column(FLOAT),
-#         "total_data": mapped_column(FLOAT),
-#         "endpoint": mapped_column(VARCHAR),
-#         "status": mapped_column(VARCHAR),
-#         "latest_handshake": mapped_column(VARCHAR),
-#         "allowed_ip": mapped_column(VARCHAR),
-#         "cumu_receive": mapped_column(FLOAT),
-#         "cumu_sent": mapped_column(FLOAT),
-#         "cumu_data": mapped_column(FLOAT),
-#         "mtu": mapped_column(INT),
-#         "keepalive": mapped_column(INT),
-#         "remote_endpoint": mapped_column(VARCHAR),
-#         "preshared_key": mapped_column(VARCHAR),
-#         "__tablename__": wgConfigName,
-#         "__table_args__": {'extend_existing': True}
-#     })
-# 
-# 
-# def _createRestrictedPeerModel(wgConfigName):
-#     return type(wgConfigName + "_restrict_access", (Base,), {
-#         "id": mapped_column(VARCHAR, primary_key=True),
-#         "private_key": mapped_column(VARCHAR),
-#         "DNS": mapped_column(VARCHAR),
-#         "endpoint_allowed_ip": mapped_column(VARCHAR),
-#         "name": mapped_column(VARCHAR),
-#         "total_receive": mapped_column(FLOAT),
-#         "total_sent": mapped_column(FLOAT),
-#         "total_data": mapped_column(FLOAT),
-#         "endpoint": mapped_column(VARCHAR),
-#         "status": mapped_column(VARCHAR),
-#         "latest_handshake": mapped_column(VARCHAR),
-#         "allowed_ip": mapped_column(VARCHAR),
-#         "cumu_receive": mapped_column(FLOAT),
-#         "cumu_sent": mapped_column(FLOAT),
-#         "cumu_data": mapped_column(FLOAT),
-#         "mtu": mapped_column(INT),
-#         "keepalive": mapped_column(INT),
-#         "remote_endpoint": mapped_column(VARCHAR),
-#         "preshared_key": mapped_column(VARCHAR),
-#         "__tablename__": wgConfigName,
-#         "__table_args__": {'extend_existing': True}
-#     })
-# 
-# 
-# def _createPeerTransferModel(wgConfigName):
-#     return type(wgConfigName + "_transfer", (Base,), {
-#         "id": mapped_column(VARCHAR, primary_key=True),
-#         "total_receive": mapped_column(FLOAT),
-#         "total_sent": mapped_column(FLOAT),
-#         "total_data": mapped_column(FLOAT),
-#         "cumu_receive": mapped_column(FLOAT),
-#         "cumu_sent": mapped_column(FLOAT),
-#         "cumu_data": mapped_column(FLOAT),
-#         "time": mapped_column(DATETIME),
-#         "__tablename__": wgConfigName + "_transfer",
-#         "__table_args__": {'extend_existing': True},
-#     })
 
 
 def _regexMatch(regex, text):
@@ -667,7 +738,7 @@ def API_SignOut():
 @app.route('/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
     WireguardConfigurations = _getConfigurationList()
-    return ResponseObject(data=[wc.toJSON() for wc in WireguardConfigurations.values()])
+    return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 
 @app.route('/api/addWireguardConfiguration', methods=["POST"])
@@ -728,7 +799,7 @@ def API_toggleWireguardConfiguration():
 
 @app.route('/api/getDashboardConfiguration', methods=["GET"])
 def API_getDashboardConfiguration():
-    return ResponseObject(data=DashboardConfig.toJSON())
+    return ResponseObject(data=DashboardConfig.toJson())
 
 
 @app.route('/api/updateDashboardConfiguration', methods=["POST"])
@@ -754,6 +825,17 @@ def API_updateDashboardConfigurationItem():
         return ResponseObject(False, msg)
 
     return ResponseObject()
+
+
+@app.route('/api/getWireguardConfigurationInfo', methods=["GET"])
+def API_getConfigurationInfo():
+    configurationName = request.args.get("configurationName")
+    if not configurationName or configurationName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please provide configuration name")
+    return ResponseObject(data={
+        "configurationInfo": WireguardConfigurations[configurationName],
+        "configurationPeers": WireguardConfigurations[configurationName].getPeers()
+    })
 
 
 @app.route('/api/getDashboardTheme')
@@ -821,60 +903,20 @@ def index():
 
 
 def backGroundThread():
-    print("Waiting 5 sec")
-    time.sleep(5)
-    while True:
-        for c in WireguardConfigurations.values():
-            if c.getStatus():
-                try:
-                    data_usage = subprocess.check_output(f"wg show {c.Name} transfer",
-                                                         shell=True, stderr=subprocess.STDOUT)
-                    data_usage = data_usage.decode("UTF-8").split("\n")
-                    data_usage = [p.split("\t") for p in data_usage]
-                    for i in range(len(data_usage)):
-                        if len(data_usage[i]) == 3:
-                            cur_i = cursor.execute(
-                                "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id= ? "
-                                % c.Name, (data_usage[i][0], )).fetchone()
-                            if cur_i is not None:
-                                total_sent = cur_i['total_sent']
-                                total_receive = cur_i['total_receive']
-                                cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
-                                cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
-                                cumulative_receive = cur_i['cumu_receive'] + total_receive
-                                cumulative_sent = cur_i['cumu_sent'] + total_sent
-                                if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
-                                    total_sent = cur_total_sent
-                                    total_receive = cur_total_receive
-                                else:
-                                    cursor.execute(
-                                        "UPDATE %s SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
-                                        c.Name, (round(cumulative_receive, 4), round(cumulative_sent, 4),
-                                                 round(cumulative_sent + cumulative_receive, 4),
-                                                 data_usage[i][0], ))
-                                    total_sent = 0
-                                    total_receive = 0
-                                cursor.execute(
-                                    "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
-                                    % c.Name, (round(total_receive, 4), round(total_sent, 4),
-                                               round(total_receive + total_sent, 4), data_usage[i][0], ))
-                                now = datetime.now()
-                                now_string = now.strftime("%d/%m/%Y %H:%M:%S")
-                                cursor.execute(f'''
-                                    INSERT INTO %s_transfer
-                                        (id, total_receive, total_sent, total_data,
-                                        cumu_receive, cumu_sent, cumu_data, time)
-                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                                ''' % c.Name, (data_usage[i][0], round(total_receive, 4), round(total_sent, 4),
-                                               round(total_receive + total_sent, 4), round(cumulative_receive, 4),
-                                               round(cumulative_sent, 4),
-                                               round(cumulative_sent + cumulative_receive, 4), now_string, ))
-                                sqldb.commit()
-                    print(data_usage)
-                    pass
-                except Exception as e:
-                    print(str(e))
-        time.sleep(30)
+    with app.app_context():
+        print("Waiting 5 sec")
+        time.sleep(5)
+        while True:
+            for c in WireguardConfigurations.values():
+                if c.getStatus():
+
+                    try:
+                        c.getPeersTransfer()
+                        c.getPeersLatestHandshake()
+                        c.getPeersEndpoint()
+                    except Exception as e:
+                        print("Error: " + str(e))
+            time.sleep(10)
 
 
 if __name__ == "__main__":
@@ -891,4 +933,4 @@ if __name__ == "__main__":
     bgThread.daemon = True
     bgThread.start()
 
-    app.run(host=app_ip, debug=False, port=app_port)
+    app.run(host=app_ip, debug=True, port=app_port)
