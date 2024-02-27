@@ -1,11 +1,6 @@
-> If anyone is interested in what I've been working on, you can check out the branch https://github.com/donaldzou/WGDashboard/tree/v.3.1-dev2023 :) You can try it out with running dashboard_new.py ;)
+### Development on v4
+Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This version will be a huge update on the structure of the app. The frontend will be completely handle on the client side with Vue.js, and communicate with the server via REST Api. With this design, it could be possible for the frontend app to connect to multiple server in the future. Stay tune to this new verion, I'm working very hard on this while balancing school and work. If you would like know whats going on, you can check out [this branch](https://github.com/donaldzou/WGDashboard/tree/v4) 😊
 
-##### Beta testing on v3.1
-If anyone would love to try out the beta version of v3.1, you can do the following. Let me know if you encountered any issues. ;)
-```
-git clone -b v3.1-dev https://github.com/donaldzou/WGDashboard.git wgdashboard
-```
-> Please note that I still do push on this branch, and it might crash or not finish yet on some functionality ;)
 ##### Known issue on WGDashboard `v3.0 - v3.0.6`
 - [IPv6 in WireGuard might not fully support.](https://github.com/donaldzou/WGDashboard/issues/167)
 <hr>
