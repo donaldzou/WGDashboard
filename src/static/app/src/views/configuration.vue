@@ -106,9 +106,9 @@ export default {
 				this.configurationPeers = [];
 				if (id){
 					this.getPeers(id)
-					this.interval = setInterval(() => {
-						this.getPeers(id)
-					}, 2000)
+					// this.interval = setInterval(() => {
+					// 	this.getPeers(id)
+					// }, 2000)
 				}
 			}
 		}
@@ -289,83 +289,147 @@ export default {
 				<div class="dot active ms-0"></div>
 			</div>
 		</div>
-		<div class="row mt-3 gy-2">
-			<div class="col-sm-3">
-				<p class="mb-0 text-muted"><small>Address</small></p>
-				{{this.configurationInfo.Address}}
+		<div class="row mt-3 gy-2 gx-2 mb-2">
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body py-2">
+						<p class="mb-0 text-muted"><small>Address</small></p>
+						{{this.configurationInfo.Address}}
+					</div>
+				</div>
 			</div>
-			<div class="col-sm-3">
-				<p class="mb-0 text-muted"><small>Listen Port</small></p>
-				{{this.configurationInfo.ListenPort}}
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body py-2">
+						<p class="mb-0 text-muted"><small>Listen Port</small></p>
+						{{this.configurationInfo.ListenPort}}
+					</div>
+				</div>
 			</div>
-			<div style="word-break: break-all" class="col-sm-6">
-				<p class="mb-0 text-muted"><small>Public Key</small></p>
-				<samp>{{this.configurationInfo.PublicKey}}</samp>
-			</div>
-			<div class="col-sm-3">
-				<p class="mb-1 text-muted"><small>Connected Peers</small></p>
-				<i class="bi bi-ethernet me-2"></i><strong>{{configurationSummary.connectedPeers}}</strong>
-			</div>
-			<div class="col-sm-3">
-				<p class="mb-0 text-muted"><small>Total Usage</small></p>
-				<i class="bi bi-arrow-down-up me-2"></i><strong>{{configurationSummary.totalUsage.toFixed(4)}}</strong> GB
-			</div>
-			<div class="col-sm-3">
-				<p class="mb-0 text-muted"><small>Total Received</small></p>
-				<i class="bi bi-arrow-down me-2"></i><strong>{{configurationSummary.totalReceive.toFixed(4)}}</strong> GB
-			</div>
-			<div class="col-sm-3">
-				<p class="mb-0 text-muted"><small>Total Sent</small></p>
-				<i class="bi bi-arrow-up me-2"></i><strong>{{configurationSummary.totalSent.toFixed(4)}}</strong> GB
+			<div style="word-break: break-all" class="col-12 col-lg-6">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body py-2">
+						<p class="mb-0 text-muted"><small>Public Key</small></p>
+						<samp>{{this.configurationInfo.PublicKey}}</samp>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="row mt-3 gx-2 gy-2 mb-2">
-			<div class="col-sm ">
-				<div class="card rounded-3 bg-transparent">
-					<div class="card-header bg-transparent border-0"><small>Peers Total Data Usage</small></div>
+		<div class="row gx-2 gy-2 mb-2">
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body d-flex">
+						<div>
+							<p class="mb-0 text-muted"><small>Connected Peers</small></p>
+							<strong class="h4">{{configurationSummary.connectedPeers}}</strong>
+						</div>
+						<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
+					</div>
+				</div>
+			</div>
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body d-flex">
+						<div>
+							<p class="mb-0 text-muted"><small>Total Usage</small></p>
+							<strong class="h4">{{configurationSummary.totalUsage.toFixed(4)}} GB</strong>
+						</div>
+						<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
+					</div>
+				</div>
+			</div>
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body d-flex">
+						<div>
+							<p class="mb-0 text-muted"><small>Total Received</small></p>
+							<strong class="h4 text-primary">{{configurationSummary.totalReceive.toFixed(4)}} GB</strong>
+						</div>
+						<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
+					</div>
+				</div>
+			</div>
+			<div class="col-6 col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-body d-flex">
+						<div>
+							<p class="mb-0 text-muted"><small>Total Sent</small></p>
+							<strong class="h4 text-success">{{configurationSummary.totalSent.toFixed(4)}} GB</strong>
+						</div>
+						<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row gx-2 gy-2 mb-5">
+			<div class="col-12 col-lg-6">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-header bg-transparent border-0"><small class="text-muted">Peers Total Data Usage</small></div>
 					<div class="card-body pt-1">
 						<Bar
 							:data="individualDataUsage"
 							:options="individualDataUsageChartOption"
-							style="height: 150px; width: 100%"></Bar>
+							style="height: 200px; width: 100%"></Bar>
 					</div>
 				</div>
-				
 			</div>
-			<div class="col-sm">
-				<div class="card rounded-3 bg-transparent">
-					<div class="card-header bg-transparent border-0"><small>Real Time Received Data Usage</small></div>
+			<div class="col-sm col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Received Data Usage</small></div>
 					<div class="card-body pt-1">
 						<Line
 							:options="chartOptions"
 							:data="receiveData"
-							style="width: 100%; height: 150px"
+							style="width: 100%; height: 200px"
 						></Line>
 					</div>
 				</div>
 			</div>
-			<div class="col-sm">
-				<div class="card rounded-3 bg-transparent">
-					<div class="card-header bg-transparent border-0"><small>Real Time Sent Data Usage</small></div>
+			<div class="col-sm col-lg-3">
+				<div class="card rounded-3 bg-transparent shadow-sm">
+					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Sent Data Usage</small></div>
 					<div class="card-body  pt-1">
 						<Line
 							:options="chartOptions"
 							:data="sentData"
-							style="width: 100%; height: 150px"
+							style="width: 100%; height: 200px"
 						></Line>
 					</div>
 				</div>
 			</div>
 		</div>
-		<hr>
-		<div class="row gx-2 gy-2">
-			<div class="col-12 col-lg-6 col-xl-4" v-for="peer in this.configurationPeers">
-				<Peer :Peer="peer"></Peer>
+		
+		
+		<div>
+			<nav class="navbar navbar-expand-lg bg-body mb-3 rounded-3 shadow-sm border">
+				<div class="container-fluid w-100">
+					<ul class="navbar-nav peerNav gap-1">
+						<li class="nav-item">
+							<a class="nav-link active rounded-3 px-3 w-100" aria-current="page" href="#">Peers</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link rounded-3 px-3" href="#">Manage Peers</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link rounded-3 px-3" href="#">Configuration Settings</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<div class="row gx-2 gy-2">
+				<div class="col-12 col-lg-6 col-xl-4" v-for="peer in this.configurationPeers">
+					<Peer :Peer="peer"></Peer>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-
+	.peerNav .nav-link{
+		&.active{
+			background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
+			color: white;
+		}
+	}
 </style>

@@ -8,7 +8,7 @@ export default {
 </script>
 
 <template>
-	<div class="card shadow rounded-3">
+	<div class="card shadow-sm rounded-3">
 		<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0">
 			<div class="dot ms-0" :class="{active: Peer.status === 'running'}"></div>
 			<div style="font-size: 0.8rem" class="ms-auto d-flex gap-2">
