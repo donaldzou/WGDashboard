@@ -419,7 +419,7 @@ main{
 label[for="username"], label[for="password"]{
     font-size: 1rem;
     margin: 0 !important;
-    transform: translateY(30px) translateX(16px);
+    /* transform: translateY(30px) translateX(16px); */
     padding: 0;
 }
 
