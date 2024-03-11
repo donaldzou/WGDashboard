@@ -3,7 +3,8 @@ import {fetchGet} from "@/utilities/fetch.js";
 
 export const WireguardConfigurationsStore = defineStore('WireguardConfigurationsStore', {
 	state: () => ({
-		Configurations: undefined
+		Configurations: undefined,
+		searchString: ""
 	}),
 	actions: {
 		async getConfigurations(){

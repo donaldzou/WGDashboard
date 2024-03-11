@@ -1,8 +1,26 @@
 <script>
+import { ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 export default {
 	name: "peer",
 	props: {
 		Peer: Object
+	},
+	data(){
+		return {
+		
+		}
+	},
+	setup(){
+		const target = ref(null);
+		const subMenuOpened = ref(false)
+		onClickOutside(target, event => {
+			subMenuOpened.value = false;
+		});
+		return {target, subMenuOpened}
+	},
+	mounted() {
+		
 	}
 }
 </script>
@@ -34,9 +52,24 @@ export default {
 				<small class="text-muted">Public Key</small>
 				<p class="mb-0"><samp>{{Peer.id}}</samp></p>
 			</div>
-			<div>
-				<small class="text-muted">Allowed IP</small>
-				<p class="mb-0"><samp>{{Peer.allowed_ip}}</samp></p>
+			<div class="d-flex align-items-end">
+				<div>
+					<small class="text-muted">Allowed IP</small>
+					<p class="mb-0"><samp>{{Peer.allowed_ip}}</samp></p>
+				</div>
+				<div class="ms-auto px-2">
+					<a role="button" class="text-body" @click="this.subMenuOpened = true">
+						<h5 class="mb-0"><i class="bi bi-three-dots"></i></h5>
+					</a>
+					<Transition name="slide-fade">
+						<ul class="dropdown-menu mt-2 shadow-lg dropdown-menu-left d-block"
+						    v-if="this.subMenuOpened"
+						    ref="target">
+							<li>
+								<a class="dropdown-item d-flex" role="button" ></a></li>
+						</ul>
+					</Transition>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -44,4 +77,13 @@ export default {
 
 <style scoped>
 
+.slide-fade-leave-active, .slide-fade-enter-active {
+	transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+	transform: translateY(20px);
+	opacity: 0;
+}
 </style>

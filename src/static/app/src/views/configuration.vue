@@ -2,6 +2,7 @@
 import {fetchGet} from "@/utilities/fetch.js";
 import Peer from "@/components/configurationComponents/peer.vue";
 import { Line, Bar } from 'vue-chartjs'
+import Fuse from "fuse.js";
 import {
 	Chart,
 	ArcElement,
@@ -56,10 +57,19 @@ Chart.register(
 );
 
 import dayjs from "dayjs";
+import PeerSearch from "@/components/configurationComponents/peerSearch.vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {ref} from "vue";
+import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 
 export default {
 	name: "configuration",
-	components: {Peer, Line, Bar},
+	setup(){
+		const dashboardConfigurationStore = DashboardConfigurationStore();
+		const wireguardConfigurationStore = WireguardConfigurationsStore();
+		return {dashboardConfigurationStore, wireguardConfigurationStore}
+	},
+	components: {PeerSearch, Peer, Line, Bar},
 	data(){
 		return {
 			loading: false,
@@ -68,6 +78,7 @@ export default {
 			configurationPeers: [],
 			historyDataSentDifference: [],
 			historyDataReceivedDifference: [],
+			
 			
 			historySentData: {
 				labels: [],
@@ -106,11 +117,13 @@ export default {
 				this.configurationPeers = [];
 				if (id){
 					this.getPeers(id)
-					// this.interval = setInterval(() => {
-					// 	this.getPeers(id)
-					// }, 2000)
+					this.setInterval();
 				}
 			}
+		},
+		'dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval'(){
+			clearInterval(this.interval);
+			this.setInterval();
 		}
 	},
 	beforeRouteLeave(){
@@ -170,7 +183,13 @@ export default {
 						}
 					}
 				});
-		}	
+		},
+		setInterval(){
+			console.log('Set Interval');
+			this.interval = setInterval(() => {
+				this.getPeers(this.$route.params.id)
+			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
+		}
 	},
 	computed: {
 		configurationSummary(){
@@ -275,6 +294,25 @@ export default {
 					}
 				}
 			}
+		},
+		searchPeers(){
+			const fuse = new Fuse(this.configurationPeers, {
+				keys: ["name", "id", "allowed_ip"]
+			});
+			
+			const result = this.wireguardConfigurationStore.searchString ? fuse.search(this.wireguardConfigurationStore.searchString).map(x => x.item) : this.configurationPeers;
+			
+			return result.slice().sort((a, b) => {
+				if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] 
+					< b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] ){
+					return -1;
+				}
+				if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] 
+					> b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]){
+					return 1;
+				}
+				return 0;
+			});
 		}
 	}
 }
@@ -398,29 +436,22 @@ export default {
 				</div>
 			</div>
 		</div>
-		
-		
 		<div>
-			<nav class="navbar navbar-expand-lg bg-body mb-3 rounded-3 shadow-sm border">
-				<div class="container-fluid w-100">
-					<ul class="navbar-nav peerNav gap-1">
-						<li class="nav-item">
-							<a class="nav-link active rounded-3 px-3 w-100" aria-current="page" href="#">Peers</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link rounded-3 px-3" href="#">Manage Peers</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link rounded-3 px-3" href="#">Configuration Settings</a>
-						</li>
-					</ul>
-				</div>
-			</nav>
-			<div class="row gx-2 gy-2">
-				<div class="col-12 col-lg-6 col-xl-4" v-for="peer in this.configurationPeers">
+			<div class="d-flex align-items-center gap-3 mb-2 ">
+				<h3>Peers</h3>
+				<a href="#"
+				   class="ms-auto text-secondary text-decoration-none"><i class="bi bi-sliders2 me-2"></i>Peer Settings</a>
+				<a href="#" class="text-decoration-none"><i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
+			</div>
+			<PeerSearch></PeerSearch>
+
+			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
+				<div class="col-12 col-lg-6 col-xl-4" 
+				     :key="peer.id"
+				     v-for="peer in this.searchPeers">
 					<Peer :Peer="peer"></Peer>
 				</div>
-			</div>
+			</TransitionGroup>
 		</div>
 	</div>
 </template>
@@ -428,8 +459,31 @@ export default {
 <style scoped>
 	.peerNav .nav-link{
 		&.active{
-			background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-			color: white;
+			//background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
+			//color: white;
+			background-color: #efefef;
 		}
+	}
+
+	.list-move, /* apply transition to moving elements */
+	.list-enter-active,
+	.list-leave-active {
+		transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+	}
+
+	.list-leave-active{
+		position: absolute;
+	}
+
+	.list-enter-from,
+	.list-leave-to {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	/* ensure leaving items are taken out of layout flow so that moving
+	   animations can be calculated correctly. */
+	.list-leave-active {
+		position: absolute;
 	}
 </style>
