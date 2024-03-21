@@ -1,8 +1,10 @@
 <script>
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+import PeerSettingsDropdown from "@/components/configurationComponents/peerSettingsDropdown.vue";
 export default {
 	name: "peer",
+	components: {PeerSettingsDropdown},
 	props: {
 		Peer: Object
 	},
@@ -19,8 +21,13 @@ export default {
 		});
 		return {target, subMenuOpened}
 	},
-	mounted() {
-		
+	computed: {
+		getLatestHandshake(){
+			if (this.Peer.latest_handshake.includes(",")){
+				return this.Peer.latest_handshake.split(",")[0]
+			}
+			return this.Peer.latest_handshake;
+		}
 	}
 }
 </script>
@@ -40,7 +47,7 @@ export default {
 				</span>
 				<span class="text-secondary" v-if="Peer.latest_handshake !== 'No Handshake'">
 					<i class="bi bi-arrows-angle-contract"></i>
-					{{Peer.latest_handshake}} ago
+					{{getLatestHandshake}} ago
 				</span>
 			</div>
 		</div>
@@ -57,17 +64,20 @@ export default {
 					<small class="text-muted">Allowed IP</small>
 					<p class="mb-0"><samp>{{Peer.allowed_ip}}</samp></p>
 				</div>
-				<div class="ms-auto px-2">
-					<a role="button" class="text-body" @click="this.subMenuOpened = true">
+				<div class="ms-auto px-2 rounded-3 subMenuBtn"
+				     :class="{active: this.subMenuOpened}"
+				>
+					<a role="button" class="text-body" 
+					   
+					   @click="this.subMenuOpened = true">
 						<h5 class="mb-0"><i class="bi bi-three-dots"></i></h5>
 					</a>
 					<Transition name="slide-fade">
-						<ul class="dropdown-menu mt-2 shadow-lg dropdown-menu-left d-block"
-						    v-if="this.subMenuOpened"
-						    ref="target">
-							<li>
-								<a class="dropdown-item d-flex" role="button" ></a></li>
-						</ul>
+						<PeerSettingsDropdown 
+							:Peer="Peer"
+							v-if="this.subMenuOpened"
+							ref="target"
+						></PeerSettingsDropdown>
 					</Transition>
 				</div>
 			</div>
@@ -85,5 +95,9 @@ export default {
 .slide-fade-leave-to {
 	transform: translateY(20px);
 	opacity: 0;
+}
+
+.subMenuBtn.active{
+	background-color: #ffffff20;
 }
 </style>

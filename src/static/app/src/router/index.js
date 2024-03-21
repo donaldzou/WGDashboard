@@ -11,6 +11,8 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import Setup from "@/views/setup.vue";
 import NewConfiguration from "@/views/newConfiguration.vue";
 import Configuration from "@/views/configuration.vue";
+import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
+import PeerList from "@/components/configurationComponents/peerList.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -48,9 +50,18 @@ const router = createRouter({
         },
         {
           name: "Configuration",
-          path: '/configuration/:id',
-          component: Configuration
-        }
+          path: '/configuration/:id/',
+          component: Configuration,
+          children: [
+              
+            {
+              name: "Peer Settings",
+              path: 'peer_settings',
+              component: PeerSettings
+            }
+          ]
+        },
+        
       ]
     },
     {

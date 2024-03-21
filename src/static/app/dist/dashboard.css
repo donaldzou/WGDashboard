@@ -1,5 +1,6 @@
-::-webkit-scrollbar {
-    display: none;
+body {
+    font-size: .875rem;
+    /*font-family: 'Poppins', sans-serif;*/
 }
 
 .codeFont{
@@ -14,6 +15,10 @@
 
 .btn-primary {
     font-weight: bold;
+}
+
+.dashboardLogo{
+    background: -webkit-linear-gradient(#178bff, #ff4a00);
 }
 
 /*
@@ -49,92 +54,10 @@
 /*    }*/
 /*}*/
 
-@property --brandColor1 {
-    syntax: '<color>';
-    initial-value: #009dff;
-    inherits: false;
-}
-
-@property --brandColor2 {
-    syntax: '<color>';
-    initial-value: #ff4a00;
-    inherits: false;
-}
-
-@property --distance2{
-    syntax: '<percentage>';
-    initial-value: 0%;
-    inherits: false;
-}
-
-@property --degree{
-    syntax: '<angle>';
-    initial-value: 234deg;
-    inherits: false;
-}
-
-.dashboardLogo{
-    background: rgb(23,139,255);
-    background: linear-gradient(234deg, var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    transition: --brandColor1 1s, --brandColor2 0.3s, --distance2 1s !important;
-
-}
-
-.btn-brand{
-    /*background: rgb(23,139,255);*/
-    background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-    border: 0 !important;
-    transition: --brandColor1 1s, --brandColor2 1s, --distance2 0.5s !important;
-}
-
-.btn-brand.loading{
-    animation: spin infinite forwards 3s linear;
-}
-
-.btn-brand:hover, .dashboardLogo:hover{
-    --brandColor1: #009dff;
-    --brandColor2: #ff875b;
-    --distance2: 30%;
-}
-
-.signInBtn.signedIn{
-    --distance2: 100%;
-}
-
-@keyframes spin {
-    0%{
-        --degree: 234deg;
-    }
-    100%{
-        --degree: 594deg;
-    }
-}
-
-[data-bs-theme="dark"].main, 
-#app:has(.main[data-bs-theme="dark"]){
-    background-color: #1b1e21;
-}
-
-
-
 .sidebar .nav-link, .bottomNavContainer .nav-link{
     font-weight: 500;
     color: #333;
     transition: 0.2s cubic-bezier(0.82, -0.07, 0, 1.01);
-}
-
-[data-bs-theme="dark"] .sidebar .nav-link{
-    color: white;
-}
-
-[data-bs-theme="dark"] .sidebar .nav-link.active{
-    color: #74b7ff;
-}
-
-[data-bs-theme="dark"] .nav-link:hover{
-    background-color: #323844;
 }
 
 .nav-link:hover {
@@ -210,16 +133,19 @@
     border-radius: 50px;
     display: inline-block;
     margin-left: auto !important;
-    background-color: #6c757d;
 }
 
-.dot.active{
+.dot-running {
     background-color: #28a745!important;
     box-shadow: 0 0 0 0.2rem #28a74545;
 }
 
 .h6-dot-running {
     margin-left: 0.3rem;
+}
+
+.dot-stopped {
+    background-color: #6c757d!important;
 }
 
 .card-running {
@@ -537,24 +463,18 @@ main {
 }
 
 .login-box #username,
-.login-box #password,
-.login-box #totp
-{
+.login-box #password {
     padding: 0.6rem calc( 0.9rem + 32px);
     height: inherit;
 }
 
 .login-box label[for="username"],
-.login-box label[for="password"],
-.login-box label[for="totp"]
-
-{
+.login-box label[for="password"] {
     font-size: 1rem;
     margin: 0 !important;
     transform: translateY(2.1rem) translateX(1rem);
     padding: 0;
 }
-
 
 
 /*label[for="password"]{*/
@@ -603,6 +523,7 @@ main {
 
 .conf_card:hover {
     border-color: #007bff;
+    cursor: pointer;
 }
 
 .info_loading {
@@ -710,10 +631,10 @@ pre.index-alert {
     margin-left: auto !important;
 }
 
-/*.conf_card .dot,*/
-/*.info .dot {*/
-/*    transform: translateX(10px);*/
-/*}*/
+.conf_card .dot,
+.info .dot {
+    transform: translateX(10px);
+}
 
 #config_body {
     transition: 0.3s ease-in-out;
@@ -1014,82 +935,4 @@ pre.index-alert {
 
 .theme-switch-btn{
     width: 100%;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: all 0.3s ease-in-out;
-    /*position: absolute;*/
-    /*padding-top: 50px*/
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    transform: translateY(30px);
-    opacity: 0;
-}
-
-.fade2-enter-active,
-.fade2-leave-active {
-    transition: all 0.15s ease-in-out;
-}
-
-.fade2-enter-from{
-    transform: translateX(20px);
-    opacity: 0;
-}
-
-.fade2-leave-to {
-    transform: translateX(-20px);
-    opacity: 0;
-}
-
-.login-container-fluid{
-    height: calc(100% - 50px) !important;
-}
-
-.totp{
-    font-family: var(--bs-font-monospace);
-}
-
-.message-move, /* apply transition to moving elements */
-.message-enter-active,
-.message-leave-active {
-    transition: all 0.5s ease;
-}
-
-.message-enter-from,
-.message-leave-to {
-    filter: blur(2px);
-    opacity: 0;
-}
-
-.message-enter-from{
-    transform: translateY(-30px) scale(0.7);
-}
-
-.message-leave-to{
-    transform: translateY(30px);
-}
-
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.message-leave-active {
-    position: absolute;
-}
-
-.fade3-enter-active,
-.fade3-leave-active {
-    transition: all 0.15s ease-in-out;
-}
-
-.fade3-enter-from{
-    transform: scale(1);
-    opacity: 0;
-}
-
-.fade3-leave-to {
-    transform: scale(0.8);
-    opacity: 0;
 }
