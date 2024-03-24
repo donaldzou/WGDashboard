@@ -21,7 +21,9 @@ export default {
 		</template>
 		
 		<li>
-			<a class="dropdown-item d-flex" role="button">
+			<a class="dropdown-item d-flex" role="button"
+				@click="this.$emit('setting')"
+			>
 				<i class="me-auto bi bi-pen"></i> Edit
 			</a>
 		</li>

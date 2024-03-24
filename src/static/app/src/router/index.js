@@ -30,34 +30,46 @@ const router = createRouter({
       path: '/',
       component: Index,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        
       },
       children: [
         {
           name: "Configuration List",
           path: '',
-          component: ConfigurationList
+          component: ConfigurationList,
+          meta: {
+            title: "WireGuard Configurations"
+          }
         },
         {
           name: "Settings",
           path: '/settings',
-          component: Settings
+          component: Settings,
+          meta: {
+            title: "Settings"
+          }
         },
         {
           name: "New Configuration",
           path: '/new_configuration',
-          component: NewConfiguration
+          component: NewConfiguration,
+          meta: {
+            title: "New Configuration"
+          }
         },
         {
           name: "Configuration",
-          path: '/configuration/:id/',
+          path: '/configuration/:id',
           component: Configuration,
+          meta: {
+            title: "Configuration"
+          },
           children: [
-              
             {
-              name: "Peer Settings",
-              path: 'peer_settings',
-              component: PeerSettings
+              name: "Peers List",
+              path: '',
+              component: PeerList
             }
           ]
         },
@@ -65,7 +77,10 @@ const router = createRouter({
       ]
     },
     {
-      path: '/signin', component: Signin
+      path: '/signin', component: Signin,
+      meta: {
+        title: "Sign In"
+      }
     },
     {
       path: '/welcome', component: Setup,
@@ -80,6 +95,15 @@ router.beforeEach(async (to, from, next) => {
   const wireguardConfigurationsStore = WireguardConfigurationsStore();
   const dashboardConfigurationStore = DashboardConfigurationStore();
   
+  if (to.meta.title){
+    if (to.params.id){
+      document.title = to.params.id + " | WGDashboard";
+    }else{
+      document.title = to.meta.title + " | WGDashboard";
+    }
+  }else{
+    document.title = "WGDashboard"
+  }
   
   if (to.meta.requiresAuth){
     if (cookie.getCookie("authToken") && await checkAuth()){

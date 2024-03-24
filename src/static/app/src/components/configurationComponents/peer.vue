@@ -74,6 +74,7 @@ export default {
 					</a>
 					<Transition name="slide-fade">
 						<PeerSettingsDropdown 
+							@setting="this.$emit('setting')"
 							:Peer="Peer"
 							v-if="this.subMenuOpened"
 							ref="target"

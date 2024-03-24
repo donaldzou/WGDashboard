@@ -71,7 +71,12 @@ export default {
 
 <template>
 	<div class="mt-5 text-body">
-		<PeerList></PeerList>
+<!--		<PeerList></PeerList>-->
+		<RouterView v-slot="{ Component }">
+			<Transition name="fade2" mode="out-in">
+				<Component :is="Component"></Component>
+			</Transition>
+		</RouterView>
 	</div>
 </template>
 

@@ -1,4 +1,5 @@
 import itertools
+import random
 import sqlite3
 import configparser
 import hashlib
@@ -13,6 +14,7 @@ import re
 import urllib.parse
 import urllib.request
 import urllib.error
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from json import JSONEncoder
@@ -262,7 +264,7 @@ class WireguardConfiguration:
             sqldb.commit()
 
     def __getPublicKey(self) -> str:
-        return subprocess.check_output(['wg', 'pubkey'], input=self.PrivateKey.encode()).decode().strip('\n')
+        return _generatePublicKey(self.PrivateKey)[1]
 
     def getStatus(self) -> bool:
         self.Status = self.Name in psutil.net_if_addrs().keys()
@@ -332,6 +334,12 @@ class WireguardConfiguration:
                             self.Peers.append(Peer(checkIfExist))
             except ValueError:
                 pass
+
+    def searchPeer(self, publicKey):
+        for i in self.Peers:
+            if i.id == publicKey:
+                return True, i
+        return False, None
 
     def __savePeers(self):
         for i in self.Peers:
@@ -671,6 +679,56 @@ def _getConfigurationList() -> [WireguardConfiguration]:
     return configurations
 
 
+def _checkIPWithRange(ip):
+    ip_patterns = (
+        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|\/)){4}([0-9]{1,2})(,|$)",
+        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}\/([0-9]{1,3})(,|$)"
+    )
+
+    for match_pattern in ip_patterns:
+        match_result = regex_match(match_pattern, ip)
+        if match_result:
+            result = match_result
+            break
+    else:
+        result = None
+
+    return result
+
+
+def _checkIP(ip):
+    ip_patterns = (
+        r"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}",
+        r"[0-9a-fA-F]{0,4}(:([0-9a-fA-F]{0,4})){1,7}$"
+    )
+    for match_pattern in ip_patterns:
+        match_result = regex_match(match_pattern, ip)
+        if match_result:
+            result = match_result
+            break
+    else:
+        result = None
+
+    return result
+
+
+def _checkDNS(dns):
+    dns = dns.replace(' ', '').split(',')
+    for i in dns:
+        if not (_checkIP(i) or regex_match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]", i)):
+            return False
+    return True
+
+
+def _generatePublicKey(privateKey) -> [bool, str]:
+    try:
+        publicKey = subprocess.check_output(f"wg pubkey", input=privateKey.encode(), shell=True,
+                                            stderr=subprocess.STDOUT)
+        return True, publicKey.decode().strip('\n')
+    except subprocess.CalledProcessError:
+        return False, None
+
+
 '''
 API Routes
 '''
@@ -827,6 +885,88 @@ def API_updateDashboardConfigurationItem():
     return ResponseObject()
 
 
+@app.route('/api/updatePeerSettings/<configName>', methods=['POST'])
+def API_updatePeerSettings(configName):
+    data = request.get_json()
+    id = data['id']
+
+    if len(id) > 0 and configName in WireguardConfigurations.keys():
+        name = data['name']
+        private_key = data['private_key']
+        dns_addresses = data['DNS']
+        allowed_ip = data['allowed_ip']
+        endpoint_allowed_ip = data['endpoint_allowed_ip']
+        preshared_key = data['preshared_key']
+
+        wireguardConfig = WireguardConfigurations[configName]
+        foundPeer, peer = wireguardConfig.searchPeer(id)
+        if foundPeer:
+            for p in wireguardConfig.Peers:
+                if allowed_ip in p.allowed_ip and p.id != peer.id:
+                    return ResponseObject(False, f"Allowed IP already taken by another peer.")
+            if not _checkIPWithRange(endpoint_allowed_ip):
+                return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect.")
+            if not _checkDNS(dns_addresses):
+                return ResponseObject(False, f"DNS format is incorrect.")
+            if data['mtu'] < 0 or data['mtu'] > 1460:
+                return ResponseObject(False, "MTU format is not correct.")
+            if data['keepalive'] < 0:
+                return ResponseObject(False, "Persistent Keepalive format is not correct.")
+            if len(private_key) > 0:
+                pubKey = _generatePublicKey(private_key)
+                if not pubKey[0] or pubKey[1] != peer.id:
+                    return ResponseObject(False, "Private key does not match with the public key.")
+
+            try:
+                rd = random.Random()
+                uid = uuid.UUID(int=rd.getrandbits(128), version=4)
+                with open(f"{uid}", "w+") as f:
+                    f.write(preshared_key)
+                updatePsk = subprocess.check_output(
+                    f"wg set {configName} peer {peer.id} preshared-key {uid}",
+                    shell=True, stderr=subprocess.STDOUT)
+                os.remove(str(uid))
+                if len(updatePsk.decode().strip("\n")) != 0:
+                    return ResponseObject(False,
+                                          "Update peer failed when updating preshared key: " + updatePsk.decode().strip(
+                                              "\n"))
+
+                allowed_ip = allowed_ip.replace(" ", "")
+                updateAllowedIp = subprocess.check_output(
+                    f'wg set {configName} peer {peer.id} allowed-ips "{allowed_ip}"',
+                    shell=True, stderr=subprocess.STDOUT)
+                if len(updateAllowedIp.decode().strip("\n")) != 0:
+                    return ResponseObject(False,
+                                          "Update peer failed when updating allowed IPs: " + updateAllowedIp.decode().strip(
+                                              "\n"))
+                saveConfig = subprocess.check_output(f"wg-quick save {configName}",
+                                                     shell=True, stderr=subprocess.STDOUT)
+                if f"wg showconf {configName}" not in saveConfig.decode().strip('\n'):
+                    return ResponseObject(False,
+                                          "Update peer failed when saving the configuration." + saveConfig.decode().strip(
+                                              '\n'))
+
+                cursor.execute(
+                    '''UPDATE %s SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
+                    keepalive = ?, preshared_key = ? WHERE id = ?''' % configName,
+                    (name, private_key, dns_addresses, endpoint_allowed_ip, data["mtu"],
+                     data["keepalive"], preshared_key, id,)
+                )
+                return ResponseObject()
+
+            except subprocess.CalledProcessError as exc:
+                return ResponseObject(False, exc.output.decode("UTF-8").strip())
+
+    return ResponseObject(False, "Peer does not exist")
+
+
+@app.route("/api/downloadPeer/<configName>")
+def API_downloadPeer(configName):
+    if configName in WireguardConfigurations.keys():
+        pass
+    return ResponseObject(False)
+
+
 @app.route('/api/getWireguardConfigurationInfo', methods=["GET"])
 def API_getConfigurationInfo():
     configurationName = request.args.get("configurationName")
@@ -841,6 +981,11 @@ def API_getConfigurationInfo():
 @app.route('/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
+
+
+'''
+Sign Up
+'''
 
 
 @app.route('/api/isTotpEnabled')

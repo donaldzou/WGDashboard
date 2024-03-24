@@ -33,6 +33,7 @@ import {
 	Tooltip
 } from 'chart.js';
 import dayjs from "dayjs";
+import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 
 Chart.register(
 	ArcElement,
@@ -62,7 +63,7 @@ Chart.register(
 
 export default {
 	name: "peerList",
-	components: {PeerSearch, Peer, Line, Bar},
+	components: {PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -100,10 +101,14 @@ export default {
 					},
 				],
 			},
+			peerSetting: {
+				modalOpen: false,
+				selectedPeer: undefined
+			}
 		}
 	},
 	watch: {
-		'$route.params.id': {
+		'$route.params': {
 			immediate: true,
 			handler(){
 				clearInterval(this.interval)
@@ -430,17 +435,9 @@ export default {
 			</div>
 		</div>
 		<div class="mb-4">
-			<RouterView v-slot="{Component}">
-				<Transition name="fade3" mode="out-in">
-					<Component :is="Component"></Component>
-				</Transition>
-			</RouterView>
 			<div class="d-flex align-items-center gap-3 mb-2 ">
 				<h3>Peers</h3>
-				<RouterLink
-					to="./peer_settings"
-					class="ms-auto text-secondary text-decoration-none"><i class="bi bi-sliders2 me-2"></i>Peer Settings</RouterLink>
-				<a href="#" class="text-decoration-none"><i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
+				<a href="#" class="text-decoration-none ms-auto"><i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
 			</div>
 			<PeerSearch></PeerSearch>
 
@@ -448,11 +445,17 @@ export default {
 				<div class="col-12 col-lg-6 col-xl-4"
 				     :key="peer.id"
 				     v-for="peer in this.searchPeers">
-					<Peer :Peer="peer"></Peer>
+					<Peer :Peer="peer" @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"></Peer>
 				</div>
 			</TransitionGroup>
-			
 		</div>
+		<Transition name="fade">
+			<PeerSettings v-if="this.peerSetting.modalOpen" 
+			              :selectedPeer="this.peerSetting.selectedPeer"
+			              @refresh="this.getPeers(this.$route.params.id)"
+			              @close="this.peerSetting.modalOpen = false">
+			</PeerSettings>
+		</Transition>
 	</div>
 </template>
 
