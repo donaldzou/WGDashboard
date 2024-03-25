@@ -1,8 +1,46 @@
 <script>
+import {fetchGet} from "@/utilities/fetch.js";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+
 export default {
 	name: "peerSettingsDropdown",
+	setup(){
+		const dashboardStore = DashboardConfigurationStore()
+		return {dashboardStore}
+	},
 	props: {
 		Peer: Object
+	},
+	methods: {
+		downloadPeer(){
+			fetchGet("/api/downloadPeer/"+this.$route.params.id, {
+				id: this.Peer.id
+			}, (res) => {
+				if (res.status){
+					const blob = new Blob([res.data.file], { type: "text/plain" });
+					const jsonObjectUrl = URL.createObjectURL(blob);
+					const filename = `${res.data.fileName}.conf`;
+					const anchorEl = document.createElement("a");
+					anchorEl.href = jsonObjectUrl;
+					anchorEl.download = filename;
+					anchorEl.click();
+					this.dashboardStore.newMessage("WGDashboard", "Peer download started", "success")
+				}else{
+					this.dashboardStore.newMessage("Server", res.message, "danger")
+				}
+			})
+		},
+		downloadQRCode(){
+			fetchGet("/api/downloadPeer/"+this.$route.params.id, {
+				id: this.Peer.id
+			}, (res) => {
+				if (res.status){
+					this.$emit("qrcode", res.data.file)					
+				}else{
+					this.dashboardStore.newMessage("Server", res.message, "danger")
+				}
+			})
+		}
 	}
 }
 </script>
@@ -29,12 +67,14 @@ export default {
 		</li>
 		<template v-if="this.Peer.private_key">
 			<li>
-				<a class="dropdown-item d-flex" role="button">
+				<a class="dropdown-item d-flex" role="button" @click="this.downloadPeer()">
 					<i class="me-auto bi bi-download"></i> Download
 				</a>
 			</li>
 			<li>
-				<a class="dropdown-item d-flex" role="button">
+				<a class="dropdown-item d-flex" role="button"
+					@click="this.downloadQRCode()"
+				>
 					<i class="me-auto bi bi-qr-code"></i> QR Code
 				</a>
 			</li>

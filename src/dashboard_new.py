@@ -962,9 +962,43 @@ def API_updatePeerSettings(configName):
 
 @app.route("/api/downloadPeer/<configName>")
 def API_downloadPeer(configName):
-    if configName in WireguardConfigurations.keys():
-        pass
-    return ResponseObject(False)
+    data = request.args
+    if configName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration or peer does not exist")
+    configuration = WireguardConfigurations[configName]
+    peerFound, peer = configuration.searchPeer(data['id'])
+    if len(data['id']) == 0 or not peerFound:
+        return ResponseObject(False, "Configuration or peer does not exist")
+
+    filename = peer.name
+    if len(filename) == 0:
+        filename = "UntitledPeer"
+    filename = "".join(filename.split(' '))
+    filename = f"{filename}_{configuration.Name}"
+    illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
+                        "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
+                        "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+    for i in illegal_filename:
+        filename = filename.replace(i, "")
+
+    peerConfiguration = f'''[Interface]
+PrivateKey = {peer.private_key}
+Address = {peer.allowed_ip}
+DNS = {peer.DNS}
+MTU = {str(peer.mtu)}
+
+[Peer]
+PublicKey = {configuration.PublicKey}
+AllowedIPs = {peer.endpoint_allowed_ip}
+Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{configuration.ListenPort}
+PersistentKeepalive = {str(peer.keepalive)}
+    '''
+    if len(peer.preshared_key) > 0:
+        peerConfiguration += f"PresharedKey = {peer.preshared_key}"
+    return ResponseObject(data={
+        "fileName": filename,
+        "file": peerConfiguration
+    })
 
 
 @app.route('/api/getWireguardConfigurationInfo', methods=["GET"])

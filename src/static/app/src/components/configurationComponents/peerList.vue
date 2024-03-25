@@ -34,6 +34,7 @@ import {
 } from 'chart.js';
 import dayjs from "dayjs";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
+import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
 
 Chart.register(
 	ArcElement,
@@ -63,7 +64,7 @@ Chart.register(
 
 export default {
 	name: "peerList",
-	components: {PeerSettings, PeerSearch, Peer, Line, Bar},
+	components: {PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -104,6 +105,10 @@ export default {
 			peerSetting: {
 				modalOpen: false,
 				selectedPeer: undefined
+			},
+			peerQRCode: {
+				modalOpen: false,
+				peerConfigData: undefined
 			}
 		}
 	},
@@ -440,12 +445,14 @@ export default {
 				<a href="#" class="text-decoration-none ms-auto"><i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
 			</div>
 			<PeerSearch></PeerSearch>
-
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
 				     :key="peer.id"
 				     v-for="peer in this.searchPeers">
-					<Peer :Peer="peer" @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"></Peer>
+					<Peer :Peer="peer" 
+					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
+					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
+					></Peer>
 				</div>
 			</TransitionGroup>
 		</div>
@@ -455,6 +462,12 @@ export default {
 			              @refresh="this.getPeers(this.$route.params.id)"
 			              @close="this.peerSetting.modalOpen = false">
 			</PeerSettings>
+			
+		</Transition>
+		<Transition name="fade">
+			<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData" 
+			            @close="this.peerQRCode.modalOpen = false"
+			            v-if="peerQRCode.modalOpen"></PeerQRCode>
 		</Transition>
 	</div>
 </template>
