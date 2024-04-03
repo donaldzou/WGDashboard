@@ -35,6 +35,7 @@ import {
 import dayjs from "dayjs";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
+import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 
 Chart.register(
 	ArcElement,
@@ -64,7 +65,7 @@ Chart.register(
 
 export default {
 	name: "peerList",
-	components: {PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+	components: {PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -109,6 +110,9 @@ export default {
 			peerQRCode: {
 				modalOpen: false,
 				peerConfigData: undefined
+			},
+			peerCreate: {
+				modalOpen: false
 			}
 		}
 	},
@@ -442,7 +446,10 @@ export default {
 		<div class="mb-4">
 			<div class="d-flex align-items-center gap-3 mb-2 ">
 				<h3>Peers</h3>
-				<a href="#" class="text-decoration-none ms-auto"><i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
+				<a role="button" 
+				   data-bs-toggle="modal" data-bs-target="#peerCreateModal"
+				   class="text-decoration-none ms-auto">
+					<i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
 			</div>
 			<PeerSearch></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
@@ -469,6 +476,10 @@ export default {
 			            @close="this.peerQRCode.modalOpen = false"
 			            v-if="peerQRCode.modalOpen"></PeerQRCode>
 		</Transition>
+<!--		<Transition name="fade">-->
+<!--			-->
+<!--		</Transition>-->
+		<PeerCreate></PeerCreate>
 	</div>
 </template>
 

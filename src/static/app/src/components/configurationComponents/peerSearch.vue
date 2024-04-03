@@ -51,6 +51,17 @@ export default {
 				}
 			})
 		}
+	},
+	mounted() {
+		let fadeIn = "animate__fadeInUp";
+		let fadeOut = "animate__fadeOutDown"
+		
+		this.$el.querySelectorAll(".dropdown").forEach(x => {
+			x.addEventListener('show.bs.dropdown', (e) => {
+				console.log(e.target.parentNode.children)
+				console.log(e.target.closest("ul.dropdown-menu"))
+			})
+		})
 	}
 }
 </script>
@@ -62,7 +73,7 @@ export default {
 				<i class="bi bi-filter-circle me-2"></i>
 				Sort
 			</button>
-			<ul class="dropdown-menu mt-2 shadow-lg">
+			<ul class="dropdown-menu mt-2 shadow">
 				<li v-for="(value, key) in this.sort">
 					<a class="dropdown-item d-flex" role="button" @click="this.updateSort(key)">
 						<span class="me-auto">{{value}}</span>
@@ -75,7 +86,7 @@ export default {
 			<button class="btn btn-outline-secondary btn-sm dropdown-toggle  rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 				<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval
 			</button>
-			<ul class="dropdown-menu">
+			<ul class="dropdown-menu shadow mt-2">
 				<li v-for="(value, key) in this.interval">
 					<a class="dropdown-item d-flex" role="button" @click="updateRefreshInterval(key)">
 						<span class="me-auto">{{value}}</span>

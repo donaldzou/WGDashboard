@@ -729,6 +729,38 @@ def _generatePublicKey(privateKey) -> [bool, str]:
         return False, None
 
 
+def _getWireguardConfigurationAvailableIP(configName) -> [bool, list[str]]:
+    if configName not in WireguardConfigurations.keys():
+        return False, None
+    configuration = WireguardConfigurations[configName]
+    if len(configuration.Address) > 0:
+        address = configuration.Address.split(',')
+        print(address)
+        existedAddress = []
+        availableAddress = []
+        for p in configuration.Peers:
+            if len(p.allowed_ip) > 0:
+                add = p.allowed_ip.split(',')
+                for i in add:
+                    a, c = i.split('/')
+                    existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
+        for i in address:
+            addressSplit, cidr = i.split('/')
+            existedAddress.append(ipaddress.ip_address(addressSplit.replace(" ", "")))
+        for i in address:
+            network = ipaddress.ip_network(i.replace(" ", ""), False)
+            count = 0
+            for h in network.hosts():
+                if h not in existedAddress:
+                    availableAddress.append(ipaddress.ip_network(h).compressed)
+                    count += 1
+                    if network.version == 6 and count > 255:
+                        break
+        return True, availableAddress
+
+    return False, None
+
+
 '''
 API Routes
 '''
@@ -999,6 +1031,12 @@ PersistentKeepalive = {str(peer.keepalive)}
         "fileName": filename,
         "file": peerConfiguration
     })
+
+
+@app.route("/api/getAvailableIPs/<configName>")
+def API_getAvailableIPs(configName):
+    status, ips = _getWireguardConfigurationAvailableIP(configName)
+    return ResponseObject(status=status, data=ips)
 
 
 @app.route('/api/getWireguardConfigurationInfo', methods=["GET"])

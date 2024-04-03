@@ -2,6 +2,7 @@ import '../../css/dashboard.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import 'animate.css/animate.compat.css'
 
 import {createApp, markRaw} from 'vue'
 import { createPinia } from 'pinia'

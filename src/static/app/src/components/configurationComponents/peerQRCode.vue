@@ -6,10 +6,8 @@ export default {
 		peerConfigData: String
 	},
 	mounted() {
-		// let qrcode = QRCode.create(, );
 		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfigData , function (error) {
 			if (error) console.error(error)
-			console.log('success!');
 		})
 	}
 }
