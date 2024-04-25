@@ -22,19 +22,21 @@ export default {
 	},
 	methods:{
 		checkDNS(){
-			let i = this.dns.split(',').map(x => x.replaceAll(' ', ''));
-			for(let ip in i){
-				if (!this.store.regexCheckIP(i[ip])){
-					if (!this.error){
-						this.dashboardStore.newMessage("WGDashboard", "DNS is invalid", "danger");
+			if(this.dns){
+				let i = this.dns.split(',').map(x => x.replaceAll(' ', ''));
+				for(let ip in i){
+					if (!this.store.regexCheckIP(i[ip])){
+						if (!this.error){
+							this.dashboardStore.newMessage("WGDashboard", "DNS is invalid", "danger");
+						}
+						this.error = true;
+						this.data.DNS = "";
+						return;
 					}
-					this.error = true;
-					this.data.DNS = "";
-					return;
 				}
+				this.error = false;
+				this.data.DNS = this.dns;
 			}
-			this.error = false;
-			this.data.DNS = this.dns;
 		}
 	},
 	watch: {
@@ -48,7 +50,7 @@ export default {
 <template>
 	<div>
 		<label for="peer_DNS_textbox" class="form-label">
-			<small class="text-muted">DNS <code>(Required)</code></small>
+			<small class="text-muted">DNS</small>
 		</label>
 		<input type="text" class="form-control form-control-sm rounded-3"
 		       :class="{'is-invalid': this.error}"

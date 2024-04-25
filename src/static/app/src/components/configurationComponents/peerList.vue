@@ -116,8 +116,19 @@ export default {
 			}
 		}
 	},
+	mounted() {
+		// console.log('mounted')
+		// this.loading = true;
+		// let id = this.$route.params.id;
+		// this.configurationInfo = [];
+		// this.configurationPeers = [];
+		// if (id){
+		// 	this.getPeers(id)
+		// 	this.setInterval();
+		// }
+	},
 	watch: {
-		'$route.params': {
+		'$route': {
 			immediate: true,
 			handler(){
 				clearInterval(this.interval)
@@ -446,10 +457,10 @@ export default {
 		<div class="mb-4">
 			<div class="d-flex align-items-center gap-3 mb-2 ">
 				<h3>Peers</h3>
-				<a role="button" 
-				   data-bs-toggle="modal" data-bs-target="#peerCreateModal"
+				<RouterLink
+					to="create"				   
 				   class="text-decoration-none ms-auto">
-					<i class="bi bi-plus-circle-fill me-2"></i>Add Peer</a>
+					<i class="bi bi-plus-circle-fill me-2"></i>Add Peer</RouterLink>
 			</div>
 			<PeerSearch></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
@@ -479,7 +490,7 @@ export default {
 <!--		<Transition name="fade">-->
 <!--			-->
 <!--		</Transition>-->
-		<PeerCreate></PeerCreate>
+		
 	</div>
 </template>
 

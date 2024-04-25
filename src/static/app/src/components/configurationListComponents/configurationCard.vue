@@ -38,7 +38,7 @@ export default {
 
 <template>
 	<div class="card conf_card rounded-3 shadow text-decoration-none">
-		<RouterLink :to="'/configuration/' + c.Name" class="card-body d-flex align-items-center gap-3 flex-wrap text-decoration-none">
+		<RouterLink :to="'/configuration/' + c.Name + '/peers'" class="card-body d-flex align-items-center gap-3 flex-wrap text-decoration-none">
 			<h6 class="mb-0"><span class="dot" :class="{active: c.Status}"></span></h6>
 			<h6 class="card-title mb-0"><samp>{{c.Name}}</samp></h6>
 			<h6 class="mb-0 ms-auto">

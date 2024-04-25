@@ -13,6 +13,7 @@ import NewConfiguration from "@/views/newConfiguration.vue";
 import Configuration from "@/views/configuration.vue";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerList from "@/components/configurationComponents/peerList.vue";
+import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -68,9 +69,14 @@ const router = createRouter({
           children: [
             {
               name: "Peers List",
-              path: '',
+              path: 'peers',
               component: PeerList
-            }
+            },
+            {
+              name: "Peers Create",
+              path: 'create',
+              component: PeerCreate
+            },
           ]
         },
         

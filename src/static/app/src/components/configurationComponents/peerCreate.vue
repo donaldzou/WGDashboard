@@ -23,7 +23,6 @@ export default {
 		PresharedKeyInput, EndpointAllowedIps, DnsInput, AllowedIPsInput, PrivatePublicKeyInput, NameInput},
 	data(){
 		return{
-			
 			data: {
 				bulkAdd: false,
 				bulkAddAmount: "",
@@ -64,7 +63,7 @@ export default {
 				}
 			}else{
 				let requireFields =
-					["allowed_ip", "private_key", "public_key", "DNS", "endpoint_allowed_ip", "keepalive", "mtu"]
+					["allowed_ip", "private_key", "public_key", "endpoint_allowed_ip", "keepalive", "mtu"]
 
 				requireFields.forEach(x => {
 					if (this.data[x].length === 0) status = false;
@@ -89,43 +88,42 @@ export default {
 </script>
 
 <template>
-	<div class="modal fade" id="peerCreateModal" data-bs-backdrop="static">
-		<div class="modal-dialog " style="max-width: 700px !important;">
-			<div class="modal-content rounded-3 border-0 shadow">
-				<div class="modal-header border-0 pb-0">
-					<h1 class="modal-title fs-5" id="staticBackdropLabel">Add Peer</h1>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	<div class="container">
+		<div class="mb-4 d-flex align-items-center gap-4">
+			<RouterLink to="peers">
+				<h3 class="mb-0 text-body">
+					<i class="bi bi-chevron-left"></i>
+				</h3>
+			</RouterLink>
+			<h3 class="text-body mb-0">New Configuration</h3>
+		</div>
+		<div class="d-flex flex-column gap-2">
+			<BulkAdd :saving="saving" :data="this.data" :availableIp="this.availableIp"></BulkAdd>
+			<hr class="mb-0 mt-2">
+			<NameInput :saving="saving" :data="this.data" v-if="!this.data.bulkAdd"></NameInput>
+			<PrivatePublicKeyInput :saving="saving" :data="data" v-if="!this.data.bulkAdd"></PrivatePublicKeyInput>
+			<AllowedIPsInput :availableIp="this.availableIp" :saving="saving" :data="data" v-if="!this.data.bulkAdd"></AllowedIPsInput>
+			<EndpointAllowedIps :saving="saving" :data="data"></EndpointAllowedIps>
+			<DnsInput :saving="saving" :data="data"></DnsInput>
+
+			<hr class="mb-0 mt-2">
+			<div class="row">
+				<div class="col-sm" v-if="!this.data.bulkAdd">
+					<PresharedKeyInput :saving="saving" :data="data" :bulk="this.data.bulkAdd"></PresharedKeyInput>
 				</div>
-				<div class="modal-body">
-					<div class="d-flex flex-column gap-2">
-						<BulkAdd :saving="saving" :data="this.data" :availableIp="this.availableIp"></BulkAdd>
-						<hr class="mb-0 mt-2">
-						<NameInput :saving="saving" :data="this.data" v-if="!this.data.bulkAdd"></NameInput>
-						<PrivatePublicKeyInput :saving="saving" :data="data" v-if="!this.data.bulkAdd"></PrivatePublicKeyInput>
-						<AllowedIPsInput :availableIp="this.availableIp" :saving="saving" :data="data" v-if="!this.data.bulkAdd"></AllowedIPsInput>
-						<DnsInput :saving="saving" :data="data"></DnsInput>
-						<EndpointAllowedIps :saving="saving" :data="data"></EndpointAllowedIps>
-						<hr class="mb-0 mt-2">
-						<div class="row">
-							<div class="col-sm" v-if="!this.data.bulkAdd">
-								<PresharedKeyInput :saving="saving" :data="data" :bulk="this.data.bulkAdd"></PresharedKeyInput>
-							</div>
-							<div class="col-sm">
-								<MtuInput :saving="saving" :data="data"></MtuInput>
-							</div>
-							<div class="col-sm">
-								<PersistentKeepAliveInput :saving="saving" :data="data"></PersistentKeepAliveInput>
-							</div>
-						</div>
-						<div class="d-flex mt-2">
-							<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
-							        :disabled="!this.allRequireFieldsFilled"
-							>
-								<i class="bi bi-plus-circle-fill me-2"></i>Add
-							</button>
-						</div>
-					</div>
+				<div class="col-sm">
+					<MtuInput :saving="saving" :data="data"></MtuInput>
 				</div>
+				<div class="col-sm">
+					<PersistentKeepAliveInput :saving="saving" :data="data"></PersistentKeepAliveInput>
+				</div>
+			</div>
+			<div class="d-flex mt-2">
+				<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
+				        :disabled="!this.allRequireFieldsFilled"
+				>
+					<i class="bi bi-plus-circle-fill me-2"></i>Add
+				</button>
 			</div>
 		</div>
 	</div>

@@ -29,7 +29,8 @@ export default {
 				</h6>
 				<ul class="nav flex-column">
 					<li class="nav-item">
-						<RouterLink :to="'/configuration/'+c.Name" class="nav-link nav-conf-link" v-for="c in this.wireguardConfigurationsStore.Configurations">
+						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link" 
+						            v-for="c in this.wireguardConfigurationsStore.Configurations">
 							<samp>{{c.Name}}</samp>
 						</RouterLink>
 					</li>

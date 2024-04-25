@@ -499,7 +499,7 @@ class DashboardConfig:
 
     def __init__(self):
         self.__config = configparser.ConfigParser(strict=False)
-        self.__config.read_file(open(DASHBOARD_CONF))
+        self.__config.read_file(open(DASHBOARD_CONF, "w+"))
         self.hiddenAttribute = ["totp_key"]
         self.__default = {
             "Account": {
@@ -938,7 +938,7 @@ def API_updatePeerSettings(configName):
                     return ResponseObject(False, f"Allowed IP already taken by another peer.")
             if not _checkIPWithRange(endpoint_allowed_ip):
                 return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect.")
-            if not _checkDNS(dns_addresses):
+            if len(dns_addresses) > 0 and _checkDNS(dns_addresses):
                 return ResponseObject(False, f"DNS format is incorrect.")
             if data['mtu'] < 0 or data['mtu'] > 1460:
                 return ResponseObject(False, "MTU format is not correct.")
@@ -1016,17 +1016,21 @@ def API_downloadPeer(configName):
     peerConfiguration = f'''[Interface]
 PrivateKey = {peer.private_key}
 Address = {peer.allowed_ip}
-DNS = {peer.DNS}
 MTU = {str(peer.mtu)}
 
+
+    '''
+    if len(peer.DNS) > 0:
+        peerConfiguration += f"DNS = {peer.DNS}\n"
+    peerConfiguration += f'''
 [Peer]
 PublicKey = {configuration.PublicKey}
 AllowedIPs = {peer.endpoint_allowed_ip}
 Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{configuration.ListenPort}
 PersistentKeepalive = {str(peer.keepalive)}
-    '''
+'''
     if len(peer.preshared_key) > 0:
-        peerConfiguration += f"PresharedKey = {peer.preshared_key}"
+        peerConfiguration += f"PresharedKey = {peer.preshared_key}\n"
     return ResponseObject(data={
         "fileName": filename,
         "file": peerConfiguration

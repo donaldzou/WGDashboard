@@ -101,15 +101,7 @@ export default {
 							       v-model="this.data.allowed_ip"
 							       id="peer_allowed_ip_textbox">
 						</div>
-						<div>
-							<label for="peer_DNS_textbox" class="form-label">
-								<small class="text-muted">DNS <code>(Required)</code></small>
-							</label>
-							<input type="text" class="form-control form-control-sm rounded-3"
-							       :disabled="this.saving"
-							       v-model="this.data.DNS"
-							       id="peer_DNS_textbox">
-						</div>
+						
 						<div>
 							<label for="peer_endpoint_allowed_ips" class="form-label">
 								<small class="text-muted">Endpoint Allowed IPs <code>(Required)</code></small>
@@ -118,6 +110,15 @@ export default {
 							       :disabled="this.saving"
 							       v-model="this.data.endpoint_allowed_ip"
 							       id="peer_endpoint_allowed_ips">
+						</div>
+						<div>
+							<label for="peer_DNS_textbox" class="form-label">
+								<small class="text-muted">DNS</small>
+							</label>
+							<input type="text" class="form-control form-control-sm rounded-3"
+							       :disabled="this.saving"
+							       v-model="this.data.DNS"
+							       id="peer_DNS_textbox">
 						</div>
 						<hr>
 						<div class="accordion mt-2" id="peerSettingsAccordion">
