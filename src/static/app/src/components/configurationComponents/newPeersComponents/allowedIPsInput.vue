@@ -29,14 +29,14 @@ export default {
 		searchAvailableIps(){
 			return this.availableIpSearchString ?
 				this.availableIp.filter(x =>
-					x.includes(this.availableIpSearchString) && !this.data.allowed_ip.includes(x)) :
-				this.availableIp.filter(x => !this.data.allowed_ip.includes(x))
+					x.includes(this.availableIpSearchString) && !this.data.allowed_ips.includes(x)) :
+				this.availableIp.filter(x => !this.data.allowed_ips.includes(x))
 		}
 	},
 	methods: {
 		addAllowedIp(ip){
 			if(this.store.checkCIDR(ip)){
-				this.data.allowed_ip.push(ip);
+				this.data.allowed_ips.push(ip);
 				return true;
 			}
 			return false;
@@ -55,11 +55,11 @@ export default {
 		<label for="peer_allowed_ip_textbox" class="form-label">
 			<small class="text-muted">Allowed IPs <code>(Required)</code></small>
 		</label>
-		<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ip.length > 0}">
+		<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ips.length > 0}">
 			<TransitionGroup name="list">
-									<span class="badge rounded-pill text-bg-success" v-for="(ip, index) in this.data.allowed_ip" :key="ip">
+									<span class="badge rounded-pill text-bg-success" v-for="(ip, index) in this.data.allowed_ips" :key="ip">
 										{{ip}}
-										<a role="button" @click="this.data.allowed_ip.splice(index, 1)">
+										<a role="button" @click="this.data.allowed_ips.splice(index, 1)">
 											<i class="bi bi-x-circle-fill ms-1"></i></a>
 									</span>
 			</TransitionGroup>

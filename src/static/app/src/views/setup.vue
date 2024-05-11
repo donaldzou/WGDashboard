@@ -71,7 +71,7 @@ export default {
 					{{this.errorMessage}}
 				</div>
 				<div class="d-flex flex-column gap-3">
-					<div id="createAccount">
+					<div id="createAccount" class="d-flex flex-column gap-2">
 						<div class="form-group text-body">
 							<label for="username" class="mb-1 text-muted">
 								<small>Pick an username you like</small></label>

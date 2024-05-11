@@ -1,6 +1,5 @@
 <script>
-// import {Popover, Dropdown} from "bootstrap";
-import {fetchGet} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import NameInput from "@/components/configurationComponents/newPeersComponents/nameInput.vue";
 import PrivatePublicKeyInput from "@/components/configurationComponents/newPeersComponents/privatePublicKeyInput.vue";
@@ -27,7 +26,7 @@ export default {
 				bulkAdd: false,
 				bulkAddAmount: "",
 				name: "",
-				allowed_ip: [],
+				allowed_ips: [],
 				private_key: "",
 				public_key: "",
 				DNS: this.dashboardStore.Configuration.Peers.peer_global_dns,
@@ -54,6 +53,19 @@ export default {
 		const dashboardStore = DashboardConfigurationStore();
 		return {store, dashboardStore}
 	}, 
+	methods: {
+		peerCreate(){
+			fetchPost("/api/addPeers/" + this.$route.params.id, this.data, (res) => {
+				if (res.status){
+					this.$router.push(`/configuration/${this.$route.params.id}/peers`)
+					this.dashboardStore.newMessage("Server", "Peer create successfully", "success")
+				}else{
+					this.dashboardStore.newMessage("Server", res.message, "danger")
+				}
+				
+			})
+		}	
+	},
 	computed:{
 		allRequireFieldsFilled(){
 			let status = true;
@@ -63,8 +75,7 @@ export default {
 				}
 			}else{
 				let requireFields =
-					["allowed_ip", "private_key", "public_key", "endpoint_allowed_ip", "keepalive", "mtu"]
-
+					["allowed_ips", "private_key", "public_key", "endpoint_allowed_ip", "keepalive", "mtu"]
 				requireFields.forEach(x => {
 					if (this.data[x].length === 0) status = false;
 				});
@@ -121,6 +132,7 @@ export default {
 			<div class="d-flex mt-2">
 				<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
 				        :disabled="!this.allRequireFieldsFilled"
+				        @click="this.peerCreate()"
 				>
 					<i class="bi bi-plus-circle-fill me-2"></i>Add
 				</button>
