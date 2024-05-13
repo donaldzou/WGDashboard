@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from json import JSONEncoder
 from operator import itemgetter
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 import bcrypt
 # PIP installed library
@@ -772,7 +772,7 @@ def _checkDNS(dns):
     return True
 
 
-def _generatePublicKey(privateKey) -> [bool, str] | [bool, None]:
+def _generatePublicKey(privateKey) -> tuple[bool, str] | tuple[bool, None]:
     try:
         publicKey = subprocess.check_output(f"wg pubkey", input=privateKey.encode(), shell=True,
                                             stderr=subprocess.STDOUT)
@@ -1032,11 +1032,28 @@ def API_addPeers(configName):
             keyPairs = []
             for i in range(bulkAddAmount):
                 key = _generatePrivateKey()[1]
-                keyPairs.append([key, _generatePublicKey(key)[1], _generatePrivateKey()[1]])
+                keyPairs.append([key, _generatePublicKey(key)[1], _generatePrivateKey()[1], availableIps[1][i],
+                                 f"{config.Name}_{datetime.now().strftime('%m%d%Y%H%M%S')}_Peer_#_{(i + 1)}"])
             if len(keyPairs) == 0:
                 return ResponseObject(False, "Generating key pairs by bulk failed")
 
-            print(keyPairs)
+            for i in range(bulkAddAmount):
+                subprocess.check_output(
+                    f"wg set {config.Name} peer {keyPairs[i][1]} allowed-ips {keyPairs[i][3]}",
+                    shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                f"wg-quick save {config.Name}", shell=True, stderr=subprocess.STDOUT)
+            config.getPeersList()
+
+            for i in range(bulkAddAmount):
+                found, peer = config.searchPeer(keyPairs[i][1])
+                if found:
+                    if not peer.updatePeer(keyPairs[i][4], keyPairs[i][0], preshared_key, dns_addresses,
+                                           keyPairs[i][3],
+                                           endpoint_allowed_ip, mtu, keep_alive).status:
+                        return ResponseObject(False, "Failed to add peers in bulk")
+
+            return ResponseObject()
 
 
 
