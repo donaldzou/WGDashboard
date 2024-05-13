@@ -505,7 +505,7 @@ class Peer:
         if keepalive < 0:
             return ResponseObject(False, "Persistent Keepalive format is not correct.")
         if len(private_key) > 0:
-            pubKey = _generatePrivateKey(private_key)
+            pubKey = _generatePublicKey(private_key)
             if not pubKey[0] or pubKey[1] != self.id:
                 return ResponseObject(False, "Private key does not match with the public key.")
         try:
@@ -772,7 +772,7 @@ def _checkDNS(dns):
     return True
 
 
-def _generatePublicKey(privateKey) -> [bool, str]:
+def _generatePublicKey(privateKey) -> [bool, str] | [bool, None]:
     try:
         publicKey = subprocess.check_output(f"wg pubkey", input=privateKey.encode(), shell=True,
                                             stderr=subprocess.STDOUT)
@@ -788,9 +788,6 @@ def _generatePrivateKey() -> [bool, str]:
         return True, publicKey.decode().strip('\n')
     except subprocess.CalledProcessError:
         return False, None
-
-
-
 
 
 def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[str]] | tuple[bool, None]:
@@ -1035,7 +1032,7 @@ def API_addPeers(configName):
             keyPairs = []
             for i in range(bulkAddAmount):
                 key = _generatePrivateKey()[1]
-                keyPairs.append([key, _generatePublicKey(key), _generatePrivateKey()[1]])
+                keyPairs.append([key, _generatePublicKey(key)[1], _generatePrivateKey()[1]])
             if len(keyPairs) == 0:
                 return ResponseObject(False, "Generating key pairs by bulk failed")
 
