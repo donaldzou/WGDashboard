@@ -131,7 +131,7 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.6 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0.6.2 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
