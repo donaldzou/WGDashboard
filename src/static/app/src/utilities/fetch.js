@@ -7,7 +7,12 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 	})
 		.then(x => x.json())
 		.then(x => callback ? callback(x) : undefined)
-		
+		.catch(x => {
+			// let router = useRouter()
+			// if (x.status === 401){
+			// 	router.push('/signin')
+			// }
+		})
 }
 
 export const fetchPost = async (url, body, callback) => {

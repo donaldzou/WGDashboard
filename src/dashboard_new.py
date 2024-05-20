@@ -35,9 +35,6 @@ from icmplib import ping, traceroute
 # Import other python files
 import threading
 
-from sqlalchemy.orm import mapped_column, declarative_base, Session
-from sqlalchemy import FLOAT, INT, VARCHAR, select, MetaData, DATETIME
-from sqlalchemy import create_engine, inspect
 from flask.json.provider import DefaultJSONProvider
 
 DASHBOARD_VERSION = 'v4.0'
@@ -141,7 +138,6 @@ class WireguardConfiguration:
 
             self.Status = self.getStatus()
 
-
         else:
             self.Name = data["ConfigurationName"]
             for i in dir(self):
@@ -168,7 +164,7 @@ class WireguardConfiguration:
                 # print(self.__parser.sections())
                 self.__parser.write(configFile)
 
-        self.Peers = []
+        self.Peers: list[Peer] = []
 
         # Create tables in database
         self.__createDatabase()
@@ -313,6 +309,30 @@ class WireguardConfiguration:
                 return True, i
         return False, None
 
+    def deletePeers(self, listOfPublicKeys):
+        numOfDeletedPeers = 0
+        numOfFailedToDeletePeers = 0
+        for p in listOfPublicKeys:
+            found, pf = self.searchPeer(p)
+            if found:
+                try:
+                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                                            shell=True, stderr=subprocess.STDOUT)
+                    cursor.execute("DELETE FROM %s WHERE id = ?" % self.Name, (pf.id,))
+                    numOfDeletedPeers += 1
+                except Exception as e:
+                    numOfFailedToDeletePeers += 1
+
+        if not self.__wgSave():
+            return ResponseObject(False, "Failed to save configuration through WireGuard")
+
+        self.__getPeers()
+
+        if numOfDeletedPeers == len(listOfPublicKeys):
+            return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
+        return ResponseObject(False,
+                              f"Deleted {numOfDeletedPeers} peer(s) successfully. Failed to delete {numOfFailedToDeletePeers} peer(s)")
+
     def __savePeers(self):
         for i in self.Peers:
             d = i.toJson()
@@ -328,6 +348,13 @@ class WireguardConfiguration:
                 ''' % self.Name, d
             )
         sqldb.commit()
+
+    def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:
+        try:
+            subprocess.check_output(f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            return True, None
+        except subprocess.CalledProcessError as e:
+            return False, str(e)
 
     def getPeersLatestHandshake(self):
         try:
@@ -383,22 +410,25 @@ class WireguardConfiguration:
                                             data_usage[i][0],))
                             total_sent = 0
                             total_receive = 0
-                        cursor.execute(
-                            "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
-                            % self.Name, (round(total_receive, 4), round(total_sent, 4),
-                                          round(total_receive + total_sent, 4), data_usage[i][0],))
+
+                        _, p = self.searchPeer(data_usage[i][0])
+                        if p.total_receive != round(total_receive, 4) or p.total_sent != round(total_sent, 4):
+                            cursor.execute(
+                                "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
+                                % self.Name, (round(total_receive, 4), round(total_sent, 4),
+                                              round(total_receive + total_sent, 4), data_usage[i][0],))
                         now = datetime.now()
                         now_string = now.strftime("%d/%m/%Y %H:%M:%S")
-                        cursor.execute(f'''
-                                    INSERT INTO %s_transfer
-                                        (id, total_receive, total_sent, total_data,
-                                        cumu_receive, cumu_sent, cumu_data, time)
-                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                                ''' % self.Name, (data_usage[i][0], round(total_receive, 4), round(total_sent, 4),
-                                                  round(total_receive + total_sent, 4), round(cumulative_receive, 4),
-                                                  round(cumulative_sent, 4),
-                                                  round(cumulative_sent + cumulative_receive, 4), now_string,))
-                        sqldb.commit()
+                        # cursor.execute(f'''
+                        #             INSERT INTO %s_transfer
+                        #                 (id, total_receive, total_sent, total_data,
+                        #                 cumu_receive, cumu_sent, cumu_data, time)
+                        #                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        #         ''' % self.Name, (data_usage[i][0], round(total_receive, 4), round(total_sent, 4),
+                        #                           round(total_receive + total_sent, 4), round(cumulative_receive, 4),
+                        #                           round(cumulative_sent, 4),
+                        #                           round(cumulative_sent + cumulative_receive, 4), now_string,))
+                        # sqldb.commit()
         except Exception as e:
             print("Error" + str(e))
 
@@ -837,9 +867,14 @@ def auth_req():
                 and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
                 and "isTotpEnabled" not in request.path
         ):
-            resp = Flask.make_response(app, "Not Authorized" + request.path)
-            resp.status_code = 401
-            return resp
+            response = Flask.make_response(app, {
+                "status": False,
+                "message": None,
+                "data": None
+            })
+            response.content_type = "application/json"
+            response.status_code = 401
+            return response
 
 
 @app.route('/api/validateAuthentication', methods=["GET"])
@@ -999,6 +1034,19 @@ def API_updatePeerSettings(configName):
     return ResponseObject(False, "Peer does not exist")
 
 
+@app.route('/api/deletePeers/<configName>', methods=['POST'])
+def API_deletePeers(configName: str) -> ResponseObject:
+    data = request.get_json()
+    peers = data['peers']
+    if configName in WireguardConfigurations.keys():
+        if len(peers) == 0:
+            return ResponseObject(False, "Please specify more than one peer")
+        configuration = WireguardConfigurations.get(configName)
+        return configuration.deletePeers(peers)
+
+    return ResponseObject(False, "Configuration does not exist")
+
+
 @app.route('/api/addPeers/<configName>', methods=['POST'])
 def API_addPeers(configName):
     data = request.get_json()
@@ -1054,8 +1102,6 @@ def API_addPeers(configName):
                         return ResponseObject(False, "Failed to add peers in bulk")
 
             return ResponseObject()
-
-
 
         else:
             if config.searchPeer(public_key)[0] is True:
@@ -1231,7 +1277,7 @@ def backGroundThread():
 
 
 if __name__ == "__main__":
-    engine = create_engine("sqlite:///" + os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
+    # engine = create_engine("sqlite:///" + os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
     sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
     sqldb.row_factory = sqlite3.Row
     cursor = sqldb.cursor()

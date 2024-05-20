@@ -8,13 +8,23 @@ export default {
 	components: {ConfigurationCard},
 	async setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
-		await wireguardConfigurationsStore.getConfigurations();
+		
 		return {wireguardConfigurationsStore}
+	},
+	data(){
+		return {
+			configurationLoaded: false
+		}
+	},
+	async mounted() {
+		await this.wireguardConfigurationsStore.getConfigurations();
+		this.configurationLoaded = true;
 	}
 }
 </script>
 
 <template>
+	
 	<div class="mt-4">
 		<div class="container">
 			<div class="d-flex mb-4 ">
@@ -24,13 +34,21 @@ export default {
 					<i class="bi bi-plus-circle-fill ms-2"></i>
 				</RouterLink>
 			</div>
-			<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
+			<Transition name="fade" mode="out-in">
+				<div v-if="this.configurationLoaded">
+					<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">
+						You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".
+					</p>
 
-			<div class="d-flex gap-3 flex-column" v-else >
-				<ConfigurationCard  v-for="c in this.wireguardConfigurationsStore.Configurations" :key="c.Name" :c="c"></ConfigurationCard>
-			</div>
+					<div class="d-flex gap-3 flex-column" v-else>
+						<ConfigurationCard  v-for="c in this.wireguardConfigurationsStore.Configurations" :key="c.Name" :c="c"></ConfigurationCard>
+					</div>
+				</div>
+			</Transition>
+			
 		</div>
 	</div>
+	
 </template>
 
 <style scoped>

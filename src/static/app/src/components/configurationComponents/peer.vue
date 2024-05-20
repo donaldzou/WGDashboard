@@ -1,6 +1,7 @@
 <script>
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+import "animate.css"
 import PeerSettingsDropdown from "@/components/configurationComponents/peerSettingsDropdown.vue";
 export default {
 	name: "peer",
@@ -76,6 +77,7 @@ export default {
 						<PeerSettingsDropdown 
 							@qrcode="(file) => this.$emit('qrcode', file)"
 							@setting="this.$emit('setting')"
+							@refresh="this.$emit('refresh')"
 							:Peer="Peer"
 							v-if="this.subMenuOpened"
 							ref="target"

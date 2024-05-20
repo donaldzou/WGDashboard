@@ -41,7 +41,11 @@ export default {
 						if (response.message){
 							this.$router.push('/welcome')
 						}else{
-							this.$router.push('/')
+							if (this.store.Redirect !== undefined){
+								this.$router.push(this.store.Redirect)
+							}else{
+								this.$router.push('/')
+							}
 						}
 					}else{
 						this.loginError = true;
@@ -71,7 +75,7 @@ export default {
 </script>
 
 <template>
-	<div class="container-fluid login-container-fluid d-flex main" :data-bs-theme="this.theme">
+	<div class="container-fluid login-container-fluid d-flex main flex-column" :data-bs-theme="this.theme">
 		<div class="login-box m-auto" style="width: 500px;">
 			<h4 class="mb-0 text-body">Welcome to</h4>
 			<span class="dashboardLogo display-3">WGDashboard</span>
@@ -117,6 +121,10 @@ export default {
 				</form>
 			</div>
 		</div>
+		<small class="text-muted pb-3 d-block w-100 text-center">
+			WGDashboard v4.0 | Developed with ❤️ by 
+			<a href="https://github.com/donaldzou" target="_blank"><strong>Donald Zou</strong></a>
+		</small>
 	</div>
 </template>
 

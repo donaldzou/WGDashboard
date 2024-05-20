@@ -1,5 +1,5 @@
 <script>
-import {fetchGet} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export default {
@@ -10,6 +10,11 @@ export default {
 	},
 	props: {
 		Peer: Object
+	},
+	data(){
+		return{
+			deleteBtnDisabled: false		
+		}
 	},
 	methods: {
 		downloadPeer(){
@@ -39,6 +44,16 @@ export default {
 				}else{
 					this.dashboardStore.newMessage("Server", res.message, "danger")
 				}
+			})
+		},
+		deletePeer(){
+			this.deleteBtnDisabled = true
+			fetchPost(`/api/deletePeers/${this.$route.params.id}`, {
+				peers: [this.Peer.id]
+			}, (res) => {
+				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")
+				this.$emit("refresh")
+				this.deleteBtnDisabled = false
 			})
 		}
 	}
@@ -90,9 +105,10 @@ export default {
 		</li>
 		<li>
 			<a class="dropdown-item d-flex fw-bold text-danger" 
-			   
+			   @click="this.deletePeer()"
+			   :class="{disabled: this.deleteBtnDisabled}"
 			   role="button">
-				<i class="me-auto bi bi-trash"></i> Delete
+				<i class="me-auto bi bi-trash"></i> {{!this.deleteBtnDisabled ? "Delete":"Deleting..."}}
 			</a>
 		</li>
 	</ul>
@@ -101,5 +117,9 @@ export default {
 <style scoped>
 .dropdown-menu{
 	right: 1rem;
+}
+
+.dropdown-item.disabled, .dropdown-item:disabled{
+	opacity: 0.7;
 }
 </style>

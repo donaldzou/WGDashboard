@@ -117,8 +117,10 @@ router.beforeEach(async (to, from, next) => {
       if (!wireguardConfigurationsStore.Configurations && to.name !== "Configuration List"){
         await wireguardConfigurationsStore.getConfigurations();
       }
+      dashboardConfigurationStore.Redirect = undefined;
       next()
     }else{
+      dashboardConfigurationStore.Redirect = to;
       next("/signin")
     }
   }else {

@@ -4,8 +4,12 @@ import {v4} from "uuid";
 
 export const DashboardConfigurationStore = defineStore('DashboardConfigurationStore', {
 	state: () => ({
+		Redirect: undefined,
 		Configuration: undefined,
-		Messages: []
+		Messages: [],
+		Peers: {
+			Selecting: false
+		}
 	}),
 	actions: {
 		async getConfiguration(){

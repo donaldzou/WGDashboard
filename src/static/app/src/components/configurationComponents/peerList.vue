@@ -73,6 +73,7 @@ export default {
 	},
 	data(){
 		return {
+			configurationToggling: false,
 			loading: false,
 			error: null,
 			configurationInfo: [],
@@ -151,7 +152,24 @@ export default {
 		clearInterval(this.interval)
 	},
 	methods:{
-		getPeers(id){
+		toggle(){
+			this.configurationToggling = true;
+			fetchGet("/api/toggleWireguardConfiguration/", {
+				configurationName: this.configurationInfo.Name
+			}, (res) => {
+				if (res.status){
+					this.dashboardConfigurationStore.newMessage("Server",
+						`${this.configurationInfo.Name} is 
+						${res.data ? 'is on':'is off'}`, "Success")
+				}else{
+					this.dashboardConfigurationStore.newMessage("Server",
+						res.message, 'danger')
+				}
+				this.configurationInfo.Status = res.data
+				this.configurationToggling = false;
+			})
+		},
+		getPeers(id = this.$route.params.id){
 			fetchGet("/api/getWireguardConfigurationInfo",
 				{
 					configurationName: id
@@ -207,7 +225,7 @@ export default {
 		},
 		setInterval(){
 			this.interval = setInterval(() => {
-				this.getPeers(this.$route.params.id)
+				this.getPeers()
 			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
 		}
 	},
@@ -338,14 +356,39 @@ export default {
 
 <template>
 	<div v-if="!this.loading">
-		<div>
-			<small CLASS="text-muted">CONFIGURATION</small>
-			<div class="d-flex align-items-center gap-3">
-				<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
-				<div class="dot active ms-0"></div>
+		<div class="d-flex align-items-center">
+			<div>
+				<small CLASS="text-muted">CONFIGURATION</small>
+				<div class="d-flex align-items-center gap-3">
+					<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
+				</div>
+			</div>
+			<div class="card rounded-3 bg-transparent shadow-sm ms-auto">
+				<div class="card-body py-2 d-flex align-items-center">
+					<div>
+						<p class="mb-0 text-muted"><small>Status</small></p>
+						<div class="form-check form-switch ms-auto">
+							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
+								{{this.configurationToggling ? 'Turning ':''}}
+								{{this.configurationInfo.Status ? "On":"Off"}}
+								<span v-if="this.configurationToggling"
+								      class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+							</label>
+							<input class="form-check-input"
+							       style="cursor: pointer"
+							       :disabled="this.configurationToggling"
+							       type="checkbox" role="switch" :id="'switch' + this.configurationInfo.id"
+							       @change="this.toggle()"
+							       v-model="this.configurationInfo.Status"
+							>
+						</div>
+					</div>
+					<div class="dot ms-5" :class="{active: this.configurationInfo.Status}"></div>
+				</div>
 			</div>
 		</div>
 		<div class="row mt-3 gy-2 gx-2 mb-2">
+			
 			<div class="col-6 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
@@ -419,36 +462,36 @@ export default {
 		</div>
 		<div class="row gx-2 gy-2 mb-5">
 			<div class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent shadow-sm">
+				<div class="card rounded-3 bg-transparent shadow-sm"  style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">Peers Total Data Usage</small></div>
 					<div class="card-body pt-1">
 						<Bar
 							:data="individualDataUsage"
 							:options="individualDataUsageChartOption"
-							style="height: 200px; width: 100%"></Bar>
+							style="width: 100%; height: 200px;  max-height: 200px"></Bar>
 					</div>
 				</div>
 			</div>
 			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm">
+				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Received Data Usage</small></div>
 					<div class="card-body pt-1">
 						<Line
 							:options="chartOptions"
 							:data="receiveData"
-							style="width: 100%; height: 200px"
+							style="width: 100%; height: 200px; max-height: 200px"
 						></Line>
 					</div>
 				</div>
 			</div>
 			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm">
+				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Sent Data Usage</small></div>
 					<div class="card-body  pt-1">
 						<Line
 							:options="chartOptions"
 							:data="sentData"
-							style="width: 100%; height: 200px"
+							style="width: 100%; height: 200px; max-height: 200px"
 						></Line>
 					</div>
 				</div>
@@ -457,17 +500,19 @@ export default {
 		<div class="mb-4">
 			<div class="d-flex align-items-center gap-3 mb-2 ">
 				<h3>Peers</h3>
+				
 				<RouterLink
 					to="create"				   
-				   class="text-decoration-none ms-auto">
-					<i class="bi bi-plus-circle-fill me-2"></i>Add Peer</RouterLink>
+				    class="text-decoration-none ms-auto btn btn-primary rounded-3">
+					<i class="bi bi-plus-circle-fill me-2"></i>Peers</RouterLink>
 			</div>
 			<PeerSearch></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
 				     :key="peer.id"
 				     v-for="peer in this.searchPeers">
-					<Peer :Peer="peer" 
+					<Peer :Peer="peer"
+					      @refresh="this.getPeers()"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
 					></Peer>
@@ -477,7 +522,7 @@ export default {
 		<Transition name="fade">
 			<PeerSettings v-if="this.peerSetting.modalOpen" 
 			              :selectedPeer="this.peerSetting.selectedPeer"
-			              @refresh="this.getPeers(this.$route.params.id)"
+			              @refresh="this.getPeers()"
 			              @close="this.peerSetting.modalOpen = false">
 			</PeerSettings>
 			
@@ -487,10 +532,6 @@ export default {
 			            @close="this.peerQRCode.modalOpen = false"
 			            v-if="peerQRCode.modalOpen"></PeerQRCode>
 		</Transition>
-<!--		<Transition name="fade">-->
-<!--			-->
-<!--		</Transition>-->
-		
 	</div>
 </template>
 

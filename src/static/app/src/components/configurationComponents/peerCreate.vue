@@ -100,13 +100,14 @@ export default {
 
 <template>
 	<div class="container">
-		<div class="mb-4 d-flex align-items-center gap-4">
-			<RouterLink to="peers">
+		<div class="mb-4">
+			<RouterLink to="peers" is="div" class="d-flex align-items-center gap-4 text-decoration-none">
 				<h3 class="mb-0 text-body">
 					<i class="bi bi-chevron-left"></i>
 				</h3>
+				<h3 class="text-body mb-0">Add Peers</h3>
 			</RouterLink>
-			<h3 class="text-body mb-0">New Configuration</h3>
+			
 		</div>
 		<div class="d-flex flex-column gap-2">
 			<BulkAdd :saving="saving" :data="this.data" :availableIp="this.availableIp"></BulkAdd>

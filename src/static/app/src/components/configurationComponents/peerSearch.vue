@@ -53,15 +53,7 @@ export default {
 		}
 	},
 	mounted() {
-		let fadeIn = "animate__fadeInUp";
-		let fadeOut = "animate__fadeOutDown"
 		
-		this.$el.querySelectorAll(".dropdown").forEach(x => {
-			x.addEventListener('show.bs.dropdown', (e) => {
-				console.log(e.target.parentNode.children)
-				console.log(e.target.closest("ul.dropdown-menu"))
-			})
-		})
 	}
 }
 </script>
@@ -73,34 +65,43 @@ export default {
 				<i class="bi bi-filter-circle me-2"></i>
 				Sort
 			</button>
-			<ul class="dropdown-menu mt-2 shadow">
+			<ul class="dropdown-menu mt-2 shadow rounded-3">
 				<li v-for="(value, key) in this.sort">
 					<a class="dropdown-item d-flex" role="button" @click="this.updateSort(key)">
 						<span class="me-auto">{{value}}</span>
-						<i class="bi bi-check" 
+						<i class="bi bi-check text-primary" 
 						   v-if="store.Configuration.Server.dashboard_sort === key"></i>
-					</a></li>
+					</a>
+				</li>
 			</ul>
 		</div>
 		<div class="dropdown">
-			<button class="btn btn-outline-secondary btn-sm dropdown-toggle  rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 				<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval
 			</button>
-			<ul class="dropdown-menu shadow mt-2">
+			<ul class="dropdown-menu shadow mt-2 rounded-3">
 				<li v-for="(value, key) in this.interval">
 					<a class="dropdown-item d-flex" role="button" @click="updateRefreshInterval(key)">
 						<span class="me-auto">{{value}}</span>
-						<i class="bi bi-check"
+						<i class="bi bi-check text-primary"
 						   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
 					</a></li>
 			</ul>
 		</div>
-
+<!--		<button class="btn btn-outline-secondary btn-sm rounded-3" type="button"-->
+<!--			@click="this.store.Peers.Selecting = !this.store.Peers.Selecting"-->
+<!--		>-->
+<!--			<i class="bi bi-app-indicator me-2"></i>-->
+<!--			Select-->
+<!--		</button>-->
+		
 		<div class="ms-auto d-flex align-items-center">
 			<label class="d-flex me-2 text-muted" for="searchPeers"><i class="bi bi-search me-1"></i></label>
 			<input class="form-control form-control-sm rounded-3"
+			       id="searchPeers"
 			       v-model="this.wireguardConfigurationStore.searchString">
 		</div>
+		
 	</div>
 </template>
 

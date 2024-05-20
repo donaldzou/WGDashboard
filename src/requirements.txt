@@ -5,3 +5,5 @@ pyotp
 flask
 icmplib
 sqlalchemy
+flask[async]
+aiosqlite

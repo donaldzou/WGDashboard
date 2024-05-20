@@ -13,12 +13,18 @@ export default {
 			
 		}
 	},
+	data(){
+		return{
+			configurationToggling: false
+		}
+	},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		return {dashboardConfigurationStore}
 	},
 	methods: {
 		toggle(){
+			this.configurationToggling = true;
 			fetchGet("/api/toggleWireguardConfiguration/", {
 				configurationName: this.c.Name
 			}, (res) => {
@@ -30,6 +36,7 @@ export default {
 						res.message, 'danger')
 				}
 				this.c.Status = res.data
+				this.configurationToggling = false;
 			})
 		}
 	}
@@ -53,10 +60,15 @@ export default {
 				<samp style="line-break: anywhere">{{c.PublicKey}}</samp>
 			</small>
 			<div class="form-check form-switch ms-auto">
-				<label class="form-check-label" :for="'switch' + c.PrivateKey">
+				<label class="form-check-label" style="cursor: pointer" :for="'switch' + c.PrivateKey">
+					{{this.configurationToggling ? 'Turning ':''}}
 					{{c.Status ? "On":"Off"}}
+					<span v-if="this.configurationToggling" 
+					      class="spinner-border spinner-border-sm" aria-hidden="true"></span>
 				</label>
-				<input class="form-check-input" 
+				<input class="form-check-input"
+				       style="cursor: pointer"
+				       :disabled="this.configurationToggling"
 				       type="checkbox" role="switch" :id="'switch' + c.PrivateKey"
 				       @change="this.toggle()"
 				       v-model="c.Status"

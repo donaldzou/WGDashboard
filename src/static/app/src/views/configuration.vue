@@ -8,7 +8,9 @@ export default {
 	<div class="mt-5 text-body">
 		<RouterView v-slot="{ Component, route }">
 			<Transition name="fade2" mode="out-in">
-				<Component :is="Component" :key="route.path"></Component>
+				<Suspense>
+					<Component :is="Component" :key="route.path"></Component>
+				</Suspense>
 			</Transition>
 		</RouterView>
 	</div>

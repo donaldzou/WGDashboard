@@ -936,3 +936,7 @@ pre.index-alert {
 .theme-switch-btn{
     width: 100%;
 }
+
+.dropdown-item.disabled, .dropdown-item:disabled{
+    opacity: 0.7;
+}

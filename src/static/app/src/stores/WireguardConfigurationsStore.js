@@ -19,6 +19,7 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 		},
 		checkCIDR(ip){
 			return isCidr(ip) !== 0
-		}
+		},
+		
 	}
 });
