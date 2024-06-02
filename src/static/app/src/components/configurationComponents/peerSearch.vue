@@ -62,14 +62,17 @@ export default {
 <template>
 	<div>
 		<div class="d-flex gap-2 mb-3 z-3">
-			<h4 class="mb-0">Peers</h4>
+<!--			<h4 class="mb-0">Peers</h4>-->
 			<RouterLink
 				to="create"
-				class=" ms-auto text-decoration-none btn btn-primary rounded-3 btn-sm">
+				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
 				<i class="bi bi-plus-lg me-2"></i>Peers
 			</RouterLink>
+			<button class="btn btn-sm btn-info rounded-3">
+				<i class="bi bi-download me-2"></i> Download All
+			</button>
 			
-			<div class="dropdown">
+			<div class="dropdown ms-auto">
 				<button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-filter-circle me-2"></i>
 					Sort
