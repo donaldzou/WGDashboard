@@ -238,6 +238,12 @@ class WireguardConfiguration:
         self.Status = self.Name in psutil.net_if_addrs().keys()
         return self.Status
 
+    def __getRestrictedPeers(self):
+        self.RestrictedPeers = []
+        restricted = cursor.execute("SELECT * FROM %s_restrict_access" % self.Name).fetchall()
+        for i in restricted:
+            self.RestrictedPeers.append(Peer(i, self))
+
     def __getPeers(self):
         self.Peers = []
         with open(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'), 'r') as configFile:
@@ -308,6 +314,55 @@ class WireguardConfiguration:
             if i.id == publicKey:
                 return True, i
         return False, None
+
+    def allowAccessPeers(self, listOfPublicKeys):
+        # numOfAllowedPeers = 0
+        # numOfFailedToAllowPeers = 0
+        for i in listOfPublicKeys:
+            p = cursor.execute("SELECT * FROM %s_restrict_access WHERE id = ?" % self.Name, (i,)).fetchone()
+            if p is not None:
+                cursor.execute("INSERT INTO %s SELECT * FROM %s_restrict_access WHERE id = ?"
+                               % (self.Name, self.Name,), (p['id'],))
+                cursor.execute("DELETE FROM %s_restrict_access WHERE id = ?"
+                               % self.Name, (p['id'],))
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
+                                        shell=True, stderr=subprocess.STDOUT)
+            else:
+                return ResponseObject(False, "Failed to allow access of peer " + i)
+        if not self.__wgSave():
+            return ResponseObject(False, "Failed to save configuration through WireGuard")
+
+        self.__getPeers()
+        return ResponseObject(True, "Allow access successfully!")
+
+    def restrictPeers(self, listOfPublicKeys):
+        numOfRestrictedPeers = 0
+        numOfFailedToRestrictPeers = 0
+        for p in listOfPublicKeys:
+            found, pf = self.searchPeer(p)
+            if found:
+                try:
+                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                                            shell=True, stderr=subprocess.STDOUT)
+                    cursor.execute("INSERT INTO %s_restrict_access SELECT * FROM %s WHERE id = ?" %
+                                   (self.Name, self.Name,), (pf.id,))
+                    cursor.execute("UPDATE %s_restrict_access SET status = 'stopped' WHERE id = ?" %
+                                   (self.Name,), (pf.id,))
+                    cursor.execute("DELETE FROM %s WHERE id = ?" % self.Name, (pf.id,))
+                    numOfRestrictedPeers += 1
+                except Exception as e:
+                    numOfFailedToRestrictPeers += 1
+
+        if not self.__wgSave():
+            return ResponseObject(False, "Failed to save configuration through WireGuard")
+
+        self.__getPeers()
+
+        if numOfRestrictedPeers == len(listOfPublicKeys):
+            return ResponseObject(True, f"Restricted {numOfRestrictedPeers} peer(s)")
+        return ResponseObject(False,
+                              f"Restricted {numOfRestrictedPeers} peer(s) successfully. Failed to restrict {numOfFailedToRestrictPeers} peer(s)")
+        pass
 
     def deletePeers(self, listOfPublicKeys):
         numOfDeletedPeers = 0
@@ -467,6 +522,10 @@ class WireguardConfiguration:
     def getPeersList(self):
         self.__getPeers()
         return self.Peers
+
+    def getRestrictedPeersList(self) -> list:
+        self.__getRestrictedPeers()
+        return self.RestrictedPeers
 
     def toJson(self):
         self.Status = self.getStatus()
@@ -1047,6 +1106,30 @@ def API_deletePeers(configName: str) -> ResponseObject:
     return ResponseObject(False, "Configuration does not exist")
 
 
+@app.route('/api/restrictPeers/<configName>', methods=['POST'])
+def API_restrictPeers(configName: str) -> ResponseObject:
+    data = request.get_json()
+    peers = data['peers']
+    if configName in WireguardConfigurations.keys():
+        if len(peers) == 0:
+            return ResponseObject(False, "Please specify more than one peer")
+        configuration = WireguardConfigurations.get(configName)
+        return configuration.restrictPeers(peers)
+    return ResponseObject(False, "Configuration does not exist")
+
+
+@app.route('/api/allowAccessPeers/<configName>', methods=['POST'])
+def API_allowAccessPeers(configName: str) -> ResponseObject:
+    data = request.get_json()
+    peers = data['peers']
+    if configName in WireguardConfigurations.keys():
+        if len(peers) == 0:
+            return ResponseObject(False, "Please specify more than one peer")
+        configuration = WireguardConfigurations.get(configName)
+        return configuration.allowAccessPeers(peers)
+    return ResponseObject(False, "Configuration does not exist")
+
+
 @app.route('/api/addPeers/<configName>', methods=['POST'])
 def API_addPeers(configName):
     data = request.get_json()
@@ -1184,7 +1267,8 @@ def API_getConfigurationInfo():
         return ResponseObject(False, "Please provide configuration name")
     return ResponseObject(data={
         "configurationInfo": WireguardConfigurations[configurationName],
-        "configurationPeers": WireguardConfigurations[configurationName].getPeersList()
+        "configurationPeers": WireguardConfigurations[configurationName].getPeersList(),
+        "configurationRestrictedPeers": WireguardConfigurations[configurationName].getRestrictedPeersList()
     })
 
 

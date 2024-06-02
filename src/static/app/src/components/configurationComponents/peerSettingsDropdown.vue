@@ -13,7 +13,9 @@ export default {
 	},
 	data(){
 		return{
-			deleteBtnDisabled: false		
+			deleteBtnDisabled: false,
+			restrictBtnDisabled: false,
+			allowAccessBtnDisabled: false,
 		}
 	},
 	methods: {
@@ -55,6 +57,26 @@ export default {
 				this.$emit("refresh")
 				this.deleteBtnDisabled = false
 			})
+		},
+		restrictPeer(){
+			this.restrictBtnDisabled = true
+			fetchPost(`/api/restrictPeers/${this.$route.params.id}`, {
+				peers: [this.Peer.id]
+			}, (res) => {
+				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")
+				this.$emit("refresh")
+				this.restrictBtnDisabled = false
+			})
+		},
+		allowAccessPeer(){
+			this.allowAccessBtnDisabled = true
+			fetchPost(`/api/allowAccessPeers/${this.$route.params.id}`, {
+				peers: [this.Peer.id]
+			}, (res) => {
+				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")
+				this.$emit("refresh")
+				this.allowAccessBtnDisabled = false
+			})
 		}
 	}
 }
@@ -62,61 +84,75 @@ export default {
 
 <template>
 	<ul class="dropdown-menu mt-2 shadow-lg d-block rounded-3" style="max-width: 200px">
-		<template v-if="!this.Peer.private_key">
-			<li>
-				<small class="w-100 dropdown-item text-muted"
-				       style="white-space: break-spaces; font-size: 0.7rem"
-				>Download & QR Code is not available due to no <code>private key</code>
-					set for this peer
-				</small>
-			</li>
-			<li><hr class="dropdown-divider"></li>
-		</template>
-		
-		<li>
-			<a class="dropdown-item d-flex" role="button"
-				@click="this.$emit('setting')"
-			>
-				<i class="me-auto bi bi-pen"></i> Edit
-			</a>
-		</li>
-		<template v-if="this.Peer.private_key">
-			<li>
-				<a class="dropdown-item d-flex" role="button" @click="this.downloadPeer()">
-					<i class="me-auto bi bi-download"></i> Download
-				</a>
-			</li>
+		<template v-if="!this.Peer.restricted">
+			<template v-if="!this.Peer.private_key">
+				<li>
+					<small class="w-100 dropdown-item text-muted"
+					       style="white-space: break-spaces; font-size: 0.7rem"
+					>Download & QR Code is not available due to no <code>private key</code>
+						set for this peer
+					</small>
+				</li>
+				<li><hr class="dropdown-divider"></li>
+			</template>
 			<li>
 				<a class="dropdown-item d-flex" role="button"
-					@click="this.downloadQRCode()"
+				   @click="this.$emit('setting')"
 				>
-					<i class="me-auto bi bi-qr-code"></i> QR Code
+					<i class="me-auto bi bi-pen"></i> Edit
+				</a>
+			</li>
+			<template v-if="this.Peer.private_key">
+				<li>
+					<a class="dropdown-item d-flex" role="button" @click="this.downloadPeer()">
+						<i class="me-auto bi bi-download"></i> Download
+					</a>
+				</li>
+				<li>
+					<a class="dropdown-item d-flex" role="button"
+					   @click="this.downloadQRCode()"
+					>
+						<i class="me-auto bi bi-qr-code"></i> QR Code
+					</a>
+				</li>
+			</template>
+
+			<li><hr class="dropdown-divider"></li>
+			<li>
+				<a class="dropdown-item d-flex text-warning"
+				   @click="this.restrictPeer()"
+				   :class="{disabled: this.restrictBtnDisabled}"
+				   role="button">
+					<i class="me-auto bi bi-lock"></i> {{!this.restrictBtnDisabled ? "Restrict Access":"Restricting..."}}
+				</a>
+			</li>
+			<li>
+				<a class="dropdown-item d-flex fw-bold text-danger"
+				   @click="this.deletePeer()"
+				   :class="{disabled: this.deleteBtnDisabled}"
+				   role="button">
+					<i class="me-auto bi bi-trash"></i> {{!this.deleteBtnDisabled ? "Delete":"Deleting..."}}
 				</a>
 			</li>
 		</template>
-		
-		<li><hr class="dropdown-divider"></li>
-		<li>
-			<a class="dropdown-item d-flex text-warning" 
-			   
-			   role="button">
-				<i class="me-auto bi bi-lock"></i> Lock
-			</a>
-		</li>
-		<li>
-			<a class="dropdown-item d-flex fw-bold text-danger" 
-			   @click="this.deletePeer()"
-			   :class="{disabled: this.deleteBtnDisabled}"
-			   role="button">
-				<i class="me-auto bi bi-trash"></i> {{!this.deleteBtnDisabled ? "Delete":"Deleting..."}}
-			</a>
-		</li>
+		<template v-else>
+			<li>
+				<a class="dropdown-item d-flex text-warning"
+				   @click="this.allowAccessPeer()"
+				   :class="{disabled: this.restrictBtnDisabled}"
+				   role="button">
+					<i class="me-auto bi bi-unlock"></i> 
+					{{!this.allowAccessBtnDisabled ? "Allow Access":"Allowing..."}}
+				</a>
+			</li>
+		</template>
 	</ul>
 </template>
 
 <style scoped>
 .dropdown-menu{
 	right: 1rem;
+	min-width: 200px;
 }
 
 .dropdown-item.disabled, .dropdown-item:disabled{

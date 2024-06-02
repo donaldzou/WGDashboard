@@ -118,15 +118,7 @@ export default {
 		}
 	},
 	mounted() {
-		// console.log('mounted')
-		// this.loading = true;
-		// let id = this.$route.params.id;
-		// this.configurationInfo = [];
-		// this.configurationPeers = [];
-		// if (id){
-		// 	this.getPeers(id)
-		// 	this.setInterval();
-		// }
+		
 	},
 	watch: {
 		'$route': {
@@ -176,6 +168,13 @@ export default {
 				}, (res) => {
 					this.configurationInfo = res.data.configurationInfo;
 					this.configurationPeers = res.data.configurationPeers;
+					this.configurationPeers.forEach(x => {
+						x.restricted = false;
+					})
+					res.data.configurationRestrictedPeers.forEach(x => {
+						x.restricted = true;
+						this.configurationPeers.push(x)
+					})
 					this.loading = false;
 					if (this.configurationPeers.length > 0){
 						const sent = this.configurationPeers.map(x => x.total_sent + x.cumu_sent).reduce((x,y) => x + y).toFixed(4);
@@ -336,8 +335,23 @@ export default {
 				keys: ["name", "id", "allowed_ip"]
 			});
 
-			const result = this.wireguardConfigurationStore.searchString ? fuse.search(this.wireguardConfigurationStore.searchString).map(x => x.item) : this.configurationPeers;
-
+			const result = this.wireguardConfigurationStore.searchString ? 
+				fuse.search(this.wireguardConfigurationStore.searchString).map(x => x.item) : this.configurationPeers;
+			
+			if (this.dashboardConfigurationStore.Configuration.Server.dashboard_sort === "restricted"){
+				return result.slice().sort((a, b) => {
+					if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]
+						< b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] ){
+						return 1;
+					}
+					if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]
+						> b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]){
+						return -1;
+					}
+					return 0;
+				});
+			}
+			
 			return result.slice().sort((a, b) => {
 				if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]
 					< b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] ){
@@ -460,7 +474,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="row gx-2 gy-2 mb-5">
+		<div class="row gx-2 gy-2 mb-3">
 			<div class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent shadow-sm"  style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">Peers Total Data Usage</small></div>
@@ -498,14 +512,9 @@ export default {
 			</div>
 		</div>
 		<div class="mb-4">
-			<div class="d-flex align-items-center gap-3 mb-2 ">
-				<h3>Peers</h3>
-				
-				<RouterLink
-					to="create"				   
-				    class="text-decoration-none ms-auto btn btn-primary rounded-3">
-					<i class="bi bi-plus-circle-fill me-2"></i>Peers</RouterLink>
-			</div>
+<!--			<div class="d-flex align-items-center gap-3 mb-2">-->
+<!--				<h3>Peers</h3>-->
+<!--			</div>-->
 			<PeerSearch></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"

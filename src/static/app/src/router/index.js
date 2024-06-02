@@ -14,6 +14,7 @@ import Configuration from "@/views/configuration.vue";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerList from "@/components/configurationComponents/peerList.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
+import RestrictedPeers from "@/components/configurationComponents/restrictedPeers.vue";
 
 const checkAuth = async () => {
   let result = false
