@@ -17,6 +17,8 @@ RUN  cd / && echo "[Interface]" > wg0.conf && echo "SaveConfig = true" >> wg0.co
 
 COPY ./src /opt/wgdashboard_tmp
 RUN pip3 install -r /opt/wgdashboard_tmp/requirements.txt   --no-cache-dir
+# install requirements for old dashboard
+RUN pip3 install -r /opt/wgdashboard_tmp/requirements_old.txt   --no-cache-dir
 RUN rm -rf /opt/wgdashboard_tmp
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
