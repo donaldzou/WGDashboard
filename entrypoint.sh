@@ -11,11 +11,11 @@
 # if they choose to run old
 if [[ ${DASHBOARD_VERSON^^} == "NEW" ]] ; then
   echo "Using newer dashboard"
-  cp dashboard.py dashboard_old.py
-  cp dashboard_new.py dashboard.py
+  cp /opt/wgdashboard/dashboard.py /opt/wgdashboard/dashboard_old.py
+  cp /opt/wgdashboard/dashboard_new.py /opt/wgdashboard/dashboard.py
 else
   echo "Defaulting to old dashboard"
-  if ! $(cp dashboard_old.py dashboard.py 2>/dev/null) ; then
+  if ! $(cp /opt/wgdashboard/dashboard_old.py /opt/wgdashboard/dashboard.py 2>/dev/null) ; then
     echo "No dashboard_old.py file, assuming dashboard.py version is old"
   fi
 fi
