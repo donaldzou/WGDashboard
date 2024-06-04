@@ -4,6 +4,7 @@ services:
     restart: unless-stopped
     container_name: wire-dash
     environment:
+      #- global_dns=8.8.8.8
       #- tz=Europe/Amsterdam # <--- is default
       - public_ip=212.124.66.17
     ports:
@@ -11,8 +12,10 @@ services:
       - 51820:51820/udp
     volumes:
       - wireguard_confs:/etc/wireguard
+      - wireguard_app:/opt/wireguardashboard/app
     cap_add:
       - NET_ADMIN
 
 volumes:
   wireguard_confs:
+  wireguard_app:

@@ -20,7 +20,7 @@ RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime \
 # Removing the linux-image package to preserve space on the container.
 
 # Installing needed packages for installation.
-RUN apt-get install -y --no-install-recommends git wireguard wireguard-tools python3 python3-pip python3-venv iproute2 openresolv procps iptables curl
+RUN apt-get install -y --no-install-recommends git wireguard wireguard-tools python3 python3-pip python3-venv iproute2 openresolv procps iptables curl iputils-ping traceroute
 
 ENV WGDASH=/opt/wireguardashboard
 RUN python3 -m venv ${WGDASH}/venv

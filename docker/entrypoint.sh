@@ -1,4 +1,7 @@
-echo "Starting the WireGuard Dashboard."
+echo "\nStarting the WireGuard Dashboard."
+
+# Cleaning out previous data such as the .pid file.
+rm /opt/wireguardashboard/app/src/gunicorn.pid
 
 # Starting the WireGuard Dashboard Web-UI.
 . ${WGDASH}/venv/bin/activate
@@ -23,7 +26,7 @@ else
 fi
 
 sleep 3s
-tail -f /opt/wireguardashboard/app/src/log/*.log
+tail -f $(ls -t /opt/wireguardashboard/app/src/log/error_*.log | head -n 1)
 
 # Blocking command in case of erroring.
 sleep infinity
