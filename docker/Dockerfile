@@ -5,9 +5,11 @@ LABEL maintainer="dselen@nerthus.nl"
 # Copy the basic entrypoint.sh script.
 COPY entrypoint.sh /entrypoint.sh
 
-# Declaring environment variables
+# Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ENV tz=Europe/Amsterdam
-ENV WGPEERNET=10.0.0.1
+ENV public_ip=0.0.0.0
+ENV wg_net=10.0.0.1
+ENV global_dns=1.1.1.1
 
 # Doing basic system maintenance. Change the timezone to the desired timezone.
 RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime \
@@ -18,7 +20,7 @@ RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime \
 # Removing the linux-image package to preserve space on the container.
 
 # Installing needed packages for installation.
-RUN apt-get install -y --no-install-recommends git wireguard wireguard-tools python3 python3-pip python3-venv iproute2 openresolv procps
+RUN apt-get install -y --no-install-recommends git wireguard wireguard-tools python3 python3-pip python3-venv iproute2 openresolv procps iptables curl
 
 ENV WGDASH=/opt/wireguardashboard
 RUN python3 -m venv ${WGDASH}/venv
@@ -33,9 +35,16 @@ RUN . ${WGDASH}/venv/bin/activate \
 # Set the volume to be used for persistency.
 VOLUME /etc/wireguard
 
-# Generate basic WireGuard interface. Change Peernet to CIDR you would like.
+# Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
-  && echo "[Interface]\nSaveConfig = true\nAddress = ${WGPEERNET}/24\nPrivateKey = $(cat /etc/wireguard/wg0_privatekey)\nListenPort = 51820\nDNS = 8.8.8.8" > /etc/wireguard/wg0.conf \
+  && echo "[Interface]" > /etc/wireguard/wg0.conf \
+  && echo "SaveConfig = true" >> /etc/wireguard/wg0.conf \
+  && echo "Address = ${wg_net}/24" >> /etc/wireguard/wg0.conf \
+  && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /etc/wireguard/wg0.conf \
+  && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "ListenPort = 51820" >> /etc/wireguard/wg0.conf \
+  && echo "DNS = ${global_dns}" >> /etc/wireguard/wg0.conf \
   && rm /etc/wireguard/wg0_privatekey
 
 # Exposing the default WireGuard Dashboard port for web access.

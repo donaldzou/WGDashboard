@@ -1,0 +1,18 @@
+services:
+  wireguard-dashboard:
+    image: repo.nerthus.nl/app/wireguard-dashboard:latest
+    restart: unless-stopped
+    container_name: wire-dash
+    environment:
+      #- tz=Europe/Amsterdam # <--- is default
+      - public_ip=212.124.66.17
+    ports:
+      - 10086:10086/tcp
+      - 51820:51820/udp
+    volumes:
+      - wireguard_confs:/etc/wireguard
+    cap_add:
+      - NET_ADMIN
+
+volumes:
+  wireguard_confs:
