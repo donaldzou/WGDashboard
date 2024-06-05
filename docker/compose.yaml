@@ -1,22 +1,23 @@
 services:
   wireguard-dashboard:
-    image: repo.nerthus.nl/app/wireguard-dashboard:05-06-2024
+    image: repo.nerthus.nl/app/wireguard-dashboard:dev
     restart: unless-stopped
     container_name: wire-dash
     environment:
       #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
       #- global_dns=        # <--- Set global DNS address, default: 1.1.1.1.
+      - enable_wg0=true        # <--- If true, wg0 will be started on container startup. defaul:
+      - isolated_peers=false     # <--- When set to true, it disallows peers to talk to eachother, setting to false, allows it, default: true.
       #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
-      - enable_wg0=true        # <--- If set to true, it will try to enable the wg0 (main) interface on startup, to immediatly accept connections. When true, there will be no need to manually start the interface.
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
     volumes:
-      - wireguard_confs:/etc/wireguard
-      - wireguard_app:/opt/wireguardashboard/app
+      - conf:/etc/wireguard
+      - app:/opt/wireguardashboard/app
     cap_add:
       - NET_ADMIN
 
 volumes:
-  wireguard_confs:
-  wireguard_app:
+  conf:
+  app:

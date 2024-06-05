@@ -19,8 +19,20 @@ start_core() {
   cd ${WGDASH}/app/src
   bash wgd.sh start
 
+  echo "${isolated_peers}"
+  if [ "${isolated_peers,,}" == "false" ]; then
+    echo "Isolated peers disabled, adjusting."
+
+    sed -i '/^.*FORWARD -i wg0 -o wg0 -j DROP.*$/s/^/#/' /etc/wireguard/wg0.conf
+  elif [ "${isolated_peers,,}" == "true" ]; then
+    echo "Isolated peers enabled, adjusting."
+
+    sed -i 's/^#//' /etc/wireguard/wg0.conf
+  fi
+
   if [ "${enable_wg0,,}" == "true" ]; then
     echo "Preference for wg0 to be turned on found."
+
     wg-quick up wg0
   else
     echo "Preference for wg0 to be turned off found."

@@ -7,12 +7,14 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ARG dash_ver="v3.0.6.2"
+ENV wg_net="10.0.0.1"
+# wg_net is used functionally as an ARG for its environment variable nature, do not change unless you know what you are doing.
 
 ENV tz="Europe/Amsterdam"
-ENV public_ip="0.0.0.0"
-ENV wg_net="10.0.0.1"
 ENV global_dns="1.1.1.1"
 ENV enable_wg0="false"
+ENV isolated_peers="true"
+ENV public_ip="0.0.0.0"
 
 # Doing basic system maintenance. Change the timezone to the desired timezone.
 RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime \
@@ -45,7 +47,9 @@ RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   && echo "Address = ${wg_net}/24" >> /etc/wireguard/wg0.conf \
   && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /etc/wireguard/wg0.conf \
   && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
   && echo "PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
   && echo "ListenPort = 51820" >> /etc/wireguard/wg0.conf \
   #&& echo "DNS = ${global_dns}" >> /etc/wireguard/wg0.conf \
   && rm /etc/wireguard/wg0_privatekey
