@@ -1,12 +1,13 @@
 services:
   wireguard-dashboard:
-    image: repo.nerthus.nl/app/wireguard-dashboard:latest
+    image: repo.nerthus.nl/app/wireguard-dashboard:05-06-2024
     restart: unless-stopped
     container_name: wire-dash
     environment:
-      #- global_dns=8.8.8.8 # <--- 1.1.1.1 is default
-      #- tz=Europe/Amsterdam # <--- Europe/Amsterdam is default
-      - public_ip=212.124.66.17
+      #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
+      #- global_dns=        # <--- Set global DNS address, default: 1.1.1.1.
+      #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
+      - enable_wg0=true        # <--- If set to true, it will try to enable the wg0 (main) interface on startup, to immediatly accept connections. When true, there will be no need to manually start the interface.
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
