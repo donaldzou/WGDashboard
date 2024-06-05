@@ -4,8 +4,8 @@ services:
     restart: unless-stopped
     container_name: wire-dash
     environment:
-      #- global_dns=8.8.8.8
-      #- tz=Europe/Amsterdam # <--- is default
+      #- global_dns=8.8.8.8 # <--- 1.1.1.1 is default
+      #- tz=Europe/Amsterdam # <--- Europe/Amsterdam is default
       - public_ip=212.124.66.17
     ports:
       - 10086:10086/tcp
