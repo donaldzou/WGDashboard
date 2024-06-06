@@ -10,6 +10,7 @@ ARG dash_ver="v3.0.6.2"
 ENV wg_net="10.0.0.1"
 # wg_net is used functionally as an ARG for its environment variable nature, do not change unless you know what you are doing.
 
+# Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
 ENV tz="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV enable_wg0="false"
@@ -17,15 +18,27 @@ ENV isolated_peers="true"
 ENV public_ip="0.0.0.0"
 
 # Doing basic system maintenance. Change the timezone to the desired timezone.
-RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime \
-  && apt-get update \
-  && apt-get upgrade -y
-# Removing the linux-image package to preserve space on the container.
+RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime
 
-# Installing needed packages for installation.
-RUN apt-get install -y --no-install-recommends git wireguard wireguard-tools python3 python3-pip python3-venv iproute2 openresolv procps iptables curl iputils-ping traceroute \
-  && apt remove linux-image-* --autoremove -y \
-  && apt-get clean
+# Doing package management operations, such as upgrading
+RUN apt-get update && apt-get upgrade -y \
+  && apt-get install -y --no-install-recommends curl \
+  git \
+  iproute2 \
+  iptables \
+  iputils-ping \
+  openresolv \
+  procps \
+  python3 \
+  python3-pip \
+  python3-venv \
+  traceroute \
+  wireguard \
+  wireguard-tools \
+  && apt-get remove linux-image-* --autoremove -y \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+# Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 ENV WGDASH=/opt/wireguardashboard
 RUN python3 -m venv ${WGDASH}/venv
@@ -41,6 +54,8 @@ RUN . ${WGDASH}/venv/bin/activate \
 VOLUME /etc/wireguard
 
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
+# Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   && echo "[Interface]" > /etc/wireguard/wg0.conf \
   && echo "SaveConfig = true" >> /etc/wireguard/wg0.conf \
@@ -48,7 +63,7 @@ RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /etc/wireguard/wg0.conf \
   && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
   && echo "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
-  && echo "PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "PreDown = iptables -t nat -D POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
   && echo "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
   && echo "ListenPort = 51820" >> /etc/wireguard/wg0.conf \
   #&& echo "DNS = ${global_dns}" >> /etc/wireguard/wg0.conf \

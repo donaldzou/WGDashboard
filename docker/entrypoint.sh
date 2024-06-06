@@ -15,21 +15,26 @@ start_core() {
   # Cleaning out previous data such as the .pid file and starting the WireGuard Dashboard. Making sure to use the python venv.
   echo "Activating Python venv and executing the WireGuard Dashboard service."
 
-  . ${WGDASH}/venv/bin/activate
-  cd ${WGDASH}/app/src
+  . "${WGDASH}"/venv/bin/activate
+  cd "${WGDASH}"/app/src || return # If changing the directory fails (permission or presence error), then bash will exist this function, causing the WireGuard Dashboard to not be succesfully launched.
   bash wgd.sh start
 
-  echo "${isolated_peers}"
+  # The following section takes care of the firewall rules regarding the 'isolated_peers' feature, which allows or drops packets destined from the wg0 to the wg0 interface.
   if [ "${isolated_peers,,}" == "false" ]; then
     echo "Isolated peers disabled, adjusting."
 
-    sed -i '/^.*FORWARD -i wg0 -o wg0 -j DROP.*$/s/^/#/' /etc/wireguard/wg0.conf
-  elif [ "${isolated_peers,,}" == "true" ]; then
+    sed -i '/PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP/d' /etc/wireguard/wg0.conf
+    sed -i '/PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP/d' /etc/wireguard/wg0.conf
+  elif [ "${isolated_peers,,}" == "true" ] && \
+       [ "$(grep -c "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" /etc/wireguard/wg0.conf)" -lt 1 ] && \
+       [ "$(grep -c "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" /etc/wireguard/wg0.conf)" -lt 1 ]; then
     echo "Isolated peers enabled, adjusting."
 
-    sed -i 's/^#//' /etc/wireguard/wg0.conf
+    sed -i '/PostUp = iptables -t nat -I POSTROUTING 1 -s/a PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP' /etc/wireguard/wg0.conf
+    sed -i '/PreDown = iptables -t nat -D POSTROUTING 1 -s/a PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP' /etc/wireguard/wg0.conf
   fi
 
+  # The following section takes care of 
   if [ "${enable_wg0,,}" == "true" ]; then
     echo "Preference for wg0 to be turned on found."
 
@@ -46,15 +51,15 @@ set_envvars() {
   if [ "${tz}" != "$(cat /etc/timezone)" ]; then
     echo "Changing timezone."
     
-    ln -sf /usr/share/zoneinfo/${tz} /etc/localtime
-    echo ${tz} > /etc/timezone
+    ln -sf /usr/share/zoneinfo/"${tz}" /etc/localtime
+    echo "${tz}" > /etc/timezone
   fi
 
   # Changing the DNS used for clients and the dashboard itself.
   if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguardashboard/app/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 
     echo "Changing default dns."
 
-    sed -i 's/^DNS = .*/DNS = ${global_dns}/' /etc/wireguard/wg0.conf
+    #sed -i "s/^DNS = .*/DNS = ${global_dns}/" /etc/wireguard/wg0.conf # Uncomment if you want to have DNS on server-level.
     sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" /opt/wireguardashboard/app/src/wg-dashboard.ini
   fi
 
@@ -64,7 +69,7 @@ set_envvars() {
     echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
 
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" /opt/wireguardashboard/app/src/wg-dashboard.ini
-  elif [ "${public_ip}" != $(grep "remote_endpoint = " /opt/wireguardashboard/app/src/wg-dashboard.ini | awk '{print $NF}') ]; then
+  elif [ "${public_ip}" != "$(grep "remote_endpoint = " /opt/wireguardashboard/app/src/wg-dashboard.ini | awk '{print $NF}')" ]; then
     echo "Setting the Public-IP using given variable: ${public_ip}"
 
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" /opt/wireguardashboard/app/src/wg-dashboard.ini
@@ -76,9 +81,9 @@ ensure_blocking() {
 
   # This function checks if the latest error log is created and tails it for docker logs uses.
   if find "/opt/wireguardashboard/app/src/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
-    latestlog=$(ls -t /opt/wireguardashboard/app/src/log/error_*.log | head -n 1)
+    latestlog=$(find /opt/wireguardashboard/app/src/log -name "error_*.log" | head -n 1)
     sleep 3s
-    tail -f ${latestlog}
+    tail -f "${latestlog}"
   fi
 
   # Blocking command in case of erroring. So the container does not quit.
