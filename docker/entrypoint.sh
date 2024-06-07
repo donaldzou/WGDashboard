@@ -77,13 +77,14 @@ set_envvars() {
 }
 
 ensure_blocking() {
+  sleep 1s
   echo "Ensuring container continuation."
 
   # This function checks if the latest error log is created and tails it for docker logs uses.
   if find "/opt/wireguardashboard/app/src/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
-    latestlog=$(find /opt/wireguardashboard/app/src/log -name "error_*.log" | head -n 1)
-    sleep 3s
-    tail -f "${latestlog}"
+    latestErrLog=$(find /opt/wireguardashboard/app/src/log -name "error_*.log" | head -n 1)
+    latestAccLog=$(find /opt/wireguardashboard/app/src/log -name "access_*.log" | head -n 1)
+    tail -f "${latestErrLog}" "${latestAccLog}"
   fi
 
   # Blocking command in case of erroring. So the container does not quit.

@@ -40,12 +40,14 @@ RUN apt-get update && apt-get upgrade -y \
   && rm -rf /var/lib/apt/lists/*
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
+# Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
 ENV WGDASH=/opt/wireguardashboard
 RUN python3 -m venv ${WGDASH}/venv
 
 # Doing WireGuard Dashboard installation measures.
 RUN . ${WGDASH}/venv/bin/activate \
   && git clone -b ${dash_ver} https://github.com/donaldzou/WGDashboard.git ${WGDASH}/app \
+  && sed -i '/Restart=always/a\StandardOutput=file:{{APP_ROOT}}/log/log1.log\nStandardError=file:{{APP_ROOT}}/log/log2.log' ${WGDASH}/app/src/wg-dashboard.service \
   && pip3 install -r ${WGDASH}/app/src/requirements.txt \
   && chmod +x ${WGDASH}/app/src/wgd.sh \
   && .${WGDASH}/app/src/wgd.sh install
@@ -63,11 +65,14 @@ RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /etc/wireguard/wg0.conf \
   && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
   && echo "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
-  && echo "PreDown = iptables -t nat -D POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /etc/wireguard/wg0.conf \
+  && echo "PreDown = iptables -t nat -D POSTROUTING 1" >> /etc/wireguard/wg0.conf \
   && echo "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" >> /etc/wireguard/wg0.conf \
   && echo "ListenPort = 51820" >> /etc/wireguard/wg0.conf \
   #&& echo "DNS = ${global_dns}" >> /etc/wireguard/wg0.conf \
   && rm /etc/wireguard/wg0_privatekey
+
+# Defining a way for Docker to check the health of the container.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl -f http://localhost:10086/signin || exit 1
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086

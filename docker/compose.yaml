@@ -1,6 +1,6 @@
 services:
   wireguard-dashboard:
-    image: repo.nerthus.nl/app/wireguard-dashboard:dev
+    image: repo.nerthus.nl/app/wireguard-dashboard:latest
     restart: unless-stopped
     container_name: wire-dash
     environment:
