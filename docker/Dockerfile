@@ -47,7 +47,6 @@ RUN python3 -m venv ${WGDASH}/venv
 # Doing WireGuard Dashboard installation measures.
 RUN . ${WGDASH}/venv/bin/activate \
   && git clone -b ${dash_ver} https://github.com/donaldzou/WGDashboard.git ${WGDASH}/app \
-  && sed -i '/Restart=always/a\StandardOutput=file:{{APP_ROOT}}/log/log1.log\nStandardError=file:{{APP_ROOT}}/log/log2.log' ${WGDASH}/app/src/wg-dashboard.service \
   && pip3 install -r ${WGDASH}/app/src/requirements.txt \
   && chmod +x ${WGDASH}/app/src/wgd.sh \
   && .${WGDASH}/app/src/wgd.sh install
