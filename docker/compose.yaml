@@ -14,7 +14,7 @@ services:
       - 51820:51820/udp
     volumes:
       - conf:/etc/wireguard
-      - app:/opt/wireguardashboard/app
+      - app:/opt/wireguarddashboard/app
     cap_add:
       - NET_ADMIN
 
