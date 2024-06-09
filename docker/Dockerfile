@@ -66,7 +66,7 @@ RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   #&& echo "DNS = ${global_dns}" >> /wg0.conf \
   && rm /etc/wireguard/wg0_privatekey
 
-# Defining a way for Docker to check the health of the container.
+# Defining a way for Docker to check the health of the container. In this case: checking the login URL.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl -f http://localhost:10086/signin || exit 1
 
 # Copy the basic entrypoint.sh script.

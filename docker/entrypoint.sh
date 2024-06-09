@@ -13,6 +13,7 @@ clean_up() {
 }
 
 start_core() {
+  # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     cp "/wg0.conf" "/etc/wireguard/wg0.conf"
     echo "WireGuard interface file copied over."
