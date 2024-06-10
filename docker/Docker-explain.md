@@ -10,7 +10,7 @@ For more details on the source-code specific to this Docker image, refer to the 
 
 I have tried to embed some new features such as `isolated_peers` and interface startup on container-start (through `enable_wg0`).
 
-<img src="https://raw.githubusercontent.com/donaldzou/WGDashboard/main/img/logo.png" alt="WG-Dashboard Logo" title="WG-Dashboard Logo" width="150" height="150" style="display: block; margin: 0 auto;" /> 
+<img src="https://raw.githubusercontent.com/donaldzou/WGDashboard/main/img/logo.png" alt="WG-Dashboard Logo" title="WG-Dashboard Logo" width="150" height="150" /> 
 
 ## Getting the container running:
 
