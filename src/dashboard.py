@@ -873,7 +873,7 @@ def update_pwd():
             config.set("Account", "password", hashlib.sha256(request.form['repnewpass'].encode()).hexdigest())
             try:
                 set_dashboard_conf(config)
-                session['message'] = "Password update successfully!"
+                session['message'] = "Password updated successfully!"
                 session['message_status'] = "success"
                 config.clear()
                 return redirect(url_for("settings"))
@@ -888,7 +888,7 @@ def update_pwd():
             config.clear()
             return redirect(url_for("settings"))
     else:
-        session['message'] = "Your Password does not match."
+        session['message'] = "Your Passwords do not match."
         session['message_status'] = "danger"
         config.clear()
         return redirect(url_for("settings"))
