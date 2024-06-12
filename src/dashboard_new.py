@@ -631,6 +631,39 @@ class Peer:
         except subprocess.CalledProcessError as exc:
             return ResponseObject(False, exc.output.decode("UTF-8").strip())
 
+    def downloadPeer(self) -> dict[str, str]:
+        filename = self.name
+        if len(filename) == 0:
+            filename = "UntitledPeer"
+        filename = "".join(filename.split(' '))
+        filename = f"{filename}_{self.configuration.Name}"
+        illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
+                            "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
+                            "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+        for i in illegal_filename:
+            filename = filename.replace(i, "")
+
+        peerConfiguration = f'''[Interface]
+PrivateKey = {self.private_key}
+Address = {self.allowed_ip}
+MTU = {str(self.mtu)}
+'''
+        if len(self.DNS) > 0:
+            peerConfiguration += f"DNS = {self.DNS}\n"
+        peerConfiguration += f'''
+[Peer]
+PublicKey = {self.configuration.PublicKey}
+AllowedIPs = {self.endpoint_allowed_ip}
+Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
+PersistentKeepalive = {str(self.keepalive)}
+'''
+        if len(self.preshared_key) > 0:
+            peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
+        return {
+            "fileName": filename,
+            "file": peerConfiguration
+        }
+
 
 # Regex Match
 def regex_match(regex, text):
@@ -1218,40 +1251,23 @@ def API_downloadPeer(configName):
     peerFound, peer = configuration.searchPeer(data['id'])
     if len(data['id']) == 0 or not peerFound:
         return ResponseObject(False, "Configuration or peer does not exist")
-
-    filename = peer.name
-    if len(filename) == 0:
-        filename = "UntitledPeer"
-    filename = "".join(filename.split(' '))
-    filename = f"{filename}_{configuration.Name}"
-    illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
-                        "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
-                        "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
-    for i in illegal_filename:
-        filename = filename.replace(i, "")
-
-    peerConfiguration = f'''[Interface]
-PrivateKey = {peer.private_key}
-Address = {peer.allowed_ip}
-MTU = {str(peer.mtu)}
+    return ResponseObject(data=peer.downloadPeer())
 
 
-    '''
-    if len(peer.DNS) > 0:
-        peerConfiguration += f"DNS = {peer.DNS}\n"
-    peerConfiguration += f'''
-[Peer]
-PublicKey = {configuration.PublicKey}
-AllowedIPs = {peer.endpoint_allowed_ip}
-Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{configuration.ListenPort}
-PersistentKeepalive = {str(peer.keepalive)}
-'''
-    if len(peer.preshared_key) > 0:
-        peerConfiguration += f"PresharedKey = {peer.preshared_key}\n"
-    return ResponseObject(data={
-        "fileName": filename,
-        "file": peerConfiguration
-    })
+@app.route("/api/downloadAllPeers/<configName>")
+def API_downloadAllPeers(configName):
+    if configName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration or peer does not exist")
+    configuration = WireguardConfigurations[configName]
+    peerData = []
+    untitledPeer = 0
+    for i in configuration.Peers:
+        file = i.downloadPeer()
+        if file["fileName"] == "UntitledPeer_" + configName:
+            file["fileName"] = str(untitledPeer) + "_" + file["fileName"]
+            untitledPeer += 1
+        peerData.append(file)
+    return ResponseObject(data=peerData)
 
 
 @app.route("/api/getAvailableIPs/<configName>")
@@ -1275,6 +1291,59 @@ def API_getConfigurationInfo():
 @app.route('/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
+
+
+@app.route('/api/ping/getAllPeersIpAddress')
+def API_ping_getAllPeersIpAddress():
+    ips = {}
+    for c in WireguardConfigurations.values():
+        cips = {}
+        for p in c.Peers:
+            allowed_ip = p.allowed_ip.replace(" ", "").split(",")
+            parsed = []
+            for x in allowed_ip:
+                ip = ipaddress.ip_network(x, strict=False)
+                if len(list(ip.hosts())) == 1:
+                    parsed.append(str(ip.hosts()[0]))
+            endpoint = p.endpoint.replace(" ", "").replace("(none)", "")
+            if len(p.name) > 0:
+                cips[f"{p.name} - {p.id}"] = {
+                    "allowed_ips": parsed,
+                    "endpoint": endpoint
+                }
+            else:
+                cips[f"{p.id}"] = {
+                    "allowed_ips": parsed,
+                    "endpoint": endpoint
+                }
+        ips[c.Name] = cips
+    return ResponseObject(data=ips)
+
+
+@app.route('/api/ping/execute')
+def API_ping_execute():
+    if "ipAddress" in request.args.keys() and "count" in request.args.keys():
+        ip = request.args['ipAddress']
+        count = request.args['count']
+        try:
+            if ip is not None and len(ip) > 0 and count is not None and count.isnumeric():
+                result = ping(ip, count=int(count), source=None)
+
+                return ResponseObject(data={
+                    "address": result.address,
+                    "is_alive": result.is_alive,
+                    "min_rtt": result.min_rtt,
+                    "avg_rtt": result.avg_rtt,
+                    "max_rtt": result.max_rtt,
+                    "package_sent": result.packets_sent,
+                    "package_received": result.packets_received,
+                    "package_loss": result.packet_loss
+                })
+
+            return ResponseObject(False, "Please specify an IP Address (v4/v6)")
+        except Exception as exp:
+            return ResponseObject(False, exp)
+    return ResponseObject(False, "Please provide ipAddress and count")
 
 
 '''

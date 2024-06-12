@@ -1,7 +1,8 @@
 <script>
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import {fetchPost} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+
 
 export default {
 	name: "peerSearch",
@@ -11,7 +12,8 @@ export default {
 		return {store, wireguardConfigurationStore}
 	},
 	props: {
-		searchString: String	
+		searchString: String,
+		configuration: Object
 	},
 	data(){
 		return {
@@ -51,6 +53,12 @@ export default {
 					this.store.getConfiguration();
 				}
 			})
+		},
+		downloadAllPeer(){
+			fetchGet(`/api/downloadAllPeers/${this.configuration.Name}`, {}, (res) => {
+				console.log(res);
+				window.wireguard.generateZipFiles(res, this.configuration.Name)
+			})
 		}
 	},
 	mounted() {
@@ -62,13 +70,12 @@ export default {
 <template>
 	<div>
 		<div class="d-flex gap-2 mb-3 z-3">
-<!--			<h4 class="mb-0">Peers</h4>-->
 			<RouterLink
 				to="create"
 				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
 				<i class="bi bi-plus-lg me-2"></i>Peers
 			</RouterLink>
-			<button class="btn btn-sm btn-info rounded-3">
+			<button class="btn btn-sm btn-info rounded-3" @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
 			

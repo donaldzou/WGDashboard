@@ -15,6 +15,7 @@ import PeerSettings from "@/components/configurationComponents/peerSettings.vue"
 import PeerList from "@/components/configurationComponents/peerList.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import RestrictedPeers from "@/components/configurationComponents/restrictedPeers.vue";
+import Ping from "@/views/ping.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -33,7 +34,6 @@ const router = createRouter({
       component: Index,
       meta: {
         requiresAuth: true,
-        
       },
       children: [
         {
@@ -51,6 +51,11 @@ const router = createRouter({
           meta: {
             title: "Settings"
           }
+        },
+        {
+          path: '/ping',
+          name: "Ping",
+          component: Ping,
         },
         {
           name: "New Configuration",

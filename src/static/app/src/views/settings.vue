@@ -35,7 +35,7 @@ export default {
 </script>
 
 <template>
-	<div class="mt-4">
+	<div class="mt-5">
 		<div class="container">
 			<h3 class="mb-3 text-body">Settings</h3>
 			<DashboardTheme></DashboardTheme>

@@ -25,7 +25,7 @@ export default {
 
 <template>
 	
-	<div class="mt-4">
+	<div class="mt-5">
 		<div class="container">
 			<div class="d-flex mb-4 ">
 				<h3 class="text-body">WireGuard Configurations</h3>
@@ -39,7 +39,6 @@ export default {
 					<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">
 						You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".
 					</p>
-
 					<div class="d-flex gap-3 flex-column" v-else>
 						<ConfigurationCard  v-for="c in this.wireguardConfigurationsStore.Configurations" :key="c.Name" :c="c"></ConfigurationCard>
 					</div>

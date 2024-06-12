@@ -476,8 +476,9 @@ export default {
 		</div>
 		<div class="row gx-2 gy-2 mb-3">
 			<div class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent shadow-sm"  style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">Peers Total Data Usage</small></div>
+				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
+					<div class="card-header bg-transparent border-0">
+						<small class="text-muted">Peers Total Data Usage</small></div>
 					<div class="card-body pt-1">
 						<Bar
 							:data="individualDataUsage"
@@ -515,7 +516,7 @@ export default {
 <!--			<div class="d-flex align-items-center gap-3 mb-2">-->
 <!--				<h3>Peers</h3>-->
 <!--			</div>-->
-			<PeerSearch></PeerSearch>
+			<PeerSearch :configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
 				     :key="peer.id"
@@ -553,25 +554,5 @@ export default {
 	}
 }
 
-.list-move, /* apply transition to moving elements */
-.list-enter-active,
-.list-leave-active {
-	transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
-}
 
-.list-leave-active{
-	position: absolute;
-}
-
-.list-enter-from,
-.list-leave-to {
-	opacity: 0;
-	transform: translateY(30px);
-}
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.list-leave-active {
-	position: absolute;
-}
 </style>

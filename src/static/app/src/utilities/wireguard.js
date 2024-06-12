@@ -230,8 +230,8 @@
 		var offset = 0;
 
 		for (var i = 0; i < files.length; ++i) {
-			var name = encodeString(files[i].filename);
-			var contents = encodeString(files[i].content);
+			var name = encodeString(files[i].fileName);
+			var contents = encodeString(files[i].file);
 			var crc = crc32(contents);
 
 			putU32(b, 0x04034b50); /* signature */
@@ -297,12 +297,12 @@
 			return keyToBase64(generatePublicKey(privateKey));
 		},
 
-		generateZipFiles: function(res){
-			var files = res.peers;
+		generateZipFiles: function(res, zipFileName){
+			var files = res.data;
 			var zipFile = createZipFile(files);
 			var blob = new Blob([zipFile], { type: "application/zip" });
 			var a = document.createElement("a");
-			a.download = res.filename;
+			a.download = zipFileName;
 			a.href = URL.createObjectURL(blob);
 			a.style.display = "none";
 			document.body.appendChild(a);

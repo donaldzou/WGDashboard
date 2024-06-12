@@ -1093,3 +1093,25 @@ pre.index-alert {
     transform: scale(0.8);
     opacity: 0;
 }
+
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+}
+
+.list-leave-active{
+    position: absolute;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-leave-active {
+    position: absolute;
+}
