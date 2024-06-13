@@ -115,7 +115,7 @@ export default {
 				<div class="col-sm-8">
 					<TransitionGroup name="ping">
 						<div v-if="!this.pingResult" key="pingPlaceholder">
-							<div class="pingPlaceholder bg-dark rounded-3 mb-3"
+							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
 							      :class="{'animate__animated animate__flash animate__slower animate__infinite': this.pinging}"
 							     :style="{'animation-delay': `${x*0.15}s`}"
 							     v-for="x in 4" ></div>

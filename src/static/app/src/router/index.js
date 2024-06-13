@@ -16,6 +16,7 @@ import PeerList from "@/components/configurationComponents/peerList.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import RestrictedPeers from "@/components/configurationComponents/restrictedPeers.vue";
 import Ping from "@/views/ping.vue";
+import Traceroute from "@/views/traceroute.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -56,6 +57,11 @@ const router = createRouter({
           path: '/ping',
           name: "Ping",
           component: Ping,
+        },
+        {
+          path: '/traceroute',
+          name: "Traceroute",
+          component: Traceroute,
         },
         {
           name: "New Configuration",

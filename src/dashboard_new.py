@@ -1346,6 +1346,43 @@ def API_ping_execute():
     return ResponseObject(False, "Please provide ipAddress and count")
 
 
+@app.route('/api/traceroute/execute')
+def API_traceroute_execute():
+    if "ipAddress" in request.args.keys() and len(request.args.get("ipAddress")) > 0:
+        ipAddress = request.args.get('ipAddress')
+        try:
+            tracerouteResult = traceroute(ipAddress)
+            result = []
+            for hop in tracerouteResult:
+                if len(result) > 1:
+                    skipped = False
+                    for i in range(result[-1]["hop"] + 1, hop.distance):
+                        result.append(
+                            {
+                                "hop": i,
+                                "ip": "*",
+                                "avg_rtt": "*",
+                                "min_rtt": "*",
+                                "max_rtt": "*"
+                            }
+                        )
+                        skip = True
+                    if skipped: continue
+                result.append(
+                    {
+                        "hop": hop.distance,
+                        "ip": hop.address,
+                        "avg_rtt": hop.avg_rtt,
+                        "min_rtt": hop.min_rtt,
+                        "max_rtt": hop.max_rtt
+                    })
+            return ResponseObject(data=result)
+        except Exception as exp:
+            return ResponseObject(False, exp)
+    else:
+        return ResponseObject(False, "Please provide ipAddress")
+
+
 '''
 Sign Up
 '''

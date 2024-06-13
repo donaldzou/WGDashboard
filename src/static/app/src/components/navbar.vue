@@ -44,8 +44,10 @@ export default {
 				</h6>
 				<ul class="nav flex-column">
 					<li class="nav-item">
-						<RouterLink to="/ping" class="nav-link">Ping</RouterLink></li>
-					<li class="nav-item"><a class="nav-link" data-toggle="modal" data-target="#traceroute_modal" href="#">Traceroute</a></li>
+						<RouterLink to="/ping" class="nav-link" active-class="active">Ping</RouterLink></li>
+					<li class="nav-item">
+						<RouterLink to="/traceroute" class="nav-link" active-class="active">Traceroute</RouterLink>
+					</li>
 				</ul>
 				<hr>
 				<ul class="nav flex-column">
