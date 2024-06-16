@@ -1240,7 +1240,7 @@ def add_peer(config_name):
         return "Please fill in all required box."
     if not isinstance(keys, list):
         return config_name + " is not running."
-    if public_key in keys:d;lp
+    if public_key in keys:
         return "Public key already exist."
     check_dup_ip = g.cur.execute(
         "SELECT COUNT(*) FROM " + config_name + " WHERE allowed_ip LIKE '" + allowed_ips + "/%'", ) \

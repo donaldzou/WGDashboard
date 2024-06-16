@@ -6,6 +6,9 @@ services:
     build: 
       context: ./
       dockerfile: ./Dockerfile
+    # if you want to use newer "testing" ui
+    # environment:
+    #   - DASHBOARD_VERSON=new
     cap_add: 
       - NET_ADMIN
       - SYS_MODULE
