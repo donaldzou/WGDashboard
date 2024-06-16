@@ -17,6 +17,7 @@ import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import RestrictedPeers from "@/components/configurationComponents/restrictedPeers.vue";
 import Ping from "@/views/ping.vue";
 import Traceroute from "@/views/traceroute.vue";
+import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -88,6 +89,11 @@ const router = createRouter({
               name: "Peers Create",
               path: 'create',
               component: PeerCreate
+            },
+            {
+              name: "Peer Jobs",
+              path: 'jobs',
+              component: PeerJobs
             },
           ]
         },

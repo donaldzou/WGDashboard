@@ -75,12 +75,18 @@ export default {
 				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
 				<i class="bi bi-plus-lg me-2"></i>Peers
 			</RouterLink>
-			<button class="btn btn-sm btn-info rounded-3" @click="this.downloadAllPeer()">
+			
+			<RouterLink
+				to="jobs"
+				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
+				<i class="bi bi-app-indicator me-2"></i>Jobs
+			</RouterLink>
+			<button class="btn btn-sm btn-primary rounded-3" @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
 			
 			<div class="dropdown ms-auto">
-				<button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<button class="btn btn-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-filter-circle me-2"></i>
 					Sort
 				</button>
@@ -95,7 +101,7 @@ export default {
 				</ul>
 			</div>
 			<div class="dropdown">
-				<button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<button class="btn btn-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval
 				</button>
 				<ul class="dropdown-menu shadow mt-2 rounded-3">
