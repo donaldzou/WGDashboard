@@ -91,6 +91,52 @@ class CustomJsonEncoder(DefaultJSONProvider):
 app.json = CustomJsonEncoder(app)
 
 
+class PeerJob:
+    def __init__(self, JobID: str, Configuration: str, Peer: str,
+                 Field: str, Operator: str, Value: str, CreationDate: datetime, ExpireDate: datetime, Action: str):
+        self.Action = Action
+        self.ExpireDate = ExpireDate
+        self.CreationDate = CreationDate
+        self.Value = Value
+        self.Operator = Operator
+        self.Field = Field
+        self.Configuration = Configuration
+        self.Peer = Peer
+        self.JobID = JobID
+
+    def toJson(self):
+        return {
+            "JobID": self.JobID,
+            "Configuration": self.Configuration,
+            "Peer": self.Peer,
+            "Field": self.Field,
+            "Operator": self.Operator,
+            "Value": self.Value,
+            "CreationDate": self.CreationDate.strftime("%Y-%m-%d %H:%M:%S"),
+            "ExpireDate": self.ExpireDate.strftime("%Y-%m-%d %H:%M:%S"),
+            "Action": self.Action
+        }
+
+
+class PeerJobs:
+
+    def __init__(self):
+        self.Jobs: list[PeerJob] = []
+
+    def __getJobs(self):
+        jobs = jobdbCursor.execute("SELECT * FROM PeerJobs WHERE CURRENT_DATE < ExpireDate").fetchall()
+        for job in jobs:
+            self.Jobs.append(PeerJob(
+                job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+                job['CreationDate'], job['ExpireDate'], job['Action']))
+
+    def toJson(self):
+        return [x.toJson() for x in self.Jobs]
+
+    def searchJob(self, Configuration: str, Peer: str):
+        return list(filter(lambda x: x.Configuration == Configuration and x.Peer == Peer, self.Jobs))
+
+
 class WireguardConfiguration:
     class InvalidConfigurationFileException(Exception):
         def __init__(self, m):
@@ -826,6 +872,7 @@ class DashboardConfig:
 
 DashboardConfig = DashboardConfig()
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
+AllPeerJobs: PeerJobs = PeerJobs()
 
 '''
 Private Functions
@@ -1466,11 +1513,38 @@ def backGroundThread():
             time.sleep(10)
 
 
+def createPeerJobsDatabase():
+    existingTable = jobdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+    existingTable = [t['name'] for t in existingTable]
+
+    if "PeerJobs" not in existingTable:
+        jobdbCursor.execute('''
+        CREATE TABLE PeerJobs (JobID VARCHAR NOT NULL, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
+        Field VARCHAR NOT NULL, Operator VARCHAR NOT NULL, Value VARCHAR NOT NULL, CreationDate DATETIME,
+        ExpireDate DATETIME, Action VARCHAR NOT NULL, PRIMARY KEY (JobID))
+        ''')
+        jobdb.commit()
+
+    if "PeerJobs_Logs" not in existingTable:
+        jobdbCursor.execute('''
+        CREATE TABLE PeerJobs_Logs (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME, Status VARCHAR NOT NULL,
+        Message VARCHAR NOT NULL, PRIMARY KEY (LogID))
+        ''')
+        jobdb.commit()
+
+
 if __name__ == "__main__":
-    # engine = create_engine("sqlite:///" + os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
     sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
     sqldb.row_factory = sqlite3.Row
     cursor = sqldb.cursor()
+
+    # Database for the background job
+    jobdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_job.db'), check_same_thread=False)
+    jobdb.row_factory = sqlite3.Row
+    jobdbCursor = jobdb.cursor()
+    createPeerJobsDatabase()
+
+    # End
 
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
