@@ -102,7 +102,7 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   gunicorn --access-logfile log/access_"$d".log \
-  --error-logfile log/error_"$d".log 'dashboard:run_dashboard()'
+  --error-logfile log/error_"$d".log 'dashboard:runGunicorn()'
   printf "| Log files is under log/                                  |\n"
   printf "%s\n" "$dashes"
 }

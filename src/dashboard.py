@@ -11,23 +11,16 @@ import secrets
 import subprocess
 import time
 import re
-import urllib.parse
-import urllib.request
-import urllib.error
 import uuid
-from dataclasses import dataclass
 from datetime import datetime, timedelta
-from json import JSONEncoder
-from operator import itemgetter
-from typing import Dict, Any, Tuple
+from typing import Any
 
 import bcrypt
 # PIP installed library
 import ifcfg
 import psutil
 import pyotp
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
-from flask.json.provider import JSONProvider
+from flask import Flask, request, render_template, session
 from json import JSONEncoder
 
 from icmplib import ping, traceroute
@@ -1545,6 +1538,25 @@ def backGroundThread():
                     except Exception as e:
                         print("Error: " + str(e))
             time.sleep(10)
+
+
+def gunicornConfig():
+    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
+    return app_ip, app_port
+
+
+def runGunicorn():
+    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+    sqldb.row_factory = sqlite3.Row
+    cursor = sqldb.cursor()
+    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
+    WireguardConfigurations = _getConfigurationList()
+    bgThread = threading.Thread(target=backGroundThread)
+    bgThread.daemon = True
+    bgThread.start()
+    return app
 
 
 if __name__ == "__main__":
