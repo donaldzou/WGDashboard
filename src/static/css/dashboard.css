@@ -1115,3 +1115,8 @@ pre.index-alert {
 .list-leave-active {
     position: absolute;
 }
+
+.peerSettingContainer {
+    background-color: #00000060;
+    z-index: 9999;
+}

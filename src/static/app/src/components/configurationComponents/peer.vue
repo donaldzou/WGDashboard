@@ -86,6 +86,7 @@ export default {
 						<PeerSettingsDropdown 
 							@qrcode="(file) => this.$emit('qrcode', file)"
 							@setting="this.$emit('setting')"
+							@jobs="this.$emit('jobs')"
 							@refresh="this.$emit('refresh')"
 							:Peer="Peer"
 							v-if="this.subMenuOpened"

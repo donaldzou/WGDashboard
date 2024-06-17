@@ -175,10 +175,6 @@ export default {
 						>
 							Save Peer<i class="bi bi-save-fill ms-2"></i></button>
 					</div>
-					
-					
-					
-					
 				</div>
 			</div>
 		</div>
@@ -187,10 +183,6 @@ export default {
 </template>
 
 <style scoped>
-.peerSettingContainer {
-	background-color: #00000060;
-	z-index: 1000;
-}
 .toggleShowKey{
 	position: absolute;
 	top: 35px;

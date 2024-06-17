@@ -90,11 +90,7 @@ const router = createRouter({
               path: 'create',
               component: PeerCreate
             },
-            {
-              name: "Peer Jobs",
-              path: 'jobs',
-              component: PeerJobs
-            },
+            
           ]
         },
         

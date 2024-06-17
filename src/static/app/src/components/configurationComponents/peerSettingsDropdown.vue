@@ -102,6 +102,13 @@ export default {
 					<i class="me-auto bi bi-pen"></i> Edit
 				</a>
 			</li>
+			<li>
+				<a class="dropdown-item d-flex" role="button"
+				   @click="this.$emit('jobs')"
+				>
+					<i class="me-auto bi bi-app-indicator"></i> Schedule Jobs
+				</a>
+			</li>
 			<template v-if="this.Peer.private_key">
 				<li>
 					<a class="dropdown-item d-flex" role="button" @click="this.downloadPeer()">

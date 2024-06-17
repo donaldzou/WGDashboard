@@ -36,6 +36,7 @@ import dayjs from "dayjs";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
+import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
 
 Chart.register(
 	ArcElement,
@@ -65,7 +66,7 @@ Chart.register(
 
 export default {
 	name: "peerList",
-	components: {PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+	components: {PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -105,6 +106,10 @@ export default {
 				],
 			},
 			peerSetting: {
+				modalOpen: false,
+				selectedPeer: undefined
+			},
+			peerScheduleJobs:{
 				modalOpen: false,
 				selectedPeer: undefined
 			},
@@ -523,6 +528,7 @@ export default {
 				     v-for="peer in this.searchPeers">
 					<Peer :Peer="peer"
 					      @refresh="this.getPeers()"
+					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
 					></Peer>
@@ -530,18 +536,33 @@ export default {
 			</TransitionGroup>
 		</div>
 		<Transition name="fade">
-			<PeerSettings v-if="this.peerSetting.modalOpen" 
+			<PeerSettings v-if="this.peerSetting.modalOpen"
+			              key="settings"
 			              :selectedPeer="this.peerSetting.selectedPeer"
 			              @refresh="this.getPeers()"
 			              @close="this.peerSetting.modalOpen = false">
 			</PeerSettings>
-			
 		</Transition>
 		<Transition name="fade">
-			<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData" 
+			<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData"
+			            key="qrcode"
 			            @close="this.peerQRCode.modalOpen = false"
 			            v-if="peerQRCode.modalOpen"></PeerQRCode>
 		</Transition>
+		<Transition name="fade">
+			<PeerJobs
+				v-if="this.peerScheduleJobs.modalOpen"
+				:selectedPeer="this.peerScheduleJobs.selectedPeer"
+				@close="this.peerScheduleJobs.modalOpen = false">
+			</PeerJobs>
+		</Transition>
+		
+<!--		<Transition name="fade">-->
+<!--			-->
+<!--		</Transition>-->
+<!--		<Transition name="fade">-->
+<!--			-->
+<!--		</Transition>-->
 	</div>
 </template>
 

@@ -76,11 +76,11 @@ export default {
 				<i class="bi bi-plus-lg me-2"></i>Peers
 			</RouterLink>
 			
-			<RouterLink
-				to="jobs"
-				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
-				<i class="bi bi-app-indicator me-2"></i>Jobs
-			</RouterLink>
+<!--			<RouterLink-->
+<!--				to="jobs"-->
+<!--				class="text-decoration-none btn btn-primary rounded-3 btn-sm">-->
+<!--				<i class="bi bi-app-indicator me-2"></i>Jobs-->
+<!--			</RouterLink>-->
 			<button class="btn btn-sm btn-primary rounded-3" @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
