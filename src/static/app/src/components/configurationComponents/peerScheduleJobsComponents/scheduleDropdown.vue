@@ -6,6 +6,7 @@ export default {
 	props: {
 		options: Array,
 		data: String,
+		edit: false
 	},
 	mounted() {
 		console.log(this.options)
@@ -19,8 +20,8 @@ export default {
 </script>
 
 <template>
-	<div class="dropdown">
-		<button class="btn btn-sm btn-outline-primary rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+	<div class="dropdown scheduleDropdown">
+		<button class="btn btn-sm btn-outline-primary rounded-3" :class="{disabled: !edit}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 			<samp>{{this.currentSelection.display}}</samp>
 		</button>
 		<ul class="dropdown-menu rounded-3 shadow" style="font-size: 0.875rem; width: 200px">
@@ -35,5 +36,8 @@ export default {
 </template>
 
 <style scoped>
-
+.btn.disabled{
+	opacity: 1;
+	background-color: rgba(13, 110, 253, 0.09);
+}
 </style>

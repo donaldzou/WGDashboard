@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# wgd.sh - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]
+# wgd.sh - Copyright(C) 2024 Donald Zou [https://github.com/donaldzou]
 # Under Apache-2.0 License
 app_name="dashboard.py"
 app_official_name="WGDashboard"
@@ -102,7 +102,8 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   gunicorn --access-logfile log/access_"$d".log \
-  --error-logfile log/error_"$d".log 'dashboard:runGunicorn()'
+  --log-level 'debug' --capture-output \
+  --error-logfile log/error_"$d".log 'dashboard:app'
   printf "| Log files is under log/                                  |\n"
   printf "%s\n" "$dashes"
 }

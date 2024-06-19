@@ -1546,29 +1546,30 @@ def gunicornConfig():
     return app_ip, app_port
 
 
-def runGunicorn():
-    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-    sqldb.row_factory = sqlite3.Row
-    cursor = sqldb.cursor()
-    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
-    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
-    WireguardConfigurations = _getConfigurationList()
-    bgThread = threading.Thread(target=backGroundThread)
-    bgThread.daemon = True
-    bgThread.start()
-    return app
+# def runGunicorn():
+#     sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+#     sqldb.row_factory = sqlite3.Row
+#     cursor = sqldb.cursor()
+#     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+#     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
+#     WireguardConfigurations = _getConfigurationList()
+#     bgThread = threading.Thread(target=backGroundThread)
+#     bgThread.daemon = True
+#     bgThread.start()
+#     return app
 
+
+sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+sqldb.row_factory = sqlite3.Row
+cursor = sqldb.cursor()
+_, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+_, app_port = DashboardConfig.GetConfig("Server", "app_port")
+_, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
+WireguardConfigurations = _getConfigurationList()
+bgThread = threading.Thread(target=backGroundThread)
+bgThread.daemon = True
+bgThread.start()
 
 if __name__ == "__main__":
-    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-    sqldb.row_factory = sqlite3.Row
-    cursor = sqldb.cursor()
-    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
-    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
-    _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
-    WireguardConfigurations = _getConfigurationList()
-    bgThread = threading.Thread(target=backGroundThread)
-    bgThread.daemon = True
-    bgThread.start()
-
     app.run(host=app_ip, debug=True, port=app_port)
+

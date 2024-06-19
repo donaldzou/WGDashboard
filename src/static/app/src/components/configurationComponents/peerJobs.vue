@@ -16,19 +16,26 @@ export default {
 				Field: [
 					{
 						display: "Total Received",
-						value: "total_receive"
+						value: "total_receive",
+						unit: "GB",
+						type: 'number'
 					},
 					{
 						display: "Total Sent",
-						value: "total_sent"
+						value: "total_sent",
+						unit: "GB",
+						type: 'number'
 					},
 					{
 						display: "Total Data",
-						value: "total_data"
+						value: "total_data",
+						unit: "GB",
+						type: 'number'
 					},
 					{
 						display: "Date",
-						value: "date"
+						value: "date",
+						type: 'date'
 					}
 				],
 				Operator: [
@@ -62,8 +69,7 @@ export default {
 			},
 			
 		}	
-	},
-	
+	}
 }
 </script>
 
@@ -78,22 +84,15 @@ export default {
 					<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 				</div>
 				<div class="card-body px-4 pb-4 pt-0">
-					<div class="d-flex">
-						<small class="text-muted">
-							Name
-						</small>
-						<small class="ms-auto">{{selectedPeer.name ? selectedPeer.name : "Untitled Peer"}}</small>
-					</div>					
-					<div class="mb-4 d-flex">
-						<small class="text-muted">
-							Public Key
-						</small>
-						<small class="ms-auto"><samp>{{this.selectedPeer.id}}</samp></small>
-					</div>
+<!--					<div class="d-flex gap-2 mb-3">-->
+<!--						<small>{{selectedPeer.name ? selectedPeer.name : "Untitled Peer"}}</small>-->
+<!--						<small class="ms-auto"><samp>{{this.selectedPeer.id}}</samp></small>-->
+<!--					</div>-->
+					
 					
 					<SchedulePeerJob 
 						:dropdowns="this.dropdowns" 
-						:job="job" v-for="job in this.selectedPeer.jobs">
+						:pjob="job" v-for="job in this.selectedPeer.jobs">
 					</SchedulePeerJob>
 				</div>
 			</div>
