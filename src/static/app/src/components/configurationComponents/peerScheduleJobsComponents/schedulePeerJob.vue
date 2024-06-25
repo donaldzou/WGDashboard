@@ -1,5 +1,8 @@
 <script>
 import ScheduleDropdown from "@/components/configurationComponents/peerScheduleJobsComponents/scheduleDropdown.vue";
+import {ref} from "vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {fetchPost} from "@/utilities/fetch.js";
 
 export default {
 	name: "schedulePeerJob",
@@ -8,22 +11,45 @@ export default {
 		dropdowns: Array[Object],
 		pjob: Object
 	},
+	setup(props){
+		const job = ref({})
+		const edit = ref(false)
+		const newJob = ref(false)
+		job.value = JSON.parse(JSON.stringify(props.pjob))
+		if (!job.value.CreationDate){
+			edit.value = true
+			newJob.value = true
+		}
+		const store = DashboardConfigurationStore()
+		return {job, edit, newJob, store}
+	},
 	data(){
 		return {
-			job: Object,
 			inputType: undefined,
-			edit: false
 		}
 	},
-	beforeMount() {
-		this.job = JSON.parse(JSON.stringify(this.pjob))
+	watch:{
+		pjob: {
+			deep: true,
+			handler(newValue){
+				this.job = JSON.parse(JSON.stringify(newValue))
+			}
+		}	
 	},
 	methods: {
 		save(){
 			if (this.job.Field && this.job.Operator && this.job.Action && this.job.Value){
-				if (this.job.Field === 'date'){
-					this.job.Value = new Date(this.job.Value).getTime();
-				}
+				fetchPost(`/api/savePeerScheduleJob/`, {
+					Job: this.job
+				}, (res) => {
+					if (res.status){
+						this.edit = false;
+						this.store.newMessage("Server", "Job Saved!", "success")
+						this.$emit("refresh")
+					}else{
+						this.store.newMessage("Server", res.message, "danger")
+					}
+				})
 			}else{
 				this.alert();
 			}
@@ -40,23 +66,28 @@ export default {
 			}, 2000)
 		},
 		reset(){
-			this.job = JSON.parse(JSON.stringify(this.pjob));
-			this.edit = false;
+			if(this.job.CreationDate){
+				this.job = JSON.parse(JSON.stringify(this.pjob));
+				this.edit = false;
+			}else{
+				this.$emit('delete')
+			}
 		}
 	},
 }
 </script>
 
 <template>
-	<div class="card shadow-sm rounded-3">
+	<div class="card shadow-sm rounded-3 mb-2" :class="{'border-warning-subtle': this.newJob}">
 		<div class="card-header bg-transparent text-muted border-0">
-			<small class="d-flex">
+			<small class="d-flex" v-if="!this.newJob">
 				<strong class="me-auto">Job ID</strong>
 				<samp>{{this.job.JobID}}</samp>
 			</small>
+			<small v-else><span class="badge text-bg-warning">Unsaved Job</span></small>
 		</div>
 		<div class="card-body pt-1" style="font-family: var(--bs-font-monospace)">
-			<div class="d-flex gap-3 align-items-center mb-2">
+			<div class="d-flex gap-2 align-items-center mb-2">
 				<samp>
 					if
 				</samp>
@@ -87,18 +118,17 @@ export default {
 				       v-model="this.job.Value"
 				       style="width: auto">
 				<samp>
-					{{this.dropdowns.Field.find(x => x.value === this.job.Field).unit}} {
+					{{this.dropdowns.Field.find(x => x.value === this.job.Field)?.unit}} {
 				</samp>
 			</div>
-			<div class="px-5 d-flex gap-3 align-items-center">
-				<samp>execute</samp>
+			<div class="px-5 d-flex gap-2 align-items-center">
+				<samp>then</samp>
 				<ScheduleDropdown
 					:edit="edit"
 					:options="this.dropdowns.Action"
 					:data="this.job.Action"
 					@update="(value) => this.job.Action = value"
 				></ScheduleDropdown>
-				<samp>;</samp>
 			</div>
 			<div class="d-flex gap-3">
 				<samp>}</samp>
@@ -123,5 +153,11 @@ export default {
 </template>
 
 <style scoped>
+*{
+	font-size: 0.875rem;
+}
 
+input{
+	padding: 0.1rem 0.4rem;
+}
 </style>

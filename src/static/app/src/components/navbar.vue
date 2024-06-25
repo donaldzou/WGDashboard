@@ -14,8 +14,8 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3">
-		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow" >
+	<div class="col-md-3 col-lg-2 d-md-block p-3" style="height: calc(-50px + 100vh);">
+		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky pt-3">
 				<ul class="nav flex-column">
 					<li class="nav-item">

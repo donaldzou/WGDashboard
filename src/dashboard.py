@@ -126,6 +126,7 @@ class PeerJobs:
         self.__getJobs()
 
     def __getJobs(self):
+        self.Jobs.clear()
         jobs = self.jobdbCursor.execute("SELECT * FROM PeerJobs WHERE ExpireDate IS NULL").fetchall()
         for job in jobs:
             self.Jobs.append(PeerJob(
@@ -157,6 +158,22 @@ class PeerJobs:
 
     def searchJob(self, Configuration: str, Peer: str):
         return list(filter(lambda x: x.Configuration == Configuration and x.Peer == Peer, self.Jobs))
+
+    def saveJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
+        try:
+            if (len(str(Job.CreationDate))) == 0:
+                self.jobdbCursor.execute('''
+                INSERT INTO PeerJobs VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%d %H:%M:%S','now'), NULL, ?)
+                ''', (Job.JobID, Job.Configuration, Job.Peer, Job.Field, Job.Operator, Job.Value, Job.Action,))
+            else:
+                self.jobdbCursor.execute('''
+                    UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
+                    ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
+            self.jobdb.commit()
+            self.__getJobs()
+            return True, list(filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID, self.Jobs))
+        except Exception as e:
+            return False, str(e)
 
 
 class WireguardConfiguration:
@@ -233,7 +250,6 @@ class WireguardConfiguration:
                 self.__parser.write(configFile)
 
         self.Peers: list[Peer] = []
-
         # Create tables in database
         self.__createDatabase()
         self.getPeersList()
@@ -638,6 +654,7 @@ class Peer:
         self.getJobs()
 
     def toJson(self):
+        self.getJobs()
         return self.__dict__
 
     def __repr__(self):
@@ -1368,6 +1385,32 @@ def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
 
 
+@app.route('/api/savePeerScheduleJob/', methods=["POST"])
+def API_savePeerScheduleJob():
+    data = request.json
+    if "Job" not in data.keys() not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please specify job")
+    job: dict = data['Job']
+    if "Peer" not in job.keys() or "Configuration" not in job.keys():
+        return ResponseObject(False, "Please specify peer and configuration")
+    configuration = WireguardConfigurations.get(job['Configuration'])
+    f, fp = configuration.searchPeer(job['Peer'])
+    if not f:
+        return ResponseObject(False, "Peer does not exist in this configuration")
+
+    s, p = AllPeerJobs.saveJob(PeerJob(
+        job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+        job['CreationDate'], job['ExpireDate'], job['Action']))
+    if s:
+        return ResponseObject(s, data=p)
+    return ResponseObject(s, message=p)
+
+
+'''
+Tools
+'''
+
+
 @app.route('/api/ping/getAllPeersIpAddress')
 def API_ping_getAllPeersIpAddress():
     ips = {}
@@ -1546,19 +1589,6 @@ def gunicornConfig():
     return app_ip, app_port
 
 
-# def runGunicorn():
-#     sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-#     sqldb.row_factory = sqlite3.Row
-#     cursor = sqldb.cursor()
-#     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
-#     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
-#     WireguardConfigurations = _getConfigurationList()
-#     bgThread = threading.Thread(target=backGroundThread)
-#     bgThread.daemon = True
-#     bgThread.start()
-#     return app
-
-
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
 cursor = sqldb.cursor()
@@ -1572,4 +1602,3 @@ bgThread.start()
 
 if __name__ == "__main__":
     app.run(host=app_ip, debug=True, port=app_port)
-

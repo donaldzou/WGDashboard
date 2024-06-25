@@ -8,8 +8,10 @@ export default {
 		data: String,
 		edit: false
 	},
-	mounted() {
-		console.log(this.options)
+	setup(props) {
+		if (props.data === undefined){
+			this.$emit('update', this.options[0].value)
+		}
 	},
 	computed:{
 		currentSelection(){
@@ -21,7 +23,8 @@ export default {
 
 <template>
 	<div class="dropdown scheduleDropdown">
-		<button class="btn btn-sm btn-outline-primary rounded-3" :class="{disabled: !edit}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+		<button class="btn btn-sm btn-outline-primary rounded-3" 
+		        :class="{'disabled': !edit}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 			<samp>{{this.currentSelection.display}}</samp>
 		</button>
 		<ul class="dropdown-menu rounded-3 shadow" style="font-size: 0.875rem; width: 200px">
@@ -39,5 +42,8 @@ export default {
 .btn.disabled{
 	opacity: 1;
 	background-color: rgba(13, 110, 253, 0.09);
+}
+.btn{
+	//padding: 0.1rem 0.4rem;
 }
 </style>

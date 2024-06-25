@@ -1120,3 +1120,12 @@ pre.index-alert {
     background-color: #00000060;
     z-index: 9999;
 }
+
+.dashboardModal{
+    min-height: calc(100% - 1.75rem * 2); 
+    width: 700px
+}
+
+.dashboardModal > .card{
+    margin: 1.75rem;
+}

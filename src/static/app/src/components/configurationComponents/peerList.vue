@@ -551,6 +551,7 @@ export default {
 		</Transition>
 		<Transition name="fade">
 			<PeerJobs
+				@refresh="this.getPeers()"
 				v-if="this.peerScheduleJobs.modalOpen"
 				:selectedPeer="this.peerScheduleJobs.selectedPeer"
 				@close="this.peerScheduleJobs.modalOpen = false">

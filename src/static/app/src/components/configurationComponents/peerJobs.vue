@@ -3,6 +3,7 @@ import ScheduleDropdown from "@/components/configurationComponents/peerScheduleJ
 import SchedulePeerJob from "@/components/configurationComponents/peerScheduleJobsComponents/schedulePeerJob.vue";
 export default {
 	name: "peerJobs",
+	
 	props:{
 		selectedPeer: Object
 	},
@@ -67,33 +68,65 @@ export default {
 					}
 				]
 			},
-			
-		}	
+		}
+	},
+	methods:{
+		
+		deleteJob(j, index){
+			if (j.CreationDate){
+
+			}else{
+				this.selectedPeer.jobs = this.selectedPeer.jobs.filter(x => x.JobID !== j.JobID)
+			}
+		},
+		addJob(){
+			this.selectedPeer.jobs.push(JSON.parse(JSON.stringify({
+				JobID: crypto.randomUUID(),
+				Configuration: this.selectedPeer.configuration.Name,
+				Peer: this.selectedPeer.id,
+				Field: this.dropdowns.Field[0].value,
+				Operator: this.dropdowns.Operator[0].value,
+				Value: "",
+				CreationDate: "",
+				ExpireDate: "",
+				Action: this.dropdowns.Action[0].value
+			}))
+			)
+		}
 	}
 }
 </script>
 
 <template>
-	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0">
+	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
-			<div class="card m-auto rounded-3 shadow" style="width: 700px">
-				<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-					<h4 class="mb-0 fw-normal">Schedule Jobs
-						<strong></strong>
-					</h4>
-					<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
-				</div>
-				<div class="card-body px-4 pb-4 pt-0">
-<!--					<div class="d-flex gap-2 mb-3">-->
-<!--						<small>{{selectedPeer.name ? selectedPeer.name : "Untitled Peer"}}</small>-->
-<!--						<small class="ms-auto"><samp>{{this.selectedPeer.id}}</samp></small>-->
-<!--					</div>-->
-					
-					
-					<SchedulePeerJob 
-						:dropdowns="this.dropdowns" 
-						:pjob="job" v-for="job in this.selectedPeer.jobs">
-					</SchedulePeerJob>
+			<div class="m-auto modal-dialog-centered dashboardModal">
+				<div class="card rounded-3 shadow" style="width: 700px">
+					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
+						<h4 class="mb-0 fw-normal">Schedule Jobs
+							<strong></strong>
+						</h4>
+						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
+					</div>
+					<div class="card-body px-4 pb-4 pt-2">
+						<div class="d-flex align-items-center mb-3">
+							<input class="form-control form-control-sm w-auto rounded-3" placeholder="Search Job...">
+							<button class="btn btn-sm btn-primary rounded-3 ms-auto" @click="this.addJob()">
+								<i class="bi bi-plus-lg me-2"></i> Job
+							</button>
+						</div>
+
+
+						<TransitionGroup name="fade">
+							<SchedulePeerJob
+								@refresh="this.$emit('refresh')"
+								@delete="this.deleteJob(job)"
+								:dropdowns="this.dropdowns"
+								:key="job.JobID"
+								:pjob="job" v-for="(job) in this.selectedPeer.jobs">
+							</SchedulePeerJob>
+						</TransitionGroup>
+					</div>
 				</div>
 			</div>
 		</div>
