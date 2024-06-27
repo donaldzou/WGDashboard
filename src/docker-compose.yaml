@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+
+  web:
+    build: 
+      context: .
+    container_name: WGDashboard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE  
+    command:   python dashboard.py
+    #command:  gunicorn --bind 0.0.0.0:10086  dashboard:app
+    restart: unless-stopped 
+    volumes:
+      - ./dashboard.py:/opt/WGDashboard/src/dashboard.py:rw
+    ports:
+      - 10086:10086
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1  
