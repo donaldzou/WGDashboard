@@ -134,8 +134,8 @@ update_wgd() {
   new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
   printf "| Are you sure you want to update to the %s? (Y/N): " "$new_ver"
-  read up
-  if [ "$up" = "Y" ]; then
+  read -p '> ' up
+  if [[ "$up" =~ ^[yY]$ ]]; then
     printf "| Shutting down WGDashboard...                             |\n"
     if check_wgd_status; then
       stop_wgd
