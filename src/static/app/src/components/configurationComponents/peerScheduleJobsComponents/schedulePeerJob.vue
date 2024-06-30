@@ -31,7 +31,9 @@ export default {
 	watch:{
 		pjob: {
 			deep: true,
+			immediate: true,
 			handler(newValue){
+				console.log(newValue)
 				this.job = JSON.parse(JSON.stringify(newValue))
 			}
 		}	
@@ -45,7 +47,8 @@ export default {
 					if (res.status){
 						this.edit = false;
 						this.store.newMessage("Server", "Job Saved!", "success")
-						this.$emit("refresh")
+						this.$emit("refresh", this.data)
+						this.newJob = false;
 					}else{
 						this.store.newMessage("Server", res.message, "danger")
 					}
@@ -72,6 +75,22 @@ export default {
 			}else{
 				this.$emit('delete')
 			}
+		},
+		delete(){
+			if(this.job.CreationDate){
+				fetchPost(`/api/deletePeerScheduleJob/`, {
+					Job: this.job
+				}, (res) => {
+					if (!res.status){
+						this.store.newMessage("Server", res.message, "danger")
+						this.$emit('delete')
+					}else{
+						this.store.newMessage("Server", "Job Deleted!", "success")
+					}
+					
+				})
+			}
+			this.$emit('delete')
 		}
 	},
 }
@@ -137,6 +156,7 @@ export default {
 					   class="ms-auto text-decoration-none"
 					   @click="this.edit = true">[E] Edit</a>
 					<a role="button"
+					   @click="this.delete()"
 					   class=" text-danger text-decoration-none">[D] Delete</a>
 				</div>
 				<div class="ms-auto d-flex gap-3" v-else>
@@ -159,5 +179,10 @@ export default {
 
 input{
 	padding: 0.1rem 0.4rem;
+}
+input:disabled{
+	border-color: transparent;
+	background-color: rgba(13, 110, 253, 0.09);
+	color: #0d6efd;
 }
 </style>

@@ -171,9 +171,81 @@ class PeerJobs:
                     ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
             self.jobdb.commit()
             self.__getJobs()
-            return True, list(filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID, self.Jobs))
+            return True, list(
+                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
+                       self.Jobs))
         except Exception as e:
             return False, str(e)
+
+    def deleteJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
+        try:
+            if (len(str(Job.CreationDate))) == 0:
+                return False, "Job does not exist"
+            self.jobdbCursor.execute('''
+                DELETE FROM PeerJobs WHERE JobID = ?
+            ''', (Job.JobID,))
+            self.jobdb.commit()
+            self.__getJobs()
+            return True, list(
+                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
+                       self.Jobs))
+        except Exception as e:
+            return False, str(e)
+
+    def finishJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
+        try:
+            if (len(str(Job.CreationDate))) == 0:
+                return False, "Job does not exist"
+            self.jobdbCursor.execute('''
+                UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobId = ?
+            ''', (Job.JobID,))
+            self.jobdb.commit()
+            self.__getJobs()
+            return True, list(
+                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
+                       self.Jobs))
+        except Exception as e:
+            return False, str(e)
+
+    def runJob(self):
+        print("======")
+        needToDelete = []
+        for job in self.Jobs:
+            print(job.toJson())
+            c = WireguardConfigurations.get(job.Configuration)
+            if c is not None:
+                f, fp = c.searchPeer(job.Peer)
+                if f:
+                    if job.Field in ["total_receive", "total_sent", "total_data"]:
+                        s = job.Field.split("_")[1]
+                        x: float = getattr(fp, f"total_{s}") + getattr(fp, f"cumu_{s}")
+                        y: float = float(job.Value)
+                    else:
+                        x: datetime = datetime.now()
+                        y: datetime = datetime.fromtimestamp(float(job.Value))
+
+                    runAction: bool = self.__runJob_Compare(x, y, job.Operator)
+                    print("Running Job:" + str(runAction) + "\n")
+                    if runAction:
+                        if job.Action == "restrict":
+                            print(str(c.restrictPeers([fp.id]).get_json()))
+                        elif job.Action == "delete":
+                            print(str(c.deletePeers([fp.id]).get_json()))
+                        needToDelete.append(job)
+
+        for j in needToDelete:
+            self.deleteJob(j)
+
+    def __runJob_Compare(self, x: float | datetime, y: float | datetime, operator: str):
+        print(x, y, operator)
+        if operator == "eq":
+            return x == y
+        if operator == "neq":
+            return x != y
+        if operator == "lgt":
+            return x > y
+        if operator == "lst":
+            return x < y
 
 
 class WireguardConfiguration:
@@ -1406,6 +1478,27 @@ def API_savePeerScheduleJob():
     return ResponseObject(s, message=p)
 
 
+@app.route('/api/deletePeerScheduleJob/', methods=['POST'])
+def API_deletePeerScheduleJob():
+    data = request.json
+    if "Job" not in data.keys() not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please specify job")
+    job: dict = data['Job']
+    if "Peer" not in job.keys() or "Configuration" not in job.keys():
+        return ResponseObject(False, "Please specify peer and configuration")
+    configuration = WireguardConfigurations.get(job['Configuration'])
+    f, fp = configuration.searchPeer(job['Peer'])
+    if not f:
+        return ResponseObject(False, "Peer does not exist in this configuration")
+
+    s, p = AllPeerJobs.deleteJob(PeerJob(
+        job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+        job['CreationDate'], job['ExpireDate'], job['Action']))
+    if s:
+        return ResponseObject(s, data=p)
+    return ResponseObject(s, message=p)
+
+
 '''
 Tools
 '''
@@ -1583,6 +1676,14 @@ def backGroundThread():
             time.sleep(10)
 
 
+def peerJobScheduleBackgroundThread():
+    with app.app_context():
+        print("-- Peer Schedule: Waiting 5 sec")
+        while True:
+            AllPeerJobs.runJob()
+            time.sleep(10)
+
+
 def gunicornConfig():
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
@@ -1600,5 +1701,9 @@ bgThread = threading.Thread(target=backGroundThread)
 bgThread.daemon = True
 bgThread.start()
 
+bg2Thread = threading.Thread(target=peerJobScheduleBackgroundThread)
+bg2Thread.daemon = True
+bg2Thread.start()
+
 if __name__ == "__main__":
-    app.run(host=app_ip, debug=True, port=app_port)
+    app.run(host=app_ip, debug=False, port=app_port)
