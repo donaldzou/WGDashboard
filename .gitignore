@@ -1,5 +1,4 @@
-.vscode/sftp.json
-src/.vscode/sftp.json
+.vscode
 .DS_Store
 .idea
 src/db
@@ -16,3 +15,4 @@ log/**
 release/*
 src/db/wgdashboard.db
 .jshintrc
+node_modules/

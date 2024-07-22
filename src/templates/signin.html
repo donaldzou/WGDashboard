@@ -14,29 +14,32 @@
         <div class="container-fluid login-container-fluid">
             <main role="main" class="container login-container">
                 <div class="login-box" style="margin: auto !important;">
-                    <h1 class="text-center">Sign In</h1>
+                    <h1 class="text-center">Sign in</h1>
+                    <h5 class="text-center">to WGDashboard</h5>
                     <form style="margin-left: auto !important; margin-right: auto !important; max-width: 500px;" action="/auth" method="post">
                         {% if message != "" %}
                             <div class="alert alert-warning" role="alert">You need to sign in first</div>
                         {% endif %}
-                        <div class="alert alert-danger d-none" role="alert"></div>
+                        <div class="alert alert-danger d-none" role="alert" style="margin-top: 1rem; margin-bottom: 0rem;"></div>
                         <div class="form-group">
-                            <label for="username" class="text-left" style="font-size: 1rem"><i class="bi bi-person-circle"></i> Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <label for="username" class="text-left" style="font-size: 1rem"><i class="bi bi-person-circle"></i></label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Your username" required>
                         </div>
                         <div class="form-group">
-                            <label for="password" class="text-left" style="font-size: 1rem"><i class="bi bi-key-fill"></i> Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <label for="password" class="text-left" style="font-size: 1rem"><i class="bi bi-key-fill"></i></label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Your password" required>
                         </div>
-                      <button type="submit" class="btn btn-dark" style="width: 100%;">Sign In</button>
+                      <button type="submit" class="btn btn-dark" style="width: 100%">Sign In</button>
                     </form>
                 </div>
             </main>
         </div>
+        <small class="text-muted" style="position: fixed; bottom: 0; width: 100%; text-align: center; margin-bottom: 2rem">Version: {{ version }}</small>
     </body>
 {% include "footer.html" %}
 <script>
-    $("button").on("click", function(e){
+    let loginButton = $('button[type="submit"]');
+    loginButton.on("click", function(e){
         e.preventDefault();
         let $password = $("#password");
         let $username = $("#username");
@@ -44,7 +47,7 @@
         let check = true
         for (let i = 0; i < req.length; i++){
             if ($(req[i]).val().length === 0){
-                $("button").html("Sign In");
+                loginButton.html("Sign In");
                 check = false;
                 $(req[i]).addClass("is-invalid");
                 break;
@@ -64,13 +67,17 @@
                 if (res.status === true){
                     const urlParams = new URLSearchParams(window.location.search);
                     if (urlParams.get("redirect")){
-                        window.location.replace(urlParams.get("redirect"))
+                        if (document.URL.substring(0, 5) == "http:"){
+                            window.location.replace(`http://${urlParams.get("redirect")}`)
+                        }else if (document.URL.substring(0, 5) == "https"){
+                            window.location.replace(`https://${urlParams.get("redirect")}`)
+                        }
                     }else{
                         window.location.replace("/");
                     }
                 }else{
-                    $(".alert").html(res.msg).removeClass("d-none");
-                    $("button").html("Sign In").removeAttr("disabled");
+                    $(".alert").html(res.msg).removeClass("d-none").fadeIn();
+                    loginButton.html("Sign In").removeAttr("disabled");
                     $("input[required]").addClass("is-invalid");
                 }
             });

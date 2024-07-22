@@ -1,3 +1,19 @@
+### Development on v4
+Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This version will be a huge update on the structure of the app. The frontend will be completely handle on the client side with Vue.js, and communicate with the server via REST Api. With this design, it could be possible for the frontend app to connect to multiple server in the future. Stay tune to this new verion, I'm working very hard on this while balancing school and work. If you would like know whats going on, you can check out [this branch](https://github.com/donaldzou/WGDashboard/tree/v4) 😊
+
+> For more information, you can visit: https://github.com/users/donaldzou/projects/2
+
+#### A preview on v4.0 🥹
+
+![v4.0 Preview](https://raw.githubusercontent.com/donaldzou/WGDashboard/main/img/ScreenRecording2024-03-31at12.47.43AM-ezgif.com-video-to-gif-converter.gif)
+
+
+<hr>
+
+##### Known issue on WGDashboard `v3.0 - v3.0.6`
+- [IPv6 in WireGuard might not fully support.](https://github.com/donaldzou/WGDashboard/issues/167)
+<hr>
+
 <p align="center">
   <img alt="WGDashboard" src="img/logo.png" width="128">
 </p>
@@ -9,7 +25,8 @@
 </p>
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
-  <a href="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6"><img src="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6.svg" alt="wakatime"></a>
+  <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
+  <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
 <p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
 <p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
@@ -90,7 +107,8 @@
 - **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
 
   > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
-
+- Net Tools (`net-tools`) is installed.
+  - You can verify this by checking if `ifconfig` return a list of network interface. Such as `eth0`
 - Configuration files under **`/etc/wireguard`**, but please note the following sample
 
   ```ini
@@ -115,7 +133,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.5 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v3.0.6.2 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -301,7 +319,7 @@ Since version 2.0, WGDashboard will be using a configuration file called `wg-das
 | `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
 | `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
 | `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
-| `version`                    | Dashboard Version                                            | `v3.0.5`                                             | **No**         |
+| `version`                    | Dashboard Version                                            | `v3.0.6`                                             | **No**         |
 | `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
 | `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
 |                              |                                                              |                                                      |                |
@@ -360,6 +378,7 @@ Endpoint = 0.0.0.0:51820
 
    ```bash
    ./wgd.sh update
+   chmod +x ./wgd.sh
    ```
 
    > If this doesn't work, please use the method below. Sorry about that :(
@@ -375,7 +394,7 @@ Endpoint = 0.0.0.0:51820
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0.5 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v3.0.6 --force
     ```
 
 3. Install
@@ -420,9 +439,57 @@ Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 
 ## ⏰  Changelog
 
+#### v3.0.6 - Mar 22, 2022
+
+**Fixed Bug**
+- When wgdashboard is running behind a proxy server, redirecting could cause using http while proxy is using https [❤️ from #161]
+
+#### v3.0.5 - Jan 31, 2022
+
+**Quick Fix**
+- Fixed public key does not match when user used an existing private key
+- Sorry for the wrong version number that causing the dashboard ask for update after updating.
+
+#### v3.0.3 - Jan 23, 2022
+
+- Fixed when dashboard configuration file cannot be found after a fresh install. [❤️  from #132 ]
+
+#### v3.0 - Jan 18, 2022
+
+- 🎉  **New Features**
+  - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
+  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
+  - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
+  - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
+  - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
+  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
+  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
+  - **Added Some [🥘 Experimental Functions](https://github.com/donaldzou/WGDashboard#-experimental-functions)** 
+
+- 🪚  **Bug Fixed**
+  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
+  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
+  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
+  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
+  - **And many other bugs provided by our beloved users** :heart:
+- **🧐  Other Changes**
+  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
+  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
+  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
+  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
+  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
+
+*And many other small changes for performance and bug fixes! :laughing:*
+
+>  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
+
+**For users who is using `v2.x.x` please be sure to read [this](https://github.com/donaldzou/WGDashboard#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
+
 #### v2.3.1 - Sep 8, 2021
 
 - Updated dashboard's name to **WGDashboard**!!
+
+
 
 #### v2.3 - Sep 8, 2021
 
@@ -505,7 +572,8 @@ Bug Fixed:
   - [jQuery](https://jquery.com) `v3.5.1`
 - Python
   - [Flask](https://pypi.org/project/Flask/) `v2.0.1`
-  - [ifcfg](https://pypi.org/project/ifcfg/) `v0.21`
+  - [ifcfg](https://pypi.org/project/ifcfg/) `v0.24`
+  - [psutil](https://pypi.org/project/psutil/) `v5.9.8`
   - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
   - [flask-qrcode](https://pypi.org/project/Flask-QRcode/) `v3.0.0`
 

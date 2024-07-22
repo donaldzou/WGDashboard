@@ -155,7 +155,7 @@
         let $enable_preshare_key = $("#enable_preshare_key");
         let data_list = [$new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
         if ($new_add_amount.val() > 0 && !$new_add_amount.hasClass("is-invalid")){
-            if ($new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
+            if ($new_add_endpoint_allowed_ip.val() !== ""){
                 let conf = $add_peer.getAttribute('conf_id');
                 let keys = [];
                 for (let i = 0; i < $new_add_amount.val(); i++) {
@@ -633,7 +633,7 @@ $add_peer.addEventListener("click",function(){
         let $enable_preshare_key = $("#enable_preshare_key");
         $add_peer.setAttribute("disabled","disabled");
         $add_peer.innerHTML = "Adding...";
-        if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_DNS.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
+        if ($allowed_ips.val() !== "" && $public_key.val() !== "" && $new_add_endpoint_allowed_ip.val() !== ""){
             let conf = $add_peer.getAttribute('conf_id');
             let data_list = [$private_key, $allowed_ips, $new_add_name, $new_add_DNS, $new_add_endpoint_allowed_ip,$new_add_MTU, $new_add_keep_alive];
             data_list.forEach((ele) => ele.attr("disabled", "disabled"));
@@ -924,7 +924,7 @@ $("#save_peer_setting").on("click",function (){
     let $peer_mtu = $("#peer_mtu");
     let $peer_keep_alive = $("#peer_keep_alive");
 
-    if ($peer_DNS_textbox.val() !== "" &&
+    if (
         $peer_allowed_ip_textbox.val() !== "" && $peer_endpoint_allowed_ips.val() !== ""){
         let peer_id = $(this).attr("peer_id");
         let conf_id = $(this).attr("conf_id");

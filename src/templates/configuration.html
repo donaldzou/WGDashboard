@@ -192,7 +192,7 @@
                             </div>
                             <div class="col-sm-6">
                                  <div class="form-group">
-                                    <label for="new_add_DNS">DNS <code>(Required)</code></label>
+                                    <label for="new_add_DNS">DNS</label>
                                     <input type="text" class="form-control" id="new_add_DNS" value="{{ DNS }}">
                                 </div>
                             </div>
@@ -297,7 +297,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="mb-3">
-                              <label for="peer_DNS_textbox" class="form-label">DNS <code>(Required)</code></label>
+                              <label for="peer_DNS_textbox" class="form-label">DNS</label>
                               <input type="text" class="form-control" id="peer_DNS_textbox">
                             </div>
                         </div>
@@ -410,8 +410,8 @@
     {% include "tools.html" %}
 </body>
 {% include "footer.html" %}
-<script src="{{ url_for('static',filename='js/wireguard.min.js') }}"></script>
-<script src="{{ url_for('static',filename='js/configuration.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/wireguard.js') }}"></script>
+<script src="{{ url_for('static',filename='js/configuration.js') }}"></script>
 <script>
     /* global peers */
     let load_timeout;

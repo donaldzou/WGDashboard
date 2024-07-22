@@ -4,7 +4,6 @@ Under Apache-2.0 License
 """
 
 import sqlite3
-from flask import g
 import configparser
 import hashlib
 import ipaddress
@@ -22,7 +21,8 @@ from datetime import datetime, timedelta
 from operator import itemgetter
 # PIP installed library
 import ifcfg
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+import psutil
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, g
 from flask_qrcode import QRcode
 from icmplib import ping, traceroute
 
@@ -31,22 +31,27 @@ from util import regex_match, check_DNS, check_Allowed_IPs, check_remote_endpoin
     check_IP_with_range, clean_IP_with_range
 
 # Dashboard Version
-DASHBOARD_VERSION = 'v3.0.5'
+DASHBOARD_VERSION = 'v3.0.6.2'
+
 # WireGuard's configuration path
 WG_CONF_PATH = None
+
 # Dashboard Config Name
 configuration_path = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(configuration_path, 'db')
 if not os.path.isdir(DB_PATH):
     os.mkdir(DB_PATH)
 DASHBOARD_CONF = os.path.join(configuration_path, 'wg-dashboard.ini')
+
 # Upgrade Required
 UPDATE = None
+
 # Flask App Configuration
 app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(16)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
 # Enable QR Code Generator
 QRcode(app)
 
@@ -99,7 +104,6 @@ def get_conf_peer_key(config_name):
         return config_name + " is not running."
 
 
-# Get numbers of connected peer of a configuration
 def get_conf_running_peer_number(config_name):
     """
     Get number of running peers on wireguard interface.
@@ -128,7 +132,6 @@ def get_conf_running_peer_number(config_name):
     return running
 
 
-# Read [Interface] section from configuration file
 def read_conf_file_interface(config_name):
     """
     Get interface settings.
@@ -161,7 +164,6 @@ def read_conf_file(config_name):
     @rtype: dict
     """
 
-    # Read Configuration File Start
     conf_location = WG_CONF_PATH + "/" + config_name + ".conf"
     f = open(conf_location, 'r')
     file = f.read().split("\n")
@@ -292,6 +294,7 @@ def get_endpoint(config_name):
         g.cur.execute("UPDATE " + config_name + " SET endpoint = '%s' WHERE id = '%s'"
                       % (data_usage[count + 1], data_usage[count]))
         count += 2
+
 
 
 def get_allowed_ip(conf_peer_data, config_name):
@@ -470,8 +473,8 @@ def get_conf_status(config_name):
     @param config_name:
     @return: Return a string indicate the running status
     """
-    ifconfig = dict(ifcfg.interfaces().items())
-    return "running" if config_name in ifconfig.keys() else "stopped"
+    addrs = psutil.net_if_addrs()
+    return "running" if config_name in addrs else "stopped"
 
 
 def get_conf_list():
@@ -626,7 +629,6 @@ def close_DB(exception):
         g.db.close()
 
 
-# Before request
 @app.before_request
 def auth_req():
     """
@@ -652,7 +654,10 @@ def auth_req():
             else:
                 session['message'] = ""
             conf.clear()
-            return redirect("/signin?redirect=" + str(request.url))
+            redirectURL = str(request.url)
+            redirectURL = redirectURL.replace("http://", "")
+            redirectURL = redirectURL.replace("https://", "")
+            return redirect("/signin?redirect=" + redirectURL)
     else:
         if request.endpoint in ['signin', 'signout', 'auth', 'settings', 'update_acct', 'update_pwd',
                                 'update_app_ip_port', 'update_wg_conf_path']:
@@ -678,7 +683,7 @@ def signin():
     if "message" in session:
         message = session['message']
         session.pop("message")
-    return render_template('signin.html', message=message)
+    return render_template('signin.html', message=message, version=DASHBOARD_VERSION)
 
 
 # Sign Out
@@ -868,7 +873,7 @@ def update_pwd():
             config.set("Account", "password", hashlib.sha256(request.form['repnewpass'].encode()).hexdigest())
             try:
                 set_dashboard_conf(config)
-                session['message'] = "Password update successfully!"
+                session['message'] = "Password updated successfully!"
                 session['message_status'] = "success"
                 config.clear()
                 return redirect(url_for("settings"))
@@ -883,7 +888,7 @@ def update_pwd():
             config.clear()
             return redirect(url_for("settings"))
     else:
-        session['message'] = "Your Password does not match."
+        session['message'] = "Your Passwords do not match."
         session['message_status'] = "danger"
         config.clear()
         return redirect(url_for("settings"))
@@ -1092,7 +1097,7 @@ def add_peer_bulk(config_name):
     if not amount.isdigit() or int(amount) < 1:
         return "Amount must be integer larger than 0"
     amount = int(amount)
-    if not check_DNS(dns_addresses):
+    if len(dns_addresses) > 0 and not check_DNS(dns_addresses):
         return "DNS formate is incorrect. Example: 1.1.1.1"
     if not check_Allowed_IPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
@@ -1155,7 +1160,7 @@ def add_peer(config_name):
     enable_preshared_key = data["enable_preshared_key"]
     preshared_key = data['preshared_key']
     keys = get_conf_peer_key(config_name)
-    if len(public_key) == 0 or len(dns_addresses) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
+    if len(public_key) == 0 or len(allowed_ips) == 0 or len(endpoint_allowed_ip) == 0:
         return "Please fill in all required box."
     if not isinstance(keys, list):
         return config_name + " is not running."
@@ -1166,7 +1171,7 @@ def add_peer(config_name):
         .fetchone()
     if check_dup_ip[0] != 0:
         return "Allowed IP already taken by another peer."
-    if not check_DNS(dns_addresses):
+    if len(dns_addresses) > 0 and not check_DNS(dns_addresses):
         return "DNS formate is incorrect. Example: 1.1.1.1"
     if not check_Allowed_IPs(endpoint_allowed_ip):
         return "Endpoint Allowed IPs format is incorrect."
@@ -1258,7 +1263,7 @@ def save_peer_setting(config_name):
         check_ip = check_repeat_allowed_ip(id, allowed_ip, config_name)
         if not check_IP_with_range(endpoint_allowed_ip):
             return jsonify({"status": "failed", "msg": "Endpoint Allowed IPs format is incorrect."})
-        if not check_DNS(dns_addresses):
+        if len(dns_addresses) > 0 and not check_DNS(dns_addresses):
             return jsonify({"status": "failed", "msg": "DNS format is incorrect."})
         if len(data['MTU']) == 0 or not data['MTU'].isdigit():
             return jsonify({"status": "failed", "msg": "MTU format is not correct."})
@@ -1417,12 +1422,30 @@ def download_all(config_name):
         filename = filename + "_" + config_name
         psk = ""
         if preshared_key != "":
-            psk = "\nPresharedKey = " + preshared_key
+            psk = "PresharedKey = " + preshared_key
+            
+        return_data = f'''[Interface]
+PrivateKey = {private_key}
+Address = {allowed_ip}
+MTU = {str(mtu_value)}
 
-        return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
-                      dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
-                      public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
-                      endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+'''
+        if len(dns_addresses) > 0:
+            return_data += f'DNS = {dns_addresses}'
+            
+        return_data += f'''
+[Peer]
+PublicKey = {public_key}
+AllowedIPs = {endpoint_allowed_ip}
+Endpoint = {endpoint}
+PersistentKeepalive = {str(keepalive)}
+{psk}
+'''
+
+        # return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
+        #               dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+        #               public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+        #               endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
         data.append({"filename": f"{filename}.conf", "content": return_data})
     return jsonify({"status": True, "peers": data, "filename": f"{config_name}.zip"})
 
@@ -1470,12 +1493,30 @@ def download(config_name):
             filename = filename + "_" + config_name
             psk = ""
             if preshared_key != "":
-                psk = "\nPresharedKey = " + preshared_key
+                psk = "PresharedKey = " + preshared_key
 
-            return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
-                          dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
-                          public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
-                          endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
+            return_data = f'''[Interface]
+PrivateKey = {private_key}
+Address = {allowed_ip}
+MTU = {str(mtu_value)}
+
+'''
+            if len(dns_addresses) > 0:
+                return_data += f'DNS = {dns_addresses}'
+        
+            return_data += f'''
+[Peer]
+PublicKey = {public_key}
+AllowedIPs = {endpoint_allowed_ip}
+Endpoint = {endpoint}
+PersistentKeepalive = {str(keepalive)}
+{psk}
+'''
+
+            # return_data = "[Interface]\nPrivateKey = " + private_key + "\nAddress = " + allowed_ip + "\nDNS = " + \
+            #               dns_addresses + "\nMTU = " + str(mtu_value) + "\n\n[Peer]\nPublicKey = " + \
+            #               public_key + "\nAllowedIPs = " + endpoint_allowed_ip + "\nEndpoint = " + \
+            #               endpoint + "\nPersistentKeepalive = " + str(keepalive) + psk
 
             return jsonify({"status": True, "filename": f"{filename}.conf", "content": return_data})
     return jsonify({"status": False, "filename": "", "content": ""})
@@ -1700,7 +1741,6 @@ def get_host_bind():
     config.read('wg-dashboard.ini')
     app_ip = config.get("Server", "app_ip")
     app_port = config.get("Server", "app_port")
-
     return app_ip, app_port
 
 
