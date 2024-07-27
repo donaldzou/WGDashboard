@@ -88,7 +88,8 @@ export default {
 			}))
 			)
 		}
-	}
+	},
+	
 }
 </script>
 
@@ -113,11 +114,11 @@ export default {
 
 						<TransitionGroup name="schedulePeerJobTransition" tag="div" class="position-relative">
 							<SchedulePeerJob
-								@refresh="(j) => job = j"
+								@refresh="(j) => this.selectedPeer.jobs[index] = j"
 								@delete="this.deleteJob(job)"
 								:dropdowns="this.dropdowns"
 								:key="job.JobID"
-								:pjob="job" v-for="(job) in this.selectedPeer.jobs">
+								:pjob="job" v-for="(job, index) in this.selectedPeer.jobs">
 							</SchedulePeerJob>
 							
 							<div class="card" key="none" v-if="this.selectedPeer.jobs.length === 0">

@@ -83,7 +83,61 @@ class CustomJsonEncoder(DefaultJSONProvider):
 
 app.json = CustomJsonEncoder(app)
 
+class Log:
+    def __init__(self, LogID: str, JobID: str, LogDate: str, Status: str, Message: str):
+        self.LogID = LogID
+        self.JobID = JobID
+        self.LogDate = LogDate
+        self.Status = Status
+        self.Message = Message
+    
+    def toJson(self):
+        return {
+            "LogID": self.LogID,
+            "JobID": self.JobID,
+            "LogDate": self.LogDate,
+            "Status": self.Status,
+            "Message": self.Message
+        }
+class Logger:
+    def __init__(self):
+        self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
+                                     check_same_thread=False)
+        self.loggerdb.row_factory = sqlite3.Row
+        self.logs:list(Log) = []
+        self.loggerdbCursor = self.loggerdb.cursor()
+        self.__createLogDatabase()
+        
+    def __createLogDatabase(self):
+        existingTable = self.loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+        existingTable = [t['name'] for t in existingTable]
 
+        if "JobLog" not in existingTable:
+            self.loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
+            self.loggerdb.commit()
+    def log(self, JobID: str, Status: bool = True, Message: str = "") -> bool:
+        try:
+            self.loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
+                                        (str(uuid.uuid4()), JobID, Status, Message,))
+            self.loggerdb.commit()
+            self.getLogs()
+        except Exception as e:
+            print(e)
+            return False
+        return True
+    
+    def getLogs(self, all: bool = False):
+        try:
+            table = self.loggerdb.execute(f"SELECT * FROM JobLog ORDER BY LogDate DESC {'LIMIT 5' if not all else ''}").fetchall()
+            self.logs.clear()
+            for l in table:
+                self.logs.append(
+                    Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
+        except Exception as e:
+            pass
+        
+        
+            
 class PeerJob:
     def __init__(self, JobID: str, Configuration: str, Peer: str,
                  Field: str, Operator: str, Value: str, CreationDate: datetime, ExpireDate: datetime, Action: str):
@@ -146,13 +200,6 @@ class PeerJobs:
             ''')
             self.jobdb.commit()
 
-        if "PeerJobs_Logs" not in existingTable:
-            self.jobdbCursor.execute('''
-            CREATE TABLE PeerJobs_Logs (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME, Status VARCHAR NOT NULL,
-            Message VARCHAR NOT NULL, PRIMARY KEY (LogID))
-            ''')
-            self.jobdb.commit()
-
     def toJson(self):
         return [x.toJson() for x in self.Jobs]
 
@@ -182,7 +229,7 @@ class PeerJobs:
             if (len(str(Job.CreationDate))) == 0:
                 return False, "Job does not exist"
             self.jobdbCursor.execute('''
-                DELETE FROM PeerJobs WHERE JobID = ?
+                UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
             ''', (Job.JobID,))
             self.jobdb.commit()
             self.__getJobs()
@@ -192,23 +239,22 @@ class PeerJobs:
         except Exception as e:
             return False, str(e)
 
-    def finishJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
-        try:
-            if (len(str(Job.CreationDate))) == 0:
-                return False, "Job does not exist"
-            self.jobdbCursor.execute('''
-                UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobId = ?
-            ''', (Job.JobID,))
-            self.jobdb.commit()
-            self.__getJobs()
-            return True, list(
-                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
-                       self.Jobs))
-        except Exception as e:
-            return False, str(e)
+    # def finishJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
+    #     try:
+    #         if (len(str(Job.CreationDate))) == 0:
+    #             return False, "Job does not exist"
+    #         self.jobdbCursor.execute('''
+    #             UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobId = ?
+    #         ''', (Job.JobID,))
+    #         self.jobdb.commit()
+    #         self.__getJobs()
+    #         return True, list(
+    #             filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
+    #                    self.Jobs))
+    #     except Exception as e:
+    #         return False, str(e)
 
     def runJob(self):
-        print("======")
         needToDelete = []
         for job in self.Jobs:
             print(job.toJson())
@@ -222,22 +268,32 @@ class PeerJobs:
                         y: float = float(job.Value)
                     else:
                         x: datetime = datetime.now()
-                        y: datetime = datetime.fromtimestamp(float(job.Value))
+                        y: datetime = datetime.strptime(job.Value, "%Y-%m-%dT%H:%M")
+                        
 
                     runAction: bool = self.__runJob_Compare(x, y, job.Operator)
                     print("Running Job:" + str(runAction) + "\n")
                     if runAction:
+                        s = False
                         if job.Action == "restrict":
-                            print(str(c.restrictPeers([fp.id]).get_json()))
+                            s = c.restrictPeers([fp.id]).get_json()
                         elif job.Action == "delete":
-                            print(str(c.deletePeers([fp.id]).get_json()))
-                        needToDelete.append(job)
-
+                            s = c.deletePeers([fp.id]).get_json()
+                
+                        if s['status'] is True:
+                            JobLogger.log(job.JobID, s["status"], 
+                                          f"Peer {fp.id} from {c.Name} is successfully {job.Action}ed."
+                            )
+                            needToDelete.append(job)
+                        else:
+                            JobLogger.log(job.JobID, s["status"],
+                                          f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
+                            )
+        print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Ran {len(needToDelete)} job(s)''')
         for j in needToDelete:
             self.deleteJob(j)
 
     def __runJob_Compare(self, x: float | datetime, y: float | datetime, operator: str):
-        print(x, y, operator)
         if operator == "eq":
             return x == y
         if operator == "neq":
@@ -990,6 +1046,7 @@ class DashboardConfig:
 DashboardConfig = DashboardConfig()
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 AllPeerJobs: PeerJobs = PeerJobs()
+JobLogger: Logger = Logger()
 
 '''
 Private Functions
@@ -1678,8 +1735,10 @@ def backGroundThread():
 
 def peerJobScheduleBackgroundThread():
     with app.app_context():
-        print("-- Peer Schedule: Waiting 5 sec")
+        print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Waiting for 10 Seconds''')
+        time.sleep(10)
         while True:
+            print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Running''')
             AllPeerJobs.runJob()
             time.sleep(10)
 
@@ -1701,9 +1760,9 @@ bgThread = threading.Thread(target=backGroundThread)
 bgThread.daemon = True
 bgThread.start()
 
-bg2Thread = threading.Thread(target=peerJobScheduleBackgroundThread)
-bg2Thread.daemon = True
-bg2Thread.start()
+scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
+scheduleJobThread.daemon = True
+scheduleJobThread.start()
 
 if __name__ == "__main__":
     app.run(host=app_ip, debug=False, port=app_port)

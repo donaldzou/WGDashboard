@@ -173,6 +173,19 @@ export default {
 				}, (res) => {
 					this.configurationInfo = res.data.configurationInfo;
 					this.configurationPeers = res.data.configurationPeers;
+					
+					// let modals = [this.peerSetting, this.peerScheduleJobs, this.peerQRCode]
+					// modals.forEach(x => {
+					//	
+					// 	if (x.modalOpen && this.configurationPeers.find(p => p.id === x.selectedPeer.id)){
+					// 		x.selectedPeer = this.configurationPeers.find(p => p.id === x.selectedPeer.id)
+					// 		console.log(this.configurationPeers.find(p => p.id === x.selectedPeer.id))
+					// 	}else{
+					// 		x.modalOpen = false
+					// 	}
+					// })
+					
+					
 					this.configurationPeers.forEach(x => {
 						x.restricted = false;
 					})

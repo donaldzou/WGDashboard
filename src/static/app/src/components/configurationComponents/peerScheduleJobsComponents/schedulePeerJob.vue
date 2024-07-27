@@ -33,8 +33,9 @@ export default {
 			deep: true,
 			immediate: true,
 			handler(newValue){
-				console.log(newValue)
-				this.job = JSON.parse(JSON.stringify(newValue))
+				if (!this.edit){
+					this.job = JSON.parse(JSON.stringify(newValue))
+				}
 			}
 		}	
 	},
@@ -47,7 +48,8 @@ export default {
 					if (res.status){
 						this.edit = false;
 						this.store.newMessage("Server", "Job Saved!", "success")
-						this.$emit("refresh", this.data)
+						console.log(res.data)
+						this.$emit("refresh", res.data[0])
 						this.newJob = false;
 					}else{
 						this.store.newMessage("Server", res.message, "danger")

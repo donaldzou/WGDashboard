@@ -34,9 +34,8 @@ export default {
 </script>
 
 <template>
-	<div class="card shadow-sm rounded-3"
-		:class="{'border-warning': Peer.restricted}"
-	>
+	<div class="card shadow-sm rounded-3 peerCard bg-transparent"
+		:class="{'border-warning': Peer.restricted}">
 		<div>
 			<div v-if="!Peer.restricted" class="card-header bg-transparent d-flex align-items-center gap-2 border-0">
 				<div class="dot ms-0" :class="{active: Peer.status === 'running'}"></div>
@@ -77,8 +76,7 @@ export default {
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"
 				     :class="{active: this.subMenuOpened}"
 				>
-					<a role="button" class="text-body" 
-					   
+					<a role="button" class="text-body"
 					   @click="this.subMenuOpened = true">
 						<h5 class="mb-0"><i class="bi bi-three-dots"></i></h5>
 					</a>
@@ -101,7 +99,7 @@ export default {
 
 <style scoped>
 
-.slide-fade-leave-active, .slide-fade-enter-active {
+.slide-fade-leave-active, .slide-fade-enter-active{
 	transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
 }
 
@@ -113,5 +111,13 @@ export default {
 
 .subMenuBtn.active{
 	background-color: #ffffff20;
+}
+
+.peerCard{
+	transition: box-shadow 0.1s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.peerCard:hover{
+	box-shadow: var(--bs-box-shadow) !important;
 }
 </style>

@@ -12,7 +12,7 @@ export default {
 		return {store, wireguardConfigurationStore}
 	},
 	props: {
-		searchString: String,
+		
 		configuration: Object
 	},
 	data(){
@@ -28,10 +28,24 @@ export default {
 				'10000': '10 Seconds',
 				'30000': '30 Seconds',
 				'60000': '1 Minutes'
-			}
+			},
+			searchString: "",
+			searchStringTimeout: undefined
 		}
 	},
 	methods: {
+		debounce(){
+			if (!this.searchStringTimeout){
+				this.searchStringTimeout = setTimeout(() => {
+					this.wireguardConfigurationStore.searchString = this.searchString;
+				}, 300)
+			}else{
+				clearTimeout(this.searchStringTimeout)
+				this.searchStringTimeout = setTimeout(() => {
+					this.wireguardConfigurationStore.searchString = this.searchString;
+				}, 300)
+			}
+		},
 		updateSort(sort){
 			fetchPost("/api/updateDashboardConfigurationItem", {
 				section: "Server",
@@ -68,25 +82,34 @@ export default {
 </script>
 
 <template>
-	<div>
-		<div class="d-flex gap-2 mb-3 z-3">
+	<div class="mb-3">
+		<div class="d-flex gap-2 z-3">
 			<RouterLink
 				to="create"
-				class="text-decoration-none btn btn-primary rounded-3 btn-sm">
-				<i class="bi bi-plus-lg me-2"></i>Peers
+				class="text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
+				<i class="bi bi-plus-lg me-2"></i>Peer
 			</RouterLink>
-			
-<!--			<RouterLink-->
-<!--				to="jobs"-->
-<!--				class="text-decoration-none btn btn-primary rounded-3 btn-sm">-->
-<!--				<i class="bi bi-app-indicator me-2"></i>Jobs-->
-<!--			</RouterLink>-->
-			<button class="btn btn-sm btn-primary rounded-3" @click="this.downloadAllPeer()">
+
+			<!--			<RouterLink-->
+			<!--				to="jobs"-->
+			<!--				class="text-decoration-none btn btn-primary rounded-3 btn-sm">-->
+			<!--				<i class="bi bi-app-indicator me-2"></i>Jobs-->
+			<!--			</RouterLink>-->
+			<button class="btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  shadow-sm"
+			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
-			
-			<div class="dropdown ms-auto">
-				<button class="btn btn-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<div class="d-flex align-items-center  ms-auto">
+				<!--			<label class="d-flex me-2 text-muted" for="searchPeers"><i class="bi bi-search me-1"></i></label>-->
+				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm"
+				       placeholder="Search..."
+				       id="searchPeers"
+				       @keyup="this.debounce()"
+				       v-model="this.searchString">
+			</div>
+			<div class="dropdown">
+				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm" 
+				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-filter-circle me-2"></i>
 					Sort
 				</button>
@@ -101,7 +124,8 @@ export default {
 				</ul>
 			</div>
 			<div class="dropdown">
-				<button class="btn btn-secondary btn-sm dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval
 				</button>
 				<ul class="dropdown-menu shadow mt-2 rounded-3">
@@ -113,24 +137,7 @@ export default {
 						</a></li>
 				</ul>
 			</div>
-
-			<!--		<button class="btn btn-outline-secondary btn-sm rounded-3" type="button"-->
-			<!--			@click="this.store.Peers.Selecting = !this.store.Peers.Selecting"-->
-			<!--		>-->
-			<!--			<i class="bi bi-app-indicator me-2"></i>-->
-			<!--			Select-->
-			<!--		</button>-->
-
-			<div class="d-flex align-items-center">
-				<!--			<label class="d-flex me-2 text-muted" for="searchPeers"><i class="bi bi-search me-1"></i></label>-->
-				<input class="form-control form-control-sm rounded-3"
-				       placeholder="Search..."
-				       id="searchPeers"
-				       v-model="this.wireguardConfigurationStore.searchString">
-			</div>
-
 		</div>
-		
 	</div>
 </template>
 

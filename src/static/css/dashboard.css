@@ -1097,17 +1097,17 @@ pre.index-alert {
 .list-move, /* apply transition to moving elements */
 .list-enter-active,
 .list-leave-active {
-    transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+    transition: all 0.5s ease-in-out;
 }
 
-.list-leave-active{
-    position: absolute;
-}
+/*.list-leave-active{*/
+/*    position: absolute !important;*/
+/*}*/
 
 .list-enter-from,
 .list-leave-to {
     opacity: 0;
-    transform: translateY(30px);
+    transform: scale(1.1);
 }
 
 /* ensure leaving items are taken out of layout flow so that moving
