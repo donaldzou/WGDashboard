@@ -1119,6 +1119,7 @@ pre.index-alert {
 .peerSettingContainer {
     background-color: #00000060;
     z-index: 9999;
+    backdrop-filter: blur(1px);
 }
 
 .dashboardModal{
@@ -1128,4 +1129,18 @@ pre.index-alert {
 
 .dashboardModal > .card{
     margin: 1.75rem;
+}
+
+.zoom-enter-active,
+.zoom-leave-active {
+    transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+    /*position: absolute;*/
+    /*padding-top: 50px*/
+}
+
+.zoom-enter-from,
+.zoom-leave-to {
+    transform: scale(1.1);
+    filter: blur(3px);
+    opacity: 0;
 }

@@ -137,6 +137,28 @@ export default {
 						</a></li>
 				</ul>
 			</div>
+
+			<div class="dropdown">
+				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+					<i class="bi bi-three-dots me-2"></i>More
+				</button>
+				<ul class="dropdown-menu shadow mt-2 rounded-3">
+					<li>
+						<h6 class="dropdown-header">Peer Jobs</h6>
+					</li>
+					<li>
+						<a role="button" class="dropdown-item" @click="this.$emit('jobsAll')">
+							All Active Jobs
+						</a>
+					</li>
+					<li>
+						<a role="button" class="dropdown-item" @click="this.$emit('jobLogs')">
+							Logs
+						</a>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </template>

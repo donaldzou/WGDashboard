@@ -6,7 +6,8 @@ export default {
 		peerConfigData: String
 	},
 	mounted() {
-		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfigData , function (error) {
+		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfigData ,  (error) => {
+			console.log(this.peerConfigData)
 			if (error) console.error(error)
 		})
 	}
@@ -14,10 +15,10 @@ export default {
 </script>
 
 <template>
-	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
-		<div class="container d-flex h-100 w-100 m-auto">
-			<div class="modal-dialog-centered dashboardModal">
-				<div class="card m-auto rounded-3 shadow">
+	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0">
+		<div class="container d-flex h-100 w-100">
+			<div class="m-auto modal-dialog-centered dashboardModal justify-content-center">
+				<div class="card rounded-3 shadow">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
 						<h4 class="mb-0">QR Code</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>

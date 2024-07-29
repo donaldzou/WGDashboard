@@ -37,6 +37,8 @@ import PeerSettings from "@/components/configurationComponents/peerSettings.vue"
 import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
+import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
+import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
 
 Chart.register(
 	ArcElement,
@@ -66,7 +68,9 @@ Chart.register(
 
 export default {
 	name: "peerList",
-	components: {PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+	components: {
+		PeerJobsLogsModal,
+		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -118,6 +122,12 @@ export default {
 				peerConfigData: undefined
 			},
 			peerCreate: {
+				modalOpen: false
+			},
+			peerScheduleJobsAll: {
+				modalOpen: false
+			},
+			peerScheduleJobsLogs: {
 				modalOpen: false
 			}
 		}
@@ -173,19 +183,6 @@ export default {
 				}, (res) => {
 					this.configurationInfo = res.data.configurationInfo;
 					this.configurationPeers = res.data.configurationPeers;
-					
-					// let modals = [this.peerSetting, this.peerScheduleJobs, this.peerQRCode]
-					// modals.forEach(x => {
-					//	
-					// 	if (x.modalOpen && this.configurationPeers.find(p => p.id === x.selectedPeer.id)){
-					// 		x.selectedPeer = this.configurationPeers.find(p => p.id === x.selectedPeer.id)
-					// 		console.log(this.configurationPeers.find(p => p.id === x.selectedPeer.id))
-					// 	}else{
-					// 		x.modalOpen = false
-					// 	}
-					// })
-					
-					
 					this.configurationPeers.forEach(x => {
 						x.restricted = false;
 					})
@@ -534,12 +531,16 @@ export default {
 <!--			<div class="d-flex align-items-center gap-3 mb-2">-->
 <!--				<h3>Peers</h3>-->
 <!--			</div>-->
-			<PeerSearch :configuration="this.configurationInfo"></PeerSearch>
+			<PeerSearch
+				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
+				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
+				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
 				     :key="peer.id"
 				     v-for="peer in this.searchPeers">
 					<Peer :Peer="peer"
+					      
 					      @refresh="this.getPeers()"
 					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
@@ -548,7 +549,7 @@ export default {
 				</div>
 			</TransitionGroup>
 		</div>
-		<Transition name="fade">
+		<Transition name="zoom">
 			<PeerSettings v-if="this.peerSetting.modalOpen"
 			              key="settings"
 			              :selectedPeer="this.peerSetting.selectedPeer"
@@ -556,13 +557,13 @@ export default {
 			              @close="this.peerSetting.modalOpen = false">
 			</PeerSettings>
 		</Transition>
-		<Transition name="fade">
+		<Transition name="zoom">
 			<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData"
 			            key="qrcode"
 			            @close="this.peerQRCode.modalOpen = false"
 			            v-if="peerQRCode.modalOpen"></PeerQRCode>
 		</Transition>
-		<Transition name="fade">
+		<Transition name="zoom">
 			<PeerJobs
 				@refresh="this.getPeers()"
 				v-if="this.peerScheduleJobs.modalOpen"
@@ -570,13 +571,22 @@ export default {
 				@close="this.peerScheduleJobs.modalOpen = false">
 			</PeerJobs>
 		</Transition>
-		
-<!--		<Transition name="fade">-->
-<!--			-->
-<!--		</Transition>-->
-<!--		<Transition name="fade">-->
-<!--			-->
-<!--		</Transition>-->
+		<Transition name="zoom">
+			<PeerJobsAllModal 
+				v-if="this.peerScheduleJobsAll.modalOpen"
+				@refresh="this.getPeers()"
+				@close="this.peerScheduleJobsAll.modalOpen = false"
+			                   :configurationPeers="this.configurationPeers"
+			>
+			</PeerJobsAllModal>
+		</Transition>
+		<Transition name="zoom">
+			<PeerJobsLogsModal v-if="this.peerScheduleJobsLogs.modalOpen"
+				@close="this.peerScheduleJobsLogs.modalOpen = false" 
+				               :configurationInfo="this.configurationInfo"
+			>
+			</PeerJobsLogsModal>
+		</Transition>
 	</div>
 </template>
 

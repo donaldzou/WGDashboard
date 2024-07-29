@@ -5,7 +5,64 @@ import isCidr from "is-cidr";
 export const WireguardConfigurationsStore = defineStore('WireguardConfigurationsStore', {
 	state: () => ({
 		Configurations: undefined,
-		searchString: ""
+		searchString: "",
+		PeerScheduleJobs: {
+			dropdowns: {
+				Field: [
+					{
+						display: "Total Received",
+						value: "total_receive",
+						unit: "GB",
+						type: 'number'
+					},
+					{
+						display: "Total Sent",
+						value: "total_sent",
+						unit: "GB",
+						type: 'number'
+					},
+					{
+						display: "Total Data",
+						value: "total_data",
+						unit: "GB",
+						type: 'number'
+					},
+					{
+						display: "Date",
+						value: "date",
+						type: 'date'
+					}
+				],
+				Operator: [
+					{
+						display: "equal",
+						value: "eq"
+					},
+					{
+						display: "not equal",
+						value: "neq"
+					},
+					{
+						display: "larger than",
+						value: "lgt"
+					},
+					{
+						display: "less than",
+						value: "lst"
+					},
+				],
+				Action: [
+					{
+						display: "Restrict Peer",
+						value: "restrict"
+					},
+					{
+						display: "Delete Peer",
+						value: "delete"
+					}
+				]
+			}
+		}
 	}),
 	actions: {
 		async getConfigurations(){

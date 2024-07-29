@@ -61,9 +61,9 @@ export default {
 			</div>
 		</div>
 		<div class="card-body pt-1" style="font-size: 0.9rem">
-			<h5>
+			<h6>
 				{{Peer.name ? Peer.name : 'Untitled Peer'}}
-			</h5>
+			</h6>
 			<div class="mb-2">
 				<small class="text-muted">Public Key</small>
 				<p class="mb-0"><samp>{{Peer.id}}</samp></p>
@@ -100,13 +100,14 @@ export default {
 <style scoped>
 
 .slide-fade-leave-active, .slide-fade-enter-active{
-	transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 0.9);
 }
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
 	transform: translateY(20px);
 	opacity: 0;
+	filter: blur(3px);
 }
 
 .subMenuBtn.active{
@@ -114,7 +115,7 @@ export default {
 }
 
 .peerCard{
-	transition: box-shadow 0.1s cubic-bezier(1, 0.5, 0.8, 1);
+	transition: box-shadow 0.1s cubic-bezier(0.82, 0.58, 0.17, 0.9);
 }
 
 .peerCard:hover{

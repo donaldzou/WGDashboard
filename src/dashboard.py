@@ -76,7 +76,7 @@ class CustomJsonEncoder(DefaultJSONProvider):
         super().__init__(app)
 
     def default(self, o):
-        if isinstance(o, WireguardConfiguration) or isinstance(o, Peer) or isinstance(o, PeerJob):
+        if isinstance(o, WireguardConfiguration) or isinstance(o, Peer) or isinstance(o, PeerJob) or isinstance(o, Log):
             return o.toJson()
         return super().default(self, o)
 
@@ -99,6 +99,10 @@ class Log:
             "Status": self.Status,
             "Message": self.Message
         }
+
+    def __dict__(self):
+        return self.toJson()
+    
 class Logger:
     def __init__(self):
         self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
@@ -120,21 +124,26 @@ class Logger:
             self.loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
                                         (str(uuid.uuid4()), JobID, Status, Message,))
             self.loggerdb.commit()
-            self.getLogs()
         except Exception as e:
             print(e)
             return False
         return True
     
-    def getLogs(self, all: bool = False):
+    def getLogs(self, all: bool = False, configName = None) -> list[Log]:
+        logs: list[Log] = []
         try:
-            table = self.loggerdb.execute(f"SELECT * FROM JobLog ORDER BY LogDate DESC {'LIMIT 5' if not all else ''}").fetchall()
+            allJobs = AllPeerJobs.getAllJobs(configName)
+            allJobsID = ", ".join([f"'{x.JobID}'" for x in allJobs])
+            table = self.loggerdb.execute(f"SELECT * FROM JobLog WHERE JobID IN ({allJobsID}) ORDER BY LogDate DESC").fetchall()
             self.logs.clear()
             for l in table:
-                self.logs.append(
+                logs.append(
                     Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
         except Exception as e:
-            pass
+            return logs
+        return logs
+    
+
         
         
             
@@ -186,7 +195,18 @@ class PeerJobs:
             self.Jobs.append(PeerJob(
                 job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
                 job['CreationDate'], job['ExpireDate'], job['Action']))
-        # print(self.Jobs)
+    
+    def getAllJobs(self, configuration: str = None):
+        if configuration is not None:
+            jobs = self.jobdbCursor.execute(
+                f"SELECT * FROM PeerJobs WHERE Configuration = ?", (configuration, )).fetchall()
+            j = []
+            for job in jobs:
+                j.append(PeerJob(
+                    job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+                    job['CreationDate'], job['ExpireDate'], job['Action']))
+            return j
+        return []
 
     def __createPeerJobsDatabase(self):
         existingTable = self.jobdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
@@ -238,21 +258,6 @@ class PeerJobs:
                        self.Jobs))
         except Exception as e:
             return False, str(e)
-
-    # def finishJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
-    #     try:
-    #         if (len(str(Job.CreationDate))) == 0:
-    #             return False, "Job does not exist"
-    #         self.jobdbCursor.execute('''
-    #             UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobId = ?
-    #         ''', (Job.JobID,))
-    #         self.jobdb.commit()
-    #         self.__getJobs()
-    #         return True, list(
-    #             filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
-    #                    self.Jobs))
-    #     except Exception as e:
-    #         return False, str(e)
 
     def runJob(self):
         needToDelete = []
@@ -1554,6 +1559,17 @@ def API_deletePeerScheduleJob():
     if s:
         return ResponseObject(s, data=p)
     return ResponseObject(s, message=p)
+
+@app.route('/api/getPeerScheduleJobLogs/<configName>', methods=['GET'])
+def API_getPeerScheduleJobLogs(configName):
+    if configName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration does not exist")
+    data = request.args.get("requestAll")
+    requestAll = False
+    if data is not None and data == "true":
+        requestAll = True
+    return ResponseObject(data=JobLogger.getLogs(requestAll, configName))
+
 
 
 '''

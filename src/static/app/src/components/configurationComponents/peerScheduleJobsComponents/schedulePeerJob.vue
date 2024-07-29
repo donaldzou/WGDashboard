@@ -9,7 +9,8 @@ export default {
 	components: {ScheduleDropdown},
 	props: {
 		dropdowns: Array[Object],
-		pjob: Object
+		pjob: Object,
+		viewOnly: false
 	},
 	setup(props){
 		const job = ref({})
