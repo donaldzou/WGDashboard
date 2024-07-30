@@ -76,7 +76,7 @@ class CustomJsonEncoder(DefaultJSONProvider):
         super().__init__(app)
 
     def default(self, o):
-        if isinstance(o, WireguardConfiguration) or isinstance(o, Peer) or isinstance(o, PeerJob) or isinstance(o, Log):
+        if isinstance(o, WireguardConfiguration) or isinstance(o, Peer) or isinstance(o, PeerJob) or isinstance(o, Log) or isinstance(o, DashboardAPIKey):
             return o.toJson()
         return super().default(self, o)
 
@@ -117,7 +117,7 @@ class Logger:
         existingTable = [t['name'] for t in existingTable]
 
         if "JobLog" not in existingTable:
-            self.loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
+            self.loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
             self.loggerdb.commit()
     def log(self, JobID: str, Status: bool = True, Message: str = "") -> bool:
         try:
@@ -310,7 +310,6 @@ class PeerJobs:
             return x > y
         if operator == "lst":
             return x < y
-
 
 class WireguardConfiguration:
     class InvalidConfigurationFileException(Exception):
@@ -763,7 +762,6 @@ class WireguardConfiguration:
             "SaveConfig": self.SaveConfig
         }
 
-
 class Peer:
     def __init__(self, tableData, configuration: WireguardConfiguration):
         self.configuration = configuration
@@ -891,18 +889,24 @@ PersistentKeepalive = {str(self.keepalive)}
         self.jobs = AllPeerJobs.searchJob(self.configuration.Name, self.id)
         # print(AllPeerJobs.searchJob(self.configuration.Name, self.id))
 
-
 # Regex Match
 def regex_match(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
-
 
 def iPv46RegexCheck(ip):
     return re.match(
         '((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))',
         ip)
 
+class DashboardAPIKey:
+    def __init__(self, Key: str, CreatedAt: str, ExpiredAt: str):
+        self.Key = Key
+        self.CreatedAt = CreatedAt
+        self.ExpiredAt = ExpiredAt
+    
+    def toJson(self):
+        return self.__dict__
 
 class DashboardConfig:
 
@@ -927,7 +931,8 @@ class DashboardConfig:
                 "version": DASHBOARD_VERSION,
                 "dashboard_refresh_interval": "60000",
                 "dashboard_sort": "status",
-                "dashboard_theme": "dark"
+                "dashboard_theme": "dark",
+                "dashboard_api_key": "false"
             },
             "Peers": {
                 "peer_global_DNS": "1.1.1.1",
@@ -947,7 +952,35 @@ class DashboardConfig:
                 exist, currentData = self.GetConfig(section, key)
                 if not exist:
                     self.SetConfig(section, key, value, True)
-
+        self.__createAPIKeyTable()
+        self.DashboardAPIKeys = self.__getAPIKeys()
+    
+    def __createAPIKeyTable(self):
+        existingTable = cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
+        if len(existingTable) == 0:
+            cursor.execute("CREATE TABLE DashboardAPIKeys (Key VARCHAR NOT NULL PRIMARY KEY, CreatedAt DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')), ExpiredAt VARCHAR)")
+            sqldb.commit()
+    
+    def __getAPIKeys(self) -> list[DashboardAPIKey]:
+        keys = cursor.execute("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
+        fKeys = []
+        for k in keys:
+            fKeys.append(DashboardAPIKey(*k))
+        return fKeys
+    
+    def createAPIKeys(self, ExpiredAt = None):
+        newKey = secrets.token_urlsafe(32)
+        cursor.execute('INSERT INTO DashboardAPIKeys (Key, ExpiredAt) VALUES (?, ?)', (newKey, ExpiredAt,))
+        sqldb.commit()
+        self.DashboardAPIKeys = self.__getAPIKeys()
+        
+    def deleteAPIKey(self, key):
+        cursor.execute("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
+        sqldb.commit()
+        self.DashboardAPIKeys = self.__getAPIKeys()
+    
+    
+    
     def __configValidation(self, key, value: Any) -> [bool, str]:
         if type(value) is str and len(value) == 0:
             return False, "Field cannot be empty!"
@@ -1050,11 +1083,6 @@ class DashboardConfig:
                         the_dict[section][key] = val
         return the_dict
 
-
-DashboardConfig = DashboardConfig()
-WireguardConfigurations: dict[str, WireguardConfiguration] = {}
-AllPeerJobs: PeerJobs = PeerJobs()
-JobLogger: Logger = Logger()
 
 '''
 Private Functions
@@ -1333,6 +1361,36 @@ def API_updateDashboardConfigurationItem():
 
     return ResponseObject()
 
+@app.route('/api/getDashboardAPIKeys', methods=['GET'])
+def API_getDashboardAPIKeys():
+    if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
+        return ResponseObject(data=DashboardConfig.DashboardAPIKeys)
+    return ResponseObject(False, "Dashboard API Keys function is disbaled")
+
+@app.route('/api/newDashboardAPIKey', methods=['POST'])
+def API_newDashboardAPIKey():
+    data = request.get_json()
+    if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
+        try:
+            if data['neverExpire']:
+                expiredAt = None
+            else:
+                expiredAt = datetime.strptime(data['ExpiredAt'], '%Y-%m-%dT%H:%M:%S')
+            DashboardConfig.createAPIKeys(expiredAt)
+            return ResponseObject(True, data=DashboardConfig.DashboardAPIKeys)
+        except Exception as e:
+            return ResponseObject(False, str(e))
+    return ResponseObject(False, "Dashboard API Keys function is disbaled")
+
+@app.route('/api/deleteDashboardAPIKey', methods=['POST'])
+def API_deleteDashboardAPIKey():
+    data = request.get_json()
+    if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
+        if len(data['Key']) > 0 and len(list(filter(lambda x : x.Key == data['Key'], DashboardConfig.DashboardAPIKeys))) > 0:
+            DashboardConfig.deleteAPIKey(data['Key'])
+            return ResponseObject(True, data=DashboardConfig.DashboardAPIKeys)
+    return ResponseObject(False, "Dashboard API Keys function is disbaled")
+    
 
 @app.route('/api/updatePeerSettings/<configName>', methods=['POST'])
 def API_updatePeerSettings(configName):
@@ -1771,6 +1829,10 @@ def gunicornConfig():
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
 cursor = sqldb.cursor()
+DashboardConfig = DashboardConfig()
+WireguardConfigurations: dict[str, WireguardConfiguration] = {}
+AllPeerJobs: PeerJobs = PeerJobs()
+JobLogger: Logger = Logger()
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")

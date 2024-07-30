@@ -10,11 +10,13 @@ import DashboardSettingsInputWireguardConfigurationPath
 import DashboardTheme from "@/components/settingsComponent/dashboardTheme.vue";
 import DashboardSettingsInputIPAddressAndPort
 	from "@/components/settingsComponent/dashboardSettingsInputIPAddressAndPort.vue";
+import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		DashboardAPIKeys,
 		DashboardSettingsInputIPAddressAndPort,
 		DashboardTheme,
 		DashboardSettingsInputWireguardConfigurationPath,
@@ -60,7 +62,6 @@ export default {
 						:warning="true"
 						warning-text="Remember to remove <code>/</code> at the end of your path. e.g <code>/etc/wireguard</code>"
 					>
-
 					</DashboardSettingsInputWireguardConfigurationPath>
 				</div>
 			</div>
@@ -76,6 +77,7 @@ export default {
 					</AccountSettingsInputPassword>
 				</div>
 			</div>
+			<DashboardAPIKeys></DashboardAPIKeys>
 		</div>
 	</div>
 </template>

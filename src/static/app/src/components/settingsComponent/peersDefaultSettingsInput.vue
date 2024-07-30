@@ -9,7 +9,6 @@ export default {
 		title: String,
 		warning: false,
 		warningText: "",
-		
 	},
 	setup(){
 		const store = DashboardConfigurationStore();

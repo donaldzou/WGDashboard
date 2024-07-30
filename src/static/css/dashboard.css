@@ -1132,7 +1132,8 @@ pre.index-alert {
 }
 
 .zoom-enter-active,
-.zoom-leave-active {
+.zoom-leave-active, .zoomReversed-enter-active,
+.zoomReversed-leave-active {
     transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 0.9);
     /*position: absolute;*/
     /*padding-top: 50px*/
@@ -1144,3 +1145,12 @@ pre.index-alert {
     filter: blur(3px);
     opacity: 0;
 }
+
+.zoomReversed-enter-from,
+.zoomReversed-leave-to {
+    transform: scale(0.9);
+    filter: blur(3px);
+    opacity: 0;
+}
+
+

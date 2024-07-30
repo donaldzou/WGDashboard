@@ -71,7 +71,7 @@ export default {
 </script>
 
 <template>
-	<div>
+	<div class="d-flex flex-column">
 		<div class="row">
 			<div class="col-sm">
 				<div class="form-group mb-2">
@@ -109,8 +109,8 @@ export default {
 				</div>
 			</div>
 		</div>
-		<button class="btn btn-success btn-sm fw-bold rounded-3" @click="this.useValidation()">
-			<i class="bi bi-key-fill me-2"></i>Update Password
+		<button class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
+			<i class="bi bi-save2-fill me-2"></i>Update Password
 		</button>
 	</div>
 </template>

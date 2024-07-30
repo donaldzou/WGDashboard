@@ -28,13 +28,13 @@ export default {
 	<div class="card mb-4 shadow rounded-3">
 		<p class="card-header">Dashboard Theme</p>
 		<div class="card-body d-flex gap-2">
-			<button class="btn btn-outline-primary flex-grow-1"
+			<button class="btn bg-primary-subtle text-primary-emphasis flex-grow-1"
 			        @click="this.switchTheme('light')"
 			        :class="{active: this.dashboardConfigurationStore.Configuration.Server.dashboard_theme === 'light'}">
 				<i class="bi bi-sun-fill"></i>
 				Light
 			</button>
-			<button class="btn btn-outline-primary flex-grow-1"
+			<button class="btn bg-primary-subtle text-primary-emphasis flex-grow-1"
 			        @click="this.switchTheme('dark')"
 			        :class="{active: this.dashboardConfigurationStore.Configuration.Server.dashboard_theme === 'dark'}">
 				<i class="bi bi-moon-fill"></i>
