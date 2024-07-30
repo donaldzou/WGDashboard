@@ -142,10 +142,6 @@ class Logger:
         except Exception as e:
             return logs
         return logs
-    
-
-        
-        
             
 class PeerJob:
     def __init__(self, JobID: str, Configuration: str, Peer: str,
@@ -175,7 +171,6 @@ class PeerJob:
 
     def __dict__(self):
         return self.toJson()
-
 
 class PeerJobs:
 
@@ -232,12 +227,19 @@ class PeerJobs:
                 self.jobdbCursor.execute('''
                 INSERT INTO PeerJobs VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%d %H:%M:%S','now'), NULL, ?)
                 ''', (Job.JobID, Job.Configuration, Job.Peer, Job.Field, Job.Operator, Job.Value, Job.Action,))
+                JobLogger.log(Job.JobID, Message=f"Job is created if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
+                
             else:
-                self.jobdbCursor.execute('''
-                    UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
-                    ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
+                currentJob = self.jobdbCursor.execute('SELECT * FROM PeerJobs WHERE JobID = ?', (Job.JobID, )).fetchone()
+                if currentJob is not None:
+                    self.jobdbCursor.execute('''
+                        UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
+                        ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
+                    JobLogger.log(Job.JobID, 
+                                  Message=f"Job is updated from if {currentJob['Field']} {currentJob['Operator']} {currentJob['value']} then {currentJob['Action']}; to if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
             self.jobdb.commit()
             self.__getJobs()
+        
             return True, list(
                 filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
                        self.Jobs))
@@ -252,6 +254,7 @@ class PeerJobs:
                 UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
             ''', (Job.JobID,))
             self.jobdb.commit()
+            JobLogger.log(Job.JobID, Message=f"Job is removed due to being deleted or finshed.")
             self.__getJobs()
             return True, list(
                 filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
