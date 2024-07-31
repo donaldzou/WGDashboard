@@ -6,4 +6,4 @@ flask
 icmplib
 sqlalchemy
 flask[async]
-aiosqlite
+flask-cors

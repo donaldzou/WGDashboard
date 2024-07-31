@@ -22,6 +22,7 @@ import psutil
 import pyotp
 from flask import Flask, request, render_template, session
 from json import JSONEncoder
+from flask_cors import CORS
 
 from icmplib import ping, traceroute
 
@@ -46,7 +47,7 @@ UPDATE = None
 app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
-
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 class ModelEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -1209,21 +1210,35 @@ API Routes
 @app.before_request
 def auth_req():
     authenticationRequired = DashboardConfig.GetConfig("Server", "auth_req")[1]
+    d = request.args
     if authenticationRequired:
-
-        if ('/static/' not in request.path and "username" not in session and "/" != request.path
-                and "validateAuthentication" not in request.path and "authenticate" not in request.path
-                and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
-                and "isTotpEnabled" not in request.path
-        ):
-            response = Flask.make_response(app, {
-                "status": False,
-                "message": None,
-                "data": None
-            })
-            response.content_type = "application/json"
-            response.status_code = 401
-            return response
+        apiKey = d.get('apiKey')
+        apiKeyEnabled = DashboardConfig.GetConfig("Server", "dashboard_api_key")[1]
+        if apiKey is not None and len(apiKey) > 0 and apiKeyEnabled:
+            apiKeyExist = len(list(filter(lambda x : x.Key == apiKey, DashboardConfig.DashboardAPIKeys))) == 1
+            if not apiKeyExist:
+                response = Flask.make_response(app, {
+                    "status": False,
+                    "message": "API Key does not exist",
+                    "data": None
+                })
+                response.content_type = "application/json"
+                response.status_code = 401
+                return response
+        else:
+            if ('/static/' not in request.path and "username" not in session and "/" != request.path
+                    and "validateAuthentication" not in request.path and "authenticate" not in request.path
+                    and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
+                    and "isTotpEnabled" not in request.path
+            ):
+                response = Flask.make_response(app, {
+                    "status": False,
+                    "message": "Unauthorized access.",
+                    "data": None
+                })
+                response.content_type = "application/json"
+                response.status_code = 401
+                return response
 
 
 @app.route('/api/validateAuthentication', methods=["GET"])
