@@ -7,6 +7,10 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 
 <img src="https://github.com/donaldzou/WGDashboard/raw/main/img/v4.0Preview.gif">
 
+> Working example of API Key and CORS ;)
+
+<img src="https://github.com/donaldzou/WGDashboard/raw/main/img/ScreenRecording2024-07-31at2.16.15AM-ezgif.com-video-to-gif-converter.gif">
+
 
 <hr>
 
