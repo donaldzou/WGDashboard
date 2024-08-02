@@ -2,8 +2,7 @@ bcrypt
 ifcfg
 psutil
 pyotp
-flask
-icmplib
-sqlalchemy
-flask[async]
+Flask
 flask-cors
+icmplib
+gunicorn

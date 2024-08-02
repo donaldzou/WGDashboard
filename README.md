@@ -12,39 +12,33 @@
   <a href="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6"><img src="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6.svg" alt="wakatime"></a>
   <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
-<p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
-<p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
+<p align="center">Monitoring WireGuard is not convenient, need to login into server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
+<p align="center"><small><i>This project is not affiliate to the official WireGuard Project</i></small></p>
 
-## 📣 What's New: v3.0
+## 📣 What's New: v4.0
+
+> I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :) Also, huge thanks who sponsored me GitHub :heart:
 
 - 🎉  **New Features**
-  - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
-  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
-  - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
-  - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
-  - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
-  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
-  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
-  - **Added Some [🥘 Experimental Functions](#-experimental-functions)** 
-  
-- 🪚  **Bug Fixed**
-  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
-  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
-  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
-  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
-  - **And many other bugs provided by our beloved users** :heart:
+  - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
+  - **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
+  - **API Key for WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the API Documentation below.
+  - **Logging**: Dashboard will now log all activity on the dashboard and API requests.
+  - **Time-Based One-Time Password (TOTP)**: You can enable this function to add one more layer of security, and generate the TOTP with your choice of authenticator.
+  - **Designs**
+    - **Real-time Graphs**: You can view real-time data changes with graphs in each configuration.
+    - **Night mode**: You know what that means, it avoids bugs ;)
+  - **Enforce Python Virtual Environment**: I noticed newer Python version (3.12) does not allow to install packages globally, and plus I think is a good idea to use venv.
+ 
 - **🧐  Other Changes**
-  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
-  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
-  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
-  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
-  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
+  - **Deprecated jQuery from the project, and migrated and rewrote the whole front-end with Vue.js. This allow the dashboard is future proofed, and potential cross server access with a desktop app.**
+  - Rewrote the backend into a REST API structure
+  - Improved SQL query efficient
+  - Removed all templates, except for `index.html` where it will load the Vue.js app.
 
-*And many other small changes for performance and bug fixes! :laughing:*
 
->  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
 
-**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
+**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard**
 
 <hr>
 
@@ -69,19 +63,23 @@
 
 ## 💡 Features
 
-- **No need to re-configure existing WireGuard configuration! It can search for existed configuration files.**
-- Easy to use interface, provided username and password protection to the dashboard
-- Add peers and edit (Allowed IPs, DNS, Private Key...)
-- View peers and configuration real time details (Data Usage, Latest Handshakes...)
-- Share your peer configuration with QR code or file download
-- Testing tool: Ping and Traceroute to your peer's ip
-- **And more functions are coming up!**
+- Automatically look for existing WireGuard configuration under `/etc/wireguard`
+- Easy to use interface, provided credential and TOTP protection to the dashboard
+- Manage peers and configuration
+  - Add Peers or by bulk with auto-generated information
+  - Edit peer information
+  - Delete peers with ease
+  - Restrict peers
+  - Generate QR Code and `.conf` file for peers
+  - Schedule jobs to delete / restrict peer when conditions are met
+- View real time peer status
+- Testing tool: Ping and Traceroute to your peer
 
 
 ## 📝 Requirement
 
 - Recommend the following OS, tested by our beloved users:
-  - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS [@Me]
+  - [x] Ubuntu 18.04.1 LTS, 20.04.1 LTS, 22.04.4 LTS [@Me]
   - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
   - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
   - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
@@ -116,7 +114,7 @@
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.5 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone -b v4.0 https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -140,7 +138,7 @@
 5. Run WGDashboard
 
    ```shell
-   ./wgd.sh start
+   sudo ./wgd.sh start
    ```
    
    **Note**:
@@ -420,6 +418,33 @@ Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
 ![Traceroute](img/Traceroute.png)
 
 ## ⏰  Changelog
+
+#### v3.0.0 - v3.0.6.2 - Jan 18, 2022
+
+- 🎉  **New Features**
+    - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
+    - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
+    - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
+    - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
+    - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
+    - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
+    - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
+    - **Added Some [🥘 Experimental Functions](#-experimental-functions)**
+
+- 🪚  **Bug Fixed**
+    - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
+    - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
+    - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
+    - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
+    - **And many other bugs provided by our beloved users** :heart:
+- **🧐  Other Changes**
+    - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)!
+    - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
+    - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
+    - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
+    - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
+
+*And many other small changes for performance and bug fixes! :laughing:*
 
 #### v2.3.1 - Sep 8, 2021
 

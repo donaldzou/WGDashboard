@@ -1012,7 +1012,7 @@ class DashboardConfig:
         return True, ""
 
     def generatePassword(self, plainTextPassword: str):
-        return bcrypt.hashpw(plainTextPassword.encode("utf-8"), bcrypt.gensalt(rounds=12))
+        return bcrypt.hashpw(plainTextPassword.encode("utf-8"), bcrypt.gensalt())
 
     def __checkPassword(self, plainTextPassword: str, hashedPassword: bytes):
         return bcrypt.checkpw(plainTextPassword.encode("utf-8"), hashedPassword)
@@ -1206,13 +1206,12 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
 API Routes
 '''
 
-
 @app.before_request
 def auth_req():
     authenticationRequired = DashboardConfig.GetConfig("Server", "auth_req")[1]
-    d = request.args
+    d = request.headers
     if authenticationRequired:
-        apiKey = d.get('apiKey')
+        apiKey = d.get('wg-dashboard-apikey')
         apiKeyEnabled = DashboardConfig.GetConfig("Server", "dashboard_api_key")[1]
         if apiKey is not None and len(apiKey) > 0 and apiKeyEnabled:
             apiKeyExist = len(list(filter(lambda x : x.Key == apiKey, DashboardConfig.DashboardAPIKeys))) == 1
@@ -1786,8 +1785,7 @@ def API_Welcome_Finish():
         updatePassword, updatePasswordErr = DashboardConfig.SetConfig("Account", "password",
                                                                       {
                                                                           "newPassword": data["newPassword"],
-                                                                          "repeatNewPassword": data[
-                                                                              "repeatNewPassword"],
+                                                                          "repeatNewPassword": data["repeatNewPassword"],
                                                                           "currentPassword": "admin"
                                                                       })
         updateEnableTotp, updateEnableTotpErr = DashboardConfig.SetConfig("Account", "enable_totp", data["enable_totp"])
@@ -1806,7 +1804,7 @@ def index():
     Index page related
     @return: Template
     """
-    return render_template('index_new.html')
+    return render_template('index.html')
 
 
 def backGroundThread():
