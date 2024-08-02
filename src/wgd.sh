@@ -37,7 +37,7 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
-        { python3 -m venv $VIRTUAL_ENV; } >> ./log/instal.txt
+        { python3 -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     printf "[WGDashboard] Activate Python Virtual Environment under ./venv\n"
     . ${VIRTUAL_ENV}/bin/activate
@@ -176,20 +176,22 @@ install_wgd(){
     else
     	printf "[WGDashboard] \xE2\x9C\x94 Python is installed\n"
     fi
-    if ! python3 -m venv -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] Python Virtual Environment is not installed, trying to install now\n"
-		_installPythonVenv
-	else
-        printf "[WGDashboard] \xE2\x9C\x94 Python Virtual Environment is installed\n"
-	fi
-	if ! python3 -m pip -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] Python Package Manager (PIP) is not installed, trying to install now\n"
-		_installPythonPip
-	else
-		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
-	fi
+    _installPythonVenv
+    _installPythonPip
+#    if ! python3 -m venv -h > /dev/null 2>&1
+#	then
+#		printf "[WGDashboard] Python Virtual Environment is not installed, trying to install now\n"
+#		_installPythonVenv
+#	else
+#        printf "[WGDashboard] \xE2\x9C\x94 Python Virtual Environment is installed\n"
+#	fi
+#	if ! python3 -m pip -h > /dev/null 2>&1
+#	then
+#		printf "[WGDashboard] Python Package Manager (PIP) is not installed, trying to install now\n"
+#		_installPythonPip
+#	else
+#		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
+#	fi
     
     
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
