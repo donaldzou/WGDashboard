@@ -39,8 +39,8 @@ _check_and_set_venv(){
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
         { python3 -m venv $VIRTUAL_ENV; } >> ./log/instal.txt
     fi
-    printf "[WGDashboard] Activate Python Virtual Environment under ./venv\n"
-    . ${VIRTUAL_ENV}/bin/activate
+#    printf "[WGDashboard] Activate Python Virtual Environment under ./venv\n"
+#    . ${VIRTUAL_ENV}/bin/activate
 }
 
 _determineOS(){
@@ -206,9 +206,9 @@ install_wgd(){
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
-    { date; python3 -m pip install -g pip printf "\n\n"; } >> ./log/install.txt
+    { date; ./venv/bin/python3 -m pip install pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; python3 -m pip install -g -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+    { date; ./venv/bin/python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
@@ -245,7 +245,7 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   _check_and_set_venv
-  gunicorn --access-logfile log/access_"$d".log \
+  sudo ./venv/bin/gunicorn --access-logfile log/access_"$d".log \
   --log-level 'debug' --capture-output \
   --error-logfile log/error_"$d".log 'dashboard:app'
   printf "[WGDashboard] Log files is under ./log\n"
@@ -273,7 +273,7 @@ start_wgd_debug() {
   printf "%s\n" "$dashes"
   _checkWireguard
   printf "| Starting WGDashboard in the foreground.                  |\n"
-  python3 "$app_name"
+  sudo ./venv/bin/python3 "$app_name"
   printf "%s\n" "$dashes"
 }
 
