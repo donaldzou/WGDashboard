@@ -39,6 +39,7 @@ import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
 import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
 import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
+import {ref} from "vue";
 
 Chart.register(
 	ArcElement,
@@ -74,7 +75,8 @@ export default {
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
-		return {dashboardConfigurationStore, wireguardConfigurationStore}
+		const interval = ref(undefined)
+		return {dashboardConfigurationStore, wireguardConfigurationStore, interval}
 	},
 	data(){
 		return {
@@ -139,24 +141,29 @@ export default {
 		'$route': {
 			immediate: true,
 			handler(){
-				clearInterval(this.interval)
+				console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
+				clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
+				console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
+				
 				this.loading = true;
 				let id = this.$route.params.id;
 				this.configurationInfo = [];
 				this.configurationPeers = [];
 				if (id){
 					this.getPeers(id)
-					this.setInterval();
+					console.log("Changed..")
+					this.setPeerInterval();
 				}
 			}
 		},
 		'dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval'(){
-			clearInterval(this.interval);
-			this.setInterval();
-		}
+			console.log("Changed?")
+			clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
+			this.setPeerInterval();
+		},
 	},
 	beforeRouteLeave(){
-		clearInterval(this.interval)
+		clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
 	},
 	methods:{
 		toggle(){
@@ -237,11 +244,12 @@ export default {
 					}
 				});
 		},
-		setInterval(){
-			this.interval = setInterval(() => {
+		setPeerInterval(){
+			this.dashboardConfigurationStore.Peers.RefreshInterval = setInterval(() => {
 				this.getPeers()
 			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
-		}
+			console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
+		},
 	},
 	computed: {
 		configurationSummary(){

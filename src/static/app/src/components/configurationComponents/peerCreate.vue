@@ -55,6 +55,7 @@ export default {
 	}, 
 	methods: {
 		peerCreate(){
+			this.saving = true
 			fetchPost("/api/addPeers/" + this.$route.params.id, this.data, (res) => {
 				if (res.status){
 					this.$router.push(`/configuration/${this.$route.params.id}/peers`)
@@ -62,7 +63,7 @@ export default {
 				}else{
 					this.dashboardStore.newMessage("Server", res.message, "danger")
 				}
-				
+				this.saving = false;
 			})
 		}	
 	},
@@ -132,10 +133,11 @@ export default {
 			</div>
 			<div class="d-flex mt-2">
 				<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
-				        :disabled="!this.allRequireFieldsFilled"
+				        :disabled="!this.allRequireFieldsFilled || this.saving"
 				        @click="this.peerCreate()"
 				>
-					<i class="bi bi-plus-circle-fill me-2"></i>Add
+					<i class="bi bi-plus-circle-fill me-2" v-if="!this.saving"></i>
+					{{this.saving ? 'Saving...': 'Add'}}
 				</button>
 			</div>
 		</div>

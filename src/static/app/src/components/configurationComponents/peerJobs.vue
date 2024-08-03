@@ -2,6 +2,7 @@
 import ScheduleDropdown from "@/components/configurationComponents/peerScheduleJobsComponents/scheduleDropdown.vue";
 import SchedulePeerJob from "@/components/configurationComponents/peerScheduleJobsComponents/schedulePeerJob.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import {v4} from "uuid";
 export default {
 	name: "peerJobs",
 	setup(){
@@ -26,7 +27,7 @@ export default {
 		},
 		addJob(){
 			this.selectedPeer.jobs.unshift(JSON.parse(JSON.stringify({
-				JobID: crypto.randomUUID(),
+				JobID: v4().toString(),
 				Configuration: this.selectedPeer.configuration.Name,
 				Peer: this.selectedPeer.id,
 				Field: this.store.PeerScheduleJobs.dropdowns.Field[0].value,

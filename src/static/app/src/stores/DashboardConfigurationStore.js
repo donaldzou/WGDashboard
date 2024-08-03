@@ -8,7 +8,8 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		Configuration: undefined,
 		Messages: [],
 		Peers: {
-			Selecting: false
+			Selecting: false,
+			RefreshInterval: undefined
 		}
 	}),
 	actions: {
