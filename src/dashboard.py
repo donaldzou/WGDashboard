@@ -20,7 +20,7 @@ import bcrypt
 import ifcfg
 import psutil
 import pyotp
-from flask import Flask, request, render_template, session
+from flask import Flask, request, render_template, session, g
 from json import JSONEncoder
 from flask_cors import CORS
 
@@ -1245,7 +1245,6 @@ def API_ValidateAuthentication():
     token = request.cookies.get("authToken") + ""
     if token == "" or "username" not in session or session["username"] != token:
         return ResponseObject(False, "Invalid authentication")
-
     return ResponseObject(True)
 
 
@@ -1286,7 +1285,9 @@ def API_SignOut():
 
 @app.route('/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
-    WireguardConfigurations = _getConfigurationList()
+    # WireguardConfigurations = _getConfigurationList()
+    print("in request::::")
+    print(list(WireguardConfigurations.keys()))
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 
@@ -1838,18 +1839,20 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
-# global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger
+
 
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
 cursor = sqldb.cursor()
 DashboardConfig = DashboardConfig()
-WireguardConfigurations: dict[str, WireguardConfiguration] = {}
+
 AllPeerJobs: PeerJobs = PeerJobs()
 JobLogger: Logger = Logger()
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
+
+WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 WireguardConfigurations = _getConfigurationList()
 bgThread = threading.Thread(target=backGroundThread)
 bgThread.daemon = True
