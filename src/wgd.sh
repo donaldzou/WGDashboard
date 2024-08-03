@@ -4,6 +4,9 @@
 # Under Apache-2.0 License
 app_name="dashboard.py"
 app_official_name="WGDashboard"
+venv_python="./venv/bin/python3"
+venv_gunicorn="./venv/bin/gunicorn"
+
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
@@ -178,21 +181,7 @@ install_wgd(){
     fi
     _installPythonVenv
     _installPythonPip
-#    if ! python3 -m venv -h > /dev/null 2>&1
-#	then
-#		printf "[WGDashboard] Python Virtual Environment is not installed, trying to install now\n"
-#		_installPythonVenv
-#	else
-#        printf "[WGDashboard] \xE2\x9C\x94 Python Virtual Environment is installed\n"
-#	fi
-#	if ! python3 -m pip -h > /dev/null 2>&1
-#	then
-#		printf "[WGDashboard] Python Package Manager (PIP) is not installed, trying to install now\n"
-#		_installPythonPip
-#	else
-#		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
-#	fi
-    
+
     
     version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
     if [ $version_pass == "0" ]
@@ -247,7 +236,7 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   _check_and_set_venv
-  sudo ./venv/bin/gunicorn --access-logfile log/access_"$d".log \
+  sudo "$venv_gunicorn" --access-logfile log/access_"$d".log \
   --log-level 'debug' --capture-output \
   --error-logfile log/error_"$d".log 'dashboard:app'
   printf "[WGDashboard] Log files is under ./log\n"
@@ -255,7 +244,7 @@ gunicorn_start () {
 }
 
 gunicorn_stop () {
-  kill $(cat ./gunicorn.pid)
+  sudo kill $(cat ./gunicorn.pid)
 }
 
 start_wgd () {
@@ -274,30 +263,27 @@ stop_wgd() {
 start_wgd_debug() {
   printf "%s\n" "$dashes"
   _checkWireguard
-  printf "| Starting WGDashboard in the foreground.                  |\n"
-  sudo ./venv/bin/python3 "$app_name"
+  printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
+  sudo "$venv_python" "$app_name"
   printf "%s\n" "$dashes"
 }
 
 update_wgd() {
   new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
-  printf "| Are you sure you want to update to the %s? (Y/N): " "$new_ver"
+  printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
-  if [ "$up" = "Y" ]; then
-    printf "| Shutting down WGDashboard...                             |\n"
+  if [ "$up" = "Y" ] || [ "$up" = "y" ]; then
+    printf "[WGDashboard] Shutting down WGDashboard\n"
     if check_wgd_status; then
       stop_wgd
     fi
     mv wgd.sh wgd.sh.old
-    printf "| Downloading %s from GitHub...                            |\n" "$new_ver"
-    git stash > /dev/null 2>&1
-    git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force >  /dev/null 2>&1
-    printf "| Upgrading pip                                            |\n"
-    python3 -m pip install -U pip --root-user-action > /dev/null 2>&1
-    printf "| Installing latest Python dependencies                    |\n"
-    python3 -m pip install -U -r requirements.txt --root-user-action > /dev/null 2>&1
-    printf "| Update Successfully!                                     |\n"
+    printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
+    { date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
+    chmod +x ./wgd.sh
+    sudo ./wgd.sh install
+    printf "[WGDashboard] Update completed!\n"
     printf "%s\n" "$dashes"
     rm wgd.sh.old
   else
@@ -315,7 +301,7 @@ if [ "$#" != 1 ];
     if [ "$1" = "start" ]; then
         if check_wgd_status; then
           printf "%s\n" "$dashes"
-          printf "| WGDashboard is already running.                          |\n"
+          printf "[WGDashboard] WGDashboard is already running.\n"
           printf "%s\n" "$dashes"
           else
             start_wgd
@@ -324,11 +310,11 @@ if [ "$#" != 1 ];
         if check_wgd_status; then
             printf "%s\n" "$dashes"
             stop_wgd
-            printf "| WGDashboard is stopped.                                  |\n"
+            printf "[WGDashboard] WGDashboard is stopped.\n"
             printf "%s\n" "$dashes"
             else
               printf "%s\n" "$dashes"
-              printf "| WGDashboard is not running.                              |\n"
+              printf "[WGDashboard] WGDashboard is not running.\n"
               printf "%s\n" "$dashes"
         fi
       elif [ "$1" = "update" ]; then
