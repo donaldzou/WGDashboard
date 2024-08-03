@@ -61,7 +61,7 @@ _determineOS(){
 _installPython(){
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt install -y python3; printf "\n\n"; } >> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 		centos|fedora|redhat)
 			if command -v dnf &> /dev/null; then
@@ -93,7 +93,7 @@ _installPython(){
 _installPythonVenv(){
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt install -y python3-venv; printf "\n\n"; } >> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 		centos|fedora|redhat)
 			if command -v dnf &> /dev/null; then
@@ -121,7 +121,7 @@ _installPythonVenv(){
 _installPythonPip(){
 	case "$OS" in
     		ubuntu|debian)
-    			{ sudo apt update ; sudo apt install -y python3-pip; printf "\n\n"; } >> ./log/install.txt 
+    			{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt 
     		;;
     		centos|fedora|redhat)
     			if command -v dnf &> /dev/null; then
