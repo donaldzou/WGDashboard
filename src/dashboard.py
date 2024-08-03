@@ -1838,6 +1838,7 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
+global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger
 
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
