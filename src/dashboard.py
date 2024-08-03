@@ -104,7 +104,34 @@ class Log:
     def __dict__(self):
         return self.toJson()
     
-class Logger:
+class DashboardLogger:
+    def __init__(self):
+        self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
+                                        check_same_thread=False)
+        self.loggerdb.row_factory = sqlite3.Row
+        self.loggerdbCursor = self.loggerdb.cursor()
+        self.__createLogDatabase()
+        self.log(Message="WGDashboard started")
+    def __createLogDatabase(self):
+        existingTable = self.loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+        existingTable = [t['name'] for t in existingTable]
+
+        if "DashboardLog" not in existingTable:
+            self.loggerdbCursor.execute("CREATE TABLE DashboardLog (LogID VARCHAR NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), URL VARCHAR, IP VARCHAR, Status VARCHAR, Message VARCHAR, PRIMARY KEY (LogID))")
+            self.loggerdb.commit()
+    
+    def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
+        try:
+            self.loggerdbCursor.execute("INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
+            self.loggerdb.commit()
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        
+        
+    
+class PeerJobLogger:
     def __init__(self):
         self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
                                      check_same_thread=False)
@@ -1208,6 +1235,13 @@ API Routes
 
 @app.before_request
 def auth_req():
+    if "api" in request.path:
+        if str(request.method) == "GET":
+            DashboardLogger.log(str(request.url), str(request.remote_addr), Message=str(request.args))
+        elif str(request.method) == "POST":
+            DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"Request Args: {str(request.args)} Body:{str(request.get_json())}")
+        
+    
     authenticationRequired = DashboardConfig.GetConfig("Server", "auth_req")[1]
     d = request.headers
     if authenticationRequired:
@@ -1215,6 +1249,7 @@ def auth_req():
         apiKeyEnabled = DashboardConfig.GetConfig("Server", "dashboard_api_key")[1]
         if apiKey is not None and len(apiKey) > 0 and apiKeyEnabled:
             apiKeyExist = len(list(filter(lambda x : x.Key == apiKey, DashboardConfig.DashboardAPIKeys))) == 1
+            DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"API Key Access: {('true' if apiKeyExist else 'false')} - Key: {apiKey}")
             if not apiKeyExist:
                 response = Flask.make_response(app, {
                     "status": False,
@@ -1268,8 +1303,10 @@ def API_AuthenticateLogin():
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
         resp.set_cookie("authToken", authToken)
         session.permanent = True
+        DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"Login success: {data['username']}")
         return resp
 
+    DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"Login failed: {data['username']}")
     if totpEnabled:
         return ResponseObject(False, "Sorry, your username, password or OTP is incorrect.")
     else:
@@ -1839,7 +1876,11 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
-
+import sys
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
 
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
@@ -1847,7 +1888,8 @@ cursor = sqldb.cursor()
 DashboardConfig = DashboardConfig()
 
 AllPeerJobs: PeerJobs = PeerJobs()
-JobLogger: Logger = Logger()
+JobLogger: PeerJobLogger = PeerJobLogger()
+DashboardLogger: DashboardLogger = DashboardLogger()
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
@@ -1861,6 +1903,7 @@ bgThread.start()
 scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
 scheduleJobThread.daemon = True
 scheduleJobThread.start()
+
 
 if __name__ == "__main__":
     app.run(host=app_ip, debug=False, port=app_port)

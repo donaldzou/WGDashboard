@@ -106,9 +106,7 @@
   # Must have for each peer
   ```
 
-- Python 3.7+ & Pip3
-
-- Browser support CSS3 and ES6
+- **Python 3.10** for v4.0+, **Python 3.7 - 3.9** for v2.0 - v3.0.6.2
 
 ## 🛠 Install
 1. Download WGDashboard

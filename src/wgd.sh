@@ -183,7 +183,7 @@ install_wgd(){
     _installPythonPip
 
     
-    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 7) else print("0");')
+    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
     if [ $version_pass == "0" ]
       then 
         printf "[WGDashboard] WGDashboard required Python 3.7 or above\n"
