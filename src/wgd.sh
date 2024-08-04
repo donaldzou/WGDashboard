@@ -165,6 +165,7 @@ _checkWireguard(){
 install_wgd(){
     printf "[WGDashboard] Starting to install WGDashboard\n"
     _checkWireguard
+    sudo chmod -R 755 /etc/wireguard/
     
     if [ ! -d "log" ]
 	  then 
