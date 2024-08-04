@@ -239,6 +239,7 @@ gunicorn_start () {
   _check_and_set_venv
   sudo "$venv_gunicorn" --access-logfile log/access.log \
   --log-level 'debug' --capture-output \
+  --config ./gunicorn.conf.py --print_config
   --error-logfile log/error.log --daemon 'dashboard:app'
   sleep 5
   checkPIDExist=0
