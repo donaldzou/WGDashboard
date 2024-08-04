@@ -244,7 +244,7 @@ gunicorn_start () {
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]
   do
-  		if [ ! -f './gunicorn.pid' ]; then
+  		if test -f './gunicorn.pid'; then
   			checkPIDExist=1
   		fi
   		sleep 2
