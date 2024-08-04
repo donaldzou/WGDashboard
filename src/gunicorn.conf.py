@@ -12,3 +12,7 @@ daemon = True
 pidfile = './gunicorn.pid'
 print_config = True
 wsgi_app = "dashboard:app"
+access_logfile = "./log/access.log"
+log_level = "debug"
+capture_output = True
+error_logfile = "./log/error.log"

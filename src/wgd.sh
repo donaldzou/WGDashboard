@@ -237,10 +237,7 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   _check_and_set_venv
-  sudo "$venv_gunicorn" --access-logfile log/access.log \
-  --log-level 'debug' --capture-output \
-  --config ./gunicorn.conf.py \
-  --error-logfile log/error.log --daemon 'dashboard:app'
+  sudo "$venv_gunicorn" --config ./gunicorn.conf.py
   sleep 5
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]
