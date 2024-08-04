@@ -8,7 +8,7 @@ worker_class = 'gthread'
 workers = 1
 threads = 1
 bind = f"{app_host}:{app_port}"
-# print("[WGDashboard] Gunicorn app will be running at " + bind)
 daemon = True
 pidfile = './gunicorn.pid'
 print_config = True
+wsgi_app = "dashboard:app"
