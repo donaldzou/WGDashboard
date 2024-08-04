@@ -1,9 +1,11 @@
 <script>
 import {fetchGet, fetchPost} from "../utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import Message from "@/components/messageCentreComponent/message.vue";
 
 export default {
 	name: "signin",
+	components: {Message},
 	async setup(){
 		const store = DashboardConfigurationStore()
 		let theme = ""
@@ -24,6 +26,11 @@ export default {
 			loginError: false,
 			loginErrorMessage: "",
 			loading: false
+		}
+	},
+	computed: {
+		getMessages(){
+			return this.store.Messages.filter(x => x.show)
 		}
 	},
 	methods: {
@@ -125,6 +132,12 @@ export default {
 			WGDashboard v4.0 | Developed with ❤️ by 
 			<a href="https://github.com/donaldzou" target="_blank"><strong>Donald Zou</strong></a>
 		</small>
+		<div class="messageCentre text-body position-absolute end-0 margin-3">
+			<TransitionGroup name="message" tag="div" class="position-relative">
+				<Message v-for="m in getMessages.slice().reverse()"
+				         :message="m" :key="m.id"></Message>
+			</TransitionGroup>
+		</div>
 	</div>
 </template>
 

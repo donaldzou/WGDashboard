@@ -293,7 +293,6 @@ class PeerJobs:
     def runJob(self):
         needToDelete = []
         for job in self.Jobs:
-            print(job.toJson())
             c = WireguardConfigurations.get(job.Configuration)
             if c is not None:
                 f, fp = c.searchPeer(job.Peer)
@@ -305,10 +304,7 @@ class PeerJobs:
                     else:
                         x: datetime = datetime.now()
                         y: datetime = datetime.strptime(job.Value, "%Y-%m-%dT%H:%M")
-                        
-
                     runAction: bool = self.__runJob_Compare(x, y, job.Operator)
-                    print("Running Job:" + str(runAction) + "\n")
                     if runAction:
                         s = False
                         if job.Action == "restrict":
@@ -325,7 +321,6 @@ class PeerJobs:
                             JobLogger.log(job.JobID, s["status"],
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                             )
-        print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Ran {len(needToDelete)} job(s)''')
         for j in needToDelete:
             self.deleteJob(j)
 
@@ -1322,9 +1317,7 @@ def API_SignOut():
 
 @app.route('/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
-    # WireguardConfigurations = _getConfigurationList()
-    print("in request::::")
-    print(list(WireguardConfigurations.keys()))
+    WireguardConfigurations = _getConfigurationList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 
@@ -1847,8 +1840,8 @@ def index():
 
 def backGroundThread():
     with app.app_context():
-        print("Waiting 5 sec")
-        time.sleep(5)
+        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #1 Started")
+        time.sleep(10)
         while True:
             for c in WireguardConfigurations.values():
                 if c.getStatus():
@@ -1857,18 +1850,17 @@ def backGroundThread():
                         c.getPeersLatestHandshake()
                         c.getPeersEndpoint()
                     except Exception as e:
-                        print("Error: " + str(e))
+                        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #1 Error: {str(e)}")
             time.sleep(10)
 
 
 def peerJobScheduleBackgroundThread():
     with app.app_context():
-        print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Waiting for 10 Seconds''')
+        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #2 Started")
         time.sleep(10)
         while True:
-            print(f'''[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Peer Job Schedule: Running''')
             AllPeerJobs.runJob()
-            time.sleep(10)
+            time.sleep(180)
 
 
 def gunicornConfig():

@@ -4,20 +4,16 @@ import Index from "@/views/index.vue"
 import Signin from "@/views/signin.vue";
 import ConfigurationList from "@/components/configurationList.vue";
 import {fetchGet} from "@/utilities/fetch.js";
-import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import Settings from "@/views/settings.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import Setup from "@/views/setup.vue";
 import NewConfiguration from "@/views/newConfiguration.vue";
 import Configuration from "@/views/configuration.vue";
-import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerList from "@/components/configurationComponents/peerList.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
-import RestrictedPeers from "@/components/configurationComponents/restrictedPeers.vue";
 import Ping from "@/views/ping.vue";
 import Traceroute from "@/views/traceroute.vue";
-import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -30,6 +26,7 @@ const checkAuth = async () => {
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
+    
     {
       name: "Index",
       path: '/',
@@ -90,7 +87,6 @@ const router = createRouter({
               path: 'create',
               component: PeerCreate
             },
-            
           ]
         },
         
@@ -136,6 +132,7 @@ router.beforeEach(async (to, from, next) => {
     }else{
       dashboardConfigurationStore.Redirect = to;
       next("/signin")
+      dashboardConfigurationStore.newMessage("WGDashboard", "Session Ended", "warning")
     }
   }else {
     next();
