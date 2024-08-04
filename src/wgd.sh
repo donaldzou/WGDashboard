@@ -239,7 +239,7 @@ gunicorn_start () {
   _check_and_set_venv
   sudo "$venv_gunicorn" --access-logfile log/access_"$d".log \
   --log-level 'debug' --capture-output \
-  --error-logfile log/error_"$d".log 'dashboard:app'
+  --error-logfile log/error_"$d".log --daemon 'dashboard:app'
   
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]
