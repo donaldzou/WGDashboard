@@ -10,7 +10,6 @@ threads = 1
 bind = f"{app_host}:{app_port}"
 daemon = True
 pidfile = './gunicorn.pid'
-print_config = True
 wsgi_app = "dashboard:app"
 access_logfile = "./log/access.log"
 log_level = "debug"
