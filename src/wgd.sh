@@ -240,6 +240,16 @@ gunicorn_start () {
   sudo "$venv_gunicorn" --access-logfile log/access_"$d".log \
   --log-level 'debug' --capture-output \
   --error-logfile log/error_"$d".log 'dashboard:app'
+  
+  checkPIDExist=0
+  while [ $checkPIDExist -eq 0 ]
+  do
+  		if [ ! -f './gunicorn.pid' ]; then
+  			checkPIDExist=1
+  		fi
+  		sleep 2
+  done
+  
   printf "[WGDashboard] Log files is under ./log\n"
   printf "%s\n" "$dashes"
 }
