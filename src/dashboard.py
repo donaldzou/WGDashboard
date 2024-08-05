@@ -1514,8 +1514,7 @@ def API_addPeers(configName):
         if (not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0)) or len(endpoint_allowed_ip) == 0:
             return ResponseObject(False, "Please fill in all required box.")
         if not config.getStatus():
-            return ResponseObject(False,
-                                  f"{configName} is not running, please turn on the configuration before adding peers.")
+            config.toggleConfiguration()
         if bulkAdd:
             if bulkAddAmount < 1:
                 return ResponseObject(False, "Please specify amount of peers you want to add")

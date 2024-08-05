@@ -14,7 +14,6 @@ export default {
 	data(){
 		return {
 			allowedIp: [],
-			
 			availableIpSearchString: "",
 			customAvailableIp: "",
 			allowedIpFormatError: false
@@ -45,7 +44,15 @@ export default {
 	watch: {
 		customAvailableIp(){
 			this.allowedIpFormatError = false;
+		},
+		availableIp(){
+			if (this.availableIp !== undefined && this.availableIp.length > 0){
+				this.addAllowedIp(this.availableIp[0])
+			}
 		}
+	},
+	mounted() {
+		
 	}
 }
 </script>
@@ -57,11 +64,11 @@ export default {
 		</label>
 		<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ips.length > 0}">
 			<TransitionGroup name="list">
-									<span class="badge rounded-pill text-bg-success" v-for="(ip, index) in this.data.allowed_ips" :key="ip">
-										{{ip}}
-										<a role="button" @click="this.data.allowed_ips.splice(index, 1)">
-											<i class="bi bi-x-circle-fill ms-1"></i></a>
-									</span>
+				<span class="badge rounded-pill text-bg-success" v-for="(ip, index) in this.data.allowed_ips" :key="ip">
+					{{ip}}
+					<a role="button" @click="this.data.allowed_ips.splice(index, 1)">
+						<i class="bi bi-x-circle-fill ms-1"></i></a>
+				</span>
 			</TransitionGroup>
 		</div>
 		<div class="d-flex gap-2 align-items-center">
