@@ -11,11 +11,13 @@ import DashboardTheme from "@/components/settingsComponent/dashboardTheme.vue";
 import DashboardSettingsInputIPAddressAndPort
 	from "@/components/settingsComponent/dashboardSettingsInputIPAddressAndPort.vue";
 import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vue";
+import AccountSettingsMFA from "@/components/settingsComponent/accountSettingsMFA.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		AccountSettingsMFA,
 		DashboardAPIKeys,
 		DashboardSettingsInputIPAddressAndPort,
 		DashboardTheme,
@@ -49,7 +51,7 @@ export default {
 					<PeersDefaultSettingsInput targetData="peer_mtu" title="MTU (Max Transmission Unit)"></PeersDefaultSettingsInput>
 					<PeersDefaultSettingsInput targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
 					<PeersDefaultSettingsInput targetData="remote_endpoint" title="Peer Remote Endpoint"
-					                           :warning="true" warningText="This will be change globally, and will be apply to all peer's QR code and configuration file."
+					                           :warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
 					></PeersDefaultSettingsInput>
 				</div>
 			</div>
@@ -67,14 +69,16 @@ export default {
 			</div>
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">Account Settings</p>
-				<div class="card-body">
+				<div class="card-body d-flex gap-4 flex-column">
 					<AccountSettingsInputUsername targetData="username"
 					                              title="Username"
 					></AccountSettingsInputUsername>
-					<hr>
+					<hr class="m-0">
 					<AccountSettingsInputPassword
 						targetData="password">
 					</AccountSettingsInputPassword>
+					<hr class="m-0">
+					<AccountSettingsMFA></AccountSettingsMFA>
 				</div>
 			</div>
 			<DashboardAPIKeys></DashboardAPIKeys>

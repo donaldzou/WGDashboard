@@ -14,6 +14,7 @@ import PeerList from "@/components/configurationComponents/peerList.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import Ping from "@/views/ping.vue";
 import Traceroute from "@/views/traceroute.vue";
+import Totp from "@/components/setupComponent/totp.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -100,6 +101,12 @@ const router = createRouter({
     },
     {
       path: '/welcome', component: Setup,
+      meta: {
+        requiresAuth: true
+      },
+    },
+    {
+      path: '/2FASetup', component: Totp,
       meta: {
         requiresAuth: true
       },

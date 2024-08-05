@@ -944,6 +944,7 @@ class DashboardConfig:
                 "username": "admin",
                 "password": "admin",
                 "enable_totp": "false",
+                "totp_verified": "false",
                 "totp_key": pyotp.random_base32()
             },
             "Server": {
@@ -1780,12 +1781,14 @@ Sign Up
 
 @app.route('/api/isTotpEnabled')
 def API_isTotpEnabled():
-    return ResponseObject(data=DashboardConfig.GetConfig("Account", "enable_totp")[1])
+    return (
+        ResponseObject(data=DashboardConfig.GetConfig("Account", "enable_totp")[1] and DashboardConfig.GetConfig("Account", "totp_verified")[1]))
 
 
 @app.route('/api/Welcome_GetTotpLink')
 def API_Welcome_GetTotpLink():
-    if DashboardConfig.GetConfig("Other", "welcome_session")[1]:
+    if not DashboardConfig.GetConfig("Account", "totp_verified")[1]:
+        DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32())
         return ResponseObject(
             data=pyotp.totp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).provisioning_uri(
                 issuer_name="WGDashboard"))
@@ -1795,11 +1798,11 @@ def API_Welcome_GetTotpLink():
 @app.route('/api/Welcome_VerifyTotpLink', methods=["POST"])
 def API_Welcome_VerifyTotpLink():
     data = request.get_json()
-    if DashboardConfig.GetConfig("Other", "welcome_session")[1]:
-        totp = pyotp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).now()
-        print(totp)
-        return ResponseObject(totp == data['totp'])
-    return ResponseObject(False)
+    totp = pyotp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).now()
+    if totp == data['totp']:
+        DashboardConfig.SetConfig("Account", "totp_verified", "true")
+        DashboardConfig.SetConfig("Account", "enable_totp", "true")
+    return ResponseObject(totp == data['totp'])
 
 
 @app.route('/api/Welcome_Finish', methods=["POST"])
@@ -1819,10 +1822,10 @@ def API_Welcome_Finish():
                                                                           "repeatNewPassword": data["repeatNewPassword"],
                                                                           "currentPassword": "admin"
                                                                       })
-        updateEnableTotp, updateEnableTotpErr = DashboardConfig.SetConfig("Account", "enable_totp", data["enable_totp"])
+        # updateEnableTotp, updateEnableTotpErr = DashboardConfig.SetConfig("Account", "enable_totp", data["enable_totp"])
 
-        if not updateUsername or not updatePassword or not updateEnableTotp:
-            return ResponseObject(False, f"{updateUsernameErr},{updatePasswordErr},{updateEnableTotpErr}".strip(","))
+        if not updateUsername or not updatePassword:
+            return ResponseObject(False, f"{updateUsernameErr},{updatePasswordErr}".strip(","))
 
         DashboardConfig.SetConfig("Other", "welcome_session", False)
 
@@ -1888,14 +1891,18 @@ _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 WireguardConfigurations = _getConfigurationList()
-bgThread = threading.Thread(target=backGroundThread)
-bgThread.daemon = True
-bgThread.start()
 
-scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
-scheduleJobThread.daemon = True
-scheduleJobThread.start()
+
+def startThreads():
+    bgThread = threading.Thread(target=backGroundThread)
+    bgThread.daemon = True
+    bgThread.start()
+    
+    scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
+    scheduleJobThread.daemon = True
+    scheduleJobThread.start()
 
 
 if __name__ == "__main__":
+    startThreads()
     app.run(host=app_ip, debug=False, port=app_port)

@@ -1,11 +1,9 @@
 <script>
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import QRCode from 'qrcode'
-import Totp from "@/components/setupComponent/totp.vue";
 import {fetchPost} from "@/utilities/fetch.js";
 export default {
 	name: "setup",
-	components: {Totp},
+	components: {},
 	setup(){
 		const store = DashboardConfigurationStore();
 		return {store}
@@ -16,8 +14,7 @@ export default {
 				username: "",
 				newPassword: "",
 				repeatNewPassword: "",
-				enable_totp: false,
-				verified_totp: false
+				enable_totp: true
 			},
 			loading: false,
 			errorMessage: "",
@@ -30,7 +27,6 @@ export default {
 				&& this.setup.newPassword.length >= 8
 				&& this.setup.repeatNewPassword.length >= 8
 				&& this.setup.newPassword === this.setup.repeatNewPassword
-				&& ((this.setup.enable_totp && this.setup.verified_totp) || !this.setup.enable_totp)
 		}
 	},
 	methods: {
@@ -39,9 +35,7 @@ export default {
 			fetchPost("/api/Welcome_Finish", this.setup, (res) => {
 				if (res.status){
 					this.done = true;
-					setTimeout(() => {
-						this.$router.push('/')
-					}, 500)
+					this.$router.push('/2FASetup')
 				}else{
 					document.querySelectorAll("#createAccount input").forEach(x => x.classList.add("is-invalid"))
 					this.errorMessage = res.message;
@@ -62,7 +56,7 @@ export default {
 <template>
 	<div class="container-fluid login-container-fluid d-flex main pt-5 overflow-scroll" 
 	     :data-bs-theme="this.store.Configuration.Server.dashboard_theme">
-		<div class="mx-auto text-body" style="width: 500px">
+		<div class="m-auto text-body" style="width: 500px">
 			<span class="dashboardLogo display-4">Nice to meet you!</span>
 			<p class="mb-5">Please fill in the following fields to finish setup 😊</p>
 			<div>
@@ -94,26 +88,23 @@ export default {
 							       class="form-control" id="confirmPassword" name="confirmPassword" placeholder="and you can remember it :)" required>
 						</div>
 					</div>
-					<hr>
-					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" role="switch" id="enable_totp" 
-						       v-model="this.setup.enable_totp">
-						<label class="form-check-label" 
-						       for="enable_totp">Enable 2 Factor Authentication? <strong>Strongly recommended</strong></label>
-					</div>
-					<Suspense>
-						<Transition name="fade">
-							<Totp v-if="this.setup.enable_totp" @verified="this.setup.verified_totp = true"></Totp>
-						</Transition>
-					</Suspense>
+<!--					<div class="form-check form-switch">-->
+<!--						<input class="form-check-input" type="checkbox" role="switch" id="enable_totp" -->
+<!--						       v-model="this.setup.enable_totp">-->
+<!--						<label class="form-check-label" -->
+<!--						       for="enable_totp">Enable 2 Factor Authentication? <strong>Strongly recommended</strong></label>-->
+<!--					</div>-->
+<!--					<Suspense>-->
+<!--						<Transition name="fade">-->
+<!--							<Totp v-if="this.setup.enable_totp" @verified="this.setup.verified_totp = true"></Totp>-->
+<!--						</Transition>-->
+<!--					</Suspense>-->
 					
 					<button class="btn btn-dark btn-lg mb-5 d-flex btn-brand shadow align-items-center" 
 					        ref="signInBtn"
 					        :disabled="!this.goodToSubmit || this.loading || this.done" @click="this.submit()">
 						<span class="d-flex align-items-center w-100" v-if="!this.loading && !this.done">
-							Finish<i class="bi bi-chevron-right ms-auto"></i></span>
-						<span class="d-flex align-items-center w-100" v-else-if="this.done">
-							Welcome to WGDashboard!</span>
+							Next<i class="bi bi-chevron-right ms-auto"></i></span>
 						<span class="d-flex align-items-center w-100" v-else>
 							Saving...<span class="spinner-border ms-auto spinner-border-sm" role="status">
 							  <span class="visually-hidden">Loading...</span>
