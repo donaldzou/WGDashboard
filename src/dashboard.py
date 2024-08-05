@@ -1840,7 +1840,7 @@ def index():
 
 def backGroundThread():
     with app.app_context():
-        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #1 Started")
+        print(f"[WGDashboard] Background Thread #1 Started", flush=True)
         time.sleep(10)
         while True:
             for c in WireguardConfigurations.values():
@@ -1850,13 +1850,13 @@ def backGroundThread():
                         c.getPeersLatestHandshake()
                         c.getPeersEndpoint()
                     except Exception as e:
-                        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #1 Error: {str(e)}")
+                        print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
             time.sleep(10)
 
 
 def peerJobScheduleBackgroundThread():
     with app.app_context():
-        print(f"[WGDashboard][{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Background Thread #2 Started")
+        print(f"[WGDashboard] Background Thread #2 Started", flush=True)
         time.sleep(10)
         while True:
             AllPeerJobs.runJob()
