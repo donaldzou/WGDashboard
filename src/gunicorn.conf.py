@@ -17,5 +17,5 @@ log_level = "debug"
 capture_output = True
 errorlog = f"./log/error_{date}.log"
 print(f"[WGDashboard] WGDashboard w/ Gunicorn will be running on {bind}", flush=True)
-print(f"[WGDashboard] Access log file is at ./log/{accesslog}", flush=True)
-print(f"[WGDashboard] Error log file is at ./log/{errorlog}", flush=True)
+print(f"[WGDashboard] Access log file is at {accesslog}", flush=True)
+print(f"[WGDashboard] Error log file is at {errorlog}", flush=True)
