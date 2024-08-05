@@ -244,11 +244,11 @@ gunicorn_start () {
   do
   		if test -f './gunicorn.pid'; then
   			checkPIDExist=1
+  			printf "[WGDashboard] Checking if WGDashboard w/ Gunicorn started successfully"
   		fi
   		sleep 2
   done
-  
-  printf "[WGDashboard] Log files is under ./log\n"
+  printf "[WGDashboard] WGDashboard w/ Gunicorn started successfully"
   printf "%s\n" "$dashes"
 }
 
