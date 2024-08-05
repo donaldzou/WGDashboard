@@ -334,6 +334,72 @@ class PeerJobs:
         if operator == "lst":
             return x < y
 
+class PeerShareLink:
+    def __init__(self, ShareID:str, Peer: str, Configuration: str, SharedDate: datetime, ExpireDate: datetime):
+        self.ShareID = ShareID
+        self.Peer = Peer
+        self.Configuration = Configuration
+        self.SharedDate = SharedDate
+        self.ExpireData = ExpireDate
+    
+    def toJson(self):
+        return {
+            "SharedID": self.ShareID,
+            "Peer": self.Peer,
+            "Configuration": self.Configuration,
+            "ShareDate": self.SharedDate
+        }
+
+class PeerShareLinks:
+    def __init__(self):
+        self.Links: list[PeerShareLink] = []
+        
+        existingTables = cursor.execute("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
+        if len(existingTables) == 0:
+            cursor.execute(
+                """
+                    CREATE TABLE PeerShareLinks (
+                        ShareID VARCHAR NOT NULL PRIMARY KEY, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
+                        ExpireDate DATETIME,
+                        SharedDate DATETIME DEFAULT (datetime('now', 'localtime'))
+                    )
+                """ % self.Name
+            )
+            sqldb.commit()
+        
+    def __getSharedLinks(self):
+        self.Links.clear()
+        allLinks = cursor.execute("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
+        for link in allLinks:
+            self.Links.append(*link)
+    
+    def getLink(self, Configuration: str, Peer: str):
+        return list(filter(lambda x : x.Configuration == Configuration and x.Peer == Peer, self.Links))
+    
+    def getLink(self, ShareID: str):
+        return list(filter(lambda x : x.ShareID == ShareID, self.Links))
+    
+    def addLink(self, Configuration: str, Peer: str, ExpireDate: datetime = None) -> tuple[bool, message]:
+        try:
+            newShareID = str(uuid.uuid4())
+            if len(self.getLink(Configuration, Peer)) > 0:
+                cursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
+            cursor.execute("INSERT INTO PeerShareLinks VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
+            sqldb.commit()
+            self.__getSharedLinks()
+        except Exception as e:
+            return False, str(e)
+        return True
+    
+    def updateLinkExpireDate(self, ShareID, ExpireDate):
+        cursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE ShareID = ?", (ShareID, ))
+        sqldb.commit()
+        self.__getSharedLinks()
+        
+    
+        
+    
+
 class WireguardConfiguration:
     class InvalidConfigurationFileException(Exception):
         def __init__(self, m):
@@ -472,6 +538,8 @@ class WireguardConfiguration:
                 """ % self.Name
             )
             sqldb.commit()
+    
+            
 
     def __getPublicKey(self) -> str:
         return _generatePublicKey(self.PrivateKey)[1]

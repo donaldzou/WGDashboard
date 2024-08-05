@@ -122,6 +122,11 @@ export default {
 						<i class="me-auto bi bi-qr-code"></i> QR Code
 					</a>
 				</li>
+				<li>
+					<a class="dropdown-item d-flex" role="button">
+						<i class="me-auto bi bi-share"></i> Share
+					</a>
+				</li>
 			</template>
 
 			<li><hr class="dropdown-divider"></li>
