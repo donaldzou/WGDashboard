@@ -27,17 +27,28 @@ export default {
 	mounted() {
 		this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
 	},
+	watch: {
+		'peer.ShareLink': {
+			deep: true,
+			handler(newVal, oldVal){
+				if (oldVal.length !== newVal.length){
+					this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
+				}
+			}
+		}
+	},
+	
 	methods: {
 		startSharing(){
 			this.loading = true;
 			fetchPost("/api/sharePeer/create", {
 				Configuration: this.peer.configuration.Name,
 				Peer: this.peer.id,
-				ExpireDate: dayjs().add(30, 'd').format("YYYY-MM-DD hh:mm:ss")
+				ExpireDate: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss")
 			}, (res) => {
 				if (res.status){
 					this.peer.ShareLink = res.data;
-					this.dataCopy = res.data;
+					this.dataCopy = res.data.at(0);
 					this.store.newMessage("Server", "Share link created successfully", "success")
 				}else{
 					this.store.newMessage("Server", 
@@ -49,8 +60,29 @@ export default {
 		},
 		updateLinkExpireDate(){
 			fetchPost("/api/sharePeer/update", this.dataCopy, (res) => {
-				console.log(res)
-			})
+				if (res.status){
+					this.dataCopy = res.data.at(0)
+					this.peer.ShareLink = res.data;
+					this.store.newMessage("Server", "Link expire date updated", "success")
+				}else{
+					this.store.newMessage("Server",
+						"Link expire date failed to update. Reason: " + res.message, "danger")
+				}
+				this.loading = false
+			});
+		},
+		stopSharing(){
+			this.loading = true;
+			this.dataCopy.ExpireDate = 	dayjs().format("YYYY-MM-DD HH:mm:ss")
+			this.updateLinkExpireDate()
+		},
+		parseTime(modelData){
+			if(modelData){
+				this.dataCopy.ExpireDate = dayjs(modelData).format("YYYY-MM-DD HH:mm:ss");
+			}else{
+				this.dataCopy.ExpireDate = undefined
+			}
+			this.updateLinkExpireDate()
 		}
 	},
 	computed: {
@@ -59,11 +91,6 @@ export default {
 				+ window.location.pathname 
 				+ this.$router.resolve(
 					{path: "/share", query: {"ShareID": this.dataCopy.ShareID}}).href;
-		}
-	},
-	watch: {
-		'dataCopy.ExpireDate'(){
-			this.updateLinkExpireDate()
 		}
 	}
 }
@@ -101,16 +128,31 @@ export default {
 									{{ getUrl }}
 								</a>
 							</div>
-							<div class="d-flex flex-column gap-2">
+							<div class="d-flex flex-column gap-2 mb-3">
 								<small>
 									<i class="bi bi-calendar me-2"></i>
 									Expire Date
 								</small>
-								<VueDatePicker v-model="this.dataCopy.ExpireDate" time-picker-inline
+								<VueDatePicker
+									:is24="true"
+									:min-date="new Date()"
+									:model-value="this.dataCopy.ExpireDate"
+									@update:model-value="this.parseTime" time-picker-inline
 								               format="yyyy-MM-dd HH:mm:ss"
+								               preview-format="yyyy-MM-dd HH:mm:ss"
+								               
 								               :dark="this.store.Configuration.Server.dashboard_theme === 'dark'"
 								/>
 							</div>
+							<button
+								@click="this.stopSharing()"
+								:disabled="this.loading"
+								class="w-100 btn bg-danger-subtle text-danger-emphasis border-1 border-danger-subtle rounded-3 shadow-sm">
+								<span :class="{'animate__animated animate__flash animate__infinite animate__slower': this.loading}">
+									<i class="bi bi-send-slash-fill me-2" ></i>
+								</span>
+								{{this.loading ? "Stop Sharing...":"Stop Sharing"}}
+							</button>
 						</div>
 					</div>
 				</div>

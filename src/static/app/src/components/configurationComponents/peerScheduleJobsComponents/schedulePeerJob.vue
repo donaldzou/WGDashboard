@@ -3,10 +3,12 @@ import ScheduleDropdown from "@/components/configurationComponents/peerScheduleJ
 import {ref} from "vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import dayjs from "dayjs";
 
 export default {
 	name: "schedulePeerJob",
-	components: {ScheduleDropdown},
+	components: {VueDatePicker, ScheduleDropdown},
 	props: {
 		dropdowns: Array[Object],
 		pjob: Object,
@@ -94,6 +96,11 @@ export default {
 				})
 			}
 			this.$emit('delete')
+		},
+		parseTime(modelData){
+			if(modelData){
+				this.job.Value = dayjs(modelData).format("YYYY-MM-DD HH:mm:ss");
+			}
 		}
 	},
 }
@@ -128,12 +135,26 @@ export default {
 					:data="this.job.Operator"
 					@update="(value) => this.job.Operator = value"
 				></ScheduleDropdown>
-				<input class="form-control form-control-sm form-control-dark rounded-3 flex-grow-1"
-				       :disabled="!edit"
-				       type="datetime-local"
-				       v-if="this.job.Field === 'date'"
-				       v-model="this.job.Value"
-				       style="width: auto">
+
+				<VueDatePicker
+					:is24="true"
+					:min-date="new Date()"
+					:model-value="this.job.Value"
+					@update:model-value="this.parseTime" time-picker-inline
+					format="yyyy-MM-dd HH:mm:ss"
+					preview-format="yyyy-MM-dd HH:mm:ss"
+					:clearable="false"
+					:disabled="!edit"
+					v-if="this.job.Field === 'date'"
+					:dark="this.store.Configuration.Server.dashboard_theme === 'dark'"
+				/>
+				
+<!--				<input class="form-control form-control-sm form-control-dark rounded-3 flex-grow-1"-->
+<!--				       :disabled="!edit"-->
+<!--				       type="datetime-local"-->
+<!--				       v-if="this.job.Field === 'date'"-->
+<!--				       v-model="this.job.Value"-->
+<!--				       style="width: auto">-->
 				<input class="form-control form-control-sm form-control-dark rounded-3 flex-grow-1" 
 				       :disabled="!edit"
 				       v-else
@@ -188,4 +209,12 @@ input:disabled{
 	background-color: rgba(13, 110, 253, 0.09);
 	color: #0d6efd;
 }
+
+.dp__main{
+	width: auto;
+	flex-grow: 1;
+	--dp-input-padding: 2.5px 30px 2.5px 12px;
+	--dp-border-radius: 0.5rem;
+}
+
 </style>

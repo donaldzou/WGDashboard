@@ -2,13 +2,15 @@
 import dayjs from "dayjs";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 export default {
 	name: "newDashboardAPIKey",
+	components: {VueDatePicker},
 	data(){
 		return{
 			newKeyData:{
-				ExpiredAt: dayjs().add(1, 'd').format("YYYY-MM-DDTHH:mm:ss"),
+				ExpiredAt: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss"),
 				neverExpire: false
 			},
 			submitting: false
@@ -39,6 +41,13 @@ export default {
 		fixDate(date){
 			console.log(dayjs(date).format("YYYY-MM-DDTHH:mm:ss"))
 			return dayjs(date).format("YYYY-MM-DDTHH:mm:ss")
+		},
+		parseTime(modelData){
+			if(modelData){
+				this.newKeyData.ExpiredAt = dayjs(modelData).format("YYYY-MM-DD HH:mm:ss");
+			}else{
+				this.newKeyData.ExpiredAt = undefined
+			}
 		}
 	}
 }
@@ -49,16 +58,23 @@ export default {
 	     style="background-color: #00000060; backdrop-filter: blur(3px)">
 		<div class="card m-auto rounded-3 mt-5">
 			<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
-				Create API Key
+				<h6 class="mb-0">Create API Key</h6>
 				<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 			</div>
 			<div class="card-body d-flex gap-2 p-4 flex-column">
 				<small class="text-muted">When should this API Key expire?</small>
 				<div class="d-flex align-items-center gap-2">
-					<input class="form-control" type="datetime-local"
-					       @change="this.newKeyData.ExpiredAt = this.fixDate(this.newKeyData.ExpiredAt)"
-					       :disabled="this.newKeyData.neverExpire || this.submitting"
-					       v-model="this.newKeyData.ExpiredAt">
+					<VueDatePicker
+						:is24="true"
+						:min-date="new Date()"
+						:model-value="this.newKeyData.ExpiredAt"
+						@update:model-value="this.parseTime" time-picker-inline
+						format="yyyy-MM-dd HH:mm:ss"
+						preview-format="yyyy-MM-dd HH:mm:ss"
+						:clearable="false"
+						:disabled="this.newKeyData.neverExpire || this.submitting"
+						:dark="this.store.Configuration.Server.dashboard_theme === 'dark'"
+					/>
 				</div>
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox"

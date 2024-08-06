@@ -346,6 +346,7 @@ class PeerShareLink:
         self.Configuration = Configuration
         self.ShareDate = ShareDate
         self.ExpireDate = ExpireDate
+        
     
     def toJson(self):
         return {
@@ -358,10 +359,10 @@ class PeerShareLink:
 class PeerShareLinks:
     def __init__(self):
         self.Links: list[PeerShareLink] = []
-        
-        existingTables = cursor.execute("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
+        self.PeerShareLinkCursor = sqldb.cursor()
+        existingTables = self.PeerShareLinkCursor.execute("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
         if len(existingTables) == 0:
-            cursor.execute(
+            self.PeerShareLinkCursor.execute(
                 """
                     CREATE TABLE PeerShareLinks (
                         ShareID VARCHAR NOT NULL PRIMARY KEY, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
@@ -375,26 +376,28 @@ class PeerShareLinks:
         # print(self.Links)
     def __getSharedLinks(self):
         self.Links.clear()
-        allLinks = cursor.execute("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
+        allLinks = self.PeerShareLinkCursor.execute("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
         for link in allLinks:
             self.Links.append(PeerShareLink(*link))
     
     def getLink(self, Configuration: str, Peer: str) -> list[PeerShareLink]:
+        self.__getSharedLinks()
         return list(filter(lambda x : x.Configuration == Configuration and x.Peer == Peer, self.Links))
     
     def getLinkByID(self, ShareID: str) -> list[PeerShareLink]:
+        self.__getSharedLinks()
         return list(filter(lambda x : x.ShareID == ShareID, self.Links))
     
     def addLink(self, Configuration: str, Peer: str, ExpireDate: datetime = None) -> tuple[bool, str]:
         try:
             newShareID = str(uuid.uuid4())
             if len(self.getLink(Configuration, Peer)) > 0:
-                cursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
+                self.PeerShareLinkCursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
         
-            if ExpireDate is not None:
-                ExpireDate = datetime.strptime(ExpireDate, '%Y-%m-%d %H:%M:%S')
-                
-            cursor.execute("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
+            # if ExpireDate is not None:
+            #     ExpireDate = datetime.strptime(ExpireDate, '%Y-%m-%d %H:%M:%S')
+
+            self.PeerShareLinkCursor.execute("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
             sqldb.commit()
             self.__getSharedLinks()
         except Exception as e:
@@ -402,16 +405,11 @@ class PeerShareLinks:
         return True, newShareID
     
     def updateLinkExpireDate(self, ShareID, ExpireDate: datetime = None) -> tuple[bool, str]:
-        try:
-            if ExpireDate is None:
-                cursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE ShareID = ?", (ShareID, ))
-            else:
-                cursor.execute("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?", (ShareID, datetime.strptime(ExpireDate, '%Y-%m-%d %H:%M:%S'), ))
-            sqldb.commit()
-            self.__getSharedLinks()
-            return True
-        except Exception as e:
-            return False, str(e)
+    
+        self.PeerShareLinkCursor.execute("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?;", (ExpireDate, ShareID, ))
+        sqldb.commit()
+        self.__getSharedLinks()
+        return True, ""
         
     
         
@@ -1511,7 +1509,7 @@ def API_newDashboardAPIKey():
             if data['neverExpire']:
                 expiredAt = None
             else:
-                expiredAt = datetime.strptime(data['ExpiredAt'], '%Y-%m-%dT%H:%M:%S')
+                expiredAt = datetime.strptime(data['ExpiredAt'], '%Y-%m-%d %H:%M:%S')
             DashboardConfig.createAPIKeys(expiredAt)
             return ResponseObject(True, data=DashboardConfig.DashboardAPIKeys)
         except Exception as e:
@@ -1594,6 +1592,8 @@ def API_sharePeer_update():
     data: dict[str, str] = request.get_json()
     ShareID: str = data.get("ShareID")
     ExpireDate: str = data.get("ExpireDate")
+    print(ShareID)
+    print(ExpireDate)
     
     if ShareID is None:
         return ResponseObject(False, "Please specify ShareID")
