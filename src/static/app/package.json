@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^9.0.1",
     "@vueuse/core": "^10.9.0",
     "@vueuse/shared": "^10.9.0",
     "animate.css": "^4.1.1",

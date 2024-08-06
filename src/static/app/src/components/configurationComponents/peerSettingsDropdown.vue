@@ -123,7 +123,7 @@ export default {
 					</a>
 				</li>
 				<li>
-					<a class="dropdown-item d-flex" role="button">
+					<a class="dropdown-item d-flex" role="button" @click="this.$emit('share')">
 						<i class="me-auto bi bi-share"></i> Share
 					</a>
 				</li>

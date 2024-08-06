@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'animate.css/animate.compat.css'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 import {createApp, markRaw} from 'vue'
 import { createPinia } from 'pinia'

@@ -40,6 +40,7 @@ import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
 import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
 import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
 import {ref} from "vue";
+import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
 
 Chart.register(
 	ArcElement,
@@ -70,6 +71,7 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		PeerShareLinkModal,
 		PeerJobsLogsModal,
 		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
 	setup(){
@@ -131,6 +133,10 @@ export default {
 			},
 			peerScheduleJobsLogs: {
 				modalOpen: false
+			},
+			peerShare:{
+				modalOpen: false,
+				selectedPeer: undefined
 			}
 		}
 	},
@@ -141,26 +147,21 @@ export default {
 		'$route': {
 			immediate: true,
 			handler(){
-				console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
 				clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
-				console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
-				
 				this.loading = true;
 				let id = this.$route.params.id;
 				this.configurationInfo = [];
 				this.configurationPeers = [];
 				if (id){
 					this.getPeers(id)
-					console.log("Changed..")
 					this.setPeerInterval();
 				}
 			}
 		},
 		'dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval'(){
-			console.log("Changed?")
 			clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
 			this.setPeerInterval();
-		},
+		}
 	},
 	beforeRouteLeave(){
 		clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
@@ -248,7 +249,6 @@ export default {
 			this.dashboardConfigurationStore.Peers.RefreshInterval = setInterval(() => {
 				this.getPeers()
 			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
-			console.log(this.dashboardConfigurationStore.Peers.RefreshInterval)
 		},
 	},
 	computed: {
@@ -548,7 +548,7 @@ export default {
 				     :key="peer.id"
 				     v-for="peer in this.searchPeers">
 					<Peer :Peer="peer"
-					      
+					      @share="this.peerShare.selectedPeer = peer.id; this.peerShare.modalOpen = true;"
 					      @refresh="this.getPeers()"
 					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
@@ -594,6 +594,12 @@ export default {
 				               :configurationInfo="this.configurationInfo"
 			>
 			</PeerJobsLogsModal>
+		</Transition>
+		<Transition name="zoom">
+			<PeerShareLinkModal 
+				v-if="this.peerShare.modalOpen"
+				@close="this.peerShare.modalOpen = false; this.peerShare.selectedPeer = undefined;"
+				:peer="this.configurationPeers.find(x => x.id === this.peerShare.selectedPeer)"></PeerShareLinkModal>
 		</Transition>
 	</div>
 </template>
