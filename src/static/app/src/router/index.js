@@ -15,6 +15,7 @@ import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import Ping from "@/views/ping.vue";
 import Traceroute from "@/views/traceroute.vue";
 import Totp from "@/components/setupComponent/totp.vue";
+import Share from "@/views/share.vue";
 
 const checkAuth = async () => {
   let result = false
@@ -102,14 +103,22 @@ const router = createRouter({
     {
       path: '/welcome', component: Setup,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        title: "Welcome to WGDashboard"
       },
     },
     {
       path: '/2FASetup', component: Totp,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
+        title: "Multi-Factor Authentication Setup"
       },
+    },
+    {
+      path: '/share', component: Share,
+      meta: {
+        title: "Share"
+      }
     }
   ]
 });

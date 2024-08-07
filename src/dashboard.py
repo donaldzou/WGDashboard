@@ -122,12 +122,14 @@ class DashboardLogger:
         existingTable = [t['name'] for t in existingTable]
 
         if "DashboardLog" not in existingTable:
-            self.loggerdbCursor.execute("CREATE TABLE DashboardLog (LogID VARCHAR NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), URL VARCHAR, IP VARCHAR, Status VARCHAR, Message VARCHAR, PRIMARY KEY (LogID))")
+            self.loggerdbCursor.execute(
+                "CREATE TABLE DashboardLog (LogID VARCHAR NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), URL VARCHAR, IP VARCHAR, Status VARCHAR, Message VARCHAR, PRIMARY KEY (LogID))")
             self.loggerdb.commit()
     
     def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
         try:
-            self.loggerdbCursor.execute("INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
+            self.loggerdbCursor.execute(
+                "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
             self.loggerdb.commit()
             return True
         except Exception as e:
@@ -308,7 +310,7 @@ class PeerJobs:
                         y: float = float(job.Value)
                     else:
                         x: datetime = datetime.now()
-                        y: datetime = datetime.strptime(job.Value, "%Y-%m-%dT%H:%M")
+                        y: datetime = datetime.strptime(job.Value, "%Y-%m-%d %H:%M:%S")
                     runAction: bool = self.__runJob_Compare(x, y, job.Operator)
                     if runAction:
                         s = False
@@ -393,10 +395,6 @@ class PeerShareLinks:
             newShareID = str(uuid.uuid4())
             if len(self.getLink(Configuration, Peer)) > 0:
                 self.PeerShareLinkCursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
-        
-            # if ExpireDate is not None:
-            #     ExpireDate = datetime.strptime(ExpireDate, '%Y-%m-%d %H:%M:%S')
-
             self.PeerShareLinkCursor.execute("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
             sqldb.commit()
             self.__getSharedLinks()
@@ -1347,6 +1345,7 @@ def auth_req():
             if ('/static/' not in request.path and "username" not in session and "/" != request.path
                     and "validateAuthentication" not in request.path and "authenticate" not in request.path
                     and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
+                    and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
             ):
                 response = Flask.make_response(app, {
@@ -1605,6 +1604,27 @@ def API_sharePeer_update():
     if not status:
         return ResponseObject(status, message)
     return ResponseObject(data=AllPeerShareLinks.getLinkByID(ShareID))
+
+@app.route('/api/sharePeer/get', methods=['GET'])
+def API_sharePeer_get():
+    data = request.args
+    ShareID = data.get("ShareID")
+    if ShareID is None or len(ShareID) == 0:
+        return ResponseObject(False, "Please provide ShareID")
+    link = AllPeerShareLinks.getLinkByID(ShareID)
+    if len(link) == 0:
+        return ResponseObject(False, "This link is either expired to invalid")
+    l = link[0]
+    if l.Configuration not in WireguardConfigurations.keys():
+        return ResponseObject(False, "The peer you're looking for does not exist")
+    c = WireguardConfigurations.get(l.Configuration)
+    fp, p = c.searchPeer(l.Peer)
+    if not fp:
+        return ResponseObject(False, "The peer you're looking for does not exist")
+    
+    return ResponseObject(data=p.downloadPeer())
+    
+    
 
 @app.route('/api/allowAccessPeers/<configName>', methods=['POST'])
 def API_allowAccessPeers(configName: str) -> ResponseObject:
