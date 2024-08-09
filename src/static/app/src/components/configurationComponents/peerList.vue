@@ -232,7 +232,8 @@ export default {
 										{
 											label: 'Data Received',
 											data: [...this.historyReceiveData.datasets[0].data,
-												((receive - this.historyDataReceivedDifference[this.historyDataReceivedDifference.length - 1])*1000).toFixed(4)],
+												((receive - this.historyDataReceivedDifference[this.historyDataReceivedDifference.length - 1])*1000)
+													.toFixed(4)],
 											fill: false,
 											borderColor: '#0d6efd',
 											tension: 0
@@ -253,12 +254,20 @@ export default {
 	},
 	computed: {
 		configurationSummary(){
-			return {
+			const k = {
 				connectedPeers: this.configurationPeers.filter(x => x.status === "running").length,
-				totalUsage: this.configurationPeers.length > 0 ? this.configurationPeers.map(x => x.total_data + x.cumu_data).reduce((a, b) => a + b) : 0,
-				totalReceive: this.configurationPeers.length > 0 ? this.configurationPeers.map(x => x.total_receive + x.cumu_receive).reduce((a, b) => a + b) : 0,
-				totalSent: this.configurationPeers.length > 0 ? this.configurationPeers.map(x => x.total_sent + x.cumu_sent).reduce((a, b) => a + b) : 0
+				totalUsage: this.configurationPeers.length > 0 ? 
+					this.configurationPeers.filter(x => !x.restricted)
+						.map(x => x.total_data + x.cumu_data).reduce((a, b) => a + b).toFixed(4) : 0,
+				totalReceive: this.configurationPeers.length > 0 ? 
+					this.configurationPeers.filter(x => !x.restricted)
+						.map(x => x.total_receive + x.cumu_receive).reduce((a, b) => a + b).toFixed(4) : 0,
+				totalSent: this.configurationPeers.length > 0 ? 
+					this.configurationPeers.filter(x => !x.restricted)
+						.map(x => x.total_sent + x.cumu_sent).reduce((a, b) => a + b).toFixed(4) : 0
 			}
+			
+			return k
 		},
 		receiveData(){
 			return this.historyReceiveData
@@ -468,7 +477,7 @@ export default {
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>Total Usage</small></p>
-							<strong class="h4">{{configurationSummary.totalUsage.toFixed(4)}} GB</strong>
+							<strong class="h4">{{configurationSummary.totalUsage}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
 					</div>
@@ -479,7 +488,7 @@ export default {
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>Total Received</small></p>
-							<strong class="h4 text-primary">{{configurationSummary.totalReceive.toFixed(4)}} GB</strong>
+							<strong class="h4 text-primary">{{configurationSummary.totalReceive}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
 					</div>
@@ -490,7 +499,7 @@ export default {
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>Total Sent</small></p>
-							<strong class="h4 text-success">{{configurationSummary.totalSent.toFixed(4)}} GB</strong>
+							<strong class="h4 text-success">{{configurationSummary.totalSent}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
 					</div>

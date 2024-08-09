@@ -621,7 +621,7 @@ class WireguardConfiguration:
                             sqldb.commit()
                             self.Peers.append(Peer(newPeer, self))
                         else:
-                            cursor.execute("UPDATE %s SET allowed_ip = ? WHERE id = ?" % self.Name,
+                            sqldb.cursor().execute("UPDATE %s SET allowed_ip = ? WHERE id = ?" % self.Name,
                                            (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
                             sqldb.commit()
                             self.Peers.append(Peer(checkIfExist, self))
@@ -788,8 +788,8 @@ class WireguardConfiguration:
                     if cur_i is not None:
                         total_sent = cur_i['total_sent']
                         total_receive = cur_i['total_receive']
-                        cur_total_sent = round(int(data_usage[i][2]) / (1024 ** 3), 4)
-                        cur_total_receive = round(int(data_usage[i][1]) / (1024 ** 3), 4)
+                        cur_total_sent = float(data_usage[i][2]) / (1024 ** 3)
+                        cur_total_receive = float(data_usage[i][1]) / (1024 ** 3)
                         cumulative_receive = cur_i['cumu_receive'] + total_receive
                         cumulative_sent = cur_i['cumu_sent'] + total_sent
                         if total_sent <= cur_total_sent and total_receive <= cur_total_receive:
@@ -798,32 +798,20 @@ class WireguardConfiguration:
                         else:
                             cursor.execute(
                                 "UPDATE %s SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
-                                self.Name, (round(cumulative_receive, 4), round(cumulative_sent, 4),
-                                            round(cumulative_sent + cumulative_receive, 4),
+                                self.Name, (cumulative_receive, cumulative_sent,
+                                            rcumulative_sent + cumulative_receive,
                                             data_usage[i][0],))
                             total_sent = 0
                             total_receive = 0
 
                         _, p = self.searchPeer(data_usage[i][0])
-                        if p.total_receive != round(total_receive, 4) or p.total_sent != round(total_sent, 4):
+                        if p.total_receive != total_receive or p.total_sent != total_sent:
                             cursor.execute(
                                 "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
-                                % self.Name, (round(total_receive, 4), round(total_sent, 4),
-                                              round(total_receive + total_sent, 4), data_usage[i][0],))
-                        now = datetime.now()
-                        now_string = now.strftime("%d/%m/%Y %H:%M:%S")
-                        # cursor.execute(f'''
-                        #             INSERT INTO %s_transfer
-                        #                 (id, total_receive, total_sent, total_data,
-                        #                 cumu_receive, cumu_sent, cumu_data, time)
-                        #                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        #         ''' % self.Name, (data_usage[i][0], round(total_receive, 4), round(total_sent, 4),
-                        #                           round(total_receive + total_sent, 4), round(cumulative_receive, 4),
-                        #                           round(cumulative_sent, 4),
-                        #                           round(cumulative_sent + cumulative_receive, 4), now_string,))
-                        # sqldb.commit()
+                                % self.Name, (total_receive, total_sent,
+                                              total_receive + total_sent, data_usage[i][0],))
         except Exception as e:
-            print("Error" + str(e))
+            print("Error: " + str(e))
 
     def getPeersEndpoint(self):
         if not self.getStatus():
@@ -881,6 +869,12 @@ class WireguardConfiguration:
             "PostUp": self.PostUp,
             "PostDown": self.PostDown,
             "SaveConfig": self.SaveConfig
+            # "DataUsage": {
+            #     "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
+            #     "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
+            #     "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
+            # },
+            # "ConnectedPeers": len(list(map(lambda x: x.status == "running", self.Peers)))
         }
 
 class Peer:
