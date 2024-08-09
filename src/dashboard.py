@@ -868,7 +868,7 @@ class WireguardConfiguration:
             "PreDown": self.PreDown,
             "PostUp": self.PostUp,
             "PostDown": self.PostDown,
-            "SaveConfig": self.SaveConfig
+            "SaveConfig": self.SaveConfig,
             "DataUsage": {
                 "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
                 "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
