@@ -869,12 +869,12 @@ class WireguardConfiguration:
             "PostUp": self.PostUp,
             "PostDown": self.PostDown,
             "SaveConfig": self.SaveConfig
-            # "DataUsage": {
-            #     "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
-            #     "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
-            #     "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
-            # },
-            # "ConnectedPeers": len(list(map(lambda x: x.status == "running", self.Peers)))
+            "DataUsage": {
+                "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
+                "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
+                "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
+            },
+            "ConnectedPeers": len(list(map(lambda x: x.status == "running", self.Peers)))
         }
 
 class Peer:
