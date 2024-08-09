@@ -1162,4 +1162,6 @@ pre.index-alert {
     opacity: 0;
 }
 
-
+.messageCentre{
+    z-index: 9999;
+}

@@ -93,8 +93,23 @@ export default {
 						set for this peer
 					</small>
 				</li>
-				<li><hr class="dropdown-divider"></li>
+				
 			</template>
+			<template v-else>
+				<li class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
+					<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.downloadPeer()">
+						<i class="me-auto bi bi-download"></i>
+					</a>
+					<a class="dropdown-item text-center px-0 rounded-3" role="button"
+					   @click="this.downloadQRCode()">
+						<i class="me-auto bi bi-qr-code"></i>
+					</a>
+					<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">
+						<i class="me-auto bi bi-share"></i>
+					</a>
+				</li>
+			</template>
+			<li><hr class="dropdown-divider"></li>
 			<li>
 				<a class="dropdown-item d-flex" role="button"
 				   @click="this.$emit('setting')"
@@ -109,25 +124,7 @@ export default {
 					<i class="me-auto bi bi-app-indicator"></i> Schedule Jobs
 				</a>
 			</li>
-			<template v-if="this.Peer.private_key">
-				<li>
-					<a class="dropdown-item d-flex" role="button" @click="this.downloadPeer()">
-						<i class="me-auto bi bi-download"></i> Download
-					</a>
-				</li>
-				<li>
-					<a class="dropdown-item d-flex" role="button"
-					   @click="this.downloadQRCode()"
-					>
-						<i class="me-auto bi bi-qr-code"></i> QR Code
-					</a>
-				</li>
-				<li>
-					<a class="dropdown-item d-flex" role="button" @click="this.$emit('share')">
-						<i class="me-auto bi bi-share"></i> Share
-					</a>
-				</li>
-			</template>
+			
 
 			<li><hr class="dropdown-divider"></li>
 			<li>

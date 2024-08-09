@@ -37,6 +37,21 @@ export default {
 				}
 				this.$emit("refresh")
 			})
+		},
+		resetPeerData(type){
+			this.saving = true
+			fetchPost(`/api/resetPeerData/${this.$route.params.id}`, {
+				id: this.data.id,
+				type: type
+			}, (res) => {
+				this.saving = false;
+				if (res.status){
+					this.dashboardConfigurationStore.newMessage("Server", "Peer data usage reset successfully.", "success")
+				}else{
+					this.dashboardConfigurationStore.newMessage("Server", res.message, "danger")
+				}
+				this.$emit("refresh")
+			})
 		}
 	},
 	beforeMount() {
@@ -57,15 +72,15 @@ export default {
 		<div class="container d-flex h-100 w-100">
 			<div class="m-auto modal-dialog-centered dashboardModal">
 				<div class="card rounded-3 shadow flex-grow-1">
-					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
+					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
 						<h4 class="mb-0">Peer Settings</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4" v-if="this.data">
 						<div class="d-flex flex-column gap-2 mb-4">
-							<div>
-								<small class="text-muted">Public Key</small><br>
-								<small><samp>{{this.data.id}}</samp></small>
+							<div class="d-flex align-items-center">
+								<small class="text-muted">Public Key</small>
+								<small class="ms-auto"><samp>{{this.data.id}}</samp></small>
 							</div>
 							<div>
 								<label for="peer_name_textbox" class="form-label">
@@ -121,8 +136,7 @@ export default {
 								       v-model="this.data.DNS"
 								       id="peer_DNS_textbox">
 							</div>
-							<hr>
-							<div class="accordion mt-2" id="peerSettingsAccordion">
+							<div class="accordion mt-3" id="peerSettingsAccordion">
 								<div class="accordion-item">
 									<h2 class="accordion-header">
 										<button class="accordion-button rounded-3 collapsed" type="button"
@@ -162,12 +176,37 @@ export default {
 									</div>
 								</div>
 							</div>
+							<hr>
+							<div class="d-flex gap-2 align-items-center">
+								<strong>Reset Data Usage</strong>
+								<div class="d-flex gap-2 ms-auto">
+									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3 flex-grow-1 shadow-sm"
+										@click="this.resetPeerData('total')"
+									>
+										<i class="bi bi-arrow-down-up me-2"></i>
+										Total
+									</button>
+									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3 flex-grow-1 shadow-sm"
+									        @click="this.resetPeerData('receive')"
+									>
+										<i class="bi bi-arrow-down me-2"></i>
+										Received
+									</button>
+									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3  flex-grow-1 shadow-sm"
+									        @click="this.resetPeerData('sent')"
+									>
+										<i class="bi bi-arrow-up me-2"></i>
+										Sent
+									</button>
+								</div>
+								
+							</div>
 						</div>
 						<div class="d-flex align-items-center gap-2">
 							<button class="btn btn-secondary rounded-3 shadow"
 							        @click="this.reset()"
 							        :disabled="!this.dataChanged || this.saving">
-								Reset <i class="bi bi-arrow-clockwise ms-2"></i>
+								Revert <i class="bi bi-arrow-clockwise ms-2"></i>
 							</button>
 
 							<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
