@@ -146,8 +146,7 @@
 }
 
 .nav-link:hover {
-    padding-left: 30px;
-    background-color: #dfdfdf;
+    background-color: #e8e8e8;
 }
 
 .sidebar .nav-link .feather {
@@ -157,6 +156,7 @@
 
 .sidebar .nav-link.active, .bottomNavContainer .nav-link.active {
     color: #007bff;
+    
 }
 
 .sidebar .nav-link:hover .feather,

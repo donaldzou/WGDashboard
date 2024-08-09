@@ -17,39 +17,46 @@ export default {
 	<div class="col-md-3 col-lg-2 d-md-block p-3" style="height: calc(-50px + 100vh);">
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky pt-3">
-				<ul class="nav flex-column">
+				<ul class="nav flex-column px-2">
 					<li class="nav-item">
-						<RouterLink class="nav-link" to="/" exact-active-class="active">Home</RouterLink></li>
+						<RouterLink class="nav-link rounded-3"
+						            to="/" exact-active-class="active">
+							<i class="bi bi-house me-2"></i>
+							Home</RouterLink></li>
 					<li class="nav-item">
-						<RouterLink class="nav-link" to="/settings" 
-						            exact-active-class="active">Settings</RouterLink></li>
+						<RouterLink class="nav-link rounded-3" to="/settings" 
+						            exact-active-class="active">
+							<i class="bi bi-gear me-2"></i>
+							Settings</RouterLink></li>
 				</ul>
-				<hr>
-				<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-					<span>Configurations</span>
+				<hr class="text-body">
+				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
+					<i class="bi bi-body-text me-2"></i>
+					Configurations
 				</h6>
-				<ul class="nav flex-column">
+				<ul class="nav flex-column px-2">
 					<li class="nav-item">
-						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link"
+						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
 						            
 						            v-for="c in this.wireguardConfigurationsStore.Configurations">
-							<samp>{{c.Name}}</samp>
+							{{c.Name}}
 						</RouterLink>
 					</li>
 				</ul>
-				<hr>
-				<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-					<span>Tools</span>
+				<hr class="text-body">
+				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
+					<i class="bi bi-tools me-2"></i>
+					Tools
 				</h6>
-				<ul class="nav flex-column">
+				<ul class="nav flex-column px-2">
 					<li class="nav-item">
-						<RouterLink to="/ping" class="nav-link" active-class="active">Ping</RouterLink></li>
+						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">Ping</RouterLink></li>
 					<li class="nav-item">
-						<RouterLink to="/traceroute" class="nav-link" active-class="active">Traceroute</RouterLink>
+						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">Traceroute</RouterLink>
 					</li>
 				</ul>
-				<hr>
+				<hr class="text-body">
 				<ul class="nav flex-column">
 					<li class="nav-item"><a class="nav-link text-danger" @click="this.dashboardConfigurationStore.signOut()" role="button" style="font-weight: bold">Sign Out</a></li>
 				</ul>

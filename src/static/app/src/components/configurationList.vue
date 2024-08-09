@@ -34,7 +34,9 @@ export default {
 	<div class="mt-5">
 		<div class="container">
 			<div class="d-flex mb-4 ">
-				<h3 class="text-body">WireGuard Configurations</h3>
+				<h3 class="text-body">
+					<i class="bi bi-body-text me-2"></i>
+					WireGuard Configurations</h3>
 				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-3">
 					<i class="bi bi-plus-circle-fill me-2"></i>
 					Configuration
