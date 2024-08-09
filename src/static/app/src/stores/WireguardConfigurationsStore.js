@@ -6,6 +6,7 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 	state: () => ({
 		Configurations: undefined,
 		searchString: "",
+		ConfigurationListInterval: undefined,
 		PeerScheduleJobs: {
 			dropdowns: {
 				Field: [
