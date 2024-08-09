@@ -7,7 +7,6 @@ export default {
 	},
 	mounted() {
 		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfigData ,  (error) => {
-			console.log(this.peerConfigData)
 			if (error) console.error(error)
 		})
 	}

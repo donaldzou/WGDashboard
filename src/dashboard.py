@@ -409,10 +409,6 @@ class PeerShareLinks:
         self.__getSharedLinks()
         return True, ""
         
-    
-        
-    
-
 class WireguardConfiguration:
     class InvalidConfigurationFileException(Exception):
         def __init__(self, m):
@@ -631,7 +627,15 @@ class WireguardConfiguration:
                             self.Peers.append(Peer(checkIfExist, self))
             except ValueError:
                 pass
-
+            
+    def addPeers(self, peers: list):
+        for p in peers:
+            subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}", 
+                                    shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(
+            f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)    
+        self.getPeersList()
+        
     def searchPeer(self, publicKey):
         for i in self.Peers:
             if i.id == publicKey:
@@ -641,6 +645,9 @@ class WireguardConfiguration:
     def allowAccessPeers(self, listOfPublicKeys):
         # numOfAllowedPeers = 0
         # numOfFailedToAllowPeers = 0
+        if not self.getStatus():
+            self.toggleConfiguration()
+        
         for i in listOfPublicKeys:
             p = cursor.execute("SELECT * FROM %s_restrict_access WHERE id = ?" % self.Name, (i,)).fetchone()
             if p is not None:
@@ -661,6 +668,8 @@ class WireguardConfiguration:
     def restrictPeers(self, listOfPublicKeys):
         numOfRestrictedPeers = 0
         numOfFailedToRestrictPeers = 0
+        if not self.getStatus():
+            self.toggleConfiguration()
         for p in listOfPublicKeys:
             found, pf = self.searchPeer(p)
             if found:
@@ -690,6 +699,8 @@ class WireguardConfiguration:
     def deletePeers(self, listOfPublicKeys):
         numOfDeletedPeers = 0
         numOfFailedToDeletePeers = 0
+        if not self.getStatus():
+            self.toggleConfiguration()
         for p in listOfPublicKeys:
             found, pf = self.searchPeer(p)
             if found:
@@ -735,6 +746,8 @@ class WireguardConfiguration:
             return False, str(e)
 
     def getPeersLatestHandshake(self):
+        if not self.getStatus():
+            self.toggleConfiguration()
         try:
             latestHandshake = subprocess.check_output(f"wg show {self.Name} latest-handshakes",
                                                       shell=True, stderr=subprocess.STDOUT)
@@ -760,6 +773,8 @@ class WireguardConfiguration:
             count += 2
 
     def getPeersTransfer(self):
+        if not self.getStatus():
+            self.toggleConfiguration()
         try:
             data_usage = subprocess.check_output(f"wg show {self.Name} transfer",
                                                  shell=True, stderr=subprocess.STDOUT)
@@ -811,6 +826,8 @@ class WireguardConfiguration:
             print("Error" + str(e))
 
     def getPeersEndpoint(self):
+        if not self.getStatus():
+            self.toggleConfiguration()
         try:
             data_usage = subprocess.check_output(f"wg show {self.Name} endpoints",
                                                  shell=True, stderr=subprocess.STDOUT)
@@ -905,6 +922,8 @@ class Peer:
                    preshared_key: str,
                    dns_addresses: str, allowed_ip: str, endpoint_allowed_ip: str, mtu: int,
                    keepalive: int) -> ResponseObject:
+        if not self.configuration.getStatus():
+            self.configuration.toggleConfiguration()
 
         existingAllowedIps = [item for row in list(
             map(lambda x: [q.strip() for q in x.split(',')],
@@ -955,6 +974,7 @@ class Peer:
                 (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
                  keepalive, preshared_key, self.id,)
             )
+            sqldb.commit()
             return ResponseObject()
         except subprocess.CalledProcessError as exc:
             return ResponseObject(False, exc.output.decode("UTF-8").strip())
@@ -998,6 +1018,21 @@ PersistentKeepalive = {str(self.keepalive)}
     def getShareLink(self):
         self.ShareLink = AllPeerShareLinks.getLink(self.configuration.Name, self.id)
         
+    def resetDataUsage(self, type):
+        try:
+            if type == "total":
+                cursor.execute("UPDATE %s SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
+            elif type == "receive":
+                cursor.execute("UPDATE %s SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+            elif type == "sent":
+                cursor.execute("UPDATE %s SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+            else:
+                return False
+        except Exception as e:
+            return False
+        return True
+    
+            
 # Regex Match
 def regex_match(regex, text):
     pattern = re.compile(regex)
@@ -1545,6 +1580,20 @@ def API_updatePeerSettings(configName):
                                    allowed_ip, endpoint_allowed_ip, mtu, keepalive)
     return ResponseObject(False, "Peer does not exist")
 
+@app.route('/api/resetPeerData/<configName>', methods=['POST'])
+def API_resetPeerData(configName):
+    data = request.get_json()
+    id = data['id']
+    type = data['type']
+    if len(id) == 0 or configName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration/Peer does not exist")
+    wgc = WireguardConfigurations.get(configName)
+    foundPeer, peer = wgc.searchPeer(id)
+    if not foundPeer:
+        return ResponseObject(False, "Configuration/Peer does not exist")
+    return ResponseObject(status=peer.resetDataUsage(type))
+    
+
 
 @app.route('/api/deletePeers/<configName>', methods=['POST'])
 def API_deletePeers(configName: str) -> ResponseObject:
@@ -1669,28 +1718,24 @@ def API_addPeers(configName):
 
             keyPairs = []
             for i in range(bulkAddAmount):
-                key = _generatePrivateKey()[1]
-                keyPairs.append([key, _generatePublicKey(key)[1], _generatePrivateKey()[1], availableIps[1][i],
-                                 f"{config.Name}_{datetime.now().strftime('%m%d%Y%H%M%S')}_Peer_#_{(i + 1)}"])
+                newPrivateKey = _generatePrivateKey()[1]
+                keyPairs.append({
+                    "private_key": newPrivateKey,
+                    "id": _generatePublicKey(newPrivateKey)[1],
+                    "preshared_key": _generatePrivateKey()[1],
+                    "allowed_ip": availableIps[1][i],
+                    "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                })
             if len(keyPairs) == 0:
                 return ResponseObject(False, "Generating key pairs by bulk failed")
-
-            for i in range(bulkAddAmount):
-                subprocess.check_output(
-                    f"wg set {config.Name} peer {keyPairs[i][1]} allowed-ips {keyPairs[i][3]}",
-                    shell=True, stderr=subprocess.STDOUT)
-            subprocess.check_output(
-                f"wg-quick save {config.Name}", shell=True, stderr=subprocess.STDOUT)
-            config.getPeersList()
-
-            for i in range(bulkAddAmount):
-                found, peer = config.searchPeer(keyPairs[i][1])
+            config.addPeers(keyPairs)
+            
+            for kp in keyPairs:
+                found, peer = config.searchPeer(kp['id'])
                 if found:
-                    if not peer.updatePeer(keyPairs[i][4], keyPairs[i][0], preshared_key, dns_addresses,
-                                           keyPairs[i][3],
-                                           endpoint_allowed_ip, mtu, keep_alive).status:
+                    if not peer.updatePeer(kp['name'], kp['private_key'], kp['preshared_key'], dns_addresses,
+                                           kp['allowed_ip'], endpoint_allowed_ip, mtu, keep_alive):
                         return ResponseObject(False, "Failed to add peers in bulk")
-
             return ResponseObject()
 
         else:
@@ -1698,16 +1743,17 @@ def API_addPeers(configName):
                 return ResponseObject(False, f"This peer already exist.")
             name = data['name']
             private_key = data['private_key']
-            subprocess.check_output(
-                f"wg set {config.Name} peer {public_key} allowed-ips {''.join(allowed_ips)}",
-                shell=True, stderr=subprocess.STDOUT)
-            if len(preshared_key) > 0:
-                subprocess.check_output(
-                    f"wg set {config.Name} peer {public_key} preshared-key {preshared_key}",
-                    shell=True, stderr=subprocess.STDOUT)
-            subprocess.check_output(
-                f"wg-quick save {config.Name}", shell=True, stderr=subprocess.STDOUT)
-            config.getPeersList()
+            config.addPeers([{"id": public_key, "allowed_ip": ''.join(allowed_ips)}])
+            # subprocess.check_output(
+            #     f"wg set {config.Name} peer {public_key} allowed-ips {''.join(allowed_ips)}",
+            #     shell=True, stderr=subprocess.STDOUT)
+            # if len(preshared_key) > 0:
+            #     subprocess.check_output(
+            #         f"wg set {config.Name} peer {public_key} preshared-key {preshared_key}",
+            #         shell=True, stderr=subprocess.STDOUT)
+            # subprocess.check_output(
+            #     f"wg-quick save {config.Name}", shell=True, stderr=subprocess.STDOUT)
+            # config.getPeersList()
             found, peer = config.searchPeer(public_key)
             if found:
                 return peer.updatePeer(name, private_key, preshared_key, dns_addresses, ",".join(allowed_ips),
