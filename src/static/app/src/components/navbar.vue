@@ -57,8 +57,8 @@ export default {
 					</li>
 				</ul>
 				<hr class="text-body">
-				<ul class="nav flex-column">
-					<li class="nav-item"><a class="nav-link text-danger" 
+				<ul class="nav flex-column px-2">
+					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
 						<i class="bi bi-box-arrow-left me-2"></i>

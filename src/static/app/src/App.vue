@@ -12,7 +12,7 @@ const store = DashboardConfigurationStore();
 	</nav>
 	<Suspense>
 		<RouterView v-slot="{ Component }">
-			<Transition name="fade2" mode="out-in">
+			<Transition name="app" mode="out-in">
 				<Component :is="Component"></Component>
 			</Transition>
 		</RouterView>
@@ -22,14 +22,16 @@ const store = DashboardConfigurationStore();
 <style scoped>
 .app-enter-active,
 .app-leave-active {
-	transition: all 0.3s ease-in-out;
-	/*position: absolute;*/
-	/*padding-top: 50px*/
+	transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 0.9);
 }
 
-.app-enter-from,
+.app-enter-from{
+	transform: translateY(20px);
+	opacity: 0;
+}
+
 .app-leave-to {
-	transform: translateX(-30px);
+	transform: translateY(-20px);
 	opacity: 0;
 }
 </style>

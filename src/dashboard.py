@@ -799,7 +799,7 @@ class WireguardConfiguration:
                             sqldb.cursor().execute(
                                 "UPDATE %s SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
                                 self.Name, (cumulative_receive, cumulative_sent,
-                                            rcumulative_sent + cumulative_receive,
+                                            cumulative_sent + cumulative_receive,
                                             data_usage[i][0],))
                             total_sent = 0
                             total_receive = 0

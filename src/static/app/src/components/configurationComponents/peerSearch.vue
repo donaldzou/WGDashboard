@@ -93,9 +93,8 @@ export default {
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
-			<div class="d-flex align-items-center  ms-auto">
-				<!--			<label class="d-flex me-2 text-muted" for="searchPeers"><i class="bi bi-search me-1"></i></label>-->
-				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm"
+			<div class="flex-grow-1">
+				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-100"
 				       placeholder="Search..."
 				       id="searchPeers"
 				       @keyup="this.debounce()"
@@ -131,14 +130,6 @@ export default {
 					</li>
 				</ul>
 			</div>
-<!--			<div class="dropdown">-->
-<!--				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"-->
-<!--				        type="button" data-bs-toggle="dropdown" aria-expanded="false">-->
-<!--					<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval-->
-<!--				</button>-->
-<!--				-->
-<!--			</div>-->
-
 			<div class="dropdown dropup">
 				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
 				        type="button" data-bs-toggle="dropdown" aria-expanded="false">

@@ -84,12 +84,11 @@ export default {
 <template>
 	<div class="container-fluid login-container-fluid d-flex main flex-column" :data-bs-theme="this.theme">
 		<div class="login-box m-auto" style="width: 600px;">
-			
 			<div class="m-auto">
 				<div class="card px-4 py-5 rounded-4 shadow-lg">
 					<div class="card-body">
 						<h4 class="mb-0 text-body">Welcome to</h4>
-						<span class="dashboardLogo display-3">WGDashboard</span>
+						<span class="dashboardLogo display-3"><strong>WGDashboard</strong></span>
 						<div class="alert alert-danger mt-2 mb-0" role="alert" v-if="loginError">
 							{{this.loginErrorMessage}}
 						</div>
@@ -117,16 +116,16 @@ export default {
 								       v-model="this.totp"
 								>
 							</div>
-							<button class="btn btn-lg btn-dark ms-auto mt-4 w-100 d-flex btn-brand shadow signInBtn" ref="signInBtn">
-						<span v-if="!this.loading" class="d-flex w-100">
-							Sign In<i class="ms-auto bi bi-chevron-right"></i>
-						</span>
+							<button class="btn btn-lg btn-dark ms-auto mt-4 w-100 d-flex btn-brand signInBtn" ref="signInBtn">
+								<span v-if="!this.loading" class="d-flex w-100">
+									Sign In<i class="ms-auto bi bi-chevron-right"></i>
+								</span>
 								<span v-else class="d-flex w-100 align-items-center">
-							Signing In...
-							<span class="spinner-border ms-auto spinner-border-sm" role="status">
-							  <span class="visually-hidden">Loading...</span>
-							</span>
-						</span>
+									Signing In...
+									<span class="spinner-border ms-auto spinner-border-sm" role="status">
+								        <span class="visually-hidden">Loading...</span>
+									</span>
+								</span>
 							</button>
 						</form>
 					</div>
@@ -137,7 +136,7 @@ export default {
 			WGDashboard v4.0 | Developed with ❤️ by 
 			<a href="https://github.com/donaldzou" target="_blank"><strong>Donald Zou</strong></a>
 		</small>
-		<div class="messageCentre text-body position-absolute end-0 margin-3">
+		<div class="messageCentre text-body position-absolute end-0 m-3">
 			<TransitionGroup name="message" tag="div" class="position-relative">
 				<Message v-for="m in getMessages.slice().reverse()"
 				         :message="m" :key="m.id"></Message>
