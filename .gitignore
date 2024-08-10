@@ -48,5 +48,4 @@ coverage
 *.sw?
 
 *.tsbuildinfo
-proxy.js
 .vite/*
