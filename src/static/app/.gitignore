@@ -28,4 +28,4 @@ coverage
 
 *.tsbuildinfo
 .vite/*
-.electron/*
+electron
