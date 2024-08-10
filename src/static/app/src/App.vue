@@ -1,7 +1,17 @@
-<script setup >
+<script setup>
 import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {watch} from "vue";
 const store = DashboardConfigurationStore();
+store.initCrossServerConfiguration();
+
+watch(store.CrossServerConfiguration, () => {
+	store.syncCrossServerConfiguration()
+}, {
+	deep: true
+});
+
+
 </script>
 
 <template>

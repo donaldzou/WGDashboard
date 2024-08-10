@@ -6,34 +6,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
-  if (mode === 'production'){
-    return {
-      base: "/static/app/dist",
-      plugins: [
-        vue(),
-      ],
-      resolve: {
-        alias: {
-          '@': fileURLToPath(new URL('./src', import.meta.url))
-        }
-      },
-      server:{
-        proxy: {
-          '/api': proxy
-        }
-      },
-      build: {
-        outDir: 'dist',
-        rollupOptions: {
-          output: {
-            entryFileNames: `assets/[name].js`,
-            chunkFileNames: `assets/[name].js`,
-            assetFileNames: `assets/[name].[ext]`
-          }
-        }
-      }
-    }
-  }
+  
 
   if (mode === 'electron'){
     return {
@@ -60,6 +33,34 @@ export default defineConfig(({mode}) => {
             chunkFileNames: `assets/[name].js`,
             assetFileNames: `assets/[name].[ext]`
           }
+        }
+      }
+    }
+  }
+
+  return {
+    base: "/static/app/dist",
+    plugins: [
+      vue(),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      }
+    },
+    server:{
+      proxy: {
+        '/api': proxy
+      },
+      host: '0.0.0.0'
+    },
+    build: {
+      outDir: 'dist',
+      rollupOptions: {
+        output: {
+          entryFileNames: `assets/[name].js`,
+          chunkFileNames: `assets/[name].js`,
+          assetFileNames: `assets/[name].[ext]`
         }
       }
     }

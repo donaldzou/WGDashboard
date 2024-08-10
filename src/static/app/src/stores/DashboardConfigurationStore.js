@@ -10,9 +10,31 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		Peers: {
 			Selecting: false,
 			RefreshInterval: undefined
+		},
+		CrossServerConfiguration:{
+			Enable: false,
+			ServerList: []
 		}
 	}),
 	actions: {
+		initCrossServerConfiguration(){
+			const currentConfiguration = localStorage.getItem('CrossServerConfiguration');
+			
+			if (currentConfiguration === null){
+				localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
+			}else{
+				this.CrossServerConfiguration = JSON.parse(currentConfiguration)
+			}
+		},
+		syncCrossServerConfiguration(){
+			localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
+		},
+		addCrossServerConfiguration(){
+			this.CrossServerConfiguration.ServerList.push(
+				{host: "", apiKey: ""}
+			)	
+		},
+		
 		async getConfiguration(){
 			await fetchGet("/api/getDashboardConfiguration", {}, (res) => {
 				if (res.status) this.Configuration = res.data

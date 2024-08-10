@@ -47,7 +47,11 @@ UPDATE = None
 app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/api/*": {
+    "origins": "*",
+    "methods": "DELETE, POST, GET, OPTIONS",
+    "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
+}})
 
 class ModelEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -1345,6 +1349,9 @@ API Routes
 
 @app.before_request
 def auth_req():
+    if request.method.lower() == 'options':
+        return ResponseObject(True)
+    
     if "api" in request.path:
         if str(request.method) == "GET":
             DashboardLogger.log(str(request.url), str(request.remote_addr), Message=str(request.args))
@@ -1384,6 +1391,10 @@ def auth_req():
                 response.content_type = "application/json"
                 response.status_code = 401
                 return response
+
+@app.route('/api/handshake', methods=["GET", "OPTIONS"])
+def API_ValidateAPIKey():
+    return ResponseObject(True)
 
 
 @app.route('/api/validateAuthentication', methods=["GET"])

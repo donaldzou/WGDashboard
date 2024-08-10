@@ -2,10 +2,11 @@
 import {fetchGet, fetchPost} from "../utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import Message from "@/components/messageCentreComponent/message.vue";
+import RemoteServerList from "@/components/signInComponents/RemoteServerList.vue";
 
 export default {
 	name: "signin",
-	components: {Message},
+	components: {RemoteServerList, Message},
 	async setup(){
 		const store = DashboardConfigurationStore()
 		let theme = ""
@@ -83,7 +84,7 @@ export default {
 
 <template>
 	<div class="container-fluid login-container-fluid d-flex main flex-column" :data-bs-theme="this.theme">
-		<div class="login-box m-auto" style="width: 600px;">
+		<div class="login-box m-auto" style="width: 700px;">
 			<div class="m-auto">
 				<div class="card px-4 py-5 rounded-4 shadow-lg">
 					<div class="card-body">
@@ -92,7 +93,8 @@ export default {
 						<div class="alert alert-danger mt-2 mb-0" role="alert" v-if="loginError">
 							{{this.loginErrorMessage}}
 						</div>
-						<form @submit="(e) => {e.preventDefault(); this.auth();}">
+						<form @submit="(e) => {e.preventDefault(); this.auth();}" 
+						      v-if="!this.store.CrossServerConfiguration.Enable">
 							<div class="form-group text-body">
 								<label for="username" class="text-left" style="font-size: 1rem">
 									<i class="bi bi-person-circle"></i></label>
@@ -128,6 +130,16 @@ export default {
 								</span>
 							</button>
 						</form>
+						<RemoteServerList v-else></RemoteServerList>
+						
+						<div class="d-flex mt-3">
+							<div class="form-check form-switch ms-auto">
+								<input 
+									v-model="this.store.CrossServerConfiguration.Enable"
+									class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+								<label class="form-check-label" for="flexSwitchCheckChecked">Access Remote Server</label>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
