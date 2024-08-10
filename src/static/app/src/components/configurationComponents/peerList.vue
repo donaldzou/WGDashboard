@@ -238,15 +238,6 @@ export default {
 											fill: false,
 											borderColor: '#0d6efd',
 											tension: 0
-										},
-										{
-											label: 'Data Sent',
-											data: [...this.historySentData.datasets[0].data,
-												((sent - this.historyDataSentDifference[this.historyDataSentDifference.length - 1])*1000)
-													.toFixed(4)],
-											fill: false,
-											borderColor: '#198754',
-											tension: 0
 										}
 									],
 								}

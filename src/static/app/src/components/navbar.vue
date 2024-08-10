@@ -58,7 +58,11 @@ export default {
 				</ul>
 				<hr class="text-body">
 				<ul class="nav flex-column">
-					<li class="nav-item"><a class="nav-link text-danger" @click="this.dashboardConfigurationStore.signOut()" role="button" style="font-weight: bold">Sign Out</a></li>
+					<li class="nav-item"><a class="nav-link text-danger" 
+					                        @click="this.dashboardConfigurationStore.signOut()" 
+					                        role="button" style="font-weight: bold">
+						<i class="bi bi-box-arrow-left me-2"></i>
+						Sign Out</a></li>
 				</ul>
 				<ul class="nav flex-column">
 					<li class="nav-item"><a href="https://github.com/donaldzou/WGDashboard/releases/tag/"><small class="nav-link text-muted"></small></a></li>
