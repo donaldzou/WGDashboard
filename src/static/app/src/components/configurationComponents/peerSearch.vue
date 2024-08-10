@@ -89,12 +89,6 @@ export default {
 				class="text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
 				<i class="bi bi-plus-lg me-2"></i>Peer
 			</RouterLink>
-
-			<!--			<RouterLink-->
-			<!--				to="jobs"-->
-			<!--				class="text-decoration-none btn btn-primary rounded-3 btn-sm">-->
-			<!--				<i class="bi bi-app-indicator me-2"></i>Jobs-->
-			<!--			</RouterLink>-->
 			<button class="btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  shadow-sm"
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
@@ -107,49 +101,56 @@ export default {
 				       @keyup="this.debounce()"
 				       v-model="this.searchString">
 			</div>
-			<div class="dropdown">
-				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm" 
+			<div class="dropdown dropup">
+				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm" 
 				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-filter-circle me-2"></i>
-					Sort
+					Display
 				</button>
-				<ul class="dropdown-menu mt-2 shadow rounded-3">
+				<ul class="dropdown-menu mt-2 shadow rounded-3 animate__animated animation__fadeInDropdown dropdown-menu-end">
+					<li>
+						<small class="dropdown-header">Sort by</small>
+					</li>
 					<li v-for="(value, key) in this.sort">
-						<a class="dropdown-item d-flex" role="button" @click="this.updateSort(key)">
-							<span class="me-auto">{{value}}</span>
+						<a class="dropdown-item d-flex align-items-center" role="button" @click="this.updateSort(key)">
+							<small class="me-auto">{{value}}</small>
 							<i class="bi bi-check text-primary"
 							   v-if="store.Configuration.Server.dashboard_sort === key"></i>
 						</a>
 					</li>
-				</ul>
-			</div>
-			<div class="dropdown">
-				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval
-				</button>
-				<ul class="dropdown-menu shadow mt-2 rounded-3">
+					<li><hr class="dropdown-divider"></li>
+					<li>
+						<small class="dropdown-header">Refresh Interval</small>
+					</li>
 					<li v-for="(value, key) in this.interval">
 						<a class="dropdown-item d-flex" role="button" @click="updateRefreshInterval(key)">
-							<span class="me-auto">{{value}}</span>
+							<small class="me-auto">{{value}}</small>
 							<i class="bi bi-check text-primary"
 							   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
-						</a></li>
+						</a>
+					</li>
 				</ul>
 			</div>
+<!--			<div class="dropdown">-->
+<!--				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"-->
+<!--				        type="button" data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--					<i class="bi bi-arrow-repeat me-2"></i>Refresh Interval-->
+<!--				</button>-->
+<!--				-->
+<!--			</div>-->
 
-			<div class="dropdown">
-				<button class="btn dropdown-toggle text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+			<div class="dropdown dropup">
+				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
 				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<i class="bi bi-three-dots me-2"></i>More
+					<i class="bi bi-three-dots"></i>
 				</button>
-				<ul class="dropdown-menu shadow mt-2 rounded-3">
+				<ul class="dropdown-menu shadow mt-2 rounded-3 animate__animated animation__fadeInDropdown">
 					<li>
 						<h6 class="dropdown-header">Peer Jobs</h6>
 					</li>
 					<li>
 						<a role="button" class="dropdown-item" @click="this.$emit('jobsAll')">
-							All Active Jobs
+							Active Jobs
 						</a>
 					</li>
 					<li>
@@ -165,4 +166,23 @@ export default {
 
 <style scoped>
 
+.animation__fadeInDropdown{
+	animation-name: fadeInDropdown;
+	animation-duration: 0.2s;
+	animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
+}
+
+@keyframes fadeInDropdown{
+	0%{
+		opacity: 0;
+		filter: blur(3px);
+		transform: translateY(-60px);
+	}
+	100%{
+		opacity: 1;
+		filter: blur(0px);
+		transform: translateY(-40px);
+	}
+	
+}
 </style>
