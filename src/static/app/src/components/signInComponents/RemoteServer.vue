@@ -15,28 +15,30 @@ export default {
 	},
 	methods: {
 		handshake(){
-			this.startTime = undefined;
-			this.endTime = undefined;
+			if (this.server.host && this.server.apiKey){
+				this.startTime = undefined;
+				this.endTime = undefined;
+				this.startTime = dayjs()
+				fetch(`${this.server.host}/api/handshake`, {
+					headers: {
+						"content-type": "application/json",
+						"wg-dashboard-apikey": this.server.apiKey
+					},
+					method: "GET",
+					signal: AbortSignal.timeout(5000)
+				}).then(res => res.json()).then(res => {
+					this.active = true;
+					this.endTime = dayjs()
+				}).catch((res) => {
+					this.startTime = undefined;
+					this.endTime = undefined;
+				})
+			}
 			
-			this.startTime = dayjs()
-			fetch(`//${this.server.host}/api/handshake`, {
-				headers: {
-					"content-type": "application/json",
-					"wg-dashboard-apikey": this.server.apiKey
-				},
-				method: "GET",
-				signal: AbortSignal.timeout(5000)
-			}).then(res => res.json()).then(res => {
-				this.active = true;
-				this.endTime = dayjs()
-			}).catch((res) => {
-				console.log(res)
-			})
 		}
 	},
-	
 	mounted() {
-		this.handshake()	
+		this.handshake()
 	},
 	computed: {
 		getHandshakeTime(){
@@ -56,19 +58,22 @@ export default {
 			<div class="d-flex gap-3 w-100">
 				<div class="d-flex gap-3 align-items-center flex-grow-1">
 					<i class="bi bi-server"></i>
-					<input class="form-control form-control-sm" 
+					<input class="form-control form-control-sm"
+					       @blur="this.handshake()"
 					       v-model="this.server.host"
 					       type="url">
 				</div>
 				<div class="d-flex gap-3 align-items-center flex-grow-1">
 					<i class="bi bi-key-fill"></i>
-					<input class="form-control form-control-sm" 
+					<input class="form-control form-control-sm"
+					       @blur="this.handshake()"
 					       v-model="this.server.apiKey"
 					       type="text">
 				</div>
 				<div class="d-flex gap-2">
 					<button 
 						@click="this.$emit('delete')"
+						
 						class="ms-auto btn btn-sm bg-danger-subtle text-danger-emphasis border-1 border-danger-subtle">
 						<i class="bi bi-trash"></i>
 					</button>
