@@ -16,8 +16,11 @@ watch(store.CrossServerConfiguration, () => {
 
 <template>
 	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark">
-		<div class="container-fluid">
+		<div class="container-fluid d-flex text-body">
 			<span class="navbar-brand mb-0 h1">WGDashboard</span>
+			<span class="ms-auto" v-if="store.getActiveCrossServer() !== undefined">
+				<i class="bi bi-server me-2"></i>{{store.getActiveCrossServer().host}}
+			</span>
 		</div>
 	</nav>
 	<Suspense>

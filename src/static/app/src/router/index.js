@@ -138,19 +138,28 @@ router.beforeEach(async (to, from, next) => {
   }
   
   if (to.meta.requiresAuth){
-    if (cookie.getCookie("authToken") && await checkAuth()){
+    if (!dashboardConfigurationStore.getActiveCrossServer()){
+      if (cookie.getCookie("authToken") && await checkAuth()){
+        await dashboardConfigurationStore.getConfiguration()
+        if (!wireguardConfigurationsStore.Configurations && to.name !== "Configuration List"){
+          await wireguardConfigurationsStore.getConfigurations();
+        }
+        dashboardConfigurationStore.Redirect = undefined;
+        next()
+      }else{
+        dashboardConfigurationStore.Redirect = to;
+        next("/signin")
+        dashboardConfigurationStore.newMessage("WGDashboard", "Session Ended", "warning")
+      }
+    }else{
       await dashboardConfigurationStore.getConfiguration()
       if (!wireguardConfigurationsStore.Configurations && to.name !== "Configuration List"){
         await wireguardConfigurationsStore.getConfigurations();
       }
-      dashboardConfigurationStore.Redirect = undefined;
       next()
-    }else{
-      dashboardConfigurationStore.Redirect = to;
-      next("/signin")
-      dashboardConfigurationStore.newMessage("WGDashboard", "Session Ended", "warning")
     }
   }else {
+    
     next();
   }
 });

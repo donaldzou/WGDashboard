@@ -1,11 +1,31 @@
 import router from "@/router/index.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+
+const getHeaders = () => {
+	let headers = {
+		"content-type": "application/json"
+	}
+	const store = DashboardConfigurationStore();
+	const apiKey = store.getActiveCrossServer();
+	if (apiKey){
+		headers['wg-dashboard-apikey'] = apiKey.apiKey
+	}
+	return headers
+}
+
+const getUrl = (url) => {
+	const store = DashboardConfigurationStore();
+	const apiKey = store.getActiveCrossServer();
+	if (apiKey){
+		return `${apiKey.host}${url}`
+	}
+	return url
+}
+
 export const fetchGet = async (url, params=undefined, callback=undefined) => {
 	const urlSearchParams = new URLSearchParams(params);
-	await fetch(`${url}?${urlSearchParams.toString()}`, {
-		headers: {
-			"content-type": "application/json"
-		}
+	await fetch(`${getUrl(url)}?${urlSearchParams.toString()}`, {
+		headers: getHeaders()
 	})
 	.then((x) => {
 		const store = DashboardConfigurationStore();
@@ -26,10 +46,8 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 }
 
 export const fetchPost = async (url, body, callback) => {
-	await fetch(`${url}`, {
-		headers: {
-			"content-type": "application/json"
-		},
+	await fetch(`${getUrl(url)}`, {
+		headers: getHeaders(),
 		method: "POST",
 		body: JSON.stringify(body)
 	}).then((x) => {

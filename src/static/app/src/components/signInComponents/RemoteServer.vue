@@ -10,11 +10,13 @@ export default {
 		return{
 			active: false,
 			startTime: undefined,
-			endTime: undefined
+			endTime: undefined,
+			errorMsg: ""
 		}
 	},
 	methods: {
 		handshake(){
+			this.active = false;
 			if (this.server.host && this.server.apiKey){
 				this.startTime = undefined;
 				this.endTime = undefined;
@@ -26,15 +28,35 @@ export default {
 					},
 					method: "GET",
 					signal: AbortSignal.timeout(5000)
-				}).then(res => res.json()).then(res => {
-					this.active = true;
+				}).then(res => {
+					if (res.status === 200){
+						return res.json()
+					}
+					throw new Error(res.statusText)
+				}).then(() => {
 					this.endTime = dayjs()
+					this.active = true;
 				}).catch((res) => {
-					this.startTime = undefined;
-					this.endTime = undefined;
+					this.active = false;
+					this.errorMsg = res;
 				})
 			}
-			
+		},
+		async connect(){
+			await fetch(`${this.server.host}/api/authenticate`, {
+				headers: {
+					"content-type": "application/json",
+					"wg-dashboard-apikey": this.server.apiKey
+				},
+				body: JSON.stringify({
+					host: window.location.hostname
+				}),
+				method: "POST",
+				signal: AbortSignal.timeout(5000),
+			}).then(res => res.json()).then(res => {
+				this.$emit("setActiveServer")
+				this.$router.push('/')
+			})
 		}
 	},
 	mounted() {
@@ -43,9 +65,9 @@ export default {
 	computed: {
 		getHandshakeTime(){
 			if (this.startTime && this.endTime){
-				return dayjs().subtract(this.startTime).millisecond()
+				return `${dayjs().subtract(this.startTime).millisecond()}ms`
 			}else{
-				return "N/A"
+				return this.errorMsg ? this.errorMsg : "N/A"
 			}
 		}
 	}
@@ -73,11 +95,13 @@ export default {
 				<div class="d-flex gap-2">
 					<button 
 						@click="this.$emit('delete')"
-						
 						class="ms-auto btn btn-sm bg-danger-subtle text-danger-emphasis border-1 border-danger-subtle">
 						<i class="bi bi-trash"></i>
 					</button>
-					<button class="ms-auto btn btn-sm bg-success-subtle text-success-emphasis border-1 border-success-subtle">
+					<button
+						@click="this.connect()"
+						:class="{disabled: !this.active}"
+						class="ms-auto btn btn-sm bg-success-subtle text-success-emphasis border-1 border-success-subtle">
 						<i class="bi bi-arrow-right-circle"></i>
 					</button>
 				</div>
@@ -85,7 +109,7 @@ export default {
 		</div>
 		<div class="card-footer gap-2 d-flex align-items-center">
 			<span class="dot ms-0 me-2" :class="[this.active ? 'active':'inactive']"></span>
-			{{this.getHandshakeTime}}
+			<small>{{this.getHandshakeTime}}</small>
 		</div>
 	</div>
 </template>

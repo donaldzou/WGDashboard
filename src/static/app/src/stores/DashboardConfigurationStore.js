@@ -13,13 +13,12 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		},
 		CrossServerConfiguration:{
 			Enable: false,
-			ServerList: []
+			ServerList: {}
 		}
 	}),
 	actions: {
 		initCrossServerConfiguration(){
 			const currentConfiguration = localStorage.getItem('CrossServerConfiguration');
-			
 			if (currentConfiguration === null){
 				localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 			}else{
@@ -30,9 +29,23 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 		},
 		addCrossServerConfiguration(){
-			this.CrossServerConfiguration.ServerList.push(
-				{host: "", apiKey: ""}
-			)	
+			this.CrossServerConfiguration.ServerList[v4().toString()] = {host: "", apiKey: "", active: false}
+		},
+		deleteCrossServerConfiguration(key){
+			delete this.CrossServerConfiguration.ServerList[key];
+		},
+		getActiveCrossServer(){
+			const key = localStorage.getItem('ActiveCrossServerConfiguration');
+			if (key !== null){
+				return this.CrossServerConfiguration.ServerList[key]
+			}
+			return undefined
+		},
+		setActiveCrossServer(key){
+			localStorage.setItem('ActiveCrossServerConfiguration', key)
+		},
+		removeActiveCrossServer(){
+			localStorage.removeItem('ActiveCrossServerConfiguration')
 		},
 		
 		async getConfiguration(){
@@ -49,6 +62,7 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		},
 		async signOut(){
 			await fetchGet("/api/signout", {}, (res) => {
+				this.removeActiveCrossServer();
 				this.$router.go('/signin')
 			});
 		},

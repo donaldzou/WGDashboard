@@ -1096,6 +1096,7 @@ class DashboardConfig:
                     self.SetConfig(section, key, value, True)
         self.__createAPIKeyTable()
         self.DashboardAPIKeys = self.__getAPIKeys()
+        self.APIAccessed = False
     
     def __createAPIKeyTable(self):
         existingTable = sqldb.cursor().execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
@@ -1343,6 +1344,7 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
     return False, None
 
 
+
 '''
 API Routes
 '''
@@ -1351,7 +1353,8 @@ API Routes
 def auth_req():
     if request.method.lower() == 'options':
         return ResponseObject(True)
-    
+
+    DashboardConfig.APIAccessed = False
     if "api" in request.path:
         if str(request.method) == "GET":
             DashboardLogger.log(str(request.url), str(request.remote_addr), Message=str(request.args))
@@ -1368,6 +1371,7 @@ def auth_req():
             apiKeyExist = len(list(filter(lambda x : x.Key == apiKey, DashboardConfig.DashboardAPIKeys))) == 1
             DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"API Key Access: {('true' if apiKeyExist else 'false')} - Key: {apiKey}")
             if not apiKeyExist:
+                DashboardConfig.APIAccessed = False
                 response = Flask.make_response(app, {
                     "status": False,
                     "message": "API Key does not exist",
@@ -1376,7 +1380,9 @@ def auth_req():
                 response.content_type = "application/json"
                 response.status_code = 401
                 return response
+            DashboardConfig.APIAccessed = True
         else:
+            DashboardConfig.APIAccessed = False
             if ('/static/' not in request.path and "username" not in session and "/" != request.path
                     and "validateAuthentication" not in request.path and "authenticate" not in request.path
                     and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
@@ -1408,6 +1414,17 @@ def API_ValidateAuthentication():
 @app.route('/api/authenticate', methods=['POST'])
 def API_AuthenticateLogin():
     data = request.get_json()
+    if DashboardConfig.APIAccessed:
+        
+        authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
+        session['username'] = authToken
+        resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
+        print(data['host'])
+        resp.set_cookie("authToken", authToken, domain=data['host'])
+        session.permanent = True
+        return resp
+    
+    
     valid = bcrypt.checkpw(data['password'].encode("utf-8"),
                            DashboardConfig.GetConfig("Account", "password")[1].encode("utf-8"))
     totpEnabled = DashboardConfig.GetConfig("Account", "enable_totp")[1]
