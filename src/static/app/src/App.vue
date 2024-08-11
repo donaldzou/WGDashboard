@@ -1,9 +1,13 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import {watch} from "vue";
+import {computed, watch} from "vue";
 const store = DashboardConfigurationStore();
 store.initCrossServerConfiguration();
+if (window.IS_WGDASHBOARD_DESKTOP){
+	store.IsElectronApp = true;
+	store.CrossServerConfiguration.Enable = true;
+}
 
 watch(store.CrossServerConfiguration, () => {
 	store.syncCrossServerConfiguration()
@@ -11,16 +15,22 @@ watch(store.CrossServerConfiguration, () => {
 	deep: true
 });
 
+const getActiveCrossServer = computed(() => {
+	if (store.ActiveServerConfiguration){
+		return store.CrossServerConfiguration.ServerList[store.ActiveServerConfiguration]
+	}
+	return undefined
+})
 
 </script>
 
 <template>
 	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark">
-		<div class="container-fluid d-flex text-body">
+		<div class="container-fluid d-flex text-body align-items-center">
 			<span class="navbar-brand mb-0 h1">WGDashboard</span>
-			<span class="ms-auto" v-if="store.getActiveCrossServer() !== undefined">
-				<i class="bi bi-server me-2"></i>{{store.getActiveCrossServer().host}}
-			</span>
+			<small class="ms-auto text-muted" v-if="getActiveCrossServer !== undefined">
+				<i class="bi bi-server me-2"></i>{{getActiveCrossServer.host}}
+			</small>
 		</div>
 	</nav>
 	<Suspense>

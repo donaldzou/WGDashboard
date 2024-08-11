@@ -27,8 +27,9 @@ export default {
 		<RemoteServer v-for="(server, key) in this.store.CrossServerConfiguration.ServerList"
 		              @setActiveServer="this.store.setActiveCrossServer(key)"
 		              @delete="this.store.deleteCrossServerConfiguration(key)"
+		              :key="key"
 		              :server="server"></RemoteServer>
-		<h6 class="text-muted m-auto" v-if="this.store.CrossServerConfiguration.ServerList.length === 0">
+		<h6 class="text-muted m-auto" v-if="Object.keys(this.store.CrossServerConfiguration.ServerList).length === 0">
 			Click<i class="bi bi-plus-circle-fill mx-1"></i>to add your server</h6>
 	</div>
 </div>

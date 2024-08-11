@@ -14,16 +14,23 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		CrossServerConfiguration:{
 			Enable: false,
 			ServerList: {}
-		}
+		},
+		ActiveServerConfiguration: undefined,
+		IsElectronApp: false
 	}),
 	actions: {
 		initCrossServerConfiguration(){
 			const currentConfiguration = localStorage.getItem('CrossServerConfiguration');
+			if (localStorage.getItem("ActiveCrossServerConfiguration") !== null){
+				this.ActiveServerConfiguration = localStorage.getItem("ActiveCrossServerConfiguration");
+			}
 			if (currentConfiguration === null){
 				localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 			}else{
 				this.CrossServerConfiguration = JSON.parse(currentConfiguration)
 			}
+			
+			
 		},
 		syncCrossServerConfiguration(){
 			localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
@@ -42,9 +49,11 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			return undefined
 		},
 		setActiveCrossServer(key){
+			this.ActiveServerConfiguration = key;
 			localStorage.setItem('ActiveCrossServerConfiguration', key)
 		},
 		removeActiveCrossServer(){
+			this.ActiveServerConfiguration = undefined;
 			localStorage.removeItem('ActiveCrossServerConfiguration')
 		},
 		

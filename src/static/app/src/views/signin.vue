@@ -9,14 +9,17 @@ export default {
 	components: {RemoteServerList, Message},
 	async setup(){
 		const store = DashboardConfigurationStore()
-		let theme = ""
+		let theme = "dark"
 		let totpEnabled = false;
-		await fetchGet("/api/getDashboardTheme", {}, (res) => {
-			theme = res.data
-		});
-		await fetchGet("/api/isTotpEnabled", {}, (res) => {
-			totpEnabled = res.data
-		}); 
+		if (!store.IsElectronApp){
+			await fetchGet("/api/getDashboardTheme", {}, (res) => {
+				theme = res.data
+			});
+			await fetchGet("/api/isTotpEnabled", {}, (res) => {
+				totpEnabled = res.data
+			});
+		}
+		store.removeActiveCrossServer();
 		return {store, theme, totpEnabled}
 	},
 	data(){
@@ -132,7 +135,7 @@ export default {
 						</form>
 						<RemoteServerList v-else></RemoteServerList>
 						
-						<div class="d-flex mt-3">
+						<div class="d-flex mt-3" v-if="!this.store.IsElectronApp">
 							<div class="form-check form-switch ms-auto">
 								<input 
 									v-model="this.store.CrossServerConfiguration.Enable"

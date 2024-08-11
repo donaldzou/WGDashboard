@@ -20,13 +20,8 @@ export default defineConfig(({mode}) => {
           '@': fileURLToPath(new URL('./src', import.meta.url))
         }
       },
-      server:{
-        proxy: {
-          '/api': proxy
-        }
-      },
       build: {
-        outDir: 'electron',
+        outDir: '../../../../WGDashboard-Desktop',
         rollupOptions: {
           output: {
             entryFileNames: `assets/[name].js`,

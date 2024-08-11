@@ -32,7 +32,7 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		if (!x.ok){
 			if (x.status !== 200){
 				if (x.status === 401){
-					router.push({path: '/signin'})
+					
 					store.newMessage("WGDashboard", "Session Ended", "warning")
 				}
 				throw new Error(x.statusText)
@@ -42,6 +42,7 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		}
 	}).then(x => callback ? callback(x) : undefined).catch(x => {
 		console.log(x)
+			router.push({path: '/signin'})
 	})
 }
 
@@ -55,7 +56,7 @@ export const fetchPost = async (url, body, callback) => {
 		if (!x.ok){
 			if (x.status !== 200){
 				if (x.status === 401){
-					router.push({path: '/signin'})
+					
 					store.newMessage("WGDashboard", "Session Ended", "warning")
 				}
 				throw new Error(x.statusText)
@@ -65,5 +66,6 @@ export const fetchPost = async (url, body, callback) => {
 		}
 	}).then(x => callback ? callback(x) : undefined).catch(x => {
 		console.log(x)
+		router.push({path: '/signin'})
 	})
 }
