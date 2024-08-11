@@ -497,7 +497,7 @@ class WireguardConfiguration:
         if self.Name not in existingTables:
             sqldb.cursor().execute(
                 """
-                CREATE TABLE %s (
+                CREATE TABLE '%s'(
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
@@ -513,7 +513,7 @@ class WireguardConfiguration:
         if f'{self.Name}_restrict_access' not in existingTables:
             sqldb.cursor().execute(
                 """
-                CREATE TABLE %s_restrict_access (
+                CREATE TABLE '%s_restrict_access' (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
@@ -528,7 +528,7 @@ class WireguardConfiguration:
         if f'{self.Name}_transfer' not in existingTables:
             sqldb.cursor().execute(
                 """
-                CREATE TABLE %s_transfer (
+                CREATE TABLE '%s_transfer' (
                     id VARCHAR NOT NULL, total_receive FLOAT NULL,
                     total_sent FLOAT NULL, total_data FLOAT NULL,
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
@@ -539,7 +539,7 @@ class WireguardConfiguration:
         if f'{self.Name}_deleted' not in existingTables:
             sqldb.cursor().execute(
                 """
-                CREATE TABLE %s_deleted (
+                CREATE TABLE '%s_deleted' (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
                     endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
                     total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
@@ -563,7 +563,7 @@ class WireguardConfiguration:
 
     def __getRestrictedPeers(self):
         self.RestrictedPeers = []
-        restricted = sqldb.cursor().execute("SELECT * FROM %s_restrict_access" % self.Name).fetchall()
+        restricted = sqldb.cursor().execute("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
         for i in restricted:
             self.RestrictedPeers.append(Peer(i, self))
 
@@ -588,7 +588,7 @@ class WireguardConfiguration:
                                     p[pCounter][split[0]] = split[1]
                 for i in p:
                     if "PublicKey" in i.keys():
-                        checkIfExist = sqldb.cursor().execute("SELECT * FROM %s WHERE id = ?" % self.Name,
+                        checkIfExist = sqldb.cursor().execute("SELECT * FROM '%s' WHERE id = ?" % self.Name,
                                                       ((i['PublicKey']),)).fetchone()
                         if checkIfExist is None:
                             newPeer = {
@@ -616,7 +616,7 @@ class WireguardConfiguration:
                             }
                             sqldb.cursor().execute(
                                 """
-                                INSERT INTO %s
+                                INSERT INTO '%s'
                                     VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
                                     :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
                                     :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
@@ -625,7 +625,7 @@ class WireguardConfiguration:
                             sqldb.commit()
                             self.Peers.append(Peer(newPeer, self))
                         else:
-                            sqldb.cursor().execute("UPDATE %s SET allowed_ip = ? WHERE id = ?" % self.Name,
+                            sqldb.cursor().execute("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
                                            (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
                             sqldb.commit()
                             self.Peers.append(Peer(checkIfExist, self))
@@ -653,11 +653,11 @@ class WireguardConfiguration:
             self.toggleConfiguration()
         
         for i in listOfPublicKeys:
-            p = sqldb.cursor().execute("SELECT * FROM %s_restrict_access WHERE id = ?" % self.Name, (i,)).fetchone()
+            p = sqldb.cursor().execute("SELECT * FROM '%s_restrict_access' WHERE id = ?" % self.Name, (i,)).fetchone()
             if p is not None:
-                sqldb.cursor().execute("INSERT INTO %s SELECT * FROM %s_restrict_access WHERE id = ?"
+                sqldb.cursor().execute("INSERT INTO '%s' SELECT * FROM %s_restrict_access WHERE id = ?"
                                % (self.Name, self.Name,), (p['id'],))
-                sqldb.cursor().execute("DELETE FROM %s_restrict_access WHERE id = ?"
+                sqldb.cursor().execute("DELETE FROM '%s_restrict_access' WHERE id = ?"
                                % self.Name, (p['id'],))
                 subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
                                         shell=True, stderr=subprocess.STDOUT)
@@ -680,11 +680,11 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqldb.cursor().execute("INSERT INTO %s_restrict_access SELECT * FROM %s WHERE id = ?" %
+                    sqldb.cursor().execute("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
-                    sqldb.cursor().execute("UPDATE %s_restrict_access SET status = 'stopped' WHERE id = ?" %
+                    sqldb.cursor().execute("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))
-                    sqldb.cursor().execute("DELETE FROM %s WHERE id = ?" % self.Name, (pf.id,))
+                    sqldb.cursor().execute("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
                     numOfRestrictedPeers += 1
                 except Exception as e:
                     numOfFailedToRestrictPeers += 1
@@ -711,7 +711,7 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqldb.cursor().execute("DELETE FROM %s WHERE id = ?" % self.Name, (pf.id,))
+                    sqldb.cursor().execute("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
                     numOfDeletedPeers += 1
                 except Exception as e:
                     numOfFailedToDeletePeers += 1
@@ -731,7 +731,7 @@ class WireguardConfiguration:
             d = i.toJson()
             sqldb.execute(
                 '''
-                UPDATE %s SET private_key = :private_key, 
+                UPDATE '%s' SET private_key = :private_key, 
                     DNS = :DNS, endpoint_allowed_ip = :endpoint_allowed_ip, name = :name, 
                     total_receive = :total_receive, total_sent = :total_sent, total_data = :total_data, 
                     endpoint = :endpoint, status = :status, latest_handshake = :latest_handshake, 
@@ -768,10 +768,10 @@ class WireguardConfiguration:
             else:
                 status = "stopped"
             if int(latestHandshake[count + 1]) > 0:
-                sqldb.execute("UPDATE %s SET latest_handshake = ?, status = ? WHERE id= ?" % self.Name
+                sqldb.execute("UPDATE '%s' SET latest_handshake = ?, status = ? WHERE id= ?" % self.Name
                               , (str(minus).split(".", maxsplit=1)[0], status, latestHandshake[count],))
             else:
-                sqldb.execute("UPDATE %s SET latest_handshake = 'No Handshake', status = ? WHERE id= ?" % self.Name
+                sqldb.execute("UPDATE '%s' SET latest_handshake = 'No Handshake', status = ? WHERE id= ?" % self.Name
                               , (status, latestHandshake[count],))
             sqldb.commit()
             count += 2
@@ -787,7 +787,7 @@ class WireguardConfiguration:
             for i in range(len(data_usage)):
                 if len(data_usage[i]) == 3:
                     cur_i = sqldb.cursor().execute(
-                        "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM %s WHERE id= ? "
+                        "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM '%s' WHERE id= ? "
                         % self.Name, (data_usage[i][0],)).fetchone()
                     if cur_i is not None:
                         total_sent = cur_i['total_sent']
@@ -801,7 +801,7 @@ class WireguardConfiguration:
                             total_receive = cur_total_receive
                         else:
                             sqldb.cursor().execute(
-                                "UPDATE %s SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
+                                "UPDATE '%s' SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
                                 self.Name, (cumulative_receive, cumulative_sent,
                                             cumulative_sent + cumulative_receive,
                                             data_usage[i][0],))
@@ -811,7 +811,7 @@ class WireguardConfiguration:
                         _, p = self.searchPeer(data_usage[i][0])
                         if p.total_receive != total_receive or p.total_sent != total_sent:
                             sqldb.cursor().execute(
-                                "UPDATE %s SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
+                                "UPDATE '%s' SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
                                 % self.Name, (total_receive, total_sent,
                                               total_receive + total_sent, data_usage[i][0],))
         except Exception as e:
@@ -828,7 +828,7 @@ class WireguardConfiguration:
         data_usage = data_usage.decode("UTF-8").split()
         count = 0
         for _ in range(int(len(data_usage) / 2)):
-            sqldb.execute("UPDATE %s SET endpoint = ? WHERE id = ?" % self.Name
+            sqldb.execute("UPDATE '%s' SET endpoint = ? WHERE id = ?" % self.Name
                           , (data_usage[count + 1], data_usage[count],))
             sqldb.commit()
             count += 2
@@ -966,7 +966,7 @@ class Peer:
                 return ResponseObject(False,
                                       "Update peer failed when saving the configuration.")
             sqldb.cursor().execute(
-                '''UPDATE %s SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
+                '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
                 keepalive = ?, preshared_key = ? WHERE id = ?''' % self.configuration.Name,
                 (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
                  keepalive, preshared_key, self.id,)
@@ -1018,11 +1018,11 @@ PersistentKeepalive = {str(self.keepalive)}
     def resetDataUsage(self, type):
         try:
             if type == "total":
-                sqldb.cursor().execute("UPDATE %s SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqldb.cursor().execute("UPDATE '%s' SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
             elif type == "receive":
-                sqldb.cursor().execute("UPDATE %s SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqldb.cursor().execute("UPDATE '%s' SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
             elif type == "sent":
-                sqldb.cursor().execute("UPDATE %s SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqldb.cursor().execute("UPDATE '%s' SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
             else:
                 return False
         except Exception as e:
