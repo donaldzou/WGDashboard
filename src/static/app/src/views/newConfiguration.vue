@@ -56,7 +56,7 @@ export default {
 						this.errorMessage = res.message;
 						document.querySelector(`#${res.data}`).classList.remove("is-valid")
 						document.querySelector(`#${res.data}`).classList.add("is-invalid")
-
+						this.loading = false;
 					}
 				})
 			}
@@ -126,15 +126,14 @@ export default {
 </script>
 
 <template>
-	<div class="mt-4">
+	<div class="mt-5">
 		<div class="container mb-4">
 			<div class="mb-4 d-flex align-items-center gap-4">
-				<RouterLink to="/">
+				<RouterLink to="/" class="text-decoration-none">
 					<h3 class="mb-0 text-body">
-						<i class="bi bi-chevron-left"></i>
+						<i class="bi bi-chevron-left me-4"></i> New Configuration
 					</h3>
 				</RouterLink>
-				<h3 class="text-body mb-0">New Configuration</h3>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
