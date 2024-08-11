@@ -35,7 +35,7 @@ export default {
 
 <template>
 	<div class="card rounded-3 shadow-sm">
-		<div class="card-body d-flex gap-3 align-items-center" v-if="!this.confirmDelete">
+		<div class="card-body d-flex gap-3 align-items-center apiKey-card-body" v-if="!this.confirmDelete">
 			<div class="d-flex align-items-center gap-2">
 				<small class="text-muted">Key</small>{{this.apiKey.Key}}
 			</div>
@@ -62,5 +62,14 @@ export default {
 </template>
 
 <style scoped>
-
+@media screen and (max-width: 992px) {
+	.apiKey-card-body{
+		flex-direction: column;
+		align-items: start !important;
+		
+		div.ms-auto{
+			margin-left: 0 !important;
+		}
+	}
+}
 </style>
