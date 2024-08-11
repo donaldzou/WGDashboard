@@ -3,6 +3,8 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 
 > For more information, you can visit: https://github.com/donaldzou/WGDashboard/issues/293
 
+> If you're interested in the Desktop App of v4.0, please visit [WGDashboard Desktop](https://github.com/donaldzou/WGDashboard-Desktop) ;)
+
 #### A preview on v4.0 🥹
 
 <img src="https://github.com/donaldzou/WGDashboard/raw/main/img/v4.0Preview.gif">
