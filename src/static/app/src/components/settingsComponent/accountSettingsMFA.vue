@@ -47,7 +47,7 @@ export default {
 		<div class="form-check form-switch ms-3">
 			<input class="form-check-input" type="checkbox"
 			       v-model="this.status"
-			       role="switch" id="allowAPIKeysSwitch">
+			       role="switch" id="allowMFAKeysSwitch">
 		</div>
 		<button class="btn bg-warning-subtle text-warning-emphasis border-1 border-warning-subtle ms-auto rounded-3 shadow-sm" 
 		        v-if="this.status" @click="this.resetMFA()">

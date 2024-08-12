@@ -37,7 +37,8 @@ export default {
 	<div class="card rounded-3 shadow-sm">
 		<div class="card-body d-flex gap-3 align-items-center apiKey-card-body" v-if="!this.confirmDelete">
 			<div class="d-flex align-items-center gap-2">
-				<small class="text-muted">Key</small>{{this.apiKey.Key}}
+				<small class="text-muted">Key</small>
+				<span style="word-break: break-all">{{this.apiKey.Key}}</span>
 			</div>
 			<div class="d-flex align-items-center gap-2 ms-auto">
 				<small class="text-muted">Expire At</small>
@@ -64,11 +65,20 @@ export default {
 <style scoped>
 @media screen and (max-width: 992px) {
 	.apiKey-card-body{
-		flex-direction: column;
+		flex-direction: column !important;
 		align-items: start !important;
 		
 		div.ms-auto{
 			margin-left: 0 !important;
+		}
+		
+		div{
+			width: 100%;
+			align-items: start !important;
+		}
+		
+		small{
+			margin-right: auto;
 		}
 	}
 }

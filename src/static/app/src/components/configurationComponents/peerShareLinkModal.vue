@@ -87,6 +87,12 @@ export default {
 	},
 	computed: {
 		getUrl(){
+			const crossServer = this.store.getActiveCrossServer();
+			if(crossServer){
+				return `${crossServer.host}/${this.$router.resolve(
+					{path: "/share", query: {"ShareID": this.dataCopy.ShareID}}).href}`
+			}
+			
 			return window.location.origin 
 				+ window.location.pathname 
 				+ this.$router.resolve(
