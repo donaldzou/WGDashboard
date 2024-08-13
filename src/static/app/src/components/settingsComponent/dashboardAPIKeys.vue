@@ -65,7 +65,7 @@ export default {
 	<div class="card mb-4 shadow rounded-3">
 		<div class="card-header d-flex">
 			API Keys
-			<div class="form-check form-switch ms-auto">
+			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()">
 				<input class="form-check-input" type="checkbox"
 				       v-model="this.value"
 				       @change="this.toggleDashboardAPIKeys()"
@@ -78,6 +78,7 @@ export default {
 		<div class="card-body position-relative d-flex flex-column gap-2" v-if="this.value">
 			<button class="ms-auto btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
 			        @click="this.newDashboardAPIKey = true"
+			        v-if="!this.store.getActiveCrossServer()"
 			>
 				<i class="bi bi-key me-2"></i> Create
 			</button>

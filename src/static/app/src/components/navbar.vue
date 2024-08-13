@@ -14,7 +14,7 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3" style="height: calc(-50px + 100vh);">
+	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container bg-body" style="height: calc(-50px + 100vh);">
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky pt-3">
 				<ul class="nav flex-column px-2">
@@ -75,5 +75,10 @@ export default {
 </template>
 
 <style scoped>
-
+@media screen and (max-width: 768px) {
+	.navbar-container{
+		position: absolute;
+		z-index: 1000;
+	}
+}
 </style>

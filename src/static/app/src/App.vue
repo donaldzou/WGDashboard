@@ -25,12 +25,13 @@ const getActiveCrossServer = computed(() => {
 </script>
 
 <template>
-	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark">
+	<nav class="navbar bg-dark sticky-top border-bottom border-secondary-subtle" data-bs-theme="dark">
 		<div class="container-fluid d-flex text-body align-items-center">
 			<span class="navbar-brand mb-0 h1">WGDashboard</span>
 			<small class="ms-auto text-muted" v-if="getActiveCrossServer !== undefined">
 				<i class="bi bi-server me-2"></i>{{getActiveCrossServer.host}}
 			</small>
+			<a role="button"><i class="bi bi-list"></i></a>
 		</div>
 	</nav>
 	<Suspense>

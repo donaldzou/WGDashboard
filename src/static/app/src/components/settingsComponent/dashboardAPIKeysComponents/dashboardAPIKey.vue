@@ -44,18 +44,22 @@ export default {
 				<small class="text-muted">Expire At</small>
 				{{this.apiKey.ExpiredAt ? this.apiKey.ExpiredAt : 'Never'}}
 			</div>
-			<a role="button" class="btn btn-sm bg-danger-subtle text-danger-emphasis rounded-3" @click="this.confirmDelete = true">
+			<a role="button" class="btn btn-sm bg-danger-subtle text-danger-emphasis rounded-3"
+			   v-if="!this.store.getActiveCrossServer()"
+			   @click="this.confirmDelete = true">
 				<i class="bi bi-trash-fill"></i>
 			</a>
 		</div>
-		<div v-else class="card-body d-flex gap-3 align-items-center justify-content-end">
+		<div v-else class="card-body d-flex gap-3 align-items-center justify-content-end" 
+		     v-if="!this.store.getActiveCrossServer()">
 			Are you sure to delete this API key?
 			<a role="button" class="btn btn-sm bg-success-subtle text-success-emphasis rounded-3"
 				@click="this.deleteAPIKey()"
 			>
 				<i class="bi bi-check-lg"></i>
 			</a>
-			<a role="button" class="btn btn-sm bg-secondary-subtle text-secondary-emphasis rounded-3" @click="this.confirmDelete = false">
+			<a role="button" class="btn btn-sm bg-secondary-subtle text-secondary-emphasis rounded-3" 
+			   @click="this.confirmDelete = false">
 				<i class="bi bi-x-lg"></i>
 			</a>
 		</div>

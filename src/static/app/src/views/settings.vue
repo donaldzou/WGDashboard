@@ -77,8 +77,8 @@ export default {
 					<AccountSettingsInputPassword
 						targetData="password">
 					</AccountSettingsInputPassword>
-					<hr class="m-0">
-					<AccountSettingsMFA></AccountSettingsMFA>
+					<hr class="m-0" v-if="!this.dashboardConfigurationStore.getActiveCrossServer()">
+					<AccountSettingsMFA v-if="!this.dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
 				</div>
 			</div>
 			<DashboardAPIKeys></DashboardAPIKeys>
