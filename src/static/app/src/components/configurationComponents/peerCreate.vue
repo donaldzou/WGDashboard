@@ -42,7 +42,7 @@ export default {
 		}
 	},
 	mounted() {
-		fetchGet("/api/getAvailableIPs/" + this.$route.params.id, {}, (res) => {
+		fetchGet(`${apiUrl}/getAvailableIPs/` + this.$route.params.id, {}, (res) => {
 			if (res.status){
 				this.availableIp = res.data;
 			}
@@ -56,7 +56,7 @@ export default {
 	methods: {
 		peerCreate(){
 			this.saving = true
-			fetchPost("/api/addPeers/" + this.$route.params.id, this.data, (res) => {
+			fetchPost(`${apiUrl}/addPeers/` + this.$route.params.id, this.data, (res) => {
 				if (res.status){
 					this.$router.push(`/configuration/${this.$route.params.id}/peers`)
 					this.dashboardStore.newMessage("Server", "Peer create successfully", "success")

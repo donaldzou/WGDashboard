@@ -18,7 +18,7 @@ export default {
 	},
 	methods: {
 		deleteAPIKey(){
-			fetchPost("/api/deleteDashboardAPIKey", {
+			fetchPost(`${apiUrl}/deleteDashboardAPIKey`, {
 				Key: this.apiKey.Key
 			}, (res) => {
 				if (res.status){

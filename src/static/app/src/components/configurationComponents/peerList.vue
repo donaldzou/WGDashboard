@@ -169,7 +169,7 @@ export default {
 	methods:{
 		toggle(){
 			this.configurationToggling = true;
-			fetchGet("/api/toggleWireguardConfiguration/", {
+			fetchGet(`${apiUrl}/toggleWireguardConfiguration/`, {
 				configurationName: this.configurationInfo.Name
 			}, (res) => {
 				if (res.status){
@@ -185,7 +185,7 @@ export default {
 			})
 		},
 		getPeers(id = this.$route.params.id){
-			fetchGet("/api/getWireguardConfigurationInfo",
+			fetchGet(`${apiUrl}/getWireguardConfigurationInfo`,
 				{
 					configurationName: id
 				}, (res) => {

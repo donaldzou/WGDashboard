@@ -12,10 +12,10 @@ export default {
 		let theme = "dark"
 		let totpEnabled = false;
 		if (!store.IsElectronApp){
-			await fetchGet("/api/getDashboardTheme", {}, (res) => {
+			await fetchGet(`${apiUrl}/getDashboardTheme`, {}, (res) => {
 				theme = res.data
 			});
-			await fetchGet("/api/isTotpEnabled", {}, (res) => {
+			await fetchGet(`${apiUrl}/isTotpEnabled`, {}, (res) => {
 				totpEnabled = res.data
 			});
 		}
@@ -41,7 +41,7 @@ export default {
 		async auth(){
 			if (this.username && this.password && ((this.totpEnabled && this.totp) || !this.totpEnabled)){
 				this.loading = true
-				await fetchPost("/api/authenticate", {
+				await fetchPost(`${apiUrl}/authenticate`, {
 					username: this.username,
 					password: this.password,
 					totp: this.totp

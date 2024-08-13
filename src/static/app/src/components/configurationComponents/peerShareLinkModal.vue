@@ -41,7 +41,7 @@ export default {
 	methods: {
 		startSharing(){
 			this.loading = true;
-			fetchPost("/api/sharePeer/create", {
+			fetchPost(`${apiUrl}/sharePeer/create`, {
 				Configuration: this.peer.configuration.Name,
 				Peer: this.peer.id,
 				ExpireDate: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss")
@@ -59,7 +59,7 @@ export default {
 			})
 		},
 		updateLinkExpireDate(){
-			fetchPost("/api/sharePeer/update", this.dataCopy, (res) => {
+			fetchPost(`${apiUrl}/sharePeer/update`, this.dataCopy, (res) => {
 				if (res.status){
 					this.dataCopy = res.data.at(0)
 					this.peer.ShareLink = res.data;

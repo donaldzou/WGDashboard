@@ -34,7 +34,7 @@ export default {
 		async useValidation(){
 			if (this.changed){
 				this.updating = true
-				await fetchPost("/api/updateDashboardConfigurationItem", {
+				await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 					section: "Account",
 					key: this.targetData,
 					value: this.value

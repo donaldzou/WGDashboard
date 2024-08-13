@@ -45,7 +45,7 @@ export default {
 	methods: {
 		save(){
 			if (this.job.Field && this.job.Operator && this.job.Action && this.job.Value){
-				fetchPost(`/api/savePeerScheduleJob/`, {
+				fetchPost(`${apiUrl}/savePeerScheduleJob/`, {
 					Job: this.job
 				}, (res) => {
 					if (res.status){
@@ -83,7 +83,7 @@ export default {
 		},
 		delete(){
 			if(this.job.CreationDate){
-				fetchPost(`/api/deletePeerScheduleJob/`, {
+				fetchPost(`${apiUrl}/deletePeerScheduleJob/`, {
 					Job: this.job
 				}, (res) => {
 					if (!res.status){

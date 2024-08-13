@@ -21,7 +21,7 @@ export default {
 	},
 	methods: {
 		async toggleDashboardAPIKeys(){
-			await fetchPost("/api/updateDashboardConfigurationItem", {
+			await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 				section: "Server",
 				key: "dashboard_api_key",
 				value: this.value
@@ -43,7 +43,7 @@ export default {
 			immediate: true,
 			handler(newValue){
 				if (newValue){
-					fetchGet("/api/getDashboardAPIKeys", {}, (res) => {
+					fetchGet(`${apiUrl}/getDashboardAPIKeys`, {}, (res) => {
 						console.log(res)
 						if(res.status){
 							this.apiKeys = res.data

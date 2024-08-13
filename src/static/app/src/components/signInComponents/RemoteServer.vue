@@ -23,7 +23,7 @@ export default {
 				this.startTime = undefined;
 				this.endTime = undefined;
 				this.startTime = dayjs()
-				await fetch(`${this.server.host}/api/handshake`, {
+				await fetch(`${this.server.host}${apiUrl}/handshake`, {
 					headers: {
 						"content-type": "application/json",
 						"wg-dashboard-apikey": this.server.apiKey
@@ -47,7 +47,7 @@ export default {
 			}
 		},
 		async connect(){
-			await fetch(`${this.server.host}/api/authenticate`, {
+			await fetch(`${this.server.host}${apiUrl}/authenticate`, {
 				headers: {
 					"content-type": "application/json",
 					"wg-dashboard-apikey": this.server.apiKey

@@ -9,7 +9,7 @@ export const wgdashboardStore = defineStore('WGDashboardStore', {
 	}),
 	actions: {
 		async getDashboardConfiguration(){
-			await fetchGet("/api/getDashboardConfiguration", {}, (res) => {
+			await fetchGet(`${apiUrl}/getDashboardConfiguration`, {}, (res) => {
 				console.log(res.status)
 				if (res.status)  this.DashboardConfiguration = res.data
 			})

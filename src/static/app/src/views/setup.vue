@@ -32,7 +32,7 @@ export default {
 	methods: {
 		submit(){
 			this.loading = true
-			fetchPost("/api/Welcome_Finish", this.setup, (res) => {
+			fetchPost(`${apiUrl}/Welcome_Finish`, this.setup, (res) => {
 				if (res.status){
 					this.done = true;
 					this.$router.push('/2FASetup')

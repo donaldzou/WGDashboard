@@ -8,7 +8,7 @@ export default {
 	async setup(){
 		const store = DashboardConfigurationStore();
 		let l = ""
-		await fetchGet("/api/Welcome_GetTotpLink", {}, (res => {
+		await fetchGet(`${apiUrl}/Welcome_GetTotpLink`, {}, (res => {
 			if (res.status) l = res.data;
 		}));
 		return {l, store}
@@ -37,7 +37,7 @@ export default {
 			if (newVal.length === 6){
 				console.log(newVal)
 				if (/[0-9]{6}/.test(newVal)){
-					fetchPost("/api/Welcome_VerifyTotpLink", {
+					fetchPost(`{apiUrl}/Welcome_VerifyTotpLink`, {
 						totp: newVal
 					}, (res) => {
 						if (res.status){

@@ -17,9 +17,11 @@ import Traceroute from "@/views/traceroute.vue";
 import Totp from "@/components/setupComponent/totp.vue";
 import Share from "@/views/share.vue";
 
+const apiUrl = window.config?.apiUrl || '/api';
+
 const checkAuth = async () => {
   let result = false
-  await fetchGet("/api/validateAuthentication", {}, (res) => {
+  await fetchGet(`${apiUrl}/validateAuthentication`, {}, (res) => {
     result = res.status
   });
   return result;

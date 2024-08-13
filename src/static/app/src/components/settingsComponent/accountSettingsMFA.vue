@@ -20,12 +20,12 @@ export default {
 	},
 	methods: {
 		async resetMFA(){
-			await fetchPost("/api/updateDashboardConfigurationItem", {
+			await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 				section: "Account",
 				key: "totp_verified",
 				value: "false"
 			}, async (res) => {
-				await fetchPost("/api/updateDashboardConfigurationItem", {
+				await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 					section: "Account",
 					key: "enable_totp",
 					value: "false"

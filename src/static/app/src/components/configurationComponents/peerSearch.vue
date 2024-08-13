@@ -47,7 +47,7 @@ export default {
 			}
 		},
 		updateSort(sort){
-			fetchPost("/api/updateDashboardConfigurationItem", {
+			fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 				section: "Server",
 				key: "dashboard_sort",
 				value: sort
@@ -58,7 +58,7 @@ export default {
 			})
 		},
 		updateRefreshInterval(refreshInterval){
-			fetchPost("/api/updateDashboardConfigurationItem", {
+			fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 				section: "Server",
 				key: "dashboard_refresh_interval",
 				value: refreshInterval
@@ -69,7 +69,7 @@ export default {
 			})
 		},
 		downloadAllPeer(){
-			fetchGet(`/api/downloadAllPeers/${this.configuration.Name}`, {}, (res) => {
+			fetchGet(`${apiUrl}/downloadAllPeers/${this.configuration.Name}`, {}, (res) => {
 				console.log(res);
 				window.wireguard.generateZipFiles(res, this.configuration.Name)
 			})

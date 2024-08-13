@@ -28,7 +28,7 @@ export default {
 		},
 		savePeer(){
 			this.saving = true;
-			fetchPost(`/api/updatePeerSettings/${this.$route.params.id}`, this.data, (res) => {
+			fetchPost(`${apiUrl}/updatePeerSettings/${this.$route.params.id}`, this.data, (res) => {
 				this.saving = false;
 				if (res.status){
 					this.dashboardConfigurationStore.newMessage("Server", "Peer Updated!", "success")
@@ -40,7 +40,7 @@ export default {
 		},
 		resetPeerData(type){
 			this.saving = true
-			fetchPost(`/api/resetPeerData/${this.$route.params.id}`, {
+			fetchPost(`${apiUrl}/resetPeerData/${this.$route.params.id}`, {
 				id: this.data.id,
 				type: type
 			}, (res) => {

@@ -44,7 +44,7 @@ export default {
 		async saveNewConfiguration(){
 			if (this.goodToSubmit){
 				this.loading = true;
-				await fetchPost("/api/addWireguardConfiguration", this.newConfiguration, async (res) => {
+				await fetchPost(`${apiUrl}/addWireguardConfiguration`, this.newConfiguration, async (res) => {
 					if (res.status){
 						this.success = true
 						await this.store.getConfigurations()

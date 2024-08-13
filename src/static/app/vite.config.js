@@ -7,9 +7,12 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
   
-
+ 
   if (mode === 'electron'){
     return {
+      define: {
+        'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || '/api')
+      },
       emptyOutDir: false,
       base: './',
       plugins: [
@@ -34,7 +37,10 @@ export default defineConfig(({mode}) => {
   }
 
   return {
-    base: "/static/app/dist",
+    define: {
+      'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || '/api')
+    },
+    base: "./",
     plugins: [
       vue(),
     ],

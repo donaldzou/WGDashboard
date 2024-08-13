@@ -14,7 +14,7 @@ export default {
 		const theme = ref("");
 		const peerConfiguration = ref("");
 		const blob = ref(new Blob())
-		await fetchGet("/api/getDashboardTheme", {}, (res) => {
+		await fetchGet(`${apiUrl}/getDashboardTheme`, {}, (res) => {
 			theme.value = res.data
 		});
 		
@@ -23,7 +23,7 @@ export default {
 			peerConfiguration.value = undefined
 			loaded.value = true;
 		}else{
-			await fetchGet("/api/sharePeer/get", {
+			await fetchGet(`${apiUrl}/sharePeer/get`, {
 				ShareID: id
 			}, (res) => {
 				if (res.status){

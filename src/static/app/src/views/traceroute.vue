@@ -20,7 +20,7 @@ export default {
 			if (this.ipAddress){
 				this.tracing = true;
 				this.tracerouteResult = undefined
-				fetchGet("/api/traceroute/execute", {
+				fetchGet(`${apiUrl}/traceroute/execute`, {
 					ipAddress: this.ipAddress,
 				}, (res) => {
 					if (res.status){

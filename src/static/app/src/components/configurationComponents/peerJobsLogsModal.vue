@@ -24,7 +24,7 @@ export default {
 	methods: {
 		async fetchLog(){
 			this.dataLoading = true;
-			await fetchGet(`/api/getPeerScheduleJobLogs/${this.configurationInfo.Name}`, {}, (res) => {
+			await fetchGet(`${apiUrl}/getPeerScheduleJobLogs/${this.configurationInfo.Name}`, {}, (res) => {
 				this.data = res.data;
 				this.logFetchTime = dayjs().format("YYYY-MM-DD HH:mm:ss")
 				this.dataLoading = false;

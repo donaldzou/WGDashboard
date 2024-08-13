@@ -21,7 +21,7 @@ export default {
 		return {store}
 	},
 	mounted() {
-		fetchGet("/api/ping/getAllPeersIpAddress", {}, (res)=> {
+		fetchGet(`${apiUrl}/ping/getAllPeersIpAddress`, {}, (res)=> {
 			if (res.status){
 				this.loading = true;
 				this.cips = res.data;
@@ -34,7 +34,7 @@ export default {
 			if (this.selectedIp){
 				this.pinging = true;
 				this.pingResult = undefined
-				fetchGet("/api/ping/execute", {
+				fetchGet(`${apiUrl}/ping/execute`, {
 					ipAddress: this.selectedIp,
 					count: this.count
 				}, (res) => {

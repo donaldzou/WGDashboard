@@ -10,7 +10,7 @@ export default {
 	},
 	methods: {
 		async switchTheme(value){
-			await fetchPost("/api/updateDashboardConfigurationItem", {
+			await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 				section: "Server",
 				key: "dashboard_theme",
 				value: value

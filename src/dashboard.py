@@ -33,6 +33,9 @@ from flask.json.provider import DefaultJSONProvider
 
 DASHBOARD_VERSION = 'v4.0'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
+# Set default URL_PREFIX
+URL_PREFIX = os.getenv('URL_PREFIX', '/')
+
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
     os.mkdir(DB_PATH)
@@ -47,7 +50,7 @@ UPDATE = None
 app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
-cors = CORS(app, resources={r"/api/*": {
+cors = CORS(app, resources={r"{URL_PREFIX}api/*": {
     "origins": "*",
     "methods": "DELETE, POST, GET, OPTIONS",
     "allow_headers": ["Content-Type", "wg-dashboard-apikey"]

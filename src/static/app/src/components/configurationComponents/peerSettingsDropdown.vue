@@ -20,7 +20,7 @@ export default {
 	},
 	methods: {
 		downloadPeer(){
-			fetchGet("/api/downloadPeer/"+this.$route.params.id, {
+			fetchGet(`${apiUrl}/downloadPeer/`+this.$route.params.id, {
 				id: this.Peer.id
 			}, (res) => {
 				if (res.status){
@@ -38,7 +38,7 @@ export default {
 			})
 		},
 		downloadQRCode(){
-			fetchGet("/api/downloadPeer/"+this.$route.params.id, {
+			fetchGet(`${apiUrl}/downloadPeer/`+this.$route.params.id, {
 				id: this.Peer.id
 			}, (res) => {
 				if (res.status){
@@ -50,7 +50,7 @@ export default {
 		},
 		deletePeer(){
 			this.deleteBtnDisabled = true
-			fetchPost(`/api/deletePeers/${this.$route.params.id}`, {
+			fetchPost(`${apiUrl}/deletePeers/${this.$route.params.id}`, {
 				peers: [this.Peer.id]
 			}, (res) => {
 				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")
@@ -60,7 +60,7 @@ export default {
 		},
 		restrictPeer(){
 			this.restrictBtnDisabled = true
-			fetchPost(`/api/restrictPeers/${this.$route.params.id}`, {
+			fetchPost(`${apiUrl}/restrictPeers/${this.$route.params.id}`, {
 				peers: [this.Peer.id]
 			}, (res) => {
 				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")
@@ -70,7 +70,7 @@ export default {
 		},
 		allowAccessPeer(){
 			this.allowAccessBtnDisabled = true
-			fetchPost(`/api/allowAccessPeers/${this.$route.params.id}`, {
+			fetchPost(`${apiUrl}/allowAccessPeers/${this.$route.params.id}`, {
 				peers: [this.Peer.id]
 			}, (res) => {
 				this.dashboardStore.newMessage("Server", res.message, res.status ? "success":"danger")

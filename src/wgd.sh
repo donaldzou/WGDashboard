@@ -7,6 +7,11 @@ app_official_name="WGDashboard"
 venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
 
+# Check if URL_PREFIX is not set or is empty
+if [[ $URL_PREFIX ]]; then
+  script_name="--env SCRIPT_NAME=${URL_PREFIX}"
+fi
+
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
@@ -240,7 +245,7 @@ gunicorn_start () {
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
   _check_and_set_venv
-  sudo "$venv_gunicorn" --config ./gunicorn.conf.py
+  sudo "$venv_gunicorn" --config ./gunicorn.conf.py ${script_name}
   sleep 5
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]

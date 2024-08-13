@@ -32,7 +32,7 @@ export default {
 		async useValidation(){
 			if (Object.values(this.value).find(x => x.length === 0) === undefined){
 				if (this.value.newPassword === this.value.repeatNewPassword){
-					await fetchPost("/api/updateDashboardConfigurationItem", {
+					await fetchPost(`${apiUrl}/updateDashboardConfigurationItem`, {
 						section: "Account",
 						key: this.targetData,
 						value: this.value

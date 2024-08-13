@@ -27,7 +27,7 @@ export default {
 	methods: {
 		submitNewAPIKey(){
 			this.submitting = true;
-			fetchPost('/api/newDashboardAPIKey', this.newKeyData, (res) => {
+			fetchPost(`${apiUrl}/newDashboardAPIKey`, this.newKeyData, (res) => {
 				if (res.status){
 					this.$emit('created', res.data);
 					this.store.newMessage("Server", "New API Key created", "success");
