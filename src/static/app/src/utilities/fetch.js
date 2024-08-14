@@ -19,7 +19,8 @@ const getUrl = (url) => {
 	if (apiKey){
 		return `${apiKey.host}${url}`
 	}
-	return `//${window.location.host}${window.location.pathname}${url}`
+	return window.location.hostname === 'localhost' ? url 
+		: `${window.location.protocol}//${window.location.host}${window.location.pathname}${url}`
 }
 
 export const fetchGet = async (url, params=undefined, callback=undefined) => {
