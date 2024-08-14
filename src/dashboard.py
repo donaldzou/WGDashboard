@@ -20,7 +20,7 @@ import bcrypt
 import ifcfg
 import psutil
 import pyotp
-from flask import Flask, request, render_template, session, g
+from flask import Flask, request, render_template, session, g, Blueprint
 from json import JSONEncoder
 from flask_cors import CORS
 
@@ -44,14 +44,13 @@ WG_CONF_PATH = None
 # Upgrade Required
 UPDATE = None
 # Flask App Configuration
+
 app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
-cors = CORS(app, resources={r"/api/*": {
-    "origins": "*",
-    "methods": "DELETE, POST, GET, OPTIONS",
-    "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
-}})
+
+
+
 
 class ModelEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -139,8 +138,6 @@ class DashboardLogger:
         except Exception as e:
             print(e)
             return False
-        
-        
     
 class PeerJobLogger:
     def __init__(self):
@@ -1028,8 +1025,7 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             return False
         return True
-    
-            
+        
 # Regex Match
 def regex_match(regex, text):
     pattern = re.compile(regex)
@@ -1067,6 +1063,7 @@ class DashboardConfig:
             },
             "Server": {
                 "wg_conf_path": "/etc/wireguard",
+                "app_prefix": "",
                 "app_ip": "0.0.0.0",
                 "app_port": "10086",
                 "auth_req": "true",
@@ -1344,10 +1341,24 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
     return False, None
 
 
+sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+sqldb.row_factory = sqlite3.Row
+cursor = sqldb.cursor()
+
+DashboardConfig = DashboardConfig()
+_, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
+cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
+    "origins": "*",
+    "methods": "DELETE, POST, GET, OPTIONS",
+    "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
+}})
+
 
 '''
 API Routes
 '''
+
+
 
 @app.before_request
 def auth_req():
@@ -1383,12 +1394,16 @@ def auth_req():
             DashboardConfig.APIAccessed = True
         else:
             DashboardConfig.APIAccessed = False
-            if ('/static/' not in request.path and "username" not in session and "/" != request.path
+            if ('/static/' not in request.path and "username" not in session 
+                    and (f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}/" != request.path 
+                         and f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}" != request.path)
                     and "validateAuthentication" not in request.path and "authenticate" not in request.path
                     and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
             ):
+                print(request.path)
+                print(f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}")
                 response = Flask.make_response(app, {
                     "status": False,
                     "message": "Unauthorized access.",
@@ -1398,12 +1413,12 @@ def auth_req():
                 response.status_code = 401
                 return response
 
-@app.route('/api/handshake', methods=["GET", "OPTIONS"])
+@app.route(f'{APP_PREFIX}/api/handshake', methods=["GET", "OPTIONS"])
 def API_ValidateAPIKey():
     return ResponseObject(True)
 
 
-@app.route('/api/validateAuthentication', methods=["GET"])
+@app.route(f'{APP_PREFIX}/api/validateAuthentication', methods=["GET"])
 def API_ValidateAuthentication():
     token = request.cookies.get("authToken") + ""
     if token == "" or "username" not in session or session["username"] != token:
@@ -1411,7 +1426,7 @@ def API_ValidateAuthentication():
     return ResponseObject(True)
 
 
-@app.route('/api/authenticate', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/authenticate', methods=['POST'])
 def API_AuthenticateLogin():
     data = request.get_json()
     if DashboardConfig.APIAccessed:
@@ -1452,20 +1467,20 @@ def API_AuthenticateLogin():
         return ResponseObject(False, "Sorry, your username or password is incorrect.")
 
 
-@app.route('/api/signout')
+@app.route(f'{APP_PREFIX}/api/signout')
 def API_SignOut():
     resp = ResponseObject(True, "")
     resp.delete_cookie("authToken")
     return resp
 
 
-@app.route('/api/getWireguardConfigurations', methods=["GET"])
+@app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
     # WireguardConfigurations = _getConfigurationList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 
-@app.route('/api/addWireguardConfiguration', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/addWireguardConfiguration', methods=["POST"])
 def API_addWireguardConfiguration():
     data = request.get_json()
     keys = [
@@ -1508,7 +1523,7 @@ def API_addWireguardConfiguration():
     return ResponseObject()
 
 
-@app.route('/api/toggleWireguardConfiguration/')
+@app.route(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
 def API_toggleWireguardConfiguration():
     configurationName = request.args.get('configurationName')
 
@@ -1521,12 +1536,12 @@ def API_toggleWireguardConfiguration():
     return ResponseObject(toggleStatus, msg, WireguardConfigurations[configurationName].Status)
 
 
-@app.route('/api/getDashboardConfiguration', methods=["GET"])
+@app.route(f'{APP_PREFIX}/api/getDashboardConfiguration', methods=["GET"])
 def API_getDashboardConfiguration():
     return ResponseObject(data=DashboardConfig.toJson())
 
 
-@app.route('/api/updateDashboardConfiguration', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/updateDashboardConfiguration', methods=["POST"])
 def API_updateDashboardConfiguration():
     data = request.get_json()
     for section in data['DashboardConfiguration'].keys():
@@ -1536,7 +1551,7 @@ def API_updateDashboardConfiguration():
     return ResponseObject()
 
 
-@app.route('/api/updateDashboardConfigurationItem', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/updateDashboardConfigurationItem', methods=["POST"])
 def API_updateDashboardConfigurationItem():
     data = request.get_json()
     if "section" not in data.keys() or "key" not in data.keys() or "value" not in data.keys():
@@ -1550,13 +1565,13 @@ def API_updateDashboardConfigurationItem():
 
     return ResponseObject()
 
-@app.route('/api/getDashboardAPIKeys', methods=['GET'])
+@app.route(f'{APP_PREFIX}/api/getDashboardAPIKeys', methods=['GET'])
 def API_getDashboardAPIKeys():
     if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
         return ResponseObject(data=DashboardConfig.DashboardAPIKeys)
     return ResponseObject(False, "Dashboard API Keys function is disbaled")
 
-@app.route('/api/newDashboardAPIKey', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/newDashboardAPIKey', methods=['POST'])
 def API_newDashboardAPIKey():
     data = request.get_json()
     if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
@@ -1571,7 +1586,7 @@ def API_newDashboardAPIKey():
             return ResponseObject(False, str(e))
     return ResponseObject(False, "Dashboard API Keys function is disbaled")
 
-@app.route('/api/deleteDashboardAPIKey', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/deleteDashboardAPIKey', methods=['POST'])
 def API_deleteDashboardAPIKey():
     data = request.get_json()
     if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
@@ -1581,7 +1596,7 @@ def API_deleteDashboardAPIKey():
     return ResponseObject(False, "Dashboard API Keys function is disbaled")
     
 
-@app.route('/api/updatePeerSettings/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/updatePeerSettings/<configName>', methods=['POST'])
 def API_updatePeerSettings(configName):
     data = request.get_json()
     id = data['id']
@@ -1601,7 +1616,7 @@ def API_updatePeerSettings(configName):
                                    allowed_ip, endpoint_allowed_ip, mtu, keepalive)
     return ResponseObject(False, "Peer does not exist")
 
-@app.route('/api/resetPeerData/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/resetPeerData/<configName>', methods=['POST'])
 def API_resetPeerData(configName):
     data = request.get_json()
     id = data['id']
@@ -1616,7 +1631,7 @@ def API_resetPeerData(configName):
     
 
 
-@app.route('/api/deletePeers/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/deletePeers/<configName>', methods=['POST'])
 def API_deletePeers(configName: str) -> ResponseObject:
     data = request.get_json()
     peers = data['peers']
@@ -1629,7 +1644,7 @@ def API_deletePeers(configName: str) -> ResponseObject:
     return ResponseObject(False, "Configuration does not exist")
 
 
-@app.route('/api/restrictPeers/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/restrictPeers/<configName>', methods=['POST'])
 def API_restrictPeers(configName: str) -> ResponseObject:
     data = request.get_json()
     peers = data['peers']
@@ -1640,7 +1655,7 @@ def API_restrictPeers(configName: str) -> ResponseObject:
         return configuration.restrictPeers(peers)
     return ResponseObject(False, "Configuration does not exist")
 
-@app.route('/api/sharePeer/create', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/sharePeer/create', methods=['POST'])
 def API_sharePeer_create():
     data: dict[str, str] = request.get_json()
     Configuration = data.get('Configuration')
@@ -1656,7 +1671,7 @@ def API_sharePeer_create():
         return ResponseObject(status, message)
     return ResponseObject(data=AllPeerShareLinks.getLinkByID(message))
 
-@app.route('/api/sharePeer/update', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/sharePeer/update', methods=['POST'])
 def API_sharePeer_update():
     data: dict[str, str] = request.get_json()
     ShareID: str = data.get("ShareID")
@@ -1675,7 +1690,7 @@ def API_sharePeer_update():
         return ResponseObject(status, message)
     return ResponseObject(data=AllPeerShareLinks.getLinkByID(ShareID))
 
-@app.route('/api/sharePeer/get', methods=['GET'])
+@app.route(f'{APP_PREFIX}/api/sharePeer/get', methods=['GET'])
 def API_sharePeer_get():
     data = request.args
     ShareID = data.get("ShareID")
@@ -1696,7 +1711,7 @@ def API_sharePeer_get():
     
     
 
-@app.route('/api/allowAccessPeers/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/allowAccessPeers/<configName>', methods=['POST'])
 def API_allowAccessPeers(configName: str) -> ResponseObject:
     data = request.get_json()
     peers = data['peers']
@@ -1708,7 +1723,7 @@ def API_allowAccessPeers(configName: str) -> ResponseObject:
     return ResponseObject(False, "Configuration does not exist")
 
 
-@app.route('/api/addPeers/<configName>', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/addPeers/<configName>', methods=['POST'])
 def API_addPeers(configName):
     data = request.get_json()
     bulkAdd = data['bulkAdd']
@@ -1817,7 +1832,7 @@ def API_getAvailableIPs(configName):
     return ResponseObject(status=status, data=ips)
 
 
-@app.route('/api/getWireguardConfigurationInfo', methods=["GET"])
+@app.route(f'{APP_PREFIX}/api/getWireguardConfigurationInfo', methods=["GET"])
 def API_getConfigurationInfo():
     configurationName = request.args.get("configurationName")
     if not configurationName or configurationName not in WireguardConfigurations.keys():
@@ -1829,12 +1844,12 @@ def API_getConfigurationInfo():
     })
 
 
-@app.route('/api/getDashboardTheme')
+@app.route(f'{APP_PREFIX}/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
 
 
-@app.route('/api/savePeerScheduleJob/', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/savePeerScheduleJob/', methods=["POST"])
 def API_savePeerScheduleJob():
     data = request.json
     if "Job" not in data.keys() not in WireguardConfigurations.keys():
@@ -1855,7 +1870,7 @@ def API_savePeerScheduleJob():
     return ResponseObject(s, message=p)
 
 
-@app.route('/api/deletePeerScheduleJob/', methods=['POST'])
+@app.route(f'{APP_PREFIX}/api/deletePeerScheduleJob/', methods=['POST'])
 def API_deletePeerScheduleJob():
     data = request.json
     if "Job" not in data.keys() not in WireguardConfigurations.keys():
@@ -1875,7 +1890,7 @@ def API_deletePeerScheduleJob():
         return ResponseObject(s, data=p)
     return ResponseObject(s, message=p)
 
-@app.route('/api/getPeerScheduleJobLogs/<configName>', methods=['GET'])
+@app.route(f'{APP_PREFIX}/api/getPeerScheduleJobLogs/<configName>', methods=['GET'])
 def API_getPeerScheduleJobLogs(configName):
     if configName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
@@ -1892,7 +1907,7 @@ Tools
 '''
 
 
-@app.route('/api/ping/getAllPeersIpAddress')
+@app.route(f'{APP_PREFIX}/api/ping/getAllPeersIpAddress')
 def API_ping_getAllPeersIpAddress():
     ips = {}
     for c in WireguardConfigurations.values():
@@ -1919,7 +1934,7 @@ def API_ping_getAllPeersIpAddress():
     return ResponseObject(data=ips)
 
 
-@app.route('/api/ping/execute')
+@app.route(f'{APP_PREFIX}/api/ping/execute')
 def API_ping_execute():
     if "ipAddress" in request.args.keys() and "count" in request.args.keys():
         ip = request.args['ipAddress']
@@ -1945,7 +1960,7 @@ def API_ping_execute():
     return ResponseObject(False, "Please provide ipAddress and count")
 
 
-@app.route('/api/traceroute/execute')
+@app.route(f'{APP_PREFIX}/api/traceroute/execute')
 def API_traceroute_execute():
     if "ipAddress" in request.args.keys() and len(request.args.get("ipAddress")) > 0:
         ipAddress = request.args.get('ipAddress')
@@ -1987,13 +2002,13 @@ Sign Up
 '''
 
 
-@app.route('/api/isTotpEnabled')
+@app.route(f'{APP_PREFIX}/api/isTotpEnabled')
 def API_isTotpEnabled():
     return (
         ResponseObject(data=DashboardConfig.GetConfig("Account", "enable_totp")[1] and DashboardConfig.GetConfig("Account", "totp_verified")[1]))
 
 
-@app.route('/api/Welcome_GetTotpLink')
+@app.route(f'{APP_PREFIX}/api/Welcome_GetTotpLink')
 def API_Welcome_GetTotpLink():
     if not DashboardConfig.GetConfig("Account", "totp_verified")[1]:
         DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32())
@@ -2003,7 +2018,7 @@ def API_Welcome_GetTotpLink():
     return ResponseObject(False)
 
 
-@app.route('/api/Welcome_VerifyTotpLink', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/Welcome_VerifyTotpLink', methods=["POST"])
 def API_Welcome_VerifyTotpLink():
     data = request.get_json()
     totp = pyotp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).now()
@@ -2013,7 +2028,7 @@ def API_Welcome_VerifyTotpLink():
     return ResponseObject(totp == data['totp'])
 
 
-@app.route('/api/Welcome_Finish', methods=["POST"])
+@app.route(f'{APP_PREFIX}/api/Welcome_Finish', methods=["POST"])
 def API_Welcome_Finish():
     data = request.get_json()
     if DashboardConfig.GetConfig("Other", "welcome_session")[1]:
@@ -2040,12 +2055,13 @@ def API_Welcome_Finish():
     return ResponseObject()
 
 
-@app.route('/', methods=['GET'])
+@app.route(f'{APP_PREFIX}/', methods=['GET'])
 def index():
     """
     Index page related
     @return: Template
     """
+    print(APP_PREFIX)
     return render_template('index.html')
 
 
@@ -2086,10 +2102,7 @@ if sys.version_info < (3, 10):
 else:
     from typing import ParamSpec
 
-sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-sqldb.row_factory = sqlite3.Row
-cursor = sqldb.cursor()
-DashboardConfig = DashboardConfig()
+
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
 AllPeerJobs: PeerJobs = PeerJobs()
@@ -2099,9 +2112,10 @@ _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
+
+
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 WireguardConfigurations = _getConfigurationList()
-
 
 def startThreads():
     bgThread = threading.Thread(target=backGroundThread)
