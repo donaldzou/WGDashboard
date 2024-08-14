@@ -52,23 +52,23 @@ export default {
 			</h6>
 		</RouterLink>
 		<div class="card-footer d-flex gap-2 flex-column">
-			<div class="d-flex gap-4">
-				<small >
+			<div class="row">
+				<small class="col-6 col-md-3">
 					<i class="bi bi-arrow-down-up me-2"></i>{{c.DataUsage.Total > 0 ? c.DataUsage.Total.toFixed(4) : 0}} GB
 				</small>
-				<small class="text-primary-emphasis">
+				<small class="text-primary-emphasis col-6 col-md-3">
 					<i class="bi bi-arrow-down me-2"></i>{{c.DataUsage.Receive > 0 ? c.DataUsage.Receive.toFixed(4) : 0}} GB
 				</small>
-				<small class="text-success-emphasis">
+				<small class="text-success-emphasis col-6 col-md-3">
 					<i class="bi bi-arrow-up me-2"></i>{{c.DataUsage.Sent > 0 ? c.DataUsage.Sent.toFixed(4) : 0}} GB
 				</small>
-				<small class="ms-auto">
+				<small class="text-md-end col-6 col-md-3">
 					<span class="dot me-2" :class="{active: c.ConnectedPeers > 0}"></span>{{c.ConnectedPeers}} Peers
 				</small>
 			</div>
-			<div class="d-flex align-items-center">
-				<small class="me-2 text-muted">
-					<strong>Public Key</strong>
+			<div class="d-flex align-items-center gap-2">
+				<small class="text-muted">
+					<strong style="word-break: keep-all">Public Key</strong>
 				</small>
 				<small class="mb-0 d-block d-lg-inline-block ">
 					<samp style="line-break: anywhere">{{c.PublicKey}}</samp>

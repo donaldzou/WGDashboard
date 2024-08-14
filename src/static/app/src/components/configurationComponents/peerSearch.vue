@@ -83,7 +83,7 @@ export default {
 
 <template>
 	<div class="mb-3">
-		<div class="d-flex gap-2 z-3">
+		<div class="d-flex gap-2 z-3 peerSearchContainer">
 			<RouterLink
 				to="create"
 				class="text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
@@ -100,6 +100,10 @@ export default {
 				       @keyup="this.debounce()"
 				       v-model="this.searchString">
 			</div>
+			<div class="">
+				
+			</div>
+			
 			<div class="dropdown dropup">
 				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm" 
 				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -174,6 +178,11 @@ export default {
 		filter: blur(0px);
 		transform: translateY(-40px);
 	}
-	
+}
+
+@media screen and (max-width: 768px) {
+	.peerSearchContainer{
+		flex-direction: column;
+	}
 }
 </style>
