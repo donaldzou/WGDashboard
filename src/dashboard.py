@@ -1798,7 +1798,7 @@ def API_addPeers(configName):
     return ResponseObject(False, "Configuration does not exist")
 
 
-@app.route("/api/downloadPeer/<configName>")
+@app.route(f"{APP_PREFIX}/api/downloadPeer/<configName>")
 def API_downloadPeer(configName):
     data = request.args
     if configName not in WireguardConfigurations.keys():
@@ -1810,7 +1810,7 @@ def API_downloadPeer(configName):
     return ResponseObject(data=peer.downloadPeer())
 
 
-@app.route("/api/downloadAllPeers/<configName>")
+@app.route(f"{APP_PREFIX}/api/downloadAllPeers/<configName>")
 def API_downloadAllPeers(configName):
     if configName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration or peer does not exist")
@@ -1826,7 +1826,7 @@ def API_downloadAllPeers(configName):
     return ResponseObject(data=peerData)
 
 
-@app.route("/api/getAvailableIPs/<configName>")
+@app.route(f"{APP_PREFIX}/api/getAvailableIPs/<configName>")
 def API_getAvailableIPs(configName):
     status, ips = _getWireguardConfigurationAvailableIP(configName)
     return ResponseObject(status=status, data=ips)
@@ -2062,7 +2062,7 @@ def index():
     @return: Template
     """
     print(APP_PREFIX)
-    return render_template('index.html')
+    return render_template('index.html', APP_PREFIX=APP_PREFIX)
 
 
 def backGroundThread():
