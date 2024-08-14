@@ -19,6 +19,10 @@ const getUrl = (url) => {
 	if (apiKey){
 		return `${apiKey.host}${url}`
 	}
+	
+	console.log("URL fetching: ", import.meta.env.MODE === 'development' ? url
+		: `${window.location.protocol}//${window.location.host}${window.location.pathname}${url}`)
+	
 	return import.meta.env.MODE === 'development' ? url 
 		: `${window.location.protocol}//${window.location.host}${window.location.pathname}${url}`
 }
