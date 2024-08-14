@@ -121,7 +121,8 @@
 }
 
 [data-bs-theme="dark"].main, 
-#app:has(.main[data-bs-theme="dark"]){
+#app:has(.main[data-bs-theme="dark"]),
+[data-bs-theme="dark"].navbar-container{
     background-color: #1b1e21;
 }
 

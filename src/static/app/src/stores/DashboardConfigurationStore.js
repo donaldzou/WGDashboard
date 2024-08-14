@@ -16,7 +16,8 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			ServerList: {}
 		},
 		ActiveServerConfiguration: undefined,
-		IsElectronApp: false
+		IsElectronApp: false,
+		ShowNavBar: false
 	}),
 	actions: {
 		initCrossServerConfiguration(){

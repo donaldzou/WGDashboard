@@ -31,7 +31,10 @@ const getActiveCrossServer = computed(() => {
 			<small class="ms-auto text-muted" v-if="getActiveCrossServer !== undefined">
 				<i class="bi bi-server me-2"></i>{{getActiveCrossServer.host}}
 			</small>
-			<a role="button"><i class="bi bi-list"></i></a>
+			<a role="button" class="navbarBtn text-body"
+			   @click="store.ShowNavBar = !store.ShowNavBar"
+			   style="line-height: 0; font-size: 2rem">
+				<i class="bi bi-list"></i></a>
 		</div>
 	</nav>
 	<Suspense>
@@ -58,4 +61,12 @@ const getActiveCrossServer = computed(() => {
 	transform: translateY(-20px);
 	opacity: 0;
 }
+
+@media screen and (min-width: 768px) {
+	.navbarBtn{
+		display: none;
+	}
+}
+
+
 </style>

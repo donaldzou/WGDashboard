@@ -19,7 +19,7 @@ const getUrl = (url) => {
 	if (apiKey){
 		return `${apiKey.host}${url}`
 	}
-	return window.location.hostname === 'localhost' ? url 
+	return import.meta.env.MODE === 'development' ? url 
 		: `${window.location.protocol}//${window.location.host}${window.location.pathname}${url}`
 }
 

@@ -32,15 +32,14 @@ export default {
 <template>
 	
 	<div class="mt-5">
-		<div class="container">
-			<div class="d-flex mb-4 ">
-				<h3 class="text-body">
+		<div class="container-md">
+			<div class="d-flex mb-4 configurationListTitle">
+				<h3 class="text-body d-flex">
 					<i class="bi bi-body-text me-2"></i>
-					WireGuard Configurations</h3>
+					<span>WireGuard Configurations</span></h3>
 				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-3">
 					<i class="bi bi-plus-circle-fill me-2"></i>
 					Configuration
-					
 				</RouterLink>
 			</div>
 			<Transition name="fade" mode="out-in">
@@ -60,5 +59,18 @@ export default {
 </template>
 
 <style scoped>
-
+@media screen and (max-width: 768px) {
+	.configurationListTitle{
+		flex-direction: column;
+		gap: 0.5rem;
+		
+		h3 span{
+			margin-left: auto !important;
+		}
+		
+		.btn{
+			width: 100%;
+		}
+	}
+}
 </style>

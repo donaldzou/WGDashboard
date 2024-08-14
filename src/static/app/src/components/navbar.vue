@@ -14,7 +14,10 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container bg-body" style="height: calc(-50px + 100vh);">
+	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container"
+	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
+	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
+	     style="height: calc(-50px + 100vh);">
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky pt-3">
 				<ul class="nav flex-column px-2">
@@ -79,6 +82,28 @@ export default {
 	.navbar-container{
 		position: absolute;
 		z-index: 1000;
+		animation-duration: 0.4s;
+		animation-fill-mode: both;
+		display: none;
+		animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
+	}
+	.navbar-container.active{
+		animation-direction: normal;
+		display: block !important;
+		animation-name: zoomInFade
+	}
+}
+
+@keyframes zoomInFade {
+	0%{
+		opacity: 0;
+		transform: translateY(60px);
+		filter: blur(3px);
+	}
+	100%{
+		opacity: 1;
+		transform: translateY(0px);
+		filter: blur(0px);
 	}
 }
 </style>

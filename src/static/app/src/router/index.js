@@ -136,6 +136,7 @@ router.beforeEach(async (to, from, next) => {
   }else{
     document.title = "WGDashboard"
   }
+  dashboardConfigurationStore.ShowNavBar = false;
   
   if (to.meta.requiresAuth){
     if (!dashboardConfigurationStore.getActiveCrossServer()){
@@ -159,7 +160,6 @@ router.beforeEach(async (to, from, next) => {
       next()
     }
   }else {
-    
     next();
   }
 });
