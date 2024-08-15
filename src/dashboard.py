@@ -578,23 +578,32 @@ class WireguardConfiguration:
                         if i == "[Peer]":
                             pCounter += 1
                             p.append({})
+                            p[pCounter]["name"] = ""
                         else:
                             if len(i) > 0:
                                 split = re.split(r'\s*=\s*', i, 1)
                                 if len(split) == 2:
                                     p[pCounter][split[0]] = split[1]
+                    
+                    if regex_match("#Name# = (.*)", i):
+                        split = re.split(r'\s*=\s*', i, 1)
+                        print(split)
+                        if len(split) == 2:
+                            p[pCounter]["name"] = split[1]
+                
                 for i in p:
                     if "PublicKey" in i.keys():
                         checkIfExist = sqldb.cursor().execute("SELECT * FROM '%s' WHERE id = ?" % self.Name,
                                                       ((i['PublicKey']),)).fetchone()
                         if checkIfExist is None:
+                            print(i)
                             newPeer = {
                                 "id": i['PublicKey'],
                                 "private_key": "",
                                 "DNS": DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
                                 "endpoint_allowed_ip": DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
                                     1],
-                                "name": "",
+                                "name": i.get("name"),
                                 "total_receive": 0,
                                 "total_sent": 0,
                                 "total_data": 0,
@@ -611,6 +620,7 @@ class WireguardConfiguration:
                                 "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
                                 "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
                             }
+                            print(newPeer)
                             sqldb.cursor().execute(
                                 """
                                 INSERT INTO '%s'
@@ -626,8 +636,8 @@ class WireguardConfiguration:
                                            (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
                             sqldb.commit()
                             self.Peers.append(Peer(checkIfExist, self))
-            except ValueError:
-                pass
+            except Exception as e:
+                print(f"[WGDashboard] {self.Name} Error: {str(e)}")
             
     def addPeers(self, peers: list):
         for p in peers:
@@ -1626,8 +1636,6 @@ def API_resetPeerData(configName):
     if not foundPeer:
         return ResponseObject(False, "Configuration/Peer does not exist")
     return ResponseObject(status=peer.resetDataUsage(type))
-    
-
 
 @app.route(f'{APP_PREFIX}/api/deletePeers/<configName>', methods=['POST'])
 def API_deletePeers(configName: str) -> ResponseObject:
@@ -1866,7 +1874,6 @@ def API_savePeerScheduleJob():
     if s:
         return ResponseObject(s, data=p)
     return ResponseObject(s, message=p)
-
 
 @app.route(f'{APP_PREFIX}/api/deletePeerScheduleJob/', methods=['POST'])
 def API_deletePeerScheduleJob():
