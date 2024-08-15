@@ -19,7 +19,7 @@
 
 - 🎉  **New Features**
   - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
-  - **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the Docker section below.
+  - **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the [Docker](#-docker-solutions) section below.
   - **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
   - **Share Peer's QR Code with Public Link**: You can share a peer's QR code and `.conf` file without the need to loging in.
   - **WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the API Documentation.
