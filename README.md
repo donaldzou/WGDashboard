@@ -40,6 +40,8 @@
   - Rewrote the backend into a REST API structure
   - Improved SQL query efficient
   - Removed all templates, except for `index.html` where it will load the Vue.js app.
+  - Parsing names in `.conf`
+  - Minimized the need to read `.conf`, only when any `.conf` is modified
 
 - **🥘  New Experimental Features**
   - **Cross-Server Access**: Now you can access other servers that installed `v4` of WGDashboard through API key.
