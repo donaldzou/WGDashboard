@@ -1083,6 +1083,9 @@ class DashboardConfig:
             },
             "Other": {
                 "welcome_session": "true"
+            },
+            "Database":{
+                "type": "sqlite"
             }
         }
 
@@ -1422,7 +1425,7 @@ def API_ValidateAPIKey():
 def API_ValidateAuthentication():
     token = request.cookies.get("authToken") + ""
     if token == "" or "username" not in session or session["username"] != token:
-        return ResponseObject(False, "Invalid authentication")
+        return ResponseObject(False, "Invalid authentication.")
     return ResponseObject(True)
 
 
@@ -1434,17 +1437,13 @@ def API_AuthenticateLogin():
         authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
-        print(data['host'])
-        resp.set_cookie("authToken", authToken, domain=data['host'])
+        resp.set_cookie("authToken", authToken)
         session.permanent = True
         return resp
-    
-    
     valid = bcrypt.checkpw(data['password'].encode("utf-8"),
                            DashboardConfig.GetConfig("Account", "password")[1].encode("utf-8"))
     totpEnabled = DashboardConfig.GetConfig("Account", "enable_totp")[1]
     totpValid = False
-
     if totpEnabled:
         totpValid = pyotp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).now() == data['totp']
 
@@ -1459,7 +1458,6 @@ def API_AuthenticateLogin():
         session.permanent = True
         DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"Login success: {data['username']}")
         return resp
-
     DashboardLogger.log(str(request.url), str(request.remote_addr), Message=f"Login failed: {data['username']}")
     if totpEnabled:
         return ResponseObject(False, "Sorry, your username, password or OTP is incorrect.")
@@ -1467,7 +1465,7 @@ def API_AuthenticateLogin():
         return ResponseObject(False, "Sorry, your username or password is incorrect.")
 
 
-@app.route(f'{APP_PREFIX}/api/signout')
+@app.get(f'{APP_PREFIX}/api/signout')
 def API_SignOut():
     resp = ResponseObject(True, "")
     resp.delete_cookie("authToken")
@@ -2090,18 +2088,10 @@ def peerJobScheduleBackgroundThread():
             AllPeerJobs.runJob()
             time.sleep(180)
 
-
 def gunicornConfig():
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
-
-import sys
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
-else:
-    from typing import ParamSpec
-
 
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
