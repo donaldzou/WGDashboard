@@ -20,8 +20,8 @@ const getUrl = (url) => {
 		return `${apiKey.host}${url}`
 	}
 	
-	console.log("URL fetching: ", import.meta.env.MODE === 'development' ? url
-		: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`)
+	// console.log("URL fetching: ", import.meta.env.MODE === 'development' ? url
+	// 	: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`)
 	return import.meta.env.MODE === 'development' ? url 
 		: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`
 }

@@ -60,7 +60,7 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5 text-body">
+	<div class="mt-md-5 mt-3 text-body">
 		<div class="container">
 			<h3 class="mb-3 text-body">Ping</h3>
 			<div class="row">

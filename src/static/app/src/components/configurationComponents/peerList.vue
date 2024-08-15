@@ -402,7 +402,7 @@ export default {
 </script>
 
 <template>
-	<div v-if="!this.loading">
+	<div v-if="!this.loading" class="container-md">
 		<div class="d-flex align-items-center">
 			<div>
 				<small CLASS="text-muted">CONFIGURATION</small>
@@ -545,10 +545,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="mb-4">
-<!--			<div class="d-flex align-items-center gap-3 mb-2">-->
-<!--				<h3>Peers</h3>-->
-<!--			</div>-->
+		<div class="mb-3">
 			<PeerSearch
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"

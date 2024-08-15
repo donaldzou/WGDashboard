@@ -17,11 +17,11 @@
 
 ## 📣 What's New: v4.0
 
-> I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :) Also, huge thanks who sponsored me GitHub :heart:
-
 - 🎉  **New Features**
   - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
+  - **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the Docker section below.
   - **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
+  - **Share Peer's QR Code with Public Link**: You can share a peer's QR code and `.conf` file without the need to loging in.
   - **API Key for WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the API Documentation below.
   - **Logging**: Dashboard will now log all activity on the dashboard and API requests.
   - **Time-Based One-Time Password (TOTP)**: You can enable this function to add one more layer of security, and generate the TOTP with your choice of authenticator.
@@ -36,9 +36,14 @@
   - Improved SQL query efficient
   - Removed all templates, except for `index.html` where it will load the Vue.js app.
 
+- **🥘  New Experimental Features**
+  - **Cross-Server Access**: Now you can access other servers that installed `v4` of WGDashboard through API key.
+  - **Desktop App**: Thanks to **Cross-Server Access**, you can now download an ElectronJS based desktop app of WGDashboard, and use that to access WGDashboard on different servers.
+  - > For more information, please scroll down to [🥘 Experimental Functions](#-experimental-functions)
 
-
-**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard**
+> I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :)
+> Also, huge thanks to who contributed to this major release: 
+> @bolgovrussia, @eduardorosabales, @Profik, @airgapper, @tokon2000, @bkeenke, @kontorskiy777, @bugsse, @Johnnykson, @DaanSelen, @shuricksumy and many others!
 
 <hr>
 
@@ -70,7 +75,7 @@
   - Edit peer information
   - Delete peers with ease
   - Restrict peers
-  - Generate QR Code and `.conf` file for peers
+  - Generate QR Code and `.conf` file for peers, share it through a public link
   - Schedule jobs to delete / restrict peer when conditions are met
 - View real time peer status
 - Testing tool: Ping and Traceroute to your peer
@@ -79,7 +84,7 @@
 ## 📝 Requirement
 
 - Recommend the following OS, tested by our beloved users:
-  - [x] Ubuntu 18.04.1 LTS, 20.04.1 LTS, 22.04.4 LTS [@Me]
+  - [x] Ubuntu 18.04.1 LTS, 20.04.1 LTS, 22.04.4 LTS, 24.02 LTS, Fedora 38 [@Me]
   - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
   - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
   - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
@@ -193,40 +198,33 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
    ```ini
    [Unit]
-   After=network.service
+   After=syslog.target network-online.target
+   Wants=wg-quick.target
+   ConditionPathIsDirectory=/etc/wireguard
    
    [Service]
-   WorkingDirectory=<your dashboard directory full path here>
-   ExecStart=/usr/bin/python3 <your dashboard directory full path here>/dashboard.py
+   Type=forking
+   PIDFile=<absolute_path_of_wgdashboard_src>/gunicorn.pid
+   WorkingDirectory=<absolute_path_of_wgdashboard_src>
+   ExecStart=<absolute_path_of_wgdashboard_src>/wgd.sh start
+   ExecStop=<absolute_path_of_wgdashboard_src>/wgd.sh stop
+   ExecReload=<absolute_path_of_wgdashboard_src>/wgd.sh restart
+   TimeoutSec=120
+   PrivateTmp=yes
    Restart=always
    
-   
    [Install]
-   WantedBy=default.target
+   WantedBy=multi-user.target
    ```
 
-   Now, we need to replace both `<your dashboard directory full path here>` to the one you just copied from step 2. After doing this, the file will become something like this, your file might be different:
-
-   ```ini
-   [Unit]
-   After=netword.service
-   
-   [Service]
-   WorkingDirectory=/root/wgdashboard/src
-   ExecStart=/usr/bin/python3 /root/wgdashboard/src/dashboard.py
-   Restart=always
-   
-   
-   [Install]
-   WantedBy=default.target
-   ```
+   Now, we need to replace all `<absolute_path_of_wgdashboard_src>` to the one you just copied from step 2. After doing this, the file will become something like this, your file might be different:
 
    **Be aware that after the value of `WorkingDirectory`, it does not have  a `/` (slash).** And then save the file after you edited it
 
 4. Copy the service file to systemd folder
 
    ```bash
-   $ cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
+   $ sudo cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
    ```
 
    To make sure you copy the file successfully, you can use this command `cat /etc/systemd/system/wg-dashboard.service` to see if it will output the file you just edited.
@@ -245,28 +243,31 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    ```bash
    $ sudo systemctl status wg-dashboard.service
    ```
-
    And you should see something like this
 
    ```shell
-   ● wg-dashboard.service
-        Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
-        Active: active (running) since Tue 2021-08-03 22:31:26 UTC; 4s ago
-      Main PID: 6602 (python3)
-         Tasks: 1 (limit: 453)
-        Memory: 26.1M
-        CGroup: /system.slice/wg-dashboard.service
-                └─6602 /usr/bin/python3 /root/wgdashboard/src/dashboard.py
-   
-   Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app1 "WGDashboard" (lazy loading)
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Environment: production
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    Use a production WSGI server instead.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Debug mode: off
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on all addresses.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on http://0.0.0.0:10086/ (Press CTRL+C to quit)
+    ● wg-dashboard.service
+    Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
+    Active: active (running) since Wed 2024-08-14 22:21:47 EDT; 55s ago
+    Process: 494968 ExecStart=/home/donaldzou/Wireguard-Dashboard/src/wgd.sh start (code=exited, status=0/SUCCESS)
+    Main PID: 495005 (gunicorn)
+    Tasks: 5 (limit: 4523)
+    Memory: 36.8M
+    CPU: 789ms
+    CGroup: /system.slice/wg-dashboard.service
+    ├─495005 /home/donaldzou/Wireguard-Dashboard/src/venv/bin/python3 ./venv/bin/gunicorn --config ./gunicorn.conf.py
+    └─495007 /home/donaldzou/Wireguard-Dashboard/src/venv/bin/python3 ./venv/bin/gunicorn --config ./gunicorn.conf.py
+    
+    Aug 14 22:21:40 wg sudo[494978]:     root : PWD=/home/donaldzou/Wireguard-Dashboard/src ; USER=root ; COMMAND=./venv/bin/gunicorn --config ./gunicorn.conf.py
+    Aug 14 22:21:40 wg sudo[494978]: pam_unix(sudo:session): session opened for user root(uid=0) by (uid=0)
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] WGDashboard w/ Gunicorn will be running on 0.0.0.0:10086
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] Access log file is at ./log/access_2024_08_14_22_21_40.log
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] Error log file is at ./log/error_2024_08_14_22_21_40.log
+    Aug 14 22:21:40 wg sudo[494978]: pam_unix(sudo:session): session closed for user root
+    Aug 14 22:21:45 wg wgd.sh[494968]: [WGDashboard] Checking if WGDashboard w/ Gunicorn started successfully
+    Aug 14 22:21:47 wg wgd.sh[494968]: [WGDashboard] WGDashboard w/ Gunicorn started successfully
+    Aug 14 22:21:47 wg wgd.sh[494968]: ------------------------------------------------------------
+    Aug 14 22:21:47 wg systemd[1]: Started wg-dashboard.service.
    ```
 
    If you see `Active:` followed by `active (running) since...` then it means it run correctly. 
@@ -339,29 +340,12 @@ Endpoint = 0.0.0.0:51820
 
 ## ❓ How to update the dashboard?
 
-#### **Please note for user who is using `v2.3.1` or below**
+#### **Please note for users who are using `v3 - v3.0.6` want to update to `v4.0`**
+- Although theoretically updating through `wgd.sh` should work, but I still suggest you to update the dashboard manually.
 
-- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
+#### **Please note for users who are using `v2.3.1` or below**
 
-<hr>
-
-#### Update Method 1 (For `v3.0` or above)
-
-1. Change your directory to `wgdashboard/src`
-
-   ```bash
-   cd wgdashboard/src
-   ```
-
-2. Update the dashboard with the following
-
-   ```bash
-   ./wgd.sh update
-   ```
-
-   > If this doesn't work, please use the method below. Sorry about that :(
-
-#### Update Method 2
+- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive:。 But I guess this would be a great start for future development :sunglasses:.
 
 
 1. Change your directory to `wgdashboard` 
@@ -372,26 +356,24 @@ Endpoint = 0.0.0.0:51820
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0.5 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v4.0 --force
     ```
 
 3. Install
 
    ```shell
-   ./wgd.sh install
+   sudo ./wgd.sh install
    ```
 
-
-
-Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
+Starting with `v3.0`, you can simply do `sudo ./wgd.sh update` !! (I hope)
 
 ## 🥘 Experimental Functions
 
-#### Progressive Web App (PWA) for WGDashboard
+### Cross-Server Access
 
-- With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
+Starting with `v4.0`, you can access WGDashboards on other server through one WGDashboard with API Keys
 
-<img src="img/PWA.gif"/>
+
 
 
 

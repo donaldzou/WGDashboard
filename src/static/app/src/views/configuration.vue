@@ -5,7 +5,7 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5 text-body">
+	<div class="mt-md-5 mt-3 text-body">
 		<RouterView v-slot="{ Component, route }">
 			<Transition name="fade2" mode="out-in">
 				<Suspense>

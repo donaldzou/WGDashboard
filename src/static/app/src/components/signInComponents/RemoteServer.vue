@@ -18,8 +18,9 @@ export default {
 	methods: {
 		async handshake(){
 			this.active = false;
-			this.refreshing = true;
 			if (this.server.host && this.server.apiKey){
+				
+				this.refreshing = true;
 				this.startTime = undefined;
 				this.endTime = undefined;
 				this.startTime = dayjs()

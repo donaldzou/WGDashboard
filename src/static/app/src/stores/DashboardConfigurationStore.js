@@ -26,7 +26,7 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 				this.ActiveServerConfiguration = localStorage.getItem("ActiveCrossServerConfiguration");
 			}
 			if (currentConfiguration === null){
-				localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
+				window.localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 			}else{
 				this.CrossServerConfiguration = JSON.parse(currentConfiguration)
 			}
@@ -34,7 +34,7 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			
 		},
 		syncCrossServerConfiguration(){
-			localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
+			window.localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 		},
 		addCrossServerConfiguration(){
 			this.CrossServerConfiguration.ServerList[v4().toString()] = {host: "", apiKey: "", active: false}

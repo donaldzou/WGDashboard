@@ -64,13 +64,13 @@ _determineOS(){
 _installPython(){
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3; printf "\n\n"; } &>> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 		centos|fedora|redhat)
 			if command -v dnf &> /dev/null; then
-				{ sudo dnf install -y python3; printf "\n\n"; } >> ./log/install.txt
+				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
 			else
-				{ sudo yum install -y python3; printf "\n\n"; } >> ./log/install.txt
+				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
 			fi
 		;;
 #		arch)
@@ -304,7 +304,6 @@ update_wgd() {
     printf "%s\n" "$dashes"
   fi
 }
-
 
 if [ "$#" != 1 ];
   then

@@ -39,8 +39,8 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5">
-		<div class="container">
+	<div class="mt-md-5 mt-3">
+		<div class="container-md">
 			<h3 class="mb-3 text-body">Settings</h3>
 			<DashboardTheme></DashboardTheme>
 			<div class="card mb-4 shadow rounded-3">

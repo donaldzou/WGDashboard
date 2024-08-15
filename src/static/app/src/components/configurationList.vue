@@ -31,7 +31,7 @@ export default {
 
 <template>
 	
-	<div class="mt-5">
+	<div class="mt-md-5 mt-3">
 		<div class="container-md">
 			<div class="d-flex mb-4 configurationListTitle">
 				<h3 class="text-body d-flex">

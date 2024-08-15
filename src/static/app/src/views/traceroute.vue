@@ -38,8 +38,8 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5 text-body">
-		<div class="container">
+	<div class="mt-md-5 mt-3 text-body">
+		<div class="container-md">
 			<h3 class="mb-3 text-body">Traceroute</h3>
 			<div class="row">
 				<div class="col-sm-4 d-flex gap-2 flex-column">

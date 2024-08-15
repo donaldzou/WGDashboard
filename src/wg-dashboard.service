@@ -5,11 +5,11 @@ ConditionPathIsDirectory=/etc/wireguard
 
 [Service]
 Type=forking
-PIDFile=/opt/wgdashboard/src/gunicorn.pid
-WorkingDirectory=/opt/wgdashboard/src
-ExecStart=/opt/wgdashboard/src/wgd.sh start
-ExecStop=/opt/wgdashboard/src/wgd.sh stop
-ExecReload=/opt/wgdashboard/src/wgd.sh restart
+PIDFile=<absolute_path_of_wgdashboard_src>/gunicorn.pid
+WorkingDirectory=<absolute_path_of_wgdashboard_src>
+ExecStart=<absolute_path_of_wgdashboard_src>/wgd.sh start
+ExecStop=<absolute_path_of_wgdashboard_src>/wgd.sh stop
+ExecReload=<absolute_path_of_wgdashboard_src>/wgd.sh restart
 TimeoutSec=120
 PrivateTmp=yes
 Restart=always

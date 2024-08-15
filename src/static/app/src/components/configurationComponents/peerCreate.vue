@@ -108,7 +108,6 @@ export default {
 				</h3>
 				<h3 class="text-body mb-0">Add Peers</h3>
 			</RouterLink>
-			
 		</div>
 		<div class="d-flex flex-column gap-2">
 			<BulkAdd :saving="saving" :data="this.data" :availableIp="this.availableIp"></BulkAdd>

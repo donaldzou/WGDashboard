@@ -30,7 +30,9 @@ export default {
 				'60000': '1 Minutes'
 			},
 			searchString: "",
-			searchStringTimeout: undefined
+			searchStringTimeout: undefined,
+			showDisplaySettings: false,
+			showMoreSettings: false
 		}
 	},
 	methods: {
@@ -93,68 +95,98 @@ export default {
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
-			<div class="flex-grow-1">
+			<div class="flex-grow-1 mt-3 mt-md-0">
 				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-100"
 				       placeholder="Search..."
 				       id="searchPeers"
 				       @keyup="this.debounce()"
 				       v-model="this.searchString">
 			</div>
-			<div class="">
-				
-			</div>
-			
-			<div class="dropdown dropup">
-				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm" 
-				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<i class="bi bi-filter-circle me-2"></i>
-					Display
-				</button>
-				<ul class="dropdown-menu mt-2 shadow rounded-3 animate__animated animation__fadeInDropdown dropdown-menu-end">
-					<li>
-						<small class="dropdown-header">Sort by</small>
-					</li>
-					<li v-for="(value, key) in this.sort">
-						<a class="dropdown-item d-flex align-items-center" role="button" @click="this.updateSort(key)">
-							<small class="me-auto">{{value}}</small>
-							<i class="bi bi-check text-primary"
-							   v-if="store.Configuration.Server.dashboard_sort === key"></i>
-						</a>
-					</li>
-					<li><hr class="dropdown-divider"></li>
-					<li>
-						<small class="dropdown-header">Refresh Interval</small>
-					</li>
-					<li v-for="(value, key) in this.interval">
-						<a class="dropdown-item d-flex" role="button" @click="updateRefreshInterval(key)">
-							<small class="me-auto">{{value}}</small>
-							<i class="bi bi-check text-primary"
-							   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
-						</a>
-					</li>
-				</ul>
-			</div>
-			<div class="dropdown dropup">
-				<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<i class="bi bi-three-dots"></i>
-				</button>
-				<ul class="dropdown-menu shadow mt-2 rounded-3 animate__animated animation__fadeInDropdown">
-					<li>
-						<h6 class="dropdown-header">Peer Jobs</h6>
-					</li>
-					<li>
-						<a role="button" class="dropdown-item" @click="this.$emit('jobsAll')">
-							Active Jobs
-						</a>
-					</li>
-					<li>
-						<a role="button" class="dropdown-item" @click="this.$emit('jobLogs')">
-							Logs
-						</a>
-					</li>
-				</ul>
-			</div>
+			<button 
+				@click="this.showDisplaySettings = true"
+				class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+			        type="button" aria-expanded="false">
+				<i class="bi bi-filter-circle me-2"></i>
+				Display
+			</button>
+			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+			        @click="this.showMoreSettings = true"
+			        type="button" aria-expanded="false">
+				<i class="bi bi-three-dots"></i>
+			</button>
+			<Transition name="zoom">
+				<div
+					v-if="this.showDisplaySettings"
+					class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll displayModal">
+					<div class="container-md d-flex h-100 w-100">
+						<div class="m-auto modal-dialog-centered dashboardModal">
+							<div class="card rounded-3 shadow w-100">
+								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
+									<h4 class="mb-0 fw-normal">Display
+									</h4>
+									<button type="button" class="btn-close ms-auto" @click="this.showDisplaySettings = false"></button>
+								</div>
+								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>Sort by</small></p>
+										<div class="list-group">
+											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" role="button" @click="this.updateSort(key)">
+												<span class="me-auto">{{value}}</span>
+												<i class="bi bi-check text-primary"
+												   v-if="store.Configuration.Server.dashboard_sort === key"></i>
+											</a>
+										</div>
+									</div>
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>Refresh interval</small></p>
+										<div class="list-group">
+											<a v-for="(value, key) in this.interval"
+											   class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.updateRefreshInterval(key)">
+												<span class="me-auto">{{value}}</span>
+												<i class="bi bi-check text-primary"
+												   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</Transition>
+			<Transition name="zoom">
+				<div
+					v-if="this.showMoreSettings"
+					class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll displayModal">
+					<div class="container-md d-flex h-100 w-100">
+						<div class="m-auto modal-dialog-centered dashboardModal">
+							<div class="card rounded-3 shadow w-100">
+								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
+									<h4 class="mb-0 fw-normal">Configuration Settings
+									</h4>
+									<button type="button" class="btn-close ms-auto" @click="this.showMoreSettings = false"></button>
+								</div>
+								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>Peer Jobs</small></p>
+										<div class="list-group">
+											<a class="list-group-item list-group-item-action d-flex" role="button" 
+											   @click="this.$emit('jobsAll')">
+												Active Jobs
+											</a>
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('jobLogs')">
+												Logs
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</Transition>
 		</div>
 	</div>
 </template>
@@ -180,9 +212,17 @@ export default {
 	}
 }
 
+.displayModal .dashboardModal{
+	width: 400px !important;
+}
+
 @media screen and (max-width: 768px) {
 	.peerSearchContainer{
 		flex-direction: column;
+	}
+	
+	.peerSettingContainer .dashboardModal{
+		width: 100% !important;
 	}
 }
 </style>
