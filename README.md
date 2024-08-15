@@ -8,7 +8,7 @@
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
     <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
     <img src="https://forthebadge.com/images/badges/license-mit.svg">
-    <img src="https://forthebadge.com/images/badges/built-with-love.png">
+    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
 
 </p>
 <p align="center">
