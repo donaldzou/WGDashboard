@@ -42,7 +42,7 @@
   - > For more information, please scroll down to [🥘 Experimental Functions](#-experimental-functions)
 
 > I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :)
-> Also, huge thanks to who contributed to this major release: 
+> Also, huge thanks to who contributed to this major release:
 > @bolgovrussia, @eduardorosabales, @Profik, @airgapper, @tokon2000, @bkeenke, @kontorskiy777, @bugsse, @Johnnykson, @DaanSelen, @shuricksumy and many others!
 
 <hr>
@@ -65,8 +65,6 @@
 - [🥘 Experimental Functions](#-experimental-functions)
 - [🔍  Screenshot](#-screenshot)
 - [⏰  Changelog](./docs/api-documents.md)
-- [🛒  Dependencies](#-dependencies)
-- [✨  Contributors](#-contributors)
 
 ## 💡 Features
 
