@@ -374,7 +374,7 @@ Current, we have 2 beloved contributors provided solutions for hosting WGDashboa
 
 ### Solution 1 from @DaanSelen
 
-Please visit [Docker-explain.md](blob/main/docker/Docker-explain.md)
+Please visit [Docker-explain.md](./docker/Docker-explain.md)
 
 ### Solution 2 from @shuricksumy
 
