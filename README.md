@@ -5,7 +5,11 @@
 
 
 <p align="center">
-  <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
+    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
+    <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
+    <img src="https://forthebadge.com/images/badges/license-mit.svg">
+    <img src="https://forthebadge.com/images/badges/built-with-love.png">
+
 </p>
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
