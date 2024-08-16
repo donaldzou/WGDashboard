@@ -207,15 +207,15 @@ _checkPythonVersion(){
 			return;
 	elif python3.10 --version > /dev/null 2>&1
 		then
-	 		printf "[WGDashboard] Found Python 3.10. Will be using python3.10 to install WGDashboard.\n"
+	 		printf "[WGDashboard] %s Found Python 3.10. Will be using python3.10 to install WGDashboard.\n" "$heavy_checkmark"
 	 		pythonExecutable="python3.10"
 	elif python3.11 --version > /dev/null 2>&1
     	 then
-    	 	printf "[WGDashboard] Found Python 3.11. Will be using python3.10 to install WGDashboard.\n"
+    	 	printf "[WGDashboard] %s Found Python 3.11. Will be using python3.10 to install WGDashboard.\n" "$heavy_checkmark"
     	 	pythonExecutable="python3.11"
     elif python3.12 --version > /dev/null 2>&1
     	 then
-    	 	printf "[WGDashboard] Found Python 3.12. Will be using python3.10 to install WGDashboard.\n"
+    	 	printf "[WGDashboard] %s Found Python 3.12. Will be using python3.10 to install WGDashboard.\n" "$heavy_checkmark"
     	 	pythonExecutable="python3.12"
 	else
 		printf "[WGDashboard] %s Could not find a compatible version of Python. Current Python is %s.\n" "$heavy_crossmark" "$version"
