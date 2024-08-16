@@ -8,6 +8,9 @@ venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
 pythonExecutable="python3"
 
+heavy_checkmark="\xE2\x9C\x94"
+heavy_crossmark="\xE2\x9C\x97"
+
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
@@ -46,7 +49,7 @@ _check_and_set_venv(){
     
     if ! venv_python --version > /dev/null 2>&1
     then
-    	printf "[WGDashboard] \u2718 Python Virtual Environment under ./venv failed to create. Halting now.\n"	
+    	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
     	exit 1
     fi 
 }
@@ -60,7 +63,7 @@ _determineOS(){
 #  elif [ -f /etc/arch-release ]; then
 #      OS="arch"
   else
-      printf "[WGDashboard] \u2718 Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
+      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
       exit 1
   fi
@@ -82,11 +85,11 @@ _installPython(){
 	
 	if ! python3 --version > /dev/null 2>&1
 	then
-		printf "[WGDashboard] \u2718 Python is still not installed, halting script now.\n"
+		printf "[WGDashboard] %s Python is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
 		exit 1
 	else
-		printf "[WGDashboard] \u2714 Python is installed\n"
+		printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
 	fi
 }
 
@@ -109,7 +112,7 @@ _installPythonVenv(){
 				fi
 			;;
 			*)
-				printf "[WGDashboard] \u2718 Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				exit 1
 			;;
@@ -118,10 +121,10 @@ _installPythonVenv(){
 	
 	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] \u2718 Python Virtual Environment is still not installed, halting script now.\n"
+		printf "[WGDashboard] %s Python Virtual Environment is still not installed, halting script now.\n"
 		printf "%s\n" "$helpMsg"
 	else
-		printf "[WGDashboard] \u2714 Python Virtual Environment is installed\n"
+		printf "[WGDashboard] %s Python Virtual Environment is installed\n" "$heavy_checkmark"
 	fi
 }
 
@@ -134,22 +137,22 @@ _installPythonPip(){
     	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] \u2718 Python Package Manager (PIP) is still not installed, halting script now.\n"
+		printf "[WGDashboard] %s Python Package Manager (PIP) is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
 	else
-		printf "[WGDashboard] \u2714 Python Package Manager (PIP) is installed\n"
+		printf "[WGDashboard] %s Python Package Manager (PIP) is installed\n" "$heavy_checkmark"
 	fi
 }
 
 _checkWireguard(){
 	if ! wg -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] \u2718 WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
+		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
 		exit 1
 	fi
 	if ! wg-quick -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] \u2718 WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
+		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
 		exit 1
 	fi
 }
@@ -175,7 +178,7 @@ _checkPythonVersion(){
     	 	printf "[WGDashboard] Found Python 3.12. Will be using python3.10 to install WGDashboard.\n"
     	 	pythonExecutable="python3.12"
 	else
-		printf "[WGDashboard] \u2718 Could not find a compatible version of Python. Current Python is %s.\n" "$version"
+		printf "[WGDashboard] %s Could not find a compatible version of Python. Current Python is %s.\n" "$heavy_crossmark" "$version"
 		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
 		exit 1
 	fi
@@ -197,7 +200,7 @@ install_wgd(){
     	printf "[WGDashboard] Python is not installed, trying to install now\n"
     	_installPython
     else
-    	printf "[WGDashboard] \u2714 Python is installed\n"
+    	printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
     fi
     
     _checkPythonVersion
