@@ -4,6 +4,55 @@
 
 **Created by: Donald Zou**
 
+<!-- TOC -->
+* [📖 API Document for WGDashboard](#-api-document-for-wgdashboard)
+  * [🔑 How to use API Key?](#-how-to-use-api-key)
+    * [Create API Key](#create-api-key)
+    * [Use API Key](#use-api-key)
+  * [API Endpoints](#api-endpoints)
+    * [Handshake to Server](#handshake-to-server)
+      * [Request](#request)
+      * [Response](#response)
+    * [Validate Authentication](#validate-authentication)
+      * [Request](#request-1)
+      * [Response](#response-1)
+    * [Authenticate](#authenticate)
+      * [Request](#request-2)
+        * [Body Parameters](#body-parameters)
+      * [Response](#response-2)
+    * [Sign Out](#sign-out)
+      * [Request](#request-3)
+      * [Response](#response-3)
+    * [Get WireGuard Configurations](#get-wireguard-configurations)
+      * [Request](#request-4)
+      * [Response](#response-4)
+    * [Add WireGuard Configuration](#add-wireguard-configuration)
+      * [Request](#request-5)
+        * [Body Parameters](#body-parameters-1)
+      * [Response](#response-5)
+    * [Toggle WireGuard Configuration](#toggle-wireguard-configuration)
+      * [Request](#request-6)
+        * [Query String Parameter](#query-string-parameter)
+      * [Response](#response-6)
+    * [Get WGDashboard Configuration](#get-wgdashboard-configuration)
+      * [Request](#request-7)
+      * [Response](#response-7)
+    * [Update WGDashboard Configuration Item](#update-wgdashboard-configuration-item)
+      * [Request](#request-8)
+        * [Body Parameters](#body-parameters-2)
+      * [Response](#response-8)
+    * [Get WGDashboard API Keys](#get-wgdashboard-api-keys)
+      * [Request](#request-9)
+      * [Response](#response-9)
+    * [Add WGDashboard API Key](#add-wgdashboard-api-key)
+      * [Request](#request-10)
+        * [Body Parameters](#body-parameters-3)
+      * [Response](#response-10)
+    * [Endpoint](#endpoint)
+      * [Request](#request-11)
+      * [Response](#response-11)
+<!-- TOC -->
+
 <hr>
 
 ## 🔑 How to use API Key?
@@ -165,6 +214,7 @@ To remove the current session on server side
     "status": true
 }
 ```
+<hr>
 
 ### Get WireGuard Configurations
 
@@ -328,9 +378,217 @@ If the `configurationName` provided does not exist
 }
 ```
 
+<hr>
+
+### Get WGDashboard Configuration
+
+Get the WGDashboard Configuration, such as `dashboard_theme`...
+
+#### Request
+
+`GET /api/getDashboardConfiguration`
+
+#### Response
+
+`200 - OK`
+
+```json
+{
+    "data": {
+        "Account": {
+            "enable_totp": false,
+            "password": "some hashed value :(",
+            "totp_verified": false,
+            "username": "admin"
+        },
+        "Database": {
+            "type": "sqlite"
+        },
+        "Other": {
+            "welcome_session": false
+        },
+        "Peers": {
+            "peer_display_mode": "grid",
+            "peer_endpoint_allowed_ip": "0.0.0.0/0",
+            "peer_global_dns": "1.1.1.1",
+            "peer_keep_alive": "21",
+            "peer_mtu": "1420",
+            "remote_endpoint": "192.168.2.38"
+        },
+        "Server": {
+            "app_ip": "0.0.0.0",
+            "app_port": "10086",
+            "app_prefix": "",
+            "auth_req": true,
+            "dashboard_api_key": true,
+            "dashboard_refresh_interval": "5000",
+            "dashboard_sort": "status",
+            "dashboard_theme": "dark",
+            "version": "v4.0",
+            "wg_conf_path": "/etc/wireguard"
+        }
+    },
+    "message": null,
+    "status": true
+}
+```
+
+<hr>
+
+### Update WGDashboard Configuration Item
+
+Update the WGDashboard Configuration one at a time
+
+#### Request
+
+`POST /api/updateDashboardConfigurationItem`
+
+##### Body Parameters
+
+```json
+{
+    "section": "Server",
+    "key": "dashboard_theme",
+    "value": "dark"
+}
+```
+| Parameter | Type   |                                                          |
+|-----------|--------|----------------------------------------------------------|
+| `section` | string | Each section in the `wg-dashboard.ini`                   |
+| `key`     | string | Each key/value pair under each in the `wg-dashboard.ini` |
+| `value`   | string | Value for this key/value pair                            |
 
 
-=============
+#### Response
+
+`200 - OK`
+
+If update is success
+
+```json
+{
+    "data": true,
+    "message": null,
+    "status": true
+}
+```
+
+If update failed
+
+```json
+{
+    "data": true,
+    "message": "Message related to the error will appear here",
+    "status": false
+}
+```
+
+<hr>
+
+### Get WGDashboard API Keys
+
+Get a list of active API key in WGDashboard
+
+#### Request
+
+`GET /api/getDashboardAPIKeys`
+
+#### Response
+
+`200 - OK`
+
+If API Key function is enabled and there are active API keys
+
+> If `ExpiredAt` is `null`, that means this API key will never expire
+
+```json
+{
+    "data": [
+        {
+            "CreatedAt": "2024-08-15 00:42:31",
+            "ExpiredAt": null,
+            "Key": "AXt1x3TZMukmA-eSnAyESy08I14n20boppSsknHOB-Y"
+        },
+        {
+            "CreatedAt": "2024-08-14 22:50:44",
+            "ExpiredAt": "2024-08-21 22:50:43",
+            "Key": "ry0Suo0BrypSMzbq0C_TjkEcgrFHHj6UBZGmC2-KI2o"
+        }
+    ],
+    "message": null,
+    "status": true
+}
+```
+
+If API key function is disabled
+
+```json
+{
+    "data": null,
+    "message": "Dashboard API Keys function is disabled",
+    "status": false
+}
+```
+
+<hr>
+
+### Add WGDashboard API Key
+
+Add a new API Key in WGDashboard
+
+#### Request
+
+`POST /api/newDashboardAPIKey`
+
+##### Body Parameters
+
+```json
+{
+    "neverExpire": false,
+    "ExpiredAt": "2024-12-31 16:00:00"
+}
+```
+| Parameter     | Type   |                                                                                   |
+|---------------|--------|-----------------------------------------------------------------------------------|
+| `neverExpire` | bool   | If this is `false`, please specify a date in `ExpiredAt`                          |
+| `ExpiredAt`   | string | If `neverExpire` is `true`, this can be omitted. Format is `YYYY-MM-DD hh:mm:ss`. |
+
+#### Response
+
+`200 - OK`
+
+If success, it will return the latest list of API Keys
+
+```json
+{
+  "data": [
+    {
+      "CreatedAt": "2024-08-15 00:42:31",
+      "ExpiredAt": null,
+      "Key": "AXt1x3TZMukmA-eSnAyESy08I14n20boppSsknHOB-Y"
+    },
+    {
+      "CreatedAt": "2024-08-14 22:50:44",
+      "ExpiredAt": "2024-12-31 16:50:43",
+      "Key": "ry0Suo0BrypSMzbq0C_TjkEcgrFHHj6UBZGmC2-KI2o"
+    }
+  ],
+  "message": null,
+  "status": true
+}
+```
+
+If API key function is disabled
+
+```json
+{
+    "data": null,
+    "message": "Dashboard API Keys function is disabled",
+    "status": false
+}
+```
+
+<hr>
 
 ### Endpoint
 
@@ -345,6 +603,10 @@ Description
 `200 - OK`
 
 ```json
-
+{
+    "data": true,
+    "message": null,
+    "status": true
+}
 ```
 

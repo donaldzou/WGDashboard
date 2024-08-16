@@ -1553,14 +1553,14 @@ def API_getDashboardConfiguration():
     return ResponseObject(data=DashboardConfig.toJson())
 
 
-@app.route(f'{APP_PREFIX}/api/updateDashboardConfiguration', methods=["POST"])
-def API_updateDashboardConfiguration():
-    data = request.get_json()
-    for section in data['DashboardConfiguration'].keys():
-        for key in data['DashboardConfiguration'][section].keys():
-            if not DashboardConfig.SetConfig(section, key, data['DashboardConfiguration'][section][key])[0]:
-                return ResponseObject(False, "Section or value is invalid.")
-    return ResponseObject()
+# @app.route(f'{APP_PREFIX}/api/updateDashboardConfiguration', methods=["POST"])
+# def API_updateDashboardConfiguration():
+#     data = request.get_json()
+#     for section in data['DashboardConfiguration'].keys():
+#         for key in data['DashboardConfiguration'][section].keys():
+#             if not DashboardConfig.SetConfig(section, key, data['DashboardConfiguration'][section][key])[0]:
+#                 return ResponseObject(False, "Section or value is invalid.")
+#     return ResponseObject()
 
 
 @app.route(f'{APP_PREFIX}/api/updateDashboardConfigurationItem', methods=["POST"])
@@ -1581,7 +1581,7 @@ def API_updateDashboardConfigurationItem():
 def API_getDashboardAPIKeys():
     if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
         return ResponseObject(data=DashboardConfig.DashboardAPIKeys)
-    return ResponseObject(False, "Dashboard API Keys function is disbaled")
+    return ResponseObject(False, "Dashboard API Keys function is disabled")
 
 @app.route(f'{APP_PREFIX}/api/newDashboardAPIKey', methods=['POST'])
 def API_newDashboardAPIKey():

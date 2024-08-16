@@ -63,13 +63,13 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 				if (res.status) this.Configuration = res.data
 			});
 		},
-		async updateConfiguration(){
-			await fetchPost("/api/updateDashboardConfiguration", {
-				DashboardConfiguration: this.Configuration
-			}, (res) => {
-				console.log(res)
-			})
-		},
+		// async updateConfiguration(){
+		// 	await fetchPost("/api/updateDashboardConfiguration", {
+		// 		DashboardConfiguration: this.Configuration
+		// 	}, (res) => {
+		// 		console.log(res)
+		// 	})
+		// },
 		async signOut(){
 			await fetchGet("/api/signout", {}, (res) => {
 				this.removeActiveCrossServer();
