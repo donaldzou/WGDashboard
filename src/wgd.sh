@@ -112,7 +112,7 @@ _installPythonVenv(){
 				fi
 			;;
 			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
@@ -150,7 +150,8 @@ _installPythonPip(){
 				fi
 			;;
 			*)
-				printf "[WGDashboard] Sorry, your OS is not support auto install. Currently the install script only support Debian-based, Red Hat-based OS."
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+				printf "%s\n" "$OS"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
