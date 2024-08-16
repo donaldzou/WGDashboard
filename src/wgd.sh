@@ -248,7 +248,7 @@ install_wgd(){
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
     { date; python3 -m pip install pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; $venv_python -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+    { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
