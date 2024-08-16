@@ -134,7 +134,11 @@ _installPythonPip(){
 	then
 		case "$OS" in
 			ubuntu|debian)
-				{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt 
+				if [ "$pythonExecutable" = "python" ]; then
+					{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
+				else
+					{ sudo apt update ; sudo apt-get install -y $pythonExecutable-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
+				fi
 			;;
 			centos|fedora|redhat)
 				if command -v dnf &> /dev/null; then
@@ -155,6 +159,7 @@ _installPythonPip(){
 	then
 		printf "[WGDashboard] %s Python Package Manager (PIP) is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
+		exit 1
 	else
 		printf "[WGDashboard] %s Python Package Manager (PIP) is installed\n" "$heavy_checkmark"
 	fi
