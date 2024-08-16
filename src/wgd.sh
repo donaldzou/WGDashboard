@@ -47,7 +47,7 @@ _check_and_set_venv(){
         { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     
-    if ! "$venv_python" --version > /dev/null 2>&1
+    if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
     	exit 1
@@ -233,9 +233,9 @@ install_wgd(){
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
-    { date; venv_python -m pip install pip; printf "\n\n"; } >> ./log/install.txt
+    { date; $venv_python -m pip install pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; venv_python -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+    { date; $venv_python -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
