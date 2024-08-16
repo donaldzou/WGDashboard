@@ -54,7 +54,9 @@ _check_and_set_venv(){
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
     	kill -s TERM $TOP_PID
-    fi 
+    fi
+    
+    . ${VIRTUAL_ENV}/bin/activate
 }
 
 _determineOS(){
@@ -244,7 +246,7 @@ install_wgd(){
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
-    { date; $venv_python -m pip install pip; printf "\n\n"; } >> ./log/install.txt
+    { date; python3 -m pip install pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
     { date; $venv_python -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
