@@ -98,7 +98,7 @@ _installPythonVenv(){
 				if [ "$pythonExecutable" = "python" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo add-apt-repository ppa:deadsnakes/ppa -y; sudo apt-get update; sudo apt-get install $pythonExecutable-venv; printf "\n\n"; } &>> ./log/install.txt
+					{ sudo apt-get update; sudo apt-get install $pythonExecutable-venv; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			centos|fedora|redhat)
@@ -157,7 +157,7 @@ _checkWireguard(){
 
 
 _checkPythonVersion(){
-	version_pass=$(pythonExecutable -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
+	version_pass=$($pythonExecutable -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
 	if [ $version_pass == "0" ]
 	  	then 
 			printf "[WGDashboard] WGDashboard required Python 3.10 or above. Looking for specific Python version.\n"
