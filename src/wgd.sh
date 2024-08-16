@@ -175,7 +175,8 @@ _checkPythonVersion(){
     	 	printf "[WGDashboard] Found Python 3.12. Will be using python3.10 to install WGDashboard.\n"
     	 	pythonExecutable="python3.12"
 	else
-		printf "[WGDashboard] Could not find a compatible version of Python.Current Python is %s. WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n" % "$version"
+		printf "[WGDashboard] Could not find a compatible version of Python.Current Python is %s.\n" "$version"
+		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
 		exit 1
 	fi
 }
