@@ -142,10 +142,7 @@ _installPythonPip(){
 				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				else
-					printf "\n\n";
-					sudo apt-get install -y ${pythonExecutable}-distutil python3-pip;
-					printf "\n\n";
-#					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
+					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			centos|fedora|redhat)
