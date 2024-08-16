@@ -72,6 +72,7 @@ _determineOS(){
       printf "%s\n" "$helpMsg"
       kill  $TOP_PID
   fi
+   printf "[WGDashboard] OS: %s\n" "$OS"
 }
 
 _installPython(){
