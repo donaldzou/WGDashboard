@@ -8,8 +8,8 @@ venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
 pythonExecutable="python3"
 
-heavy_checkmark="\xE2\x9C\x94"
-heavy_crossmark="\xE2\x9C\x97"
+heavy_checkmark=$(printf "\xE2\x9C\x94")
+heavy_crossmark=$(printf "\xE2\x9C\x97")
 
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
