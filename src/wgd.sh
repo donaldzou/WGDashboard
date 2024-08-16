@@ -132,7 +132,23 @@ _installPythonPip(){
 	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
-		{ $pythonExecutable -m ensurepip --default-pip; printf "\n\n"; } &>> ./log/install.txt 
+		case "$OS" in
+			ubuntu|debian)
+				{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt 
+			;;
+			centos|fedora|redhat)
+				if command -v dnf &> /dev/null; then
+					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
+				else
+					{ sudo yum install -y python3-pip printf "\n\n"; } >> ./log/install.txt
+				fi
+			;;
+			*)
+				printf "[WGDashboard] Sorry, your OS is not support auto install. Currently the install script only support Debian-based, Red Hat-based OS."
+				printf "%s\n" "$helpMsg"
+				exit 1
+			;;
+		esac
     fi
     	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
