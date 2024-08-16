@@ -47,7 +47,7 @@ _check_and_set_venv(){
         { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     
-    if ! venv_python --version > /dev/null 2>&1
+    if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
     	exit 1
