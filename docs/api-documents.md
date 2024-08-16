@@ -60,6 +60,8 @@ This endpoint is designed for a simple handshake when using API key to connect. 
 ```
 > Notice: this `401` response will return at all endpoint if your API Key or session is invalid.
 
+<hr>
+
 ### Validate Authentication
 
 This endpoint if needed for non-cross-server access. This will check if the cookie on the client side is still valid on the server side.
@@ -91,6 +93,7 @@ Session is invalid
     "status": false
 }
 ```
+<hr>
 
 ### Authenticate
 
@@ -140,6 +143,8 @@ If username, password or TOTP is not match
     "status": false
 }
 ```
+
+<hr>
 
 ### Sign Out
 
@@ -200,6 +205,7 @@ To get all WireGuard configurations in `/etc/wireguard`
     "status": true
 }
 ```
+<hr>
 
 ### Add WireGuard Configuration
 
@@ -282,6 +288,7 @@ If the new configuration's `Address` is used by another configuration
     "status": false
 }
 ```
+<hr>
 
 ### Toggle WireGuard Configuration
 
