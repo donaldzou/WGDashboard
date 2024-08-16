@@ -6,6 +6,7 @@ app_name="dashboard.py"
 app_official_name="WGDashboard"
 venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
+pythonExecutable="python3"
 
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
@@ -40,10 +41,14 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
-        { python3 -m venv $VIRTUAL_ENV; } >> ./log/install.txt
+        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
-    printf "[WGDashboard] Activate Python Virtual Environment under ./venv\n"
-    . ${VIRTUAL_ENV}/bin/activate
+    
+    if ! venv_python --version > /dev/null 2>&1
+    then
+    	printf "[WGDashboard] Python Virtual Environment under ./venv failed to create. Halting now.\n"	
+    	exit 1
+    fi 
 }
 
 _determineOS(){
@@ -73,14 +78,6 @@ _installPython(){
 				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
 			fi
 		;;
-#		arch)
-#			{ sudo pacman -Sy python python-pip; printf "\n\n"; } >> ./log/install.txt
-#		;;
-#		*)
-#        	printf "[WGDashboard] Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based and Arch-based OS."
-#        	printf "%s" "$helpMsg"
-#        	exit 1
-#        ;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -94,25 +91,32 @@ _installPython(){
 }
 
 _installPythonVenv(){
-	case "$OS" in
-		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt 
-		;;
-		centos|fedora|redhat)
-			if command -v dnf &> /dev/null; then
-				{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-			else
-				{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-			fi
-		;;
-		*)
-        	printf "[WGDashboard] Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
-        	printf "%s\n" "$helpMsg"
-        	exit 1
-        ;;
-	esac
+	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
+	then
+		case "$OS" in
+			ubuntu|debian)
+				if [ "$pythonExecutable" = "python" ]; then
+					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
+				else
+					{ sudo add-apt-repository ppa:deadsnakes/ppa -y; sudo apt-get update; sudo apt-get install $pythonExecutable-venv; printf "\n\n"; } &>> ./log/install.txt
+				fi
+			;;
+			centos|fedora|redhat)
+				if command -v dnf &> /dev/null; then
+					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+				else
+					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+				fi
+			;;
+			*)
+				printf "[WGDashboard] Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
+				printf "%s\n" "$helpMsg"
+				exit 1
+			;;
+		esac
+	fi
 	
-	if ! python3 -m venv -h > /dev/null 2>&1
+	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
 	then
 		printf "[WGDashboard] Python Virtual Environment is still not installed, halting script now.\n"
 		printf "%s\n" "$helpMsg"
@@ -122,31 +126,19 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
-	case "$OS" in
-    		ubuntu|debian)
-    			{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt 
-    		;;
-    		centos|fedora|redhat)
-    			if command -v dnf &> /dev/null; then
-    				{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
-    			else
-    				{ sudo yum install -y python3-pip printf "\n\n"; } >> ./log/install.txt
-    			fi
-    		;;
-    		*)
-            	printf "[WGDashboard] Sorry, your OS is not support auto install. Currently the install script only support Debian-based, Red Hat-based OS."
-            	printf "%s\n" "$helpMsg"
-            	exit 1
-            ;;
-    	esac
+	
+	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
+	then
+		{ $pythonExecutable -m ensurepip --default-pip; printf "\n\n"; } &>> ./log/install.txt 
+    fi
     	
-    	if ! python3 -m pip -h > /dev/null 2>&1
-    	then
-    		printf "[WGDashboard] Python Package Manager (PIP) is still not installed, halting script now.\n"
-    		printf "%s\n" "$helpMsg"
-    	else
-    		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
-    	fi
+	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
+	then
+		printf "[WGDashboard] Python Package Manager (PIP) is still not installed, halting script now.\n"
+		printf "%s\n" "$helpMsg"
+	else
+		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
+	fi
 }
 
 _checkWireguard(){
@@ -158,6 +150,31 @@ _checkWireguard(){
 	if ! wg-quick -h > /dev/null 2>&1
 	then
 		printf "[WGDashboard] WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
+		exit 1
+	fi
+}
+
+
+
+_checkPythonVersion(){
+	version_pass=$(pythonExecutable -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
+	if [ $version_pass == "0" ]
+	  	then 
+			printf "[WGDashboard] WGDashboard required Python 3.10 or above. Looking for specific Python version.\n"
+	elif python3.10 --version > /dev/null 2>&1
+		then
+	 		printf "[WGDashboard] Found Python 3.10. Will be using python3.10 to install WGDashboard.\n"
+	 		pythonExecutable="python3.10"
+	elif python3.11 --version > /dev/null 2>&1
+    	 then
+    	 	printf "[WGDashboard] Found Python 3.11. Will be using python3.10 to install WGDashboard.\n"
+    	 	pythonExecutable="python3.11"
+    elif python3.12 --version > /dev/null 2>&1
+    	 then
+    	 	printf "[WGDashboard] Found Python 3.12. Will be using python3.10 to install WGDashboard.\n"
+    	 	pythonExecutable="python3.12"
+	else
+		printf "[WGDashboard] Could not find a compatible version of Python. WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n" 
 		exit 1
 	fi
 }
@@ -181,13 +198,7 @@ install_wgd(){
     	printf "[WGDashboard] \xE2\x9C\x94 Python is installed\n"
     fi
     
-    version_pass=$(python3 -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
-	if [ $version_pass == "0" ]
-	  then 
-		printf "[WGDashboard] WGDashboard required Python 3.10 or above\n"
-		exit 1
-	fi
-    
+    _checkPythonVersion
     _installPythonVenv
     _installPythonPip
 
@@ -201,9 +212,9 @@ install_wgd(){
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
-    { date; python3 -m pip install pip; printf "\n\n"; } >> ./log/install.txt
+    { date; venv_python -m pip install pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+    { date; venv_python -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
@@ -281,7 +292,7 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-  new_ver=$(python3 -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
+  new_ver=$(venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
   printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
