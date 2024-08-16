@@ -72,7 +72,7 @@ _determineOS(){
       printf "%s\n" "$helpMsg"
       kill  $TOP_PID
   fi
-   printf "[WGDashboard] OS: |%s|\n" "$OS"
+   printf "[WGDashboard] OS: %s\n" "$OS"
 }
 
 _installPython(){
@@ -105,7 +105,7 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 			;;
-			centos|fedora|redhat|rehl)
+			centos|fedora|redhat|rhel)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				else
@@ -123,7 +123,7 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-			centos|fedora|redhat|rehl)
+			centos|fedora|redhat|rhel)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				else
@@ -159,7 +159,7 @@ _installPythonPip(){
 					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
-			centos|fedora|redhat|rehl)
+			centos|fedora|redhat|rhel)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
 				else
