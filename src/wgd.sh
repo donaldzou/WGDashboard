@@ -160,10 +160,10 @@ _installPythonPip(){
 				fi
 			;;
 			centos|fedora|redhat|rhel)
-				if command -v dnf &> /dev/null; then
+				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
 				else
-					{ sudo yum install -y python3-pip printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
 				fi
 			;;
 			*)
