@@ -142,7 +142,7 @@ _installPythonPip(){
 					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
-			centos|fedora|redhat)
+			centos|fedora|redhat|rehl)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
 				else
@@ -151,7 +151,6 @@ _installPythonPip(){
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
-				printf "%s\n" "$OS"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
