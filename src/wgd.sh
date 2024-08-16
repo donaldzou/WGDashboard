@@ -158,9 +158,9 @@ _checkWireguard(){
 
 _checkPythonVersion(){
 	version_pass=$($pythonExecutable -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
-	if [ $version_pass == "0" ]
+	if [ $version_pass == "1" ]
 	  	then 
-			printf "[WGDashboard] WGDashboard required Python 3.10 or above. Looking for specific Python version.\n"
+			return;
 	elif python3.10 --version > /dev/null 2>&1
 		then
 	 		printf "[WGDashboard] Found Python 3.10. Will be using python3.10 to install WGDashboard.\n"
