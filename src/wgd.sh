@@ -2,6 +2,9 @@
 
 # wgd.sh - Copyright(C) 2024 Donald Zou [https://github.com/donaldzou]
 # Under Apache-2.0 License
+trap "kill -s TERM $TOP_PID" TERM
+export TOP_PID=$$
+
 app_name="dashboard.py"
 app_official_name="WGDashboard"
 venv_python="./venv/bin/python3"
@@ -50,7 +53,7 @@ _check_and_set_venv(){
     if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
-    	exit 1
+    	kill -s TERM $TOP_PID
     fi 
 }
 
@@ -65,7 +68,7 @@ _determineOS(){
   else
       printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
-      exit 1
+      kill -s TERM $TOP_PID
   fi
 }
 
@@ -87,7 +90,7 @@ _installPython(){
 	then
 		printf "[WGDashboard] %s Python is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
-		exit 1
+		kill -s TERM $TOP_PID
 	else
 		printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
 	fi
@@ -114,7 +117,7 @@ _installPythonVenv(){
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
-				exit 1
+				kill -s TERM $TOP_PID
 			;;
 		esac
 	fi
@@ -150,7 +153,7 @@ _installPythonPip(){
 			*)
 				printf "[WGDashboard] Sorry, your OS is not support auto install. Currently the install script only support Debian-based, Red Hat-based OS."
 				printf "%s\n" "$helpMsg"
-				exit 1
+				kill -s TERM $TOP_PID
 			;;
 		esac
     fi
@@ -159,7 +162,7 @@ _installPythonPip(){
 	then
 		printf "[WGDashboard] %s Python Package Manager (PIP) is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
-		exit 1
+		kill -s TERM $TOP_PID
 	else
 		printf "[WGDashboard] %s Python Package Manager (PIP) is installed\n" "$heavy_checkmark"
 	fi
@@ -169,12 +172,12 @@ _checkWireguard(){
 	if ! wg -h > /dev/null 2>&1
 	then
 		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		exit 1
+		kill -s TERM $TOP_PID
 	fi
 	if ! wg-quick -h > /dev/null 2>&1
 	then
 		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		exit 1
+		kill -s TERM $TOP_PID
 	fi
 }
 
@@ -201,7 +204,7 @@ _checkPythonVersion(){
 	else
 		printf "[WGDashboard] %s Could not find a compatible version of Python. Current Python is %s.\n" "$heavy_crossmark" "$version"
 		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
-		exit 1
+		kill -s TERM $TOP_PID
 	fi
 }
 
