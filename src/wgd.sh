@@ -46,7 +46,7 @@ _check_and_set_venv(){
     
     if ! venv_python --version > /dev/null 2>&1
     then
-    	printf "[WGDashboard] Python Virtual Environment under ./venv failed to create. Halting now.\n"	
+    	printf "[WGDashboard] \u2718 Python Virtual Environment under ./venv failed to create. Halting now.\n"	
     	exit 1
     fi 
 }
@@ -60,7 +60,7 @@ _determineOS(){
 #  elif [ -f /etc/arch-release ]; then
 #      OS="arch"
   else
-      printf "[WGDashboard] Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
+      printf "[WGDashboard] \u2718 Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
       printf "%s\n" "$helpMsg"
       exit 1
   fi
@@ -82,11 +82,11 @@ _installPython(){
 	
 	if ! python3 --version > /dev/null 2>&1
 	then
-		printf "[WGDashboard] Python is still not installed, halting script now.\n"
+		printf "[WGDashboard] \u2718 Python is still not installed, halting script now.\n"
 		printf "%s\n" "$helpMsg"
 		exit 1
 	else
-		printf "[WGDashboard] \xE2\x9C\x94 Python is installed\n"
+		printf "[WGDashboard] \u2714 Python is installed\n"
 	fi
 }
 
@@ -109,7 +109,7 @@ _installPythonVenv(){
 				fi
 			;;
 			*)
-				printf "[WGDashboard] Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
+				printf "[WGDashboard] \u2718 Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS."
 				printf "%s\n" "$helpMsg"
 				exit 1
 			;;
@@ -118,10 +118,10 @@ _installPythonVenv(){
 	
 	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] Python Virtual Environment is still not installed, halting script now.\n"
+		printf "[WGDashboard] \u2718 Python Virtual Environment is still not installed, halting script now.\n"
 		printf "%s\n" "$helpMsg"
 	else
-		printf "[WGDashboard] \xE2\x9C\x94 Python Virtual Environment is installed\n"
+		printf "[WGDashboard] \u2714 Python Virtual Environment is installed\n"
 	fi
 }
 
@@ -134,22 +134,22 @@ _installPythonPip(){
     	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] Python Package Manager (PIP) is still not installed, halting script now.\n"
+		printf "[WGDashboard] \u2718 Python Package Manager (PIP) is still not installed, halting script now.\n"
 		printf "%s\n" "$helpMsg"
 	else
-		printf "[WGDashboard] \xE2\x9C\x94 Python Package Manager (PIP) is installed\n"
+		printf "[WGDashboard] \u2714 Python Package Manager (PIP) is installed\n"
 	fi
 }
 
 _checkWireguard(){
 	if ! wg -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
+		printf "[WGDashboard] \u2718 WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
 		exit 1
 	fi
 	if ! wg-quick -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
+		printf "[WGDashboard] \u2718 WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n"
 		exit 1
 	fi
 }
@@ -175,7 +175,7 @@ _checkPythonVersion(){
     	 	printf "[WGDashboard] Found Python 3.12. Will be using python3.10 to install WGDashboard.\n"
     	 	pythonExecutable="python3.12"
 	else
-		printf "[WGDashboard] Could not find a compatible version of Python.Current Python is %s.\n" "$version"
+		printf "[WGDashboard] \u2718 Could not find a compatible version of Python. Current Python is %s.\n" "$version"
 		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
 		exit 1
 	fi
@@ -197,7 +197,7 @@ install_wgd(){
     	printf "[WGDashboard] Python is not installed, trying to install now\n"
     	_installPython
     else
-    	printf "[WGDashboard] \xE2\x9C\x94 Python is installed\n"
+    	printf "[WGDashboard] \u2714 Python is installed\n"
     fi
     
     _checkPythonVersion
