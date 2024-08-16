@@ -79,7 +79,7 @@ _installPython(){
 		ubuntu|debian)
 			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
-		centos|fedora|redhat)
+		centos|fedora|redhat|rehl)
 			if command -v dnf &> /dev/null; then
 				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
 			else
@@ -104,7 +104,7 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 			;;
-			centos|fedora|redhat)
+			centos|fedora|redhat|rehl)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				else
