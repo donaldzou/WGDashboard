@@ -104,7 +104,9 @@ _installPythonVenv(){
 				if [ "$pythonExecutable" = "python" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv; printf "\n\n"; } &>> ./log/install.txt
+					sudo apt-get install ${pythonExecutable}-venv
+					printf "\n\n";
+#					{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 				fi
 			;;
 			centos|fedora|redhat)
