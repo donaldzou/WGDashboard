@@ -101,7 +101,7 @@ _installPythonVenv(){
 	then
 		case "$OS" in
 			ubuntu|debian)
-				if [ "$pythonExecutable" = "python" ]; then
+				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 				else
 					sudo apt-get install ${pythonExecutable}-venv
@@ -139,7 +139,7 @@ _installPythonPip(){
 	then
 		case "$OS" in
 			ubuntu|debian)
-				if [ "$pythonExecutable" = "python" ]; then
+				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				else
 					printf "\n\n";
