@@ -21,7 +21,7 @@ import bcrypt
 import ifcfg
 import psutil
 import pyotp
-from flask import Flask, request, render_template, session, g, Blueprint
+from flask import Flask, request, render_template, session, g
 from json import JSONEncoder
 from flask_cors import CORS
 
@@ -601,7 +601,6 @@ class WireguardConfiguration:
                             checkIfExist = sqldb.cursor().execute("SELECT * FROM '%s' WHERE id = ?" % self.Name,
                                                           ((i['PublicKey']),)).fetchone()
                             if checkIfExist is None:
-                                print(i)
                                 newPeer = {
                                     "id": i['PublicKey'],
                                     "private_key": "",
@@ -625,7 +624,6 @@ class WireguardConfiguration:
                                     "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
                                     "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
                                 }
-                                print(newPeer)
                                 sqldb.cursor().execute(
                                     """
                                     INSERT INTO '%s'
@@ -823,7 +821,6 @@ class WireguardConfiguration:
                             sqldb.commit()
                             total_sent = 0
                             total_receive = 0
-                        print(data_usage[i][0])
                         _, p = self.searchPeer(data_usage[i][0])
                         if p.total_receive != total_receive or p.total_sent != total_sent:
                             sqldb.cursor().execute(
@@ -832,7 +829,6 @@ class WireguardConfiguration:
                                               total_receive + total_sent, data_usage[i][0],))
                             sqldb.commit()
         except Exception as e:
-            traceback.print_exc()
             print(f"[WGDashboard] {self.Name} Error: {str(e)} {str(e.__traceback__)}")
 
     def getPeersEndpoint(self):
@@ -1339,7 +1335,6 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
     configuration = WireguardConfigurations[configName]
     if len(configuration.Address) > 0:
         address = configuration.Address.split(',')
-        print(address)
         existedAddress = []
         availableAddress = []
         for p in configuration.Peers:
@@ -1426,8 +1421,6 @@ def auth_req():
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
             ):
-                print(request.path)
-                print(f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}")
                 response = Flask.make_response(app, {
                     "status": False,
                     "message": "Unauthorized access.",
@@ -1693,8 +1686,6 @@ def API_sharePeer_update():
     data: dict[str, str] = request.get_json()
     ShareID: str = data.get("ShareID")
     ExpireDate: str = data.get("ExpireDate")
-    print(ShareID)
-    print(ExpireDate)
     
     if ShareID is None:
         return ResponseObject(False, "Please specify ShareID")
@@ -2077,7 +2068,6 @@ def index():
     Index page related
     @return: Template
     """
-    print(APP_PREFIX)
     return render_template('index.html', APP_PREFIX=APP_PREFIX)
 
 

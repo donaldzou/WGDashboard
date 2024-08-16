@@ -113,10 +113,12 @@
   # make any changes with the dashboard, you can set it to false.
   
   [Peer]
+  #Name# = Donald's iPhone
   PublicKey = abcd1234
   AllowedIPs = 1.2.3.4/32
-  # Must have for each peer
   ```
+  
+  > With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
 
 - **Python 3.10** for v4.0+, **Python 3.7 - 3.9** for v2.0 - v3.0.6.2
 
