@@ -100,26 +100,23 @@ _installPython(){
 
 _installPythonVenv(){
 	if [ "$pythonExecutable" = "python3" ]; then
-		if ! $pythonExecutable -m venv -h > /dev/null 2>&1
-		then
-			case "$OS" in
-				ubuntu|debian)
-					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
-				;;
-				centos|fedora|redhat)
-					if command -v dnf &> /dev/null; then
-						{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-					else
-						{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-					fi
-				;;
-				*)
-					printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
-					printf "%s\n" "$helpMsg"
-					kill -s TERM $TOP_PID
-				;;
-			esac
-		fi
+		case "$OS" in
+			ubuntu|debian)
+				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
+			;;
+			centos|fedora|redhat)
+				if command -v dnf &> /dev/null; then
+					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+				else
+					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+				fi
+			;;
+			*)
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
+				printf "%s\n" "$helpMsg"
+				kill -s TERM $TOP_PID
+			;;
+		esac
 	else
 		{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 	fi
