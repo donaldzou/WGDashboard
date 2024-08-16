@@ -97,36 +97,34 @@ _installPython(){
 }
 
 _installPythonVenv(){
-	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
-	then
-		case "$OS" in
-			ubuntu|debian)
-				if [ "$pythonExecutable" = "python3" ]; then
+	if [ "$pythonExecutable" = "python3" ]; then
+		if ! $pythonExecutable -m venv -h > /dev/null 2>&1
+		then
+			case "$OS" in
+				ubuntu|debian)
 					{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
-				else
-					sudo apt-get install ${pythonExecutable}-venv
-					printf "\n\n";
-#					{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
-				fi
-			;;
-			centos|fedora|redhat)
-				if command -v dnf &> /dev/null; then
-					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-				else
-					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-				fi
-			;;
-			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
-				printf "%s\n" "$helpMsg"
-				kill -s TERM $TOP_PID
-			;;
-		esac
+				;;
+				centos|fedora|redhat)
+					if command -v dnf &> /dev/null; then
+						{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					else
+						{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					fi
+				;;
+				*)
+					printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
+					printf "%s\n" "$helpMsg"
+					kill -s TERM $TOP_PID
+				;;
+			esac
+		fi
+	else
+		{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 	fi
 	
 	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
 	then
-		printf "[WGDashboard] %s Python Virtual Environment is still not installed, halting script now.\n"
+		printf "[WGDashboard] %s Python Virtual Environment is still not installed, halting script now.\n" "$heavy_crossmark"
 		printf "%s\n" "$helpMsg"
 	else
 		printf "[WGDashboard] %s Python Virtual Environment is installed\n" "$heavy_checkmark"
