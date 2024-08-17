@@ -126,10 +126,8 @@ SaveConfig = true
 PublicKey = abcd1234
 AllowedIPs = 1.2.3.4/32
 ```
-> ![!TIP]
+> [!TIP]
 > With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
-
-
 
 ## 🛠 Install
 
@@ -170,7 +168,7 @@ sudo sysctl -p /etc/sysctl.conf
 
 ### Manual Installation
 
-> ![!NOTE]
+> [!NOTE]
 > To ensure a smooth install process, please make sure Python 3.10/3.11/3.12, `git`, `wireguard-tools` and `net-tools` are installed :)
 
 1. Download WGDashboard
