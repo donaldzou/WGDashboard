@@ -88,54 +88,46 @@
 - Testing tool: Ping and Traceroute to your peer
 
 
-## 📝 Requirement
+## 📝 Requirements
 
-- Tested on the following Operating Systems
-    > [!NOTE]
-    > All operating systems I tested are ARM64 ran in UTM Virtual Machine.
- 
-    | Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
-    |-----------|--------|--------------------------|----------|--------|
-    | 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
-    | 22.04 LTS | 11.10  |                          |          | 39     |
-    | 24.02 LTS |        |                          |          | 38     |
+1. Supported operating systems. Please view the list below.
+2. WireGuard & WireGuard-Tools (`wg-quick`)
+3. Python 3.10 / 3.11 / 3.12
+4. `git`, `net-tools`, `sudo` (_This should only apply to RHEL 9 & 8, interestingly it doesn't have it preinstalled)_
 
-    > ![!TIP] 
-    > **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
+### Supported Operating Systems
+> [!NOTE]
+> All operating systems below are tested by myself. All are ARM64 ran in UTM Virtual Machine.
 
-- **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
+| Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
+|-----------|--------|--------------------------|----------|--------|
+| 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
+| 22.04 LTS | 11.10  |                          |          | 39     |
+| 24.02 LTS |        |                          |          | 38     |
 
-  > [!TIP]
-  > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
+> ![!TIP] 
+> **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
 
-- `git`, `net-tools`， `sudo` (_This only apply to RHEL 9 & 8, can't believe it doesn't come with `sudo` installed lol)_
+### Existing WireGuard Configurations
 
-- Python 3.10 / 3.11 / 3.12
+> ![!NOTE]
+> This only applies to existing WireGuard Configuration under `/etc/wireguard`
 
-    > [!TIP]
-    > Check your Python version with
-    > ```shell
-    > $ python3 --version
-    > Python 3.12.0
-    > ``` 
+```ini
+[Interface]
+...
+SaveConfig = true
+# Need to include this line to allow WireGuard Tool to save your configuration, 
+# or if you just want it to monitor your WireGuard Interface and don't need to
+# make any changes with the dashboard, you can set it to false.
 
-- Configuration files under **`/etc/wireguard`**, but please note the following sample
-
-  ```ini
-  [Interface]
-  ...
-  SaveConfig = true
-  # Need to include this line to allow WireGuard Tool to save your configuration, 
-  # or if you just want it to monitor your WireGuard Interface and don't need to
-  # make any changes with the dashboard, you can set it to false.
-  
-  [Peer]
-  #Name# = Donald's iPhone
-  PublicKey = abcd1234
-  AllowedIPs = 1.2.3.4/32
-  ```
-  
-  > With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
+[Peer]
+#Name# = Donald's iPhone
+PublicKey = abcd1234
+AllowedIPs = 1.2.3.4/32
+```
+> ![!TIP]
+> With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
 
 
 
@@ -146,7 +138,7 @@
 These commands are tested by myself in each OS. It contains commands to install WireGuard, Git, Net Tools, and even Python on some OS.
 
 > [!WARNING]
-> Please makesure you understand these commands before you run them
+> Please make sure you understand these commands before you run them.
 
 #### Ubuntu 20.04 LTS
 
