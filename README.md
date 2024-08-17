@@ -1,3 +1,25 @@
+### Development on v4
+Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This version will be a huge update on the structure of the app. The frontend will be completely handle on the client side with Vue.js, and communicate with the server via REST Api. With this design, it could be possible for the frontend app to connect to multiple server in the future. Stay tune to this new verion, I'm working very hard on this while balancing school and work. If you would like know whats going on, you can check out [this branch](https://github.com/donaldzou/WGDashboard/tree/v4) 😊
+
+> For more information, you can visit: https://github.com/donaldzou/WGDashboard/issues/293
+
+> If you're interested in the Desktop App of v4.0, please visit [WGDashboard Desktop](https://github.com/donaldzou/WGDashboard-Desktop) ;)
+
+#### A preview on v4.0 🥹
+
+<img src="https://github.com/donaldzou/WGDashboard/raw/main/img/v4.0Preview.gif">
+
+> Working example of API Key and CORS ;)
+
+<img src="https://github.com/donaldzou/WGDashboard/raw/main/img/ScreenRecording2024-07-31at2.16.15AM-ezgif.com-video-to-gif-converter.gif">
+
+
+<hr>
+
+##### Known issue on WGDashboard `v3.0 - v3.0.6`
+- [IPv6 in WireGuard might not fully support.](https://github.com/donaldzou/WGDashboard/issues/167)
+<hr>
+
 <p align="center">
   <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
 </p>
@@ -14,7 +36,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
-  <a href="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6"><img src="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6.svg" alt="wakatime"></a>
+  <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
   <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
 <p align="center">Monitoring WireGuard is not convenient, need to remote access to server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
