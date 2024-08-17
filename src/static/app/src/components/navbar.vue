@@ -2,6 +2,7 @@
 import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {fetchGet} from "@/utilities/fetch.js";
 
 export default {
 	name: "navbar",
@@ -9,6 +10,27 @@ export default {
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		return {wireguardConfigurationsStore, dashboardConfigurationStore}
+	},
+	data(){
+		return {
+			updateAvailable: false,
+			updateMessage: "Checking for update...",
+			updateUrl: ""
+		}
+	},
+	mounted() {
+		fetchGet("/api/getDashboardUpdate", {}, (res) => {
+			if (res.status){
+				if (res.data){
+					this.updateAvailable = true
+					this.updateUrl = res.data
+				}
+				this.updateMessage = res.message
+			}else{
+				this.updateMessage = "Failed to check available update"
+				console.log(`Failed to get update: ${res.message}`)
+			}
+		})
 	}
 }
 </script>
@@ -65,11 +87,20 @@ export default {
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
 						<i class="bi bi-box-arrow-left me-2"></i>
-						Sign Out</a></li>
+						Sign Out</a>
+					</li>
+					<li class="nav-item" style="font-size: 0.8rem">
+						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none" target="_blank">
+							<small class="nav-link text-muted rounded-3" >
+								{{ this.updateMessage }}
+							</small>
+						</a>
+						<small class="nav-link text-muted" v-else>
+							{{ this.updateMessage }}
+						</small>
+					</li>
 				</ul>
-				<ul class="nav flex-column">
-					<li class="nav-item"><a href="https://github.com/donaldzou/WGDashboard/releases/tag/"><small class="nav-link text-muted"></small></a></li>
-				</ul>
+				
 			</div>
 		</nav>
 	</div>

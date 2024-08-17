@@ -57,14 +57,14 @@
 
 <hr>
 
-## Table of Content
+## 📋  Table of Content
 
 <!-- TOC -->
   * [📣 What's New: v4.0](#-whats-new-v40)
     * [🎉 New Features](#-new-features)
     * [🧐 Other Changes](#-other-changes)
     * [🥘 New Experimental Features](#-new-experimental-features)
-  * [Table of Content](#table-of-content)
+  * [📋  Table of Content](#-table-of-content)
   * [💡 Features](#-features)
   * [📝 Requirements](#-requirements)
     * [Supported Operating Systems](#supported-operating-systems)
@@ -91,7 +91,7 @@
     * [Solution 1 from @DaanSelen](#solution-1-from-daanselen)
     * [Solution 2 from @shuricksumy](#solution-2-from-shuricksumy)
   * [📖 WGDashboard REST API Documentation & How to use API Key](#-wgdashboard-rest-api-documentation--how-to-use-api-key)
-  * [🥘 Experimental Functions](#-experimental-functions)
+  * [🥘 Experimental Features](#-experimental-features)
     * [Cross-Server Access](#cross-server-access)
     * [Desktop App](#desktop-app)
   * [🔍 Screenshot](#-screenshot)
@@ -531,7 +531,7 @@ Please visit [shuricksumy/docker-wgdashboard](https://github.com/shuricksumy/doc
 
 Please visit the [API Documentation](./docs/api-documents.md)
 
-## 🥘 Experimental Functions
+## 🥘 Experimental Features
 
 ### Cross-Server Access
 

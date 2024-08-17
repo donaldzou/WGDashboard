@@ -12,6 +12,7 @@ import secrets
 import subprocess
 import time
 import re
+import urllib.error
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
@@ -2003,6 +2004,24 @@ def API_traceroute_execute():
     else:
         return ResponseObject(False, "Please provide ipAddress")
 
+@app.route(f'{APP_PREFIX}/api/getDashboardUpdate')
+def API_getDashboardUpdate():
+    import urllib.request as req;
+    
+    try:
+        r = req.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases/latest", timeout=5).read()
+        data = dict(json.loads(r))
+        tagName = data.get('tag_name')
+        htmlUrl = data.get('html_url')
+        if tagName is not None and htmlUrl is not None:
+            if tagName != DASHBOARD_VERSION:
+                return ResponseObject(message=f"{tagName} is now avaible for update!", data=htmlUrl)
+            else:
+                return ResponseObject(message="You're on the latest version")
+        return ResponseObject(False)
+        
+    except urllib.error.HTTPError as e:
+        return ResponseObject(False, f"Request to GitHub API failed. Returned a {e.code} status.")
 
 '''
 Sign Up
@@ -2109,7 +2128,6 @@ DashboardLogger: DashboardLogger = DashboardLogger()
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
-
 
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
