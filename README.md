@@ -91,7 +91,7 @@
 ## 📝 Requirement
 
 - Tested on the following Operating Systems
-    > [!Note]
+    > [!NOTE]
     > All operating systems I tested are ARM64 ran in UTM Virtual Machine.
  
     | Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
@@ -100,19 +100,19 @@
     | 22.04 LTS | 11.10  |                          |          | 39     |
     | 24.02 LTS |        |                          |          | 38     |
 
-    > ![!Tip] 
+    > ![!TIP] 
     > **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
 
 - **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
 
-  > [!TIPS]
+  > [!TIP]
   > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
 
 - `git`, `net-tools`， `sudo` (_This only apply to RHEL 9 & 8, can't believe it doesn't come with `sudo` installed lol)_
 
 - Python 3.10 / 3.11 / 3.12
 
-    > [!TIPS]
+    > [!TIP]
     > Check your Python version with
     > ```shell
     > $ python3 --version
