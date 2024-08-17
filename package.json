@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "dayjs": "^1.11.12"
+  }
+}

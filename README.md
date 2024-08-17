@@ -21,125 +21,272 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 <hr>
 
 <p align="center">
-  <img alt="WGDashboard" src="img/logo.png" width="128">
+  <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
 
 
 <p align="center">
-  <img src="http://ForTheBadge.com/images/badges/made-with-python.svg">
+    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
+    <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
+    <img src="https://forthebadge.com/images/badges/license-mit.svg">
+</p>
+<p align="center">
+    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
 </p>
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
   <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
   <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
-<p align="center">Monitoring WireGuard is not convinient, need to login into server and type <code>wg show</code>. That's why this platform is being created, to view all configurations and manage them in a easier way.</p>
-<p align="center"><small>Note: This project is not affiliate to the official WireGuard Project ;)</small></p>
+<p align="center">Monitoring WireGuard is not convenient, need to remote access to server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
+<p align="center">With all these awesome features, while keeping it <b>simple</b>, <b>easy to install and use</b></p>
 
-## 📣 What's New: v3.0
+<p align="center"><b><i>This project is not affiliate to the official WireGuard Project</i></b></p>
 
-- 🎉  **New Features**
-  - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
-  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
-  - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
-  - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
-  - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
-  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
-  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
-  - **Added Some [🥘 Experimental Functions](#-experimental-functions)** 
-  
-- 🪚  **Bug Fixed**
-  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
-  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
-  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
-  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
-  - **And many other bugs provided by our beloved users** :heart:
-- **🧐  Other Changes**
-  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
-  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
-  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
-  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
-  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
+## 📣 What's New: v4.0
 
-*And many other small changes for performance and bug fixes! :laughing:*
+### 🎉 New Features
 
->  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
+- **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
+- **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the [Docker](#-docker-solutions) section below.
+- **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
+- **Share Peer's QR Code with Public Link**: You can share a peer's QR code and `.conf` file without the need to loging in.
+- **WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the [API Documentation](./docs/api-documents.md).
+- **Logging**: Dashboard will now log all activity on the dashboard and API requests.
+- **Time-Based One-Time Password (TOTP)**: You can enable this function to add one more layer of security, and generate the TOTP with your choice of authenticator.
+- **Designs**
+  - **Real-time Graphs**: You can view real-time data changes with graphs in each configuration.
+  - **Night mode**: You know what that means, it avoids bugs ;)
+- **Enforce Python Virtual Environment**: I noticed newer Python version (3.12) does not allow to install packages globally, and plus I think is a good idea to use venv.
+ 
+### 🧐 Other Changes
+- **Deprecated jQuery from the project, and migrated and rewrote the whole front-end with Vue.js. This allows the dashboard is future proofed, and potential cross server access with a desktop app.**
+- Rewrote the backend into a REST API structure
+- Improved SQL query efficient
+- Removed all templates, except for `index.html` where it will load the Vue.js app.
+- Parsing names in `.conf`
+- Minimized the need to read `.conf`, only when any `.conf` is modified
 
-**For users who is using `v2.x.x` please be sure to read [this](#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
+### 🥘 New Experimental Features
+  - **Cross-Server Access**: Now you can access other servers that installed `v4` of WGDashboard through API key.
+  - **Desktop App**: Thanks to **Cross-Server Access**, you can now download an ElectronJS based desktop app of WGDashboard, and use that to access WGDashboard on different servers.
+  - > For more information, please scroll down to [🥘 Experimental Functions](#-experimental-functions)
+
+> I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :)
+> Also, huge thanks to who contributed to this major release:
+> @bolgovrussia, @eduardorosabales, @Profik, @airgapper, @tokon2000, @bkeenke, @kontorskiy777, @bugsse, @Johnnykson, @DaanSelen, @shuricksumy and many others!
 
 <hr>
 
-## Table of Content
+## 📋  Table of Content
 
-
-- [💡  Features](#-features)
-- [📝  Requirement](#-requirement)
-- [🛠  Install](#-install)
-- [🪜  Usage](#-usage)
-  - [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
-  - [Autostart WGDashboard on boot](#autostart-wgdashboard-on-boot--v22)
-- [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
-  - [Dashboard Configuration file](#dashboard-configuration-file)
-  - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
-- [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
-- [🥘 Experimental Functions](#-experimental-functions)
-- [🔍  Screenshot](#-screenshot)
-- [⏰  Changelog](#--changelog)
-- [🛒  Dependencies](#-dependencies)
-- [✨  Contributors](#-contributors)
+<!-- TOC -->
+  * [📣 What's New: v4.0](#-whats-new-v40)
+    * [🎉 New Features](#-new-features)
+    * [🧐 Other Changes](#-other-changes)
+    * [🥘 New Experimental Features](#-new-experimental-features)
+  * [📋  Table of Content](#-table-of-content)
+  * [💡 Features](#-features)
+  * [📝 Requirements](#-requirements)
+    * [Supported Operating Systems](#supported-operating-systems)
+    * [Existing WireGuard Configurations](#existing-wireguard-configurations)
+  * [🛠 Install](#-install)
+    * [Install Commands](#install-commands)
+      * [Ubuntu 20.04 LTS](#ubuntu-2004-lts)
+      * [Ubuntu 22.04 LTS & Ubuntu 24.02 LTS](#ubuntu-2204-lts--ubuntu-2402-lts)
+      * [Debian 12.6](#debian-126)
+      * [Debian 11.10](#debian-1110)
+      * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream](#red-hat-enterprise-linux-94--centos-9-stream)
+      * [Fedora 40 & Fedora 39 & Fedora 38](#fedora-40--fedora-39--fedora-38)
+    * [Manual Installation](#manual-installation)
+  * [🪜 Usage](#-usage)
+      * [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
+      * [Autostart WGDashboard on boot (>= v2.2)](#autostart-wgdashboard-on-boot--v22)
+  * [✂️ Dashboard Configuration](#-dashboard-configuration)
+      * [Dashboard Configuration file](#dashboard-configuration-file)
+      * [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
+  * [❓ How to update the dashboard?](#-how-to-update-the-dashboard)
+      * [**Please note for users who are using `v3 - v3.0.6` want to update to `v4.0`**](#please-note-for-users-who-are-using-v3---v306-want-to-update-to-v40)
+      * [**Please note for users who are using `v2.3.1` or below**](#please-note-for-users-who-are-using-v231-or-below)
+  * [🐬 Docker Solutions](#-docker-solutions)
+    * [Solution 1 from @DaanSelen](#solution-1-from-daanselen)
+    * [Solution 2 from @shuricksumy](#solution-2-from-shuricksumy)
+  * [📖 WGDashboard REST API Documentation & How to use API Key](#-wgdashboard-rest-api-documentation--how-to-use-api-key)
+  * [🥘 Experimental Features](#-experimental-features)
+    * [Cross-Server Access](#cross-server-access)
+    * [Desktop App](#desktop-app)
+  * [🔍 Screenshot](#-screenshot)
+  * [🕰️ Changelogs](#-changelogs)
+<!-- TOC -->
 
 ## 💡 Features
 
-- **No need to re-configure existing WireGuard configuration! It can search for existed configuration files.**
-- Easy to use interface, provided username and password protection to the dashboard
-- Add peers and edit (Allowed IPs, DNS, Private Key...)
-- View peers and configuration real time details (Data Usage, Latest Handshakes...)
-- Share your peer configuration with QR code or file download
-- Testing tool: Ping and Traceroute to your peer's ip
-- **And more functions are coming up!**
+- Automatically look for existing WireGuard configuration under `/etc/wireguard`
+- Easy to use interface, provided credential and TOTP protection to the dashboard
+- Manage peers and configuration
+  - Add Peers or by bulk with auto-generated information
+  - Edit peer information
+  - Delete peers with ease
+  - Restrict peers
+  - Generate QR Code and `.conf` file for peers, share it through a public link
+  - Schedule jobs to delete / restrict peer when conditions are met
+- View real time peer status
+- Testing tool: Ping and Traceroute to your peer
 
 
-## 📝 Requirement
+## 📝 Requirements
 
-- Recommend the following OS, tested by our beloved users:
-  - [x] Ubuntu 18.04.1 LTS - 20.04.1 LTS [@Me]
-  - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
-  - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
-  - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
+1. Supported operating systems. Please view the list below.
+2. WireGuard & WireGuard-Tools (`wg-quick`)
+3. Python 3.10 / 3.11 / 3.12
+4. `git`, `net-tools`, `sudo` (_This should only apply to RHEL 9 & 8, interestingly it doesn't have it preinstalled)_
 
-  > **If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!**
+### Supported Operating Systems
+> [!NOTE]
+> All operating systems below are tested by myself. All are ARM64 ran in UTM Virtual Machine.
 
-- **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
+| Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
+|-----------|--------|--------------------------|----------|--------|
+| 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
+| 22.04 LTS | 11.10  |                          |          | 39     |
+| 24.02 LTS |        |                          |          | 38     |
 
-  > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
-- Net Tools (`net-tools`) is installed.
-  - You can verify this by checking if `ifconfig` return a list of network interface. Such as `eth0`
-- Configuration files under **`/etc/wireguard`**, but please note the following sample
+> [!TIP] 
+> If you installed WGDashboard on other systems without any issues, please let me know. Thank you!
 
-  ```ini
-  [Interface]
-  ...
-  SaveConfig = true
-  # Need to include this line to allow WireGuard Tool to save your configuration, 
-  # or if you just want it to monitor your WireGuard Interface and don't need to
-  # make any changes with the dashboard, you can set it to false.
-  
-  [Peer]
-  PublicKey = abcd1234
-  AllowedIPs = 1.2.3.4/32
-  # Must have for each peer
-  ```
+### Existing WireGuard Configurations
 
-- Python 3.7+ & Pip3
+> [!NOTE]
+> This only applies to existing WireGuard Configuration under `/etc/wireguard`
 
-- Browser support CSS3 and ES6
+```ini
+[Interface]
+...
+SaveConfig = true
+# Need to include this line to allow WireGuard Tool to save your configuration, 
+# or if you just want it to monitor your WireGuard Interface and don't need to
+# make any changes with the dashboard, you can set it to false.
+
+[Peer]
+#Name# = Donald's iPhone
+PublicKey = abcd1234
+AllowedIPs = 1.2.3.4/32
+```
+> [!TIP]
+> With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
 
 ## 🛠 Install
+
+### Install Commands
+
+These commands are tested by myself in each OS. It contains commands to install WireGuard, Git, Net Tools, and even Python on some OS.
+
+> [!WARNING]
+> Please make sure you understand these commands before you run them.
+
+#### Ubuntu 20.04 LTS
+
+```shell
+sudo add-apt-repository ppa:deadsnakes/ppa -y && \
+sudo apt-get update -y && \
+sudo apt-get install python3.10 python3.10-distutils wireguard-tools net-tools --no-install-recommends -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p
+```
+#### Ubuntu 22.04 LTS & Ubuntu 24.02 LTS
+
+```shell
+sudo apt-get update -y && \
+sudo apt install wireguard-tools net-tools --no-install-recommends -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+#### Debian 12.6
+
+```shell
+apt-get install sudo git iptables -y && \ 
+sudo apt-get update && \
+sudo apt install wireguard-tools net-tools && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+
+#### Debian 11.10
+
+> [!WARNING]
+> This commands will download Python 3.10's source code and build from it, since Debian 11.10 doesn't comes with Python 3.10
+
+```shell
+apt-get install sudo -y && \ 
+sudo apt-get update && \ 
+sudo apt install -y git iptables build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev wireguard-tools net-tools && \ 
+wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz && \ 
+tar -xvf Python-3.10.0.tgz && \ 
+cd Python-3.10.0 && \ 
+sudo ./configure --enable-optimizations && \ 
+sudo make && \ 
+sudo make altinstall && \ 
+cd .. && \ 
+git clone https://github.com/donaldzou/WGDashboard.git && \ 
+cd ./WGDashboard/src && \ 
+chmod +x ./wgd.sh && \ 
+./wgd.sh install && \ 
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+
+#### Red Hat Enterprise Linux 9.4 & CentOS 9-Stream
+
+```shell
+sudo yum install wireguard-tools net-tools git python3.11 -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf && \
+firewall-cmd --add-port=10086/tcp --permanent && \
+firewall-cmd --add-port=51820/udp --permanent && \
+firewall-cmd --reload
+```
+
+#### Fedora 40 & Fedora 39 & Fedora 38
+
+```shell
+sudo yum install wireguard-tools net-tools git -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf && \
+firewall-cmd --add-port=10086/tcp --permanent && \
+firewall-cmd --add-port=51820/udp --permanent && \
+firewall-cmd --reload
+```
+
+### Manual Installation
+
+> [!NOTE]
+> To ensure a smooth installation process, please make sure Python 3.10/3.11/3.12, `git`, `wireguard-tools` and `net-tools` are installed :)
+
 1. Download WGDashboard
 
    ```shell
-   git clone -b v3.0.6.2 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -150,7 +297,7 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 3. Install WGDashboard
 
    ```shell
-   sudo chmod u+x wgd.sh
+   sudo chmod u+x wgd.sh && \
    sudo ./wgd.sh install
    ```
 
@@ -163,16 +310,14 @@ Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This 
 5. Run WGDashboard
 
    ```shell
-   ./wgd.sh start
+   sudo ./wgd.sh start
    ```
-   
-   **Note**:
-
-   > For [`pivpn`](https://github.com/pivpn/pivpn) user, please use `sudo ./wgd.sh start` to run if your current account does not have the permission to run `wg show` and `wg-quick`.
 
 6. Access dashboard
 
    Access your server with port `10086` (e.g. http://your_server_ip:10086), using username `admin` and password `admin`. See below how to change port and ip that the dashboard is running with.
+
+
 
 ## 🪜 Usage
 
@@ -220,40 +365,33 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
    ```ini
    [Unit]
-   After=network.service
+   After=syslog.target network-online.target
+   Wants=wg-quick.target
+   ConditionPathIsDirectory=/etc/wireguard
    
    [Service]
-   WorkingDirectory=<your dashboard directory full path here>
-   ExecStart=/usr/bin/python3 <your dashboard directory full path here>/dashboard.py
+   Type=forking
+   PIDFile=<absolute_path_of_wgdashboard_src>/gunicorn.pid
+   WorkingDirectory=<absolute_path_of_wgdashboard_src>
+   ExecStart=<absolute_path_of_wgdashboard_src>/wgd.sh start
+   ExecStop=<absolute_path_of_wgdashboard_src>/wgd.sh stop
+   ExecReload=<absolute_path_of_wgdashboard_src>/wgd.sh restart
+   TimeoutSec=120
+   PrivateTmp=yes
    Restart=always
    
-   
    [Install]
-   WantedBy=default.target
+   WantedBy=multi-user.target
    ```
 
-   Now, we need to replace both `<your dashboard directory full path here>` to the one you just copied from step 2. After doing this, the file will become something like this, your file might be different:
-
-   ```ini
-   [Unit]
-   After=netword.service
-   
-   [Service]
-   WorkingDirectory=/root/wgdashboard/src
-   ExecStart=/usr/bin/python3 /root/wgdashboard/src/dashboard.py
-   Restart=always
-   
-   
-   [Install]
-   WantedBy=default.target
-   ```
+   Now, we need to replace all `<absolute_path_of_wgdashboard_src>` to the one you just copied from step 2. After doing this, the file will become something like this, your file might be different:
 
    **Be aware that after the value of `WorkingDirectory`, it does not have  a `/` (slash).** And then save the file after you edited it
 
 4. Copy the service file to systemd folder
 
    ```bash
-   $ cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
+   $ sudo cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
    ```
 
    To make sure you copy the file successfully, you can use this command `cat /etc/systemd/system/wg-dashboard.service` to see if it will output the file you just edited.
@@ -272,28 +410,31 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
    ```bash
    $ sudo systemctl status wg-dashboard.service
    ```
-
    And you should see something like this
 
    ```shell
-   ● wg-dashboard.service
-        Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
-        Active: active (running) since Tue 2021-08-03 22:31:26 UTC; 4s ago
-      Main PID: 6602 (python3)
-         Tasks: 1 (limit: 453)
-        Memory: 26.1M
-        CGroup: /system.slice/wg-dashboard.service
-                └─6602 /usr/bin/python3 /root/wgdashboard/src/dashboard.py
-   
-   Aug 03 22:31:26 ubuntu-wg systemd[1]: Started wg-dashboard.service.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Serving Flask app "WGDashboard" (lazy loading)
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Environment: production
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    Use a production WSGI server instead.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Debug mode: off
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on all addresses.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:    WARNING: This is a development server. Do not use it in a production deployment.
-   Aug 03 22:31:27 ubuntu-wg python3[6602]:  * Running on http://0.0.0.0:10086/ (Press CTRL+C to quit)
+    ● wg-dashboard.service
+    Loaded: loaded (/etc/systemd/system/wg-dashboard.service; enabled; vendor preset: enabled)
+    Active: active (running) since Wed 2024-08-14 22:21:47 EDT; 55s ago
+    Process: 494968 ExecStart=/home/donaldzou/Wireguard-Dashboard/src/wgd.sh start (code=exited, status=0/SUCCESS)
+    Main PID: 495005 (gunicorn)
+    Tasks: 5 (limit: 4523)
+    Memory: 36.8M
+    CPU: 789ms
+    CGroup: /system.slice/wg-dashboard.service
+    ├─495005 /home/donaldzou/Wireguard-Dashboard/src/venv/bin/python3 ./venv/bin/gunicorn --config ./gunicorn.conf.py
+    └─495007 /home/donaldzou/Wireguard-Dashboard/src/venv/bin/python3 ./venv/bin/gunicorn --config ./gunicorn.conf.py
+    
+    Aug 14 22:21:40 wg sudo[494978]:     root : PWD=/home/donaldzou/Wireguard-Dashboard/src ; USER=root ; COMMAND=./venv/bin/gunicorn --config ./gunicorn.conf.py
+    Aug 14 22:21:40 wg sudo[494978]: pam_unix(sudo:session): session opened for user root(uid=0) by (uid=0)
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] WGDashboard w/ Gunicorn will be running on 0.0.0.0:10086
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] Access log file is at ./log/access_2024_08_14_22_21_40.log
+    Aug 14 22:21:40 wg wgd.sh[494979]: [WGDashboard] Error log file is at ./log/error_2024_08_14_22_21_40.log
+    Aug 14 22:21:40 wg sudo[494978]: pam_unix(sudo:session): session closed for user root
+    Aug 14 22:21:45 wg wgd.sh[494968]: [WGDashboard] Checking if WGDashboard w/ Gunicorn started successfully
+    Aug 14 22:21:47 wg wgd.sh[494968]: [WGDashboard] WGDashboard w/ Gunicorn started successfully
+    Aug 14 22:21:47 wg wgd.sh[494968]: ------------------------------------------------------------
+    Aug 14 22:21:47 wg systemd[1]: Started wg-dashboard.service.
    ```
 
    If you see `Active:` followed by `active (running) since...` then it means it run correctly. 
@@ -314,28 +455,29 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 
 Since version 2.0, WGDashboard will be using a configuration file called `wg-dashboard.ini`, (It will generate automatically after first time running the dashboard). More options will include in future versions, and for now it included the following configurations:
 
-|                              | Description                                                  | Default                                              | Edit Available |
-| ---------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- | -------------- |
-| **`[Account]`**              | *Configuration on account*                                   |                                                      |                |
-| `username`                   | Dashboard login username                                     | `admin`                                              | Yes            |
-| `password`                   | Password, will be hash with SHA256                           | `admin` hashed in SHA256                             | Yes            |
-|                              |                                                              |                                                      |                |
-| **`[Server]`**               | *Configuration on dashboard*                                 |                                                      |                |
-| `wg_conf_path`               | The path of all the Wireguard configurations                 | `/etc/wireguard`                                     | Yes            |
-| `app_ip`                     | IP address the dashboard will run with                       | `0.0.0.0`                                            | Yes            |
-| `app_port`                   | Port the the dashboard will run with                         | `10086`                                              | Yes            |
+|                              | Description                                                                                                                                                                                              | Default                                              | Edit Available |
+|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|----------------|
+| **`[Account]`**              | *Configuration on account*                                                                                                                                                                               |                                                      |                |
+| `username`                   | Dashboard login username                                                                                                                                                                                 | `admin`                                              | Yes            |
+| `password`                   | Password, will be hash with SHA256                                                                                                                                                                       | `admin` hashed in SHA256                             | Yes            |
+|                              |                                                                                                                                                                                                          |                                                      |                |
+| **`[Server]`**               | *Configuration on dashboard*                                                                                                                                                                             |                                                      |                |
+| `wg_conf_path`               | The path of all the Wireguard configurations                                                                                                                                                             | `/etc/wireguard`                                     | Yes            |
+| `app_ip`                     | IP address the dashboard will run with                                                                                                                                                                   | `0.0.0.0`                                            | Yes            |
+| `app_port`                   | Port the the dashboard will run with                                                                                                                                                                     | `10086`                                              | Yes            |
 | `auth_req`                   | Does the dashboard need authentication to access, if `auth_req = false` , user will not be access the **Setting** tab due to security consideration. **User can only edit the file directly in system**. | `true`                                               | **No**         |
-| `version`                    | Dashboard Version                                            | `v3.0.6`                                             | **No**         |
-| `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page | `60000ms`                                            | Yes            |
-| `dashboard_sort`             | How configuration is sorting                                 | `status`                                             | Yes            |
-|                              |                                                              |                                                      |                |
-| **`[Peers]`**                | *Default Settings on a new peer*                             |                                                      |                |
-| `peer_global_dns`            | DNS Server                                                   | `1.1.1.1`                                            | Yes            |
-| `peer_endpoint_allowed_ip`   | Endpoint Allowed IP                                          | `0.0.0.0/0`                                          | Yes            |
-| `peer_display_mode`          | How peer will display                                        | `grid`                                               | Yes            |
-| `remote_endpoint`            | Remote Endpoint (i.e where your peers will connect to)       | *depends on your server's default network interface* | Yes            |
-| `peer_mtu`                   | Maximum Transmit Unit                                        | `1420`                                               |                |
-| `peer_keep_alive`            | Keep Alive                                                   | `21`                                                 | Yes            |
+| `version`                    | Dashboard Version                                                                                                                                                                                        | `v4.0`                                               | **No**         |
+| `dashboard_refresh_interval` | How frequent the dashboard will refresh on the configuration page                                                                                                                                        | `60000ms`                                            | Yes            |
+| `dashboard_sort`             | How configuration is sorting                                                                                                                                                                             | `status`                                             | Yes            |
+| `dashboard_theme`            | Dashboard Theme                                                                                                                                                                                          | `dark`                                               | Yes            |
+|                              |                                                                                                                                                                                                          |                                                      |                |
+| **`[Peers]`**                | *Default Settings on a new peer*                                                                                                                                                                         |                                                      |                |
+| `peer_global_dns`            | DNS Server                                                                                                                                                                                               | `1.1.1.1`                                            | Yes            |
+| `peer_endpoint_allowed_ip`   | Endpoint Allowed IP                                                                                                                                                                                      | `0.0.0.0/0`                                          | Yes            |
+| `peer_display_mode`          | How peer will display                                                                                                                                                                                    | `grid`                                               | Yes            |
+| `remote_endpoint`            | Remote Endpoint (i.e where your peers will connect to)                                                                                                                                                   | *depends on your server's default network interface* | Yes            |
+| `peer_mtu`                   | Maximum Transmit Unit                                                                                                                                                                                    | `1420`                                               |                |
+| `peer_keep_alive`            | Keep Alive                                                                                                                                                                                               | `21`                                                 | Yes            |
 
 #### Generating QR code and peer configuration file (.conf)
 
@@ -366,30 +508,12 @@ Endpoint = 0.0.0.0:51820
 
 ## ❓ How to update the dashboard?
 
-#### **Please note for user who is using `v2.3.1` or below**
+#### **Please note for users who are using `v3 - v3.0.6` want to update to `v4.0`**
+- Although theoretically updating through `wgd.sh` should work, but I still suggest you to update the dashboard manually.
 
-- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive: . But I guess this would be a great start for future development :sunglasses:.
+#### **Please note for users who are using `v2.3.1` or below**
 
-<hr>
-
-#### Update Method 1 (For `v3.0` or above)
-
-1. Change your directory to `wgdashboard/src`
-
-   ```bash
-   cd wgdashboard/src
-   ```
-
-2. Update the dashboard with the following
-
-   ```bash
-   ./wgd.sh update
-   chmod +x ./wgd.sh
-   ```
-
-   > If this doesn't work, please use the method below. Sorry about that :(
-
-#### Update Method 2
+- For user who is using `v2.3.1` or below, please notice that all data that stored in the current database will **not** transfer to the new database. This is hard decision to move from TinyDB to SQLite. But SQLite does provide a thread-safe access and TinyDB doesn't. I couldn't find a safe way to transfer the data, so you need to do them manually... Sorry about that :pensive:。 But I guess this would be a great start for future development :sunglasses:.
 
 
 1. Change your directory to `wgdashboard` 
@@ -400,214 +524,65 @@ Endpoint = 0.0.0.0:51820
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v3.0.6 --force
+    git pull https://github.com/donaldzou/WGDashboard.git v4.0 --force
     ```
 
 3. Install
 
    ```shell
-   ./wgd.sh install
+   sudo ./wgd.sh install
    ```
 
+Starting with `v3.0`, you can simply do `sudo ./wgd.sh update` !! (I hope)
 
+## 🐬 Docker Solutions
 
-Starting with `v3.0`, you can simply do `./wgd.sh update` !! (I hope, lol)
+Current, we have 2 beloved contributors provided solutions for hosting WGDashboard with Docker
 
-## 🥘 Experimental Functions
+### Solution 1 from @DaanSelen
 
-#### Progressive Web App (PWA) for WGDashboard
+Please visit [Docker-explain.md](./docker/Docker-explain.md)
 
-- With `v3.0`, I've added a `manifest.json` into the dashboard, so user could add their dashboard as a PWA to their browser or mobile device.
+### Solution 2 from @shuricksumy
 
-<img src="img/PWA.gif"/>
+Please visit [shuricksumy/docker-wgdashboard](https://github.com/shuricksumy/docker-wgdashboard)
 
+> For questions or issues related to Docker, please visit [#272](https://github.com/donaldzou/WGDashboard/issues/272)
 
+## 📖 WGDashboard REST API Documentation & How to use API Key
+
+Please visit the [API Documentation](./docs/api-documents.md)
+
+## 🥘 Experimental Features
+
+### Cross-Server Access
+
+Starting with `v4.0`, you can access WGDashboards on other server through one WGDashboard with API Keys
+
+![Cross Server Example](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/cross-server.gif)
+
+### Desktop App
+
+Since the major changes for `v4.0` is to move the whole front-end code to Vue.js. And with this change, we can take the
+advantage of combining ElectronJS and Vue.js to create a Desktop version of WGDashboard. Currently, we provide an Universal macOS app and a Windows app.
+
+To download the app, please visit the [latest release](https://github.com/donaldzou/WGDashboard/releases).
+
+![ElectronJS App Demo](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/electronjs-app.gif)
 
 ## 🔍 Screenshot
 
-![Sign In Page](img/SignIn.png)
+![Sign In](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/sign-in.png)
+![Cross Server](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/cross-server.png)
+![Index](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/index.png)
+![New Configuration](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/new-configuration.png)
+![Settings](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/settings.png)
+![Light-Dark Mode](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/light-dark.png)
+![Configuration](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/configuration.png)
+![Add Peers](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/add-peers.png)
+![Ping](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/ping.png)
+![Traceroute](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/traceroute.png)
 
-![Index Image](img/HomePage.png)
+## 🕰️ Changelogs
 
-![Configuration](img/Configuration.png)
-
-![Add Peer](img/AddPeer.png)
-
-![Edit Peer](img/EditPeer.png)
-
-![Delete Peer](img/DeleteBulk.png)
-
-![Dashboard Setting](img/DashboardSetting.png)
-
-![Ping](img/Ping.png)
-
-![Traceroute](img/Traceroute.png)
-
-## ⏰  Changelog
-
-#### v3.0.6 - Mar 22, 2022
-
-**Fixed Bug**
-- When wgdashboard is running behind a proxy server, redirecting could cause using http while proxy is using https [❤️ from #161]
-
-#### v3.0.5 - Jan 31, 2022
-
-**Quick Fix**
-- Fixed public key does not match when user used an existing private key
-- Sorry for the wrong version number that causing the dashboard ask for update after updating.
-
-#### v3.0.3 - Jan 23, 2022
-
-- Fixed when dashboard configuration file cannot be found after a fresh install. [❤️  from #132 ]
-
-#### v3.0 - Jan 18, 2022
-
-- 🎉  **New Features**
-  - **Moved from TinyDB to SQLite**: SQLite provide a better performance and loading speed when getting peers! Also avoided crashing the database due to **race condition**.
-  - **Added Gunicorn WSGI Server**: This could provide more stable on handling HTTP request, and more flexibility in the future (such as HTTPS support). **BIG THANKS to @pgalonza :heart:**
-  - **Add Peers by Bulk:** User can add peers by bulk, just simply set the amount and click add.
-  - **Delete Peers by Bulk**: User can delete peers by bulk, without deleting peers one by one.
-  - **Download Peers in Zip**: User can download all *downloadable* peers in a zip.
-  - **Added Pre-shared Key to peers:** Now each peer can add with a pre-shared key to enhance security. Previously added peers can add the pre-shared key through the peer setting button.
-  - **Redirect Back to Previous Page:** The dashboard will now redirect you back to your previous page if the current session got timed out and you need to sign in again.
-  - **Added Some [🥘 Experimental Functions](https://github.com/donaldzou/WGDashboard#-experimental-functions)** 
-
-- 🪚  **Bug Fixed**
-  - [IP Sorting range issues #99](https://github.com/donaldzou/WGDashboard/issues/99) [❤️ @barryboom]
-  - [INvalid character written to tunnel json file #108](https://github.com/donaldzou/WGDashboard/issues/108) [❤️ @ikidd]
-  - [Add IPv6 #91](https://github.com/donaldzou/WGDashboard/pull/91) [❤️ @pgalonza]
-  - [Added MTU and PersistentKeepalive to QR code and download files #112](https://github.com/donaldzou/WGDashboard/pull/112) [:heart: @reafian]
-  - **And many other bugs provided by our beloved users** :heart:
-- **🧐  Other Changes**
-  - **Key generating moved to front-end**: No longer need to use the server's WireGuard to generate keys, thanks to the `wireguard.js` from the [official repository](https://git.zx2c4.com/wireguard-tools/tree/contrib/keygen-html/wireguard.js)! 
-  - **Peer transfer calculation**: each peer will now show all transfer amount (previously was only showing transfer amount from the last configuration start-up).
-  - **UI adjustment on running peers**: peers will have a new style indicating that it is running.
-  - **`wgd.sh` finally can update itself**: So now user could update the whole dashboard from `wgd.sh`, with the `update` command.
-  - **Minified JS and CSS files**: Although only a small changes on the file size, but I think is still a good practice to save a bit of bandwidth ;)
-
-*And many other small changes for performance and bug fixes! :laughing:*
-
->  If you have any other brilliant ideas for this project, please shout it in here [#129](https://github.com/donaldzou/WGDashboard/issues/129) :heart:   
-
-**For users who is using `v2.x.x` please be sure to read [this](https://github.com/donaldzou/WGDashboard#please-note-for-user-who-is-using-v231-or-below) before updating WGDashboard ;)**
-
-#### v2.3.1 - Sep 8, 2021
-
-- Updated dashboard's name to **WGDashboard**!!
-
-
-
-#### v2.3 - Sep 8, 2021
-
-- 🎉  **New Features**
-  - **Update directly from `wgd.sh`:** Now you can update WGDashboard directly from the bash script.
-  - **Displaying Peers:** You can switch the display mode between list and table in the configuration page.
-- 🪚  **Bug Fixed**
-  - [Peer DNS Validation Fails #67](issues/67): Added DNS format check. [❤️ @realfian]
-  - [configparser.NoSectionError: No section: 'Interface' #66](issues/66): Changed permission requirement for `etc/wireguard` from `744` to `755`. [❤️ @ramalmaty]
-  - [Feature request: Interface not loading when information missing #73](issues/73): Fixed when Configuration Address and Listen Port is missing will crash the dashboard. [❤️ @js32]
-  - [Remote Peer, MTU and PersistentKeepalives added #70](pull/70): Added MTU, remote peer and Persistent Keepalive. [❤️ @realfian]
-  - [Fixes DNS check to support search domain #65](pull/65): Added allow input domain into DNS. [❤️@davejlong]
-- **🧐  Other Changes**
-  - Moved Add Peer Button into the right bottom corner.
-
-#### v2.2.1 - Aug 16, 2021
-
-Bug Fixed:
-- Added support for full subnet on Allowed IP
-- Peer setting Save button
-
-#### v2.2 - Aug 14, 2021
-
-- 🎉  **New Features**
-  - **Add new peers**: Now you can add peers directly on dashboard, it will generate a pair of private key and public key. You can also set its DNS, endpoint allowed IPs. Both can set a default value in the setting page. [❤️ in [#44](https://github.com/donaldzou/wireguard-dashboard/issues/44)]  
-  - **QR Code:** You can add the private key in peer setting of your existed peer to create a QR code. Or just create a new one, dashboard will now be able to auto generate a private key and public key ;) Don't worry, all keys will be generated on your machine, and **will delete all key files after they got generated**. [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
-  - **Peer configuration file download:** Same as QR code, you now can download the peer configuration file, so you don't need to manually input all the details on the peer machine! [❤️ in [#40](https://github.com/donaldzou/wireguard-dashboard/issues/40)]
-  - **Search peers**: You can now search peers by their name.
-  - **Autostart on boot:** Added a tutorial on how to start the dashboard to on boot! Please read the [tutorial below](#autostart-wireguard-dashboard-on-boot). [❤️ in [#29](https://github.com/donaldzou/wireguard-dashboard/issues/29)]  
-  - **Click to copy**: You can now click and copy all peer's public key and configuration's public key.
-  - ....
-- 🪚  **Bug Fixed**
-  - When there are comments in the wireguard config file, will cause the dashboard to crash.
-  - Used regex to search for config files.
-- **🧐  Other Changes**
-  - Moved all external CSS and JavaScript file to local hosting (Except Bootstrap Icon, due to large amount of SVG files).
-  - Updated Python dependencies
-    - Flask: `v1.1.2 => v2.0.1`
-    - Jinja: `v2.10.1 => v3.0.1`
-    - icmplib: `v2.1.1 => v3.0.1`
-  - Updated CSS/JS dependencies
-    - Bootstrap: `v4.5.3 => v4.6.0`
-  - UI adjustment
-    - Adjusted how peers will display in larger screens, used to be 1 row per peer, now is 3 peers in 1 row.
-
-#### v2.1 - Jul 2, 2021
-
-- Added **Ping** and **Traceroute** tools!
-- Adjusted the calculation of data usage on each peers
-- Added refresh interval of the dashboard
-- Bug fixed when no configuration on fresh install ([#23](https://github.com/donaldzou/wireguard-dashboard/issues/23))
-- Fixed crash when too many peers ([#22](https://github.com/donaldzou/wireguard-dashboard/issues/22))
-
-#### v2.0 - May 5, 2021
-
-- Added login function to dashboard
-  - ***I'm not using the most ideal way to store the username and password, feel free to provide a better way to do this if you any good idea!***
-- Added a config file to the dashboard
-- Dashboard config can be change within the **Setting** tab on the side bar
-- Adjusted UI
-- And much more!
-
-#### v1.1.2 - Apr 3, 2021
-
-- Resolved issue [#3](https://github.com/donaldzou/wireguard-dashboard/issues/3).
-
-#### v1.1.1 - Apr 2, 2021
-
-- Able to add a friendly name to each peer. Thanks [#2](https://github.com/donaldzou/wireguard-dashboard/issues/2) !
-
-#### v1.0 - Dec 27, 2020
-
-- Added the function to remove peers
-
-## 🛒 Dependencies
-
-- CSS/JS
-  - [Bootstrap](https://getbootstrap.com/docs/4.6/getting-started/introduction/) `v4.6.0`
-  - [Bootstrap Icon](https://icons.getbootstrap.com) `v1.4.0`
-  - [jQuery](https://jquery.com) `v3.5.1`
-- Python
-  - [Flask](https://pypi.org/project/Flask/) `v2.0.1`
-  - [ifcfg](https://pypi.org/project/ifcfg/) `v0.24`
-  - [psutil](https://pypi.org/project/psutil/) `v5.9.8`
-  - [icmplib](https://pypi.org/project/icmplib/) `v2.1.1`
-  - [flask-qrcode](https://pypi.org/project/Flask-QRcode/) `v3.0.0`
-
-## ✨ Contributors
-
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/antonioag95"><img src="https://avatars.githubusercontent.com/u/30556866?v=4?s=100" width="100px;" alt=""/><br /><sub><b>antonioag95</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=antonioag95" title="Tests">⚠️</a> <a href="https://github.com/donaldzou/WGDashboard/commits?author=antonioag95" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/tonjo"><img src="https://avatars.githubusercontent.com/u/4726289?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tonjo</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=tonjo" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/reafian"><img src="https://avatars.githubusercontent.com/u/11992416?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Newton</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=reafian" title="Code">💻</a></td>
-    <td align="center"><a href="http://www.davejlong.com"><img src="https://avatars.githubusercontent.com/u/175317?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Long</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=davejlong" title="Code">💻</a></td>
-    <td align="center"><a href="http://www.std-soft.com"><img src="https://avatars.githubusercontent.com/u/5978293?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Markus Neubauer</b></sub></a><br /><a href="https://github.com/donaldzou/WGDashboard/commits?author=marneu" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
+Please visit the [Changelogs.md](./docs/changelogs.md)

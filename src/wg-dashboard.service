@@ -1,14 +1,18 @@
 [Unit]
 After=syslog.target network-online.target
+Wants=wg-quick.target
 ConditionPathIsDirectory=/etc/wireguard
 
 [Service]
-Environment="VIRTUAL_ENV={{VIRTUAL_ENV}}"
-WorkingDirectory={{APP_ROOT}}
-ExecStart={{VIRTUAL_ENV}}/bin/python3 {{APP_ROOT}}/dashboard.py
+Type=forking
+PIDFile=<absolute_path_of_wgdashboard_src>/gunicorn.pid
+WorkingDirectory=<absolute_path_of_wgdashboard_src>
+ExecStart=<absolute_path_of_wgdashboard_src>/wgd.sh start
+ExecStop=<absolute_path_of_wgdashboard_src>/wgd.sh stop
+ExecReload=<absolute_path_of_wgdashboard_src>/wgd.sh restart
+TimeoutSec=120
 PrivateTmp=yes
 Restart=always
-
 
 [Install]
 WantedBy=multi-user.target

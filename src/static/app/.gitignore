@@ -1,24 +1,3 @@
-.vscode
-.DS_Store
-.idea
-src/db
-__pycache__
-src/test.py
-*.db
-src/wg-dashboard.ini
-src/static/pic.xd
-*.conf
-private_key.txt
-public_key.txt
-venv/**
-log/**
-release/*
-src/db/wgdashboard.db
-.jshintrc
-node_modules/**
-*/proxy.js
-src/static/app/proxy.js
-
 # Logs
 logs
 *.log

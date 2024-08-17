@@ -1,7 +1,8 @@
-Flask
+bcrypt
 ifcfg
 psutil
+pyotp
+Flask
+flask-cors
 icmplib
-flask-qrcode
 gunicorn
-certbot

@@ -1,78 +1,22 @@
-<!-- index.html - < WGDashboard > - Copyright(C) 2021 Donald Zou [https://github.com/donaldzou]-->
+<!DOCTYPE html>
 <html lang="en">
-{% with %}
-    {% set title="Home" %}
-    {% include "header.html"%}
-{% endwith %}
-
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>WGDashboard</title>
+	<link rel="manifest" href="{{ url_for('static',filename='json/manifest.json') }}">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="application-name" content="WGDashboard">
+	<meta name="apple-mobile-web-app-title" content="WGDashboard">
+	<meta name="msapplication-starturl" content="/">
+	<link rel="apple-touch-icon" sizes="192x192" href="{{ url_for('static',filename='img/192x192ios.png') }}">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="icon" href="{{ url_for('static',filename='img/logo.png') }}"/>
+	<link rel="stylesheet" href="{{ url_for('static',filename='app/dist/assets/index.css') }}">
+	<script src="{{ url_for('static',filename='app/dist/assets/index.js') }}" type="module"></script>
+</head>
 <body>
-	{% include "navbar.html" %}
-	<div class="container-fluid">
-        {% include "sidebar.html" %}
-		<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-4">
-            <div style="display: flex; flex-direction: row; align-items: center;">
-                <h1 class="pb-4 mt-4">Home</h1>
-            </div>
-            {% if msg != "" %}
-                <div class="alert alert-danger" role="alert">
-                    Configuration toggle failed. Please check the following error message:
-                </div>
-                <pre class="index-alert"><code>{{ msg }}</code></pre>
-            {% endif %}
-
-            {% if conf == [] %}
-                <p class="text-muted">You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".</p>
-            {% endif %}
-			{% for i in conf%}
-				<div class="card mt-3 conf_card">
-					<div class="card-body">
-						<div class="row">
-							<div class="col card-col">
-								<small class="text-muted"><strong>CONFIGURATION</strong></small>
-								<a href="/configuration/{{i['conf']}}" class="conf_link">
-									<h6 class="card-title" style="margin:0 !important;"><samp>{{i['conf']}}</samp></h6>
-								</a>
-							</div>
-							<div class="col card-col">
-								<small class="text-muted"><strong>STATUS</strong></small>
-								<h6 style="text-transform: uppercase; margin:0 !important;">{{i['status']}}<span class="dot dot-{{i['status']}}"></span></h6>
-							</div>
-							<div class="col-md card-col">
-								<small class="text-muted"><strong>PUBLIC KEY</strong></small>
-								<h6 style="margin:0 !important;"><samp>{{i['public_key']}}</samp></h6>
-							</div>
-							<div class="col-md index-switch">
-                                {% if i['checked'] == "checked" %}
-                                    <a href="#" id="{{i['conf']}}" {{i['checked']}} class="switch text-primary tt"><i class="bi bi-toggle2-on"></i></a>
-                                {% else %}
-                                    <a href="#" id="{{i['conf']}}" {{i['checked']}} class="switch text-secondary"><i class="bi bi-toggle2-off"></i></a>
-                                {% endif %}
-                                <div class="spinner-border text-primary" role="status" style="display: none">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-							</div>
-						</div>
-					</div>
-				</div>
-			{%endfor%}
-		</main>
-	</div>
-{% include "tools.html" %}
+	<div id="app" class="w-100 vh-100"></div>
 </body>
-{% include "footer.html" %}
-<script>
-
-	$('.switch').on("click", function() {
-	    $(this).siblings($(".spinner-border")).css("display", "inline-block")
-	    $(this).remove()
-		location.replace("/switch/"+$(this).attr('id'))
-    });
-	$(".sb-home-url").addClass("active");
-
-    $(".card-body").on("click", function(handle){
-        if ($(handle.target).attr("class") !== "bi bi-toggle2-off" && $(handle.target).attr("class") !== "bi bi-toggle2-on") {
-            window.open($(this).find("a").attr("href"), "_self");
-        }
-    })
-</script>
 </html>
