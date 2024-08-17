@@ -267,7 +267,7 @@ firewall-cmd --reload
 3. Install WGDashboard
 
    ```shell
-   sudo chmod u+x wgd.sh
+   sudo chmod u+x wgd.sh && \
    sudo ./wgd.sh install
    ```
 
