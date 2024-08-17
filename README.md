@@ -17,33 +17,36 @@
   <a href="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6"><img src="https://wakatime.com/badge/user/45f53c7c-9da9-4cb0-85d6-17bd38cc748b/project/5334ae20-e9a6-4c55-9fea-52d4eb9dfba6.svg" alt="wakatime"></a>
   <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
-<p align="center">Monitoring WireGuard is not convenient, need to login into server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
-<p align="center"><small><i>This project is not affiliate to the official WireGuard Project</i></small></p>
+<p align="center">Monitoring WireGuard is not convenient, need to remote access to server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
+<p align="center">With all these awesome features, while keeping it <b>simple</b>, <b>easy to install and use</b></p>
+
+<p align="center"><b><i>This project is not affiliate to the official WireGuard Project</i></b></p>
 
 ## 📣 What's New: v4.0
 
-- 🎉  **New Features**
-  - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
-  - **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the [Docker](#-docker-solutions) section below.
-  - **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
-  - **Share Peer's QR Code with Public Link**: You can share a peer's QR code and `.conf` file without the need to loging in.
-  - **WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the [API Documentation](./docs/api-documents.md).
-  - **Logging**: Dashboard will now log all activity on the dashboard and API requests.
-  - **Time-Based One-Time Password (TOTP)**: You can enable this function to add one more layer of security, and generate the TOTP with your choice of authenticator.
-  - **Designs**
-    - **Real-time Graphs**: You can view real-time data changes with graphs in each configuration.
-    - **Night mode**: You know what that means, it avoids bugs ;)
-  - **Enforce Python Virtual Environment**: I noticed newer Python version (3.12) does not allow to install packages globally, and plus I think is a good idea to use venv.
- 
-- **🧐  Other Changes**
-  - **Deprecated jQuery from the project, and migrated and rewrote the whole front-end with Vue.js. This allows the dashboard is future proofed, and potential cross server access with a desktop app.**
-  - Rewrote the backend into a REST API structure
-  - Improved SQL query efficient
-  - Removed all templates, except for `index.html` where it will load the Vue.js app.
-  - Parsing names in `.conf`
-  - Minimized the need to read `.conf`, only when any `.conf` is modified
+### 🎉 New Features
 
-- **🥘  New Experimental Features**
+- **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
+- **Docker Solution**: We now have 2 docker solutions! Thanks to @DaanSelen & @shuricksumy for providing them. For more information, please see the [Docker](#-docker-solutions) section below.
+- **Peer Job Scheduler**: Now you can schedule jobs for each peer to either **restrict** or **delete** the peer if the peer's total / upload / download data usage exceeded a limit, or you can set a specific datetime to restrict or delete the peer.
+- **Share Peer's QR Code with Public Link**: You can share a peer's QR code and `.conf` file without the need to loging in.
+- **WGDashboard's REST API**: You can now request all the api endpoint used in the dashboard. For more details please review the [API Documentation](./docs/api-documents.md).
+- **Logging**: Dashboard will now log all activity on the dashboard and API requests.
+- **Time-Based One-Time Password (TOTP)**: You can enable this function to add one more layer of security, and generate the TOTP with your choice of authenticator.
+- **Designs**
+  - **Real-time Graphs**: You can view real-time data changes with graphs in each configuration.
+  - **Night mode**: You know what that means, it avoids bugs ;)
+- **Enforce Python Virtual Environment**: I noticed newer Python version (3.12) does not allow to install packages globally, and plus I think is a good idea to use venv.
+ 
+### 🧐 Other Changes
+- **Deprecated jQuery from the project, and migrated and rewrote the whole front-end with Vue.js. This allows the dashboard is future proofed, and potential cross server access with a desktop app.**
+- Rewrote the backend into a REST API structure
+- Improved SQL query efficient
+- Removed all templates, except for `index.html` where it will load the Vue.js app.
+- Parsing names in `.conf`
+- Minimized the need to read `.conf`, only when any `.conf` is modified
+
+### 🥘 New Experimental Features
   - **Cross-Server Access**: Now you can access other servers that installed `v4` of WGDashboard through API key.
   - **Desktop App**: Thanks to **Cross-Server Access**, you can now download an ElectronJS based desktop app of WGDashboard, and use that to access WGDashboard on different servers.
   - > For more information, please scroll down to [🥘 Experimental Functions](#-experimental-functions)
@@ -58,6 +61,9 @@
 
 <!-- TOC -->
   * [📣 What's New: v4.0](#-whats-new-v40)
+    * [🎉 New Features](#-new-features)
+    * [🧐 Other Changes](#-other-changes)
+    * [🥘 New Experimental Features](#-new-experimental-features)
   * [Table of Content](#table-of-content)
   * [💡 Features](#-features)
   * [📝 Requirements](#-requirements)
@@ -84,10 +90,12 @@
   * [🐬 Docker Solutions](#-docker-solutions)
     * [Solution 1 from @DaanSelen](#solution-1-from-daanselen)
     * [Solution 2 from @shuricksumy](#solution-2-from-shuricksumy)
+  * [📖 WGDashboard REST API Documentation & How to use API Key](#-wgdashboard-rest-api-documentation--how-to-use-api-key)
   * [🥘 Experimental Functions](#-experimental-functions)
     * [Cross-Server Access](#cross-server-access)
     * [Desktop App](#desktop-app)
   * [🔍 Screenshot](#-screenshot)
+  * [🕰️ Changelogs](#-changelogs)
 <!-- TOC -->
 
 ## 💡 Features
@@ -251,7 +259,7 @@ firewall-cmd --reload
 ### Manual Installation
 
 > [!NOTE]
-> To ensure a smooth install process, please make sure Python 3.10/3.11/3.12, `git`, `wireguard-tools` and `net-tools` are installed :)
+> To ensure a smooth installation process, please make sure Python 3.10/3.11/3.12, `git`, `wireguard-tools` and `net-tools` are installed :)
 
 1. Download WGDashboard
 
