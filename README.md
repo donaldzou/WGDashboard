@@ -105,12 +105,12 @@
 | 22.04 LTS | 11.10  |                          |          | 39     |
 | 24.02 LTS |        |                          |          | 38     |
 
-> ![!TIP] 
+> [!TIP] 
 > **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
 
 ### Existing WireGuard Configurations
 
-> ![!NOTE]
+> [!NOTE]
 > This only applies to existing WireGuard Configuration under `/etc/wireguard`
 
 ```ini
