@@ -90,17 +90,34 @@
 
 ## 📝 Requirement
 
-- Recommend the following OS, tested by our beloved users:
-  - [x] Ubuntu 18.04.1 LTS, 20.04.1 LTS, 22.04.4 LTS, 24.02 LTS, Fedora 38 [@Me]
-  - [x] Debian GNU/Linux 10 (buster) [❤️ @[robchez](https://github.com/robchez)]
-  - [x] AlmaLinux 8.4 (Electric Cheetah) [❤️ @[barry-smithjr](https://github.com/)]
-  - [x] CentOS 7 [❤️ @[PrzemekSkw](https://github.com/PrzemekSkw)]
+- Tested on the following Operating Systems
+    > [!Note]
+    > All operating systems I tested are ARM64 ran in UTM Virtual Machine.
+ 
+    | Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
+    |-----------|--------|--------------------------|----------|--------|
+    | 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
+    | 22.04 LTS | 11.10  |                          |          | 39     |
+    | 24.02 LTS |        |                          |          | 38     |
 
-  > **If you have tested on other OS and it works perfectly please provide it to me in [#31](https://github.com/donaldzou/wireguard-dashboard/issues/31). Thank you!**
+    > ![!Tip] 
+    > **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
 
 - **WireGuard** and **WireGuard-Tools (`wg-quick`)**  are installed.
 
+  > [!TIPS]
   > Don't know how? Check this <a href="https://www.wireguard.com/install/">official documentation</a>
+
+- `git`, `net-tools`， `sudo` (_This only apply to RHEL 9 & 8, can't believe it doesn't come with `sudo` installed lol)_
+
+- Python 3.10 / 3.11 / 3.12
+
+    > [!TIPS]
+    > Check your Python version with
+    > ```shell
+    > $ python3 --version
+    > Python 3.12.0
+    > ``` 
 
 - Configuration files under **`/etc/wireguard`**, but please note the following sample
 
@@ -120,13 +137,54 @@
   
   > With `v4`, WGDashboard will look for entry with `#Name# = abc...` in each peer and use that for the name.
 
-- **Python 3.10** for v4.0+, **Python 3.7 - 3.9** for v2.0 - v3.0.6.2
+
 
 ## 🛠 Install
+
+### Install Commands
+
+These commands are tested by myself in each OS. It contains commands to install WireGuard, Git, Net Tools, and even Python on some OS.
+
+> [!WARNING]
+> Please makesure you understand these commands before you run them
+
+#### Ubuntu 20.04 LTS
+
+```shell
+sudo add-apt-repository ppa:deadsnakes/ppa -y && \
+sudo apt-get update -y && \
+sudo apt-get install python3.10 python3.10-distutils wireguard-tools net-tools --no-install-recommends -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p
+```
+
+#### Ubuntu 22.04 LTS & Ubuntu 24.02 LTS
+
+```shell
+sudo apt-get update -y && \
+sudo apt install wireguard-tools net-tools --no-install-recommends -y && \
+git clone -b v4 https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+
+
+### Manual Installation
+
+> ![!NOTE]
+> To ensure a smooth install process, please make sure Python 3.10/3.11/3.12, `git`, `wireguard-tools` and `net-tools` are installed :)
+
 1. Download WGDashboard
 
    ```shell
-   git clone -b v4.0 https://github.com/donaldzou/WGDashboard.git wgdashboard
+   git clone https://github.com/donaldzou/WGDashboard.git wgdashboard
    
 2. Open the WGDashboard folder
 
@@ -152,14 +210,12 @@
    ```shell
    sudo ./wgd.sh start
    ```
-   
-   **Note**:
-
-   > For [`pivpn`](https://github.com/pivpn/pivpn) user, please use `sudo ./wgd.sh start` to run if your current account does not have the permission to run `wg show` and `wg-quick`.
 
 6. Access dashboard
 
    Access your server with port `10086` (e.g. http://your_server_ip:10086), using username `admin` and password `admin`. See below how to change port and ip that the dashboard is running with.
+
+
 
 ## 🪜 Usage
 
