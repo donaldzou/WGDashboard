@@ -1,25 +1,3 @@
-### Development on v4
-Hi Everyone, I've decided to promote the long time working `v3.1` to `v4`! This version will be a huge update on the structure of the app. The frontend will be completely handle on the client side with Vue.js, and communicate with the server via REST Api. With this design, it could be possible for the frontend app to connect to multiple server in the future. Stay tune to this new verion, I'm working very hard on this while balancing school and work. If you would like know whats going on, you can check out [this branch](https://github.com/donaldzou/WGDashboard/tree/v4) 😊
-
-> For more information, you can visit: https://github.com/donaldzou/WGDashboard/issues/293
-
-> If you're interested in the Desktop App of v4.0, please visit [WGDashboard Desktop](https://github.com/donaldzou/WGDashboard-Desktop) ;)
-
-#### A preview on v4.0 🥹
-
-<img src="https://github.com/donaldzou/WGDashboard/raw/main/img/v4.0Preview.gif">
-
-> Working example of API Key and CORS ;)
-
-<img src="https://github.com/donaldzou/WGDashboard/raw/main/img/ScreenRecording2024-07-31at2.16.15AM-ezgif.com-video-to-gif-converter.gif">
-
-
-<hr>
-
-##### Known issue on WGDashboard `v3.0 - v3.0.6`
-- [IPv6 in WireGuard might not fully support.](https://github.com/donaldzou/WGDashboard/issues/167)
-<hr>
-
 <p align="center">
   <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
 </p>
