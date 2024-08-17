@@ -519,6 +519,9 @@ Please visit [shuricksumy/docker-wgdashboard](https://github.com/shuricksumy/doc
 
 > For questions or issues related to Docker, please visit [#272](https://github.com/donaldzou/WGDashboard/issues/272)
 
+## 📖 WGDashboard REST API Documentation & How to use API Key
+
+Please visit the [API Documentation](./docs/api-documents.md)
 
 ## 🥘 Experimental Functions
 
@@ -537,7 +540,6 @@ To download the app, please visit the [latest release](https://github.com/donald
 
 ![ElectronJS App Demo](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/electronjs-app.gif)
 
- 
 ## 🔍 Screenshot
 
 ![Sign In](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/sign-in.png)
@@ -550,3 +552,7 @@ To download the app, please visit the [latest release](https://github.com/donald
 ![Add Peers](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/add-peers.png)
 ![Ping](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/ping.png)
 ![Traceroute](https://donaldzou.nyc3.cdn.digitaloceanspaces.com/wgdashboard-images/traceroute.png)
+
+## 🕰️ Changelogs
+
+Please visit the [Changelogs.md](./docs/changelogs.md)
