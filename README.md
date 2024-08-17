@@ -56,22 +56,39 @@
 
 ## Table of Content
 
-
-- [💡  Features](#-features)
-- [📝  Requirement](#-requirement)
-- [🛠  Install](#-install)
-- [🪜  Usage](#-usage)
-  - [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
-  - [Autostart WGDashboard on boot](#autostart-wgdashboard-on-boot--v22)
-- [✂️  Dashboard Configuration](#%EF%B8%8F-dashboard-configuration)
-  - [Dashboard Configuration file](#dashboard-configuration-file)
-  - [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
-- [❓  How to update the dashboard?](#-how-to-update-the-dashboard)
-- [🐬  Docker Solutions](#-docker-solutions)
-- [📖  How to use API Key & API Document](./docs/api-documents.md)
-- [🥘 Experimental Functions](#-experimental-functions)
-- [🔍  Screenshot](#-screenshot)
-- [⏰  Changelog](./docs/api-documents.md)
+<!-- TOC -->
+  * [📣 What's New: v4.0](#-whats-new-v40)
+  * [Table of Content](#table-of-content)
+  * [💡 Features](#-features)
+  * [📝 Requirements](#-requirements)
+    * [Supported Operating Systems](#supported-operating-systems)
+    * [Existing WireGuard Configurations](#existing-wireguard-configurations)
+  * [🛠 Install](#-install)
+    * [Install Commands](#install-commands)
+      * [Ubuntu 20.04 LTS](#ubuntu-2004-lts)
+      * [Ubuntu 22.04 LTS & Ubuntu 24.02 LTS](#ubuntu-2204-lts--ubuntu-2402-lts)
+      * [Debian 12.6](#debian-126)
+      * [Debian 11.10](#debian-1110)
+      * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream](#red-hat-enterprise-linux-94--centos-9-stream)
+      * [Fedora 40 & Fedora 39 & Fedora 38](#fedora-40--fedora-39--fedora-38)
+    * [Manual Installation](#manual-installation)
+  * [🪜 Usage](#-usage)
+      * [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
+      * [Autostart WGDashboard on boot (>= v2.2)](#autostart-wgdashboard-on-boot--v22)
+  * [✂️ Dashboard Configuration](#-dashboard-configuration)
+      * [Dashboard Configuration file](#dashboard-configuration-file)
+      * [Generating QR code and peer configuration file (.conf)](#generating-qr-code-and-peer-configuration-file-conf)
+  * [❓ How to update the dashboard?](#-how-to-update-the-dashboard)
+      * [**Please note for users who are using `v3 - v3.0.6` want to update to `v4.0`**](#please-note-for-users-who-are-using-v3---v306-want-to-update-to-v40)
+      * [**Please note for users who are using `v2.3.1` or below**](#please-note-for-users-who-are-using-v231-or-below)
+  * [🐬 Docker Solutions](#-docker-solutions)
+    * [Solution 1 from @DaanSelen](#solution-1-from-daanselen)
+    * [Solution 2 from @shuricksumy](#solution-2-from-shuricksumy)
+  * [🥘 Experimental Functions](#-experimental-functions)
+    * [Cross-Server Access](#cross-server-access)
+    * [Desktop App](#desktop-app)
+  * [🔍 Screenshot](#-screenshot)
+<!-- TOC -->
 
 ## 💡 Features
 
@@ -106,7 +123,7 @@
 | 24.02 LTS |        |                          |          | 38     |
 
 > [!TIP] 
-> **If you have tested on other operating systems and it works perfectly please provide it to me. Thank you!**
+> If you installed WGDashboard on other systems without any issues, please let me know. Thank you!
 
 ### Existing WireGuard Configurations
 
@@ -151,13 +168,25 @@ chmod +x ./wgd.sh && \
 sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
 sudo sysctl -p
 ```
-
 #### Ubuntu 22.04 LTS & Ubuntu 24.02 LTS
 
 ```shell
 sudo apt-get update -y && \
 sudo apt install wireguard-tools net-tools --no-install-recommends -y && \
-git clone -b v4 https://github.com/donaldzou/WGDashboard.git && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+#### Debian 12.6
+
+```shell
+apt-get install sudo git iptables -y && \ 
+sudo apt-get update && \
+sudo apt install wireguard-tools net-tools && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
 cd ./WGDashboard/src && \
 chmod +x ./wgd.sh && \
 ./wgd.sh install && \
@@ -165,6 +194,59 @@ sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
 sudo sysctl -p /etc/sysctl.conf
 ```
 
+#### Debian 11.10
+
+> [!WARNING]
+> This commands will download Python 3.10's source code and build from it, since Debian 11.10 doesn't comes with Python 3.10
+
+```shell
+apt-get install sudo -y && \ 
+sudo apt-get update && \ 
+sudo apt install -y git iptables build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev wireguard-tools net-tools && \ 
+wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz && \ 
+tar -xvf Python-3.10.0.tgz && \ 
+cd Python-3.10.0 && \ 
+sudo ./configure --enable-optimizations && \ 
+sudo make && \ 
+sudo make altinstall && \ 
+cd .. && \ 
+git clone https://github.com/donaldzou/WGDashboard.git && \ 
+cd ./WGDashboard/src && \ 
+chmod +x ./wgd.sh && \ 
+./wgd.sh install && \ 
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf
+```
+
+#### Red Hat Enterprise Linux 9.4 & CentOS 9-Stream
+
+```shell
+sudo yum install wireguard-tools net-tools git python3.11 -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf && \
+firewall-cmd --add-port=10086/tcp --permanent && \
+firewall-cmd --add-port=51820/udp --permanent && \
+firewall-cmd --reload
+```
+
+#### Fedora 40 & Fedora 39 & Fedora 38
+
+```shell
+sudo yum install wireguard-tools net-tools git -y && \
+git clone https://github.com/donaldzou/WGDashboard.git && \
+cd ./WGDashboard/src && \
+chmod +x ./wgd.sh && \
+./wgd.sh install && \
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && \
+sudo sysctl -p /etc/sysctl.conf && \
+firewall-cmd --add-port=10086/tcp --permanent && \
+firewall-cmd --add-port=51820/udp --permanent && \
+firewall-cmd --reload
+```
 
 ### Manual Installation
 
