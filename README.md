@@ -501,7 +501,7 @@ Endpoint = 0.0.0.0:51820
     
 2. Update the dashboard
     ```shell
-    git pull https://github.com/donaldzou/WGDashboard.git v4.0 --force
+    git pull https://github.com/donaldzou/WGDashboard.git --force
     ```
 
 3. Install
