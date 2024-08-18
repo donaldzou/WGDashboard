@@ -80,7 +80,7 @@ _installPython(){
 		ubuntu|debian)
 			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
-		centos|fedora|redhat|rehl)
+		centos|fedora|redhat|rehl|almalinux)
 			if command -v dnf &> /dev/null; then
 				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
 			else
@@ -105,7 +105,7 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 			;;
-			centos|fedora|redhat|rhel)
+			centos|fedora|redhat|rhel|almalinux)
 				if command -v dnf &> /dev/null; then
 					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				else
@@ -123,7 +123,7 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-#			centos|fedora|redhat|rhel)
+#			centos|fedora|redhat|rhel|almalinux)
 #				if command -v dnf &> /dev/null; then
 #					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
 #				else
@@ -159,7 +159,7 @@ _installPythonPip(){
 					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
-			centos|fedora|redhat|rhel)
+			centos|fedora|redhat|rhel|almalinux)
 				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
 				else
