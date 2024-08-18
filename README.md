@@ -369,7 +369,7 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 4. Copy the service file to systemd folder
 
    ```bash
-   $ sudo cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
+   sudo cp wg-dashboard.service /etc/systemd/system/wg-dashboard.service
    ```
 
    To make sure you copy the file successfully, you can use this command `cat /etc/systemd/system/wg-dashboard.service` to see if it will output the file you just edited.
@@ -377,16 +377,15 @@ In the `src` folder, it contained a file called `wg-dashboard.service`, we can u
 5. Enable the service
 
    ```bash
-   $ sudo chmod 664 /etc/systemd/system/wg-dashboard.service
-   $ sudo systemctl daemon-reload
-   $ sudo systemctl enable wg-dashboard.service
-   $ sudo systemctl start wg-dashboard.service  # <-- To start the service
+   sudo chmod 664 /etc/systemd/system/wg-dashboard.service
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now wg-dashboard.service # <-- To autostart the service on boot and start the service right now
    ```
 
 6. Check if the service run correctly
 
    ```bash
-   $ sudo systemctl status wg-dashboard.service
+   sudo systemctl status wg-dashboard.service
    ```
    And you should see something like this
 
