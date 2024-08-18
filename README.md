@@ -75,7 +75,7 @@
       * [Ubuntu 22.04 LTS & Ubuntu 24.02 LTS](#ubuntu-2204-lts--ubuntu-2402-lts)
       * [Debian 12.6](#debian-126)
       * [Debian 11.10](#debian-1110)
-      * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream](#red-hat-enterprise-linux-94--centos-9-stream)
+      * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream (also AlmaLinux 9.4)](#red-hat-enterprise-linux-94--centos-9-stream)
       * [Fedora 40 & Fedora 39 & Fedora 38](#fedora-40--fedora-39--fedora-38)
     * [Manual Installation](#manual-installation)
   * [🪜 Usage](#-usage)
