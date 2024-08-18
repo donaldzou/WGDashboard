@@ -220,7 +220,7 @@ _checkPythonVersion(){
 	else
 		printf "[WGDashboard] %s Could not find a compatible version of Python. Current Python is %s.\n" "$heavy_crossmark" "$version"
 		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
-		kill  $TOP_PID
+		kill $TOP_PID
 	fi
 }
 
