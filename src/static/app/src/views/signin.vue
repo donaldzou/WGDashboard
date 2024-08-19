@@ -11,16 +11,22 @@ export default {
 		const store = DashboardConfigurationStore()
 		let theme = "dark"
 		let totpEnabled = false;
+		let version = undefined;
 		if (!store.IsElectronApp){
-			await fetchGet("/api/getDashboardTheme", {}, (res) => {
-				theme = res.data
-			});
-			await fetchGet("/api/isTotpEnabled", {}, (res) => {
-				totpEnabled = res.data
-			});
+			await Promise.all([
+				fetchGet("/api/getDashboardTheme", {}, (res) => {
+					theme = res.data
+				}),
+				fetchGet("/api/isTotpEnabled", {}, (res) => {
+					totpEnabled = res.data
+				}),
+				fetchGet("/api/getDashboardVersion", {}, (res) => {
+					version = res.data
+				})
+			]);
 		}
 		store.removeActiveCrossServer();
-		return {store, theme, totpEnabled}
+		return {store, theme, totpEnabled, version}
 	},
 	data(){
 		return {
@@ -146,7 +152,7 @@ export default {
 			</div>
 		</div>
 		<small class="text-muted pb-3 d-block w-100 text-center mt-3">
-			WGDashboard v4.0 | Developed with ❤️ by 
+			WGDashboard {{ this.version }} | Developed with ❤️ by 
 			<a href="https://github.com/donaldzou" target="_blank"><strong>Donald Zou</strong></a>
 		</small>
 		<div class="messageCentre text-body position-absolute end-0 m-3">

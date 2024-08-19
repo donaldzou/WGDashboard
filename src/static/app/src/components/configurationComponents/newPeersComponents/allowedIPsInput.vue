@@ -36,8 +36,11 @@ export default {
 		addAllowedIp(ip){
 			if(this.store.checkCIDR(ip)){
 				this.data.allowed_ips.push(ip);
+				this.customAvailableIp = ''
 				return true;
 			}
+			this.allowedIpFormatError = true;
+			this.dashboardStore.newMessage('WGDashboard', 'Allowed IP is invalid', 'danger')
 			return false;
 		}
 	},
@@ -80,10 +83,7 @@ export default {
 				       :disabled="bulk">
 				<button class="btn btn-outline-success btn-sm rounded-end-3"
 				        :disabled="bulk || !this.customAvailableIp"
-				        @click="this.addAllowedIp(this.customAvailableIp) 
-				            ? this.customAvailableIp = '' : 
-				            this.allowedIpFormatError = true;
-				            this.dashboardStore.newMessage('WGDashboard', 'Allowed IP is invalid', 'danger')"
+				        @click="this.addAllowedIp(this.customAvailableIp)"
 				        type="button" id="button-addon2">
 					<i class="bi bi-plus-lg"></i>
 				</button>

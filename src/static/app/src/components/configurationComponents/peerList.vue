@@ -200,7 +200,8 @@ export default {
 					})
 					this.loading = false;
 					if (this.configurationPeers.length > 0){
-						const sent = this.configurationPeers.map(x => x.total_sent + x.cumu_sent).reduce((x,y) => x + y).toFixed(4);
+						const sent = this.configurationPeers.map(x => x.total_sent + x.cumu_sent)
+							.reduce((x,y) => x + y).toFixed(4);
 						const receive = this.configurationPeers.map(x => x.total_receive + x.cumu_receive).reduce((x,y) => x + y).toFixed(4);
 						if (
 							this.historyDataSentDifference[this.historyDataSentDifference.length - 1] !== sent
@@ -259,13 +260,13 @@ export default {
 				connectedPeers: this.configurationPeers.filter(x => x.status === "running").length,
 				totalUsage: this.configurationPeers.length > 0 ? 
 					this.configurationPeers.filter(x => !x.restricted)
-						.map(x => x.total_data + x.cumu_data).reduce((a, b) => a + b).toFixed(4) : 0,
+						.map(x => x.total_data + x.cumu_data).reduce((a, b) => a + b, 0).toFixed(4) : 0,
 				totalReceive: this.configurationPeers.length > 0 ? 
 					this.configurationPeers.filter(x => !x.restricted)
-						.map(x => x.total_receive + x.cumu_receive).reduce((a, b) => a + b).toFixed(4) : 0,
+						.map(x => x.total_receive + x.cumu_receive).reduce((a, b) => a + b, 0).toFixed(4) : 0,
 				totalSent: this.configurationPeers.length > 0 ? 
 					this.configurationPeers.filter(x => !x.restricted)
-						.map(x => x.total_sent + x.cumu_sent).reduce((a, b) => a + b).toFixed(4) : 0
+						.map(x => x.total_sent + x.cumu_sent).reduce((a, b) => a + b, 0).toFixed(4) : 0
 			}
 			
 			return k
