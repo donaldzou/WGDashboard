@@ -2,7 +2,7 @@
 
 # wgd.sh - Copyright(C) 2024 Donald Zou [https://github.com/donaldzou]
 # Under Apache-2.0 License
-trap "kill  $TOP_PID" 
+#trap "kill $TOP_PID"
 export TOP_PID=$$
 
 app_name="dashboard.py"
@@ -337,7 +337,7 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-  new_ver=$(venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
+  new_ver=$($venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
   printf "%s\n" "$dashes"
   printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
   read up
