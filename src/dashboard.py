@@ -33,7 +33,7 @@ import threading
 
 from flask.json.provider import DefaultJSONProvider
 
-DASHBOARD_VERSION = 'v4.0'
+DASHBOARD_VERSION = 'v4.0.1.1'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
@@ -490,6 +490,7 @@ class WireguardConfiguration:
         # Create tables in database
         self.__createDatabase()
         self.getPeersList()
+        self.getRestrictedPeersList()
 
     def __createDatabase(self):
         existingTables = sqldb.cursor().execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -697,6 +698,7 @@ class WireguardConfiguration:
                     sqldb.cursor().execute("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))
                     sqldb.cursor().execute("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
+                    sqldb.commit()
                     numOfRestrictedPeers += 1
                 except Exception as e:
                     numOfFailedToRestrictPeers += 1
@@ -1115,6 +1117,8 @@ class DashboardConfig:
         self.__createAPIKeyTable()
         self.DashboardAPIKeys = self.__getAPIKeys()
         self.APIAccessed = False
+        self.SetConfig("Server", "version", DASHBOARD_VERSION)
+    
     
     def __createAPIKeyTable(self):
         existingTable = sqldb.cursor().execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
@@ -1344,6 +1348,14 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
                 for i in add:
                     a, c = i.split('/')
                     existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
+
+        for p in configuration.getRestrictedPeersList():
+            if len(p.allowed_ip) > 0:
+                add = p.allowed_ip.split(',')
+                for i in add:
+                    a, c = i.split('/')
+                    existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
+        
         for i in address:
             addressSplit, cidr = i.split('/')
             existedAddress.append(ipaddress.ip_address(addressSplit.replace(" ", "")))
@@ -1419,6 +1431,7 @@ def auth_req():
                          and f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}" != request.path)
                     and "validateAuthentication" not in request.path and "authenticate" not in request.path
                     and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
+                    and "getDashboardVersion" not in request.path
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
             ):
@@ -1751,10 +1764,13 @@ def API_addPeers(configName):
             return ResponseObject(False, "Please fill in all required box.")
         if not config.getStatus():
             config.toggleConfiguration()
+
+        availableIps = _getWireguardConfigurationAvailableIP(configName)
+        
         if bulkAdd:
             if bulkAddAmount < 1:
                 return ResponseObject(False, "Please specify amount of peers you want to add")
-            availableIps = _getWireguardConfigurationAvailableIP(configName)
+            
             if not availableIps[0]:
                 return ResponseObject(False, "No more available IP can assign")
             if bulkAddAmount > len(availableIps[1]):
@@ -1788,6 +1804,11 @@ def API_addPeers(configName):
                 return ResponseObject(False, f"This peer already exist.")
             name = data['name']
             private_key = data['private_key']
+            
+            for i in allowed_ips:
+                if i not in availableIps[1]:
+                    return ResponseObject(False, f"This IP is not available: {i}")
+            
             config.addPeers([{"id": public_key, "allowed_ip": ''.join(allowed_ips)}])
             # subprocess.check_output(
             #     f"wg set {config.Name} peer {public_key} allowed-ips {''.join(allowed_ips)}",
@@ -1856,6 +1877,10 @@ def API_getConfigurationInfo():
 @app.route(f'{APP_PREFIX}/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
+
+@app.route(f'{APP_PREFIX}/api/getDashboardVersion')
+def API_getDashboardVersion():
+    return ResponseObject(data=DashboardConfig.GetConfig("Server", "version")[1])
 
 
 @app.route(f'{APP_PREFIX}/api/savePeerScheduleJob/', methods=["POST"])
@@ -2102,6 +2127,7 @@ def backGroundThread():
                         c.getPeersLatestHandshake()
                         c.getPeersEndpoint()
                         c.getPeersList()
+                        c.getRestrictedPeersList()
                     except Exception as e:
                         print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
             time.sleep(10)
