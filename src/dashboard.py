@@ -119,26 +119,30 @@ class DashboardLogger:
         self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
                                         check_same_thread=False)
         self.loggerdb.row_factory = sqlite3.Row
-        self.loggerdbCursor = self.loggerdb.cursor()
         self.__createLogDatabase()
         self.log(Message="WGDashboard started")
     def __createLogDatabase(self):
-        existingTable = self.loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-        existingTable = [t['name'] for t in existingTable]
-
-        if "DashboardLog" not in existingTable:
-            self.loggerdbCursor.execute(
-                "CREATE TABLE DashboardLog (LogID VARCHAR NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), URL VARCHAR, IP VARCHAR, Status VARCHAR, Message VARCHAR, PRIMARY KEY (LogID))")
-            self.loggerdb.commit()
+        with self.loggerdb:
+            loggerdbCursor = self.loggerdb.cursor()
+            existingTable = loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+            existingTable = [t['name'] for t in existingTable]
+            if "DashboardLog" not in existingTable:
+                loggerdbCursor.execute(
+                    "CREATE TABLE DashboardLog (LogID VARCHAR NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), URL VARCHAR, IP VARCHAR, Status VARCHAR, Message VARCHAR, PRIMARY KEY (LogID))")
+            if self.loggerdb.in_transaction:
+                self.loggerdb.commit()
     
     def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
         try:
-            self.loggerdbCursor.execute(
-                "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
-            self.loggerdb.commit()
-            return True
+            with self.loggerdb:
+                loggerdbCursor = self.loggerdb.cursor()
+                loggerdbCursor.execute(
+                    "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
+                if self.loggerdb.in_transaction:
+                    self.loggerdb.commit()
+                return True
         except Exception as e:
-            print(e)
+            print(f"[WGDashboard] Access Log Error: {str(e)}")
             return False
     
 class PeerJobLogger:
@@ -147,23 +151,29 @@ class PeerJobLogger:
                                      check_same_thread=False)
         self.loggerdb.row_factory = sqlite3.Row
         self.logs:list(Log) = []
-        self.loggerdbCursor = self.loggerdb.cursor()
         self.__createLogDatabase()
         
     def __createLogDatabase(self):
-        existingTable = self.loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-        existingTable = [t['name'] for t in existingTable]
-
-        if "JobLog" not in existingTable:
-            self.loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
-            self.loggerdb.commit()
+        with self.loggerdb:
+            loggerdbCursor = self.loggerdb.cursor()
+        
+            existingTable = loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+            existingTable = [t['name'] for t in existingTable]
+    
+            if "JobLog" not in existingTable:
+                loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
+                if self.loggerdb.in_transaction:
+                    self.loggerdb.commit()
     def log(self, JobID: str, Status: bool = True, Message: str = "") -> bool:
         try:
-            self.loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
-                                        (str(uuid.uuid4()), JobID, Status, Message,))
-            self.loggerdb.commit()
+            with self.loggerdb:
+                loggerdbCursor = self.loggerdb.cursor()
+                loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
+                                            (str(uuid.uuid4()), JobID, Status, Message,))
+                if self.loggerdb.in_transaction:
+                    self.loggerdb.commit()
         except Exception as e:
-            print(e)
+            print(f"[WGDashboard] Peer Job Log Error: {str(e)}")
             return False
         return True
     
@@ -172,11 +182,13 @@ class PeerJobLogger:
         try:
             allJobs = AllPeerJobs.getAllJobs(configName)
             allJobsID = ", ".join([f"'{x.JobID}'" for x in allJobs])
-            table = self.loggerdb.execute(f"SELECT * FROM JobLog WHERE JobID IN ({allJobsID}) ORDER BY LogDate DESC").fetchall()
-            self.logs.clear()
-            for l in table:
-                logs.append(
-                    Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
+            with self.loggerdb:
+                loggerdbCursor = self.loggerdb.cursor()
+                table = loggerdbCursor.execute(f"SELECT * FROM JobLog WHERE JobID IN ({allJobsID}) ORDER BY LogDate DESC").fetchall()
+                self.logs.clear()
+                for l in table:
+                    logs.append(
+                        Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
         except Exception as e:
             return logs
         return logs
@@ -217,41 +229,47 @@ class PeerJobs:
         self.jobdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_job.db'),
                                      check_same_thread=False)
         self.jobdb.row_factory = sqlite3.Row
-        self.jobdbCursor = self.jobdb.cursor()
         self.__createPeerJobsDatabase()
         self.__getJobs()
 
     def __getJobs(self):
         self.Jobs.clear()
-        jobs = self.jobdbCursor.execute("SELECT * FROM PeerJobs WHERE ExpireDate IS NULL").fetchall()
-        for job in jobs:
-            self.Jobs.append(PeerJob(
-                job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
-                job['CreationDate'], job['ExpireDate'], job['Action']))
+        with self.jobdb:
+            jobdbCursor = self.jobdb.cursor()
+            jobs = jobdbCursor.execute("SELECT * FROM PeerJobs WHERE ExpireDate IS NULL").fetchall()
+            for job in jobs:
+                self.Jobs.append(PeerJob(
+                    job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+                    job['CreationDate'], job['ExpireDate'], job['Action']))
     
     def getAllJobs(self, configuration: str = None):
         if configuration is not None:
-            jobs = self.jobdbCursor.execute(
-                f"SELECT * FROM PeerJobs WHERE Configuration = ?", (configuration, )).fetchall()
-            j = []
-            for job in jobs:
-                j.append(PeerJob(
-                    job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
-                    job['CreationDate'], job['ExpireDate'], job['Action']))
-            return j
+            with self.jobdb:
+                jobdbCursor = self.jobdb.cursor()
+                jobs = jobdbCursor.execute(
+                    f"SELECT * FROM PeerJobs WHERE Configuration = ?", (configuration, )).fetchall()
+                j = []
+                for job in jobs:
+                    j.append(PeerJob(
+                        job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
+                        job['CreationDate'], job['ExpireDate'], job['Action']))
+                return j
         return []
 
     def __createPeerJobsDatabase(self):
-        existingTable = self.jobdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-        existingTable = [t['name'] for t in existingTable]
-
-        if "PeerJobs" not in existingTable:
-            self.jobdbCursor.execute('''
-            CREATE TABLE PeerJobs (JobID VARCHAR NOT NULL, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
-            Field VARCHAR NOT NULL, Operator VARCHAR NOT NULL, Value VARCHAR NOT NULL, CreationDate DATETIME,
-            ExpireDate DATETIME, Action VARCHAR NOT NULL, PRIMARY KEY (JobID))
-            ''')
-            self.jobdb.commit()
+        with self.jobdb:
+            jobdbCursor = self.jobdb.cursor()
+        
+            existingTable = jobdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
+            existingTable = [t['name'] for t in existingTable]
+    
+            if "PeerJobs" not in existingTable:
+                jobdbCursor.execute('''
+                CREATE TABLE PeerJobs (JobID VARCHAR NOT NULL, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
+                Field VARCHAR NOT NULL, Operator VARCHAR NOT NULL, Value VARCHAR NOT NULL, CreationDate DATETIME,
+                ExpireDate DATETIME, Action VARCHAR NOT NULL, PRIMARY KEY (JobID))
+                ''')
+                self.jobdb.commit()
 
     def toJson(self):
         return [x.toJson() for x in self.Jobs]
@@ -261,22 +279,25 @@ class PeerJobs:
 
     def saveJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
         try:
-            if (len(str(Job.CreationDate))) == 0:
-                self.jobdbCursor.execute('''
-                INSERT INTO PeerJobs VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%d %H:%M:%S','now'), NULL, ?)
-                ''', (Job.JobID, Job.Configuration, Job.Peer, Job.Field, Job.Operator, Job.Value, Job.Action,))
-                JobLogger.log(Job.JobID, Message=f"Job is created if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
-                
-            else:
-                currentJob = self.jobdbCursor.execute('SELECT * FROM PeerJobs WHERE JobID = ?', (Job.JobID, )).fetchone()
-                if currentJob is not None:
-                    self.jobdbCursor.execute('''
-                        UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
-                        ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
-                    JobLogger.log(Job.JobID, 
-                                  Message=f"Job is updated from if {currentJob['Field']} {currentJob['Operator']} {currentJob['value']} then {currentJob['Action']}; to if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
-            self.jobdb.commit()
-            self.__getJobs()
+            with self.jobdb:
+                jobdbCursor = self.jobdb.cursor()
+            
+                if (len(str(Job.CreationDate))) == 0:
+                    jobdbCursor.execute('''
+                    INSERT INTO PeerJobs VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%d %H:%M:%S','now'), NULL, ?)
+                    ''', (Job.JobID, Job.Configuration, Job.Peer, Job.Field, Job.Operator, Job.Value, Job.Action,))
+                    JobLogger.log(Job.JobID, Message=f"Job is created if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
+                    
+                else:
+                    currentJob = jobdbCursor.execute('SELECT * FROM PeerJobs WHERE JobID = ?', (Job.JobID, )).fetchone()
+                    if currentJob is not None:
+                        jobdbCursor.execute('''
+                            UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
+                            ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
+                        JobLogger.log(Job.JobID, 
+                                      Message=f"Job is updated from if {currentJob['Field']} {currentJob['Operator']} {currentJob['value']} then {currentJob['Action']}; to if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
+                self.jobdb.commit()
+                self.__getJobs()
         
             return True, list(
                 filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
@@ -288,10 +309,12 @@ class PeerJobs:
         try:
             if (len(str(Job.CreationDate))) == 0:
                 return False, "Job does not exist"
-            self.jobdbCursor.execute('''
-                UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
-            ''', (Job.JobID,))
-            self.jobdb.commit()
+            with self.jobdb:
+                jobdbCursor = self.jobdb.cursor()
+                jobdbCursor.execute('''
+                    UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
+                ''', (Job.JobID,))
+                self.jobdb.commit()
             JobLogger.log(Job.JobID, Message=f"Job is removed due to being deleted or finshed.")
             self.__getJobs()
             return True, list(
@@ -364,10 +387,9 @@ class PeerShareLink:
 class PeerShareLinks:
     def __init__(self):
         self.Links: list[PeerShareLink] = []
-        self.PeerShareLinkCursor = sqldb.cursor()
-        existingTables = self.PeerShareLinkCursor.execute("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
+        existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
         if len(existingTables) == 0:
-            self.PeerShareLinkCursor.execute(
+            sqlUpdate(
                 """
                     CREATE TABLE PeerShareLinks (
                         ShareID VARCHAR NOT NULL PRIMARY KEY, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
@@ -376,12 +398,12 @@ class PeerShareLinks:
                     )
                 """
             )
-            sqldb.commit()
+            # sqldb.commit()
         self.__getSharedLinks()
         # print(self.Links)
     def __getSharedLinks(self):
         self.Links.clear()
-        allLinks = self.PeerShareLinkCursor.execute("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
+        allLinks = sqlSelect("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
         for link in allLinks:
             self.Links.append(PeerShareLink(*link))
     
@@ -397,18 +419,17 @@ class PeerShareLinks:
         try:
             newShareID = str(uuid.uuid4())
             if len(self.getLink(Configuration, Peer)) > 0:
-                self.PeerShareLinkCursor.execute("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
-            self.PeerShareLinkCursor.execute("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
-            sqldb.commit()
+                sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
+            sqlUpdate("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
+            # sqldb.commit()
             self.__getSharedLinks()
         except Exception as e:
             return False, str(e)
         return True, newShareID
     
     def updateLinkExpireDate(self, ShareID, ExpireDate: datetime = None) -> tuple[bool, str]:
-    
-        self.PeerShareLinkCursor.execute("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?;", (ExpireDate, ShareID, ))
-        sqldb.commit()
+        sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?;", (ExpireDate, ShareID, ))
+        # sqldb.commit()
         self.__getSharedLinks()
         return True, ""
         
@@ -493,10 +514,10 @@ class WireguardConfiguration:
         self.getRestrictedPeersList()
 
     def __createDatabase(self):
-        existingTables = sqldb.cursor().execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         existingTables = [t['name'] for t in existingTables]
         if self.Name not in existingTables:
-            sqldb.cursor().execute(
+            sqlUpdate(
                 """
                 CREATE TABLE '%s'(
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
@@ -509,10 +530,10 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            sqldb.commit()
+            # sqldb.commit()
 
         if f'{self.Name}_restrict_access' not in existingTables:
-            sqldb.cursor().execute(
+            sqlUpdate(
                 """
                 CREATE TABLE '%s_restrict_access' (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
@@ -525,9 +546,9 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            sqldb.commit()
+            # sqldb.commit()
         if f'{self.Name}_transfer' not in existingTables:
-            sqldb.cursor().execute(
+            sqlUpdate(
                 """
                 CREATE TABLE '%s_transfer' (
                     id VARCHAR NOT NULL, total_receive FLOAT NULL,
@@ -536,9 +557,9 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            sqldb.commit()
+            # sqldb.commit()
         if f'{self.Name}_deleted' not in existingTables:
-            sqldb.cursor().execute(
+            sqlUpdate(
                 """
                 CREATE TABLE '%s_deleted' (
                     id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, 
@@ -551,7 +572,7 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            sqldb.commit()
+            # sqldb.commit()
     
             
 
@@ -564,7 +585,7 @@ class WireguardConfiguration:
 
     def __getRestrictedPeers(self):
         self.RestrictedPeers = []
-        restricted = sqldb.cursor().execute("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
+        restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
         for i in restricted:
             self.RestrictedPeers.append(Peer(i, self))
 
@@ -600,7 +621,7 @@ class WireguardConfiguration:
                 
                 for i in p:
                     if "PublicKey" in i.keys():
-                        checkIfExist = sqldb.cursor().execute("SELECT * FROM '%s' WHERE id = ?" % self.Name,
+                        checkIfExist = sqlSelect("SELECT * FROM '%s' WHERE id = ?" % self.Name,
                                                       ((i['PublicKey']),)).fetchone()
                         if checkIfExist is None:
                             newPeer = {
@@ -626,7 +647,7 @@ class WireguardConfiguration:
                                 "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
                                 "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
                             }
-                            sqldb.cursor().execute(
+                            sqlUpdate(
                                 """
                                 INSERT INTO '%s'
                                     VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
@@ -634,12 +655,12 @@ class WireguardConfiguration:
                                     :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
                                 """ % self.Name
                                 , newPeer)
-                            sqldb.commit()
+                            # sqldb.commit()
                             self.Peers.append(Peer(newPeer, self))
                         else:
-                            sqldb.cursor().execute("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
+                            sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
                                            (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
-                            sqldb.commit()
+                            # sqldb.commit()
                             self.Peers.append(Peer(checkIfExist, self))
             except Exception as e:
                 print(f"[WGDashboard] {self.Name} Error: {str(e)}")
@@ -666,11 +687,11 @@ class WireguardConfiguration:
             self.toggleConfiguration()
         
         for i in listOfPublicKeys:
-            p = sqldb.cursor().execute("SELECT * FROM '%s_restrict_access' WHERE id = ?" % self.Name, (i,)).fetchone()
+            p = sqlSelect("SELECT * FROM '%s_restrict_access' WHERE id = ?" % self.Name, (i,)).fetchone()
             if p is not None:
-                sqldb.cursor().execute("INSERT INTO '%s' SELECT * FROM %s_restrict_access WHERE id = ?"
+                sqlUpdate("INSERT INTO '%s' SELECT * FROM %s_restrict_access WHERE id = ?"
                                % (self.Name, self.Name,), (p['id'],))
-                sqldb.cursor().execute("DELETE FROM '%s_restrict_access' WHERE id = ?"
+                sqlUpdate("DELETE FROM '%s_restrict_access' WHERE id = ?"
                                % self.Name, (p['id'],))
                 subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
                                         shell=True, stderr=subprocess.STDOUT)
@@ -693,12 +714,12 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqldb.cursor().execute("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
+                    sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
-                    sqldb.cursor().execute("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
+                    sqlUpdate("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))
-                    sqldb.cursor().execute("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
-                    sqldb.commit()
+                    sqlUpdate("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
+                    # sqldb.commit()
                     numOfRestrictedPeers += 1
                 except Exception as e:
                     numOfFailedToRestrictPeers += 1
@@ -725,7 +746,7 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqldb.cursor().execute("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
+                    sqlUpdate("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
                     numOfDeletedPeers += 1
                 except Exception as e:
                     numOfFailedToDeletePeers += 1
@@ -801,7 +822,7 @@ class WireguardConfiguration:
             data_usage = [p.split("\t") for p in data_usage]
             for i in range(len(data_usage)):
                 if len(data_usage[i]) == 3:
-                    cur_i = sqldb.cursor().execute(
+                    cur_i = sqlSelect(
                         "SELECT total_receive, total_sent, cumu_receive, cumu_sent, status FROM '%s' WHERE id= ? "
                         % self.Name, (data_usage[i][0],)).fetchone()
                     if cur_i is not None:
@@ -816,7 +837,7 @@ class WireguardConfiguration:
                             total_sent = cur_total_sent
                             total_receive = cur_total_receive
                         else:
-                            sqldb.cursor().execute(
+                            sqlUpdate(
                                 "UPDATE '%s' SET cumu_receive = ?, cumu_sent = ?, cumu_data = ? WHERE id = ?" %
                                 self.Name, (cumulative_receive, cumulative_sent,
                                             cumulative_sent + cumulative_receive,
@@ -826,7 +847,7 @@ class WireguardConfiguration:
                             total_receive = 0
                         _, p = self.searchPeer(data_usage[i][0])
                         if p.total_receive != total_receive or p.total_sent != total_sent:
-                            sqldb.cursor().execute(
+                            sqlUpdate(
                                 "UPDATE '%s' SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
                                 % self.Name, (total_receive, total_sent,
                                               total_receive + total_sent, data_usage[i][0],))
@@ -847,7 +868,7 @@ class WireguardConfiguration:
         for _ in range(int(len(data_usage) / 2)):
             sqldb.execute("UPDATE '%s' SET endpoint = ? WHERE id = ?" % self.Name
                           , (data_usage[count + 1], data_usage[count],))
-            sqldb.commit()
+            # sqldb.commit()
             count += 2
 
     def toggleConfiguration(self) -> [bool, str]:
@@ -982,7 +1003,7 @@ class Peer:
             if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
                 return ResponseObject(False,
                                       "Update peer failed when saving the configuration.")
-            sqldb.cursor().execute(
+            sqlUpdate(
                 '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
                 keepalive = ?, preshared_key = ? WHERE id = ?''' % self.configuration.Name,
                 (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
@@ -1035,11 +1056,11 @@ PersistentKeepalive = {str(self.keepalive)}
     def resetDataUsage(self, type):
         try:
             if type == "total":
-                sqldb.cursor().execute("UPDATE '%s' SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqlUpdate("UPDATE '%s' SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
             elif type == "receive":
-                sqldb.cursor().execute("UPDATE '%s' SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqlUpdate("UPDATE '%s' SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
             elif type == "sent":
-                sqldb.cursor().execute("UPDATE '%s' SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                sqlUpdate("UPDATE '%s' SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
             else:
                 return False
         except Exception as e:
@@ -1121,13 +1142,13 @@ class DashboardConfig:
     
     
     def __createAPIKeyTable(self):
-        existingTable = sqldb.cursor().execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
+        existingTable = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
         if len(existingTable) == 0:
-            sqldb.cursor().execute("CREATE TABLE DashboardAPIKeys (Key VARCHAR NOT NULL PRIMARY KEY, CreatedAt DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')), ExpiredAt VARCHAR)")
-            sqldb.commit()
+            sqlUpdate("CREATE TABLE DashboardAPIKeys (Key VARCHAR NOT NULL PRIMARY KEY, CreatedAt DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')), ExpiredAt VARCHAR)")
+            # sqldb.commit()
     
     def __getAPIKeys(self) -> list[DashboardAPIKey]:
-        keys = sqldb.cursor().execute("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
+        keys = sqlSelect("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
         fKeys = []
         for k in keys:
             fKeys.append(DashboardAPIKey(*k))
@@ -1135,13 +1156,13 @@ class DashboardConfig:
     
     def createAPIKeys(self, ExpiredAt = None):
         newKey = secrets.token_urlsafe(32)
-        sqldb.cursor().execute('INSERT INTO DashboardAPIKeys (Key, ExpiredAt) VALUES (?, ?)', (newKey, ExpiredAt,))
-        sqldb.commit()
+        sqlUpdate('INSERT INTO DashboardAPIKeys (Key, ExpiredAt) VALUES (?, ?)', (newKey, ExpiredAt,))
+        # sqldb.commit()
         self.DashboardAPIKeys = self.__getAPIKeys()
         
     def deleteAPIKey(self, key):
-        sqldb.cursor().execute("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
-        sqldb.commit()
+        sqlUpdate("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
+        # sqldb.commit()
         self.DashboardAPIKeys = self.__getAPIKeys()
     
     
@@ -1376,6 +1397,17 @@ def _getWireguardConfigurationAvailableIP(configName: str) -> tuple[bool, list[s
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
 cursor = sqldb.cursor()
+
+def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
+    with sqldb:
+        cursor = sqldb.cursor()
+        return cursor.execute(statement, paramters)
+
+def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
+    with sqldb:
+        cursor = sqldb.cursor()
+        cursor.execute(statement, paramters)
+        sqldb.commit()
 
 DashboardConfig = DashboardConfig()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
