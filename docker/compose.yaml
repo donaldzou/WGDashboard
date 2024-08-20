@@ -1,6 +1,6 @@
 services:
   wireguard-dashboard:
-    image: dselen/wgdashboard:dev
+    image: dselen/wgdashboard:latest
     restart: unless-stopped
     container_name: wire-dash
     environment:
@@ -11,7 +11,7 @@ services:
       #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
     ports:
       - 10086:10086/tcp
-      - 51820:51820/udp
+      - 51830:51820/udp
     volumes:
       - conf:/etc/wireguard
       - app:/opt/wireguarddashboard

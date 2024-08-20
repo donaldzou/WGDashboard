@@ -23,8 +23,8 @@ An example of a simple command to get the container running is show below:<br>
 docker run -d \
   --name wireguard-dashboard \
   --restart unless-stopped \
-  -e enable_wg0=true \
-  -e isolated_peers=true \
+  -e enable=wg0 \
+  -e isolate=wg0 \
   -p 10086:10086/tcp \
   -p 51820:51820/udp \
   --cap-add NET_ADMIN \
@@ -89,10 +89,11 @@ To build the image yourself, you need to do a couple things:<br>
 1. Navigate into the docker directory.
 1. (Make sure you have Docker correctly installed, if not: [Click here](https://docs.docker.com/engine/install/)) and run: `docker build . -t <Image name>:<Image tag>` as an example: `docker build . -t dselen/wgdashboard:latest`.<br>This will make Docker compile the image from the resources in the directory you mention, in this case the current one. Let it compile, it takes about a minute or maximally two.
 1. If all went well, see your image with `docker images`. Example below:
-```
+
+```shell
 dselen@dev-mach:~/development/WGDashboard/docker$ docker images
 REPOSITORY           TAG       IMAGE ID       CREATED             SIZE
-dselen/wgdashboard   dev       c96fd96ee3b3   42 minutes ago      314MB
+dselen/wgdashboard   latest       c96fd96ee3b3   42 minutes ago      314MB
 ```
 
 ## Closing remarks:
