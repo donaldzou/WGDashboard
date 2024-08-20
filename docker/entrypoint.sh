@@ -26,6 +26,9 @@ clean_up() {
   else
     echo "No pycaches found, continuing."
   fi
+  
+  echo "Setting permissions to not be world-accesible."
+  chmod 640 /etc/wireguard/*
 }
 
 # === CORE SERVICES ===
@@ -45,7 +48,7 @@ start_core() {
   cd "${WGDASH}"/src || return # If changing the directory fails (permission or presence error), then bash will exist this function, causing the WireGuard Dashboard to not be succesfully launched.
   bash wgd.sh start
 
-  # Isolated peers
+  # Isolated peers feature:
   local configurations=(/etc/wireguard/*)
   IFS=',' read -r -a do_isolate <<< "${isolate}"
   non_isolate=()
@@ -64,9 +67,6 @@ start_core() {
     fi
   done
 
-  echo "Isolate configurations: ${do_isolate[@]}"
-  echo "Non-Isolate configurations: ${non_isolate[@]}"
-
   for interface in "${do_isolate[@]}"; do
     if [ -f "/etc/wireguard/${interface}.conf" ]; then
       echo "Isolating:" $interface
@@ -84,7 +84,7 @@ start_core() {
   
   for interface in "${non_isolate[@]}"; do
     if [ -f "/etc/wireguard/${interface}.conf" ]; then
-      echo "Removing Isolation for:" $interface
+      echo "Removing Isolation if present for:" $interface
       sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
       sed -i "/PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
     else
@@ -108,8 +108,7 @@ start_core() {
 
 # === SET ENV VARS ===
 set_envvars() {
-  echo "------------------------------------------------------------"
-  echo "Setting relevant variables for operation."
+  echo "------------- SETTING ENVIRONMENT VARIABLES ----------------"
 
   # If the timezone is different, for example in North-America or Asia.
   if [ "${tz}" != "$(cat /etc/timezone)" ]; then
@@ -142,7 +141,7 @@ set_envvars() {
 
 # === CLEAN UP ===
 ensure_blocking() {
-  echo "------------------------------------------------------------"
+  echo "-------------- ENSURING CONTAINER CONTINUATION -------------"
   sleep 1s
   echo "Ensuring container continuation."
 
@@ -159,6 +158,7 @@ ensure_blocking() {
 
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 clean_up
+repair
 start_core
 set_envvars
 ensure_blocking

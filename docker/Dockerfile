@@ -10,7 +10,7 @@ ENV wg_net="10.0.0.1"
 ENV tz="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV enable="none"
-ENV isolate="none"
+ENV isolate="wg0"
 ENV public_ip="0.0.0.0"
 
 # Doing basic system maintenance. Change the timezone to the desired timezone.
