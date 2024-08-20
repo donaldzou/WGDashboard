@@ -33,7 +33,7 @@ import threading
 
 from flask.json.provider import DefaultJSONProvider
 
-DASHBOARD_VERSION = 'v4.0.1.1'
+DASHBOARD_VERSION = 'v4.0.2'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
@@ -2031,8 +2031,7 @@ def API_traceroute_execute():
 
 @app.route(f'{APP_PREFIX}/api/getDashboardUpdate')
 def API_getDashboardUpdate():
-    import urllib.request as req;
-    
+    import urllib.request as req
     try:
         r = req.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases/latest", timeout=5).read()
         data = dict(json.loads(r))
@@ -2045,8 +2044,8 @@ def API_getDashboardUpdate():
                 return ResponseObject(message="You're on the latest version")
         return ResponseObject(False)
         
-    except urllib.error.HTTPError as e:
-        return ResponseObject(False, f"Request to GitHub API failed. Returned a {e.code} status.")
+    except urllib.error.HTTPError and urllib.error.URLError as e:
+        return ResponseObject(False, f"Request to GitHub API failed.")
 
 '''
 Sign Up
