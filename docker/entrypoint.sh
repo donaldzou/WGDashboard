@@ -8,7 +8,7 @@ clean_up() {
   echo "Looking for remains of previous instances..."
   local pid_file="${WGDASH}/src/gunicorn.pid"
   if [ -f $pid_file ]; then
-    echo "Found old .pid file, removing."
+    echo "Found old pid file, removing."
     rm $pid_file
   else
     echo "No pid remains found, continuing."
@@ -45,26 +45,56 @@ start_core() {
   cd "${WGDASH}"/src || return # If changing the directory fails (permission or presence error), then bash will exist this function, causing the WireGuard Dashboard to not be succesfully launched.
   bash wgd.sh start
 
-  # The following section takes care of the firewall rules regarding the 'isolated_peers' feature, which allows or drops packets destined from the wg0 to the wg0 interface.
-  if [ "${isolated_peers,,}" = "false" ]; then
-    echo "Isolated peers disabled, adjusting."
+  # Isolated peers
+  local configurations=(/etc/wireguard/*)
+  IFS=',' read -r -a do_isolate <<< "${isolate}"
+  non_isolate=()
 
-    sed -i '/PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP/d' /etc/wireguard/wg0.conf
-    sed -i '/PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP/d' /etc/wireguard/wg0.conf
-  elif [ "${isolated_peers,,}" = "true" ]; then
-    upblocking=$(grep -c "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" /etc/wireguard/wg0.conf)
-    downblocking=$(grep -c "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" /etc/wireguard/wg0.conf)
-    if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
-      echo "Isolated peers enabled, adjusting."
-
-      sed -i '/PostUp = iptables -t nat -I POSTROUTING 1 -s/a PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP' /etc/wireguard/wg0.conf
-      sed -i '/PreDown = iptables -t nat -D POSTROUTING 1 -s/a PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP' /etc/wireguard/wg0.conf
+  for config in "${configurations[@]}"; do
+    local config=$(echo "$config" | sed -e 's|.*/etc/wireguard/||' -e 's|\.conf$||')
+    found=false
+    for interface in "${do_isolate[@]}"; do
+      if [[ "$config" == "$interface" ]]; then
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      non_isolate+=("$config")
     fi
+  done
 
-  fi
+  echo "Isolate configurations: ${do_isolate[@]}"
+  echo "Non-Isolate configurations: ${non_isolate[@]}"
+
+  for interface in "${do_isolate[@]}"; do
+    if [ -f "/etc/wireguard/${interface}.conf" ]; then
+      echo "Isolating:" $interface
+      upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
+      downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
+
+      if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
+        sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
+        sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
+      fi
+    else
+      echo "Configuration for $interface does not seem to exist, continuing."
+    fi
+  done
+  
+  for interface in "${non_isolate[@]}"; do
+    if [ -f "/etc/wireguard/${interface}.conf" ]; then
+      echo "Removing Isolation for:" $interface
+      sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
+      sed -i "/PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
+    else
+      echo "Configuration for $interface does not seem to exist, continuing."
+    fi
+  done
 
   # The following section takes care of enabling wireguard interfaces on startup.
   IFS=',' read -r -a enable_array <<< "${enable}"
+
   for interface in "${enable_array[@]}"; do
     echo "Preference for $interface to be turned on found."
     if [ -f "/etc/wireguard/${interface}.conf" ]; then

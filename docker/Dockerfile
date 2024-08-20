@@ -9,8 +9,8 @@ ENV wg_net="10.0.0.1"
 # Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
 ENV tz="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
-ENV enable="(`none`)"
-ENV isolated_peers="true"
+ENV enable="none"
+ENV isolate="none"
 ENV public_ip="0.0.0.0"
 
 # Doing basic system maintenance. Change the timezone to the desired timezone.
@@ -66,7 +66,7 @@ RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
   && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /wg0.conf \
   && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /wg0.conf \
   && echo "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" >> /wg0.conf \
-  && echo "PreDown = iptables -t nat -D POSTROUTING 1" >> /wg0.conf \
+  && echo "PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /wg0.conf \
   && echo "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" >> /wg0.conf \
   && echo "ListenPort = 51820" >> /wg0.conf \
   #&& echo "DNS = ${global_dns}" >> /wg0.conf \
