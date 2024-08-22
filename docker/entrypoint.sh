@@ -26,8 +26,14 @@ ensure_installation() {
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     echo "Standard wg0 Configuration file not found, grabbing template."
     cp "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
+
+    echo "Setting a secure private key."
+    local privateKey=$(wg genkey)
+    sed -i "s|^PrivateKey =$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
+    sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
+    echo "Done setting template."
   else
-    echo "Standard wg0 Configuration file found, using that."
+    echo "Existing wg0 configuration file found, using that."
   fi
 }
 
@@ -58,6 +64,11 @@ clean_up() {
   else
     echo "No pycaches found, continuing."
   fi
+
+  local logdir="${WGDASH}/src/log"
+  echo "Cleaning log directory."
+  rm ${logdir}/access_*.log ${logdir}/error_*.log
+  echo "Removed unneeded logs!"
 }
 
 #update_checker() {
@@ -135,17 +146,22 @@ start_core() {
 
   # Isolating the matches.
   for interface in "${do_isolate[@]}"; do
-    if [ -f "/etc/wireguard/${interface}.conf" ]; then
-      echo "Isolating interface:" $interface
-      upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
-      downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
-
-      if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
-        sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
-        sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
-      fi
+    if [ "$interface" = "none" ]; then
+      echo "Found: $interface, stopping isolation checking."
+      break
     else
-      echo "Configuration for $interface does not seem to exist, continuing."
+      if [ -f "/etc/wireguard/${interface}.conf" ]; then
+        echo "Isolating interface:" $interface
+        upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
+        downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
+
+        if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
+          sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
+          sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
+        fi
+      else
+        echo "Configuration for $interface does not seem to exist, continuing."
+      fi
     fi
   done
   
@@ -164,18 +180,23 @@ start_core() {
   IFS=',' read -r -a enable_array <<< "${enable}"
 
   for interface in "${enable_array[@]}"; do
-    echo "Enabling interface:" $interface
-    
-    local fileperms=$(stat -c "%a" /etc/wireguard/${interface}.conf)
-    if [ $fileperms -eq 644 ]; then
-      echo "Configuration is world accessible, adjusting."
-      chmod 600 "/etc/wireguard/${interface}.conf"    
-    fi
-
-    if [ -f "/etc/wireguard/${interface}.conf" ]; then
-      wg-quick up $interface
+    if [ "$interface" = "none" ]; then
+      echo "Found: $interface, stopping enabling checking."
+      break
     else
-      echo "No corresponding configuration file found for $interface doing nothing."
+      echo "Enabling interface:" $interface
+      
+      local fileperms=$(stat -c "%a" /etc/wireguard/${interface}.conf)
+      if [ $fileperms -eq 644 ]; then
+        echo "Configuration is world accessible, adjusting."
+        chmod 600 "/etc/wireguard/${interface}.conf"    
+      fi
+
+      if [ -f "/etc/wireguard/${interface}.conf" ]; then
+        wg-quick up $interface
+      else
+        echo "No corresponding configuration file found for $interface doing nothing."
+      fi
     fi
   done
 }

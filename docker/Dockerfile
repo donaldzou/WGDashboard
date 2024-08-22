@@ -23,19 +23,11 @@ ENV WGDASH=/opt/wireguarddashboard
 
 # Doing package management operations, such as upgrading
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    git \
-    iproute2 \
-    iptables \
-    iputils-ping \
-    openresolv \
-    procps \
-    python3 \
-    python3-pip \
-    python3-venv \
-    traceroute \
-    wireguard \
-    wireguard-tools \
+    curl git iproute2 \
+    iptables iputils-ping \
+    openresolv procps traceroute \
+    python3 python3-pip python3-venv \
+    wireguard wireguard-tools \
     sudo && \
     apt-get remove -y linux-image-* && \
     apt-get autoremove -y && \
@@ -55,18 +47,16 @@ VOLUME ${WGDASH}
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 # Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN wg genkey | tee /etc/wireguard/wg0_privatekey \
-  && echo "[Interface]" > /setup/conf/wg0.conf \
+RUN echo "[Interface]" > /setup/conf/wg0.conf \
   && echo "Address = ${wg_net}/24" >> /setup/conf/wg0.conf \
-  && echo "PrivateKey = $(cat /etc/wireguard/wg0_privatekey)" >> /setup/conf/wg0.conf \
+  && echo "PrivateKey ="  >> /setup/conf/wg0.conf \
   && echo "PostUp = iptables -t nat -I POSTROUTING 1 -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /setup/conf/wg0.conf \
   && echo "PostUp = iptables -I FORWARD -i wg0 -o wg0 -j DROP" >> /setup/conf/wg0.conf \
   && echo "PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o $(ip -o -4 route show to default | awk '{print $NF}') -j MASQUERADE" >> /setup/conf/wg0.conf \
   && echo "PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP" >> /setup/conf/wg0.conf \
   && echo "ListenPort = ${wg_port}" >> /setup/conf/wg0.conf \
   && echo "SaveConfig = true" >> /setup/conf/wg0.conf \
-  && echo "DNS = ${global_dns}" >> /setup/conf/wg0.conf \
-  && rm /etc/wireguard/wg0_privatekey
+  && echo "DNS = ${global_dns}" >> /setup/conf/wg0.conf
 
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
 HEALTHCHECK --interval=2m --timeout=1m --start-period=5s --retries=3 \
