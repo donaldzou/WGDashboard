@@ -15,7 +15,9 @@ I have tried to embed some new features such as `isolate` and interface startup 
 ## Getting the container running:
 
 To get the container running you either pull the image from the repository, `dselen/wgdashboard:latest`.<br>
-From there either use the environment variables describe below as parameters or use the Docker Compose file: `compose.yaml`.
+From there either use the environment variables describe below as parameters or use the Docker Compose file: `compose.yaml`.<br>
+Be careful, the default generated WireGuard configuration file uses port 51820/udp. So use this port if you want to use it out of the box.<br>
+Otherwise edit the configuration file in `/etc/wireguard/wg0.conf`.
 
 An example of a simple command to get the container running is show below:<br>
 
