@@ -102,3 +102,7 @@ dselen/wgdashboard   latest       c96fd96ee3b3   42 minutes ago      314MB
 
 Excuse the large image size, whoops! Debian's big... sometimes.<br>
 For feedback please submit an issue to the repository. Or message dselen@nerthus.nl.
+
+## In Progress:
+
+Auto-Updating Capabilities, together with Donald I am working on it.
