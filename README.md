@@ -126,9 +126,9 @@
 
 | Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
 |-----------|--------|--------------------------|----------|--------|
-| 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
+| 24.02 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
 | 22.04 LTS | 11.10  |                          |          | 39     |
-| 24.02 LTS |        |                          |          | 38     |
+| 20.04 LTS |        |                          |          | 38     |
 
 > [!TIP] 
 > If you installed WGDashboard on other systems without any issues, please let me know. Thank you!
