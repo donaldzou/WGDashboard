@@ -67,7 +67,8 @@ clean_up() {
 
   local logdir="${WGDASH}/src/log"
   echo "Cleaning log directory."
-  rm ${logdir}/access_*.log ${logdir}/error_*.log
+  find /opt/wireguarddashboard/src/log -name 'access_*.log' -exec rm {} +
+  find /opt/wireguarddashboard/src/log -name 'error_*.log' -exec rm {} +
   echo "Removed unneeded logs!"
 }
 
@@ -92,6 +93,8 @@ set_envvars() {
     
     ln -sf /usr/share/zoneinfo/"${tz}" /etc/localtime
     echo "${tz}" > /etc/timezone
+  else
+    echo "Timezone is set correctly."
   fi
 
   # Changing the DNS used for clients and the dashboard itself.
@@ -100,6 +103,8 @@ set_envvars() {
 
     #sed -i "s/^DNS = .*/DNS = ${global_dns}/" /etc/wireguard/wg0.conf # Uncomment if you want to have DNS on server-level.
     sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" /opt/wireguarddashboard/src/wg-dashboard.ini
+  else
+    echo "DNS is set correctly."
   fi
 
   # Setting the public IP of the WireGuard Dashboard container host. If not defined, it will trying fetching it using a curl to ifconfig.me.
@@ -224,6 +229,6 @@ ensure_blocking() {
 ensure_installation
 clean_up
 #update_checker
-set_envvars
 start_core
+set_envvars
 ensure_blocking

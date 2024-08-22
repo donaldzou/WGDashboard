@@ -59,7 +59,7 @@ RUN echo "[Interface]" > /setup/conf/wg0.conf \
   && echo "DNS = ${global_dns}" >> /setup/conf/wg0.conf
 
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
-HEALTHCHECK --interval=2m --timeout=1m --start-period=5s --retries=3 \
+HEALTHCHECK --interval=2m --timeout=1m --start-period=20s --retries=3 \
   CMD [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:10086/)" -eq "200" ] || exit 1
 
 
