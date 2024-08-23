@@ -13,6 +13,11 @@ ensure_installation() {
     mv /setup/app/{.[!.],}* "${WGDASH}"
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
+
+    # Extra step for Alpine
+    mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+    mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+
     chmod +x "${WGDASH}"/src/wgd.sh
     cd "${WGDASH}"/src || exit
     ./wgd.sh install
