@@ -3,7 +3,7 @@ FROM alpine:latest AS build
 LABEL maintainer="dselen@nerthus.nl"
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
-ARG Git_Url="https://github.com/donaldzou/WGDashboard.git"
+ARG Git_Url="https://github.com/DaanSelen/WGDashboard.git"
 ARG wg_net="10.0.0.1"
 ARG wg_port="51820"
 
@@ -19,7 +19,7 @@ ENV update="yes"
 RUN apk update \
   && apk add --no-cache bash git curl tzdata \
   wireguard-tools sudo \
-  gcc py3-pip python3-dev musl-dev linux-headers
+  py3-pip python3-dev
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
 ENV WGDASH=/opt/wireguarddashboard
@@ -27,9 +27,9 @@ ENV WGDASH=/opt/wireguarddashboard
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH} 
-  #&& git clone ${Git_Url} /setup/app
-COPY src /setup/app/src
+RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH} \
+  && git clone ${Git_Url} /setup/app
+#COPY src /setup/app/src
 
 # Set the volume to be used for WireGuard configuration persistency.
 VOLUME /etc/wireguard

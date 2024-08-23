@@ -199,25 +199,25 @@ _checkWireguard(){
 	if [ ! wg -h > /dev/null 2>&1 ] || [ ! wg-quick -h > /dev/null 2>&1 ]
 	then
 		case "$OS" in
-		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y  wireguard; printf "\n\n"; } &>> ./log/install.txt
-		;;
-		#centos|fedora|redhat|rhel)
-		#	if [ "$pythonExecutable" = "python3" ]; then
-		#		{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
-		#	else
-		#		{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
-		#	fi
-		#;;
-		alpine)
-			{ sudo apk update; sudo apk add wireguard-tools ; printf "\n\n"; } >> ./log/install.txt
-		;;
-		*)
-			printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-			printf "%s\n" "$helpMsg"
-			kill  $TOP_PID
-		;;
-	esac
+			ubuntu|debian)
+				{ sudo apt update ; sudo apt-get install -y  wireguard; printf "\n\n"; } &>> ./log/install.txt
+			;;
+			#centos|fedora|redhat|rhel)
+			#	if [ "$pythonExecutable" = "python3" ]; then
+			#		{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
+			#	else
+			#		{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
+			#	fi
+			#;;
+			alpine)
+				{ sudo apk update; sudo apk add wireguard-tools ; printf "\n\n"; } >> ./log/install.txt
+			;;
+			*)
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
+				printf "%s\n" "$helpMsg"
+				kill  $TOP_PID
+			;;
+		esac
 	fi
 }
 
@@ -280,7 +280,24 @@ install_wgd(){
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+    
+	printf "$OS"
+	case "$OS" in
+		ubuntu|debian)
+			echo "Lol"
+			{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+		;;
+		## TO DO ADD RHEL and ROCKY SUPPORT
+		alpine)
+			printf "[WGDashboard] Grabbing Alpine dependencies.\n"
+			{ date; sudo apk add gcc python3-dev musl-dev linux-headers ; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+		;;
+		*)
+			printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
+			printf "%s\n" "$helpMsg"
+			kill  $TOP_PID
+		;;
+	esac
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }

@@ -91,11 +91,11 @@ set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
   # If the timezone is different, for example in North-America or Asia.
-  if [ "${TZ}" != "$(cat /etc/localtime)" ]; then
+  if [ "${tz}" != "$(cat /etc/localtime)" ]; then
     echo "Changing timezone."
     
-    ln -sf /usr/share/zoneinfo/"${TZ}" /etc/localtime
-    echo "${TZ}" > /etc/timezone
+    ln -sf /usr/share/zoneinfo/"${tz}" /etc/localtime
+    echo "${tz}" > /etc/timezone
   else
     echo "Timezone is set correctly."
   fi
