@@ -10,7 +10,7 @@ ensure_installation() {
   if [ -z "$(ls -A "${WGDASH}")" ]; then
     echo "Detected empty directory, moving over..."
 
-    mv /setup/app/* "${WGDASH}"
+    mv /setup/app/{.[!.],}* "${WGDASH}"
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
     chmod +x "${WGDASH}"/src/wgd.sh
@@ -89,16 +89,6 @@ clean_up() {
 # === SET ENV VARS ===
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
-
-  # If the timezone is different, for example in North-America or Asia.
-  if [ "${tz}" != "$(cat /etc/localtime)" ]; then
-    echo "Changing timezone."
-    
-    ln -sf /usr/share/zoneinfo/"${tz}" /etc/localtime
-    echo "${tz}" > /etc/timezone
-  else
-    echo "Timezone is set correctly."
-  fi
 
   # Changing the DNS used for clients and the dashboard itself.
   if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 

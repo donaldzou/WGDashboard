@@ -281,15 +281,11 @@ install_wgd(){
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
     
-	printf "$OS"
 	case "$OS" in
-		ubuntu|debian)
-			echo "Lol"
-			{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+		ubuntu|debian|centos|fedora|redhat|rhel)
+			{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
 		;;
-		## TO DO ADD RHEL and ROCKY SUPPORT
 		alpine)
-			printf "[WGDashboard] Grabbing Alpine dependencies.\n"
 			{ date; sudo apk add gcc python3-dev musl-dev linux-headers ; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
 		;;
 		*)
