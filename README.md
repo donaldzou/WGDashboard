@@ -1,3 +1,7 @@
+> [!WARNING]
+> For users who installed the Docker solution under `./docker`, please view this important message: https://github.com/donaldzou/WGDashboard/issues/333
+<hr>
+
 <p align="center">
   <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
 </p>
