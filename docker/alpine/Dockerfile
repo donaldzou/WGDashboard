@@ -19,7 +19,7 @@ ENV update="yes"
 RUN apk update \
   && apk add --no-cache bash git curl tzdata \
   wireguard-tools sudo \
-  py3-pip py3-psutil py3-bcrypt python3-dev
+  py3-pip py3-psutil py3-bcrypt
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
 ENV WGDASH=/opt/wireguarddashboard

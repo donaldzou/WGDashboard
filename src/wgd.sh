@@ -280,20 +280,7 @@ install_wgd(){
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    
-	case "$OS" in
-		ubuntu|debian|centos|fedora|redhat|rhel)
-			{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
-		;;
-		alpine)
-			{ date; sudo apk add gcc python3-dev musl-dev linux-headers ; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
-		;;
-		*)
-			printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-			printf "%s\n" "$helpMsg"
-			kill  $TOP_PID
-		;;
-	esac
+	{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
