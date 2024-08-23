@@ -1,5 +1,5 @@
 # Pull from small Debian stable image.
-FROM debian:stable-slim AS build
+FROM alpine:latest AS build
 LABEL maintainer="dselen@nerthus.nl"
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
@@ -8,37 +8,28 @@ ARG wg_net="10.0.0.1"
 ARG wg_port="51820"
 
 # Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
-ENV tz="Europe/Amsterdam"
+ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV enable="none"
 ENV isolate="wg0"
 ENV public_ip="0.0.0.0"
 ENV update="yes"
 
-# Doing basic system maintenance. Change the timezone to the desired timezone.
-RUN ln -sf /usr/share/zoneinfo/${tz} /etc/localtime
+# Doing package management operations, such as upgrading
+RUN apk update \
+  && apk add --no-cache bash git curl tzdata \
+  wireguard-tools sudo \
+  gcc py3-pip python3-dev musl-dev linux-headers
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
 ENV WGDASH=/opt/wireguarddashboard
 
-# Doing package management operations, such as upgrading
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl git iproute2 \
-    iptables iputils-ping \
-    openresolv procps traceroute \
-    python3 python3-pip python3-venv \
-    wireguard wireguard-tools \
-    sudo && \
-    apt-get remove -y linux-image-* && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH} \
-  && git clone ${Git_Url} /setup/app
+RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH} 
+  #&& git clone ${Git_Url} /setup/app
+COPY src /setup/app/src
 
 # Set the volume to be used for WireGuard configuration persistency.
 VOLUME /etc/wireguard

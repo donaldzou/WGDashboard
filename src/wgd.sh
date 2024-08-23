@@ -65,10 +65,12 @@ _determineOS(){
       OS=$ID
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
+  elif [ -f /etc/alpine-release ]; then
+	  OS="alpine"
 #  elif [ -f /etc/arch-release ]; then
 #      OS="arch"
   else
-      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
+      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
       kill  $TOP_PID
   fi
@@ -87,6 +89,9 @@ _installPython(){
 				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
 			fi
 		;;
+		alpine)
+				{ sudo apk update; sudo apk add python3 net-tools; printf "\n\n"; } >> ./log/install.txt
+			;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -112,8 +117,11 @@ _installPythonVenv(){
 					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				fi
 			;;
+			alpine)
+				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
+			;;
 			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
@@ -166,8 +174,11 @@ _installPythonPip(){
 					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
 				fi
 			;;
+			alpine)
+				{ sudo apk update; sudo apk add py3-pip ; printf "\n\n"; } >> ./log/install.txt
+			;;
 			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
@@ -185,15 +196,28 @@ _installPythonPip(){
 }
 
 _checkWireguard(){
-	if ! wg -h > /dev/null 2>&1
+	if [ ! wg -h > /dev/null 2>&1 ] || [ ! wg-quick -h > /dev/null 2>&1 ]
 	then
-		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		kill  $TOP_PID
-	fi
-	if ! wg-quick -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		kill  $TOP_PID
+		case "$OS" in
+		ubuntu|debian)
+			{ sudo apt update ; sudo apt-get install -y  wireguard; printf "\n\n"; } &>> ./log/install.txt
+		;;
+		#centos|fedora|redhat|rhel)
+		#	if [ "$pythonExecutable" = "python3" ]; then
+		#		{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
+		#	else
+		#		{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
+		#	fi
+		#;;
+		alpine)
+			{ sudo apk update; sudo apk add wireguard-tools ; printf "\n\n"; } >> ./log/install.txt
+		;;
+		*)
+			printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
+			printf "%s\n" "$helpMsg"
+			kill  $TOP_PID
+		;;
+	esac
 	fi
 }
 
@@ -246,9 +270,6 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
-
-    
-    
 
     if [ ! -d "db" ] 
       then 

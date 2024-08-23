@@ -7,14 +7,14 @@ ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
   echo "Checking if everything is present."
 
-  if [ -z "$(ls -A ${WGDASH})" ]; then
+  if [ -z "$(ls -A "${WGDASH}")" ]; then
     echo "Detected empty directory, moving over..."
 
-    mv /setup/app/* ${WGDASH}
-    python3 -m venv ${WGDASH}/src/venv
+    mv /setup/app/* "${WGDASH}"
+    python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
-    chmod +x ${WGDASH}/src/wgd.sh
-    cd ${WGDASH}/src
+    chmod +x "${WGDASH}"/src/wgd.sh
+    cd "${WGDASH}"/src || exit
     ./wgd.sh install
 
     echo "Looks like the installation succesfully moved over."
@@ -28,7 +28,10 @@ ensure_installation() {
     cp "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key."
-    local privateKey=$(wg genkey)
+
+    local privateKey
+    privateKey=$(wg genkey)
+
     sed -i "s|^PrivateKey =$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     echo "Done setting template."
@@ -44,7 +47,7 @@ clean_up() {
   # Cleaning out previous data such as the .pid file and starting the WireGuard Dashboard. Making sure to use the python venv.
   echo "Looking for remains of previous instances..."
   local pid_file="${WGDASH}/src/gunicorn.pid"
-  if [ -f $pid_file ]; then
+  if [ -f "$pid_file" ]; then
     echo "Found old pid file, removing."
     rm $pid_file
   else
@@ -88,11 +91,11 @@ set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
   # If the timezone is different, for example in North-America or Asia.
-  if [ "${tz}" != "$(cat /etc/timezone)" ]; then
+  if [ "${TZ}" != "$(cat /etc/localtime)" ]; then
     echo "Changing timezone."
     
-    ln -sf /usr/share/zoneinfo/"${tz}" /etc/localtime
-    echo "${tz}" > /etc/timezone
+    ln -sf /usr/share/zoneinfo/"${TZ}" /etc/localtime
+    echo "${TZ}" > /etc/timezone
   else
     echo "Timezone is set correctly."
   fi
