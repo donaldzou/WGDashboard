@@ -19,9 +19,9 @@ ensure_blocking() {
   echo "Ensuring container continuation."
 
   # This function checks if the latest error log is created and tails it for docker logs uses.
-  if find "/home/app/wireguarddashboard/app/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
-    latestErrLog=$(find /home/app/wireguarddashboard/app/log -name "error_*.log" | head -n 1)
-    latestAccLog=$(find /home/app/wireguarddashboard/app/log -name "access_*.log" | head -n 1)
+  if find "/opt/wireguarddashboard/src/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
+    latestErrLog=$(find /opt/wireguarddashboard/src/log -name "error_*.log" | head -n 1)
+    latestAccLog=$(find /opt/wireguarddashboard/src/log -name "access_*.log" | head -n 1)
     tail -f "${latestErrLog}" "${latestAccLog}"
   fi
 
@@ -32,10 +32,10 @@ ensure_blocking() {
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 clean_up
 
-chmod u+x /home/app/wgd.sh
-if [ ! -f "/home/app/wg-dashboard.ini" ]; then
-  /home/app/wgd.sh install
+chmod u+x /opt/wireguarddashboard/src/wgd.sh
+if [ ! -f "/opt/wireguarddashboard/src/wg-dashboard.ini" ]; then
+  /opt/wireguarddashboard/src/wgd.sh install
   
 fi
-/home/app/wgd.sh start
+/opt/wireguarddashboard/src/wgd.sh start
 ensure_blocking

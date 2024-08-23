@@ -7,9 +7,12 @@ services:
       - NET_ADMIN
       - SYS_MODULE
     restart: unless-stopped
+    environment:
+      - wg_net=10.0.0.1/24
+      - wg_port=51820
     volumes:
       - wgd_configs:/etc/wireguard
-      - wgd_app:/home/app
+      - wgd_app:/opt/wireguarddashboard/src
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp

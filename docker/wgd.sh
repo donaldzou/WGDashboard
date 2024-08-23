@@ -271,14 +271,11 @@ gunicorn_start () {
     printf "[ERROR] Gunicorn executable not found or not executable.\n"
     return 1
   fi
-
-
-  gunicorn -c ./gunicorn.conf.py 
-  # line below exsits after execution when using docker
-  #"$venv_gunicorn" --config ./gunicorn.conf.py &
-
-  sleep 5
-  
+    start_core
+    gunicorn -c ./gunicorn.conf.py 
+    # line below exsits after execution when using docker
+    #"$venv_gunicorn" --config ./gunicorn.conf.py &
+    sleep 5
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]; do
     if test -f './gunicorn.pid'; then
@@ -289,7 +286,6 @@ gunicorn_start () {
     fi
     sleep 2
   done
-
   printf "[WGDashboard] WGDashboard w/ Gunicorn started successfully\n"
   printf "%s\n" "$dashes"
 }
@@ -301,6 +297,9 @@ gunicorn_stop () {
 start_wgd () {
 	_checkWireguard
     gunicorn_start
+    
+    
+    
 }
 
 stop_wgd() {
@@ -344,7 +343,38 @@ update_wgd() {
   fi
 }
 
+start_core () {
+  local config_files=$(find /etc/wireguard -type f -name "*.conf")
+  local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
 
+  newconf_wgd
+    find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
+    find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
+  
+  
+      for file in $config_files; do
+        config_name=$(basename "$file" ".conf")
+        { date; wg-quick up "$config_name"; printf "\n\n"; } >> /opt/wireguarddashboard/src/log/install.txt 2>&1
+      done
+}
+
+newconf_wgd() {
+    local wg_port_listen=$wg_port
+    local wg_addr_range=$wg_net
+    private_key=$(wg genkey)
+    public_key=$(echo "$private_key" | wg pubkey)
+    cat <<EOF >"/etc/wireguard/wg0.conf"
+[Interface]
+PrivateKey = $private_key
+Address = $wg_addr_range
+ListenPort = $wg_port_listen
+SaveConfig = true
+PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
+PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
+
+
+EOF
+}
 
 if [ "$#" != 1 ];
   then
