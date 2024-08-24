@@ -32,10 +32,12 @@ jobs:
           docker buildx create --use
           docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t wg-dashboard:latest .
 
-      - name: Docker Scout
+      - name: Docker Scout Analysis
         id: docker-scout
-        uses: docker/scout-action@v1
-        with:
-          command: cves
-          image: wg-dashboard:latest
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            docker/scout-action:v1 \
+            cves \
+            --image wg-dashboard:latest \
+            --github-token ${{ secrets.GITHUB_TOKEN }}
