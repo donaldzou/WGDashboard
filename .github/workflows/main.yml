@@ -41,6 +41,7 @@ jobs:
           
           docker scout cves my-app-image:latest > $OUTPUT_FILE
           echo "CVE report saved to $OUTPUT_FILE"
+          cat $OUTPUT_FILE
 
       - name: Upload Scout results
         uses: actions/upload-artifact@v3
