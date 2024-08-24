@@ -173,7 +173,7 @@ _installPythonPip(){
 				fi
 			;;
 			alpine)
-				{ apk add python3 py3-pip; printf "\n\n"; } &>> ./log/install.txt 
+				{ apk add py3-pip; printf "\n\n"; } &>> ./log/install.txt 
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
