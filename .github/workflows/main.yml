@@ -44,20 +44,13 @@ jobs:
           cat scout-results.txt  # Print the report to the workflow logs for easy viewing
           echo "Docker Scout analysis completed."
 
-      - name: Create GitHub issue comment
-        uses: peter-evans/create-issue-comment@v3
-        with:
-          issue-number: 1  # Replace with the issue number or use an appropriate method to identify the issue or PR
-          body: |
-            **Docker Image Build and Analysis Report**
-            
-            The Docker image was built and analyzed successfully.
-
-            **Build Summary:**
-            - Image Tag: my-app-image:latest
-
-            **Analysis Report:**
-            ```
-            $(cat scout-results.txt)
-            ```
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Post Comment on Issue or PR
+        run: |
+          COMMENT="**Docker Image Build and Analysis Report**\n\nThe Docker image was built and analyzed successfully.\n\n**Build Summary:**\n- Image Tag: my-app-image:latest\n\n**Analysis Report:**\n\`\`\`\n$(cat scout-results.txt)\n\`\`\`"
+          
+          # Post comment using GitHub API
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\": \"$COMMENT\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/1/comments"  # Replace '1' with the issue or PR number
