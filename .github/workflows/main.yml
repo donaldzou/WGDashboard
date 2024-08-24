@@ -1,3 +1,5 @@
+name: Docker Image Build and Analysis
+
 on:
   schedule:
     - cron: "0 0 * * *"  # Schedule the workflow to run daily at midnight (UTC time). Adjust the time if needed.
@@ -7,11 +9,6 @@ on:
         description: 'Trigger a manual build and push'
         default: 'true'
 
-env:
-  REGISTRY: docker.io
-  IMAGE_NAME: ${{ github.repository }}
-  SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
-
 jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
@@ -20,45 +17,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v4.4.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          labels: |
-            org.opencontainers.image.revision=${{ env.SHA }}
-          tags: |
-            type=edge,branch=$repo.default_branch
-            type=semver,pattern=v{{version}}
-            type=sha,prefix=,suffix=,format=short
 
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@v4.0.0
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          
-      - name: Docker Scout
-        id: docker-scout
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: docker/scout-action@dd36f5b0295baffa006aa6623371f226cc03e506
-        with:
-          command: cves
-          only-severities: critical,high,medium,low,unspecified 
-          image: ${{ steps.meta.outputs.tags }}
-          exit-code: true
+      - name: Build Docker image
+        id: build-image
+        run: |
+          docker build -t my-app-image:latest .
+
+      - name: Install Docker Scout
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
+
+      - name: Analyze Docker image with Docker Scout
+        id: analyze-image
+        run: |
+          docker scout cves my-app-image:latest > scout-results.json
+          cat scout-results.json  # Print the report to the workflow logs for easy viewing
