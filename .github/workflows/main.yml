@@ -38,6 +38,4 @@ jobs:
         with:
           command: cves
           image: wg-dashboard:latest
-          ignore-unchanged: true
-          only-severities: critical,high
           github-token: ${{ secrets.GITHUB_TOKEN }}
