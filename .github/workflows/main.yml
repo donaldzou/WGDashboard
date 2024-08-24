@@ -59,5 +59,6 @@ jobs:
         uses: docker/scout-action@dd36f5b0295baffa006aa6623371f226cc03e506
         with:
           command: cves
+          only-severities: critical,high,medium,low,unspecified 
           image: ${{ steps.meta.outputs.tags }}
           exit-code: true
