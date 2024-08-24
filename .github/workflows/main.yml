@@ -35,10 +35,15 @@ jobs:
       - name: Analyze Docker image with Docker Scout
         id: analyze-image
         run: |
-          docker scout cves  my-app-image:latest > scout-results.json
+          # Get the current date in YYYY-MM-DD format
+          DATE=$(date +'%Y-%m-%d')
+          OUTPUT_FILE=".github/workflows/cve-report-$DATE.json"
+          
+          docker scout cves my-app-image:latest > $OUTPUT_FILE
+          echo "CVE report saved to $OUTPUT_FILE"
 
       - name: Upload Scout results
         uses: actions/upload-artifact@v3
         with:
           name: scout-results
-          path: scout-results.json
+          path: .github/workflows/cve-report-*.json
