@@ -63,3 +63,43 @@ jobs:
           command: cves
           image: ${{ steps.meta.outputs.tags }}
           exit-code: true
+
+      - name: Create build summary
+        if: ${{ always() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const summary = `
+            ### Docker Image Build and Analysis Summary
+            
+            - **Image Name:** ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            - **Commit SHA:** ${{ env.SHA }}
+            - **Build Status:** ${{ job.status }}
+            - **Docker Scout Results:**
+              - **CVE Analysis:** ${{ steps.docker-scout.outputs.result || 'No results' }}
+            `;
+            
+            const comment = {
+              body: summary
+            };
+
+            if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
+              const prNumber = process.env.GITHUB_REF.split('/')[2];
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ...comment
+              });
+            } else {
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: process.env.GITHUB_SHA,
+                state: job.status === 'success' ? 'success' : 'failure',
+                description: 'Docker image build and analysis complete',
+                context: 'docker-build'
+              });
+            }
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
