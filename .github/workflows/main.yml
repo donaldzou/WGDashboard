@@ -36,7 +36,7 @@ jobs:
         id: docker-scout
         uses: docker/scout-action@v1
         with:
-          command: scan
+          command: cves
           image: wg-dashboard:latest
           ignore-unchanged: true
           only-severities: critical,high
