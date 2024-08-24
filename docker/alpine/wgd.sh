@@ -47,7 +47,7 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
-        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
+        { $pythonExecutable -m venv  $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     
     if ! $venv_python --version > /dev/null 2>&1
@@ -88,7 +88,7 @@ _installPython(){
 			fi
 		;;
 		alpine)
-			{ apk update; apk add python3 net-tools python3-dev; printf "\n\n"; } &>> ./log/install.txt 
+			{ apk update; apk add python3 net-tools py3-bcrypt py3-psutil; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 	esac
 	
@@ -265,6 +265,7 @@ install_wgd(){
         mkdir "db"
     fi
     _check_and_set_venv
+
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
@@ -304,8 +305,10 @@ gunicorn_start () {
   if [[ $USER == root ]]; then
     export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
   fi
+  
   _check_and_set_venv
   sudo "$venv_gunicorn" --config ./gunicorn.conf.py
+  #sudo gunicorn -c ./gunicorn.conf.py 
   sleep 5
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]

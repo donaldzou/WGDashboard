@@ -1,19 +1,20 @@
 # Pull from small Debian stable image.
 FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
-ENV PYTHONPATH="/usr/bin/python"
+ENV PYTHONPATH="/usr/lib/python3.12/site-packages"
 
 WORKDIR /opt/wireguarddashboard/src
 RUN    apk update && \
-    apk add --no-cache py3-bcrypt py3-psutil && \
+    apk add --no-cache sudo gcc musl-dev linux-headers && \
     apk add --no-cache wireguard-tools && \
-    apk add --no-cache net-tools iproute2 iptables ip6tables  && \
-    apk add --no-cache inotify-tools procps openresolv  && \
+    apk add --no-cache  iptables ip6tables && \
     mkdir /opt/wireguarddashboard/src/master-key 
     
+
 COPY ./src /opt/wireguarddashboard/src/
-COPY ./docker/wgd.sh /opt/wireguarddashboard/src/
-COPY ./docker/requirements.txt /opt/wireguarddashboard/src/
+COPY ./docker/alpine/entrypoint.sh /opt/wireguarddashboard/src/
+#COPY ./docker/alpine/wgd.sh /opt/wireguarddashboard/src/
+#COPY ./docker/alpine/requirements.txt /opt/wireguarddashboard/src/
 
 RUN   chmod u+x /opt/wireguarddashboard/src/entrypoint.sh 
 

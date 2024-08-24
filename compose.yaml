@@ -10,9 +10,9 @@ services:
     environment:
       - wg_net=10.0.0.1/24
       - wg_port=51820
-    volumes:
-      - wgd_configs:/etc/wireguard
-      - wgd_app:/opt/wireguarddashboard/src
+    #volumes:
+      #- wgd_configs:/etc/wireguard
+      #- wgd_app:/opt/wireguarddashboard/src
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
@@ -21,6 +21,6 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
    
 
-volumes:
-    wgd_configs:
-    wgd_app:
+#volumes:
+    #wgd_configs:
+    #wgd_app:
