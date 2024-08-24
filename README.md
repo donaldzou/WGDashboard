@@ -28,6 +28,9 @@
 
 ## 📣 What's New: v4.0
 
+> [!TIP]
+> [📹 Demo video on YouTube](https://www.youtube.com/watch?v=0mwzd5Gr2eU)
+
 ### 🎉 New Features
 
 - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
@@ -58,6 +61,8 @@
 > I can't thank enough for all of you who wait for this release, and for those who are new to this project, welcome :)
 > Also, huge thanks to who contributed to this major release:
 > @bolgovrussia, @eduardorosabales, @Profik, @airgapper, @tokon2000, @bkeenke, @kontorskiy777, @bugsse, @Johnnykson, @DaanSelen, @shuricksumy and many others!
+
+
 
 <hr>
 
