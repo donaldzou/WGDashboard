@@ -87,6 +87,9 @@ _installPython(){
 				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
 			fi
 		;;
+		alpine)
+			{ apk update; apk add python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
+		;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -111,6 +114,9 @@ _installPythonVenv(){
 				else
 					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
 				fi
+			;;
+			alpine)
+				{ apk add python3 py3-virtualenv; printf "\n\n"; } &>> ./log/install.txt 
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
@@ -165,6 +171,9 @@ _installPythonPip(){
 				else
 					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
 				fi
+			;;
+			alpine)
+				{ apk add python3 py3-pip; printf "\n\n"; } &>> ./log/install.txt 
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
