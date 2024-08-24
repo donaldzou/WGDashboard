@@ -30,7 +30,7 @@ jobs:
 
       - name: Install Docker Scout
         run: |
-          curl -fsSL https://get.docker.com/scout/install.sh | sh
+          curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
 
       - name: Analyze Docker image with Docker Scout
         id: analyze-image
