@@ -55,12 +55,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           
-      - name: Docker Scout Analysis
+      - name: Docker Scout
         id: docker-scout
-        run: |
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            docker/scout-action:v1 \
-            cves \
-            --image wg-dashboard:latest \
-            --github-token ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: docker/scout-action@dd36f5b0295baffa006aa6623371f226cc03e506
+        with:
+          command: cves
+          image: ${{ steps.meta.outputs.tags }}
+          only-severities: critical,high
+          exit-code: true
