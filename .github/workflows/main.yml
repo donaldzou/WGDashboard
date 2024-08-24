@@ -35,7 +35,7 @@ jobs:
       - name: Analyze Docker image with Docker Scout
         id: analyze-image
         run: |
-          docker scout cves --format json my-app-image:latest > scout-results.json
+          docker scout cves  my-app-image:latest > scout-results.json
 
       - name: Upload Scout results
         uses: actions/upload-artifact@v3
