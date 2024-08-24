@@ -17,34 +17,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
+      - name: Build multiarch Docker image
         id: build-image
         run: |
-          docker build -t my-app-image:latest .
+          docker buildx create --use
+          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t wg-dashboard:latest --push .
 
-      - name: Install Docker Scout
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
-
-      - name: Analyze Docker image with Docker Scout
-        id: analyze-image
-        run: |
-          # Get the current date in YYYY-MM-DD format
-          DATE=$(date +'%Y-%m-%d')
-          OUTPUT_FILE=".github/workflows/cve-report-$DATE.json"
-          
-          docker scout cves my-app-image:latest > $OUTPUT_FILE
-          echo "CVE report saved to $OUTPUT_FILE"
-          cat $OUTPUT_FILE
-
-      - name: Upload Scout results
-        uses: actions/upload-artifact@v3
+      - name: Docker Scout
+        id: docker-scout
+        uses: docker/scout-action@v1
         with:
-          name: scout-results
-          path: .github/workflows/cve-report-*.json
+          command: scan
+          image: wg-dashboard:latest
+          ignore-unchanged: true
+          only-severities: critical,high
+          github-token: ${{ secrets.GITHUB_TOKEN }}
