@@ -53,4 +53,4 @@ jobs:
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -d "{\"body\": \"$COMMENT\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/1/comments"  # Replace '1' with the issue or PR number
+            "https://api.github.com/repos/NOXCIS/WGDashboard/issues/1/comments"  # Replace '1' with the issue or PR number
