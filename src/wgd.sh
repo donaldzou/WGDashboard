@@ -47,14 +47,17 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
-        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
-    fi
+        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt    fi
     
     if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
     	kill  $TOP_PID
     fi
+
+    printf "[WGDashboard] Installing dependencies for Python Virtual Environment under ./venv\n"
+    { $venv_python -m pip install -r requirements.txt; } >> ./log/install.txt
+
     
     . ${VIRTUAL_ENV}/bin/activate
 }
