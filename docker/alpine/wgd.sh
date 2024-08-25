@@ -47,7 +47,7 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
-        { $pythonExecutable -m venv  $VIRTUAL_ENV; } >> ./log/install.txt
+        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     
     if ! $venv_python --version > /dev/null 2>&1
