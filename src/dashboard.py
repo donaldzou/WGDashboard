@@ -442,7 +442,7 @@ class WireguardConfiguration:
             return self.message
 
     def __init__(self, name: str = None, data: dict = None):
-        print(f"Initialized {name}")
+        print(f"[WGDashboard] Initialized Configuration: {name}")
         
         self.__parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
         self.__parser.optionxform = str
