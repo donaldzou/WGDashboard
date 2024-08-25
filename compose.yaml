@@ -12,7 +12,7 @@ services:
       - wg_port=51820
     volumes:
       - wgd_configs:/etc/wireguard
-      #- wgd_app:/opt/wireguarddashboard/src
+      - wgd_app:/opt/wireguarddashboard/src
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
@@ -23,4 +23,4 @@ services:
 
 volumes:
     wgd_configs:
-    #wgd_app:
+    wgd_app:

@@ -20,10 +20,6 @@ WORKDIR /opt/wireguarddashboard/src
 COPY ./src /opt/wireguarddashboard/src/
 COPY --from=builder /opt/wireguarddashboard/src/venv /opt/wireguarddashboard/src/venv
 COPY --from=builder /opt/wireguarddashboard/src/log /opt/wireguarddashboard/src/log/
-COPY ./docker/alpine/entrypoint.sh /opt/wireguarddashboard/src/
-COPY ./docker/alpine/wgd.sh /opt/wireguarddashboard/src/
-
-
 
 RUN    apk update && \
     apk add --no-cache wireguard-tools sudo && \
