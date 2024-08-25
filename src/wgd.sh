@@ -129,15 +129,15 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-#			centos|fedora|redhat|rhel)
-#				if command -v dnf &> /dev/null; then
-#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				else
-#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				fi
-#			;;
-#			*)
-#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+	#			centos|fedora|redhat|rhel)
+	#				if command -v dnf &> /dev/null; then
+	#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				else
+	#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				fi
+	#			;;
+	#			*)
+	#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
 #				printf "%s\n" "$helpMsg"
 #				kill  $TOP_PID
 #			;;
@@ -256,9 +256,6 @@ install_wgd(){
     _installPythonVenv
     _installPythonPip
 
-    
-    
-
     if [ ! -d "db" ] 
       then 
         printf "[WGDashboard] Creating ./db folder\n"
@@ -266,6 +263,7 @@ install_wgd(){
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
+	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
     { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
@@ -337,6 +335,53 @@ stop_wgd() {
   fi
 }
 
+startwgd_docker() {
+	_checkWireguard
+	printf "[WGDashboard] WireGuard Config Started\n"
+	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
+    gunicorn_start
+}
+start_core() {
+  local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
+  # Check if wg0.conf exists in /etc/wireguard
+  if [[ ! -f /etc/wireguard/wg0.conf ]]; then
+    echo "wg0.conf not found. Running Generate Configuration."
+    newconf_wgd
+  else
+    echo "wg0.conf already exists. Skipping WireGuard Config Generation."
+  fi
+  # Re-assign config_files to ensure it includes any newly created configurations
+  local config_files=$(find /etc/wireguard -type f -name "*.conf")
+  
+  # Set file permissions
+  find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
+  find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
+
+  # Start WireGuard for each config file
+  for file in $config_files; do
+    config_name=$(basename "$file" ".conf")
+    wg-quick up "$config_name"
+  done
+}
+
+
+
+newconf_wgd() {
+    local wg_port_listen=$wg_port
+    local wg_addr_range=$wg_net
+    private_key=$(wg genkey)
+    public_key=$(echo "$private_key" | wg pubkey)
+    cat <<EOF >"/etc/wireguard/wg0.conf"
+[Interface]
+PrivateKey = $private_key
+Address = $wg_addr_range
+ListenPort = $wg_port_listen
+SaveConfig = true
+PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
+PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
+EOF
+}
+
 start_wgd_debug() {
   printf "%s\n" "$dashes"
   _checkWireguard
@@ -396,6 +441,10 @@ if [ "$#" != 1 ];
           else
             start_wgd
         fi
+	  elif [ "$1" = "docker_start" ]; then
+        printf "%s\n" "$dashes"
+        startwgd_docker
+        printf "%s\n" "$dashes"
       elif [ "$1" = "stop" ]; then
         if check_wgd_status; then
             printf "%s\n" "$dashes"
