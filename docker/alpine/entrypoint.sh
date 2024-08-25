@@ -11,9 +11,6 @@ clean_up() {
     echo "No remains found, continuing."
   fi
 }
-
-
-
 ensure_blocking() {
   sleep 1s
   echo "Ensuring container continuation."
@@ -29,13 +26,13 @@ ensure_blocking() {
   sleep infinity
 }
 
-# Execute functions for the WireGuard Dashboard services, then set the environment variables
-clean_up
+{ date; clean_up; printf "\n\n"; } >> ./log/install.txt
+
 
 chmod u+x /opt/wireguarddashboard/src/wgd.sh
-if [ ! -f "/opt/wireguarddashboard/src/wg-dashboard.ini" ]; then
-  /opt/wireguarddashboard/src/wgd.sh install
-  
-fi
+
+
+
+/opt/wireguarddashboard/src/wgd.sh install
 /opt/wireguarddashboard/src/wgd.sh start
 ensure_blocking

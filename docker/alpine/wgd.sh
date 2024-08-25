@@ -59,14 +59,15 @@ _check_and_set_venv(){
     . ${VIRTUAL_ENV}/bin/activate
 }
 
+
 _determineOS(){
   if [ -f /etc/os-release ]; then
       . /etc/os-release
       OS=$ID
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
-#  elif [ -f /etc/arch-release ]; then
-#      OS="arch"
+	#  elif [ -f /etc/arch-release ]; then
+	#      OS="arch"
   else
       printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
@@ -88,7 +89,7 @@ _installPython(){
 			fi
 		;;
 		alpine)
-			{ apk update; apk add python3 net-tools py3-bcrypt py3-psutil; printf "\n\n"; } &>> ./log/install.txt 
+			{ apk update; apk add python3 net-tools  ; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 	esac
 	
@@ -129,18 +130,18 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-#			centos|fedora|redhat|rhel)
-#				if command -v dnf &> /dev/null; then
-#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				else
-#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				fi
-#			;;
-#			*)
-#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
-#				printf "%s\n" "$helpMsg"
-#				kill  $TOP_PID
-#			;;
+	#			centos|fedora|redhat|rhel)
+	#				if command -v dnf &> /dev/null; then
+	#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				else
+	#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				fi
+	#			;;
+	#			*)
+	#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+	#				printf "%s\n" "$helpMsg"
+	#				kill  $TOP_PID
+	#			;;
 		esac
 	fi
 	
@@ -256,8 +257,6 @@ install_wgd(){
     _installPythonVenv
     _installPythonPip
 
-    
-    
 
     if [ ! -d "db" ] 
       then 
@@ -265,13 +264,17 @@ install_wgd(){
         mkdir "db"
     fi
     _check_and_set_venv
+	
 
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
+	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
     { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
+	#deactivate
+
 }
 
 check_wgd_status(){
@@ -307,8 +310,8 @@ gunicorn_start () {
   fi
   
   _check_and_set_venv
+	
   sudo "$venv_gunicorn" --config ./gunicorn.conf.py
-  #sudo gunicorn -c ./gunicorn.conf.py 
   sleep 5
   checkPIDExist=0
   while [ $checkPIDExist -eq 0 ]

@@ -1,8 +1,2 @@
-#bcrypt
-ifcfg
-#psutil
-pyotp
-Flask
-flask-cors
-icmplib
-gunicorn
+bcrypt
+psutil

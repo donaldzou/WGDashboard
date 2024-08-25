@@ -88,7 +88,7 @@ _installPython(){
 			fi
 		;;
 		alpine)
-			{ apk update; apk add python3 net-tools python3-dev; printf "\n\n"; } &>> ./log/install.txt 
+			{ apk update; apk add python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 	esac
 	
@@ -129,15 +129,15 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-#			centos|fedora|redhat|rhel)
-#				if command -v dnf &> /dev/null; then
-#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				else
-#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				fi
-#			;;
-#			*)
-#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+	#			centos|fedora|redhat|rhel)
+	#				if command -v dnf &> /dev/null; then
+	#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				else
+	#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
+	#				fi
+	#			;;
+	#			*)
+	#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
 #				printf "%s\n" "$helpMsg"
 #				kill  $TOP_PID
 #			;;
