@@ -86,6 +86,7 @@
       * [Debian 11.10](#debian-1110)
       * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream](#red-hat-enterprise-linux-94--centos-9-stream)
       * [Fedora 40 & Fedora 39 & Fedora 38](#fedora-40--fedora-39--fedora-38)
+      * [Alpine Linux 3.20.2](#alpine-linux-3202)
     * [Manual Installation](#manual-installation)
   * [🪜 Usage](#-usage)
       * [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
@@ -133,11 +134,11 @@
 > [!NOTE]
 > All operating systems below are tested by myself. All are ARM64 ran in UTM Virtual Machine.
 
-| Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora |
-|-----------|--------|--------------------------|----------|--------|
-| 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     |
-| 22.04 LTS | 11.10  |                          |          | 39     |
-| 24.02 LTS |        |                          |          | 38     |
+| Ubuntu    | Debian | Red Hat Enterprise Linux | CentOS   | Fedora | Alpine Linux           |
+|-----------|--------|--------------------------|----------|--------|------------------------|
+| 20.04 LTS | 12.6   | 9.4                      | 9-Stream | 40     | 3.20.2 (Under Testing) |
+| 22.04 LTS | 11.10  |                          |          | 39     |                        |
+| 24.02 LTS |        |                          |          | 38     |                        |
 
 > [!TIP] 
 > If you installed WGDashboard on other systems without any issues, please let me know. Thank you!
@@ -263,6 +264,20 @@ sudo sysctl -p /etc/sysctl.conf && \
 firewall-cmd --add-port=10086/tcp --permanent && \
 firewall-cmd --add-port=51820/udp --permanent && \
 firewall-cmd --reload
+```
+
+#### Alpine Linux 3.20.2
+
+```shell
+setup-interfaces -a ; \
+rc-service networking --quiet start ; \
+printf "https://mirrors.aliyun.com/alpine/latest-stable/main\nhttps://mirrors.aliyun.com/alpine/latest-stable/community" > /etc/apk/repositories ; \
+apk update ; \
+apk add wireguard-tools python3 python3-dev git iptables net-tools gcc musl-dev linux-headers sudo ; \
+git clone -b v4.0-alpine-linux https://github.com/donaldzou/WGDashboard.git ; \
+cd ./WGDashboard/src ; \
+chmod +x ./wgd.sh ; \
+./wgd.sh install
 ```
 
 ### Manual Installation
