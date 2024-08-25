@@ -65,8 +65,6 @@ _determineOS(){
       OS=$ID
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
-#  elif [ -f /etc/arch-release ]; then
-#      OS="arch"
   else
       printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
@@ -129,18 +127,6 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-	#			centos|fedora|redhat|rhel)
-	#				if command -v dnf &> /dev/null; then
-	#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-	#				else
-	#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-	#				fi
-	#			;;
-	#			*)
-	#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
-#				printf "%s\n" "$helpMsg"
-#				kill  $TOP_PID
-#			;;
 		esac
 	fi
 	
@@ -257,9 +243,9 @@ install_wgd(){
     _installPythonPip
 
     if [ ! -d "db" ] 
-      then 
-        printf "[WGDashboard] Creating ./db folder\n"
-        mkdir "db"
+		then 
+			printf "[WGDashboard] Creating ./db folder\n"
+			mkdir "db"
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
@@ -288,11 +274,11 @@ check_wgd_status(){
 }
 
 certbot_create_ssl () {
-  certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
+	certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
 }
 
 certbot_renew_ssl () {
-  certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
+	certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
 }
 
 gunicorn_start () {
@@ -319,7 +305,7 @@ gunicorn_start () {
 }
 
 gunicorn_stop () {
-  sudo kill $(cat ./gunicorn.pid)
+	sudo kill $(cat ./gunicorn.pid)
 }
 
 start_wgd () {
@@ -328,40 +314,41 @@ start_wgd () {
 }
 
 stop_wgd() {
-  if test -f "$PID_FILE"; then
-    gunicorn_stop
-  else
-    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
-  fi
+	if test -f "$PID_FILE"; then
+		gunicorn_stop
+	else
+		kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+	fi
 }
 
 startwgd_docker() {
 	_checkWireguard
-	printf "[WGDashboard] WireGuard Config Started\n"
+	printf "[WGDashboard][Docker] WireGuard configuration started\n"
 	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
     gunicorn_start
 }
-start_core() {
-  local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
-  # Check if wg0.conf exists in /etc/wireguard
-  if [[ ! -f /etc/wireguard/wg0.conf ]]; then
-    echo "wg0.conf not found. Running Generate Configuration."
-    newconf_wgd
-  else
-    echo "wg0.conf already exists. Skipping WireGuard Config Generation."
-  fi
-  # Re-assign config_files to ensure it includes any newly created configurations
-  local config_files=$(find /etc/wireguard -type f -name "*.conf")
-  
-  # Set file permissions
-  find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
-  find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
 
-  # Start WireGuard for each config file
-  for file in $config_files; do
-    config_name=$(basename "$file" ".conf")
-    wg-quick up "$config_name"
-  done
+start_core() {
+	local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
+	# Check if wg0.conf exists in /etc/wireguard
+	if [[ ! -f /etc/wireguard/wg0.conf ]]; then
+		echo "[WGDashboard][Docker] wg0.conf not found. Running generate configuration."
+		newconf_wgd
+	else
+		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping WireGuard configuration generation."
+	fi
+	# Re-assign config_files to ensure it includes any newly created configurations
+	local config_files=$(find /etc/wireguard -type f -name "*.conf")
+	
+	# Set file permissions
+	find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
+	find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
+	
+	# Start WireGuard for each config file
+	for file in $config_files; do
+		config_name=$(basename "$file" ".conf")
+		wg-quick up "$config_name"
+	done
 }
 
 
@@ -383,15 +370,14 @@ EOF
 }
 
 start_wgd_debug() {
-  printf "%s\n" "$dashes"
-  _checkWireguard
-  printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
-  sudo "$venv_python" "$app_name"
-  printf "%s\n" "$dashes"
+	printf "%s\n" "$dashes"
+	_checkWireguard
+	printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
+	sudo "$venv_python" "$app_name"
+	printf "%s\n" "$dashes"
 }
 
 update_wgd() {
-
 	_determineOS
 	if ! python3 --version > /dev/null 2>&1
 	then
@@ -430,55 +416,55 @@ update_wgd() {
 }
 
 if [ "$#" != 1 ];
-  then
-    help
-  else
-    if [ "$1" = "start" ]; then
-        if check_wgd_status; then
-          printf "%s\n" "$dashes"
-          printf "[WGDashboard] WGDashboard is already running.\n"
-          printf "%s\n" "$dashes"
-          else
-            start_wgd
-        fi
-	  elif [ "$1" = "docker_start" ]; then
-        printf "%s\n" "$dashes"
-        startwgd_docker
-        printf "%s\n" "$dashes"
-      elif [ "$1" = "stop" ]; then
-        if check_wgd_status; then
-            printf "%s\n" "$dashes"
-            stop_wgd
-            printf "[WGDashboard] WGDashboard is stopped.\n"
-            printf "%s\n" "$dashes"
-            else
-              printf "%s\n" "$dashes"
-              printf "[WGDashboard] WGDashboard is not running.\n"
-              printf "%s\n" "$dashes"
-        fi
-      elif [ "$1" = "update" ]; then
-        update_wgd
-      elif [ "$1" = "install" ]; then
-        printf "%s\n" "$dashes"
-        install_wgd
-        printf "%s\n" "$dashes"
-      elif [ "$1" = "restart" ]; then
-         if check_wgd_status; then
-           printf "%s\n" "$dashes"
-           stop_wgd
-           printf "| WGDashboard is stopped.                                  |\n"
-           sleep 4
-           start_wgd
-        else
-          start_wgd
-        fi
-      elif [ "$1" = "debug" ]; then
-        if check_wgd_status; then
-          printf "| WGDashboard is already running.                          |\n"
-          else
-            start_wgd_debug
-        fi
-      else
-        help
-    fi
+	then
+		help
+	else
+		if [ "$1" = "start" ]; then
+			if check_wgd_status; then
+				printf "%s\n" "$dashes"
+				printf "[WGDashboard] WGDashboard is already running.\n"
+				printf "%s\n" "$dashes"
+				else
+					start_wgd
+			fi
+			elif [ "$1" = "docker_start" ]; then
+				printf "%s\n" "$dashes"
+				startwgd_docker
+				printf "%s\n" "$dashes"
+			elif [ "$1" = "stop" ]; then
+				if check_wgd_status; then
+					printf "%s\n" "$dashes"
+					stop_wgd
+					printf "[WGDashboard] WGDashboard is stopped.\n"
+					printf "%s\n" "$dashes"
+					else
+						printf "%s\n" "$dashes"
+						printf "[WGDashboard] WGDashboard is not running.\n"
+						printf "%s\n" "$dashes"
+				fi
+			elif [ "$1" = "update" ]; then
+				update_wgd
+			elif [ "$1" = "install" ]; then
+				printf "%s\n" "$dashes"
+				install_wgd
+				printf "%s\n" "$dashes"
+			elif [ "$1" = "restart" ]; then
+				if check_wgd_status; then
+					printf "%s\n" "$dashes"
+					stop_wgd
+					printf "[WGDashboard] WGDashboard is stopped.\n"
+					sleep 4
+					start_wgd
+				else
+					start_wgd
+				fi
+			elif [ "$1" = "debug" ]; then
+				if check_wgd_status; then
+					printf "[WGDashboard] WGDashboard is already running.\n"
+				else
+					start_wgd_debug
+				fi
+			else
+				help
+		fi
 fi
