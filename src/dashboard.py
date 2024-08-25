@@ -598,6 +598,7 @@ class WireguardConfiguration:
         return changed
         
     def __getPeers(self):
+        
         if self.configurationFileChanged():
             self.Peers = []
             with open(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'), 'r') as configFile:
@@ -670,6 +671,11 @@ class WireguardConfiguration:
                                 self.Peers.append(Peer(checkIfExist, self))
                 except Exception as e:
                     print(f"[WGDashboard] {self.Name} Error: {str(e)}")
+        else:
+            self.Peers.clear()
+            checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
+            for i in checkIfExist:
+                self.Peers.append(Peer(i, self))
         
             
     def addPeers(self, peers: list):
@@ -809,12 +815,11 @@ class WireguardConfiguration:
             else:
                 status = "stopped"
             if int(latestHandshake[count + 1]) > 0:
-                sqldb.execute("UPDATE '%s' SET latest_handshake = ?, status = ? WHERE id= ?" % self.Name
+                sqlUpdate("UPDATE '%s' SET latest_handshake = ?, status = ? WHERE id= ?" % self.Name
                               , (str(minus).split(".", maxsplit=1)[0], status, latestHandshake[count],))
             else:
-                sqldb.execute("UPDATE '%s' SET latest_handshake = 'No Handshake', status = ? WHERE id= ?" % self.Name
+                sqlUpdate("UPDATE '%s' SET latest_handshake = 'No Handshake', status = ? WHERE id= ?" % self.Name
                               , (status, latestHandshake[count],))
-            sqldb.commit()
             count += 2
     
     
