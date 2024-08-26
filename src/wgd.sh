@@ -90,7 +90,7 @@ _installPython(){
 			fi
 		;;
 		alpine)
-				{ sudo apk update; sudo apk add python3 net-tools; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
 			;;
 	esac
 	
@@ -174,7 +174,7 @@ _installPythonPip(){
 				fi
 			;;
 			alpine)
-				{ sudo apk update; sudo apk add py3-pip ; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -195,26 +195,25 @@ _installPythonPip(){
 }
 
 _checkWireguard(){
-    # Check if wg and wg-quick are installed
     if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
     then
         case "$OS" in
             ubuntu|debian)
                 { 
                     sudo apt update && sudo apt-get install -y wireguard; 
-                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
             ;;
             centos|fedora|redhat|rhel)
                 { 
                     sudo dnf install -y wireguard-tools;
-                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
             ;;
             alpine)
                 { 
-                    sudo apk update && sudo apk add wireguard-tools;
-                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                    sudo apk update && sudo apk add wireguard-tools --no-cache;
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
             ;;
             *)
@@ -224,7 +223,7 @@ _checkWireguard(){
             ;;
         esac
     else
-        printf "WireGuard is already installed.\n"
+        printf "[WGDashboard] WireGuard is already installed.\n"
     fi
 }
 
@@ -413,7 +412,7 @@ if [ "$#" != 1 ];
           printf "%s\n" "$dashes"
           printf "[WGDashboard] WGDashboard is already running.\n"
           printf "%s\n" "$dashes"
-          else
+        else
             start_wgd
         fi
       elif [ "$1" = "stop" ]; then

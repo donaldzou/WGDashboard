@@ -13,11 +13,11 @@ ENV global_dns="1.1.1.1"
 ENV enable="none"
 ENV isolate="wg0"
 ENV public_ip="0.0.0.0"
-ENV update="yes"
 
 # Doing package management operations, such as upgrading
 RUN apk update \
-  && apk add --no-cache bash git curl tzdata \
+  && apk add --no-cache bash git tzdata \
+  iptables ip6tables curl openrc wireguard-tools \
   sudo py3-psutil py3-bcrypt
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
@@ -49,8 +49,8 @@ RUN echo "[Interface]" > /setup/conf/wg0.conf \
   && echo "DNS = ${global_dns}" >> /setup/conf/wg0.conf
 
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
-HEALTHCHECK --interval=2m --timeout=1m --start-period=20s --retries=3 \
-  CMD [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:10086/)" -eq "200" ] || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
 
 # Copy the basic entrypoint.sh script.

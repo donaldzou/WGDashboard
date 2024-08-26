@@ -1,6 +1,6 @@
 services:
   wireguard-dashboard:
-    image: dselen/wgdashboard:dev
+    image: dselen:alpine
     restart: unless-stopped
     container_name: wgdashboard
     environment:
