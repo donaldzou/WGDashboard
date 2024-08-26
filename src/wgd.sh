@@ -194,7 +194,7 @@ _installPythonPip(){
 	fi
 }
 
-checkWireguard(){
+_checkWireguard(){
     # Check if wg and wg-quick are installed
     if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
     then
