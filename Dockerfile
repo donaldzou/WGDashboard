@@ -26,6 +26,6 @@ RUN    apk update && \
     apk add --no-cache  iptables ip6tables && \
     chmod u+x /opt/wireguarddashboard/src/entrypoint.sh 
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl -f http://localhost:10086/signin || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
 ENTRYPOINT ["/opt/wireguarddashboard/src/entrypoint.sh"]
