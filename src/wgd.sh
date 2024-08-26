@@ -156,7 +156,6 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
-	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
 		case "$OS" in
@@ -195,31 +194,40 @@ _installPythonPip(){
 	fi
 }
 
-_checkWireguard(){
-	if [ ! wg -h > /dev/null 2>&1 ] || [ ! wg-quick -h > /dev/null 2>&1 ]
-	then
-		case "$OS" in
-			ubuntu|debian)
-				{ sudo apt update ; sudo apt-get install -y  wireguard; printf "\n\n"; } &>> ./log/install.txt
-			;;
-			#centos|fedora|redhat|rhel)
-			#	if [ "$pythonExecutable" = "python3" ]; then
-			#		{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
-			#	else
-			#		{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
-			#	fi
-			#;;
-			alpine)
-				{ sudo apk update; sudo apk add wireguard-tools ; printf "\n\n"; } >> ./log/install.txt
-			;;
-			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-				printf "%s\n" "$helpMsg"
-				kill  $TOP_PID
-			;;
-		esac
-	fi
+checkWireguard(){
+    # Check if wg and wg-quick are installed
+    if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
+    then
+        case "$OS" in
+            ubuntu|debian)
+                { 
+                    sudo apt update && sudo apt-get install -y wireguard; 
+                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            centos|fedora|redhat|rhel)
+                { 
+                    sudo dnf install -y wireguard-tools;
+                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            alpine)
+                { 
+                    sudo apk update && sudo apk add wireguard-tools;
+                    printf "\nWireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            *)
+                printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
+                printf "%s\n" "$helpMsg"
+                kill $TOP_PID
+            ;;
+        esac
+    else
+        printf "WireGuard is already installed.\n"
+    fi
 }
+
 
 
 
@@ -250,8 +258,6 @@ _checkPythonVersion(){
 
 install_wgd(){
     printf "[WGDashboard] Starting to install WGDashboard\n"
-    _checkWireguard
-    sudo chmod -R 755 /etc/wireguard/
     
     if [ ! -d "log" ]
 	  then 
@@ -270,6 +276,8 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
+	_checkWireguard
+    sudo chmod -R 755 /etc/wireguard/
 
     if [ ! -d "db" ] 
       then 

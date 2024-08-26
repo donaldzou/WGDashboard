@@ -80,17 +80,6 @@ clean_up() {
   echo "Removed unneeded logs!"
 }
 
-#update_checker() {
-  #if [ "$update" = "yes" ]; then
-  # echo "Activating Python venv and executing the WireGuard Dashboard service."
-  #  . "${WGDASH}/src/venv/bin/activate"
-  #  cd "${WGDASH}"/src || exit
-  #  bash wgd.sh update
-  #else
-  #  echo "Auto Updater disabled"
-  #fi
-#}
-
 # === SET ENV VARS ===
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
