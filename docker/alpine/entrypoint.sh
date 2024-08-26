@@ -105,6 +105,10 @@ set_envvars() {
 
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" /opt/wireguarddashboard/src/wg-dashboard.ini
   fi
+
+  echo "Restarting service for good measure"
+  cd "${WGDASH}"/src || exit
+    ./wgd.sh restart
 }
 
 # === CORE SERVICES ===
