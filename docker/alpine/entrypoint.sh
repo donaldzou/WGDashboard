@@ -223,7 +223,6 @@ ensure_blocking() {
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 ensure_installation
 clean_up
-#update_checker
-start_core
 set_envvars
+start_core
 ensure_blocking
