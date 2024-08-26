@@ -22,10 +22,6 @@ ensure_installation() {
     cd "${WGDASH}"/src || exit
     ./wgd.sh install
 
-    echo "Generating some files..."
-    ./wgd.sh start
-    ./wgd.sh stop
-
     echo "Looks like the installation succesfully moved over."
   else
     echo "Looks like everything is present. Or the directory is not empty."
@@ -109,10 +105,6 @@ set_envvars() {
 
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" /opt/wireguarddashboard/src/wg-dashboard.ini
   fi
-
-  #echo "Restarting service for good measure"
-  #cd "${WGDASH}"/src || exit
-  #./wgd.sh restart
 }
 
 # === CORE SERVICES ===
@@ -121,8 +113,8 @@ start_core() {
 
   echo "Activating Python venv and executing the WireGuard Dashboard service."
   . "${WGDASH}"/src/venv/bin/activate
-  cd "${WGDASH}"/src || return # If changing the directory fails (permission or presence error), then bash will exist this function, causing the WireGuard Dashboard to not be succesfully launched.
-  bash wgd.sh start
+  cd "${WGDASH}"/src || return
+  bash wgd.sh start &>> /dev/null
 
   # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
   local configurations=(/etc/wireguard/*)
@@ -205,6 +197,10 @@ start_core() {
 ensure_blocking() {
   printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
 
+  . "${WGDASH}"/src/venv/bin/activate
+  cd "${WGDASH}"/src || return
+  bash wgd.sh restart
+
   sleep 1s
   echo "Ensuring container continuation."
 
@@ -223,6 +219,6 @@ ensure_blocking() {
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 ensure_installation
 clean_up
-set_envvars
 start_core
+set_envvars
 ensure_blocking
