@@ -22,9 +22,13 @@ ensure_installation() {
     cd "${WGDASH}"/src || exit
     ./wgd.sh install
 
+    echo "Generating some files..."
+    ./wgd.sh start
+    ./wgd.sh stop
+
     echo "Looks like the installation succesfully moved over."
   else
-    echo "Looks like everything is present."
+    echo "Looks like everything is present. Or the directory is not empty."
   fi
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
@@ -106,9 +110,9 @@ set_envvars() {
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" /opt/wireguarddashboard/src/wg-dashboard.ini
   fi
 
-  echo "Restarting service for good measure"
-  cd "${WGDASH}"/src || exit
-    ./wgd.sh restart
+  #echo "Restarting service for good measure"
+  #cd "${WGDASH}"/src || exit
+  #./wgd.sh restart
 }
 
 # === CORE SERVICES ===
