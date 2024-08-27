@@ -10,7 +10,8 @@ ensure_installation() {
   if [ -z "$(ls -A "${WGDASH}")" ]; then
     echo "Detected empty directory, moving over..."
 
-    mv /setup/app/{.[!.],}* "${WGDASH}"
+    mv /setup/app/* "${WGDASH}"
+    mv /setup/app/.* "${WGDASH}"
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
 
@@ -82,7 +83,7 @@ clean_up() {
 
 # === SET ENV VARS ===
 set_envvars() {
-  printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
+  #printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
   # Changing the DNS used for clients and the dashboard itself.
   if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 
@@ -195,7 +196,7 @@ start_core() {
 
 # === CLEAN UP ===
 ensure_blocking() {
-  printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
+  #printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
 
   . "${WGDASH}"/src/venv/bin/activate
   cd "${WGDASH}"/src || return
