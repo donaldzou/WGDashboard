@@ -325,7 +325,7 @@ stop_wgd() {
 
 startwgd_docker() {
 	_checkWireguard
-	printf "[WGDashboard][Docker] WireGuard configuration started\n"
+	printf "[WGDashboard][Docker] WGD Docker Started\n"
 	set_env docker
 	start_core 
     gunicorn_start
@@ -336,14 +336,14 @@ set_env() {
 
   # Check if the env_file exists and is not empty
   if [[ -f "$env_file" && -s "$env_file" ]]; then
-    printf "[WGDashboard][Docker] %s Loading Enviornment File.\n" "$heavy_checkmark"
+    printf "[WG-DASH ENVIORNMENT] %s Loading Enviornment File.\n" "$heavy_checkmark"
     return 0
   fi
 
   # Create the env_file if it doesn't exist
   if [[ ! -f "$env_file" ]]; then
     touch "$env_file"
-    printf "[WGDashboard][Docker] %s Enviornment File Missing, Creating ...\n" "$heavy_checkmark" 
+    printf "[WG-DASH ENVIORNMENT] %s Enviornment File Missing, Creating ...\n" "$heavy_checkmark" 
   fi
 
   # Clear the file to ensure it's updated with the latest values
@@ -384,10 +384,10 @@ start_core() {
 	local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
 	# Check if wg0.conf exists in /etc/wireguard
 	if [[ ! -f /etc/wireguard/wg0.conf ]]; then
-		echo "[WGDashboard][Docker] wg0.conf not found. Running generate configuration."
+		printf "[WGDashboard][Docker] %s Wireguard Configuration Missing, Creating ....\n" "$heavy_checkmark"
 		newconf_wgd
 	else
-		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping ..."
+				printf "[WGDashboard][Docker] %s Loading Wireguard Configuartions.\n" "$heavy_checkmark"
 	fi
 	# Re-assign config_files to ensure it includes any newly created configurations
 	local config_files=$(find /etc/wireguard -type f -name "*.conf")
@@ -396,6 +396,8 @@ start_core() {
 	find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
 	find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
 	
+	printf "[WGDashboard][Docker] %s Starting Wireguard Configuartions.\n" "$heavy_checkmark"
+  	printf "%s\n" "$dashes"
 	# Start WireGuard for each config file
 	for file in $config_files; do
 		config_name=$(basename "$file" ".conf")
