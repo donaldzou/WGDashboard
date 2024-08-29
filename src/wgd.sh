@@ -10,6 +10,7 @@ app_official_name="WGDashboard"
 venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
 pythonExecutable="python3"
+svr_config="/etc/wireguard/wg0.conf"
 
 heavy_checkmark=$(printf "\xE2\x9C\x94")
 heavy_crossmark=$(printf "\xE2\x9C\x97")
@@ -310,6 +311,7 @@ gunicorn_stop () {
 
 start_wgd () {
 	_checkWireguard
+	set_env regular
     gunicorn_start
 }
 
@@ -324,7 +326,8 @@ stop_wgd() {
 startwgd_docker() {
 	_checkWireguard
 	printf "[WGDashboard][Docker] WireGuard configuration started\n"
-	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
+	set_env docker
+	start_core 
     gunicorn_start
 }
 
@@ -335,7 +338,7 @@ start_core() {
 		echo "[WGDashboard][Docker] wg0.conf not found. Running generate configuration."
 		newconf_wgd
 	else
-		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping WireGuard configuration generation."
+		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping ..."
 	fi
 	# Re-assign config_files to ensure it includes any newly created configurations
 	local config_files=$(find /etc/wireguard -type f -name "*.conf")
@@ -350,12 +353,61 @@ start_core() {
 		wg-quick up "$config_name"
 	done
 }
+set_env() {
+  local env_file=".env"
+  local env_type="$1"
 
+  # Check if the env_file exists and is not empty
+  if [[ -f "$env_file" && -s "$env_file" ]]; then
+    printf "[WGDashboard][Docker] %s Loading Enviornment File.\n" "$heavy_checkmark"
+    return 0
+  fi
+
+  # Create the env_file if it doesn't exist
+  if [[ ! -f "$env_file" ]]; then
+    touch "$env_file"
+    printf "[WGDashboard][Docker] %s Enviornment File Missing, Creating ...\n" "$heavy_checkmark" 
+  fi
+
+  # Clear the file to ensure it's updated with the latest values
+  > "$env_file"
+
+  if [[ "$env_type" == "docker" ]]; then
+    printf "WGD_WELCOME_SESSION=%s\n" "${WGD_WELCOME_SESSION}" >> "$env_file"
+    printf "WGD_APP_PORT=%s\n" "${WGD_APP_PORT}" >> "$env_file"
+    printf "WGD_USER=%s\n" "${WGD_USER}" >> "$env_file"
+    printf "WGD_PASS=%s\n" "${WGD_PASS}" >> "$env_file"
+    printf "WGD_REMOTE_ENDPOINT=%s\n" "${WGD_REMOTE_ENDPOINT}" >> "$env_file"
+    printf "WGD_DNS=%s\n" "${WGD_DNS}" >> "$env_file"
+    printf "WGD_IPTABLES_DNS=%s\n" "${WGD_IPTABLES_DNS}" >> "$env_file"
+    printf "WGD_PEER_ENDPOINT_ALLOWED_IP=%s\n" "${WGD_PEER_ENDPOINT_ALLOWED_IP}" >> "$env_file"
+    printf "WGD_KEEP_ALIVE=%s\n" "${WGD_KEEP_ALIVE}" >> "$env_file"
+    printf "WGD_MTU=%s\n" "${WGD_MTU}" >> "$env_file"
+    printf "WGD_PORT_RANGE_STARTPORT=%s\n" "${WGD_PORT_RANGE_STARTPORT}" >> "$env_file"
+
+  elif [[ "$env_type" == "regular" ]]; then
+    printf "WGD_WELCOME_SESSION=true\n" >> "$env_file"
+    printf "WGD_APP_PORT=10086\n" >> "$env_file"
+    printf "WGD_USER=admin\n" >> "$env_file"
+    printf "WGD_PASS=admin\n" >> "$env_file"
+    printf "WGD_REMOTE_ENDPOINT=0.0.0.0\n" >> "$env_file"
+    printf "WGD_DNS=1.1.1.1\n" >> "$env_file"
+    printf "WGD_IPTABLES_DNS=%s\n" "${WGD_IPTABLES_DNS}" >> "$env_file"
+    printf "WGD_PEER_ENDPOINT_ALLOWED_IP=0.0.0.0/0\n" >> "$env_file"
+    printf "WGD_KEEP_ALIVE=21\n" >> "$env_file"
+    printf "WGD_MTU=1420\n" >> "$env_file"
+    printf "WGD_PORT_RANGE_STARTPORT=%s\n" "${WGD_PORT_RANGE_STARTPORT}" >> "$env_file"
+  else
+    echo "Error: Invalid environment type. Use 'docker' or 'regular'."
+    return 1
+  fi
+  . .env
+}
 
 
 newconf_wgd() {
-    local wg_port_listen=$wg_port
-    local wg_addr_range=$wg_net
+    local wg_port_listen=$WGD_PORT
+    local wg_addr_range=$WGD_NET
     private_key=$(wg genkey)
     public_key=$(echo "$private_key" | wg pubkey)
     cat <<EOF >"/etc/wireguard/wg0.conf"

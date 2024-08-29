@@ -26,6 +26,8 @@ from flask import Flask, request, render_template, session, g
 from json import JSONEncoder
 from flask_cors import CORS
 
+from dotenv import load_dotenv
+
 from icmplib import ping, traceroute
 
 # Import other python files
@@ -51,7 +53,20 @@ app = Flask("WGDashboard")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
-
+#Docker ENV ARGS Import
+load_dotenv()
+wgd_welcome = os.environ.get('WGD_WELCOME_SESSION')
+wgd_app_port = os.environ.get('WGD_APP_PORT')
+wgd_user = os.environ.get('WGD_USER')
+wgd_pass = os.environ.get('WGD_PASS')
+wgd_global_dns = os.environ.get('WGD_DNS')
+wgd_peer_endpoint_allowed_ip = os.environ.get('WGD_PEER_ENDPOINT_ALLOWED_IP')
+wgd_remote_endpoint = os.environ.get('WGD_REMOTE_ENDPOINT')
+if wgd_remote_endpoint == '0.0.0.0':
+    default_interface = ifcfg.default_interface()
+    wgd_remote_endpoint = default_interface['inet']
+wgd_keep_alive = os.environ.get('WGD_KEEP_ALIVE')
+wgd_mtu = os.environ.get('WGD_MTU')
 
 
 class ModelEncoder(JSONEncoder):
@@ -1107,8 +1122,8 @@ class DashboardConfig:
         self.hiddenAttribute = ["totp_key"]
         self.__default = {
             "Account": {
-                "username": "admin",
-                "password": "admin",
+                "username": wgd_user,
+                "password": wgd_pass,
                 "enable_totp": "false",
                 "totp_verified": "false",
                 "totp_key": pyotp.random_base32()
@@ -1117,7 +1132,7 @@ class DashboardConfig:
                 "wg_conf_path": "/etc/wireguard",
                 "app_prefix": "",
                 "app_ip": "0.0.0.0",
-                "app_port": "10086",
+                "app_port": wgd_app_port,
                 "auth_req": "true",
                 "version": DASHBOARD_VERSION,
                 "dashboard_refresh_interval": "60000",
@@ -1126,15 +1141,15 @@ class DashboardConfig:
                 "dashboard_api_key": "false"
             },
             "Peers": {
-                "peer_global_DNS": "1.1.1.1",
-                "peer_endpoint_allowed_ip": "0.0.0.0/0",
+                "peer_global_DNS": wgd_global_dns,
+                "peer_endpoint_allowed_ip": wgd_peer_endpoint_allowed_ip,
                 "peer_display_mode": "grid",
-                "remote_endpoint": ifcfg.default_interface()['inet'],
-                "peer_MTU": "1420",
-                "peer_keep_alive": "21"
+                "remote_endpoint": wgd_remote_endpoint,
+                "peer_MTU": wgd_mtu,
+                "peer_keep_alive": wgd_keep_alive 
             },
             "Other": {
-                "welcome_session": "true"
+                "welcome_session": wgd_welcome
             },
             "Database":{
                 "type": "sqlite"

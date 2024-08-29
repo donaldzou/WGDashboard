@@ -9,9 +9,10 @@ RUN    apk update && \
     apk add --no-cache sudo gcc musl-dev rust cargo linux-headers 
 
 COPY ./docker/alpine/builder.sh /opt/wireguarddashboard/src/
-COPY ./docker/alpine/requirements.txt /opt/wireguarddashboard/src/
+COPY ./docker/alpine/builder_requirements.txt /opt/wireguarddashboard/src/
 RUN   chmod u+x /opt/wireguarddashboard/src/builder.sh
 RUN  /opt/wireguarddashboard/src/builder.sh
+
 
 
 FROM alpine:latest
@@ -29,3 +30,9 @@ RUN    apk update && \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
 ENTRYPOINT ["/opt/wireguarddashboard/src/entrypoint.sh"]
+
+
+CMD ["docker_start"]
+
+# Define the stop signal to be used by Docker
+STOPSIGNAL SIGTERM

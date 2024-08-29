@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Trap the SIGTERM signal and call the stop_service function
+trap './wgd.sh stop' SIGTERM
+
 echo "Starting the WireGuard Dashboard Docker container."
 
 clean_up() {
@@ -32,3 +36,8 @@ chmod u+x /opt/wireguarddashboard/src/wgd.sh
 /opt/wireguarddashboard/src/wgd.sh install
 /opt/wireguarddashboard/src/wgd.sh docker_start
 ensure_blocking
+# Store the PID of the background process
+SERVICE_PID=$!
+
+# Wait for the service process to exit
+wait $SERVICE_PID
