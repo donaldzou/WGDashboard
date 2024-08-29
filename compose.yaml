@@ -8,18 +8,17 @@ services:
       - SYS_MODULE
     restart: unless-stopped
     environment:
+      - WGD_USER=admin
+      - WGD_PASS=admin
       - WGD_NET=10.0.0.1/24
       - WGD_PORT=51820
-      - WGD_WELCOME_SESSION=true
       - WGD_APP_PORT=10086
-      - WGD_USER=james
-      - WGD_PASS=admin
       - WGD_REMOTE_ENDPOINT=0.0.0.0
-      - WGD_DNS="10.2.0.100, 10.2.0.100"
-      - WGD_IPTABLES_DNS=10.2.0.100
+      - WGD_DNS="1.1.1.1, 1.0.0.1"
       - WGD_PEER_ENDPOINT_ALLOWED_IP=0.0.0.0/0
       - WGD_KEEP_ALIVE=21
       - WGD_MTU=1420
+      - WGD_WELCOME_SESSION=true
     volumes:
       - wgd_configs:/etc/wireguard
       - wgd_app:/opt/wireguarddashboard/src
