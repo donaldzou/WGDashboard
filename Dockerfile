@@ -1,7 +1,8 @@
-# Pull from small Debian stable image.
+# Pull from small secure alpine image.
 FROM alpine:latest AS builder
 
 LABEL maintainer="dselen@nerthus.nl"
+LABEL engineer="NOXCIS"
 
 WORKDIR /opt/wireguarddashboard/src
 
