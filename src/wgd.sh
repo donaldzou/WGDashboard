@@ -356,11 +356,11 @@ set_env() {
     printf "WGD_PASS=%s\n" "${WGD_PASS}" >> "$env_file"
     printf "WGD_REMOTE_ENDPOINT=%s\n" "${WGD_REMOTE_ENDPOINT}" >> "$env_file"
     printf "WGD_DNS=%s\n" "${WGD_DNS}" >> "$env_file"
-    printf "WGD_IPTABLES_DNS=%s\n" "${WGD_IPTABLES_DNS}" >> "$env_file"
     printf "WGD_PEER_ENDPOINT_ALLOWED_IP=%s\n" "${WGD_PEER_ENDPOINT_ALLOWED_IP}" >> "$env_file"
     printf "WGD_KEEP_ALIVE=%s\n" "${WGD_KEEP_ALIVE}" >> "$env_file"
     printf "WGD_MTU=%s\n" "${WGD_MTU}" >> "$env_file"
-    printf "WGD_PORT_RANGE_STARTPORT=%s\n" "${WGD_PORT_RANGE_STARTPORT}" >> "$env_file"
+    printf "WGD_PORT=%s\n" "${WGD_PORT}" >> "$env_file"
+	printf "WGD_NET=%s\n" "${WGD_NET}" >> "$env_file"
 
   elif [[ "$env_type" == "regular" ]]; then
     printf "WGD_WELCOME_SESSION=true\n" >> "$env_file"
@@ -369,11 +369,11 @@ set_env() {
     printf "WGD_PASS=admin\n" >> "$env_file"
     printf "WGD_REMOTE_ENDPOINT=0.0.0.0\n" >> "$env_file"
     printf "WGD_DNS=1.1.1.1\n" >> "$env_file"
-    printf "WGD_IPTABLES_DNS=%s\n" "${WGD_IPTABLES_DNS}" >> "$env_file"
     printf "WGD_PEER_ENDPOINT_ALLOWED_IP=0.0.0.0/0\n" >> "$env_file"
     printf "WGD_KEEP_ALIVE=21\n" >> "$env_file"
     printf "WGD_MTU=1420\n" >> "$env_file"
-    printf "WGD_PORT_RANGE_STARTPORT=%s\n" "${WGD_PORT_RANGE_STARTPORT}" >> "$env_file"
+    printf "WGD_PORT=51820\n" >> "$env_file"
+	printf "WGD_NET=10.0.0.1/24\n" >> "$env_file"
   else
     echo "Error: Invalid environment type. Use 'docker' or 'regular'."
     return 1
