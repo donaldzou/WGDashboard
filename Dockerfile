@@ -1,8 +1,8 @@
 # Pull from small secure alpine image.
 FROM alpine:latest AS builder
 
-LABEL maintainer="dselen@nerthus.nl"
-LABEL engineer="NOXCIS"
+LABEL Maintainer="dselen@nerthus.nl"
+LABEL Deployment-Engineer="NOXCIS"
 
 WORKDIR /opt/wireguarddashboard/src
 
