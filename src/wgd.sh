@@ -372,8 +372,6 @@ set_env() {
     printf "WGD_PEER_ENDPOINT_ALLOWED_IP=0.0.0.0/0\n" >> "$env_file"
     printf "WGD_KEEP_ALIVE=21\n" >> "$env_file"
     printf "WGD_MTU=1420\n" >> "$env_file"
-    printf "WGD_PORT=51820\n" >> "$env_file"
-	printf "WGD_NET=10.0.0.1/24\n" >> "$env_file"
   else
     echo "Error: Invalid environment type. Use 'docker' or 'regular'."
     return 1
