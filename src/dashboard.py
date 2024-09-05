@@ -1792,6 +1792,7 @@ def API_addPeers(configName):
     mtu = data['mtu']
     keep_alive = data['keepalive']
     preshared_key = data['preshared_key']
+    preshared_key_bulkAdd: bool = data['preshared_key_bulkAdd']
 
     if configName in WireguardConfigurations.keys():
         config = WireguardConfigurations.get(configName)
@@ -1818,7 +1819,7 @@ def API_addPeers(configName):
                 keyPairs.append({
                     "private_key": newPrivateKey,
                     "id": _generatePublicKey(newPrivateKey)[1],
-                    "preshared_key": _generatePrivateKey()[1],
+                    "preshared_key": (_generatePrivateKey()[1] if preshared_key_bulkAdd else ""),
                     "allowed_ip": availableIps[1][i],
                     "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
                 })
