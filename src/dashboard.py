@@ -398,7 +398,6 @@ class PeerShareLinks:
                     )
                 """
             )
-            # sqldb.commit()
         self.__getSharedLinks()
         # print(self.Links)
     def __getSharedLinks(self):
@@ -421,7 +420,6 @@ class PeerShareLinks:
             if len(self.getLink(Configuration, Peer)) > 0:
                 sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
             sqlUpdate("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
-            # sqldb.commit()
             self.__getSharedLinks()
         except Exception as e:
             return False, str(e)
@@ -429,7 +427,6 @@ class PeerShareLinks:
     
     def updateLinkExpireDate(self, ShareID, ExpireDate: datetime = None) -> tuple[bool, str]:
         sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?;", (ExpireDate, ShareID, ))
-        # sqldb.commit()
         self.__getSharedLinks()
         return True, ""
         
@@ -532,7 +529,6 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            # sqldb.commit()
 
         if f'{self.Name}_restrict_access' not in existingTables:
             sqlUpdate(
@@ -548,7 +544,6 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            # sqldb.commit()
         if f'{self.Name}_transfer' not in existingTables:
             sqlUpdate(
                 """
@@ -559,7 +554,6 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            # sqldb.commit()
         if f'{self.Name}_deleted' not in existingTables:
             sqlUpdate(
                 """
@@ -574,10 +568,7 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-            # sqldb.commit()
     
-            
-
     def __getPublicKey(self) -> str:
         return _generatePublicKey(self.PrivateKey)[1]
 
@@ -662,12 +653,10 @@ class WireguardConfiguration:
                                         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
                                     """ % self.Name
                                     , newPeer)
-                                # sqldb.commit()
                                 self.Peers.append(Peer(newPeer, self))
                             else:
                                 sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
                                                (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
-                                # sqldb.commit()
                                 self.Peers.append(Peer(checkIfExist, self))
                 except Exception as e:
                     print(f"[WGDashboard] {self.Name} Error: {str(e)}")
@@ -731,7 +720,6 @@ class WireguardConfiguration:
                     sqlUpdate("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))
                     sqlUpdate("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
-                    # sqldb.commit()
                     numOfRestrictedPeers += 1
                 except Exception as e:
                     numOfFailedToRestrictPeers += 1
@@ -776,7 +764,7 @@ class WireguardConfiguration:
     def __savePeers(self):
         for i in self.Peers:
             d = i.toJson()
-            sqldb.execute(
+            sqlUpdate(
                 '''
                 UPDATE '%s' SET private_key = :private_key, 
                     DNS = :DNS, endpoint_allowed_ip = :endpoint_allowed_ip, name = :name, 
@@ -787,7 +775,6 @@ class WireguardConfiguration:
                     remote_endpoint = :remote_endpoint, preshared_key = :preshared_key WHERE id = :id
                 ''' % self.Name, d
             )
-        sqldb.commit()
 
     def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:
         try:
@@ -853,7 +840,6 @@ class WireguardConfiguration:
                                 self.Name, (cumulative_receive, cumulative_sent,
                                             cumulative_sent + cumulative_receive,
                                             data_usage[i][0],))
-                            sqldb.commit()
                             total_sent = 0
                             total_receive = 0
                         _, p = self.searchPeer(data_usage[i][0])
@@ -862,7 +848,6 @@ class WireguardConfiguration:
                                 "UPDATE '%s' SET total_receive = ?, total_sent = ?, total_data = ? WHERE id = ?"
                                 % self.Name, (total_receive, total_sent,
                                               total_receive + total_sent, data_usage[i][0],))
-                            sqldb.commit()
         except Exception as e:
             print(f"[WGDashboard] {self.Name} Error: {str(e)} {str(e.__traceback__)}")
 
@@ -877,9 +862,8 @@ class WireguardConfiguration:
         data_usage = data_usage.decode("UTF-8").split()
         count = 0
         for _ in range(int(len(data_usage) / 2)):
-            sqldb.execute("UPDATE '%s' SET endpoint = ? WHERE id = ?" % self.Name
+            sqlUpdate("UPDATE '%s' SET endpoint = ? WHERE id = ?" % self.Name
                           , (data_usage[count + 1], data_usage[count],))
-            # sqldb.commit()
             count += 2
 
     def toggleConfiguration(self) -> [bool, str]:
@@ -1020,7 +1004,6 @@ class Peer:
                 (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
                  keepalive, preshared_key, self.id,)
             )
-            sqldb.commit()
             return ResponseObject()
         except subprocess.CalledProcessError as exc:
             return ResponseObject(False, exc.output.decode("UTF-8").strip())
@@ -1156,7 +1139,6 @@ class DashboardConfig:
         existingTable = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
         if len(existingTable) == 0:
             sqlUpdate("CREATE TABLE DashboardAPIKeys (Key VARCHAR NOT NULL PRIMARY KEY, CreatedAt DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')), ExpiredAt VARCHAR)")
-            # sqldb.commit()
     
     def __getAPIKeys(self) -> list[DashboardAPIKey]:
         keys = sqlSelect("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
@@ -1168,12 +1150,11 @@ class DashboardConfig:
     def createAPIKeys(self, ExpiredAt = None):
         newKey = secrets.token_urlsafe(32)
         sqlUpdate('INSERT INTO DashboardAPIKeys (Key, ExpiredAt) VALUES (?, ?)', (newKey, ExpiredAt,))
-        # sqldb.commit()
+        
         self.DashboardAPIKeys = self.__getAPIKeys()
         
     def deleteAPIKey(self, key):
         sqlUpdate("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
-        # sqldb.commit()
         self.DashboardAPIKeys = self.__getAPIKeys()
     
     
@@ -1422,7 +1403,10 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
         cursor = sqldb.cursor()
         cursor.execute(statement, paramters)
-        sqldb.commit()
+        try:
+            sqldb.commit()
+        except sqlite3.OperationalError as error:
+            print("[WGDashboard] SQLite Error:" + str(error))
 
 DashboardConfig = DashboardConfig()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
