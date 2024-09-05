@@ -659,7 +659,8 @@ class WireguardConfiguration:
                                                (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
                                 self.Peers.append(Peer(checkIfExist, self))
                 except Exception as e:
-                    print(f"[WGDashboard] {self.Name} Error: {str(e)}")
+                    if __name__ == '__main__':
+                        print(f"[WGDashboard] {self.Name} Error: {str(e)}")
         else:
             self.Peers.clear()
             checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
@@ -1363,7 +1364,10 @@ def _getWireguardConfigurationAvailableIP(configName: str, all: bool = False) ->
                 add = p.allowed_ip.split(',')
                 for i in add:
                     a, c = i.split('/')
-                    existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
+                    try:
+                        existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
+                    except ValueError as error:
+                        print(f"[WGDashboard] Error: {configName} peer {p.id} have invalid ip")
 
         for p in configuration.getRestrictedPeersList():
             if len(p.allowed_ip) > 0:
@@ -1402,8 +1406,8 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
         cursor = sqldb.cursor()
-        cursor.execute(statement, paramters)
         try:
+            cursor.execute(statement, paramters)
             sqldb.commit()
         except sqlite3.OperationalError as error:
             print("[WGDashboard] SQLite Error:" + str(error))
