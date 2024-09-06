@@ -66,6 +66,11 @@ export default {
 				this.invalidFeedback = "Please fill in all required fields."
 			}
 		}
+	},
+	computed: {
+		passwordValid(){
+			return Object.values(this.value).find(x => x.length === 0) === undefined && this.value.newPassword === this.value.repeatNewPassword
+		}
 	}
 }
 </script>
@@ -109,7 +114,9 @@ export default {
 				</div>
 			</div>
 		</div>
-		<button class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
+		<button 
+			:disabled="!this.passwordValid"
+			class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
 			<i class="bi bi-save2-fill me-2"></i>Update Password
 		</button>
 	</div>

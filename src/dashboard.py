@@ -462,11 +462,11 @@ class WireguardConfiguration:
 
         if name is not None:
             self.Name = name
-            self.__parser.read_file(open(os.path.join(WG_CONF_PATH, f'{self.Name}.conf')))
+            self.__parser.read_file(open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')))
             sections = self.__parser.sections()
             if "Interface" not in sections:
                 raise self.InvalidConfigurationFileException(
-                    "[Interface] section not found in " + os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+                    "[Interface] section not found in " + os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'))
             interfaceConfig = dict(self.__parser.items("Interface", True))
             for i in dir(self):
                 if str(i) in interfaceConfig.keys():
@@ -583,7 +583,7 @@ class WireguardConfiguration:
             self.RestrictedPeers.append(Peer(i, self))
             
     def configurationFileChanged(self) :
-        mt = os.path.getmtime(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'))
+        mt = os.path.getmtime(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'))
         changed = self.__configFileModifiedTime is None or self.__configFileModifiedTime != mt
         self.__configFileModifiedTime = mt
         return changed
@@ -592,7 +592,7 @@ class WireguardConfiguration:
         
         if self.configurationFileChanged():
             self.Peers = []
-            with open(os.path.join(WG_CONF_PATH, f'{self.Name}.conf'), 'r') as configFile:
+            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as configFile:
                 p = []
                 pCounter = -1
                 content = configFile.read().split('\n')
@@ -1210,6 +1210,10 @@ class DashboardConfig:
             else:
                 value = self.generatePassword(value).decode("utf-8")
 
+        if section == "Server" and key == "wg_conf_path":
+            if not os.path.exists(value):
+                return False, "Path does not exist"
+
         if section not in self.__config:
             self.__config[section] = {}
 
@@ -1232,7 +1236,7 @@ class DashboardConfig:
         except Exception as e:
             return False
 
-    def GetConfig(self, section, key) -> [any, bool]:
+    def GetConfig(self, section, key) -> [bool, any]:
         if section not in self.__config:
             return False, None
 
@@ -1279,7 +1283,8 @@ def _regexMatch(regex, text):
 
 def _getConfigurationList():
     # configurations = {}
-    for i in os.listdir(WG_CONF_PATH):
+    print(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+    for i in os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             try:
@@ -1400,8 +1405,11 @@ cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
-        cursor = sqldb.cursor()
-        return cursor.execute(statement, paramters)
+        try:
+            cursor = sqldb.cursor()
+            return cursor.execute(statement, paramters)
+        except sqlite3.OperationalError as error:
+            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
@@ -1602,14 +1610,7 @@ def API_getDashboardConfiguration():
     return ResponseObject(data=DashboardConfig.toJson())
 
 
-# @app.route(f'{APP_PREFIX}/api/updateDashboardConfiguration', methods=["POST"])
-# def API_updateDashboardConfiguration():
-#     data = request.get_json()
-#     for section in data['DashboardConfiguration'].keys():
-#         for key in data['DashboardConfiguration'][section].keys():
-#             if not DashboardConfig.SetConfig(section, key, data['DashboardConfiguration'][section][key])[0]:
-#                 return ResponseObject(False, "Section or value is invalid.")
-#     return ResponseObject()
+
 
 
 @app.route(f'{APP_PREFIX}/api/updateDashboardConfigurationItem', methods=["POST"])
@@ -1617,13 +1618,16 @@ def API_updateDashboardConfigurationItem():
     data = request.get_json()
     if "section" not in data.keys() or "key" not in data.keys() or "value" not in data.keys():
         return ResponseObject(False, "Invalid request.")
-
     valid, msg = DashboardConfig.SetConfig(
         data["section"], data["key"], data['value'])
-
     if not valid:
         return ResponseObject(False, msg)
-
+    
+    if data['section'] == "Server":
+        if data['key'] == 'wg_conf_path':
+            WireguardConfigurations.clear()
+            _getConfigurationList()
+            
     return ResponseObject()
 
 @app.route(f'{APP_PREFIX}/api/getDashboardAPIKeys', methods=['GET'])
@@ -2141,10 +2145,13 @@ def index():
 
 
 def backGroundThread():
-    with app.app_context():
-        print(f"[WGDashboard] Background Thread #1 Started", flush=True)
-        time.sleep(10)
-        while True:
+    global WireguardConfigurations
+    print(f"[WGDashboard] Background Thread #1 Started", flush=True)
+    time.sleep(10)
+    while True:
+        with app.app_context():
+            print(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+            print(id(WireguardConfigurations))
             for c in WireguardConfigurations.values():
                 if c.getStatus():
                     try:
@@ -2155,7 +2162,7 @@ def backGroundThread():
                         c.getRestrictedPeersList()
                     except Exception as e:
                         print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
-            time.sleep(10)
+        time.sleep(10)
 
 
 def peerJobScheduleBackgroundThread():
@@ -2170,6 +2177,11 @@ def gunicornConfig():
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
+
+def clearWireguardConfigurations():
+    WireguardConfigurations = {}
+    WireguardConfigurations.clear()
+    print(WireguardConfigurations.keys())
 
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()

@@ -2,6 +2,7 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
+import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 
 export default {
 	name: "dashboardSettingsInputWireguardConfigurationPath",
@@ -13,8 +14,9 @@ export default {
 	},
 	setup(){
 		const store = DashboardConfigurationStore();
+		const WireguardConfigurationStore = WireguardConfigurationsStore()
 		const uuid = `input_${v4()}`;
-		return {store, uuid};
+		return {store, uuid, WireguardConfigurationStore};
 	},
 	data(){
 		return{
@@ -33,6 +35,7 @@ export default {
 	methods:{
 		async useValidation(){
 			if(this.changed){
+				this.updating = true;
 				await fetchPost("/api/updateDashboardConfigurationItem", {
 					section: "Server",
 					key: this.targetData,
@@ -44,6 +47,8 @@ export default {
 						this.store.Configuration.Account[this.targetData] = this.value
 						clearTimeout(this.timeout)
 						this.timeout = setTimeout(() => this.isValid = false, 5000);
+						this.WireguardConfigurationStore.getConfigurations()
+						this.store.newMessage("Server", "WireGuard configuration path saved", "success")
 					}else{
 						this.isValid = false;
 						this.showInvalidFeedback = true;
@@ -59,24 +64,35 @@ export default {
 </script>
 
 <template>
-	<div class="form-group mb-2">
+	<div class="form-group">
 		<label :for="this.uuid" class="text-muted mb-1">
 			<strong><small>{{this.title}}</small></strong>
 		</label>
-		<input type="text" class="form-control"
-		       :class="{'is-invalid': this.showInvalidFeedback, 'is-valid': this.isValid}"
-		       :id="this.uuid"
-		       v-model="this.value"
-		       @keydown="this.changed = true"
-		       @blur="this.useValidation()"
-		       :disabled="this.updating"
-		>
-		<div class="invalid-feedback">{{this.invalidFeedback}}</div>
-		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1"
+		<div class="d-flex gap-2 align-items-start mb-2">
+			<div class="flex-grow-1">
+				<input type="text" class="form-control rounded-3"
+				       :class="{'is-invalid': this.showInvalidFeedback, 'is-valid': this.isValid}"
+				       :id="this.uuid"
+				       v-model="this.value"
+				       @keydown="this.changed = true"
+				       :disabled="this.updating"
+				>
+				<div class="invalid-feedback fw-bold">{{this.invalidFeedback}}</div>
+			</div>
+			<button
+				@click="this.useValidation()"
+				:disabled="!this.changed"
+				class="ms-auto btn rounded-3 border-success-subtle bg-success-subtle text-success-emphasis">
+				<i class="bi bi-save2-fill" v-if="!this.updating"></i>
+				<span class="spinner-border spinner-border-sm" v-else></span>
+			</button>
+		</div>
+		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1 mb-2"
 		     v-if="warning"
 		>
 			<small><i class="bi bi-exclamation-triangle-fill me-2"></i><span v-html="warningText"></span></small>
 		</div>
+		
 	</div>
 </template>
 
