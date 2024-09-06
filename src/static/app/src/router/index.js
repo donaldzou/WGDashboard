@@ -28,7 +28,6 @@ const checkAuth = async () => {
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    
     {
       name: "Index",
       path: '/',

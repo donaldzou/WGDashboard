@@ -1107,7 +1107,8 @@ class DashboardConfig:
                 "dashboard_refresh_interval": "60000",
                 "dashboard_sort": "status",
                 "dashboard_theme": "dark",
-                "dashboard_api_key": "false"
+                "dashboard_api_key": "false",
+                "dashboard_language": "en"
             },
             "Peers": {
                 "peer_global_DNS": "1.1.1.1",
@@ -2125,13 +2126,10 @@ def API_Welcome_Finish():
                                                                           "repeatNewPassword": data["repeatNewPassword"],
                                                                           "currentPassword": "admin"
                                                                       })
-        # updateEnableTotp, updateEnableTotpErr = DashboardConfig.SetConfig("Account", "enable_totp", data["enable_totp"])
-
         if not updateUsername or not updatePassword:
             return ResponseObject(False, f"{updateUsernameErr},{updatePasswordErr}".strip(","))
 
         DashboardConfig.SetConfig("Other", "welcome_session", False)
-
     return ResponseObject()
 
 
