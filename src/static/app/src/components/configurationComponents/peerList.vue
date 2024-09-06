@@ -369,8 +369,12 @@ export default {
 				keys: ["name", "id", "allowed_ip"]
 			});
 
-			const result = this.wireguardConfigurationStore.searchString ? 
-				fuse.search(this.wireguardConfigurationStore.searchString).map(x => x.item) : this.configurationPeers;
+			const result = this.wireguardConfigurationStore.searchString ?
+				this.configurationPeers.filter(x => {
+					return x.name.includes(this.wireguardConfigurationStore.searchString) ||
+						x.id.includes(this.wireguardConfigurationStore.searchString) || 
+						x.allowed_ip.includes(this.wireguardConfigurationStore.searchString)
+				}) : this.configurationPeers;
 			
 			if (this.dashboardConfigurationStore.Configuration.Server.dashboard_sort === "restricted"){
 				return result.slice().sort((a, b) => {

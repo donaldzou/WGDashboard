@@ -95,17 +95,18 @@ export default {
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i> Download All
 			</button>
-			<div class="flex-grow-1 mt-3 mt-md-0">
+			<div class="mt-3 mt-md-0 flex-grow-1">
+
 				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-100"
-				       placeholder="Search..."
+				       placeholder="Search Peers..."
 				       id="searchPeers"
 				       @keyup="this.debounce()"
 				       v-model="this.searchString">
 			</div>
-			<button 
+			<button
 				@click="this.showDisplaySettings = true"
 				class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-			        type="button" aria-expanded="false">
+				type="button" aria-expanded="false">
 				<i class="bi bi-filter-circle me-2"></i>
 				Display
 			</button>
