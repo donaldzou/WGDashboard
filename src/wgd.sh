@@ -65,10 +65,6 @@ _determineOS(){
       OS=$ID
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
-  elif [ -f /etc/alpine-release ]; then
-	  OS="alpine"
-#  elif [ -f /etc/arch-release ]; then
-#      OS="arch"
   else
       printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
@@ -131,18 +127,6 @@ _installPythonVenv(){
 			ubuntu|debian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
-#			centos|fedora|redhat|rhel)
-#				if command -v dnf &> /dev/null; then
-#					{ sudo dnf install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				else
-#					{ sudo yum install -y ${pythonExecutable}-virtualenv; printf "\n\n"; } >> ./log/install.txt
-#				fi
-#			;;
-#			*)
-#				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
-#				printf "%s\n" "$helpMsg"
-#				kill  $TOP_PID
-#			;;
 		esac
 	fi
 	
@@ -275,16 +259,17 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
-	_checkWireguard
+	  _checkWireguard
     sudo chmod -R 755 /etc/wireguard/
 
     if [ ! -d "db" ] 
-      then 
-        printf "[WGDashboard] Creating ./db folder\n"
-        mkdir "db"
+		then 
+			printf "[WGDashboard] Creating ./db folder\n"
+			mkdir "db"
     fi
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
+	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
 	{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
@@ -309,11 +294,11 @@ check_wgd_status(){
 }
 
 certbot_create_ssl () {
-  certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
+	certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
 }
 
 certbot_renew_ssl () {
-  certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
+	certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
 }
 
 gunicorn_start () {
@@ -340,7 +325,7 @@ gunicorn_start () {
 }
 
 gunicorn_stop () {
-  sudo kill $(cat ./gunicorn.pid)
+	sudo kill $(cat ./gunicorn.pid)
 }
 
 start_wgd () {
@@ -349,23 +334,70 @@ start_wgd () {
 }
 
 stop_wgd() {
-  if test -f "$PID_FILE"; then
-    gunicorn_stop
-  else
-    kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
-  fi
+	if test -f "$PID_FILE"; then
+		gunicorn_stop
+	else
+		kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
+	fi
+}
+
+startwgd_docker() {
+	_checkWireguard
+	printf "[WGDashboard][Docker] WireGuard configuration started\n"
+	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
+    gunicorn_start
+}
+
+start_core() {
+	local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
+	# Check if wg0.conf exists in /etc/wireguard
+	if [[ ! -f /etc/wireguard/wg0.conf ]]; then
+		echo "[WGDashboard][Docker] wg0.conf not found. Running generate configuration."
+		newconf_wgd
+	else
+		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping WireGuard configuration generation."
+	fi
+	# Re-assign config_files to ensure it includes any newly created configurations
+	local config_files=$(find /etc/wireguard -type f -name "*.conf")
+	
+	# Set file permissions
+	find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
+	find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
+	
+	# Start WireGuard for each config file
+	for file in $config_files; do
+		config_name=$(basename "$file" ".conf")
+		wg-quick up "$config_name"
+	done
+}
+
+
+
+newconf_wgd() {
+    local wg_port_listen=$wg_port
+    local wg_addr_range=$wg_net
+    private_key=$(wg genkey)
+    public_key=$(echo "$private_key" | wg pubkey)
+    cat <<EOF >"/etc/wireguard/wg0.conf"
+[Interface]
+PrivateKey = $private_key
+Address = $wg_addr_range
+ListenPort = $wg_port_listen
+SaveConfig = true
+PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
+PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
+EOF
 }
 
 start_wgd_debug() {
-  printf "%s\n" "$dashes"
-  _checkWireguard
-  printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
-  sudo "$venv_python" "$app_name"
-  printf "%s\n" "$dashes"
+	printf "%s\n" "$dashes"
+	_checkWireguard
+	printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
+	sudo "$venv_python" "$app_name"
+	printf "%s\n" "$dashes"
 }
 
 update_wgd() {
-
 	_determineOS
 	if ! python3 --version > /dev/null 2>&1
 	then

@@ -28,6 +28,9 @@
 
 ## 📣 What's New: v4.0
 
+> [!TIP]
+> [📹 Demo video on YouTube](https://www.youtube.com/watch?v=0mwzd5Gr2eU)
+
 ### 🎉 New Features
 
 - **Updated dashboard design**: Re-designed some of the section with more modern style and layout, the UI is faster and more responsive, it also uses less memory. But overall is still the same dashboard you're familiarized.
@@ -59,6 +62,8 @@
 > Also, huge thanks to who contributed to this major release:
 > @bolgovrussia, @eduardorosabales, @Profik, @airgapper, @tokon2000, @bkeenke, @kontorskiy777, @bugsse, @Johnnykson, @DaanSelen, @shuricksumy and many others!
 
+
+
 <hr>
 
 ## 📋  Table of Content
@@ -81,6 +86,7 @@
       * [Debian 11.10](#debian-1110)
       * [Red Hat Enterprise Linux 9.4 & CentOS 9-Stream](#red-hat-enterprise-linux-94--centos-9-stream)
       * [Fedora 40 & Fedora 39 & Fedora 38](#fedora-40--fedora-39--fedora-38)
+      * [Alpine Linux 3.20.2](#alpine-linux-3202)
     * [Manual Installation](#manual-installation)
   * [🪜 Usage](#-usage)
       * [Start/Stop/Restart WGDashboard](#startstoprestart-wgdashboard)
@@ -258,6 +264,20 @@ sudo sysctl -p /etc/sysctl.conf && \
 firewall-cmd --add-port=10086/tcp --permanent && \
 firewall-cmd --add-port=51820/udp --permanent && \
 firewall-cmd --reload
+```
+
+#### Alpine Linux 3.20.2
+
+```shell
+setup-interfaces -a ; \
+rc-service networking --quiet start ; \
+printf "https://mirrors.aliyun.com/alpine/latest-stable/main\nhttps://mirrors.aliyun.com/alpine/latest-stable/community" > /etc/apk/repositories ; \
+apk update ; \
+apk add wireguard-tools python3 python3-dev git iptables net-tools gcc musl-dev linux-headers sudo ; \
+git clone -b v4.0-alpine-linux https://github.com/donaldzou/WGDashboard.git ; \
+cd ./WGDashboard/src ; \
+chmod +x ./wgd.sh ; \
+./wgd.sh install
 ```
 
 ### Manual Installation
