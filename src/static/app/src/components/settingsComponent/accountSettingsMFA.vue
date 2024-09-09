@@ -2,9 +2,11 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "accountSettingsMFA",
+	components: {LocaleText},
 	setup(){
 		const store = DashboardConfigurationStore();
 		const uuid = `input_${v4()}`;
@@ -43,7 +45,9 @@ export default {
 <template>
 <div>
 	<div class="d-flex align-items-center">
-		<strong>Multi-Factor Authentication</strong>
+		<strong>
+			<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
+		</strong>
 		<div class="form-check form-switch ms-3">
 			<input class="form-check-input" type="checkbox"
 			       v-model="this.status"
@@ -52,7 +56,9 @@ export default {
 		<button class="btn bg-warning-subtle text-warning-emphasis border-1 border-warning-subtle ms-auto rounded-3 shadow-sm" 
 		        v-if="this.status" @click="this.resetMFA()">
 			<i class="bi bi-shield-lock-fill me-2"></i>
-			{{this.store.Configuration.Account["totp_verified"] ? "Reset" : "Setup" }} MFA
+			<LocaleText t="Reset" v-if='this.store.Configuration.Account["totp_verified"]'></LocaleText>
+			<LocaleText t="Setup" v-else></LocaleText>
+			MFA
 		</button>
 	</div>
 </div>

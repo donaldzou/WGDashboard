@@ -4,7 +4,11 @@
 		"lang_name": "English"
 	},
 	{
-		"lang_id": "zh-cn",
+		"lang_id": "zh-CN",
 		"lang_name": "Chinese (Simplified)"
+	},
+	{
+		"lang_id": "zh-HK",
+		"lang_name": "Chinese (Traditional)"
 	}
 ]

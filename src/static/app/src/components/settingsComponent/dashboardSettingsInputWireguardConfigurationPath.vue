@@ -3,9 +3,11 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dashboardSettingsInputWireguardConfigurationPath",
+	components: {LocaleText},
 	props:{
 		targetData: String,
 		title: String,
@@ -66,7 +68,9 @@ export default {
 <template>
 	<div class="form-group">
 		<label :for="this.uuid" class="text-muted mb-1">
-			<strong><small>{{this.title}}</small></strong>
+			<strong><small>
+				<LocaleText :t="this.title"></LocaleText>
+			</small></strong>
 		</label>
 		<div class="d-flex gap-2 align-items-start mb-2">
 			<div class="flex-grow-1">
@@ -90,7 +94,9 @@ export default {
 		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1 mb-2"
 		     v-if="warning"
 		>
-			<small><i class="bi bi-exclamation-triangle-fill me-2"></i><span v-html="warningText"></span></small>
+			<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
+				<LocaleText :t="warningText"></LocaleText>
+			</small>
 		</div>
 		
 	</div>

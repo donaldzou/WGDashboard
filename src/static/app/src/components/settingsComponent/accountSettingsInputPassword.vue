@@ -2,9 +2,11 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "accountSettingsInputPassword",
+	components: {LocaleText},
 	props:{
 		targetData: String,
 		warning: false,
@@ -81,7 +83,9 @@ export default {
 			<div class="col-sm">
 				<div class="form-group mb-2">
 					<label :for="'currentPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>Current Password</small></strong>
+						<strong><small>
+							<LocaleText t="Current Password"></LocaleText>
+						</small></strong>
 					</label>
 					<input type="password" class="form-control mb-2"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
@@ -93,7 +97,9 @@ export default {
 			<div class="col-sm">
 				<div class="form-group mb-2">
 					<label :for="'newPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>New Password</small></strong>
+						<strong><small>
+							<LocaleText t="New Password"></LocaleText>
+						</small></strong>
 					</label>
 					<input type="password" class="form-control mb-2"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
@@ -105,7 +111,9 @@ export default {
 			<div class="col-sm">
 				<div class="form-group mb-2">
 					<label :for="'repeatNewPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>Repeat New Password</small></strong>
+						<strong><small>
+							<LocaleText t="Repeat New Password"></LocaleText>
+						</small></strong>
 					</label>
 					<input type="password" class="form-control mb-2"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
@@ -117,7 +125,8 @@ export default {
 		<button 
 			:disabled="!this.passwordValid"
 			class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
-			<i class="bi bi-save2-fill me-2"></i>Update Password
+			<i class="bi bi-save2-fill me-2"></i>
+			<LocaleText t="Update Password"></LocaleText>
 		</button>
 	</div>
 </template>

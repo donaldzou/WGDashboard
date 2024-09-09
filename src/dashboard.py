@@ -399,7 +399,6 @@ class PeerShareLinks:
                 """
             )
         self.__getSharedLinks()
-        # print(self.Links)
     def __getSharedLinks(self):
         self.Links.clear()
         allLinks = sqlSelect("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
@@ -503,7 +502,6 @@ class WireguardConfiguration:
 
             with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
                                    f"{self.Name}.conf"), "w+") as configFile:
-                # print(self.__parser.sections())
                 self.__parser.write(configFile)
 
         self.Peers: list[Peer] = []
@@ -613,7 +611,6 @@ class WireguardConfiguration:
                         
                         if regex_match("#Name# = (.*)", i):
                             split = re.split(r'\s*=\s*', i, 1)
-                            print(split)
                             if len(split) == 2:
                                 p[pCounter]["name"] = split[1]
                     
@@ -1283,8 +1280,6 @@ def _regexMatch(regex, text):
 
 
 def _getConfigurationList():
-    # configurations = {}
-    print(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     for i in os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
@@ -1478,6 +1473,7 @@ def auth_req():
                     and "getDashboardVersion" not in request.path
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
+                    and "locale" not in request.path
             ):
                 response = Flask.make_response(app, {
                     "status": False,
@@ -2132,6 +2128,24 @@ def API_Welcome_Finish():
         DashboardConfig.SetConfig("Other", "welcome_session", False)
     return ResponseObject()
 
+@app.get(f'{APP_PREFIX}/api/locale')
+def API_Local_CurrentLang():
+    # if param is None or len(param) == 0:
+    #     with open(os.path.join("./static/locale/active_languages.json"), "r") as f:
+    #         return ResponseObject(data=''.join(f.readlines()))
+    
+    _, param = DashboardConfig.GetConfig("Server", "dashboard_language")
+    
+    if param == "en":
+        return ResponseObject()
+    
+    if os.path.exists(os.path.join(f"./static/locale/{param}.json")):
+        with open(os.path.join(f"./static/locale/{param}.json"), "r") as f:
+            return ResponseObject(data=''.join(f.readlines()))
+    
+    
+    
+
 
 @app.route(f'{APP_PREFIX}/', methods=['GET'])
 def index():
@@ -2148,8 +2162,6 @@ def backGroundThread():
     time.sleep(10)
     while True:
         with app.app_context():
-            print(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
-            print(id(WireguardConfigurations))
             for c in WireguardConfigurations.values():
                 if c.getStatus():
                     try:
@@ -2175,11 +2187,6 @@ def gunicornConfig():
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
-
-def clearWireguardConfigurations():
-    WireguardConfigurations = {}
-    WireguardConfigurations.clear()
-    print(WireguardConfigurations.keys())
 
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
