@@ -48,7 +48,9 @@ export default {
 				<small class="text-muted">
 					<LocaleText t="Expire At"></LocaleText>
 				</small>
-				{{this.apiKey.ExpiredAt ? this.apiKey.ExpiredAt : 'Never'}}
+				
+				<LocaleText t="Never Expire" v-if="!this.apiKey.ExpiredAt"></LocaleText>
+				<span>{{ this.apiKey.ExpiredAt }}</span>
 			</div>
 			<a role="button" class="btn btn-sm bg-danger-subtle text-danger-emphasis rounded-3"
 			   v-if="!this.store.getActiveCrossServer()"

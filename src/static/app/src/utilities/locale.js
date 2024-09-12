@@ -1,16 +1,12 @@
 export const GetLocale = (key) => {
-	console.log(key)
-	
 	if (window.Locale === null)
 		return key
-	
 	const reg = Object.keys(window.Locale)
 	const match = reg.filter(x => {
-		return key.match(new RegExp('^' + x + '$', 'g')) !== null
+		return key.match(new RegExp('^' + x + '$', 'gi')) !== null
 	})
-	console.log(match)
 	if (match.length === 0 || match.length > 1){
 		return key
 	}
-	return window.Locale[match[0]]
+	return key.replace(new RegExp(match[0], 'gi'), window.Locale[match[0]])
 }

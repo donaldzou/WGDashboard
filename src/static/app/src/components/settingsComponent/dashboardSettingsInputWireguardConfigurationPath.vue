@@ -72,7 +72,7 @@ export default {
 				<LocaleText :t="this.title"></LocaleText>
 			</small></strong>
 		</label>
-		<div class="d-flex gap-2 align-items-start mb-2">
+		<div class="d-flex gap-2 align-items-start">
 			<div class="flex-grow-1">
 				<input type="text" class="form-control rounded-3"
 				       :class="{'is-invalid': this.showInvalidFeedback, 'is-valid': this.isValid}"

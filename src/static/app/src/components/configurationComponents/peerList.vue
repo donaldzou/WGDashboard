@@ -41,6 +41,7 @@ import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllMo
 import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
 import {ref} from "vue";
 import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 Chart.register(
 	ArcElement,
@@ -71,6 +72,7 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		LocaleText,
 		PeerShareLinkModal,
 		PeerJobsLogsModal,
 		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
@@ -410,7 +412,9 @@ export default {
 	<div v-if="!this.loading" class="container-md">
 		<div class="d-flex align-items-center">
 			<div>
-				<small CLASS="text-muted">CONFIGURATION</small>
+				<small CLASS="text-muted">
+					<LocaleText t="CONFIGURATION"></LocaleText>
+				</small>
 				<div class="d-flex align-items-center gap-3">
 					<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
 				</div>
@@ -418,13 +422,15 @@ export default {
 			<div class="card rounded-3 bg-transparent shadow-sm ms-auto">
 				<div class="card-body py-2 d-flex align-items-center">
 					<div>
-						<p class="mb-0 text-muted"><small>Status</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Status"></LocaleText>
+						</small></p>
 						<div class="form-check form-switch ms-auto">
 							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								{{this.configurationToggling ? 'Turning ':''}}
-								{{this.configurationInfo.Status ? "On":"Off"}}
+								<LocaleText t="On" v-if="this.configurationInfo.Status"></LocaleText>
+								<LocaleText t="Off" v-else></LocaleText>
 								<span v-if="this.configurationToggling"
-								      class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 							</label>
 							<input class="form-check-input"
 							       style="cursor: pointer"
@@ -444,7 +450,9 @@ export default {
 			<div class="col-6 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Address</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Address"></LocaleText>
+						</small></p>
 						{{this.configurationInfo.Address}}
 					</div>
 				</div>
@@ -452,7 +460,9 @@ export default {
 			<div class="col-6 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Listen Port</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Listen Port"></LocaleText>
+						</small></p>
 						{{this.configurationInfo.ListenPort}}
 					</div>
 				</div>
@@ -460,7 +470,9 @@ export default {
 			<div style="word-break: break-all" class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Public Key</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Public Key"></LocaleText>
+						</small></p>
 						<samp>{{this.configurationInfo.PublicKey}}</samp>
 					</div>
 				</div>
@@ -471,7 +483,9 @@ export default {
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Connected Peers</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Connected Peers"></LocaleText>
+							</small></p>
 							<strong class="h4">{{configurationSummary.connectedPeers}}</strong>
 						</div>
 						<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
@@ -482,7 +496,9 @@ export default {
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Usage</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Usage"></LocaleText>
+							</small></p>
 							<strong class="h4">{{configurationSummary.totalUsage}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
@@ -493,7 +509,9 @@ export default {
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Received</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Received"></LocaleText>
+							</small></p>
 							<strong class="h4 text-primary">{{configurationSummary.totalReceive}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
@@ -504,7 +522,9 @@ export default {
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Sent</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Sent"></LocaleText>
+							</small></p>
 							<strong class="h4 text-success">{{configurationSummary.totalSent}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
@@ -516,7 +536,9 @@ export default {
 			<div class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
 					<div class="card-header bg-transparent border-0">
-						<small class="text-muted">Peers Total Data Usage</small></div>
+						<small class="text-muted">
+							<LocaleText t="Peers Data Usage"></LocaleText>
+						</small></div>
 					<div class="card-body pt-1">
 						<Bar
 							:data="individualDataUsage"
@@ -527,7 +549,9 @@ export default {
 			</div>
 			<div class="col-sm col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Received Data Usage</small></div>
+					<div class="card-header bg-transparent border-0"><small class="text-muted">
+						<LocaleText t="Real Time Received Data Usage"></LocaleText>
+					</small></div>
 					<div class="card-body pt-1">
 						<Line
 							:options="chartOptions"
@@ -539,7 +563,9 @@ export default {
 			</div>
 			<div class="col-sm col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Sent Data Usage</small></div>
+					<div class="card-header bg-transparent border-0"><small class="text-muted">
+						<LocaleText t="Real Time Sent Data Usage"></LocaleText>
+					</small></div>
 					<div class="card-body  pt-1">
 						<Line
 							:options="chartOptions"
