@@ -1,8 +1,10 @@
 <script>
 import dayjs from "dayjs";
 import {fetchGet} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerJobsLogsModal",
+	components: {LocaleText},
 	props: {
 		configurationInfo: Object	
 	},
@@ -51,44 +53,56 @@ export default {
 			<div class="m-auto mt-0 modal-dialog-centered dashboardModal" style="width: 100%">
 				<div class="card rounded-3 shadow w-100" >
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
-						<h4 class="mb-0">Jobs Logs</h4>
+						<h4 class="mb-0">
+							<LocaleText t="Jobs Logs"></LocaleText>
+						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4 pt-2">
 						<div v-if="!this.dataLoading">
-							<p>Updated at: {{this.logFetchTime}}</p>
+							<p>
+								<LocaleText t="Updated at"></LocaleText>
+								: {{this.logFetchTime}}</p>
 							<div class="mb-2 d-flex gap-3">
 								<button @click="this.fetchLog()"
 								        class="btn btn-sm rounded-3 shadow-sm
 							        text-info-emphasis bg-info-subtle border-1 border-info-subtle me-1">
 									<i class="bi bi-arrow-clockwise me-2"></i>
-									Refresh
+									<LocaleText t="Refresh"></LocaleText>
 								</button>
 								<div class="d-flex gap-3 align-items-center">
-									<span class="text-muted">Filter</span>
+									<span class="text-muted">
+										<LocaleText t="Filter"></LocaleText>
+									</span>
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" v-model="this.showSuccessJob"
 										       id="jobLogsShowSuccessCheck">
 										<label class="form-check-label" for="jobLogsShowSuccessCheck">
-											<span class="badge text-success-emphasis bg-success-subtle">Success</span>
+											<span class="badge text-success-emphasis bg-success-subtle">
+												<LocaleText t="Success"></LocaleText>
+											</span>
 										</label>
 									</div>
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" v-model="this.showFailedJob"
 										       id="jobLogsShowFailedCheck">
 										<label class="form-check-label" for="jobLogsShowFailedCheck">
-											<span class="badge text-danger-emphasis bg-danger-subtle">Failed</span>
+											<span class="badge text-danger-emphasis bg-danger-subtle">
+												<LocaleText t="Failed"></LocaleText>
+											</span>
 										</label>
 									</div>
 								</div>
 								<div class="d-flex gap-3 align-items-center ms-auto">
-									<span class="text-muted">Display</span>
+									<span class="text-muted">
+										<LocaleText t="Display"></LocaleText>
+									</span>
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox"
 										       v-model="showJobID"
 										       id="jobLogsShowJobIDCheck">
 										<label class="form-check-label" for="jobLogsShowJobIDCheck">
-											Job ID
+											<LocaleText t="Job ID"></LocaleText>
 										</label>
 									</div>
 									<div class="form-check">
@@ -96,7 +110,7 @@ export default {
 										       v-model="showLogID"
 										       id="jobLogsShowLogIDCheck">
 										<label class="form-check-label" for="jobLogsShowLogIDCheck">
-											Log ID
+											<LocaleText t="Log ID"></LocaleText>
 										</label>
 									</div>
 
@@ -106,11 +120,21 @@ export default {
 							<table class="table">
 								<thead>
 								<tr>
-									<th scope="col">Date</th>
-									<th scope="col" v-if="showLogID">Log ID</th>
-									<th scope="col" v-if="showJobID">Job ID</th>
-									<th scope="col">Status</th>
-									<th scope="col">Message</th>
+									<th scope="col">
+										<LocaleText t="Date"></LocaleText>
+									</th>
+									<th scope="col" v-if="showLogID">
+										<LocaleText t="Log ID"></LocaleText>
+									</th>
+									<th scope="col" v-if="showJobID">
+										<LocaleText t="Job ID"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Status"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Message"></LocaleText>
+									</th>
 								</tr>
 								</thead>
 								<tbody>

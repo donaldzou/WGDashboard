@@ -4,6 +4,7 @@ import {fetchPost} from "@/utilities/fetch.js";
 import dayjs from "dayjs";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import VueDatePicker from '@vuepic/vue-datepicker';
+import LocaleText from "@/components/text/localeText.vue";
 
 
 export default {
@@ -12,6 +13,7 @@ export default {
 		peer: Object
 	},
 	components: {
+		LocaleText,
 		VueDatePicker
 	},
 	data(){
@@ -49,11 +51,9 @@ export default {
 				if (res.status){
 					this.peer.ShareLink = res.data;
 					this.dataCopy = res.data.at(0);
-					this.store.newMessage("Server", "Share link created successfully", "success")
 				}else{
 					this.store.newMessage("Server", 
 						"Share link failed to create. Reason: " + res.message, "danger")
-
 				}
 				this.loading = false;
 			})
@@ -108,13 +108,15 @@ export default {
 			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 500px">
 				<div class="card rounded-3 shadow flex-grow-1">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
-						<h4 class="mb-0">Share Peer</h4>
+						<h4 class="mb-0">
+							<LocaleText t="Share Peer"></LocaleText>
+						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4" v-if="this.peer.ShareLink">
 						<div v-if="!this.dataCopy">
 							<h6 class="mb-3 text-muted">
-								Currently the peer is not sharing
+								<LocaleText t="Currently the peer is not sharing"></LocaleText>
 							</h6>
 							<button 
 								@click="this.startSharing()"
@@ -123,7 +125,8 @@ export default {
 								<span :class="{'animate__animated animate__flash animate__infinite animate__slower': this.loading}">
 									<i class="bi bi-send-fill me-2" ></i>
 								</span>
-								{{this.loading ? "Sharing...":"Start Sharing"}}
+								<LocaleText t="Sharing..." v-if="this.loading"></LocaleText>
+								<LocaleText t="Start Sharing" v-else></LocaleText>
 							</button>
 						</div>
 						<div v-else>
@@ -137,7 +140,7 @@ export default {
 							<div class="d-flex flex-column gap-2 mb-3">
 								<small>
 									<i class="bi bi-calendar me-2"></i>
-									Expire Date
+									<LocaleText t="Expire At"></LocaleText>
 								</small>
 								<VueDatePicker
 									:is24="true"
@@ -157,7 +160,8 @@ export default {
 								<span :class="{'animate__animated animate__flash animate__infinite animate__slower': this.loading}">
 									<i class="bi bi-send-slash-fill me-2" ></i>
 								</span>
-								{{this.loading ? "Stop Sharing...":"Stop Sharing"}}
+								<LocaleText t="Stop Sharing..." v-if="this.loading"></LocaleText>
+								<LocaleText t="Stop Sharing" v-else></LocaleText>
 							</button>
 						</div>
 					</div>

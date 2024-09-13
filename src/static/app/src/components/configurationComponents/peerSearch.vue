@@ -23,7 +23,7 @@ export default {
 			sort: {
 				status: GetLocale("Status"),
 				name: GetLocale("Name"),
-				allowed_ip: GetLocale("Allowed IP"),
+				allowed_ip: GetLocale("Allowed IPs"),
 				restricted: GetLocale("Restricted")
 			},
 			interval: {
