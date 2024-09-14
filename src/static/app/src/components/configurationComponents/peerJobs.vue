@@ -3,6 +3,7 @@ import ScheduleDropdown from "@/components/configurationComponents/peerScheduleJ
 import SchedulePeerJob from "@/components/configurationComponents/peerScheduleJobsComponents/schedulePeerJob.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {v4} from "uuid";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerJobs",
 	setup(){
@@ -13,6 +14,7 @@ export default {
 		selectedPeer: Object
 	},
 	components:{
+		LocaleText,
 		SchedulePeerJob,
 		ScheduleDropdown,
 	},
@@ -50,8 +52,8 @@ export default {
 			<div class="m-auto modal-dialog-centered dashboardModal">
 				<div class="card rounded-3 shadow" style="width: 700px">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-						<h4 class="mb-0 fw-normal">Schedule Jobs
-							<strong></strong>
+						<h4 class="mb-0 fw-normal">
+							<LocaleText t="Schedule Jobs"></LocaleText>
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
@@ -60,7 +62,8 @@ export default {
 							<button class="btn bg-primary-subtle border-1 border-primary-subtle text-primary-emphasis rounded-3 shadow" 
 							        
 							        @click="this.addJob()">
-								<i class="bi bi-plus-lg me-2"></i> Job
+								<i class="bi bi-plus-lg me-2"></i>
+								<LocaleText t="Job"></LocaleText>
 							</button>
 						</div>
 						<TransitionGroup name="schedulePeerJobTransition" tag="div" class="position-relative">
@@ -76,7 +79,9 @@ export default {
 							     style="height: 153px"
 							     v-if="this.selectedPeer.jobs.length === 0">
 								<div class="card-body text-muted text-center d-flex">
-									<h6 class="m-auto">This peer does not have any job yet.</h6>
+									<h6 class="m-auto">
+										<LocaleText t="This peer does not have any job yet."></LocaleText>
+									</h6>
 								</div>
 							</div>
 						</TransitionGroup>

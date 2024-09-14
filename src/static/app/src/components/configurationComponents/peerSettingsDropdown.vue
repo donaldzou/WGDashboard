@@ -1,9 +1,11 @@
 <script>
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "peerSettingsDropdown",
+	components: {LocaleText},
 	setup(){
 		const dashboardStore = DashboardConfigurationStore()
 		return {dashboardStore}
@@ -88,9 +90,8 @@ export default {
 			<template v-if="!this.Peer.private_key">
 				<li>
 					<small class="w-100 dropdown-item text-muted"
-					       style="white-space: break-spaces; font-size: 0.7rem"
-					>Download & QR Code is not available due to no <code>private key</code>
-						set for this peer
+					       style="white-space: break-spaces; font-size: 0.7rem">
+						<LocaleText t="Download & QR Code is not available due to no private key set for this peer"></LocaleText>
 					</small>
 				</li>
 				
@@ -114,7 +115,7 @@ export default {
 				<a class="dropdown-item d-flex" role="button"
 				   @click="this.$emit('setting')"
 				>
-					<i class="me-auto bi bi-pen"></i> Edit
+					<i class="me-auto bi bi-pen"></i> <LocaleText t="Peer Settings"></LocaleText>
 				</a>
 			</li>
 			<li>

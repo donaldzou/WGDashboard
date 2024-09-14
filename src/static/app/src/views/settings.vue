@@ -12,11 +12,13 @@ import DashboardSettingsInputIPAddressAndPort
 	from "@/components/settingsComponent/dashboardSettingsInputIPAddressAndPort.vue";
 import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vue";
 import AccountSettingsMFA from "@/components/settingsComponent/accountSettingsMFA.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		LocaleText,
 		AccountSettingsMFA,
 		DashboardAPIKeys,
 		DashboardSettingsInputIPAddressAndPort,
@@ -27,24 +29,20 @@ export default {
 		const dashboardConfigurationStore = DashboardConfigurationStore()
 		return {dashboardConfigurationStore}
 	},
-	watch: {
-		// 'dashboardConfigurationStore.Configuration': {
-		// 	deep: true,
-		// 	handler(){
-		// 		this.dashboardConfigurationStore.updateConfiguration();
-		// 	}
-		// }
-	}
 }
 </script>
 
 <template>
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
-			<h3 class="mb-3 text-body">Settings</h3>
+			<h3 class="mb-3 text-body">
+				<LocaleText t="Settings"></LocaleText>
+			</h3>
 			<DashboardTheme></DashboardTheme>
 			<div class="card mb-4 shadow rounded-3">
-				<p class="card-header">Peers Default Settings</p>
+				<p class="card-header">
+					<LocaleText t="Peers Default Settings"></LocaleText>
+				</p>
 				<div class="card-body">
 					<PeersDefaultSettingsInput targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
 					<PeersDefaultSettingsInput targetData="peer_endpoint_allowed_ip" title="Peer Endpoint Allowed IPs"></PeersDefaultSettingsInput>
@@ -56,19 +54,23 @@ export default {
 				</div>
 			</div>
 			<div class="card mb-4 shadow rounded-3">
-				<p class="card-header">WireGuard Configurations Settings</p>
+				<p class="card-header">
+					<LocaleText t="WireGuard Configurations Settings"></LocaleText>
+				</p>
 				<div class="card-body">
 					<DashboardSettingsInputWireguardConfigurationPath
 						targetData="wg_conf_path"
 						title="Configurations Directory"
 						:warning="true"
-						warning-text="Remember to remove <code>/</code> at the end of your path. e.g <code>/etc/wireguard</code>"
+						warning-text="Remember to remove / at the end of your path. e.g /etc/wireguard"
 					>
 					</DashboardSettingsInputWireguardConfigurationPath>
 				</div>
 			</div>
 			<div class="card mb-4 shadow rounded-3">
-				<p class="card-header">Account Settings</p>
+				<p class="card-header">
+					<LocaleText t="WGDashboard Account Settings"></LocaleText>
+				</p>
 				<div class="card-body d-flex gap-4 flex-column">
 					<AccountSettingsInputUsername targetData="username"
 					                              title="Username"

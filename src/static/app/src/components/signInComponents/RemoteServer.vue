@@ -1,5 +1,6 @@
 <script>
 import dayjs from "dayjs";
+import {GetLocale} from "@/utilities/locale.js";
 
 export default {
 	name: "RemoteServer",
@@ -73,7 +74,7 @@ export default {
 				return `${dayjs().subtract(this.startTime).millisecond()}ms`
 			}else{
 				if (this.refreshing){
-					return `Pinging...`
+					return GetLocale(`Pinging...`)
 				}
 				return this.errorMsg ? this.errorMsg : "N/A"
 			}

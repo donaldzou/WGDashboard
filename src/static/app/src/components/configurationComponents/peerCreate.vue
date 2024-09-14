@@ -33,7 +33,8 @@ export default {
 				endpoint_allowed_ip: this.dashboardStore.Configuration.Peers.peer_endpoint_allowed_ip,
 				keepalive: parseInt(this.dashboardStore.Configuration.Peers.peer_keep_alive),
 				mtu: parseInt(this.dashboardStore.Configuration.Peers.peer_mtu),
-				preshared_key: ""
+				preshared_key: "",
+				preshared_key_bulkAdd: false
 			},
 			availableIp: undefined,
 			availableIpSearchString: "",
@@ -119,15 +120,27 @@ export default {
 			<DnsInput :saving="saving" :data="data"></DnsInput>
 
 			<hr class="mb-0 mt-2">
-			<div class="row">
+			<div class="row gy-3">
 				<div class="col-sm" v-if="!this.data.bulkAdd">
 					<PresharedKeyInput :saving="saving" :data="data" :bulk="this.data.bulkAdd"></PresharedKeyInput>
 				</div>
+				
 				<div class="col-sm">
 					<MtuInput :saving="saving" :data="data"></MtuInput>
 				</div>
 				<div class="col-sm">
 					<PersistentKeepAliveInput :saving="saving" :data="data"></PersistentKeepAliveInput>
+				</div>
+				<div class="col-12" v-if="this.data.bulkAdd">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" role="switch"
+						       v-model="this.data.preshared_key_bulkAdd"
+						       id="bullAdd_PresharedKey_Switch" checked>
+						<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
+							Pre-Share Key
+							{{this.data.preshared_key_bulkAdd ? "Enabled":"Disabled"}}
+						</label>
+					</div>
 				</div>
 			</div>
 			<div class="d-flex mt-2">

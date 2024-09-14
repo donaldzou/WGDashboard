@@ -4,10 +4,11 @@ import {v4} from "uuid";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import NewDashboardAPIKey from "@/components/settingsComponent/dashboardAPIKeysComponents/newDashboardAPIKey.vue";
 import DashboardAPIKey from "@/components/settingsComponent/dashboardAPIKeysComponents/dashboardAPIKey.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dashboardAPIKeys",
-	components: {DashboardAPIKey, NewDashboardAPIKey},
+	components: {LocaleText, DashboardAPIKey, NewDashboardAPIKey},
 	setup(){
 		const store = DashboardConfigurationStore();
 		return {store};
@@ -64,14 +65,17 @@ export default {
 <template>
 	<div class="card mb-4 shadow rounded-3">
 		<div class="card-header d-flex">
-			API Keys
+			<LocaleText t="API Keys"></LocaleText>
 			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()">
 				<input class="form-check-input" type="checkbox"
 				       v-model="this.value"
 				       @change="this.toggleDashboardAPIKeys()"
 				       role="switch" id="allowAPIKeysSwitch">
 				<label class="form-check-label" for="allowAPIKeysSwitch">
-					{{this.value ? 'Enabled':'Disabled'}}
+					<LocaleText t="Enabled" v-if="this.value"></LocaleText>
+					<LocaleText t="Disabled" v-else></LocaleText>
+					
+					
 				</label>
 			</div>
 		</div>
@@ -80,12 +84,13 @@ export default {
 			        @click="this.newDashboardAPIKey = true"
 			        v-if="!this.store.getActiveCrossServer()"
 			>
-				<i class="bi bi-key me-2"></i> Create
+				<i class="bi bi-plus-circle-fill me-2"></i> 
+				<LocaleText t="API Key"></LocaleText>
 			</button>
 			<div class="card" style="height: 300px" v-if="this.apiKeys.length === 0">
 				<div class="card-body d-flex text-muted">
 						<span class="m-auto">
-							No Dashboard API Key
+							<LocaleText t="No WGDashboard API Key"></LocaleText>
 						</span>
 				</div>
 			</div>

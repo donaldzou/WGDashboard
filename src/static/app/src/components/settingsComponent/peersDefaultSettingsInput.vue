@@ -2,8 +2,10 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
+	components: {LocaleText},
 	props:{
 		targetData: String,
 		title: String,
@@ -61,7 +63,9 @@ export default {
 <template>
 	<div class="form-group mb-2">
 		<label :for="this.uuid" class="text-muted mb-1">
-			<strong><small>{{this.title}}</small></strong>
+			<strong><small>
+				<LocaleText :t="this.title"></LocaleText>
+			</small></strong>
 		</label>
 		<input type="text" class="form-control" 
 		       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
@@ -75,7 +79,9 @@ export default {
 		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1"
 			v-if="warning"
 		>
-			<small><i class="bi bi-exclamation-triangle-fill me-2"></i><span v-html="warningText"></span></small>
+			<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
+				<LocaleText :t="warningText"></LocaleText>
+			</small>
 		</div>
 	</div>
 </template>

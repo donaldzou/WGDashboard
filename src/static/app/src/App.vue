@@ -1,4 +1,4 @@
-<script setup>
+<script setup async>
 import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {computed, watch} from "vue";
@@ -21,7 +21,6 @@ const getActiveCrossServer = computed(() => {
 	}
 	return undefined
 })
-
 </script>
 
 <template>

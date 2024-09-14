@@ -1,9 +1,11 @@
 <script>
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "peerSettings",
+	components: {LocaleText},
 	props: {
 		selectedPeer: Object
 	},
@@ -73,18 +75,24 @@ export default {
 			<div class="m-auto modal-dialog-centered dashboardModal">
 				<div class="card rounded-3 shadow flex-grow-1">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-						<h4 class="mb-0">Peer Settings</h4>
+						<h4 class="mb-0">
+							<LocaleText t="Peer Settings"></LocaleText>
+						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4" v-if="this.data">
 						<div class="d-flex flex-column gap-2 mb-4">
 							<div class="d-flex align-items-center">
-								<small class="text-muted">Public Key</small>
+								<small class="text-muted">
+									<LocaleText t="Public Key"></LocaleText>
+								</small>
 								<small class="ms-auto"><samp>{{this.data.id}}</samp></small>
 							</div>
 							<div>
 								<label for="peer_name_textbox" class="form-label">
-									<small class="text-muted">Name</small>
+									<small class="text-muted">
+										<LocaleText t="Name"></LocaleText>
+									</small>
 								</label>
 								<input type="text" class="form-control form-control-sm rounded-3"
 								       :disabled="this.saving"
@@ -94,7 +102,10 @@ export default {
 							<div>
 								<div class="d-flex position-relative">
 									<label for="peer_private_key_textbox" class="form-label">
-										<small class="text-muted">Private Key <code>(Required for QR Code and Download)</code></small>
+										<small class="text-muted"><LocaleText t="Private Key"></LocaleText> 
+											<code>
+												<LocaleText t="(Required for QR Code and Download)"></LocaleText>
+											</code></small>
 									</label>
 									<a role="button" class="ms-auto text-decoration-none toggleShowKey"
 									   @click="this.showKey = !this.showKey"
@@ -110,7 +121,11 @@ export default {
 							</div>
 							<div>
 								<label for="peer_allowed_ip_textbox" class="form-label">
-									<small class="text-muted">Allowed IPs <code>(Required)</code></small>
+									<small class="text-muted">
+										<LocaleText t="Allowed IPs"></LocaleText>
+										<code>
+											<LocaleText t="(Required)"></LocaleText>
+										</code></small>
 								</label>
 								<input type="text" class="form-control form-control-sm rounded-3"
 								       :disabled="this.saving"
@@ -120,7 +135,11 @@ export default {
 
 							<div>
 								<label for="peer_endpoint_allowed_ips" class="form-label">
-									<small class="text-muted">Endpoint Allowed IPs <code>(Required)</code></small>
+									<small class="text-muted">
+										<LocaleText t="Endpoint Allowed IPs"></LocaleText>
+										<code>
+											<LocaleText t="(Required)"></LocaleText>
+										</code></small>
 								</label>
 								<input type="text" class="form-control form-control-sm rounded-3"
 								       :disabled="this.saving"
@@ -129,7 +148,9 @@ export default {
 							</div>
 							<div>
 								<label for="peer_DNS_textbox" class="form-label">
-									<small class="text-muted">DNS</small>
+									<small class="text-muted">
+										<LocaleText t="DNS"></LocaleText>
+									</small>
 								</label>
 								<input type="text" class="form-control form-control-sm rounded-3"
 								       :disabled="this.saving"
@@ -141,7 +162,7 @@ export default {
 									<h2 class="accordion-header">
 										<button class="accordion-button rounded-3 collapsed" type="button"
 										        data-bs-toggle="collapse" data-bs-target="#peerSettingsAccordionOptional">
-											Optional Settings
+											<LocaleText t="Optional Settings"></LocaleText>
 										</button>
 									</h2>
 									<div id="peerSettingsAccordionOptional" class="accordion-collapse collapse"
@@ -149,7 +170,8 @@ export default {
 										<div class="accordion-body d-flex flex-column gap-2 mb-2">
 											<div>
 												<label for="peer_preshared_key_textbox" class="form-label">
-													<small class="text-muted">Pre-Shared Key</small>
+													<small class="text-muted">
+														<LocaleText t="Pre-Shared Key"></LocaleText></small>
 												</label>
 												<input type="text" class="form-control form-control-sm rounded-3"
 												       :disabled="this.saving"
@@ -157,7 +179,9 @@ export default {
 												       id="peer_preshared_key_textbox">
 											</div>
 											<div>
-												<label for="peer_mtu" class="form-label"><small class="text-muted">MTU</small></label>
+												<label for="peer_mtu" class="form-label"><small class="text-muted">
+													<LocaleText t="MTU"></LocaleText>
+												</small></label>
 												<input type="number" class="form-control form-control-sm rounded-3"
 												       :disabled="this.saving"
 												       v-model="this.data.mtu"
@@ -165,7 +189,9 @@ export default {
 											</div>
 											<div>
 												<label for="peer_keep_alive" class="form-label">
-													<small class="text-muted">Persistent Keepalive</small>
+													<small class="text-muted">
+														<LocaleText t="Persistent Keepalive"></LocaleText>
+													</small>
 												</label>
 												<input type="number" class="form-control form-control-sm rounded-3"
 												       :disabled="this.saving"
@@ -178,25 +204,27 @@ export default {
 							</div>
 							<hr>
 							<div class="d-flex gap-2 align-items-center">
-								<strong>Reset Data Usage</strong>
+								<strong>
+									<LocaleText t="Reset Data Usage"></LocaleText>
+								</strong>
 								<div class="d-flex gap-2 ms-auto">
 									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3 flex-grow-1 shadow-sm"
 										@click="this.resetPeerData('total')"
 									>
 										<i class="bi bi-arrow-down-up me-2"></i>
-										Total
+										<LocaleText t="Total"></LocaleText>
 									</button>
 									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3 flex-grow-1 shadow-sm"
 									        @click="this.resetPeerData('receive')"
 									>
 										<i class="bi bi-arrow-down me-2"></i>
-										Received
+										<LocaleText t="Received"></LocaleText>
 									</button>
 									<button class="btn bg-primary-subtle text-primary-emphasis rounded-3  flex-grow-1 shadow-sm"
 									        @click="this.resetPeerData('sent')"
 									>
 										<i class="bi bi-arrow-up me-2"></i>
-										Sent
+										<LocaleText t="Sent"></LocaleText>
 									</button>
 								</div>
 								
@@ -206,14 +234,16 @@ export default {
 							<button class="btn btn-secondary rounded-3 shadow"
 							        @click="this.reset()"
 							        :disabled="!this.dataChanged || this.saving">
-								Revert <i class="bi bi-arrow-clockwise ms-2"></i>
+								<LocaleText t="Revert"></LocaleText>
+								 <i class="bi bi-arrow-clockwise ms-2"></i>
 							</button>
 
 							<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
 							        :disabled="!this.dataChanged || this.saving"
 							        @click="this.savePeer()"
 							>
-								Save Peer<i class="bi bi-save-fill ms-2"></i></button>
+								<LocaleText t="Save Peer"></LocaleText>
+								<i class="bi bi-save-fill ms-2"></i></button>
 						</div>
 					</div>
 				</div>

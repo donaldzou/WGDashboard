@@ -3,9 +3,11 @@ import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "navbar",
+	components: {LocaleText},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -47,17 +49,19 @@ export default {
 						<RouterLink class="nav-link rounded-3"
 						            to="/" exact-active-class="active">
 							<i class="bi bi-house me-2"></i>
-							Home</RouterLink></li>
+							<LocaleText t="Home"></LocaleText>	
+						</RouterLink></li>
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3" to="/settings" 
 						            exact-active-class="active">
 							<i class="bi bi-gear me-2"></i>
-							Settings</RouterLink></li>
+							<LocaleText t="Settings"></LocaleText>	
+						</RouterLink></li>
 				</ul>
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
 					<i class="bi bi-body-text me-2"></i>
-					Configurations
+					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
@@ -72,7 +76,7 @@ export default {
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
 					<i class="bi bi-tools me-2"></i>
-					Tools
+					<LocaleText t="Tools"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
@@ -87,16 +91,18 @@ export default {
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
 						<i class="bi bi-box-arrow-left me-2"></i>
-						Sign Out</a>
+						<LocaleText t="Sign Out"></LocaleText>	
+					</a>
 					</li>
 					<li class="nav-item" style="font-size: 0.8rem">
 						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none" target="_blank">
 							<small class="nav-link text-muted rounded-3" >
-								{{ this.updateMessage }}
+								<LocaleText :t="this.updateMessage"></LocaleText>
 							</small>
 						</a>
 						<small class="nav-link text-muted" v-else>
-							{{ this.updateMessage }}
+							<LocaleText :t="this.updateMessage"></LocaleText>
+							({{ dashboardConfigurationStore.Configuration.Server.version}})
 						</small>
 					</li>
 				</ul>

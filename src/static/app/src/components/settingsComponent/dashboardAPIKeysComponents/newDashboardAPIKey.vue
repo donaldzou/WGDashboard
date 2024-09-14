@@ -3,10 +3,11 @@ import dayjs from "dayjs";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import VueDatePicker from "@vuepic/vue-datepicker";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "newDashboardAPIKey",
-	components: {VueDatePicker},
+	components: {LocaleText, VueDatePicker},
 	data(){
 		return{
 			newKeyData:{
@@ -58,11 +59,15 @@ export default {
 	     style="background-color: #00000060; backdrop-filter: blur(3px)">
 		<div class="card m-auto rounded-3 mt-5">
 			<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
-				<h6 class="mb-0">Create API Key</h6>
+				<h6 class="mb-0">
+					<LocaleText t="Create API Key"></LocaleText>
+				</h6>
 				<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 			</div>
 			<div class="card-body d-flex gap-2 p-4 flex-column">
-				<small class="text-muted">When should this API Key expire?</small>
+				<small class="text-muted">
+					<LocaleText t="When should this API Key expire?"></LocaleText>
+				</small>
 				<div class="d-flex align-items-center gap-2">
 					<VueDatePicker
 						:is24="true"
@@ -80,7 +85,8 @@ export default {
 					<input class="form-check-input" type="checkbox"
 					       v-model="this.newKeyData.neverExpire" id="neverExpire" :disabled="this.submitting">
 					<label class="form-check-label" for="neverExpire">
-						Never Expire (<i class="bi bi-emoji-grimace-fill"></i> Don't think that's a good idea)
+						<LocaleText t="Never Expire"></LocaleText> (<i class="bi bi-emoji-grimace-fill me-2"></i> 
+						<LocaleText t="Don't think that's a good idea"></LocaleText>)
 					</label>
 				</div>
 				<button class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm"
@@ -88,7 +94,8 @@ export default {
 				        @click="this.submitNewAPIKey()"
 				>
 					<i class="bi bi-check-lg me-2" v-if="!this.submitting"></i>
-					{{this.submitting ? 'Creating...':'Done'}}
+					<LocaleText t="Creating..." v-if="this.submitting"></LocaleText>
+					<LocaleText t="Create" v-else></LocaleText>
 				</button>
 			</div>
 		</div>

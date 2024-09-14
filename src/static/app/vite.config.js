@@ -21,6 +21,7 @@ export default defineConfig(({mode}) => {
         }
       },
       build: {
+        target: "es2022",
         outDir: '../../../../WGDashboard-Desktop',
         rollupOptions: {
           output: {
@@ -50,6 +51,7 @@ export default defineConfig(({mode}) => {
       host: '0.0.0.0'
     },
     build: {
+      target: "es2022",
       outDir: 'dist',
       rollupOptions: {
         output: {
