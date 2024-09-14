@@ -33,6 +33,7 @@ import threading
 
 from flask.json.provider import DefaultJSONProvider
 
+
 DASHBOARD_VERSION = 'v4.1'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
@@ -1111,7 +1112,7 @@ class DashboardConfig:
                 "peer_global_DNS": "1.1.1.1",
                 "peer_endpoint_allowed_ip": "0.0.0.0/0",
                 "peer_display_mode": "grid",
-                "remote_endpoint": ifcfg.default_interface()['inet'],
+                "remote_endpoint": ifcfg.default_interface()['inet'] if ifcfg.default_interface() else '',
                 "peer_MTU": "1420",
                 "peer_keep_alive": "21"
             },
