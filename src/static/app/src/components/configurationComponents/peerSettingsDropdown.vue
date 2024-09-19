@@ -122,7 +122,7 @@ export default {
 				<a class="dropdown-item d-flex" role="button"
 				   @click="this.$emit('jobs')"
 				>
-					<i class="me-auto bi bi-app-indicator"></i> Schedule Jobs
+					<i class="me-auto bi bi-app-indicator"></i> <LocaleText t="Schedule Jobs"></LocaleText>
 				</a>
 			</li>
 			
@@ -133,7 +133,10 @@ export default {
 				   @click="this.restrictPeer()"
 				   :class="{disabled: this.restrictBtnDisabled}"
 				   role="button">
-					<i class="me-auto bi bi-lock"></i> {{!this.restrictBtnDisabled ? "Restrict Access":"Restricting..."}}
+					<i class="me-auto bi bi-lock"></i>
+					<LocaleText t="Restrict Access" v-if="!this.restrictBtnDisabled"></LocaleText>
+					<LocaleText t="Restricting..." v-else></LocaleText>
+					
 				</a>
 			</li>
 			<li>
@@ -141,7 +144,9 @@ export default {
 				   @click="this.deletePeer()"
 				   :class="{disabled: this.deleteBtnDisabled}"
 				   role="button">
-					<i class="me-auto bi bi-trash"></i> {{!this.deleteBtnDisabled ? "Delete":"Deleting..."}}
+					<i class="me-auto bi bi-trash"></i> 
+					<LocaleText t="Delete" v-if="!this.deleteBtnDisabled"></LocaleText>
+					<LocaleText t="Deleting..." v-else></LocaleText>
 				</a>
 			</li>
 		</template>
@@ -149,10 +154,12 @@ export default {
 			<li>
 				<a class="dropdown-item d-flex text-warning"
 				   @click="this.allowAccessPeer()"
-				   :class="{disabled: this.restrictBtnDisabled}"
+				   :class="{disabled: this.allowAccessBtnDisabled}"
 				   role="button">
-					<i class="me-auto bi bi-unlock"></i> 
-					{{!this.allowAccessBtnDisabled ? "Allow Access":"Allowing..."}}
+					<i class="me-auto bi bi-unlock"></i>
+					<LocaleText t="Allow Access" v-if="!this.allowAccessBtnDisabled"></LocaleText>
+					<LocaleText t="Allowing Access..." v-else></LocaleText>
+
 				</a>
 			</li>
 		</template>

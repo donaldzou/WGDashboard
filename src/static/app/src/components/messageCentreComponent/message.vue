@@ -1,6 +1,9 @@
 <script>
+import LocaleText from "@/components/text/localeText.vue";
+
 export default {
 	name: "message",
+	components: {LocaleText},
 	props: {
 		message: Object
 	},
@@ -21,7 +24,9 @@ export default {
 	     :id="this.message.id"
 	     style="width: 400px">
 		<div class="card-body">
-			<small class="fw-bold d-block" style="text-transform: uppercase">FROM {{this.message.from}}</small>
+			<small class="fw-bold d-block" style="text-transform: uppercase">
+				<LocaleText t="FROM "></LocaleText>
+				{{this.message.from}}</small>
 			{{this.message.content}}
 		</div>
 	</div>

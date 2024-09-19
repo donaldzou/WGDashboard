@@ -1,6 +1,9 @@
 <script>
+import LocaleText from "@/components/text/localeText.vue";
+
 export default {
 	name: "presharedKeyInput",
+	components: {LocaleText},
 	props: {
 		data: Object,
 		saving: Boolean
@@ -26,7 +29,9 @@ export default {
 <div>
 	<div class="d-flex align-items-start">
 		<label for="peer_preshared_key_textbox" class="form-label">
-			<small class="text-muted">Pre-Shared Key</small>
+			<small class="text-muted">
+				<LocaleText t="Pre-Shared Key"></LocaleText>
+			</small>
 		</label>
 		<div class="form-check form-switch ms-auto">
 			<input class="form-check-input" type="checkbox" role="switch" 

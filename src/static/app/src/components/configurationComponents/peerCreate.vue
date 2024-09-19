@@ -12,10 +12,12 @@ import PersistentKeepAliveInput
 	from "@/components/configurationComponents/newPeersComponents/persistentKeepAliveInput.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import BulkAdd from "@/components/configurationComponents/newPeersComponents/bulkAdd.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "peerCreate",
 	components: {
+		LocaleText,
 		BulkAdd,
 		PersistentKeepAliveInput,
 		MtuInput,
@@ -107,7 +109,9 @@ export default {
 				<h3 class="mb-0 text-body">
 					<i class="bi bi-chevron-left"></i>
 				</h3>
-				<h3 class="text-body mb-0">Add Peers</h3>
+				<h3 class="text-body mb-0">
+					<LocaleText t="Add Peers"></LocaleText>
+				</h3>
 			</RouterLink>
 		</div>
 		<div class="d-flex flex-column gap-2">
@@ -137,8 +141,11 @@ export default {
 						       v-model="this.data.preshared_key_bulkAdd"
 						       id="bullAdd_PresharedKey_Switch" checked>
 						<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
-							Pre-Share Key
-							{{this.data.preshared_key_bulkAdd ? "Enabled":"Disabled"}}
+							<small class="fw-bold">
+								<LocaleText t="Pre-Shared Key"></LocaleText>
+								<LocaleText t="Enabled" v-if="this.data.preshared_key_bulkAdd"></LocaleText>
+								<LocaleText t="Disabled" v-else></LocaleText>
+							</small>
 						</label>
 					</div>
 				</div>
@@ -149,7 +156,8 @@ export default {
 				        @click="this.peerCreate()"
 				>
 					<i class="bi bi-plus-circle-fill me-2" v-if="!this.saving"></i>
-					{{this.saving ? 'Saving...': 'Add'}}
+					<LocaleText t="Adding..." v-if="this.saving"></LocaleText>
+					<LocaleText t="Add" v-else></LocaleText>
 				</button>
 			</div>
 		</div>

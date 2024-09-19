@@ -4,15 +4,17 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {fetchGet} from "@/utilities/fetch.js";
 import {ref} from "vue";
 import QRCode from "qrcode";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "share",
+	components: {LocaleText},
 	async setup(){
 		const route = useRoute();
 		const loaded = ref(false)
 		const store = DashboardConfigurationStore();
 		const theme = ref("");
-		const peerConfiguration = ref("");
+		const peerConfiguration = ref(undefined);
 		const blob = ref(new Blob())
 		await fetchGet("/api/getDashboardTheme", {}, (res) => {
 			theme.value = res.data
@@ -38,9 +40,11 @@ export default {
 		return {store, theme, peerConfiguration, blob}
 	},
 	mounted() {
-		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfiguration.file ,  (error) => {
-			if (error) console.error(error)
-		})
+		if(this.peerConfiguration){
+			QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfiguration.file,  (error) => {
+				if (error) console.error(error)
+			})
+		}
 	},
 	methods:{
 		download(){
@@ -76,18 +80,23 @@ export default {
 				<div class="position-absolute w-100 h-100 top-0 start-0 d-flex animate__animated animate__fadeInUp"
 					style="animation-delay: 0.1s;"
 				>
-					<h3 class="m-auto">Oh no... This link is either expired or invalid.</h3>
+					<h3 class="m-auto">
+						<LocaleText t="Oh no... This link is either expired or invalid."></LocaleText>
+					</h3>
 				</div>
 			</div>
 			<div v-else class="d-flex align-items-center flex-column gap-3">
 				<div class="h1 dashboardLogo text-center animate__animated animate__fadeInUp">
 					<h6>WGDashboard</h6>
-					Scan QR Code from the WireGuard App
+					<LocaleText t="Scan QR Code with the WireGuard App to add peer"></LocaleText>
 				</div>
 				<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeInUp mb-3" ref="qrcode"></canvas>
 				<p class="text-muted animate__animated animate__fadeInUp mb-1"
-				   style="animation-delay: 0.2s;"
-				>or click the button below to download the <samp>.conf</samp> file</p>
+				   style="animation-delay: 0.2s;"> 
+					<LocaleText t="or click the button below to download the "></LocaleText>
+					<samp>.conf</samp>
+					<LocaleText t=" file"></LocaleText>
+				</p>
 				<a 
 					:download="this.peerConfiguration.fileName + '.conf'"
 					:href="getBlob"

@@ -1983,7 +1983,10 @@ def API_ping_getAllPeersIpAddress():
             allowed_ip = p.allowed_ip.replace(" ", "").split(",")
             parsed = []
             for x in allowed_ip:
-                ip = ipaddress.ip_network(x, strict=False)
+                try:
+                    ip = ipaddress.ip_network(x, strict=False)
+                except ValueError as e:
+                    print(f"{p.id} - {c.Name}")
                 if len(list(ip.hosts())) == 1:
                     parsed.append(str(ip.hosts()[0]))
             endpoint = p.endpoint.replace(" ", "").replace("(none)", "")
@@ -2073,7 +2076,7 @@ def API_getDashboardUpdate():
         htmlUrl = data.get('html_url')
         if tagName is not None and htmlUrl is not None:
             if tagName != DASHBOARD_VERSION:
-                return ResponseObject(message=f"{tagName} is now avaible for update!", data=htmlUrl)
+                return ResponseObject(message=f"{tagName} is now available for update!", data=htmlUrl)
             else:
                 return ResponseObject(message="You're on the latest version")
         return ResponseObject(False)

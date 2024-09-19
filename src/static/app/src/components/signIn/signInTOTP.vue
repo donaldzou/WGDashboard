@@ -9,7 +9,7 @@ export default {
 	},
 	computed: {
 		getLocaleText(){
-			return GetLocale(this.placeholder)
+			return GetLocale('OTP from your authenticator')
 		}
 	}
 }
@@ -19,7 +19,7 @@ export default {
 	<input class="form-control totp"
 	       required
 	       id="totp" maxlength="6" type="text" inputmode="numeric" autocomplete="one-time-code"
-	       :placeholder="this.getLocaleText('OTP from your authenticator')"
+	       :placeholder="this.getLocaleText"
 	       v-model="this.data.totp"
 	>
 </template>

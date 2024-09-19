@@ -1,8 +1,10 @@
 <script>
 import "@/utilities/wireguard.js"
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "privatePublicKeyInput",
+	components: {LocaleText},
 	props: {
 		data: Object,
 		saving: Boolean,
@@ -75,7 +77,11 @@ export default {
 	<div class="d-flex gap-2 flex-column" :class="{inactiveField: this.bulk}">
 		<div>
 			<label for="peer_private_key_textbox" class="form-label">
-				<small class="text-muted">Private Key <code>(Required for QR Code and Download)</code></small>
+				<small class="text-muted">
+					<LocaleText t="Private Key"></LocaleText>
+					<code>
+						<LocaleText t="(Required for QR Code and Download)"></LocaleText>
+					</code></small>
 			</label>
 			<div class="input-group">
 				<input type="text" class="form-control form-control-sm rounded-start-3"
@@ -94,14 +100,20 @@ export default {
 		<div>
 			<div class="d-flex">
 				<label for="public_key" class="form-label">
-					<small class="text-muted">Public Key <code>(Required)</code></small>
+					<small class="text-muted">
+						<LocaleText t="Public Key"></LocaleText>
+						<code>
+							<LocaleText t="(Required)"></LocaleText>
+						</code></small>
 				</label>
 				<div class="form-check form-switch ms-auto">
 					<input class="form-check-input" type="checkbox" role="switch"
 					       :disabled="this.bulk"
 					       id="enablePublicKeyEdit" v-model="this.editKey">
 					<label class="form-check-label" for="enablePublicKeyEdit">
-						<small>Edit</small>
+						<small>
+							<LocaleText t="Use your own Private and Public Key"></LocaleText>
+						</small>
 					</label>
 				</div>
 			</div>

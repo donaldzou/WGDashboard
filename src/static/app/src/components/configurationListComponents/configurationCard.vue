@@ -1,9 +1,11 @@
 <script>
 import {fetchGet} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "configurationCard",
+	components: {LocaleText},
 	props: {
 		c: {
 			Name: String,
@@ -63,22 +65,30 @@ export default {
 					<i class="bi bi-arrow-up me-2"></i>{{c.DataUsage.Sent > 0 ? c.DataUsage.Sent.toFixed(4) : 0}} GB
 				</small>
 				<small class="text-md-end col-6 col-md-3">
-					<span class="dot me-2" :class="{active: c.ConnectedPeers > 0}"></span>{{c.ConnectedPeers}} Peers
+					<span class="dot me-2" :class="{active: c.ConnectedPeers > 0}"></span>{{c.ConnectedPeers}}
+					<LocaleText t="Peers"></LocaleText>
 				</small>
 			</div>
 			<div class="d-flex align-items-center gap-2">
 				<small class="text-muted">
-					<strong style="word-break: keep-all">Public Key</strong>
+					<strong style="word-break: keep-all">
+						<LocaleText t="Public Key"></LocaleText>
+					</strong>
 				</small>
 				<small class="mb-0 d-block d-lg-inline-block ">
 					<samp style="line-break: anywhere">{{c.PublicKey}}</samp>
 				</small>
 				<div class="form-check form-switch ms-auto">
 					<label class="form-check-label" style="cursor: pointer" :for="'switch' + c.PrivateKey">
-						{{this.configurationToggling ? 'Turning ':''}}
-						{{c.Status ? "On":"Off"}}
+
+						<LocaleText t="Turning Off..." v-if="!c.Status && this.configurationToggling"></LocaleText>
+						<LocaleText t="Turning On..." v-else-if="c.Status && this.configurationToggling"></LocaleText>
+						<LocaleText t="On" v-else-if="c.Status && !this.configurationToggling"></LocaleText>
+						<LocaleText t="Off" v-else-if="!c.Status && !this.configurationToggling"></LocaleText>
+						
+						
 						<span v-if="this.configurationToggling"
-						      class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+						      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 					</label>
 					<input class="form-check-input"
 					       style="cursor: pointer"

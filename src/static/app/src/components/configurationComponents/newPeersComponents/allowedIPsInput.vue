@@ -2,9 +2,12 @@
 import {fetchGet} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
+import {GetLocale} from "@/utilities/locale.js";
 
 export default {
 	name: "allowedIPsInput",
+	components: {LocaleText},
 	props: {
 		data: Object,
 		saving: Boolean,
@@ -30,6 +33,9 @@ export default {
 				this.availableIp.filter(x =>
 					x.includes(this.availableIpSearchString) && !this.data.allowed_ips.includes(x)) :
 				this.availableIp.filter(x => !this.data.allowed_ips.includes(x))
+		},
+		inputGetLocale(){
+			return GetLocale("Enter IP Address/CIDR")
 		}
 	},
 	methods: {
@@ -40,7 +46,7 @@ export default {
 				return true;
 			}
 			this.allowedIpFormatError = true;
-			this.dashboardStore.newMessage('WGDashboard', 'Allowed IP is invalid', 'danger')
+			this.dashboardStore.newMessage('WGDashboard', 'Allowed IPs is invalid', 'danger')
 			return false;
 		}
 	},
@@ -63,7 +69,11 @@ export default {
 <template>
 	<div :class="{inactiveField: this.bulk}">
 		<label for="peer_allowed_ip_textbox" class="form-label">
-			<small class="text-muted">Allowed IPs <code>(Required)</code></small>
+			<small class="text-muted">
+				<LocaleText t="Allowed IPs"></LocaleText>
+				<code>
+					<LocaleText t="(Required)"></LocaleText>
+				</code></small>
 		</label>
 		<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ips.length > 0}">
 			<TransitionGroup name="list">
@@ -77,7 +87,7 @@ export default {
 		<div class="d-flex gap-2 align-items-center">
 			<div class="input-group">
 				<input type="text" class="form-control form-control-sm rounded-start-3" 
-				       placeholder="Enter IP Address/CIDR"
+				       :placeholder="this.inputGetLocale"
 				       :class="{'is-invalid': this.allowedIpFormatError}"
 				       v-model="customAvailableIp"
 				       :disabled="bulk">
@@ -88,23 +98,29 @@ export default {
 					<i class="bi bi-plus-lg"></i>
 				</button>
 			</div>
-			<small class="text-muted">or</small>
+			<small class="text-muted">
+				<LocaleText t="or"></LocaleText>
+			</small>
 			<div class="dropdown flex-grow-1">
 				<button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-3 w-100"
 				        :disabled="!availableIp || bulk"
 				        data-bs-auto-close="outside"
 				        type="button" data-bs-toggle="dropdown" aria-expanded="false">
 					<i class="bi bi-filter-circle me-2"></i>
-					Pick Available IP
+					<LocaleText t="Pick Available IP"></LocaleText>
 				</button>
 				<ul class="dropdown-menu mt-2 shadow w-100 dropdown-menu-end rounded-3"
 				    v-if="this.availableIp"
 				    style="overflow-y: scroll; max-height: 270px; width: 300px !important;">
 					<li>
-						<div class="px-3 pb-2 pt-1">
-							<input class="form-control form-control-sm rounded-3"
-							       v-model="this.availableIpSearchString"
-							       placeholder="Search...">
+						<div class="px-3 pb-2 pt-1 d-flex gap-3 align-items-center">
+							<label for="availableIpSearchString" class="text-muted">
+								<i class="bi bi-search"></i>
+							</label>
+							<input 
+								id="availableIpSearchString"
+								class="form-control form-control-sm rounded-3"
+							       v-model="this.availableIpSearchString">
 						</div>
 					</li>
 					<li v-for="ip in this.searchAvailableIps" >
@@ -113,7 +129,9 @@ export default {
 						</a>
 					</li>
 					<li v-if="this.searchAvailableIps.length === 0">
-						<small class="px-3 text-muted">No available IP containing "{{this.availableIpSearchString}}"</small>
+						<small class="px-3 text-muted">
+							<LocaleText t="No available IP containing"></LocaleText>
+							"{{this.availableIpSearchString}}"</small>
 					</li>
 				</ul>
 			</div>

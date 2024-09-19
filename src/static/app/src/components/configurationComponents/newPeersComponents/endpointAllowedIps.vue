@@ -1,9 +1,11 @@
 <script>
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "endpointAllowedIps",
+	components: {LocaleText},
 	props: {
 		data: Object,
 		saving: Boolean
@@ -47,7 +49,11 @@ export default {
 <template>
 	<div>
 		<label for="peer_endpoint_allowed_ips" class="form-label">
-			<small class="text-muted">Endpoint Allowed IPs <code>(Required)</code></small>
+			<small class="text-muted">
+				<LocaleText t="Endpoint Allowed IPs"></LocaleText>
+				<code>
+					<LocaleText t="(Required)"></LocaleText>
+				</code></small>
 		</label>
 		<input type="text" class="form-control form-control-sm rounded-3"
 		       :class="{'is-invalid': error}"

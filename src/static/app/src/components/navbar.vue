@@ -4,6 +4,7 @@ import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStor
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {GetLocale} from "@/utilities/locale.js";
 
 export default {
 	name: "navbar",
@@ -29,7 +30,7 @@ export default {
 				}
 				this.updateMessage = res.message
 			}else{
-				this.updateMessage = "Failed to check available update"
+				this.updateMessage = GetLocale("Failed to check available update")
 				console.log(`Failed to get update: ${res.message}`)
 			}
 		})
@@ -95,14 +96,15 @@ export default {
 					</a>
 					</li>
 					<li class="nav-item" style="font-size: 0.8rem">
-						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none" target="_blank">
+						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none rounded-3" target="_blank">
 							<small class="nav-link text-muted rounded-3" >
 								<LocaleText :t="this.updateMessage"></LocaleText>
+								(<LocaleText t="Current Version:"></LocaleText> {{ dashboardConfigurationStore.Configuration.Server.version }})
 							</small>
 						</a>
-						<small class="nav-link text-muted" v-else>
+						<small class="nav-link text-muted rounded-3" v-else>
 							<LocaleText :t="this.updateMessage"></LocaleText>
-							({{ dashboardConfigurationStore.Configuration.Server.version}})
+							({{ dashboardConfigurationStore.Configuration.Server.version }})
 						</small>
 					</li>
 				</ul>

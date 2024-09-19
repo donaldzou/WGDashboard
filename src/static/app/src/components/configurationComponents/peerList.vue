@@ -176,8 +176,7 @@ export default {
 			}, (res) => {
 				if (res.status){
 					this.dashboardConfigurationStore.newMessage("Server",
-						`${this.configurationInfo.Name} is 
-						${res.data ? 'is on':'is off'}`, "Success")
+						`${this.configurationInfo.Name} ${res.data ? 'is on':'is off'}`, "success")
 				}else{
 					this.dashboardConfigurationStore.newMessage("Server",
 						res.message, 'danger')
@@ -427,8 +426,13 @@ export default {
 						</small></p>
 						<div class="form-check form-switch ms-auto">
 							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								<LocaleText t="On" v-if="this.configurationInfo.Status"></LocaleText>
-								<LocaleText t="Off" v-else></LocaleText>
+								
+								<LocaleText t="Turning Off..." v-if="!this.configurationInfo.Status && this.configurationToggling"></LocaleText>
+								<LocaleText t="Turning On..." v-else-if="this.configurationInfo.Status && this.configurationToggling"></LocaleText>
+								<LocaleText t="On" v-else-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
+								<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
+								
+								
 								<span v-if="this.configurationToggling"
 								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 							</label>
