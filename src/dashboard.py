@@ -33,7 +33,7 @@ import threading
 
 from flask.json.provider import DefaultJSONProvider
 
-DASHBOARD_VERSION = 'v4.0.3'
+DASHBOARD_VERSION = 'v4.0.4'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
