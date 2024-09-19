@@ -693,8 +693,6 @@ class WireguardConfiguration:
         return False, None
 
     def allowAccessPeers(self, listOfPublicKeys):
-        # numOfAllowedPeers = 0
-        # numOfFailedToAllowPeers = 0
         if not self.getStatus():
             self.toggleConfiguration()
         
@@ -705,7 +703,15 @@ class WireguardConfiguration:
                                % (self.Name, self.Name,), (p['id'],))
                 sqlUpdate("DELETE FROM '%s_restrict_access' WHERE id = ?"
                                % self.Name, (p['id'],))
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
+                
+                presharedKeyExist = len(p['preshared_key']) > 0
+                rd = random.Random()
+                uid = uuid.UUID(int=rd.getrandbits(128), version=4)
+                if presharedKeyExist:
+                    with open(f"{uid}", "w+") as f:
+                        f.write(p['preshared_key'])
+                        
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
             else:
                 return ResponseObject(False, "Failed to allow access of peer " + i)
