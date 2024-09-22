@@ -146,6 +146,7 @@
 	"You can add up to (.*) peers": "您最多可以添加 $1 個端點",
 	"Use your own Private and Public Key": "使用您自己的秘鑰和公鑰",
 	"Enter IP Address/CIDR": "輸入 IP 地址/前綴長度",
+	"IP Address/CIDR": "IP 地址/前綴長度",
 	"or": "或",
 	"Pick Available IP": "選擇可用的 IP 地址",
 	"No available IP containing": "沒有可用的 IP 地址含有 ",
@@ -223,5 +224,13 @@
 	"Please provide ipAddress": "請提供 ipAddress",
 	"Dashboard Language": "面板語言",
 	"Dashboard language update failed": "面板語言更新失敗",
-	"Peer Remote Endpoint": "端點末端地址"
+	"Peer Remote Endpoint": "端點末端地址",
+	"New Configuration": "新配置",
+	"Configuration Name": "配置名稱",
+	"Configuration name is invalid. Possible reasons:": "配置名稱不正確。可能的原因：",
+	"Configuration name already exist\\.": "配置名稱已存在。",
+	"Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen\\.": "配置名稱只能含有15個小/大寫英文字母，數字，下划線，等於號，加號，小數點或短橫線。",
+	"Invalid Port": "錯誤的端口",
+	"Save Configuration": "保存配置",
+	"IP Address/CIDR is invalid": "IP 地址/前綴長度格式錯誤"
 }
