@@ -966,19 +966,19 @@ class Peer:
                     list(filter(lambda k: k.id != self.id, self.configuration.getPeersList()))))) for item in row]
 
         if allowed_ip in existingAllowedIps:
-            return ResponseObject(False, "Allowed IP already taken by another peer.")
+            return ResponseObject(False, "Allowed IP already taken by another peer")
         if not _checkIPWithRange(endpoint_allowed_ip):
-            return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect.")
+            return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect")
         if len(dns_addresses) > 0 and not _checkDNS(dns_addresses):
-            return ResponseObject(False, f"DNS format is incorrect.")
+            return ResponseObject(False, f"DNS format is incorrect")
         if mtu < 0 or mtu > 1460:
-            return ResponseObject(False, "MTU format is not correct.")
+            return ResponseObject(False, "MTU format is not correct")
         if keepalive < 0:
-            return ResponseObject(False, "Persistent Keepalive format is not correct.")
+            return ResponseObject(False, "Persistent Keepalive format is not correct")
         if len(private_key) > 0:
             pubKey = _generatePublicKey(private_key)
             if not pubKey[0] or pubKey[1] != self.id:
-                return ResponseObject(False, "Private key does not match with the public key.")
+                return ResponseObject(False, "Private key does not match with the public key")
         try:
             if len(preshared_key) > 0:
                 rd = random.Random()
@@ -1805,7 +1805,7 @@ def API_addPeers(configName):
     if configName in WireguardConfigurations.keys():
         config = WireguardConfigurations.get(configName)
         if (not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0)) or len(endpoint_allowed_ip) == 0:
-            return ResponseObject(False, "Please fill in all required box.")
+            return ResponseObject(False, "Please fill in all required box")
         if not config.getStatus():
             config.toggleConfiguration()
 
@@ -1814,7 +1814,6 @@ def API_addPeers(configName):
         if bulkAdd:
             if bulkAddAmount < 1:
                 return ResponseObject(False, "Please specify amount of peers you want to add")
-            
             if not availableIps[0]:
                 return ResponseObject(False, "No more available IP can assign")
             if bulkAddAmount > len(availableIps[1]):
@@ -1845,7 +1844,7 @@ def API_addPeers(configName):
 
         else:
             if config.searchPeer(public_key)[0] is True:
-                return ResponseObject(False, f"This peer already exist.")
+                return ResponseObject(False, f"This peer already exist")
             name = data['name']
             private_key = data['private_key']
             

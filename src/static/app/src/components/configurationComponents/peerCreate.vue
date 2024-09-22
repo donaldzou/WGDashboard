@@ -62,7 +62,7 @@ export default {
 			fetchPost("/api/addPeers/" + this.$route.params.id, this.data, (res) => {
 				if (res.status){
 					this.$router.push(`/configuration/${this.$route.params.id}/peers`)
-					this.dashboardStore.newMessage("Server", "Peer create successfully", "success")
+					this.dashboardStore.newMessage("Server", "Peer created successfully", "success")
 				}else{
 					this.dashboardStore.newMessage("Server", res.message, "danger")
 				}

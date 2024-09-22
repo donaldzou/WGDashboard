@@ -176,5 +176,19 @@
 	"FROM ": "来自 ",
 	"(.*) is on": "$1 已启用",
 	"(.*) is off": "$1 已停用",
-	"Allowed IPs is invalid": "允许的 IP 地址错误"
+	"Allowed IPs is invalid": "允许的 IP 地址错误",
+	"Peer created successfully": "成功创建端点",
+	"Please fill in all required box": "请填写所有必填项",
+	"Please specify amount of peers you want to add": "请提供批量添加端点的数量",
+	"No more available IP can assign": "没有更多可用的 IP 可以分配了",
+	"The maximum number of peers can add is (.*)": "最多只能添加$1个端点",
+	"Generating key pairs by bulk failed": "生成公钥秘钥失败了",
+	"Failed to add peers in bulk": "批量创建端点失败",
+	"This peer already exist": "此端点已存在",
+	"This IP is not available: (.*)": "此 IP 地址不可用：$1",
+	"Configuration does not exist": "此配置不存在",
+	"Please provide a valid configuration name": "请提供一个正确的配置名称",
+	"Peer saved": "端点保存成功",
+	"Allowed IP already taken by another peer": "允许的 IP 地址已被其他端点使用",
+	"Endpoint Allowed IPs format is incorrect": ""
 }

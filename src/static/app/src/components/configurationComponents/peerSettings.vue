@@ -33,7 +33,7 @@ export default {
 			fetchPost(`/api/updatePeerSettings/${this.$route.params.id}`, this.data, (res) => {
 				this.saving = false;
 				if (res.status){
-					this.dashboardConfigurationStore.newMessage("Server", "Peer Updated!", "success")
+					this.dashboardConfigurationStore.newMessage("Server", "Peer saved", "success")
 				}else{
 					this.dashboardConfigurationStore.newMessage("Server", res.message, "danger")
 				}
