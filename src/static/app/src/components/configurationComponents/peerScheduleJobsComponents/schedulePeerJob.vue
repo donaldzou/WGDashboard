@@ -51,7 +51,7 @@ export default {
 				}, (res) => {
 					if (res.status){
 						this.edit = false;
-						this.store.newMessage("Server", "Job Saved!", "success")
+						this.store.newMessage("Server", "Peer job saved", "success")
 						console.log(res.data)
 						this.$emit("refresh", res.data[0])
 						this.newJob = false;
@@ -91,7 +91,7 @@ export default {
 						this.store.newMessage("Server", res.message, "danger")
 						this.$emit('delete')
 					}else{
-						this.store.newMessage("Server", "Job Deleted!", "success")
+						this.store.newMessage("Server", "Peer job deleted", "success")
 					}
 					
 				})

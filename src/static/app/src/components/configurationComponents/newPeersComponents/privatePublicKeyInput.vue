@@ -44,7 +44,7 @@ export default {
 						if (window.wireguard.generatePublicKey(this.keypair.privateKey)
 							!== this.keypair.publicKey){
 							this.error = true;
-							this.dashboardStore.newMessage("WGDashboard", "Private Key and Public Key does not match.", "danger");
+							this.dashboardStore.newMessage("WGDashboard", "Private key does not match with the public key", "danger");
 						}else{
 							this.data.private_key = this.keypair.privateKey
 							this.data.public_key = this.keypair.publicKey

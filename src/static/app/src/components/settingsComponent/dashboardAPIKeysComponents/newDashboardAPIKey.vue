@@ -31,7 +31,7 @@ export default {
 			fetchPost('/api/newDashboardAPIKey', this.newKeyData, (res) => {
 				if (res.status){
 					this.$emit('created', res.data);
-					this.store.newMessage("Server", "New API Key created", "success");
+					this.store.newMessage("Server", "API Key created", "success");
 					this.$emit('close')
 				}else{
 					this.store.newMessage("Server", res.message, "danger")

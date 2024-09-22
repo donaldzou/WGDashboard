@@ -34,7 +34,7 @@ export default {
 				}else{
 					this.value = this.store.Configuration.Peers[this.targetData];
 					this.store.newMessage("Server",
-						`API Keys function is failed ${this.value ? 'enabled':'disabled'}`, "danger")
+						`API Keys function is failed to ${this.value ? 'enabled':'disabled'}`, "danger")
 				}
 			})
 		},

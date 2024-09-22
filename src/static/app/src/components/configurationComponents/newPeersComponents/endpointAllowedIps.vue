@@ -27,7 +27,7 @@ export default {
 			for (let ip in i){
 				if (!this.store.checkCIDR(i[ip])){
 					if (!this.error){
-						this.dashboardStore.newMessage("WGDashboard", "Endpoint Allowed IP is invalid.", "danger")
+						this.dashboardStore.newMessage("WGDashboard", "Endpoint Allowed IPs format is incorrect", "danger")
 					}
 					this.data.endpoint_allowed_ip = "";
 					this.error = true;

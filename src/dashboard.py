@@ -1599,13 +1599,10 @@ def API_addWireguardConfiguration():
 @app.route(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
 def API_toggleWireguardConfiguration():
     configurationName = request.args.get('configurationName')
-
     if configurationName is None or len(
             configurationName) == 0 or configurationName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Please provide a valid configuration name")
-
     toggleStatus, msg = WireguardConfigurations[configurationName].toggleConfiguration()
-
     return ResponseObject(toggleStatus, msg, WireguardConfigurations[configurationName].Status)
 
 
@@ -1638,7 +1635,7 @@ def API_updateDashboardConfigurationItem():
 def API_getDashboardAPIKeys():
     if DashboardConfig.GetConfig('Server', 'dashboard_api_key'):
         return ResponseObject(data=DashboardConfig.DashboardAPIKeys)
-    return ResponseObject(False, "Dashboard API Keys function is disabled")
+    return ResponseObject(False, "WGDashboard API Keys function is disabled")
 
 @app.route(f'{APP_PREFIX}/api/newDashboardAPIKey', methods=['POST'])
 def API_newDashboardAPIKey():
@@ -1704,7 +1701,7 @@ def API_deletePeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify more than one peer")
+            return ResponseObject(False, "Please specify one or more peers")
         configuration = WireguardConfigurations.get(configName)
         return configuration.deletePeers(peers)
 
@@ -1717,7 +1714,7 @@ def API_restrictPeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify more than one peer")
+            return ResponseObject(False, "Please specify one or more peers")
         configuration = WireguardConfigurations.get(configName)
         return configuration.restrictPeers(peers)
     return ResponseObject(False, "Configuration does not exist")
@@ -1729,7 +1726,7 @@ def API_sharePeer_create():
     Peer = data.get('Peer')
     ExpireDate = data.get('ExpireDate')
     if Configuration is None or Peer is None:
-        return ResponseObject(False, "Please specify configuration and peer")
+        return ResponseObject(False, "Please specify configuration and peers")
     activeLink = AllPeerShareLinks.getLink(Configuration, Peer)
     if len(activeLink) > 0:
         return ResponseObject(False, "This peer is already sharing, please stop sharing first.")
@@ -1782,7 +1779,7 @@ def API_allowAccessPeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify more than one peer")
+            return ResponseObject(False, "Please specify one or more peers")
         configuration = WireguardConfigurations.get(configName)
         return configuration.allowAccessPeers(peers)
     return ResponseObject(False, "Configuration does not exist")
@@ -1865,18 +1862,18 @@ def API_addPeers(configName):
 def API_downloadPeer(configName):
     data = request.args
     if configName not in WireguardConfigurations.keys():
-        return ResponseObject(False, "Configuration or peer does not exist")
+        return ResponseObject(False, "Configuration does not exist")
     configuration = WireguardConfigurations[configName]
     peerFound, peer = configuration.searchPeer(data['id'])
     if len(data['id']) == 0 or not peerFound:
-        return ResponseObject(False, "Configuration or peer does not exist")
+        return ResponseObject(False, "Peer does not exist")
     return ResponseObject(data=peer.downloadPeer())
 
 
 @app.route(f"{APP_PREFIX}/api/downloadAllPeers/<configName>")
 def API_downloadAllPeers(configName):
     if configName not in WireguardConfigurations.keys():
-        return ResponseObject(False, "Configuration or peer does not exist")
+        return ResponseObject(False, "Configuration does not exist")
     configuration = WireguardConfigurations[configName]
     peerData = []
     untitledPeer = 0
@@ -1927,7 +1924,7 @@ def API_savePeerScheduleJob():
     configuration = WireguardConfigurations.get(job['Configuration'])
     f, fp = configuration.searchPeer(job['Peer'])
     if not f:
-        return ResponseObject(False, "Peer does not exist in this configuration")
+        return ResponseObject(False, "Peer does not exist")
 
     s, p = AllPeerJobs.saveJob(PeerJob(
         job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
@@ -1947,7 +1944,7 @@ def API_deletePeerScheduleJob():
     configuration = WireguardConfigurations.get(job['Configuration'])
     f, fp = configuration.searchPeer(job['Peer'])
     if not f:
-        return ResponseObject(False, "Peer does not exist in this configuration")
+        return ResponseObject(False, "Peer does not exist")
 
     s, p = AllPeerJobs.deleteJob(PeerJob(
         job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],

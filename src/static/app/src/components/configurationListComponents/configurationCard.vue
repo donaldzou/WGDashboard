@@ -31,7 +31,7 @@ export default {
 			}, (res) => {
 				if (res.status){
 					this.dashboardConfigurationStore.newMessage("Server",
-						`${this.c.Name} is ${res.data ? 'is on':'is off'}`)
+						`${this.c.Name} ${res.data ? 'is on':'is off'}`)
 				}else{
 					this.dashboardConfigurationStore.newMessage("Server",
 						res.message, 'danger')

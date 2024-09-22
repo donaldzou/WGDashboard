@@ -37,7 +37,7 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 			if (x.status !== 200){
 				if (x.status === 401){
 					
-					store.newMessage("WGDashboard", "Session Ended", "warning")
+					store.newMessage("WGDashboard", "Sign in session ended, please sign in again", "warning")
 				}
 				throw new Error(x.statusText)
 			}
@@ -61,7 +61,7 @@ export const fetchPost = async (url, body, callback) => {
 			if (x.status !== 200){
 				if (x.status === 401){
 					
-					store.newMessage("WGDashboard", "Session Ended", "warning")
+					store.newMessage("WGDashboard", "Sign in session ended, please sign in again", "warning")
 				}
 				throw new Error(x.statusText)
 			}

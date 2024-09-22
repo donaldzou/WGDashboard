@@ -29,7 +29,7 @@ export default {
 				for(let ip in i){
 					if (!this.store.regexCheckIP(i[ip])){
 						if (!this.error){
-							this.dashboardStore.newMessage("WGDashboard", "DNS is invalid", "danger");
+							this.dashboardStore.newMessage("WGDashboard", "DNS format is incorrect", "danger");
 						}
 						this.error = true;
 						this.data.DNS = "";

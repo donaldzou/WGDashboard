@@ -149,7 +149,7 @@ router.beforeEach(async (to, from, next) => {
       }else{
         dashboardConfigurationStore.Redirect = to;
         next("/signin")
-        dashboardConfigurationStore.newMessage("WGDashboard", "Session Ended", "warning")
+        dashboardConfigurationStore.newMessage("WGDashboard", "Sign in session ended, please sign in again", "warning")
       }
     }else{
       await dashboardConfigurationStore.getConfiguration()
