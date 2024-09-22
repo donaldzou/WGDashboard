@@ -48,7 +48,7 @@ export default {
 			}, (res) => {
 				this.saving = false;
 				if (res.status){
-					this.dashboardConfigurationStore.newMessage("Server", "Peer data usage reset successfully.", "success")
+					this.dashboardConfigurationStore.newMessage("Server", "Peer data usage reset successfully", "success")
 				}else{
 					this.dashboardConfigurationStore.newMessage("Server", res.message, "danger")
 				}

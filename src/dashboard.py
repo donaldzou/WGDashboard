@@ -991,18 +991,18 @@ class Peer:
                 os.remove(str(uid))
                 if len(updatePsk.decode().strip("\n")) != 0:
                     return ResponseObject(False,
-                                          "Update peer failed when updating preshared key")
+                                          "Update peer failed when updating Pre-Shared Key")
             updateAllowedIp = subprocess.check_output(
                 f'wg set {self.configuration.Name} peer {self.id} allowed-ips "{allowed_ip.replace(" ", "")}"',
                 shell=True, stderr=subprocess.STDOUT)
             if len(updateAllowedIp.decode().strip("\n")) != 0:
                 return ResponseObject(False,
-                                      "Update peer failed when updating allowed IPs")
+                                      "Update peer failed when updating Allowed IPs")
             saveConfig = subprocess.check_output(f"wg-quick save {self.configuration.Name}",
                                                  shell=True, stderr=subprocess.STDOUT)
             if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
                 return ResponseObject(False,
-                                      "Update peer failed when saving the configuration.")
+                                      "Update peer failed when saving the configuration")
             sqlUpdate(
                 '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
                 keepalive = ?, preshared_key = ? WHERE id = ?''' % self.configuration.Name,

@@ -189,6 +189,14 @@
 	"Configuration does not exist": "此配置不存在",
 	"Please provide a valid configuration name": "请提供一个正确的配置名称",
 	"Peer saved": "端点保存成功",
-	"Allowed IP already taken by another peer": "允许的 IP 地址已被其他端点使用",
-	"Endpoint Allowed IPs format is incorrect": ""
+	"Allowed IPs already taken by another peer": "允许的 IP 地址已被其他端点使用",
+	"Endpoint Allowed IPs format is incorrect": "终结点允许的 IP 地址格式不正确",
+	"DNS format is incorrect": "域名系统（DNS）格式不正确",
+	"MTU format is not correct": "最大传输单元格式不正确",
+	"Persistent Keepalive format is not correct": "持久保持活动格式不正确",
+	"Private key does not match with the public key": "秘钥与公钥不匹配",
+	"Update peer failed when updating Pre-Shared Key": "更新共享密钥失败",
+	"Update peer failed when updating Allowed IPs": "更新允许的 IP 地址失败",
+	"Update peer failed when saving the configuration": "配置保存端点失败",
+	"Peer data usage reset successfully": "端点数据重置成功"
 }
