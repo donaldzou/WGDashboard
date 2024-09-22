@@ -13,5 +13,10 @@
 		"lang_id": "zh-HK",
 		"lang_name": "Chinese (Traditional)",
 		"lang_name_localized": "中文（繁體）"
+	},
+	{
+		"lang_id": "uk",
+		"lang_name": "Ukrainian",
+		"lang_name_localized": "Українська"
 	}
 ]
