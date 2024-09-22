@@ -220,5 +220,8 @@
 	"Sign in session ended, please sign in again": "登录已过期，请重新登录",
 	"Please specify an IP Address (v4/v6)": "请提供一个 IP 地址 （v4或v6）",
 	"Please provide ipAddress and count": "请提供 ipAddress 和 count",
-	"Please provide ipAddress": "请提供 ipAddress"
+	"Please provide ipAddress": "请提供 ipAddress",
+	"Dashboard Language": "面板语言",
+	"Dashboard language update failed": "面板语言更新失败",
+	"Peer Remote Endpoint": "端点末端地址"
 }

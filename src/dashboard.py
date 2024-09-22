@@ -2134,20 +2134,50 @@ def API_Welcome_Finish():
         DashboardConfig.SetConfig("Other", "welcome_session", False)
     return ResponseObject()
 
+class Locale:
+    def __init__(self):
+        self.localePath = './static/locale/'
+        self.activeLanguages = {}
+        with open(os.path.join(f"{self.localePath}active_languages.json"), "r") as f:
+            self.activeLanguages = json.loads(''.join(f.readlines()))
+        
+    
+    def getLanguage(self) -> dict | None:
+        currentLanguage = DashboardConfig.GetConfig("Server", "dashboard_language")[1]
+        if currentLanguage == "en":
+            return None
+        if os.path.exists(os.path.join(f"{self.localePath}{currentLanguage}.json")):
+            with open(os.path.join(f"{self.localePath}{currentLanguage}.json"), "r") as f:
+                return dict(json.loads(''.join(f.readlines())))
+        else:
+            return None
+    
+    def updateLanguage(self, lang_id):
+        if not os.path.exists(os.path.join(f"{self.localePath}{lang_id}.json")):
+            DashboardConfig.SetConfig("Server", "dashboard_language", "en")
+        else:
+            DashboardConfig.SetConfig("Server", "dashboard_language", lang_id)
+        
+    
+Locale = Locale()
+
 @app.get(f'{APP_PREFIX}/api/locale')
-def API_Local_CurrentLang():
-    # if param is None or len(param) == 0:
-    #     with open(os.path.join("./static/locale/active_languages.json"), "r") as f:
-    #         return ResponseObject(data=''.join(f.readlines()))
+def API_Locale_CurrentLang():    
+    return ResponseObject(data=Locale.getLanguage())
+
+@app.get(f'{APP_PREFIX}/api/locale/available')
+def API_Locale_Available():
+    return ResponseObject(data=Locale.activeLanguages)
+        
+@app.post(f'{APP_PREFIX}/api/locale/update')
+def API_Locale_Update():
+    data = request.get_json()
+    if 'lang_id' not in data.keys():
+        return ResponseObject(False, "Please specify a lang_id")
+    Locale.updateLanguage(data['lang_id'])
+    return ResponseObject(data=Locale.getLanguage())
     
-    _, param = DashboardConfig.GetConfig("Server", "dashboard_language")
     
-    if param == "en":
-        return ResponseObject()
-    
-    if os.path.exists(os.path.join(f"./static/locale/{param}.json")):
-        with open(os.path.join(f"./static/locale/{param}.json"), "r") as f:
-            return ResponseObject(data=''.join(f.readlines()))
     
     
     

@@ -1,5 +1,4 @@
 <script>
-import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import PeersDefaultSettingsInput from "@/components/settingsComponent/peersDefaultSettingsInput.vue";
 import {ipV46RegexCheck} from "@/utilities/ipCheck.js";
@@ -13,11 +12,13 @@ import DashboardSettingsInputIPAddressAndPort
 import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vue";
 import AccountSettingsMFA from "@/components/settingsComponent/accountSettingsMFA.vue";
 import LocaleText from "@/components/text/localeText.vue";
+import DashboardLanguage from "@/components/settingsComponent/dashboardLanguage.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		DashboardLanguage,
 		LocaleText,
 		AccountSettingsMFA,
 		DashboardAPIKeys,
@@ -39,14 +40,15 @@ export default {
 				<LocaleText t="Settings"></LocaleText>
 			</h3>
 			<DashboardTheme></DashboardTheme>
+			<DashboardLanguage></DashboardLanguage>
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">
 					<LocaleText t="Peers Default Settings"></LocaleText>
 				</p>
 				<div class="card-body">
 					<PeersDefaultSettingsInput targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_endpoint_allowed_ip" title="Peer Endpoint Allowed IPs"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_mtu" title="MTU (Max Transmission Unit)"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
 					<PeersDefaultSettingsInput targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
 					<PeersDefaultSettingsInput targetData="remote_endpoint" title="Peer Remote Endpoint"
 					                           :warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."

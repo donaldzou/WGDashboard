@@ -14,7 +14,7 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {fetchGet} from "@/utilities/fetch.js";
 
 let Locale;
-await fetch("/api/locale").then(res => res.json()).then(res => Locale = JSON.parse(res.data))
+await fetch("/api/locale").then(res => res.json()).then(res => Locale = res.data)
 
 
 const app = createApp(App)
@@ -29,5 +29,7 @@ pinia.use(({ store }) => {
 app.use(pinia)
 
 const store = DashboardConfigurationStore()
-window.Locale = Locale;
+// window.Locale = Locale;
+
+store.Locale = Locale;
 app.mount('#app')
