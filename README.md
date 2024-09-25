@@ -21,14 +21,20 @@
   <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
   <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
 </p>
-<p align="center">Monitoring WireGuard is not convenient, need to remote access to server and type <code>wg show</code>. That's why this project is being created, to view all configurations and manage them in a easy way.</p>
-<p align="center">With all these awesome features, while keeping it <b>simple</b>, <b>easy to install and use</b></p>
+<p align="center">Monitoring WireGuard is not convenient, in most case, you'll need to login to your server and type <code>wg show</code>. That's why this project is being created, to view and manage all WireGuard configurations in a easy way.</p>
+<p align="center">With all these awesome features, while keeping it <b>easy to install and use</b></p>
 
 <p align="center"><b><i>This project is not affiliate to the official WireGuard Project</i></b></p>
 
-<h2 align="center">
-  <a href="https://donaldzou.github.io/WGDashboard-Documentation/">Official Documentation ➡️</a>
-</h2>
-<p align="center">
-  I've moved the documentation to a new repo with a published site. It improved readability for you and easier to manage for me ;)
-</p>
+<hr>
+
+## [Official Documentation ➡️](https://donaldzou.github.io/WGDashboard-Documentation/)
+> [!NOTE]
+> To better manage documentation for this project. I've moved it to its own [repo](https://github.com/donaldzou/WGDashboard-Documentation). I will keep updating over there and leave this README only with important information.
+
+- [💡 Features](https://donaldzou.github.io/WGDashboard-Documentation/features.html)
+- [📝 Requirements](https://donaldzou.github.io/WGDashboard-Documentation/requirements.html)
+- [🛠 Install﻿](https://donaldzou.github.io/WGDashboard-Documentation/install.html)
+- [🪜 Usage﻿](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
+- [📖 API Documentation﻿](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
+- [And much more...](https://donaldzou.github.io/WGDashboard-Documentation/)
