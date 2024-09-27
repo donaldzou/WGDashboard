@@ -1781,8 +1781,8 @@ def API_allowAccessPeers(configName: str) -> ResponseObject:
 
 @app.post(f'{APP_PREFIX}/api/addPeers/<configName>')
 def API_addPeers(configName):
-    data = request.get_json()
-    bulkAdd = data['bulkAdd']
+    data: dict = request.get_json()
+    bulkAdd = data['bulkAdd'] 
     bulkAddAmount = data['bulkAddAmount']
     public_key = data['public_key']
     allowed_ips = data['allowed_ips']

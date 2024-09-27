@@ -23,5 +23,10 @@
 		"lang_id": "de",
 		"lang_name": "German",
 		"lang_name_localized": "Deutsch"
+	},
+	{
+		"lang_id": "ru",
+		"lang_name": "Russian",
+		"lang_name_localized": "Русский"
 	}
 ]
