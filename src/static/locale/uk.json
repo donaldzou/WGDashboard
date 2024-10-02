@@ -232,5 +232,9 @@
 	"Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen\\.": "Назва конфігурації може містити лише 15 літер нижнього/верхнього регістру, цифри, підкреслення, знак рівності, плюс, крапку та дефіс. ",
 	"Invalid Port": "Невірний порт",
 	"Save Configuration": "Зберегти конфігурацію",
-	"IP Address/CIDR is invalid": "IP-адреса/CIDR невірна"
+	"IP Address/CIDR is invalid": "IP-адреса/CIDR невірна",
+	"IP Address": "IP-адреса",
+	"Enter IP Address / Hostname": "Введіть IP-адресу / ім’я хоста",
+	"Count": "Граф"
+
 }

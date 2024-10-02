@@ -232,5 +232,8 @@
   "Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen\\.": "Der Konfigurationsname darf nur 15 Zeichen enthalten, bestehend aus Groß-/Kleinbuchstaben, Zahlen, Unterstrich, Gleichheitszeichen, Pluszeichen, Punkt und Bindestrich.",
   "Invalid Port": "Ungültiger Port",
   "Save Configuration": "Konfiguration speichern",
-  "IP Address/CIDR is invalid": "IP-Adresse/CIDR ist ungültig"
+  "IP Address/CIDR is invalid": "IP-Adresse/CIDR ist ungültig",
+  "IP Address": "IP-Adresse",
+  "Enter IP Address / Hostname": "IP-Adresse/Hostnamen eingeben",
+  "Count": "Zählen"
 }

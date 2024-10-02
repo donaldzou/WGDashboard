@@ -232,5 +232,13 @@
 	"Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen\\.": "配置名称只能含有15个小/大写英文字母，数字，下划线，等于号，加号，小数点或短横线。",
 	"Invalid Port": "错误的端口",
 	"Save Configuration": "保存配置",
-	"IP Address/CIDR is invalid": "IP 地址/前缀长度格式错误"
+	"IP Address/CIDR is invalid": "IP 地址/前缀长度格式错误",
+	"IP Address": "IP 地址",
+	"Enter IP Address / Hostname": "输入 IP 地址 / 域名",
+	"Count": "数量",
+	"Geolocation": "地理位置",
+	"Is Alive": "在线",
+	"Average / Min / Max Round Trip Time": "平均 / 最低 / 最高来回通讯延迟",
+	"Sent / Received / Lost Package": "发送 / 接收 / 丢失数据包"
+
 }

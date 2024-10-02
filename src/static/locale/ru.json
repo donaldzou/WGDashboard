@@ -232,5 +232,9 @@
 	"Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen\\.": "Название конфигурации может содержать только 15 строчных/прописных букв, цифры, подчеркивание, знак равенства, знак плюс, точку и дефис ",
 	"Invalid Port": "Неверный порт",
 	"Save Configuration": "Сохранить конфигурацию",
-	"IP Address/CIDR is invalid": "IP-адрес/CIDR недействителен"
+	"IP Address/CIDR is invalid": "IP-адрес/CIDR недействителен",
+	"IP Address": "IP-адрес",
+	"Enter IP Address / Hostname": "Введите IP-адрес/имя хоста",
+	"Count": "Считать"
+
 }
