@@ -2,11 +2,11 @@
 import {fetchGet} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
-import Map from "@/components/map/map.vue";
+import OSMap from "@/components/map/osmap.vue";
 
 export default {
 	name: "ping",
-	components: {Map, LocaleText},
+	components: {OSMap, LocaleText},
 	data(){
 		return {
 			loading: false,
@@ -177,7 +177,7 @@ export default {
 						</div>
 
 						<div v-else key="pingResult" class="d-flex flex-column gap-2 w-100">
-							<Map :d="this.pingResult" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'"></Map>
+							<OSMap :d="this.pingResult" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'"></OSMap>
 							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.15s">
 								<div class="card-body row">
 									<div class="col-sm">

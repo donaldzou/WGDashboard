@@ -1,11 +1,12 @@
 <script>
 import {fetchGet} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
-import Map from "@/components/map/map.vue";
+import OSMap from "@/components/map/osmap.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "traceroute",
-	components: {Map},
+	components: {LocaleText, OSMap},
 	data(){
 		return {
 			tracing: false,
@@ -46,14 +47,16 @@ export default {
 			<div class="d-flex gap-2 flex-column mb-5">
 				<div>
 					<label class="mb-1 text-muted" for="ipAddress">
-						<small>IP Address</small></label>
+						<small>
+							<LocaleText t="Enter IP Address / Hostname"></LocaleText>
+						</small></label>
 					<input
 						:disabled="this.tracing"
 						id="ipAddress"
 						class="form-control"
 						v-model="this.ipAddress"
 						@keyup.enter="this.execute()"
-						type="text" placeholder="Enter an IP Address you want to trace :)">
+						type="text">
 				</div>
 				<button class="btn btn-primary rounded-3 mt-3 position-relative"
 				        :disabled="this.tracing || !this.ipAddress"
@@ -82,7 +85,7 @@ export default {
 						     v-for="x in 5" ></div>
 					</div>
 					<div v-else>
-						<Map :d="this.tracerouteResult" type="traceroute"></Map>
+						<OSMap :d="this.tracerouteResult" type="traceroute"></OSMap>
 						
 						<div key="table" class="w-100 mt-2">
 							<table class="table table-sm rounded-3 w-100">
