@@ -46,7 +46,9 @@ export default {
 					}else{
 						this.store.newMessage("Server", res.message, "danger")
 					}
+					this.pinging = false
 				})
+				
 			}
 {}		}	
 	},
@@ -73,7 +75,7 @@ export default {
 							<small>
 								<LocaleText t="Configuration"></LocaleText>
 							</small></label>
-						<select class="form-select" v-model="this.selectedConfiguration">
+						<select class="form-select" v-model="this.selectedConfiguration" :disabled="this.pinging">
 							<option disabled selected :value="undefined"></option>
 							<option :value="key" v-for="(val, key) in this.cips">
 								{{key}}
@@ -85,7 +87,7 @@ export default {
 							<small>
 								<LocaleText t="Peer"></LocaleText>
 							</small></label>
-						<select id="peer" class="form-select" v-model="this.selectedPeer" :disabled="this.selectedConfiguration === undefined">
+						<select id="peer" class="form-select" v-model="this.selectedPeer" :disabled="this.selectedConfiguration === undefined || this.pinging">
 							<option disabled selected :value="undefined"></option>
 							<option v-if="this.selectedConfiguration !== undefined" :value="key" v-for="(peer, key) in 
 								this.cips[this.selectedConfiguration]">
@@ -98,7 +100,7 @@ export default {
 							<small>
 								<LocaleText t="IP Address"></LocaleText>
 							</small></label>
-						<select id="ip" class="form-select" v-model="this.selectedIp" :disabled="this.selectedPeer === undefined">
+						<select id="ip" class="form-select" v-model="this.selectedIp" :disabled="this.selectedPeer === undefined || this.pinging">
 							<option disabled selected :value="undefined"></option>
 							<option
 								v-if="this.selectedPeer !== undefined"
@@ -121,6 +123,7 @@ export default {
 							</small></label>
 						<input class="form-control" type="text"
 						       id="ipAddress"
+						       :disabled="this.pinging"
 						       v-model="this.selectedIp">
 					</div>
 					<div class="w-100 border-top my-2"></div>
@@ -141,29 +144,40 @@ export default {
 								<i class="bi bi-plus-lg"></i>
 							</button>
 						</div>
-						
-						
-<!--						<input class="form-control" type="number" -->
-<!--						       v-model="this.count"-->
-<!--						       min="1" id="count" placeholder="How many times you want to ping?">-->
 					</div>
-					<button class="btn btn-primary rounded-3 mt-3" 
-					        :disabled="!this.selectedIp"
+					<button class="btn btn-primary rounded-3 mt-3 position-relative" 
+					        :disabled="!this.selectedIp || this.pinging"
 					        @click="this.execute()">
-						<i class="bi bi-person-walking me-2"></i>Ping!
+						<Transition name="slide">
+							<span v-if="!this.pinging" class="d-block">
+								<i class="bi bi-person-walking me-2"></i>Ping!
+							</span>
+							<span v-else class="d-block">
+								<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+								<span class="visually-hidden" role="status">Loading...</span>
+							</span>
+						</Transition>
+						
+						
+						
 					</button>
 				</div>
 				
-				<div class="col-sm-8">
-					<TransitionGroup name="ping">
+				<div class="col-sm-8 position-relative">
+					<Transition name="ping">
 						<div v-if="!this.pingResult" key="pingPlaceholder">
+							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
+							     style="height: 300px"
+							></div>
 							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
 							      :class="{'animate__animated animate__flash animate__slower animate__infinite': this.pinging}"
 							     :style="{'animation-delay': `${x*0.15}s`}"
 							     v-for="x in 4" ></div>
+							
 						</div>
 
 						<div v-else key="pingResult" class="d-flex flex-column gap-2 w-100">
+							<Map :d="this.pingResult" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'"></Map>
 							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.15s">
 								<div class="card-body row">
 									<div class="col-sm">
@@ -216,9 +230,8 @@ export default {
 									</samp>
 								</div>
 							</div>
-							<Map :d="this.pingResult" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'"></Map>
 						</div>
-					</TransitionGroup>
+					</Transition>
 					
 
 				</div>
@@ -241,17 +254,12 @@ export default {
 
 	.ping-leave-active{
 		position: absolute;
+		width: 100%;
 	}
-
 	.ping-enter-from,
 	.ping-leave-to {
 		opacity: 0;
-		//transform: scale(0.9);
-	}
-
-	/* ensure leaving items are taken out of layout flow so that moving
-	   animations can be calculated correctly. */
-	.ping-leave-active {
-		position: absolute;
+		//transform: scale(1.1);
+		filter: blur(3px);
 	}
 </style>

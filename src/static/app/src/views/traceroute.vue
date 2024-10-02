@@ -48,24 +48,37 @@ export default {
 					<label class="mb-1 text-muted" for="ipAddress">
 						<small>IP Address</small></label>
 					<input
+						:disabled="this.tracing"
 						id="ipAddress"
 						class="form-control"
 						v-model="this.ipAddress"
 						@keyup.enter="this.execute()"
 						type="text" placeholder="Enter an IP Address you want to trace :)">
 				</div>
-				<button class="btn btn-primary rounded-3 mt-3"
-				        :disabled="this.tracing"
+				<button class="btn btn-primary rounded-3 mt-3 position-relative"
+				        :disabled="this.tracing || !this.ipAddress"
 				        @click="this.execute()">
-					<i class="bi bi-bullseye me-2"></i> {{this.tracing ? "Tracing...":"Trace It!"}}
+					<Transition name="slide">
+							<span v-if="!this.tracing" class="d-block">
+								<i class="bi bi-person-walking me-2"></i>Trace!
+							</span>
+						<span v-else class="d-block">
+								<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+								<span class="visually-hidden" role="status">Loading...</span>
+							</span>
+					</Transition>
 				</button>
 			</div>
 			<div class="position-relative">
-				<TransitionGroup name="ping">
+				<Transition name="ping">
 					<div v-if="!this.tracerouteResult" key="pingPlaceholder">
 						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-						     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
+						     style="height: 300px !important;"
+						></div>
+						
+						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
 						     :style="{'animation-delay': `${x*0.05}s`}"
+						     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
 						     v-for="x in 5" ></div>
 					</div>
 					<div v-else>
@@ -111,7 +124,7 @@ export default {
 							</table>
 						</div>
 					</div>
-				</TransitionGroup>
+				</Transition>
 			</div>
 		</div>
 	</div>
@@ -130,12 +143,14 @@ export default {
 
 .ping-leave-active{
 	position: absolute;
+	width: 100%;
 }
 
 .ping-enter-from,
 .ping-leave-to {
 	opacity: 0;
-	//transform: scale(0.9);
+	//transform: scale(1.1);
+	filter: blur(3px);
 }
 
 /* ensure leaving items are taken out of layout flow so that moving
@@ -150,5 +165,22 @@ table th, table td{
 
 .table > :not(caption) > * > *{
 	background-color: transparent !important;
+}
+
+.ping-move, /* apply transition to moving elements */
+.ping-enter-active,
+.ping-leave-active {
+	transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+}
+
+.ping-leave-active{
+	position: absolute;
+	width: 100%;
+}
+.ping-enter-from,
+.ping-leave-to {
+	opacity: 0;
+	//transform: scale(1.1);
+	filter: blur(3px);
 }
 </style>

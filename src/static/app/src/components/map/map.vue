@@ -68,7 +68,6 @@ export default {
 			const marker = new Feature({
 				geometry: new Point(coordinate)
 			});
-			// Add marker to the vector source
 			vectorSource.addFeature(marker);
 		}
 		const lineString = new LineString(coordinates);
@@ -90,8 +89,8 @@ export default {
 				} else if (feature.getGeometry().getType() === 'LineString') {
 					return new Style({
 						stroke: new Stroke({
-							color: '#0d6efd',  // Line color
-							width: 2       // Line width
+							color: '#0d6efd',
+							width: 2
 						})
 					});
 				}
@@ -103,11 +102,15 @@ export default {
 </script>
 
 <template>
-	<div id="map" class="w-100 rounded-3" style="height: 300px"></div>
+	<div id="map" class="w-100 rounded-3"></div>
 </template>
 
 <style>
 .ol-layer canvas{
 	border-radius: var(--bs-border-radius-lg) !important;
+}
+
+#map{
+	height: 300px;
 }
 </style>
