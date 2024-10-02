@@ -10,6 +10,7 @@ import {LineString, Point} from "ol/geom"
 import {Circle, Fill, Stroke, Style, Text} from "ol/style.js";
 import {Vector} from "ol/layer"
 import {Vector as SourceVector} from "ol/source"
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export default {
 	name: "osmap",
@@ -20,6 +21,12 @@ export default {
 	data(){
 		return {
 			osmAvailable: true
+		}
+	},
+	setup(){
+		const store = DashboardConfigurationStore();
+		return {
+			store
 		}
 	},
 	methods: {
@@ -107,6 +114,11 @@ export default {
 					}
 				});
 				map.addLayer(vectorLayer);
+				if (this.store.Configuration.Server.dashboard_theme === 'dark'){
+					map.on('postcompose',function(e){
+						document.querySelector('#map').style.filter="grayscale(80%) invert(100%) ";
+					});
+				}
 			}).catch(e => {
 				this.osmAvailable = false
 			})
