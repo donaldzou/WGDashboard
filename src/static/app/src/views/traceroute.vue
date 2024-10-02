@@ -1,9 +1,11 @@
 <script>
 import {fetchGet} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import Map from "@/components/map/map.vue";
 
 export default {
 	name: "traceroute",
+	components: {Map},
 	data(){
 		return {
 			tracing: false,
@@ -41,55 +43,75 @@ export default {
 	<div class="mt-md-5 mt-3 text-body">
 		<div class="container-md">
 			<h3 class="mb-3 text-body">Traceroute</h3>
-			<div class="row">
-				<div class="col-sm-4 d-flex gap-2 flex-column">
-					<div>
-						<label class="mb-1 text-muted" for="ipAddress">
-							<small>IP Address</small></label>
-						<input 
-							id="ipAddress"
-							class="form-control"
-							v-model="this.ipAddress"
-							type="text" placeholder="Enter an IP Address you want to trace :)">
-					</div>
-					<button class="btn btn-primary rounded-3 mt-3"
-					        :disabled="!this.store.regexCheckIP(this.ipAddress) || this.tracing"
-					        @click="this.execute()">
-						<i class="bi bi-bullseye me-2"></i> {{this.tracing ? "Tracing...":"Trace It!"}}
-					</button>
+			<div class="d-flex gap-2 flex-column mb-5">
+				<div>
+					<label class="mb-1 text-muted" for="ipAddress">
+						<small>IP Address</small></label>
+					<input
+						id="ipAddress"
+						class="form-control"
+						v-model="this.ipAddress"
+						@keyup.enter="this.execute()"
+						type="text" placeholder="Enter an IP Address you want to trace :)">
 				</div>
-				<div class="col-sm-8 position-relative">
-					<TransitionGroup name="ping">
-						<div v-if="!this.tracerouteResult" key="pingPlaceholder">
-							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-							     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
-							     :style="{'animation-delay': `${x*0.05}s`}"
-							     v-for="x in 10" ></div>
-						</div>
-						<div v-else key="table" class="w-100">
-							<table class="table table-borderless rounded-3 w-100">
+				<button class="btn btn-primary rounded-3 mt-3"
+				        :disabled="this.tracing"
+				        @click="this.execute()">
+					<i class="bi bi-bullseye me-2"></i> {{this.tracing ? "Tracing...":"Trace It!"}}
+				</button>
+			</div>
+			<div class="position-relative">
+				<TransitionGroup name="ping">
+					<div v-if="!this.tracerouteResult" key="pingPlaceholder">
+						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
+						     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
+						     :style="{'animation-delay': `${x*0.05}s`}"
+						     v-for="x in 5" ></div>
+					</div>
+					<div v-else>
+						<Map :d="this.tracerouteResult" type="traceroute"></Map>
+						
+						<div key="table" class="w-100 mt-2">
+							<table class="table table-sm rounded-3 w-100">
 								<thead>
 								<tr>
 									<th scope="col">Hop</th>
 									<th scope="col">IP Address</th>
-									<th scope="col">Average / Min / Max Round Trip Time</th>
+									<th scope="col">Average RTT (ms)</th>
+									<th scope="col">Min RTT (ms)</th>
+									<th scope="col">Max RTT (ms)</th>
+									<th scope="col">Geolocation</th>
 								</tr>
 								</thead>
 								<tbody>
-									<tr v-for="(hop, key) in this.tracerouteResult"
-										class="animate__fadeInUp animate__animated"
-									    :style="{'animation-delay': `${key * 0.05}s`}"
-									>
-										<td>{{hop.hop}}</td>
-										<td>{{hop.ip}}</td>
-										<td>{{hop.avg_rtt}} / {{hop.min_rtt}} / {{hop.max_rtt}}</td>
-									</tr>
+								<tr v-for="(hop, key) in this.tracerouteResult">
+									<td>
+										<small>{{hop.hop}}</small>
+									</td>
+									<td>
+										<small>{{hop.ip}}</small>
+									</td>
+									<td>
+										<small>{{hop.avg_rtt}}</small>
+									</td>
+									<td>
+										<small>{{hop.min_rtt}}</small>
+									</td>
+									<td>
+										<small>{{hop.max_rtt}}</small>
+									</td>
+									<td>
+									<span v-if="hop.geo.city && hop.geo.country">
+										<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
+									</span>
+									</td>
+								</tr>
 								</tbody>
-								
+
 							</table>
 						</div>
-					</TransitionGroup>
-				</div>
+					</div>
+				</TransitionGroup>
 			</div>
 		</div>
 	</div>
@@ -123,11 +145,7 @@ export default {
 }
 
 table th, table td{
-	padding: 0.9rem;
-}
-
-table tbody{
-	border-top: 1em solid transparent;
+	padding: 0.5rem;
 }
 
 .table > :not(caption) > * > *{

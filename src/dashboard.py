@@ -1781,73 +1781,95 @@ def API_allowAccessPeers(configName: str) -> ResponseObject:
 
 @app.post(f'{APP_PREFIX}/api/addPeers/<configName>')
 def API_addPeers(configName):
-    data: dict = request.get_json()
-    bulkAdd = data['bulkAdd'] 
-    bulkAddAmount = data['bulkAddAmount']
-    public_key = data['public_key']
-    allowed_ips = data['allowed_ips']
-    endpoint_allowed_ip = data['endpoint_allowed_ip']
-    dns_addresses = data['DNS']
-    mtu = data['mtu']
-    keep_alive = data['keepalive']
-    preshared_key = data['preshared_key']
-    preshared_key_bulkAdd: bool = data['preshared_key_bulkAdd']
-
     if configName in WireguardConfigurations.keys():
-        config = WireguardConfigurations.get(configName)
-        if (not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0)) or len(endpoint_allowed_ip) == 0:
-            return ResponseObject(False, "Please fill in all required box")
-        if not config.getStatus():
-            config.toggleConfiguration()
+        try:
+            data: dict = request.get_json()
 
-        availableIps = _getWireguardConfigurationAvailableIP(configName)
-        
-        if bulkAdd:
-            if bulkAddAmount < 1:
-                return ResponseObject(False, "Please specify amount of peers you want to add")
-            if not availableIps[0]:
-                return ResponseObject(False, "No more available IP can assign")
-            if bulkAddAmount > len(availableIps[1]):
-                return ResponseObject(False,
-                                      f"The maximum number of peers can add is {len(availableIps[1])}")
-
-            keyPairs = []
-            for i in range(bulkAddAmount):
-                newPrivateKey = _generatePrivateKey()[1]
-                keyPairs.append({
-                    "private_key": newPrivateKey,
-                    "id": _generatePublicKey(newPrivateKey)[1],
-                    "preshared_key": (_generatePrivateKey()[1] if preshared_key_bulkAdd else ""),
-                    "allowed_ip": availableIps[1][i],
-                    "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                })
-            if len(keyPairs) == 0:
-                return ResponseObject(False, "Generating key pairs by bulk failed")
-            config.addPeers(keyPairs)
+            bulkAdd: bool = data.get("bulkAdd", False)
+            bulkAddAmount: int = data.get('bulkAddAmount', 0)
+            preshared_key_bulkAdd: bool = data.get('preshared_key_bulkAdd', False)
+    
+    
+            public_key: str = data.get('public_key', "")
+            allowed_ips: list[str] = data.get('allowed_ips', "")
             
-            for kp in keyPairs:
-                found, peer = config.searchPeer(kp['id'])
+            endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1])
+            dns_addresses: str = data.get('DNS', DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1])
+            mtu: int = data.get('mtu', int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1]))
+            keep_alive: int = data.get('keepalive', int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]))
+            preshared_key: str = data.get('preshared_key', "")
+            
+    
+            if type(mtu) is not int or mtu < 0 or mtu > 1460:
+                mtu = int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1])
+            if type(keep_alive) is not int or keep_alive < 0:
+                keep_alive = int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1])
+            if len(dns_addresses) == 0:
+                dns_addresses = DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1]
+            if len(endpoint_allowed_ip) == 0:
+                endpoint_allowed_ip = DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1]
+            
+    
+            config = WireguardConfigurations.get(configName)
+            if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
+                return ResponseObject(False, "Please provide at lease public_key and allowed_ips")
+            if not config.getStatus():
+                config.toggleConfiguration()
+    
+            availableIps = _getWireguardConfigurationAvailableIP(configName)
+    
+            if bulkAdd:
+                if type(preshared_key_bulkAdd) is not bool:
+                    preshared_key_bulkAdd = False
+                
+                if type(bulkAddAmount) is not int or bulkAddAmount < 1:
+                    return ResponseObject(False, "Please specify amount of peers you want to add")
+                if not availableIps[0]:
+                    return ResponseObject(False, "No more available IP can assign")
+                if bulkAddAmount > len(availableIps[1]):
+                    return ResponseObject(False,
+                                          f"The maximum number of peers can add is {len(availableIps[1])}")
+    
+                keyPairs = []
+                for i in range(bulkAddAmount):
+                    newPrivateKey = _generatePrivateKey()[1]
+                    keyPairs.append({
+                        "private_key": newPrivateKey,
+                        "id": _generatePublicKey(newPrivateKey)[1],
+                        "preshared_key": (_generatePrivateKey()[1] if preshared_key_bulkAdd else ""),
+                        "allowed_ip": availableIps[1][i],
+                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    })
+                if len(keyPairs) == 0:
+                    return ResponseObject(False, "Generating key pairs by bulk failed")
+                config.addPeers(keyPairs)
+    
+                for kp in keyPairs:
+                    found, peer = config.searchPeer(kp['id'])
+                    if found:
+                        if not peer.updatePeer(kp['name'], kp['private_key'], kp['preshared_key'], dns_addresses,
+                                               kp['allowed_ip'], endpoint_allowed_ip, mtu, keep_alive):
+                            return ResponseObject(False, "Failed to add peers in bulk")
+                return ResponseObject()
+    
+            else:
+                if config.searchPeer(public_key)[0] is True:
+                    return ResponseObject(False, f"This peer already exist")
+                name = data.get("name", "")
+                private_key = data.get("private_key", "")
+    
+                for i in allowed_ips:
+                    if i not in availableIps[1]:
+                        return ResponseObject(False, f"This IP is not available: {i}")
+    
+                config.addPeers([{"id": public_key, "allowed_ip": ','.join(allowed_ips)}])
+                found, peer = config.searchPeer(public_key)
                 if found:
-                    if not peer.updatePeer(kp['name'], kp['private_key'], kp['preshared_key'], dns_addresses,
-                                           kp['allowed_ip'], endpoint_allowed_ip, mtu, keep_alive):
-                        return ResponseObject(False, "Failed to add peers in bulk")
-            return ResponseObject()
-
-        else:
-            if config.searchPeer(public_key)[0] is True:
-                return ResponseObject(False, f"This peer already exist")
-            name = data['name']
-            private_key = data['private_key']
-            
-            for i in allowed_ips:
-                if i not in availableIps[1]:
-                    return ResponseObject(False, f"This IP is not available: {i}")
-            
-            config.addPeers([{"id": public_key, "allowed_ip": ','.join(allowed_ips)}])
-            found, peer = config.searchPeer(public_key)
-            if found:
-                return peer.updatePeer(name, private_key, preshared_key, dns_addresses, ",".join(allowed_ips),
-                                       endpoint_allowed_ip, mtu, keep_alive)
+                    return peer.updatePeer(name, private_key, preshared_key, dns_addresses, ",".join(allowed_ips),
+                                           endpoint_allowed_ip, mtu, keep_alive)
+        except Exception as e:
+            print(e)
+            return ResponseObject(False, "Add peers failed. Please see data for specific issue")
 
     return ResponseObject(False, "Configuration does not exist")
 
@@ -1992,6 +2014,7 @@ def API_ping_getAllPeersIpAddress():
         ips[c.Name] = cips
     return ResponseObject(data=ips)
 
+import requests
 
 @app.get(f'{APP_PREFIX}/api/ping/execute')
 def API_ping_execute():
@@ -2001,8 +2024,8 @@ def API_ping_execute():
         try:
             if ip is not None and len(ip) > 0 and count is not None and count.isnumeric():
                 result = ping(ip, count=int(count), source=None)
-
-                return ResponseObject(data={
+                
+                data = {
                     "address": result.address,
                     "is_alive": result.is_alive,
                     "min_rtt": result.min_rtt,
@@ -2010,9 +2033,17 @@ def API_ping_execute():
                     "max_rtt": result.max_rtt,
                     "package_sent": result.packets_sent,
                     "package_received": result.packets_received,
-                    "package_loss": result.packet_loss
-                })
-
+                    "package_loss": result.packet_loss,
+                    "geo": None
+                }
+                
+                
+                try:
+                    r = requests.get(f"http://ip-api.com/json/{result.address}?field=city")
+                    data['geo'] = r.json()
+                except Exception as e:
+                    pass
+                return ResponseObject(data=data)
             return ResponseObject(False, "Please specify an IP Address (v4/v6)")
         except Exception as exp:
             return ResponseObject(False, exp)
@@ -2024,7 +2055,7 @@ def API_traceroute_execute():
     if "ipAddress" in request.args.keys() and len(request.args.get("ipAddress")) > 0:
         ipAddress = request.args.get('ipAddress')
         try:
-            tracerouteResult = traceroute(ipAddress)
+            tracerouteResult = traceroute(ipAddress, timeout=1, max_hops=64)
             result = []
             for hop in tracerouteResult:
                 if len(result) > 1:
@@ -2049,6 +2080,15 @@ def API_traceroute_execute():
                         "min_rtt": hop.min_rtt,
                         "max_rtt": hop.max_rtt
                     })
+            try:
+                r = requests.post(f"http://ip-api.com/batch?fields=city,country,lat,lon,query",
+                                  data=json.dumps([x['ip'] for x in result]))
+                d = r.json()
+                for i in range(len(result)):
+                    result[i]['geo'] = d[i]
+                
+            except Exception as e:
+                print(e)
             return ResponseObject(data=result)
         except Exception as exp:
             return ResponseObject(False, exp)
@@ -2076,7 +2116,6 @@ def API_getDashboardUpdate():
 '''
 Sign Up
 '''
-
 
 @app.get(f'{APP_PREFIX}/api/isTotpEnabled')
 def API_isTotpEnabled():

@@ -26,7 +26,7 @@ export default {
 		return{
 			data: {
 				bulkAdd: false,
-				bulkAddAmount: "",
+				bulkAddAmount: 0,
 				name: "",
 				allowed_ips: [],
 				private_key: "",
