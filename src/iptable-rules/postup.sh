@@ -22,5 +22,8 @@ iptables -A $CHAIN_NAME -o lo -j ACCEPT
 # Drop everything else coming through the Wireguard interface
 iptables -A $CHAIN_NAME -i $WIREGUARD_INTERFACE -j DROP
 
+# Drop traffic between the peers
+iptables -I FORWARD -i $WIREGUARD_INTERFACE -o $WIREGUARD_INTERFACE -j DROP
+
 # Return to FORWARD chain
 iptables -A $CHAIN_NAME -j RETURN
