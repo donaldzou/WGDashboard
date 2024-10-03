@@ -27,6 +27,7 @@
 <p align="center"><b><i>This project is not affiliate to the official WireGuard Project</i></b></p>
 
 <hr>
+
 > [!NOTE]
 > To better manage documentation for this project. I've moved it to its own [repo](https://github.com/donaldzou/WGDashboard-Documentation). I will keep updating over there and leave this README only with important information.
 
