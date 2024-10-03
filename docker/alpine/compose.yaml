@@ -1,0 +1,23 @@
+services:
+  wireguard-dashboard:
+    image: dselen:alpine
+    restart: unless-stopped
+    container_name: wgdashboard
+    environment:
+      #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
+      - global_dns=9.9.9.9        # <--- Set global DNS address, default: 1.1.1.1.
+      - enable=wg0          # <--- Set the interfaces that will be enabled on startup, default: none. The option "off" is also allowed.
+      - isolate=wg0         # <--- When set to true, it disallows peers to talk to eachother, setting to false, allows it, default: true.
+      #- public_ip=    # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
+    ports:
+      - 10086:10086/tcp
+      - 51820:51820/udp
+    volumes:
+      - ./app:/opt/wireguarddashboard
+      - ./conf:/etc/wireguard
+    cap_add:
+      - NET_ADMIN
+
+volumes:
+  app:
+  conf:

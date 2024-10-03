@@ -66,7 +66,7 @@ _determineOS(){
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
   else
-      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS." "$heavy_crossmark"
+      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
       kill  $TOP_PID
   fi
@@ -86,8 +86,8 @@ _installPython(){
 			fi
 		;;
 		alpine)
-			{ apk update; apk add python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
-		;;
+				{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+			;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -114,10 +114,10 @@ _installPythonVenv(){
 				fi
 			;;
 			alpine)
-				{ apk add python3 py3-virtualenv; printf "\n\n"; } &>> ./log/install.txt 
+				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
 			;;
 			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
@@ -140,7 +140,6 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
-	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
 		case "$OS" in
@@ -159,10 +158,10 @@ _installPythonPip(){
 				fi
 			;;
 			alpine)
-				{ apk add py3-pip; printf "\n\n"; } &>> ./log/install.txt 
+				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
 			;;
 			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS.\n" "$heavy_crossmark"
+				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
 				kill  $TOP_PID
 			;;
@@ -180,17 +179,38 @@ _installPythonPip(){
 }
 
 _checkWireguard(){
-	if ! wg -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		kill  $TOP_PID
-	fi
-	if ! wg-quick -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s WireGuard is not installed. Please follow instruction on https://www.wireguard.com/install/ to install. \n" "$heavy_crossmark"
-		kill  $TOP_PID
-	fi
+    if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
+    then
+        case "$OS" in
+            ubuntu|debian)
+                { 
+                    sudo apt update && sudo apt-get install -y wireguard; 
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            centos|fedora|redhat|rhel)
+                { 
+                    sudo dnf install -y wireguard-tools;
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            alpine)
+                { 
+                    sudo apk update && sudo apk add wireguard-tools --no-cache;
+                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
+                } &>> ./log/install.txt
+            ;;
+            *)
+                printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
+                printf "%s\n" "$helpMsg"
+                kill $TOP_PID
+            ;;
+        esac
+    else
+        printf "[WGDashboard] WireGuard is already installed.\n"
+    fi
 }
+
 
 
 
@@ -221,8 +241,6 @@ _checkPythonVersion(){
 
 install_wgd(){
     printf "[WGDashboard] Starting to install WGDashboard\n"
-    _checkWireguard
-    sudo chmod -R 755 /etc/wireguard/
     
     if [ ! -d "log" ]
 	  then 
@@ -241,6 +259,8 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
+	  _checkWireguard
+    sudo chmod -R 755 /etc/wireguard/
 
     if [ ! -d "db" ] 
 		then 
@@ -252,7 +272,7 @@ install_wgd(){
 	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
     { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-    { date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt
+	{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
@@ -416,55 +436,51 @@ update_wgd() {
 }
 
 if [ "$#" != 1 ];
-	then
-		help
-	else
-		if [ "$1" = "start" ]; then
-			if check_wgd_status; then
-				printf "%s\n" "$dashes"
-				printf "[WGDashboard] WGDashboard is already running.\n"
-				printf "%s\n" "$dashes"
-				else
-					start_wgd
-			fi
-			elif [ "$1" = "docker_start" ]; then
-				printf "%s\n" "$dashes"
-				startwgd_docker
-				printf "%s\n" "$dashes"
-			elif [ "$1" = "stop" ]; then
-				if check_wgd_status; then
-					printf "%s\n" "$dashes"
-					stop_wgd
-					printf "[WGDashboard] WGDashboard is stopped.\n"
-					printf "%s\n" "$dashes"
-					else
-						printf "%s\n" "$dashes"
-						printf "[WGDashboard] WGDashboard is not running.\n"
-						printf "%s\n" "$dashes"
-				fi
-			elif [ "$1" = "update" ]; then
-				update_wgd
-			elif [ "$1" = "install" ]; then
-				printf "%s\n" "$dashes"
-				install_wgd
-				printf "%s\n" "$dashes"
-			elif [ "$1" = "restart" ]; then
-				if check_wgd_status; then
-					printf "%s\n" "$dashes"
-					stop_wgd
-					printf "[WGDashboard] WGDashboard is stopped.\n"
-					sleep 4
-					start_wgd
-				else
-					start_wgd
-				fi
-			elif [ "$1" = "debug" ]; then
-				if check_wgd_status; then
-					printf "[WGDashboard] WGDashboard is already running.\n"
-				else
-					start_wgd_debug
-				fi
-			else
-				help
-		fi
+  then
+    help
+  else
+    if [ "$1" = "start" ]; then
+        if check_wgd_status; then
+          printf "%s\n" "$dashes"
+          printf "[WGDashboard] WGDashboard is already running.\n"
+          printf "%s\n" "$dashes"
+        else
+            start_wgd
+        fi
+      elif [ "$1" = "stop" ]; then
+        if check_wgd_status; then
+            printf "%s\n" "$dashes"
+            stop_wgd
+            printf "[WGDashboard] WGDashboard is stopped.\n"
+            printf "%s\n" "$dashes"
+            else
+              printf "%s\n" "$dashes"
+              printf "[WGDashboard] WGDashboard is not running.\n"
+              printf "%s\n" "$dashes"
+        fi
+      elif [ "$1" = "update" ]; then
+        update_wgd
+      elif [ "$1" = "install" ]; then
+        printf "%s\n" "$dashes"
+        install_wgd
+        printf "%s\n" "$dashes"
+      elif [ "$1" = "restart" ]; then
+         if check_wgd_status; then
+           printf "%s\n" "$dashes"
+           stop_wgd
+           printf "| WGDashboard is stopped.                                  |\n"
+           sleep 4
+           start_wgd
+        else
+          start_wgd
+        fi
+      elif [ "$1" = "debug" ]; then
+        if check_wgd_status; then
+          printf "| WGDashboard is already running.                          |\n"
+          else
+            start_wgd_debug
+        fi
+      else
+        help
+    fi
 fi
