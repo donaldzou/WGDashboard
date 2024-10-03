@@ -30,6 +30,17 @@
     }
 }
 
+#app{
+    width: 100%;
+    height: 100vh;
+}
+
+@supports (height: 100dvh) {
+    #app{
+        height: 100dvh;
+    }
+}
+
 /*
  * Sidebar
  */

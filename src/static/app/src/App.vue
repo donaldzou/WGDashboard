@@ -62,7 +62,7 @@ const getActiveCrossServer = computed(() => {
 }
 
 @media screen and (min-width: 768px) {
-	.navbarBtn{
+	.navbar{
 		display: none;
 	}
 }

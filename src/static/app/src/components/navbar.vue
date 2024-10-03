@@ -42,9 +42,10 @@ export default {
 	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container"
 	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
 	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
-	     style="height: calc(-50px + 100vh);">
+	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
-			<div class="sidebar-sticky pt-3">
+			<div class="sidebar-sticky ">
+				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand fw-light">WGDashboard</h5>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
@@ -125,13 +126,34 @@ export default {
 		animation-fill-mode: both;
 		display: none;
 		animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
+
+		
 	}
 	.navbar-container.active{
 		animation-direction: normal;
 		display: block !important;
 		animation-name: zoomInFade
 	}
+
+	
+	
 }
+
+.navbar-container{
+	height: 100vh;
+}
+
+
+@supports (height: 100dvh) {
+	@media screen and (max-width: 768px){
+		.navbar-container{
+			height: calc(100dvh - 50px);
+		}	
+	}
+	
+
+}
+
 
 @keyframes zoomInFade {
 	0%{

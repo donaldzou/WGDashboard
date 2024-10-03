@@ -24,7 +24,7 @@ export default {
 	<div class="container-fluid flex-grow-1 main" :data-bs-theme="this.dashboardConfigurationStore.Configuration.Server.dashboard_theme">
 		<div class="row h-100">
 			<Navbar></Navbar>
-			<main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 overflow-y-scroll mb-0" style="height: calc(100vh - 50px)">
+			<main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 overflow-y-scroll mb-0">
 				<Suspense>
 					<RouterView v-slot="{Component}">
 						<Transition name="fade2" mode="out-in">
@@ -32,8 +32,8 @@ export default {
 						</Transition>
 					</RouterView>
 				</Suspense>
-				<div class="messageCentre text-body position-fixed">
-					<TransitionGroup name="message" tag="div" class="position-relative">
+				<div class="messageCentre text-body position-fixed d-flex">
+					<TransitionGroup name="message" tag="div" class="position-relative flex-grow-1 d-flex align-items-end">
 						<Message v-for="m in getMessages.slice().reverse()"
 						         :message="m" :key="m.id"></Message>
 					</TransitionGroup>
@@ -47,5 +47,19 @@ export default {
 	.messageCentre{
 		top: calc(50px + 1rem);
 		right: 1rem;
+		width: calc(100% - 2rem);
 	}
+	main{
+		height: 100vh;
+	}
+	
+	@supports (height: 100dvh) {
+		@media screen and (max-width: 768px) {
+			main{
+				height: calc(100dvh - 50px);
+			}
+		}
+	}
+	
+	
 </style>

@@ -70,8 +70,7 @@ export default {
 									{{ x.lang_name }}
 								</small>
 							</p>
-							<i class="bi bi-check text-primary fs-5" 
-							   
+							<i class="bi bi-check text-primary fs-5"
 							   v-if="currentLanguage?.lang_id === x.lang_id"></i>
 						</a>
 					</li>
