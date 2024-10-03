@@ -341,22 +341,7 @@ stop_wgd() {
 	fi
 }
 
-startwgd_docker() {
-	_checkWireguard
-	printf "[WGDashboard][Docker] WireGuard configuration started\n"
-	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
-    gunicorn_start
-}
-
 start_core() {
-	local iptable_dir="/opt/wireguarddashboard/src/iptable-rules"
-	# Check if wg0.conf exists in /etc/wireguard
-	if [[ ! -f /etc/wireguard/wg0.conf ]]; then
-		echo "[WGDashboard][Docker] wg0.conf not found. Running generate configuration."
-		newconf_wgd
-	else
-		echo "[WGDashboard][Docker] wg0.conf already exists. Skipping WireGuard configuration generation."
-	fi
 	# Re-assign config_files to ensure it includes any newly created configurations
 	local config_files=$(find /etc/wireguard -type f -name "*.conf")
 	
@@ -369,24 +354,6 @@ start_core() {
 		config_name=$(basename "$file" ".conf")
 		wg-quick up "$config_name"
 	done
-}
-
-
-
-newconf_wgd() {
-    local wg_port_listen=$wg_port
-    local wg_addr_range=$wg_net
-    private_key=$(wg genkey)
-    public_key=$(echo "$private_key" | wg pubkey)
-    cat <<EOF >"/etc/wireguard/wg0.conf"
-[Interface]
-PrivateKey = $private_key
-Address = $wg_addr_range
-ListenPort = $wg_port_listen
-SaveConfig = true
-PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
-PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
-EOF
 }
 
 start_wgd_debug() {

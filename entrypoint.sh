@@ -10,22 +10,29 @@ ensure_installation() {
   if [ -z "$(ls -A "${WGDASH}")" ]; then
     echo "Detected empty directory, moving over..."
 
-    mv /setup/app/{.[!.],}* "${WGDASH}"
+    mv /setup/app/* "${WGDASH}"
+    #mv /setup/app/.* "${WGDASH}"
+
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
+
+    # Extra step for Alpine
+    mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+    mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+
     chmod +x "${WGDASH}"/src/wgd.sh
     cd "${WGDASH}"/src || exit
     ./wgd.sh install
 
     echo "Looks like the installation succesfully moved over."
   else
-    echo "Looks like everything is present."
+    echo "Looks like everything is present. Or the directory is not empty."
   fi
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     echo "Standard wg0 Configuration file not found, grabbing template."
-    cp "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
+    cp -a "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key."
 
@@ -75,21 +82,10 @@ clean_up() {
   echo "Removed unneeded logs!"
 }
 
-#update_checker() {
-  #if [ "$update" = "yes" ]; then
-  # echo "Activating Python venv and executing the WireGuard Dashboard service."
-  #  . "${WGDASH}/src/venv/bin/activate"
-  #  cd "${WGDASH}"/src || exit
-  #  bash wgd.sh update
-  #else
-  #  echo "Auto Updater disabled"
-  #fi
-#}
-
 # === SET ENV VARS ===
 set_envvars() {
-  printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
-  
+  #printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
+
   # Changing the DNS used for clients and the dashboard itself.
   if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 
     echo "Changing default dns."
@@ -119,8 +115,8 @@ start_core() {
 
   echo "Activating Python venv and executing the WireGuard Dashboard service."
   . "${WGDASH}"/src/venv/bin/activate
-  cd "${WGDASH}"/src || return # If changing the directory fails (permission or presence error), then bash will exist this function, causing the WireGuard Dashboard to not be succesfully launched.
-  bash wgd.sh start
+  cd "${WGDASH}"/src || return
+  bash wgd.sh start &>> /dev/null
 
   # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
   local configurations=(/etc/wireguard/*)
@@ -201,7 +197,11 @@ start_core() {
 
 # === CLEAN UP ===
 ensure_blocking() {
-  printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
+  #printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
+
+  . "${WGDASH}"/src/venv/bin/activate
+  cd "${WGDASH}"/src || return
+  bash wgd.sh restart
 
   sleep 1s
   echo "Ensuring container continuation."
@@ -221,7 +221,6 @@ ensure_blocking() {
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 ensure_installation
 clean_up
-#update_checker
 start_core
 set_envvars
 ensure_blocking
