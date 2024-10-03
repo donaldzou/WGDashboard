@@ -6,3 +6,4 @@ Flask
 flask-cors
 icmplib
 gunicorn
+requests

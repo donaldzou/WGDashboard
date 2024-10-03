@@ -28,5 +28,10 @@
 		"lang_id": "it-IT",
 		"lang_name": "Italian",
 		"lang_name_localized": "Italiano"
+  },
+  {
+		"lang_id": "ru",
+		"lang_name": "Russian",
+		"lang_name_localized": "Русский"
 	}
 ]

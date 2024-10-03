@@ -24,6 +24,12 @@
     font-weight: bold;
 }
 
+[data-bs-theme="dark"]{
+    hr{
+        border-color: #efefef;
+    }
+}
+
 /*
  * Sidebar
  */
@@ -1165,4 +1171,25 @@ pre.index-alert {
 
 .messageCentre{
     z-index: 9999;
+}
+
+
+.slide-move, /* apply transition to moving elements */
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+}
+
+.slide-leave-active{
+    position: absolute;
+    width: 100%;
+}
+.slide-enter-from{
+    opacity: 0;
+    transform: translateX(-50px) !important;
+}
+
+.slide-leave-to {
+    opacity: 0;
+    transform: translateX(50px) !important;
 }

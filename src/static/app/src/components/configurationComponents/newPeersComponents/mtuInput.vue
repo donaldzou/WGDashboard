@@ -19,6 +19,7 @@ export default {
 		<input type="number" class="form-control form-control-sm rounded-3"
 		       :disabled="this.saving"
 		       v-model="this.data.mtu"
+		       min="0"
 		       id="peer_mtu">
 	</div>
 </template>

@@ -13,11 +13,13 @@ import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vu
 import AccountSettingsMFA from "@/components/settingsComponent/accountSettingsMFA.vue";
 import LocaleText from "@/components/text/localeText.vue";
 import DashboardLanguage from "@/components/settingsComponent/dashboardLanguage.vue";
+import DashboardIPPortInput from "@/components/settingsComponent/dashboardIPPortInput.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		DashboardIPPortInput,
 		DashboardLanguage,
 		LocaleText,
 		AccountSettingsMFA,
@@ -39,18 +41,22 @@ export default {
 			<h3 class="mb-3 text-body">
 				<LocaleText t="Settings"></LocaleText>
 			</h3>
-			<DashboardTheme></DashboardTheme>
-			<DashboardLanguage></DashboardLanguage>
+			
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">
 					<LocaleText t="Peers Default Settings"></LocaleText>
 				</p>
 				<div class="card-body">
-					<PeersDefaultSettingsInput targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="remote_endpoint" title="Peer Remote Endpoint"
+					<PeersDefaultSettingsInput 
+						targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="remote_endpoint" title="Peer Remote Endpoint"
 					                           :warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
 					></PeersDefaultSettingsInput>
 				</div>
@@ -69,6 +75,19 @@ export default {
 					</DashboardSettingsInputWireguardConfigurationPath>
 				</div>
 			</div>
+			<hr class="mb-4">
+			<div class="row gx-4">
+				<div class="col-sm">
+					<DashboardTheme></DashboardTheme>
+				</div>
+				<div class="col-sm">
+					<DashboardLanguage></DashboardLanguage>
+				</div>
+
+			</div>
+			<DashboardIPPortInput></DashboardIPPortInput>
+			
+			
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">
 					<LocaleText t="WGDashboard Account Settings"></LocaleText>

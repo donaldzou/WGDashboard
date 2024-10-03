@@ -31,7 +31,8 @@ export default {
 		this.value = this.store.Configuration.Account[this.targetData];
 	},
 	methods:{
-		async useValidation(){
+		async useValidation(e){
+			
 			if (this.changed){
 				this.updating = true
 				await fetchPost("/api/updateDashboardConfigurationItem", {
