@@ -1,4 +1,3 @@
-# Pull from small Debian stable image.
 FROM alpine:latest AS build
 LABEL maintainer="dselen@nerthus.nl"
 
@@ -27,7 +26,6 @@ ENV WGDASH=/opt/wireguarddashboard
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
 RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH}
 COPY ./src /setup/app/src
-#COPY src /setup/app/src
 
 # Set the volume to be used for WireGuard configuration persistency.
 VOLUME /etc/wireguard
@@ -46,14 +44,12 @@ PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o ${out_adapt} -j MASQ
 PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP\n\
 ListenPort = ${wg_port}\n\
 SaveConfig = true\n\
-DNS = ${global_dns}" > /setup/conf/wg0.conf
-
-
+DNS = ${global_dns}" > /setup/conf/wg0.conf \
+  && chmod 600 /setup/conf/wg0.conf
 
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
-
 
 # Copy the basic entrypoint.sh script.
 COPY entrypoint.sh /entrypoint.sh
