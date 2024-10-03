@@ -1,5 +1,4 @@
 # WGDashboard Docker Explanation:
-
 Author: DaanSelen<br>
 
 This document delves into how the WGDashboard Docker container has been built.<br>
@@ -100,7 +99,6 @@ dselen/wgdashboard   latest       c96fd96ee3b3   42 minutes ago      314MB
 
 ## Closing remarks:
 
-Excuse the large image size, whoops! Debian's big... sometimes.<br>
 For feedback please submit an issue to the repository. Or message dselen@nerthus.nl.
 
 ## In Progress:

@@ -31,7 +31,7 @@ ensure_installation() {
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
-    echo "Standard wg0 Configuration file not found, grabbing template. And adjusting permissions."
+    echo "Standard wg0 Configuration file not found, grabbing template."
     cp -a "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key."
