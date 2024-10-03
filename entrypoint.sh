@@ -11,7 +11,8 @@ ensure_installation() {
     echo "Detected empty directory, moving over..."
 
     mv /setup/app/* "${WGDASH}"
-    mv /setup/app/.* "${WGDASH}"
+    #mv /setup/app/.* "${WGDASH}"
+
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
 
