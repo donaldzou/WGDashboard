@@ -235,5 +235,6 @@
   "IP Address/CIDR is invalid": "IP-Adresse/CIDR ist ungültig",
   "IP Address": "IP-Adresse",
   "Enter IP Address / Hostname": "IP-Adresse/Hostnamen eingeben",
+  "IP Address / Hostname": "IP-Adresse/Hostnamen",
   "Count": "Zählen"
 }

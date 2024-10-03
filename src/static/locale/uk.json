@@ -235,6 +235,7 @@
 	"IP Address/CIDR is invalid": "IP-адреса/CIDR невірна",
 	"IP Address": "IP-адреса",
 	"Enter IP Address / Hostname": "Введіть IP-адресу / ім’я хоста",
+	"IP Address / Hostname": "IP-адресу / ім’я хоста",
 	"Count": "Граф"
 
 }

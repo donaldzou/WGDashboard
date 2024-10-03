@@ -13,11 +13,13 @@ import DashboardAPIKeys from "@/components/settingsComponent/dashboardAPIKeys.vu
 import AccountSettingsMFA from "@/components/settingsComponent/accountSettingsMFA.vue";
 import LocaleText from "@/components/text/localeText.vue";
 import DashboardLanguage from "@/components/settingsComponent/dashboardLanguage.vue";
+import DashboardIPPortInput from "@/components/settingsComponent/dashboardIPPortInput.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		DashboardIPPortInput,
 		DashboardLanguage,
 		LocaleText,
 		AccountSettingsMFA,
@@ -39,8 +41,7 @@ export default {
 			<h3 class="mb-3 text-body">
 				<LocaleText t="Settings"></LocaleText>
 			</h3>
-			<DashboardTheme></DashboardTheme>
-			<DashboardLanguage></DashboardLanguage>
+			
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">
 					<LocaleText t="Peers Default Settings"></LocaleText>
@@ -69,6 +70,19 @@ export default {
 					</DashboardSettingsInputWireguardConfigurationPath>
 				</div>
 			</div>
+			<hr class="mb-4">
+			<div class="row gx-4">
+				<div class="col-sm">
+					<DashboardTheme></DashboardTheme>
+				</div>
+				<div class="col-sm">
+					<DashboardLanguage></DashboardLanguage>
+				</div>
+
+			</div>
+			<DashboardIPPortInput></DashboardIPPortInput>
+			
+			
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">
 					<LocaleText t="WGDashboard Account Settings"></LocaleText>

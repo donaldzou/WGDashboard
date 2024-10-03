@@ -235,11 +235,12 @@
 	"IP Address/CIDR is invalid": "IP 地址/前綴長度格式錯誤",
 	"IP Address": "IP 地址",
 	"Enter IP Address / Hostname": "输入 IP 地址 / 域名",
+	"IP Address / Hostname": "IP 地址 / 域名",
 	"Count": "數量",
 	"Geolocation": "地理位置",
 	"Is Alive": "在線",
 	"Average / Min / Max Round Trip Time": "平均 / 最低 / 最高來回通信延遲",
-	"Sent / Received / Lost Package": "發送 / 接收 / 遺失數據包"
-
+	"Sent / Received / Lost Package": "發送 / 接收 / 遺失數據包",
+	"Manual restart of WGDashboard is needed to apply changes on IP Address and Listen Port": "更改 IP 位址或監聽埠後需要手動重新啟動 WGDashboard 以使用最新的設置"
 
 }

@@ -1228,6 +1228,8 @@ class DashboardConfig:
                     self.__config[section][key] = "true"
                 else:
                     self.__config[section][key] = "false"
+            if type(value) in [int, float]:
+                self.__config[section][key] = str(value)
             else:
                 self.__config[section][key] = value
             return self.SaveConfig(), ""

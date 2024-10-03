@@ -24,6 +24,12 @@
     font-weight: bold;
 }
 
+[data-bs-theme="dark"]{
+    hr{
+        border-color: #efefef;
+    }
+}
+
 /*
  * Sidebar
  */

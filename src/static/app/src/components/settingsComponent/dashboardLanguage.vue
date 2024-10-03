@@ -59,7 +59,7 @@ export default {
 					</span>
 					
 				</button>
-				<ul class="dropdown-menu rounded-3 shadow" style="width: 500px">
+				<ul class="dropdown-menu rounded-3 shadow">
 					<li v-for="x in this.languages">
 						<a class="dropdown-item d-flex align-items-center" role="button"
 							@click="this.changeLanguage(x.lang_id)"
@@ -82,5 +82,8 @@ export default {
 </template>
 
 <style scoped>
+.dropdown-menu{
+	width: 100%;
+}
 
 </style>
