@@ -47,11 +47,16 @@ export default {
 					<LocaleText t="Peers Default Settings"></LocaleText>
 				</p>
 				<div class="card-body">
-					<PeersDefaultSettingsInput targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
-					<PeersDefaultSettingsInput targetData="remote_endpoint" title="Peer Remote Endpoint"
+					<PeersDefaultSettingsInput 
+						targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
+					<PeersDefaultSettingsInput 
+						targetData="remote_endpoint" title="Peer Remote Endpoint"
 					                           :warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
 					></PeersDefaultSettingsInput>
 				</div>

@@ -1,7 +1,6 @@
 <script>
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import {v4} from "uuid";
 import {fetchPost} from "@/utilities/fetch.js";
 
 export default {
@@ -62,6 +61,7 @@ export default {
 <div class="card mb-4 shadow rounded-3">
 	<p class="card-header">
 		<LocaleText t="Dashboard IP Address & Listen Port"></LocaleText>
+		
 	</p>
 	<div class="card-body">
 		<div class="row gx-3">
