@@ -30,12 +30,24 @@ export default {
 			this.data.private_key = this.keypair.privateKey;
 			this.data.public_key = this.keypair.publicKey;
 		},
+		testKey(key){
+			const reg = /^[A-Za-z0-9+/]{43}=?=?$/;
+			return reg.test(key)
+		},
 		checkMatching(){
 			try{
-				if (window.wireguard.generatePublicKey(this.keypair.privateKey)
-					!== this.keypair.publicKey){
-					this.error = true;
-					this.dashboardStore.newMessage("WGDashboard", "Private Key and Public Key does not match.", "danger");
+				if(this.keypair.privateKey){
+					if(this.testKey(this.keypair.privateKey)){
+						this.keypair.publicKey = window.wireguard.generatePublicKey(this.keypair.privateKey)
+						if (window.wireguard.generatePublicKey(this.keypair.privateKey)
+							!== this.keypair.publicKey){
+							this.error = true;
+							this.dashboardStore.newMessage("WGDashboard", "Private Key and Public Key does not match.", "danger");
+						}else{
+							this.data.private_key = this.keypair.privateKey
+							this.data.public_key = this.keypair.publicKey
+						}
+					}
 				}
 			}catch (e){
 				this.error = true;
