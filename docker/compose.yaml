@@ -1,6 +1,6 @@
 services:
   wireguard-dashboard:
-    image: test:latest
+    image: dselen/wgdashboard:latest
     restart: unless-stopped
     container_name: wgdashboard
     environment:
@@ -13,11 +13,13 @@ services:
       - 10086:10086/tcp
       - 51820:51820/udp
     volumes: # Can be customized to only the /opt/wireguarddashboard/src/db folder with the /opt/wireguarddashboard/src/wg-dashboard.ini file.
-      - app:/opt/wireguarddashboard
       - conf:/etc/wireguard
+      - db:/opt/wireguarddashboard/db
+      - ini:/opt/wireguarddashboard/src/wg-dashboard.ini
     cap_add:
       - NET_ADMIN
 
 volumes:
-  app:
   conf:
+  db:
+  ini:

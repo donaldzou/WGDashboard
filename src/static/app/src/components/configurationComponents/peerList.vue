@@ -337,7 +337,7 @@ export default {
 					tooltip: {
 						callbacks: {
 							label: (tooltipItem) => {
-								return `${tooltipItem.formattedValue} MB/s`
+								return `${tooltipItem.formattedValue} Mb/s`
 							}
 						}
 					}
@@ -354,7 +354,7 @@ export default {
 					y:{
 						ticks: {
 							callback: (val, index) => {
-								return `${val} MB/s`
+								return `${val} Mb/s`
 							}
 						},
 						grid: {

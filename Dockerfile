@@ -25,11 +25,18 @@ ENV WGDASH=/opt/wireguarddashboard
 VOLUME /etc/wireguard
 VOLUME ${WGDASH}
 
+# Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
+RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH}
+
+# Copy the basic working files.
+COPY ./src /setup/app/src
+
+COPY ./wg-dashboard.ini /setup/conf/wg-dashboard.ini
+COPY entrypoint.sh /entrypoint.sh
+
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 # Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# DEFAULT WIREGUARD INTERFACE CONFIG.
 RUN out_adapt=$(ip -o -4 route show to default | awk '{print $NF}') \
   && echo -e "[Interface]\n\
 Address = ${wg_net}/24\n\
@@ -46,14 +53,6 @@ DNS = ${global_dns}" > /setup/conf/wg0.conf \
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
-
-# Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH}
-
-# Copy the basic entrypoint.sh script.
-COPY ./src /setup/app/src
-COPY ./wg-dashboard.ini /setup/conf/wg-dashboard.ini
-COPY entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
