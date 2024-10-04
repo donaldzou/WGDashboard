@@ -27,6 +27,15 @@ const checkAuth = async () => {
 
 const router = createRouter({
   history: createWebHashHistory(),
+  scrollBehavior(){
+    if (document.querySelector("main") !== null){
+      document.querySelector("main").scrollTo({
+        top: 0
+      })
+    }
+    
+    
+  },
   routes: [
     {
       name: "Index",
