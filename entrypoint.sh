@@ -2,6 +2,7 @@
 
 echo "------------------------- START ----------------------------"
 echo "Starting the WireGuard Dashboard Docker container."
+echo "Working dir: ${WGDASH}"
 
 ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
@@ -17,8 +18,7 @@ ensure_installation() {
     . "${WGDASH}/src/venv/bin/activate"
 
     # Extra step for Alpine
-    mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-    mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+    mv /usr/lib/python3.12/site-packages/{psutil*,bcrypt*} "${WGDASH}/src/venv/lib/python3.12/site-packages"
 
     chmod +x "${WGDASH}"/src/wgd.sh
     cd "${WGDASH}"/src || exit
@@ -31,7 +31,7 @@ ensure_installation() {
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
-    echo "Standard wg0 Configuration file not found, grabbing template."
+    echo "No wg0 Configuration file not found, grabbing a template from ephemerality."
     cp -a "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key."
@@ -39,11 +39,17 @@ ensure_installation() {
     local privateKey
     privateKey=$(wg genkey)
 
-    sed -i "s|^PrivateKey =$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     echo "Done setting template."
   else
     echo "Existing wg0 configuration file found, using that."
+  fi
+
+  if [ ! -f "${WGDASH}/src/wg-dashboard.ini" ]; then
+    echo "No wg-dashboard.ini file not found, grabbing a template from ephemerality."
+    cp -a "/setup/conf/wg-dashboard.ini" "${WGDASH}/src/wg-dashboard.ini"
+  else
+    echo "Existing wg-dashboard.ini configuration file found, using that."
   fi
 }
 
@@ -84,7 +90,7 @@ clean_up() {
 
 # === SET ENV VARS ===
 set_envvars() {
-  #printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
+  printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
   # Changing the DNS used for clients and the dashboard itself.
   if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 
@@ -114,9 +120,6 @@ start_core() {
   printf "\n---------------------- STARTING CORE -----------------------\n"
 
   echo "Activating Python venv and executing the WireGuard Dashboard service."
-  . "${WGDASH}"/src/venv/bin/activate
-  cd "${WGDASH}"/src || return
-  bash wgd.sh start &>> /dev/null
 
   # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
   local configurations=(/etc/wireguard/*)
@@ -201,7 +204,7 @@ ensure_blocking() {
 
   . "${WGDASH}"/src/venv/bin/activate
   cd "${WGDASH}"/src || return
-  bash wgd.sh restart
+  bash wgd.sh start
 
   sleep 1s
   echo "Ensuring container continuation."

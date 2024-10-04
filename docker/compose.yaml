@@ -13,8 +13,8 @@ services:
       - 10086:10086/tcp
       - 51820:51820/udp
     volumes: # Can be customized to only the /opt/wireguarddashboard/src/db folder with the /opt/wireguarddashboard/src/wg-dashboard.ini file.
-      - ./app:/opt/wireguarddashboard
-      - ./conf:/etc/wireguard
+      - app:/opt/wireguarddashboard
+      - conf:/etc/wireguard
     cap_add:
       - NET_ADMIN
 
