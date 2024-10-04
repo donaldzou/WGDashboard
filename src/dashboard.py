@@ -1303,7 +1303,9 @@ def _regexMatch(regex, text):
 
 def _getConfigurationList():
     # configurations = {}
-    for i in os.listdir(WG_CONF_PATH):
+    items = os.listdir(WG_CONF_PATH)
+    items.sort()
+    for i in items:
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             try:
