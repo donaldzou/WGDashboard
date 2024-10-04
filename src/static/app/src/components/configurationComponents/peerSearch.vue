@@ -182,6 +182,13 @@ export default {
 								</div>
 								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
 									<div>
+										<div class="list-group">
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('editConfiguration')">
+												<LocaleText t="Configuration Settings"></LocaleText>
+											</a>
+										</div>
+										<hr>
 										<p class="text-muted fw-bold mb-2"><small>
 											<LocaleText t="Peer Jobs"></LocaleText>
 										</small></p>

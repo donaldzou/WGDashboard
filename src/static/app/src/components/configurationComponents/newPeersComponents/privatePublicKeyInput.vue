@@ -2,6 +2,7 @@
 import "@/utilities/wireguard.js"
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 export default {
 	name: "privatePublicKeyInput",
 	components: {LocaleText},
@@ -12,7 +13,8 @@ export default {
 	},
 	setup(){
 		const dashboardStore = DashboardConfigurationStore();
-		return {dashboardStore}
+		const wgStore = WireguardConfigurationsStore()
+		return {dashboardStore, wgStore}
 	},
 	data(){
 		return {
@@ -39,7 +41,7 @@ export default {
 		checkMatching(){
 			try{
 				if(this.keypair.privateKey){
-					if(this.testKey(this.keypair.privateKey)){
+					if(this.wgStore.checkWGKeyLength(this.keypair.privateKey)){
 						this.keypair.publicKey = window.wireguard.generatePublicKey(this.keypair.privateKey)
 						if (window.wireguard.generatePublicKey(this.keypair.privateKey)
 							!== this.keypair.publicKey){

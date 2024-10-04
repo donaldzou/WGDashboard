@@ -38,7 +38,7 @@ const getActiveCrossServer = computed(() => {
 	</nav>
 	<Suspense>
 		<RouterView v-slot="{ Component }">
-			<Transition name="app" mode="out-in">
+			<Transition name="app" mode="out-in" type="transition">
 				<Component :is="Component"></Component>
 			</Transition>
 		</RouterView>

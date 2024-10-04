@@ -1,5 +1,6 @@
 import itertools
 import random
+import shutil
 import sqlite3
 import configparser
 import hashlib
@@ -488,8 +489,6 @@ class WireguardConfiguration:
                         setattr(self, i, _strToBool(data[i]))
                     else:
                         setattr(self, i, str(data[i]))
-
-            # self.__createDatabase()
             self.__parser["Interface"] = {
                 "PrivateKey": self.PrivateKey,
                 "Address": self.Address,
@@ -506,7 +505,6 @@ class WireguardConfiguration:
                 self.__parser.write(configFile)
 
         self.Peers: list[Peer] = []
-        # Create tables in database
         self.__createDatabase()
         self.getPeersList()
         self.getRestrictedPeersList()
@@ -815,7 +813,6 @@ class WireguardConfiguration:
                               , (status, latestHandshake[count],))
             count += 2
     
-    
     def getPeersTransfer(self):
         if not self.getStatus():
             self.toggleConfiguration()
@@ -918,6 +915,51 @@ class WireguardConfiguration:
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers)))
         }
+    
+    def updateConfigurationSettings(self, newData: dict) -> tuple[bool, str]:
+        if self.Status:
+            self.toggleConfiguration()
+        original = []
+        dataChanged = False
+        with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
+            original = f.readlines()
+            original = [l.rstrip("\n") for l in original]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost", "PrivateKey"]
+            
+
+            start = original.index("[Interface]")
+            for line in range(start+1, len(original)):
+                if original[line] == "[Peer]":
+                    break
+                split = re.split(r'\s*=\s*', original[line], 1)
+                if len(split) == 2:
+                    key = split[0]
+                    value = split[1]
+                    if key in allowEdit and key in newData.keys() and value != newData[key]:
+                        split[1] = newData[key]
+                        original[line] = " = ".join(split)
+                        if isinstance(getattr(self, key), bool):
+                            setattr(self, key, _strToBool(newData[key]))
+                        else:
+                            setattr(self, key, str(newData[key]))
+                        dataChanged = True
+                    print(original[line])
+        if dataChanged:
+            
+            if not os.path.exists(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')):
+                os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
+            shutil.copy(
+                os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'),
+                os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{datetime.now().strftime("%Y%m%d%H%M%S")}.conf')
+            )
+            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
+                f.write("\n".join(original))
+        
+        
+        status, msg = self.toggleConfiguration()        
+        if not status:
+            return False, msg
+        return True, ""
 
 class Peer:
     def __init__(self, tableData, configuration: WireguardConfiguration):
@@ -1607,6 +1649,21 @@ def API_toggleWireguardConfiguration():
     toggleStatus, msg = WireguardConfigurations[configurationName].toggleConfiguration()
     return ResponseObject(toggleStatus, msg, WireguardConfigurations[configurationName].Status)
 
+@app.post(f'{APP_PREFIX}/api/updateWireguardConfiguration')
+def API_updateWireguardConfiguration():
+    data = request.get_json()
+    requiredKeys = ["Name"]
+    for i in requiredKeys:
+        if i not in data.keys():
+            return ResponseObject(False, "Please provide these following field: " + ", ".join(requiredKeys))
+    
+    name = data.get("Name")
+    if name not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration does not exist")
+    
+    status, msg = WireguardConfigurations[name].updateConfigurationSettings(data)
+    
+    return ResponseObject(status, message=msg, data=WireguardConfigurations[name])
 
 @app.get(f'{APP_PREFIX}/api/getDashboardConfiguration')
 def API_getDashboardConfiguration():
