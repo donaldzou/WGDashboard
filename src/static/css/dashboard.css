@@ -1233,3 +1233,36 @@ pre.index-alert {
         --bgdegree: 594deg;
     }
 }
+
+.loadingBar{
+    background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
+}
+
+.loadingBar.loading{
+    animation: loading cubic-bezier(0.82, 0.58, 0.17, 1) 0.2s forwards;
+}
+.loadingBar.loadingDone{
+    animation: loadingDone cubic-bezier(0.82, 0.58, 0.17, 1) 0.5s forwards;
+}
+
+@keyframes loading {
+    from{
+        opacity: 0;
+        width: 0%;
+    }
+    to{
+        opacity: 1;
+        width: 20%;
+    }
+}
+
+@keyframes loadingDone {
+    from{
+        opacity: 1;
+        width: 20%;
+    }
+    to{
+        opacity: 0;
+        width: 100%;
+    }
+}

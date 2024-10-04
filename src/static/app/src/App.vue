@@ -24,6 +24,7 @@ const getActiveCrossServer = computed(() => {
 </script>
 
 <template>
+	<div style="z-index: 9999; height: 5px" class="position-absolute loadingBar top-0 start-0"></div>
 	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark">
 		<div class="container-fluid d-flex text-body align-items-center">
 			<span class="navbar-brand mb-0 h1">WGDashboard</span>
