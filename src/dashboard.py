@@ -913,7 +913,8 @@ class WireguardConfiguration:
                 "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
                 "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
             },
-            "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers)))
+            "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
+            "TotalPeers": len(self.Peers)
         }
     
     def updateConfigurationSettings(self, newData: dict) -> tuple[bool, str]:

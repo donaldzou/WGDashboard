@@ -65,7 +65,8 @@ export default {
 					<i class="bi bi-arrow-up me-2"></i>{{c.DataUsage.Sent > 0 ? c.DataUsage.Sent.toFixed(4) : 0}} GB
 				</small>
 				<small class="text-md-end col-6 col-md-3">
-					<span class="dot me-2" :class="{active: c.ConnectedPeers > 0}"></span>{{c.ConnectedPeers}}
+					<span class="dot me-2" :class="{active: c.ConnectedPeers > 0}"></span>
+					{{c.ConnectedPeers}} / {{c.TotalPeers}}
 					<LocaleText t="Peers"></LocaleText>
 				</small>
 			</div>

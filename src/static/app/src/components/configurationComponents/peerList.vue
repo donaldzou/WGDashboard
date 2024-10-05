@@ -495,7 +495,9 @@ export default {
 							<p class="mb-0 text-muted"><small>
 								<LocaleText t="Connected Peers"></LocaleText>
 							</small></p>
-							<strong class="h4">{{configurationSummary.connectedPeers}}</strong>
+							<strong class="h4">
+								{{configurationSummary.connectedPeers}} / {{configurationPeers.length}}
+							</strong>
 						</div>
 						<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
 					</div>
