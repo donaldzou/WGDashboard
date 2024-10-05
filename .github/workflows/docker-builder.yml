@@ -20,37 +20,26 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build Docker image
         id: build-image
         run: |
           echo "Building Docker image..."
-          docker build -t my-app-image:latest .
+          docker build -t dselen/wgdashboard:latest .
           echo "Docker image built successfully."
 
       - name: Install Docker Scout
         run: |
           echo "Installing Docker Scout..."
-          curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
+          curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
           echo "Docker Scout installed successfully."
 
       - name: Analyze Docker image with Docker Scout
         id: analyze-image
         run: |
           echo "Analyzing Docker image with Docker Scout..."
-          docker scout cves my-app-image:latest > scout-results.txt
+          docker scout cves dselen/wgdashboard:latest > scout-results.txt
           cat scout-results.txt  # Print the report to the workflow logs for easy viewing
           echo "Docker Scout analysis completed."
-
-      - name: Post Comment on Issue or PR
-        run: |
-          COMMENT="**Docker Image Build and Analysis Report**\n\nThe Docker image was built and analyzed successfully.\n\n**Build Summary:**\n- Image Tag: my-app-image:latest\n\n**Analysis Report:**\n\`\`\`\n$(cat scout-results.txt)\n\`\`\`"
-          
-          # Post comment using GitHub API
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d "{\"body\": \"$COMMENT\"}" \
-            "https://api.github.com/repos/NOXCIS/WGDashboard/issues/1/comments"  # Replace '1' with the issue or PR number
