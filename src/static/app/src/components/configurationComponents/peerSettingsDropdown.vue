@@ -86,7 +86,20 @@ export default {
 
 <template>
 	<ul class="dropdown-menu mt-2 shadow-lg d-block rounded-3" style="max-width: 200px">
+		
 		<template v-if="!this.Peer.restricted">
+	
+			<template v-if="this.Peer.status === 'running'">
+				<li style="font-size: 0.8rem; padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
+				<span class="text-body d-flex">
+						<i class="bi bi-box-arrow-in-right"></i>
+						<span class="ms-auto">
+							{{this.Peer.endpoint}}
+						</span>
+				</span>
+				</li>
+				<li><hr class="dropdown-divider"></li>
+			</template>
 			<template v-if="!this.Peer.private_key">
 				<li>
 					<small class="w-100 dropdown-item text-muted"

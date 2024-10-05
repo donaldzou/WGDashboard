@@ -1192,6 +1192,7 @@ class DashboardConfig:
         keys = sqlSelect("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
         fKeys = []
         for k in keys:
+            
             fKeys.append(DashboardAPIKey(*k))
         return fKeys
     

@@ -1266,3 +1266,16 @@ pre.index-alert {
         width: 100%;
     }
 }
+
+@media screen and (max-width: 576px) {
+    .dashboardModal{
+        width: 100% !important;
+    }
+    .dashboardModal > .card{
+        margin: 0.5rem !important;
+    }
+}
+
+samp{
+    word-wrap: anywhere;
+}

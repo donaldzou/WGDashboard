@@ -14,7 +14,12 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {fetchGet} from "@/utilities/fetch.js";
 
 let Locale;
-await fetch("/api/locale").then(res => res.json()).then(res => Locale = res.data)
+await fetch("/api/locale")
+	.then(res => res.json())
+	.then(res => Locale = res.data)
+	.catch(() => {
+		Locale = null
+	})
 
 
 const app = createApp(App)

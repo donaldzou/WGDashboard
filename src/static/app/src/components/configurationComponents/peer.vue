@@ -65,19 +65,24 @@ export default {
 			<h6>
 				{{Peer.name ? Peer.name : 'Untitled Peer'}}
 			</h6>
-			<div class="mb-2">
+			<div class="mb-1">
 				<small class="text-muted">
-					<LocaleText t="Public Key"></LocaleText>
+					Public Key
 				</small>
-				<p class="mb-0"><samp>{{Peer.id}}</samp></p>
+				<small class="d-block">
+					<samp>{{Peer.id}}</samp>
+				</small>
+			</div>
+			<div>
+				<small class="text-muted">
+					<LocaleText t="Allowed IPs"></LocaleText>
+				</small>
+				<small class="d-block">
+					<samp>{{Peer.allowed_ip}}</samp>
+				</small>
 			</div>
 			<div class="d-flex align-items-end">
-				<div>
-					<small class="text-muted">
-						<LocaleText t="Allowed IPs"></LocaleText>
-					</small>
-					<p class="mb-0"><samp>{{Peer.allowed_ip}}</samp></p>
-				</div>
+				
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"
 				     :class="{active: this.subMenuOpened}"
 				>

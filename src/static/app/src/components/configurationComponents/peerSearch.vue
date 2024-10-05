@@ -118,6 +118,11 @@ export default {
 				<LocaleText t="Display"></LocaleText>
 			</button>
 			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+			        @click="this.$emit('editConfiguration')"
+			        type="button" aria-expanded="false">
+				<i class="bi bi-gear-fill"></i>
+			</button>
+			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
 			        @click="this.showMoreSettings = true"
 			        type="button" aria-expanded="false">
 				<i class="bi bi-three-dots"></i>
@@ -174,21 +179,11 @@ export default {
 					<div class="container-md d-flex h-100 w-100">
 						<div class="m-auto modal-dialog-centered dashboardModal">
 							<div class="card rounded-3 shadow w-100">
-								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-									<h4 class="mb-0 fw-normal">
-										<LocaleText t="Configuration Settings"></LocaleText>
-									</h4>
+								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
 									<button type="button" class="btn-close ms-auto" @click="this.showMoreSettings = false"></button>
 								</div>
-								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
+								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column pt-0">
 									<div>
-										<div class="list-group">
-											<a class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.$emit('editConfiguration')">
-												<LocaleText t="Configuration Settings"></LocaleText>
-											</a>
-										</div>
-										<hr>
 										<p class="text-muted fw-bold mb-2"><small>
 											<LocaleText t="Peer Jobs"></LocaleText>
 										</small></p>
