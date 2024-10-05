@@ -43,7 +43,9 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3 text-body">
 		<div class="container-md">
-			<h3 class="mb-3 text-body">Traceroute</h3>
+			<h3 class="mb-3 text-body">
+				<LocaleText t="Traceroute"></LocaleText>
+			</h3>
 			<div class="d-flex gap-2 flex-column mb-5">
 				<div>
 					<label class="mb-1 text-muted" for="ipAddress">
@@ -91,12 +93,24 @@ export default {
 							<table class="table table-sm rounded-3 w-100">
 								<thead>
 								<tr>
-									<th scope="col">Hop</th>
-									<th scope="col">IP Address</th>
-									<th scope="col">Average RTT (ms)</th>
-									<th scope="col">Min RTT (ms)</th>
-									<th scope="col">Max RTT (ms)</th>
-									<th scope="col">Geolocation</th>
+									<th scope="col">
+										<LocaleText t="Hop"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="IP Address"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Average RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Min RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Max RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Geolocation"></LocaleText>
+									</th>
 								</tr>
 								</thead>
 								<tbody>

@@ -82,9 +82,13 @@ export default {
 				</h6>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
-						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">Ping</RouterLink></li>
+						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="Ping"></LocaleText>
+						</RouterLink></li>
 					<li class="nav-item">
-						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">Traceroute</RouterLink>
+						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="Traceroute"></LocaleText>
+						</RouterLink>
 					</li>
 				</ul>
 				<hr class="text-body">

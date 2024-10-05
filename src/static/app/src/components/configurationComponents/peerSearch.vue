@@ -145,7 +145,9 @@ export default {
 											<LocaleText t="Sort by"></LocaleText>
 										</small></p>
 										<div class="list-group">
-											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" role="button" @click="this.updateSort(key)">
+											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" 
+											   role="button" 
+											   @click="this.updateSort(key)">
 												<span class="me-auto">{{value}}</span>
 												<i class="bi bi-check text-primary"
 												   v-if="store.Configuration.Server.dashboard_sort === key"></i>
