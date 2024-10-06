@@ -22,14 +22,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -43,13 +35,8 @@ jobs:
         id: build-image
         run: |
           echo "Building Docker image..."
-          docker build . --tag ${{ env.DOCKER_IMAGE }} --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache-new
+          docker build . --tag ${{ env.DOCKER_IMAGE }}
           echo "Docker image built successfully."
-
-      - name: Save cache after build
-        if: always()
-        run: |
-          cp -r /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   analyze:
     runs-on: ubuntu-latest
