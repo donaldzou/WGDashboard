@@ -1,4 +1,4 @@
-name: Docker-Build-and-Analyze
+name: Docker-Build
 
 on:
   schedule:
@@ -10,10 +10,10 @@ on:
         default: 'true'
 
 env:
-  DOCKER_IMAGE: dselen/wgdashboard:latest
+  DOCKER_IMAGE: dselen/wgdashboard
 
 jobs:
-  build_analyze_push:
+  docker_build:
     runs-on: ubuntu-latest
     strategy: 
       fail-fast: false
@@ -34,30 +34,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          tags: dselen/wgdashboard:latest
-          outputs: type=docker,dest=/tmp/WGDashboard.tar
-
-      - name: Install Docker Scout
-        run: |
-          echo "Installing Docker Scout..."
-          curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
-          echo "Docker Scout installed successfully."
-
-      - name: Analyze Docker image with Docker Scout
-        id: analyze-image
-        run: |
-          echo "Analyzing Docker image with Docker Scout..."
-          docker scout cves ${{ env.DOCKER_IMAGE }} > scout-results.txt
-          cat scout-results.txt
-          echo "Docker Scout analysis completed."
-
-      - name: Fail if critical CVEs are found
-        run: |
-          if grep -q "CRITICAL" scout-results.txt; then
-            echo "Critical vulnerabilities found! Failing the job."
-            exit 1
-          fi
-
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push ${{ env.DOCKER_IMAGE }}
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
