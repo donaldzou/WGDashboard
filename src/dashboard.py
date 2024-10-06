@@ -1213,12 +1213,7 @@ class DashboardConfig:
         if type(value) is str and len(value) == 0:
             return False, "Field cannot be empty!"
         if key == "peer_global_dns":
-            value = value.split(",")
-            for i in value:
-                try:
-                    ipaddress.ip_address(i)
-                except ValueError as e:
-                    return False, str(e)
+            return _checkDNS(value)
         if key == "peer_endpoint_allowed_ip":
             value = value.split(",")
             for i in value:
@@ -1383,9 +1378,9 @@ def _checkIP(ip):
 def _checkDNS(dns):
     dns = dns.replace(' ', '').split(',')
     for i in dns:
-        if not (_checkIP(i) or regex_match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]", i)):
-            return False
-    return True
+        if not _checkIP(i) and not regex_match(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z]{0,61}[a-z]", i):
+            return False, f"{i} does not appear to be an valid DNS address"
+    return True, ""
 
 
 def _generatePublicKey(privateKey) -> tuple[bool, str] | tuple[bool, None]:
