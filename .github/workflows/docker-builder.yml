@@ -35,7 +35,7 @@ jobs:
         id: build-image
         run: |
           echo "Building Docker image..."
-          docker build . --tag ${{ env.DOCKER_IMAGE }}
+          docker build . -t ${{ env.DOCKER_IMAGE }}
           echo "Docker image built successfully."
 
   analyze:
@@ -79,6 +79,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: List built images.
+        run: |
+          docker images
 
       - name: Push Docker image to Docker Hub
         run: |
