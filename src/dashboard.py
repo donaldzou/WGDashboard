@@ -697,7 +697,7 @@ class WireguardConfiguration:
                     with open(f"{uid}", "w+") as f:
                         f.write(p['preshared_key'])
                         
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}{f' preshared-key {uid}' if presharedKeyExist else ''}",
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist: os.remove(str(uid))
             else:

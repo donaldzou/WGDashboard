@@ -18,6 +18,7 @@ export default {
 			deleteBtnDisabled: false,
 			restrictBtnDisabled: false,
 			allowAccessBtnDisabled: false,
+			confirmDelete: false,
 		}
 	},
 	methods: {
@@ -88,80 +89,98 @@ export default {
 	<ul class="dropdown-menu mt-2 shadow-lg d-block rounded-3" style="max-width: 200px">
 		
 		<template v-if="!this.Peer.restricted">
-	
-			<template v-if="this.Peer.status === 'running'">
-				<li style="font-size: 0.8rem; padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
+			<template v-if="!this.confirmDelete">
+				<template v-if="this.Peer.status === 'running'">
+					<li style="font-size: 0.8rem; padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
 				<span class="text-body d-flex">
 						<i class="bi bi-box-arrow-in-right"></i>
 						<span class="ms-auto">
 							{{this.Peer.endpoint}}
 						</span>
 				</span>
+					</li>
+					<li><hr class="dropdown-divider"></li>
+				</template>
+				<template v-if="!this.Peer.private_key">
+					<li>
+						<small class="w-100 dropdown-item text-muted"
+						       style="white-space: break-spaces; font-size: 0.7rem">
+							<LocaleText t="Download & QR Code is not available due to no private key set for this peer"></LocaleText>
+						</small>
+					</li>
+
+				</template>
+				<template v-else>
+					<li class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
+						<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.downloadPeer()">
+							<i class="me-auto bi bi-download"></i>
+						</a>
+						<a class="dropdown-item text-center px-0 rounded-3" role="button"
+						   @click="this.downloadQRCode()">
+							<i class="me-auto bi bi-qr-code"></i>
+						</a>
+						<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">
+							<i class="me-auto bi bi-share"></i>
+						</a>
+					</li>
+				</template>
+				<li><hr class="dropdown-divider"></li>
+				<li>
+					<a class="dropdown-item d-flex" role="button"
+					   @click="this.$emit('setting')"
+					>
+						<i class="me-auto bi bi-pen"></i> <LocaleText t="Peer Settings"></LocaleText>
+					</a>
+				</li>
+				<li>
+					<a class="dropdown-item d-flex" role="button"
+					   @click="this.$emit('jobs')"
+					>
+						<i class="me-auto bi bi-app-indicator"></i> <LocaleText t="Schedule Jobs"></LocaleText>
+					</a>
 				</li>
 				<li><hr class="dropdown-divider"></li>
-			</template>
-			<template v-if="!this.Peer.private_key">
 				<li>
-					<small class="w-100 dropdown-item text-muted"
-					       style="white-space: break-spaces; font-size: 0.7rem">
-						<LocaleText t="Download & QR Code is not available due to no private key set for this peer"></LocaleText>
-					</small>
+					<a class="dropdown-item d-flex text-warning"
+					   @click="this.restrictPeer()"
+					   :class="{disabled: this.restrictBtnDisabled}"
+					   role="button">
+						<i class="me-auto bi bi-lock"></i>
+						<LocaleText t="Restrict Access" v-if="!this.restrictBtnDisabled"></LocaleText>
+						<LocaleText t="Restricting..." v-else></LocaleText>
+
+					</a>
 				</li>
-				
+				<li>
+					<a class="dropdown-item d-flex fw-bold text-danger"
+					   @click="this.confirmDelete = true"
+					   :class="{disabled: this.deleteBtnDisabled}"
+					   role="button">
+						<i class="me-auto bi bi-trash"></i>
+						<LocaleText t="Delete" v-if="!this.deleteBtnDisabled"></LocaleText>
+						<LocaleText t="Deleting..." v-else></LocaleText>
+					</a>
+				</li>
 			</template>
 			<template v-else>
-				<li class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
-					<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.downloadPeer()">
-						<i class="me-auto bi bi-download"></i>
-					</a>
-					<a class="dropdown-item text-center px-0 rounded-3" role="button"
-					   @click="this.downloadQRCode()">
-						<i class="me-auto bi bi-qr-code"></i>
-					</a>
-					<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">
-						<i class="me-auto bi bi-share"></i>
-					</a>
+				<li class="confirmDelete">
+					<small style="white-space: break-spaces" class="mb-2 d-block fw-bold">Are you sure to delete this peer?</small>
+					<div class="d-flex w-100 gap-2">
+						<button
+							:disabled="this.deleteBtnDisabled"
+							@click="this.confirmDelete = false"
+							class="flex-grow-1 btn btn-sm bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
+							<LocaleText t="No"></LocaleText>
+						</button>
+						<button 
+							@click="this.deletePeer()"
+							:disabled="this.deleteBtnDisabled"
+							class="flex-grow-1 ms-auto btn btn-sm bg-danger">
+							<LocaleText t="Yes"></LocaleText>
+						</button>
+					</div>
 				</li>
 			</template>
-			<li><hr class="dropdown-divider"></li>
-			<li>
-				<a class="dropdown-item d-flex" role="button"
-				   @click="this.$emit('setting')"
-				>
-					<i class="me-auto bi bi-pen"></i> <LocaleText t="Peer Settings"></LocaleText>
-				</a>
-			</li>
-			<li>
-				<a class="dropdown-item d-flex" role="button"
-				   @click="this.$emit('jobs')"
-				>
-					<i class="me-auto bi bi-app-indicator"></i> <LocaleText t="Schedule Jobs"></LocaleText>
-				</a>
-			</li>
-			
-
-			<li><hr class="dropdown-divider"></li>
-			<li>
-				<a class="dropdown-item d-flex text-warning"
-				   @click="this.restrictPeer()"
-				   :class="{disabled: this.restrictBtnDisabled}"
-				   role="button">
-					<i class="me-auto bi bi-lock"></i>
-					<LocaleText t="Restrict Access" v-if="!this.restrictBtnDisabled"></LocaleText>
-					<LocaleText t="Restricting..." v-else></LocaleText>
-					
-				</a>
-			</li>
-			<li>
-				<a class="dropdown-item d-flex fw-bold text-danger"
-				   @click="this.deletePeer()"
-				   :class="{disabled: this.deleteBtnDisabled}"
-				   role="button">
-					<i class="me-auto bi bi-trash"></i> 
-					<LocaleText t="Delete" v-if="!this.deleteBtnDisabled"></LocaleText>
-					<LocaleText t="Deleting..." v-else></LocaleText>
-				</a>
-			</li>
 		</template>
 		<template v-else>
 			<li>
@@ -172,7 +191,6 @@ export default {
 					<i class="me-auto bi bi-unlock"></i>
 					<LocaleText t="Allow Access" v-if="!this.allowAccessBtnDisabled"></LocaleText>
 					<LocaleText t="Allowing Access..." v-else></LocaleText>
-
 				</a>
 			</li>
 		</template>
@@ -187,5 +205,9 @@ export default {
 
 .dropdown-item.disabled, .dropdown-item:disabled{
 	opacity: 0.7;
+}
+
+.confirmDelete{
+	padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
 }
 </style>

@@ -1051,17 +1051,17 @@ pre.index-alert {
 
 .fade2-enter-active,
 .fade2-leave-active {
-    transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+    transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 1.3);
 }
 
 .fade2-enter-from{
-    transform: translateY(30px);
-    filter: blur(3px);
+    transform: translateY(-30px);
+    /*filter: blur(3px);*/
     opacity: 0;
 }
 
 .fade2-leave-to {
-    transform: translateY(-30px);
+    transform: translateY(30px);
     filter: blur(3px);
     opacity: 0;
 }

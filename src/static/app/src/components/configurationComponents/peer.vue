@@ -111,7 +111,7 @@ export default {
 <style scoped>
 
 .slide-fade-leave-active, .slide-fade-enter-active{
-	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 1.3);
 }
 
 .slide-fade-enter-from,
