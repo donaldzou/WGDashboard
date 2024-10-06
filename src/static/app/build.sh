@@ -8,8 +8,6 @@ else
   echo "Vite build failed. Exiting."
   exit 1
 fi
-
-# Step 2: Check for changes and commit
 echo "Checking for changes to commit..."
 if git diff-index --quiet HEAD --; then
   echo "No changes to commit. Skipping commit."
