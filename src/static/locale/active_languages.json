@@ -33,5 +33,10 @@
 		"lang_id": "ru",
 		"lang_name": "Russian",
 		"lang_name_localized": "Русский"
+	},
+  {
+		"lang_id": "es",
+		"lang_name": "Español",
+		"lang_name_localized": "Español"
 	}
 ]
