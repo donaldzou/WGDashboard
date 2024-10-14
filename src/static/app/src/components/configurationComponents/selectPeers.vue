@@ -71,14 +71,11 @@ const el = useTemplateRef("sp")
 console.log(el.value)
 const submitDownload = async () => {
 	downloadConfirmation.value = true
-	// await sleep(100)
 	for (const x of selectedPeers.value) {
-		// await sleep(100)
 		cardBody.value.scrollTo({
 			top: el.value.find(y => y.dataset.id === x).offsetTop - 20,
 			behavior: 'smooth'
 		})
-		
 		await fetchGet("/api/downloadPeer/"+route.params.id, {
 			id: x
 		}, (res) => {
@@ -95,7 +92,6 @@ const submitDownload = async () => {
 				downloaded.failed.push(x)
 			}
 		})
-		
 	}
 }
 const clearDownload = () => {
