@@ -66,9 +66,7 @@ const downloaded = reactive({
 	failed: []
 })
 const cardBody = useTemplateRef('card-body');
-const sleep = m => new Promise(resolve => setTimeout(resolve, m))
 const el = useTemplateRef("sp")
-console.log(el.value)
 const submitDownload = async () => {
 	downloadConfirmation.value = true
 	for (const x of selectedPeers.value) {

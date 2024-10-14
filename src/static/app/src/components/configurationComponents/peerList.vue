@@ -145,10 +145,10 @@ export default {
 				selectedPeer: undefined
 			},
 			editConfiguration: {
-				modalOpen: false
+				modalOpen: true
 			},
 			selectPeers: {
-				modalOpen: true
+				modalOpen: false
 			}
 		}
 	},

@@ -66,10 +66,10 @@ export default {
 					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
-					<li class="nav-item">
+					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
-						            v-for="c in this.wireguardConfigurationsStore.Configurations">
+						            >
 							<span class="dot me-2" :class="{active: c.Status}"></span>
 							{{c.Name}}
 						</RouterLink>

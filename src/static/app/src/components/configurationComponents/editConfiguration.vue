@@ -5,6 +5,8 @@ import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStor
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import router from "@/router/index.js";
+import ConfigurationBackupRestore
+	from "@/components/configurationComponents/editConfigurationComponents/configurationBackupRestore.vue";
 const props = defineProps({
 	configurationInfo: Object
 })
@@ -177,13 +179,17 @@ watch(data, () => {
 								        :disabled="!dataChanged || saving">
 									<i class="bi bi-arrow-clockwise"></i>
 								</button>
-
 								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
 								        :disabled="!dataChanged || saving"
 								        @click="saveForm()"
 								>
 									<i class="bi bi-save-fill"></i></button>
 							</div>
+							<hr>
+							<h6>
+								<LocaleText t="Backup & Restore"></LocaleText>
+							</h6>
+							<ConfigurationBackupRestore></ConfigurationBackupRestore>
 						</div>
 					</div>
 				</div>
