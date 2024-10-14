@@ -135,17 +135,18 @@ class DashboardLogger:
                 self.loggerdb.commit()
     
     def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
-        try:
-            with self.loggerdb:
-                loggerdbCursor = self.loggerdb.cursor()
-                loggerdbCursor.execute(
-                    "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
-                if self.loggerdb.in_transaction:
-                    self.loggerdb.commit()
-                return True
-        except Exception as e:
-            print(f"[WGDashboard] Access Log Error: {str(e)}")
-            return False
+        pass
+        # try:
+        #     with self.loggerdb:
+        #         loggerdbCursor = self.loggerdb.cursor()
+        #         loggerdbCursor.execute(
+        #             "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
+        #         if self.loggerdb.in_transaction:
+        #             self.loggerdb.commit()
+        #         return True
+        # except Exception as e:
+        #     print(f"[WGDashboard] Access Log Error: {str(e)}")
+        #     return False
     
 class PeerJobLogger:
     def __init__(self):
@@ -1940,7 +1941,8 @@ def API_downloadPeer(configName):
     if len(data['id']) == 0 or not peerFound:
         return ResponseObject(False, "Peer does not exist")
     return ResponseObject(data=peer.downloadPeer())
-
+    
+    
 
 @app.get(f"{APP_PREFIX}/api/downloadAllPeers/<configName>")
 def API_downloadAllPeers(configName):

@@ -45,7 +45,7 @@ export default {
 	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky ">
-				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand fw-light">WGDashboard</h5>
+				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand">WGDashboard</h5>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
@@ -92,7 +92,7 @@ export default {
 					</li>
 				</ul>
 				<hr class="text-body">
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 mb-3">
 					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">

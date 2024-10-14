@@ -42,7 +42,8 @@ import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogs
 import {ref} from "vue";
 import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
 import LocaleText from "@/components/text/localeText.vue";
-import EditConfiguration from "@/components/configurationComponents/peerScheduleJobsComponents/editConfiguration.vue";
+import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
+import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
 
 Chart.register(
 	ArcElement,
@@ -73,6 +74,7 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		SelectPeers,
 		EditConfiguration,
 		LocaleText,
 		PeerShareLinkModal,
@@ -144,6 +146,9 @@ export default {
 			},
 			editConfiguration: {
 				modalOpen: false
+			},
+			selectPeers: {
+				modalOpen: true
 			}
 		}
 	},
@@ -592,6 +597,7 @@ export default {
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
 				@editConfiguration="this.editConfiguration.modalOpen = true"
+				@selectPeers="this.selectPeers.modalOpen = true"
 				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
@@ -658,14 +664,21 @@ export default {
 				:configurationInfo="this.configurationInfo"
 				v-if="this.editConfiguration.modalOpen"></EditConfiguration>
 		</Transition>
+		<Transition name="zoom">
+			<SelectPeers
+				@refresh="this.getPeers()"
+				v-if="this.selectPeers.modalOpen"
+				:configurationPeers="this.configurationPeers"
+				@close="this.selectPeers.modalOpen = false"
+			></SelectPeers>
+		</Transition>
+		
 	</div>
 </template>
 
 <style scoped>
 .peerNav .nav-link{
 	&.active{
-		//background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-		//color: white;
 		background-color: #efefef;
 	}
 }
