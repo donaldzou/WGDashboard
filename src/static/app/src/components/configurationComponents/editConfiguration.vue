@@ -56,6 +56,7 @@ watch(data, () => {
 	deep: true
 })
 
+const openBackupRestore = ref(false)
 </script>
 
 <template>
@@ -185,11 +186,6 @@ watch(data, () => {
 								>
 									<i class="bi bi-save-fill"></i></button>
 							</div>
-							<hr>
-							<h6>
-								<LocaleText t="Backup & Restore"></LocaleText>
-							</h6>
-							<ConfigurationBackupRestore></ConfigurationBackupRestore>
 						</div>
 					</div>
 				</div>

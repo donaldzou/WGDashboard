@@ -190,6 +190,17 @@ export default {
 								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column pt-0">
 									<div>
 										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Configuration"></LocaleText>
+										</small></p>
+										<div class="list-group">
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('backupRestore')">
+												<LocaleText t="Backup & Restore"></LocaleText>
+											</a>
+										</div>
+									</div>
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>
 											<LocaleText t="Manage Peers"></LocaleText>
 										</small></p>
 										<div class="list-group">

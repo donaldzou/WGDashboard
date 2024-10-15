@@ -44,6 +44,8 @@ import PeerShareLinkModal from "@/components/configurationComponents/peerShareLi
 import LocaleText from "@/components/text/localeText.vue";
 import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
 import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
+import ConfigurationBackupRestore
+	from "@/components/configurationComponents/editConfigurationComponents/configurationBackupRestore.vue";
 
 Chart.register(
 	ArcElement,
@@ -74,6 +76,7 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		ConfigurationBackupRestore,
 		SelectPeers,
 		EditConfiguration,
 		LocaleText,
@@ -145,10 +148,13 @@ export default {
 				selectedPeer: undefined
 			},
 			editConfiguration: {
-				modalOpen: true
+				modalOpen: false
 			},
 			selectPeers: {
 				modalOpen: false
+			},
+			backupRestore: {
+				modalOpen: true
 			}
 		}
 	},
@@ -598,6 +604,7 @@ export default {
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
 				@editConfiguration="this.editConfiguration.modalOpen = true"
 				@selectPeers="this.selectPeers.modalOpen = true"
+				@backupRestore="this.backupRestore.modalOpen = true"
 				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
@@ -671,6 +678,11 @@ export default {
 				:configurationPeers="this.configurationPeers"
 				@close="this.selectPeers.modalOpen = false"
 			></SelectPeers>
+		</Transition>
+		<Transition name="zoom">
+			<ConfigurationBackupRestore
+				@close="backupRestore.modalOpen = false"
+				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
 		</Transition>
 		
 	</div>
