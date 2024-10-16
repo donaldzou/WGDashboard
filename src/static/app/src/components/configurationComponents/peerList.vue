@@ -45,7 +45,7 @@ import LocaleText from "@/components/text/localeText.vue";
 import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
 import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
 import ConfigurationBackupRestore
-	from "@/components/configurationComponents/editConfigurationComponents/configurationBackupRestore.vue";
+	from "@/components/configurationComponents/configurationBackupRestore.vue";
 
 Chart.register(
 	ArcElement,
@@ -682,6 +682,7 @@ export default {
 		<Transition name="zoom">
 			<ConfigurationBackupRestore
 				@close="backupRestore.modalOpen = false"
+				@refreshPeersList="this.getPeers()"
 				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
 		</Transition>
 		

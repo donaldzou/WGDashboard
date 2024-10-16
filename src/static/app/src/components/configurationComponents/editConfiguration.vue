@@ -4,9 +4,6 @@ import {onMounted, reactive, ref, useTemplateRef, watch} from "vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import router from "@/router/index.js";
-import ConfigurationBackupRestore
-	from "@/components/configurationComponents/editConfigurationComponents/configurationBackupRestore.vue";
 const props = defineProps({
 	configurationInfo: Object
 })
