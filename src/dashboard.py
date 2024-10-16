@@ -515,6 +515,13 @@ class WireguardConfiguration:
             self.PublicKey = self.__getPublicKey()
 
         self.Status = self.getStatus()
+    
+    def __dropDatabase(self):
+        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        for t in existingTables:
+            sqlUpdate(f"DROP TABLE {t['name']}")
+
+        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
     def __createDatabase(self):
         existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -572,7 +579,16 @@ class WireguardConfiguration:
                 )
                 """ % self.Name
             )
-    
+            
+    def __dumpDatabase(self):
+        for line in sqldb.iterdump():
+            if (line.startswith(f"INSERT INTO \"{self.Name}\"") 
+                    or line.startswith(f'INSERT INTO "{self.Name}_restrict_access"')
+                    or line.startswith(f'INSERT INTO "{self.Name}_transfer"')
+                    or line.startswith(f'INSERT INTO "{self.Name}_deleted"')
+            ):
+                yield line
+                
     def __getPublicKey(self) -> str:
         return _generatePublicKey(self.PrivateKey)[1]
 
@@ -925,10 +941,14 @@ class WireguardConfiguration:
     def backupConfigurationFile(self):
         if not os.path.exists(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')):
             os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
+        time = datetime.now().strftime("%Y%m%d%H%M%S")
         shutil.copy(
             os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'),
-            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{datetime.now().strftime("%Y%m%d%H%M%S")}.conf')
+            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.conf')
         )
+        with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
+            for l in self.__dumpDatabase():
+                f.write(l + "\n")
         
             
     def getBackups(self) -> list[dict[str: str, str: str, str: str]]:
@@ -959,6 +979,7 @@ class WireguardConfiguration:
         if self.Status:
             self.toggleConfiguration()
         target = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', backupFileName)
+        targetSQL = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', backupFileName.replace(".conf", ".sql"))
         if not os.path.exists(target):
             return False
         targetContent = open(target, 'r').read()
@@ -968,6 +989,15 @@ class WireguardConfiguration:
         except Exception as e:
             return False
         self.__parseConfigurationFile()
+        self.__dropDatabase()
+        self.__createDatabase()
+        if (os.path.exists(targetSQL)):
+            with open(targetSQL, 'r') as sqlFile:
+                for l in sqlFile.readlines():
+                    l = l.rstrip('\n')
+                    if len(l) > 0:
+                        sqlUpdate(l)
+        
         self.__initPeersList()
         return True
     
@@ -1518,7 +1548,7 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             cursor.execute(statement, paramters)
             sqldb.commit()
         except sqlite3.OperationalError as error:
-            print("[WGDashboard] SQLite Error:" + str(error))
+            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
 
 DashboardConfig = DashboardConfig()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")

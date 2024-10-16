@@ -154,7 +154,7 @@ export default {
 				modalOpen: false
 			},
 			backupRestore: {
-				modalOpen: true
+				modalOpen: false
 			}
 		}
 	},

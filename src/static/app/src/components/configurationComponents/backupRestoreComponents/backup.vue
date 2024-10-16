@@ -34,9 +34,10 @@ const restoreBackup = () => {
 		backupFileName: props.b.filename
 	}, (res) => {
 		loading.value = false;
+		restoreConfirmation.value = false;
 		if (res.status){
 			emit("refresh")
-			store.newMessage("Server", "Backup restored", "success")
+			store.newMessage("Server", "Backup restored with " + props.b.filename, "success")
 		}else{
 			store.newMessage("Server", "Backup failed to restore", "danger")
 		}
@@ -83,7 +84,7 @@ const delaySeconds = computed(() => {
 							<button
 								:disabled="loading"
 								@click="restoreBackup()"
-								class="btn btn-danger rounded-3">
+								class="btn btn-success rounded-3">
 								Yes
 							</button>
 							<button

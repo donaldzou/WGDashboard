@@ -1038,14 +1038,12 @@ pre.index-alert {
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: all 0.3s ease-in-out;
-    /*position: absolute;*/
-    /*padding-top: 50px*/
+    transition: all 0.5s cubic-bezier(0.42, 0, 0.22, 1.0);
 }
 
 .fade-enter-from,
 .fade-leave-to {
-    transform: translateY(30px);
+    transform: translateY(40px);
     opacity: 0;
 }
 

@@ -45,16 +45,17 @@ export default {
 					<LocaleText t="Configuration"></LocaleText>
 				</RouterLink>
 			</div>
-			<Transition name="fade" mode="out-in">
-				<div v-if="this.configurationLoaded">
-					<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">
-						<LocaleText t="You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard."></LocaleText>
-					</p>
-					<div class="d-flex gap-3 flex-column mb-3" v-else>
-						<ConfigurationCard v-for="c in this.wireguardConfigurationsStore.Configurations" :key="c.Name" :c="c"></ConfigurationCard>
-					</div>
-				</div>
-			</Transition>
+			<TransitionGroup name="fade" tag="div" class="d-flex flex-column gap-3 mb-4">
+				<p class="text-muted" 
+				   key="noConfiguration"
+				   v-if="this.configurationLoaded && this.wireguardConfigurationsStore.Configurations.length === 0">
+					<LocaleText t="You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard."></LocaleText>
+				</p>
+				<ConfigurationCard v-for="(c, index) in this.wireguardConfigurationsStore.Configurations"
+				                   :delay="index*0.05 + 's'"
+				                   v-else-if="this.configurationLoaded"
+				                   :key="c.Name" :c="c"></ConfigurationCard>
+			</TransitionGroup>
 			
 		</div>
 	</div>
