@@ -403,9 +403,13 @@ class PeerShareLinks:
         # print(self.Links)
     def __getSharedLinks(self):
         self.Links.clear()
-        allLinks = sqlSelect("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
-        for link in allLinks:
-            self.Links.append(PeerShareLink(*link))
+        try:
+            allLinks = sqlSelect("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
+            for link in allLinks:
+                self.Links.append(PeerShareLink(*link))
+        # temo fix for https://github.com/donaldzou/WGDashboard/issues/432
+        except sqlite3.DatabaseError as e:
+            print(f"Database error occurred: {e}")
     
     def getLink(self, Configuration: str, Peer: str) -> list[PeerShareLink]:
         self.__getSharedLinks()
