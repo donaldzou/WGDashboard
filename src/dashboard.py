@@ -1423,8 +1423,13 @@ cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
-        cursor = sqldb.cursor()
-        return cursor.execute(statement, paramters)
+        try:
+            cursor = sqldb.cursor()
+            return cursor.execute(statement, paramters)
+            # temo fix for https://github.com/donaldzou/WGDashboard/issues/432
+        except sqlite3.DatabaseError as e:
+            print(f"Database error occurred: {e}")
+        return []
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
