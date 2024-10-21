@@ -41,7 +41,10 @@ jobs:
           echo "Docker Scout analysis completed."
       - name: Fail if critical CVEs are found
         run: |
-          if grep -q "CRITICAL" scout-results.txt; then
-            echo "Critical vulnerabilities found! Failing the job."
+          if grep -q "0C" scout-results.txt; then
+            echo "No critical vulnerabilities found! Continueing."
+            exit 0
+          else
+            echo "At least one critical vulnerabilities found! Exiting."
             exit 1
           fi
