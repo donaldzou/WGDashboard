@@ -46,6 +46,7 @@ import EditConfiguration from "@/components/configurationComponents/editConfigur
 import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
 import ConfigurationBackupRestore
 	from "@/components/configurationComponents/configurationBackupRestore.vue";
+import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
 
 Chart.register(
 	ArcElement,
@@ -76,6 +77,7 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		DeleteConfiguration,
 		ConfigurationBackupRestore,
 		SelectPeers,
 		EditConfiguration,
@@ -154,6 +156,9 @@ export default {
 				modalOpen: false
 			},
 			backupRestore: {
+				modalOpen: true
+			},
+			deleteConfiguration: {
 				modalOpen: false
 			}
 		}
@@ -605,6 +610,7 @@ export default {
 				@editConfiguration="this.editConfiguration.modalOpen = true"
 				@selectPeers="this.selectPeers.modalOpen = true"
 				@backupRestore="this.backupRestore.modalOpen = true"
+				@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
 				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
@@ -685,7 +691,11 @@ export default {
 				@refreshPeersList="this.getPeers()"
 				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
 		</Transition>
-		
+		<Transition name="zoom">
+			<DeleteConfiguration
+				@close="deleteConfiguration.modalOpen = false"
+				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+		</Transition>
 	</div>
 </template>
 

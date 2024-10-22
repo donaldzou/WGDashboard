@@ -16,6 +16,7 @@ import Ping from "@/views/ping.vue";
 import Traceroute from "@/views/traceroute.vue";
 import Totp from "@/components/setupComponent/totp.vue";
 import Share from "@/views/share.vue";
+import RestoreConfiguration from "@/views/restoreConfiguration.vue";
 
 const checkAuth = async () => {
 	let result = false
@@ -75,6 +76,14 @@ const router = createRouter({
 					component: NewConfiguration,
 					meta: {
 						title: "New Configuration"
+					}
+				},
+				{
+					name: "Restore Configuration",
+					path: '/restore_configuration',
+					component: RestoreConfiguration,
+					meta: {
+						title: "Restore Configuration"
 					}
 				},
 				{

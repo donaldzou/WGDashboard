@@ -172,12 +172,12 @@ const openBackupRestore = ref(false)
 								       id="configuration_postdown">
 							</div>
 							<div class="d-flex align-items-center gap-2 mt-4">
-								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto px-3 py-2"
+								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
 								        @click="resetForm()"
 								        :disabled="!dataChanged || saving">
 									<i class="bi bi-arrow-clockwise"></i>
 								</button>
-								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
+								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
 								        :disabled="!dataChanged || saving"
 								        @click="saveForm()"
 								>

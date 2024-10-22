@@ -34,16 +34,19 @@ export default {
 	
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
-			<div class="d-flex mb-4 configurationListTitle">
-				<h3 class="text-body d-flex">
-					<i class="bi bi-body-text me-2"></i>
+			<div class="d-flex mb-4 configurationListTitle align-items-center gap-3">
+				<h2 class="text-body d-flex">
 					<span>
 						<LocaleText t="WireGuard Configurations"></LocaleText>
-					</span></h3>
-				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-3">
-					<i class="bi bi-plus-circle-fill me-2"></i>
-					<LocaleText t="Configuration"></LocaleText>
+					</span>
+				</h2>
+				<RouterLink to="/new_configuration"
+				            class="btn btn-dark btn-brand rounded-3 p-2 shadow ms-auto rounded-3">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-plus-circle"></i>
+					</h2>
 				</RouterLink>
+				
 			</div>
 			<TransitionGroup name="fade" tag="div" class="d-flex flex-column gap-3 mb-4">
 				<p class="text-muted" 
@@ -63,6 +66,13 @@ export default {
 </template>
 
 <style scoped>
+.configurationListTitle{
+	.btn{
+		border-radius: 50% !important;
+	}
+}
+
+
 @media screen and (max-width: 768px) {
 	.configurationListTitle{
 		flex-direction: column;

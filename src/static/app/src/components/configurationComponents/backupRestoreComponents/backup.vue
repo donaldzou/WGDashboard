@@ -47,6 +47,8 @@ const restoreBackup = () => {
 const delaySeconds = computed(() => {
 	return props.delay + 's'
 })
+
+const showContent = ref(false);
 </script>
  
 <template>
@@ -100,7 +102,7 @@ const delaySeconds = computed(() => {
 			<div class="d-flex gap-3">
 				<div class="d-flex flex-column">
 					<small class="text-muted">
-						Filename
+						Backup
 					</small>
 					<samp>{{b.filename}}</samp>
 				</div>
@@ -124,9 +126,32 @@ const delaySeconds = computed(() => {
 				</div>
 			</div>
 			<hr>
-			<textarea class="form-control rounded-3" :value="b.content"
-			          disabled
-			          style="height: 400px; font-family: var(--bs-font-monospace),sans-serif !important;"></textarea>
+			<div class="card rounded-3">
+				<a role="button" class="card-header d-flex text-decoration-none align-items-center" 
+				   :class="{'border-bottom-0': !showContent}"
+				   style="cursor: pointer" @click="showContent = !showContent">
+					<small>.conf File
+						</small>
+					<i class="bi bi-chevron-down ms-auto"></i>
+				</a>
+				<div class="card-body" v-if="showContent">
+					<textarea class="form-control rounded-3" :value="b.content"
+					          disabled
+					          style="height: 300px; font-family: var(--bs-font-monospace),sans-serif !important;"></textarea>
+				</div>
+			</div>
+			<hr>
+			<div class="d-flex">
+				<span>
+					<i class="bi bi-database me-1"></i>
+					Database
+				</span>
+				<i class="bi ms-auto"
+					:class="[b.database ? 'text-success bi-check-circle-fill' : 'text-danger bi-x-circle-fill']"
+				></i>
+			</div>
+			
+			
 		</div>
 	</div>
 </template>
