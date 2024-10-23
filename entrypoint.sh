@@ -7,7 +7,7 @@ ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
   echo "Checking if everything is present."
 
-  if [ -z "$(ls -A "${WGDASH}")" ]; then
+  if [ -z "$(ls -A "${WGDASH}")" ]; then # [ ! -f "/data/wg-dashboard.ini" ] && [ ! -d "/data/db" ]
     echo "Detected empty directory, moving over..."
 
     # Moving over source files. (This does not include src/db and src/wg-dashboard.ini folder and file.)
@@ -16,14 +16,14 @@ ensure_installation() {
     if [ ! -d "/data/db" ]; then
       echo "Creating database dir"
       mkdir /data/db
-      ln -s /data/db ${WGDASH}/src/db
     fi
+    ln -s /data/db ${WGDASH}/src/db
 
     if [ ! -f "/data/wg-dashboard.ini" ]; then
       echo "Creating wg-dashboard.ini file"
       touch /data/wg-dashboard.ini
-      ln -s /data/wg-dashboard.ini ${WGDASH}/src/wg-dashboard.ini
     fi
+    ln -s /data/wg-dashboard.ini ${WGDASH}/src/wg-dashboard.ini
 
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
@@ -161,7 +161,7 @@ start_core() {
   #
   # WILL BE REMOVED IN FUTURE WHEN WGDASHBOARD ITSELF SUPPORTS THIS!!
   #
-  
+
   local configurations=(/etc/wireguard/*)
   IFS=',' read -r -a do_isolate <<< "${isolate}"
   non_isolate=()
