@@ -30,9 +30,9 @@ RUN mkdir -p /setup/conf \
   && mkdir /data
 COPY ./src /setup/app/src
 
-# Set the volume to be used for WireGuard configuration persistency.
-VOLUME /etc/wireguard
-VOLUME ${WGDASH}
+# Set the volume to be used for WireGuard configuration persistency. Can be ignored so it does not create volumes when not specified.
+#VOLUME /etc/wireguard
+#VOLUME /data
 
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 # Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.

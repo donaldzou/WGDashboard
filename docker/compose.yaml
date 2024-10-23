@@ -17,6 +17,7 @@ services:
       - data:/data
     cap_add:
       - NET_ADMIN
+
 volumes:
   conf:
   data:

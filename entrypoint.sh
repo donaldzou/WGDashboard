@@ -13,17 +13,12 @@ ensure_installation() {
     # Moving over source files. (This does not include src/db and src/wg-dashboard.ini folder and file.)
     mv -v /setup/app/* "${WGDASH}"
 
-    if [ ! -d "/data/db" ]; then
-      echo "Creating database dir"
-      mkdir /data/db
-    fi
-    ln -s /data/db ${WGDASH}/src/db
+    [ ! -d "/data/db" ] && echo "Creating database dir" && mkdir /data/db
+    ln -s /data/db "${WGDASH}/src/db"
 
-    if [ ! -f "/data/wg-dashboard.ini" ]; then
-      echo "Creating wg-dashboard.ini file"
-      touch /data/wg-dashboard.ini
-    fi
-    ln -s /data/wg-dashboard.ini ${WGDASH}/src/wg-dashboard.ini
+    [ ! -f "/data/wg-dashboard.ini" ] && echo "Creating wg-dashboard.ini file" && touch /data/wg-dashboard.ini
+    ln -s /data/wg-dashboard.ini "${WGDASH}/src/wg-dashboard.ini"
+
 
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
@@ -50,9 +45,8 @@ ensure_installation() {
     echo "Setting a secure private key." # SORRY 4 BE4 - Daan
 
     local privateKey=$(wg genkey)
-
-    sed -i "s|^PrivateKey =$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
+
     echo "Done setting template."
   else
     echo "Existing wg0 configuration file found, using that."
@@ -62,41 +56,39 @@ ensure_installation() {
 clean_up() {
   printf "\n------------------------ CLEAN UP --------------------------\n"
 
-  # Cleaning out previous data such as the .pid file and starting the WireGuard Dashboard. Making sure to use the python venv.
+  local pid_file="${WGDASH}/src/gunicorn.pid"
+  local pycache="${WGDASH}/src/__pycache__"
+  local logdir="${WGDASH}/src/log"
+
   echo "Looking for remains of previous instances..."
 
-  local pid_file="${WGDASH}/src/gunicorn.pid"
+  # Handle the .pid file cleanup
   if [ -f "$pid_file" ]; then
     echo "Found old pid file, removing."
-    rm $pid_file
+    rm -f "$pid_file"
   else
     echo "No pid remains found, continuing."
   fi
 
-  # Also check for Python caches (pycache) inspired by https://github.com/shuricksumy
+  # Remove Python caches (__pycache__)
   echo "Looking for remains of pycache..."
-
-  local pycache="${WGDASH}/src/__pycache__"
   if [ -d "$pycache" ]; then
-    local pycache_filecount=$(find "$pycache" -maxdepth 1 -type f | wc -l)
-    if [ "$pycache_filecount" -gt 0 ]; then
+    if find "$pycache" -type f -print -quit | grep -q .; then
       echo "Found old pycaches, removing."
-      rm -rf "$pycache"/*
+      rm -rf "$pycache"
     else
       echo "No pycaches found, continuing."
     fi
   else
-    echo "No pycaches found, continuing."
+    echo "No pycaches directory found, continuing."
   fi
 
-  # Cleaning up the logs from the previous instance.
+  # Clean up log files
   echo "Cleaning log directory..."
-
-  local logdir="${WGDASH}/src/log"
-  find $logdir -name 'access_*.log' -exec rm {} +
-  find $logdir -name 'error_*.log' -exec rm {} +
+  find "$logdir" -type f -name 'access_*.log' -o -name 'error_*.log' -exec rm -f {} +
   echo "Removed unneeded logs!"
 }
+
 
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
@@ -118,7 +110,6 @@ set_envvars() {
   else
     echo "Config file is not empty"
 
-    cat /opt/wireguarddashboard/src/wg-dashboard.ini
     # Check and update the DNS if it has changed
     current_dns=$(grep "peer_global_dns = " "$config_file" | awk '{print $NF}')
     if [ "${global_dns}" != "$current_dns" ]; then
@@ -242,22 +233,24 @@ start_core() {
   done
 }
 
-# === CLEAN UP ===
 ensure_blocking() {
-  #printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
-
   sleep 1s
   echo -e "\nEnsuring container continuation."
 
-  # This function checks if the latest error log is created and tails it for docker logs uses.
-  if find "/opt/wireguarddashboard/src/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
-    latestErrLog=$(find /opt/wireguarddashboard/src/log -name "error_*.log" | head -n 1)
-    latestAccLog=$(find /opt/wireguarddashboard/src/log -name "access_*.log" | head -n 1)
+  # Find and tail the latest error and access logs if they exist
+  local logdir="/opt/wireguarddashboard/src/log"
+  
+  latestErrLog=$(find "$logdir" -name "error_*.log" -type f -print | sort -r | head -n 1)
+  latestAccLog=$(find "$logdir" -name "access_*.log" -type f -print | sort -r | head -n 1)
 
-    tail -f "${latestErrLog}" "${latestAccLog}"
+  # Only tail the logs if they are found
+  if [ -n "$latestErrLog" ] || [ -n "$latestAccLog" ]; then
+    tail -f "$latestErrLog" "$latestAccLog"
+  else
+    echo "No log files found to tail."
   fi
 
-  # Blocking command in case of erroring. So the container does not quit.
+  # Blocking command to keep the container running as a last resort.
   sleep infinity
 }
 
