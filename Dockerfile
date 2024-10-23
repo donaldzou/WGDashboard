@@ -24,11 +24,9 @@ ENV WGDASH=/opt/wireguarddashboard
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir -p /setup/conf \
-  && mkdir /setup/app \
-  && mkdir ${WGDASH} \
-  && mkdir /data
-COPY ./src /setup/app/src
+RUN mkdir -p /data/conf \
+  && mkdir -p ${WGDASH}/src
+COPY ./src ${WGDASH}/src
 
 # Set the volume to be used for WireGuard configuration persistency. Can be ignored so it does not create volumes when not specified.
 #VOLUME /etc/wireguard
@@ -47,8 +45,8 @@ PreDown = iptables -t nat -D POSTROUTING -s ${wg_net}/24 -o ${out_adapt} -j MASQ
 PreDown = iptables -D FORWARD -i wg0 -o wg0 -j DROP\n\
 ListenPort = ${wg_port}\n\
 SaveConfig = true\n\
-DNS = ${global_dns}" > /setup/conf/wg0.conf \
-  && chmod 600 /setup/conf/wg0.conf
+DNS = ${global_dns}" > /data/conf/wg0.conf \
+  && chmod 600 /data/conf/wg0.conf
 
 # Defining a way for Docker to check the health of the container. In this case: checking the login URL.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

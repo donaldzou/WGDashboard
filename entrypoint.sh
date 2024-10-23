@@ -5,42 +5,32 @@ echo "Starting the WireGuard Dashboard Docker container."
 
 ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
-  echo "Checking if everything is present."
+  echo "Quick-installing..."
 
-  if [ -z "$(ls -A "${WGDASH}")" ]; then # [ ! -f "/data/wg-dashboard.ini" ] && [ ! -d "/data/db" ]
-    echo "Detected empty directory, moving over..."
+  [ ! -d "/data/db" ] && echo "Creating database dir" && mkdir /data/db
+  ln -s /data/db "${WGDASH}/src/db"
 
-    # Moving over source files. (This does not include src/db and src/wg-dashboard.ini folder and file.)
-    mv -v /setup/app/* "${WGDASH}"
+  [ ! -f "/data/wg-dashboard.ini" ] && echo "Creating wg-dashboard.ini file" && touch /data/wg-dashboard.ini
+  ln -s /data/wg-dashboard.ini "${WGDASH}/src/wg-dashboard.ini"
 
-    [ ! -d "/data/db" ] && echo "Creating database dir" && mkdir /data/db
-    ln -s /data/db "${WGDASH}/src/db"
+  python3 -m venv "${WGDASH}"/src/venv
+  . "${WGDASH}/src/venv/bin/activate"
 
-    [ ! -f "/data/wg-dashboard.ini" ] && echo "Creating wg-dashboard.ini file" && touch /data/wg-dashboard.ini
-    ln -s /data/wg-dashboard.ini "${WGDASH}/src/wg-dashboard.ini"
+  mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+  mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
 
+  chmod +x "${WGDASH}"/src/wgd.sh
+  cd "${WGDASH}"/src || exit
+  ./wgd.sh install
 
-    python3 -m venv "${WGDASH}"/src/venv
-    . "${WGDASH}/src/venv/bin/activate"
-
-    mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-    mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-
-    chmod +x "${WGDASH}"/src/wgd.sh
-    cd "${WGDASH}"/src || exit
-    ./wgd.sh install
-
-    echo "Looks like the installation succesfully moved over."
-  else
-    echo "Looks like everything is present. Or the directory is not empty."
-  fi
+  echo "Looks like the installation succeeded."
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   # This is done so WGDashboard it works out of the box
 
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     echo "Standard wg0 Configuration file not found, grabbing template."
-    cp -a "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
+    cp -a "/data/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key." # SORRY 4 BE4 - Daan
 
@@ -88,7 +78,6 @@ clean_up() {
   find "$logdir" -type f -name 'access_*.log' -o -name 'error_*.log' -exec rm -f {} +
   echo "Removed unneeded logs!"
 }
-
 
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
