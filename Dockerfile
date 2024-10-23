@@ -1,4 +1,4 @@
-FROM alpine:latest AS build
+FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
