@@ -24,7 +24,10 @@ ENV WGDASH=/opt/wireguarddashboard
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir -p /setup/conf && mkdir /setup/app && mkdir ${WGDASH}
+RUN mkdir -p /setup/conf \
+  && mkdir /setup/app \
+  && mkdir ${WGDASH} \
+  && mkdir /data
 COPY ./src /setup/app/src
 
 # Set the volume to be used for WireGuard configuration persistency.

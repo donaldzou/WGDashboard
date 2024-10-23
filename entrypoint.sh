@@ -10,13 +10,24 @@ ensure_installation() {
   if [ -z "$(ls -A "${WGDASH}")" ]; then
     echo "Detected empty directory, moving over..."
 
-    mv /setup/app/* "${WGDASH}"
-    #mv /setup/app/.* "${WGDASH}"
+    # Moving over source files. (This does not include src/db and src/wg-dashboard.ini folder and file.)
+    mv -v /setup/app/* "${WGDASH}"
+
+    if [ ! -d "/data/db" ]; then
+      echo "Creating database dir"
+      mkdir /data/db
+      ln -s /data/db ${WGDASH}/src/db
+    fi
+
+    if [ ! -f "/data/wg-dashboard.ini" ]; then
+      echo "Creating wg-dashboard.ini file"
+      touch /data/wg-dashboard.ini
+      ln -s /data/wg-dashboard.ini ${WGDASH}/src/wg-dashboard.ini
+    fi
 
     python3 -m venv "${WGDASH}"/src/venv
     . "${WGDASH}/src/venv/bin/activate"
 
-    # Extra step for Alpine
     mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
     mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
 
@@ -84,30 +95,53 @@ clean_up() {
 
 # === SET ENV VARS ===
 set_envvars() {
-  #printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
+  printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
-  # Changing the DNS used for clients and the dashboard itself.
-  if [ "${global_dns}" != "$(grep "peer_global_dns = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then 
-    echo "Changing default dns."
+  # Path to the configuration file (exists because of previous function).
+  config_file="/opt/wireguarddashboard/src/wg-dashboard.ini"
 
-    #sed -i "s/^DNS = .*/DNS = ${global_dns}/" /etc/wireguard/wg0.conf # Uncomment if you want to have DNS on server-level.
-    sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" /opt/wireguarddashboard/src/wg-dashboard.ini
+  # Check if the file is empty
+  if [ ! -s "$config_file" ]; then
+    echo "Config file is empty. Creating [Peers] section."
+    
+    # Create [Peers] section with initial values
+    {
+      echo "[Peers]"
+      echo "remote_endpoint = ${public_ip}"
+      echo "peer_global_dns = ${global_dns}"
+    } > "$config_file"
+
   else
-    echo "DNS is set correctly."
-  fi
+    echo "Config file is not empty"
 
-  # Setting the public IP of the WireGuard Dashboard container host. If not defined, it will trying fetching it using a curl to ifconfig.me.
-  if [ "${public_ip}" = "0.0.0.0" ]; then
-    default_ip=$(curl -s ifconfig.me)
-    echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
+    cat /opt/wireguarddashboard/src/wg-dashboard.ini
+    # Check and update the DNS if it has changed
+    current_dns=$(grep "peer_global_dns = " "$config_file" | awk '{print $NF}')
+    if [ "${global_dns}" != "$current_dns" ]; then
+      echo "Changing default DNS."
+      sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" "$config_file"
+    else
+      echo "DNS is set correctly."
+    fi
 
-    sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" /opt/wireguarddashboard/src/wg-dashboard.ini
-  elif [ "${public_ip}" != "$(grep "remote_endpoint = " /opt/wireguarddashboard/src/wg-dashboard.ini | awk '{print $NF}')" ]; then
-    echo "Setting the Public-IP using given variable: ${public_ip}"
+    # Determine the public IP and update if necessary
+    if [ "${public_ip}" = "0.0.0.0" ]; then
+      default_ip=$(curl -s ifconfig.me)
+      echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
+      sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" "$config_file"
+    else
+      current_ip=$(grep "remote_endpoint = " "$config_file" | awk '{print $NF}')
+      if [ "${public_ip}" != "$current_ip" ]; then
+        echo "Setting the Public-IP using given variable: ${public_ip}"
+        sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" "$config_file"
+      fi
 
-    sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" /opt/wireguarddashboard/src/wg-dashboard.ini
+    fi
+
   fi
 }
+
+
 
 # === CORE SERVICES ===
 start_core() {
@@ -116,7 +150,7 @@ start_core() {
   echo "Activating Python venv and executing the WireGuard Dashboard service."
   . "${WGDASH}"/src/venv/bin/activate
   cd "${WGDASH}"/src || return
-  bash wgd.sh start &>> /dev/null
+  bash wgd.sh start
 
   # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
   local configurations=(/etc/wireguard/*)
@@ -199,12 +233,8 @@ start_core() {
 ensure_blocking() {
   #printf "\n-------------- ENSURING CONTAINER CONTINUATION -------------\n"
 
-  . "${WGDASH}"/src/venv/bin/activate
-  cd "${WGDASH}"/src || return
-  bash wgd.sh restart
-
   sleep 1s
-  echo "Ensuring container continuation."
+  echo -e "\nEnsuring container continuation."
 
   # This function checks if the latest error log is created and tails it for docker logs uses.
   if find "/opt/wireguarddashboard/src/log" -mindepth 1 -maxdepth 1 -type f | read -r; then
@@ -220,7 +250,7 @@ ensure_blocking() {
 
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 ensure_installation
+set_envvars
 clean_up
 start_core
-set_envvars
 ensure_blocking
