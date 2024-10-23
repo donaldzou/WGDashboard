@@ -30,7 +30,7 @@ ensure_installation() {
 
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     echo "Standard wg0 Configuration file not found, grabbing template."
-    cp -a "/data/conf/wg0.conf" "/etc/wireguard/wg0.conf"
+    cp -a "/configs/wg0.conf.template" "/etc/wireguard/wg0.conf"
 
     echo "Setting a secure private key." # SORRY 4 BE4 - Daan
 
