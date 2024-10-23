@@ -41,14 +41,15 @@ ensure_installation() {
   fi
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
+  # This is done so WGDashboard it works out of the box
+
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     echo "Standard wg0 Configuration file not found, grabbing template."
     cp -a "/setup/conf/wg0.conf" "/etc/wireguard/wg0.conf"
 
-    echo "Setting a secure private key."
+    echo "Setting a secure private key." # SORRY 4 BE4 - Daan
 
-    local privateKey
-    privateKey=$(wg genkey)
+    local privateKey=$(wg genkey)
 
     sed -i "s|^PrivateKey =$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
     sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
@@ -58,12 +59,12 @@ ensure_installation() {
   fi
 }
 
-# === CLEAN UP ===
 clean_up() {
   printf "\n------------------------ CLEAN UP --------------------------\n"
 
   # Cleaning out previous data such as the .pid file and starting the WireGuard Dashboard. Making sure to use the python venv.
   echo "Looking for remains of previous instances..."
+
   local pid_file="${WGDASH}/src/gunicorn.pid"
   if [ -f "$pid_file" ]; then
     echo "Found old pid file, removing."
@@ -73,6 +74,8 @@ clean_up() {
   fi
 
   # Also check for Python caches (pycache) inspired by https://github.com/shuricksumy
+  echo "Looking for remains of pycache..."
+
   local pycache="${WGDASH}/src/__pycache__"
   if [ -d "$pycache" ]; then
     local pycache_filecount=$(find "$pycache" -maxdepth 1 -type f | wc -l)
@@ -86,19 +89,20 @@ clean_up() {
     echo "No pycaches found, continuing."
   fi
 
+  # Cleaning up the logs from the previous instance.
+  echo "Cleaning log directory..."
+
   local logdir="${WGDASH}/src/log"
-  echo "Cleaning log directory."
-  find /opt/wireguarddashboard/src/log -name 'access_*.log' -exec rm {} +
-  find /opt/wireguarddashboard/src/log -name 'error_*.log' -exec rm {} +
+  find $logdir -name 'access_*.log' -exec rm {} +
+  find $logdir -name 'error_*.log' -exec rm {} +
   echo "Removed unneeded logs!"
 }
 
-# === SET ENV VARS ===
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
   # Path to the configuration file (exists because of previous function).
-  config_file="/opt/wireguarddashboard/src/wg-dashboard.ini"
+  local config_file="/opt/wireguarddashboard/src/wg-dashboard.ini"
 
   # Check if the file is empty
   if [ ! -s "$config_file" ]; then
@@ -148,11 +152,16 @@ start_core() {
   printf "\n---------------------- STARTING CORE -----------------------\n"
 
   echo "Activating Python venv and executing the WireGuard Dashboard service."
+
   . "${WGDASH}"/src/venv/bin/activate
   cd "${WGDASH}"/src || return
   bash wgd.sh start
 
   # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
+  #
+  # WILL BE REMOVED IN FUTURE WHEN WGDASHBOARD ITSELF SUPPORTS THIS!!
+  #
+  
   local configurations=(/etc/wireguard/*)
   IFS=',' read -r -a do_isolate <<< "${isolate}"
   non_isolate=()
@@ -205,6 +214,10 @@ start_core() {
   done
 
   # The following section takes care of enabling wireguard interfaces on startup. Using arrays and given arguments.
+  #
+  # WILL BE REMOVED IN FUTURE WHEN WGDASHBOARD ITSELF SUPPORTS THIS!!
+  #
+
   IFS=',' read -r -a enable_array <<< "${enable}"
 
   for interface in "${enable_array[@]}"; do
