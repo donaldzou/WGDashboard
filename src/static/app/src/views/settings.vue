@@ -38,9 +38,9 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
-			<h3 class="mb-3 text-body">
+			<h2 class="mb-4 text-body">
 				<LocaleText t="Settings"></LocaleText>
-			</h3>
+			</h2>
 			
 			<div class="card mb-4 shadow rounded-3">
 				<p class="card-header">

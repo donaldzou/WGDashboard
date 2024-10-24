@@ -462,11 +462,13 @@ class WireguardConfiguration:
         self.PostDown: str = ""
         self.SaveConfig: bool = True
         self.Name = name
+        self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
 
         if name is not None:
             self.__parseConfigurationFile()
         else:
             self.Name = data["ConfigurationName"]
+            self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
             for i in dir(self):
                 if str(i) in data.keys():
                     if isinstance(getattr(self, i), bool):
@@ -484,8 +486,7 @@ class WireguardConfiguration:
                 "SaveConfig": "true"
             }
 
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
-                                   f"{self.Name}.conf"), "w+") as configFile:
+            with open(self.__configPath, "w+") as configFile:
                 self.__parser.write(configFile)
 
        
@@ -498,7 +499,7 @@ class WireguardConfiguration:
         self.getRestrictedPeersList()
     
     def __parseConfigurationFile(self):
-        self.__parser.read_file(open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')))
+        self.__parser.read_file(open(self.__configPath))
         sections = self.__parser.sections()
         if "Interface" not in sections:
             raise self.InvalidConfigurationFileException(
@@ -510,16 +511,14 @@ class WireguardConfiguration:
                     setattr(self, i, _strToBool(interfaceConfig[i]))
                 else:
                     setattr(self, i, interfaceConfig[i])
-
         if self.PrivateKey:
             self.PublicKey = self.__getPublicKey()
-
         self.Status = self.getStatus()
     
     def __dropDatabase(self):
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
         for t in existingTables:
-            sqlUpdate(f"DROP TABLE {t['name']}")
+            sqlUpdate("DROP TABLE '%s'" % t['name'])
 
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
@@ -950,8 +949,7 @@ class WireguardConfiguration:
             for l in self.__dumpDatabase():
                 f.write(l + "\n")
         
-            
-    def getBackups(self) -> list[dict[str: str, str: str, str: str]]:
+    def getBackups(self, databaseContent: bool = False) -> list[dict[str: str, str: str, str: str]]:
         backups = []
         
         directory = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
@@ -963,11 +961,16 @@ class WireguardConfiguration:
             if _regexMatch(f"^({self.Name})_(.*)\.(conf)$", f):
                 s = re.search(f"^({self.Name})_(.*)\.(conf)$", f)
                 date = s.group(2)
-                backups.append({
+                d = {
                     "filename": f,
                     "backupDate": date,
                     "content": open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
-                })
+                }
+                if f.replace(".conf", ".sql") in list(os.listdir(directory)):
+                    d['database'] = True
+                    if databaseContent:
+                        d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
+                backups.append(d)
         
         return backups
     
@@ -1047,7 +1050,15 @@ class WireguardConfiguration:
         if not status:
             return False, msg
         return True, ""
-
+    
+    def deleteConfiguration(self):
+        if self.getStatus():
+            self.toggleConfiguration()
+        os.remove(self.__configPath)
+        self.__dropDatabase()
+        return True
+        
+    
 class Peer:
     def __init__(self, tableData, configuration: WireguardConfiguration):
         self.configuration = configuration
@@ -1545,6 +1556,8 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
         cursor = sqldb.cursor()
         try:
+            statement = statement.rstrip(';')
+            s = f'BEGIN TRANSACTION;{statement};END TRANSACTION;'
             cursor.execute(statement, paramters)
             sqldb.commit()
         except sqlite3.OperationalError as error:
@@ -1748,12 +1761,61 @@ def API_updateWireguardConfiguration():
     
     return ResponseObject(status, message=msg, data=WireguardConfigurations[name])
 
+@app.post(f'{APP_PREFIX}/api/deleteWireguardConfiguration')
+def API_deleteWireguardConfiguration():
+    data = request.get_json()
+    if "Name" not in data.keys() or data.get("Name") is None or data.get("Name") not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please provide the configuration name you want to delete")
+    
+    status = WireguardConfigurations[data.get("Name")].deleteConfiguration()
+    
+    if status:
+        WireguardConfigurations.pop(data.get("Name"))
+    return ResponseObject(status)
+
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationBackup')
 def API_getWireguardConfigurationBackup():
     configurationName = request.args.get('configurationName')
     if configurationName is None or configurationName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
     return ResponseObject(data=WireguardConfigurations[configurationName].getBackups())
+
+@app.get(f'{APP_PREFIX}/api/getAllWireguardConfigurationBackup')
+def API_getAllWireguardConfigurationBackup():
+    data = {
+        "ExistingConfigurations": {},
+        "NonExistingConfigurations": {}
+    }
+    existingConfiguration = WireguardConfigurations.keys()
+    for i in existingConfiguration:
+        b = WireguardConfigurations[i].getBackups(True)
+        if len(b) > 0:
+            data['ExistingConfigurations'][i] = WireguardConfigurations[i].getBackups(True)
+
+    directory = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
+    files = [(file, os.path.getctime(os.path.join(directory, file)))
+             for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
+    files.sort(key=lambda x: x[1], reverse=True)
+
+    for f, ct in files:
+        if _regexMatch(f"^(.*)_(.*)\.(conf)$", f):
+            s = re.search(f"^(.*)_(.*)\.(conf)$", f)
+            name = s.group(1)
+            if name not in existingConfiguration:
+                if name not in data['NonExistingConfigurations'].keys():
+                    data['NonExistingConfigurations'][name] = []
+                
+                date = s.group(2)
+                d = {
+                    "filename": f,
+                    "backupDate": date,
+                    "content": open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
+                }
+                if f.replace(".conf", ".sql") in list(os.listdir(directory)):
+                    d['database'] = True
+                    d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
+                data['NonExistingConfigurations'][name].append(d)
+    return ResponseObject(data=data)
 
 @app.get(f'{APP_PREFIX}/api/createWireguardConfigurationBackup')
 def API_createWireguardConfigurationBackup():
