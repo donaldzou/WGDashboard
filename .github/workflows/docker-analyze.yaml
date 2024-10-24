@@ -10,7 +10,7 @@ on:
         default: 'true'
 
 env:
-  DOCKER_IMAGE: dselen/wgdashboard
+  DOCKER_IMAGE: donaldzou/wgdashboard
 
 jobs:
   docker_analyze:
