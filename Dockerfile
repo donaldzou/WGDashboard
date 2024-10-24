@@ -9,7 +9,7 @@ ARG wg_port="51820"
 ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV enable="none"
-ENV isolate="wg0"
+ENV isolate="none"
 ENV public_ip="0.0.0.0"
 
 # Doing package management operations, such as upgrading
@@ -29,10 +29,6 @@ RUN mkdir /data \
   && mkdir -p ${WGDASH}/src
 COPY ./src ${WGDASH}/src
 
-# Set the volume to be used for WireGuard configuration persistency. Can be ignored so it does not create volumes when not specified.
-#VOLUME /etc/wireguard
-#VOLUME /data
-
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 # Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -49,7 +45,7 @@ SaveConfig = true\n\
 DNS = ${global_dns}" > /configs/wg0.conf.template \
   && chmod 600 /configs/wg0.conf.template
 
-# Defining a way for Docker to check the health of the container. In this case: checking the login URL.
+# Defining a way for Docker to check the health of the container. In this case: checking the gunicorn process.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 

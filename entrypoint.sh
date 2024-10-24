@@ -34,49 +34,14 @@ ensure_installation() {
 
     echo "Setting a secure private key." # SORRY 4 BE4 - Daan
 
-    local privateKey=$(wg genkey)
+    local privateKey
+    privateKey=$(wg genkey)
     sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
 
     echo "Done setting template."
   else
     echo "Existing wg0 configuration file found, using that."
   fi
-}
-
-clean_up() {
-  printf "\n------------------------ CLEAN UP --------------------------\n"
-
-  local pid_file="${WGDASH}/src/gunicorn.pid"
-  local pycache="${WGDASH}/src/__pycache__"
-  local logdir="${WGDASH}/src/log"
-
-  echo "Looking for remains of previous instances..."
-
-  # Handle the .pid file cleanup
-  if [ -f "$pid_file" ]; then
-    echo "Found old pid file, removing."
-    rm -f "$pid_file"
-  else
-    echo "No pid remains found, continuing."
-  fi
-
-  # Remove Python caches (__pycache__)
-  echo "Looking for remains of pycache..."
-  if [ -d "$pycache" ]; then
-    if find "$pycache" -type f -print -quit | grep -q .; then
-      echo "Found old pycaches, removing."
-      rm -rf "$pycache"
-    else
-      echo "No pycaches found, continuing."
-    fi
-  else
-    echo "No pycaches directory found, continuing."
-  fi
-
-  # Clean up log files
-  echo "Cleaning log directory..."
-  find "$logdir" -type f -name 'access_*.log' -o -name 'error_*.log' -exec rm -f {} +
-  echo "Removed unneeded logs!"
 }
 
 set_envvars() {
@@ -97,7 +62,7 @@ set_envvars() {
     } > "$config_file"
 
   else
-    echo "Config file is not empty"
+    echo "Config file is not empty, enforcing environment variables."
 
     # Check and update the DNS if it has changed
     current_dns=$(grep "peer_global_dns = " "$config_file" | awk '{print $NF}')
@@ -111,12 +76,15 @@ set_envvars() {
     # Determine the public IP and update if necessary
     if [ "${public_ip}" = "0.0.0.0" ]; then
       default_ip=$(curl -s ifconfig.me)
+
       echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
       sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" "$config_file"
     else
       current_ip=$(grep "remote_endpoint = " "$config_file" | awk '{print $NF}')
+    
       if [ "${public_ip}" != "$current_ip" ]; then
         echo "Setting the Public-IP using given variable: ${public_ip}"
+
         sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" "$config_file"
       fi
 
@@ -124,8 +92,6 @@ set_envvars() {
 
   fi
 }
-
-
 
 # === CORE SERVICES ===
 start_core() {
@@ -148,49 +114,64 @@ start_core() {
 
   # Checking if there are matches between the two arrays.
   for config in "${configurations[@]}"; do
-    local config=$(echo "$config" | sed -e 's|.*/etc/wireguard/||' -e 's|\.conf$||')
+    config=$(echo "$config" | sed -e 's|.*/etc/wireguard/||' -e 's|\.conf$||')
+
+    local found
     found=false
+
     for interface in "${do_isolate[@]}"; do
+
       if [[ "$config" == "$interface" ]]; then
         found=true
         break
       fi
+
     done
+
     if [ "$found" = false ]; then
       non_isolate+=("$config")
     fi
+
   done
 
   # Isolating the matches.
   for interface in "${do_isolate[@]}"; do
-    if [ "$interface" = "none" ]; then
+
+    if [ "$interface" = "none" ] || [ "$interface" = "" ]; then
       echo "Found: $interface, stopping isolation checking."
       break
     else
       if [ -f "/etc/wireguard/${interface}.conf" ]; then
-        echo "Isolating interface:" $interface
-        upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
-        downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf)
+        echo "Isolating interface:" "$interface"
+
+        upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
+        downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
 
         if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
-          sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
-          sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/${interface}.conf
+          sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf
+          sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf
         fi
+
       else
-        echo "Configuration for $interface does not seem to exist, continuing."
+        echo "Configuration for $interface in enforce isolation does not seem to exist, continuing."
       fi
+
     fi
+
   done
   
   # Removing isolation for the configurations that did not match.
   for interface in "${non_isolate[@]}"; do
+
     if [ -f "/etc/wireguard/${interface}.conf" ]; then
-      echo "Removing Isolation if present for:" $interface
-      sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
-      sed -i "/PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/${interface}.conf
+      echo "Removing isolation, if isolation is present for:" "$interface"
+
+      sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
+      sed -i "/PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
     else
-      echo "Configuration for $interface does not seem to exist, continuing."
+      echo "Configuration for $interface in removing isolation does not seem to exist, continuing."
     fi
+
   done
 
   # The following section takes care of enabling wireguard interfaces on startup. Using arrays and given arguments.
@@ -201,24 +182,28 @@ start_core() {
   IFS=',' read -r -a enable_array <<< "${enable}"
 
   for interface in "${enable_array[@]}"; do
+
     if [ "$interface" = "none" ]; then
       echo "Found: $interface, stopping enabling checking."
       break
     else
-      echo "Enabling interface:" $interface
+      echo "Enabling interface:" "$interface"
       
-      local fileperms=$(stat -c "%a" /etc/wireguard/${interface}.conf)
-      if [ $fileperms -eq 644 ]; then
+      local fileperms
+      fileperms=$(stat -c "%a" /etc/wireguard/"${interface}".conf)
+      if [ "$fileperms" -eq 644 ]; then
         echo "Configuration is world accessible, adjusting."
         chmod 600 "/etc/wireguard/${interface}.conf"    
       fi
 
       if [ -f "/etc/wireguard/${interface}.conf" ]; then
-        wg-quick up $interface
+        wg-quick up "$interface"
       else
         echo "No corresponding configuration file found for $interface doing nothing."
       fi
+
     fi
+    
   done
 }
 
@@ -246,6 +231,5 @@ ensure_blocking() {
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
 ensure_installation
 set_envvars
-clean_up
 start_core
 ensure_blocking
