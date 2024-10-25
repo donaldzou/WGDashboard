@@ -1054,7 +1054,6 @@ pre.index-alert {
 
 .fade2-enter-from{
     transform: translateY(-30px);
-    /*filter: blur(3px);*/
     opacity: 0;
 }
 
@@ -1081,7 +1080,7 @@ pre.index-alert {
 .message-move, /* apply transition to moving elements */
 .message-enter-active,
 .message-leave-active {
-    transition: all 0.5s ease;
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
 
 .message-enter-from,
@@ -1091,7 +1090,7 @@ pre.index-alert {
 }
 
 .message-enter-from{
-    transform: translateY(-30px) scale(0.7);
+    transform: translateY(-30px);
 }
 
 .message-leave-to{

@@ -27,13 +27,14 @@ export default {
 			<main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 overflow-y-scroll mb-0">
 				<Suspense>
 					<RouterView v-slot="{Component}">
-						<Transition name="fade2" mode="out-in">
+						<Transition name="fade2" mode="out-in" appear>
 							<Component :is="Component"></Component>
 						</Transition>
 					</RouterView>
 				</Suspense>
 				<div class="messageCentre text-body position-fixed d-flex">
-					<TransitionGroup name="message" tag="div" class="position-relative flex-grow-1 d-flex align-items-end">
+					<TransitionGroup name="message" tag="div" 
+					                 class="position-relative flex-sm-grow-0 flex-grow-1 d-flex align-items-end ms-sm-auto flex-column gap-2">
 						<Message v-for="m in getMessages.slice().reverse()"
 						         :message="m" :key="m.id"></Message>
 					</TransitionGroup>
@@ -45,7 +46,7 @@ export default {
 
 <style scoped>
 	.messageCentre{
-		top: calc(50px + 1rem);
+		top: 1rem;
 		right: 1rem;
 		width: calc(100% - 2rem);
 	}
