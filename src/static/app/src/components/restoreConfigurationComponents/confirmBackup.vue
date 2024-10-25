@@ -3,13 +3,17 @@ import {computed, onMounted, reactive, ref, watch} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {parse} from "cidr-tools";
+import {fetchPost} from "@/utilities/fetch.js";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {useRouter} from "vue-router";
 
 const props = defineProps({
 	selectedConfigurationBackup: Object
 })
 
 const newConfiguration = reactive({
-	ConfigurationName: props.selectedConfigurationBackup.filename.split("_")[0]
+	ConfigurationName: props.selectedConfigurationBackup.filename.split("_")[0],
+	Backup: props.selectedConfigurationBackup.filename
 })
 
 const lineSplit = props.selectedConfigurationBackup.content.split("\n");
@@ -76,7 +80,6 @@ const validateForm = computed(() => {
 		&& validatePrivateKey.value 
 		&& validateConfigurationName.value
 })
- 
 onMounted(() => {
 	document.querySelector("main").scrollTo({
 		top: 0,
@@ -90,7 +93,6 @@ onMounted(() => {
 		immediate: true
 	})
 })
-
 const availableIPAddress = computed(() => {
 	let p;
 	try{
@@ -100,7 +102,6 @@ const availableIPAddress = computed(() => {
 	}
 	return p.end - p.start
 })
-
 const peersCount = computed(() => {
 	if (props.selectedConfigurationBackup.database){
 		let l = props.selectedConfigurationBackup.databaseContent.split("\n")
@@ -108,7 +109,6 @@ const peersCount = computed(() => {
 	}
 	return 0
 })
-
 const restrictedPeersCount = computed(() => {
 	if (props.selectedConfigurationBackup.database){
 		let l = props.selectedConfigurationBackup.databaseContent.split("\n")
@@ -116,10 +116,19 @@ const restrictedPeersCount = computed(() => {
 	}
 	return 0
 })
-
-
-
-
+const dashboardStore = DashboardConfigurationStore()
+const router = useRouter();
+const submitRestore = async () => {
+	if (validateForm.value){
+		await fetchPost("/api/addWireguardConfiguration", newConfiguration, async (res) => {
+			if (res.status){
+				dashboardStore.newMessage("Server", "Configuration restored", "success")
+				await store.getConfigurations()
+				await router.push(`/configuration/${newConfiguration.ConfigurationName}/peers`)
+			}
+		})
+	}
+}
 </script>
 
 <template>
@@ -137,7 +146,7 @@ const restrictedPeersCount = computed(() => {
 			<input type="text" class="form-control rounded-3" placeholder="ex. wg1" id="ConfigurationName"
 			       v-model="newConfiguration.ConfigurationName"
 			       :class="[validateConfigurationName ? 'is-valid':'is-invalid']"
-			       :disabled="loading"
+			       disabled
 			       required>
 			<div class="invalid-feedback">
 				<div v-if="error">{{errorMessage}}</div>
@@ -162,16 +171,9 @@ const restrictedPeersCount = computed(() => {
 					</small></label>
 					<div class="input-group">
 						<input type="text" class="form-control rounded-start-3" id="PrivateKey" required
-						       :disabled="loading"
 						       :class="[validatePrivateKey ? 'is-valid':'is-invalid']"
 						       v-model="newConfiguration.PrivateKey" disabled
 						>
-						<button class="btn btn-outline-primary rounded-end-3" type="button"
-						        title="Regenerate Private Key"
-						        @click="wireguardGenerateKeypair()"
-						>
-							<i class="bi bi-arrow-repeat"></i>
-						</button>
 					</div>
 				</div>
 			</div>
@@ -195,7 +197,7 @@ const restrictedPeersCount = computed(() => {
 			       max="65353"
 			       v-model="newConfiguration.ListenPort"
 			       :class="[validateListenPort ? 'is-valid':'is-invalid']"
-			       :disabled="loading"
+			       disabled
 			       required>
 			<div class="invalid-feedback">
 				<div v-if="error">{{errorMessage}}</div>
@@ -225,7 +227,7 @@ const restrictedPeersCount = computed(() => {
 			       placeholder="Ex: 10.0.0.1/24" id="Address"
 			       v-model="newConfiguration.Address"
 			       :class="[validateAddress ? 'is-valid':'is-invalid']"
-			       :disabled="loading"
+			       disabled
 			       required>
 			<div class="invalid-feedback">
 				<div v-if="error">{{errorMessage}}</div>
@@ -250,25 +252,33 @@ const restrictedPeersCount = computed(() => {
 							<label class="text-muted mb-1" for="PreUp"><small>
 								<LocaleText t="PreUp"></LocaleText>
 							</small></label>
-							<input type="text" class="form-control rounded-3" id="PreUp" v-model="newConfiguration.PreUp">
+							<input type="text" class="form-control rounded-3" id="PreUp"
+							       disabled
+							       v-model="newConfiguration.PreUp">
 						</div>
 						<div>
 							<label class="text-muted mb-1" for="PreDown"><small>
 								<LocaleText t="PreDown"></LocaleText>
 							</small></label>
-							<input type="text" class="form-control rounded-3" id="PreDown" v-model="newConfiguration.PreDown">
+							<input type="text" class="form-control rounded-3" id="PreDown"
+							       disabled
+							       v-model="newConfiguration.PreDown">
 						</div>
 						<div>
 							<label class="text-muted mb-1" for="PostUp"><small>
 								<LocaleText t="PostUp"></LocaleText>
 							</small></label>
-							<input type="text" class="form-control rounded-3" id="PostUp" v-model="newConfiguration.PostUp">
+							<input type="text" class="form-control rounded-3" id="PostUp"
+							       disabled
+							       v-model="newConfiguration.PostUp">
 						</div>
 						<div>
 							<label class="text-muted mb-1" for="PostDown"><small>
 								<LocaleText t="PostDown"></LocaleText>
 							</small></label>
-							<input type="text" class="form-control rounded-3" id="PostDown" v-model="newConfiguration.PostDown">
+							<input type="text" class="form-control rounded-3" id="PostDown"
+							       disabled
+							       v-model="newConfiguration.PostDown">
 						</div>
 					</div>
 				</div>
@@ -305,9 +315,10 @@ const restrictedPeersCount = computed(() => {
 	</div>
 	<div class="d-flex">
 		<button class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto"
-			:disabled="!validateForm"
+			:disabled="!validateForm || loading"
+		        @click="submitRestore()"
 		>
-			<i class="bi bi-clock-history me-2"></i> Restore
+			<i class="bi bi-clock-history me-2"></i> {{ !loading ? 'Restore':'Restoring...'}}
 		</button>
 	</div>
 </div>

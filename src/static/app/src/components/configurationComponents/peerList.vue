@@ -156,10 +156,10 @@ export default {
 				modalOpen: false
 			},
 			backupRestore: {
-				modalOpen: true
+				modalOpen: false
 			},
 			deleteConfiguration: {
-				modalOpen: false
+				modalOpen: true
 			}
 		}
 	},
@@ -685,16 +685,18 @@ export default {
 				@close="this.selectPeers.modalOpen = false"
 			></SelectPeers>
 		</Transition>
+		
+		<Transition name="zoom">
+			<DeleteConfiguration
+				@backup="backupRestore.modalOpen = true"
+				@close="deleteConfiguration.modalOpen = false"
+				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+		</Transition>
 		<Transition name="zoom">
 			<ConfigurationBackupRestore
 				@close="backupRestore.modalOpen = false"
 				@refreshPeersList="this.getPeers()"
 				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
-		</Transition>
-		<Transition name="zoom">
-			<DeleteConfiguration
-				@close="deleteConfiguration.modalOpen = false"
-				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
 		</Transition>
 	</div>
 </template>

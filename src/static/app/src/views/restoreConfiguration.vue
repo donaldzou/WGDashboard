@@ -29,7 +29,7 @@ const selectedConfiguration = ref("")
 					<LocaleText t="Restore Configuration"></LocaleText>
 				</h2>
 			</div>
-			<div name="restore" v-if="backups" >
+			<div v-if="backups" >
 				<div class="d-flex mb-5 align-items-center steps" role="button"
 				     :class="{active: !confirm}"
 				     @click="confirm = false" key="step1">
@@ -58,21 +58,21 @@ const selectedConfiguration = ref("")
 					</Transition>
 				</div>
 				<div id="step1Detail" v-if="!confirm">
+<!--					<div class="mb-4">-->
+<!--						<h5>Backup of existing WireGuard Configurations</h5>-->
+<!--						<hr>-->
+<!--						<div class="d-flex gap-3 flex-column">-->
+<!--							<BackupGroup-->
+<!--								@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"-->
+<!--								:open="selectedConfiguration === c"-->
+<!--								:selectedConfigurationBackup="selectedConfigurationBackup"-->
+<!--								v-for="c in Object.keys(backups.ExistingConfigurations)"-->
+<!--								:configuration-name="c" :backups="backups.ExistingConfigurations[c]"></BackupGroup>-->
+<!--						</div>-->
+<!--					</div>-->
 					<div class="mb-4">
-						<h5>Backup of existing WireGuard Configurations</h5>
-						<hr>
-						<div class="d-flex gap-3 flex-column">
-							<BackupGroup
-								@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"
-								:open="selectedConfiguration === c"
-								:selectedConfigurationBackup="selectedConfigurationBackup"
-								v-for="c in Object.keys(backups.ExistingConfigurations)"
-								:configuration-name="c" :backups="backups.ExistingConfigurations[c]"></BackupGroup>
-						</div>
-					</div>
-					<div class="mb-4">
-						<h5>Backup of non-existing WireGuard Configurations</h5>
-						<hr>
+<!--						<h5>Backup of non-existing WireGuard Configurations</h5>-->
+<!--						<hr>-->
 						<div class="d-flex gap-3 flex-column">
 							<BackupGroup
 								@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"
@@ -80,6 +80,13 @@ const selectedConfiguration = ref("")
 								:open="selectedConfiguration === c"
 								v-for="c in Object.keys(backups.NonExistingConfigurations)"
 								:configuration-name="c" :backups="backups.NonExistingConfigurations[c]"></BackupGroup>
+							<div v-if="Object.keys(backups.NonExistingConfigurations).length === 0">
+								<div class="card rounded-3">
+									<div class="card-body">
+										<p class="mb-0">You don't have any configuration to restore</p>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
