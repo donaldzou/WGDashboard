@@ -1,8 +1,8 @@
 <script setup>
 import LocaleText from "@/components/text/localeText.vue";
 import {useRoute, useRouter} from "vue-router";
-import {ref} from "vue";
-import {fetchPost} from "@/utilities/fetch.js";
+import {onMounted, ref, useTemplateRef} from "vue";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 const route = useRoute()
@@ -26,13 +26,37 @@ const deleteConfiguration = () => {
 		}
 	})
 }
+
+
+const loading = ref(true)
+const backups = ref([])
+let timeout = undefined;
+const getBackup = () => {
+	loading.value = true;
+	fetchGet("/api/getWireguardConfigurationBackup", {
+		configurationName: configurationName
+	}, (res) => {
+		backups.value = res.data;
+		loading.value = false;
+	})
+}
+
+
+onMounted(() => {
+	getBackup()
+})
+
+const emits = defineEmits(["backup"])
+
+
+
 </script>
 
 <template>
-	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll" ref="editConfigurationContainer">
+	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
 			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 700px">
-				<div class="card rounded-3 shadow flex-grow-1 bg-danger-subtle border-danger-subtle">
+				<div class="card rounded-3 shadow flex-grow-1 bg-danger-subtle border-danger-subtle" id="deleteConfigurationContainer">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
 						<h5 class="mb-0">
 							Are you sure to delete this configuration?
@@ -40,11 +64,37 @@ const deleteConfiguration = () => {
 						<button type="button" class="btn-close ms-auto" @click="$emit('close')"></button>
 					</div>
 					<div class="card-body px-4">
-						
 						<p class="text-muted">
 							Once you deleted, all connected peers will get disconnected; Both configuration file 
 							(<code>.conf</code>) and database table related to this configuration will get deleted.
 						</p>
+						<div class="alert"
+						     :class="[loading ? 'alert-secondary' : (backups.length > 0 ? 'alert-success' : 'alert-danger')]">
+							<div v-if="loading">
+								<i class="bi bi-search me-2"></i>
+								<LocaleText t="Checking backups..."></LocaleText>
+							</div>
+							<div v-else-if="backups.length > 0">
+								<i class="bi bi-check-circle-fill me-2"></i>
+								<LocaleText :t="'This configuration have ' + backups.length + ' backups'"></LocaleText>
+							</div>
+							<div v-else class="d-flex align-items-center gap-2">
+								<i class="bi bi-x-circle-fill me-2"></i>
+								<LocaleText t="This configuration have no backup."></LocaleText>
+								
+								<a role="button" 
+								   @click="emits('backup')"
+								   class="ms-auto btn btn-sm btn-primary rounded-3">
+									<i class="bi bi-clock-history me-2"></i>
+									Backup
+								</a>
+								<a role="button"
+								   @click="getBackup()"
+								   class="btn btn-sm btn-primary rounded-3">
+									<i class="bi bi-arrow-clockwise"></i>
+								</a>
+							</div>
+						</div>
 						<hr>
 						<p>If you're sure, please type in the configuration name below and click Delete.</p>
 						<input class="form-control rounded-3 mb-3" 
