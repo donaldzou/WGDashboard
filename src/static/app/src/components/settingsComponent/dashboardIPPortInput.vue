@@ -58,55 +58,53 @@ export default {
 </script>
 
 <template>
-<div class="card mb-4 shadow rounded-3">
-	<p class="card-header">
+<div>
+	<h5>
 		<LocaleText t="Dashboard IP Address & Listen Port"></LocaleText>
-		
-	</p>
-	<div class="card-body">
-		<div class="row gx-3">
-			<div class="col-sm">
-				<div class="form-group mb-2">
-					<label for="input_dashboard_ip" class="text-muted mb-1">
-						<strong><small>
-							<LocaleText t="IP Address / Hostname"></LocaleText>
-						</small></strong>
-					</label>
-					<input type="text" class="form-control"
-					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
-					       id="input_dashboard_ip"
-					       v-model="this.ipAddress"
-					       @keydown="this.changed = true"
-					       @blur="useValidation($event, 'app_ip', this.ipAddress)"
-					       :disabled="this.updating"
-					>
-					<div class="invalid-feedback">{{this.invalidFeedback}}</div>
-				</div>
-			</div>
-			<div class="col-sm">
-				<div class="form-group mb-2">
-					<label for="input_dashboard_ip" class="text-muted mb-1">
-						<strong><small>
-							<LocaleText t="Listen Port"></LocaleText>
-						</small></strong>
-					</label>
-					<input type="number" class="form-control"
-					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
-					       id="input_dashboard_ip"
-					       v-model="this.port"
-					       @keydown="this.changed = true"
-					       @blur="useValidation($event, 'app_port', this.port)"
-					       :disabled="this.updating"
-					>
-					<div class="invalid-feedback">{{this.invalidFeedback}}</div>
-				</div>
+	</h5>
+	<div class="row g-2">
+		<div class="col-sm">
+			<div class="form-group">
+				<label for="input_dashboard_ip" class="text-muted mb-1">
+					<strong><small>
+						<LocaleText t="IP Address / Hostname"></LocaleText>
+					</small></strong>
+				</label>
+				<input type="text" class="form-control"
+				       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
+				       id="input_dashboard_ip"
+				       v-model="this.ipAddress"
+				       @keydown="this.changed = true"
+				       @blur="useValidation($event, 'app_ip', this.ipAddress)"
+				       :disabled="this.updating"
+				>
+				<div class="invalid-feedback">{{this.invalidFeedback}}</div>
 			</div>
 		</div>
-		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1 mb-2">
-			<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
-				<LocaleText t="Manual restart of WGDashboard is needed to apply changes on IP Address and Listen Port"></LocaleText>
-			</small>
+		<div class="col-sm">
+			<div class="form-group">
+				<label for="input_dashboard_ip" class="text-muted mb-1">
+					<strong><small>
+						<LocaleText t="Listen Port"></LocaleText>
+					</small></strong>
+				</label>
+				<input type="number" class="form-control"
+				       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
+				       id="input_dashboard_ip"
+				       v-model="this.port"
+				       @keydown="this.changed = true"
+				       @blur="useValidation($event, 'app_port', this.port)"
+				       :disabled="this.updating"
+				>
+				<div class="invalid-feedback">{{this.invalidFeedback}}</div>
+			</div>
 		</div>
+	</div>
+	<div
+		class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mb-2 mt-2">
+		<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
+			<LocaleText t="Manual restart of WGDashboard is needed to apply changes on IP Address and Listen Port"></LocaleText>
+		</small>
 	</div>
 </div>
 </template>

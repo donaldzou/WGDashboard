@@ -441,12 +441,12 @@ class WireguardConfiguration:
             return self.message
 
     def __init__(self, name: str = None, data: dict = None, backup: dict = None):
-        print(f"[WGDashboard] Initialized Configuration: {name}")
+        
         
         self.__parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
         self.__parser.optionxform = str
         self.__configFileModifiedTime = None
-
+        
         self.Status: bool = False
         self.Name: str = ""
         self.PrivateKey: str = ""
@@ -504,10 +504,13 @@ class WireguardConfiguration:
                 with open(self.__configPath, "w+") as configFile:
                     self.__parser.write(configFile)
                 self.__initPeersList()
-            
-                                    
-            
-    
+        
+        print(f"[WGDashboard] Initialized Configuration: {name}")    
+        if self.getAutostartStatus() and not self.getStatus():
+            self.toggleConfiguration()
+            print(f"[WGDashboard] Autostart Configuration: {name}")
+        
+                      
     def __initPeersList(self):
         self.Peers: list[Peer] = []
         self.getPeersList()
@@ -621,6 +624,10 @@ class WireguardConfiguration:
     def getStatus(self) -> bool:
         self.Status = self.Name in psutil.net_if_addrs().keys()
         return self.Status
+    
+    def getAutostartStatus(self):
+        s, d = DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
+        return self.Name in d
 
     def __getRestrictedPeers(self):
         self.RestrictedPeers = []
@@ -1078,7 +1085,6 @@ class WireguardConfiguration:
         self.__dropDatabase()
         return True
         
-    
 class Peer:
     def __init__(self, tableData, configuration: WireguardConfiguration):
         self.configuration = configuration
@@ -1225,16 +1231,10 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             return False
         return True
-        
 # Regex Match
 def regex_match(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
-
-def iPv46RegexCheck(ip):
-    return re.match(
-        r'((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))',
-        ip)
 
 class DashboardAPIKey:
     def __init__(self, Key: str, CreatedAt: str, ExpiredAt: str):
@@ -1287,6 +1287,9 @@ class DashboardConfig:
             },
             "Database":{
                 "type": "sqlite"
+            },
+            "WireGuardConfiguration": {
+                "autostart": ""
             }
         }
 
@@ -1323,8 +1326,6 @@ class DashboardConfig:
     def deleteAPIKey(self, key):
         sqlUpdate("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
         self.DashboardAPIKeys = self.__getAPIKeys()
-    
-    
     
     def __configValidation(self, key, value: Any) -> [bool, str]:
         if type(value) is str and len(value) == 0:
@@ -1384,8 +1385,10 @@ class DashboardConfig:
                     self.__config[section][key] = "true"
                 else:
                     self.__config[section][key] = "false"
-            if type(value) in [int, float]:
+            elif type(value) in [int, float]:
                 self.__config[section][key] = str(value)
+            elif type(value) is list:
+                self.__config[section][key] = "||".join(value)
             else:
                 self.__config[section][key] = value
             return self.SaveConfig(), ""
@@ -1411,6 +1414,9 @@ class DashboardConfig:
 
         if self.__config[section][key] in ["0", "no", "false", "off"]:
             return True, False
+        
+        if section == "WireGuardConfiguration" and key == "autostart":
+            return True, self.__config[section][key].split("||")
 
         return True, self.__config[section][key]
 
@@ -1421,12 +1427,7 @@ class DashboardConfig:
             the_dict[section] = {}
             for key, val in self.__config.items(section):
                 if key not in self.hiddenAttribute:
-                    if val in ["1", "yes", "true", "on"]:
-                        the_dict[section][key] = True
-                    elif val in ["0", "no", "false", "off"]:
-                        the_dict[section][key] = False
-                    else:
-                        the_dict[section][key] = val
+                    the_dict[section][key] = self.GetConfig(section, key)[1]
         return the_dict
 
 

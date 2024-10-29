@@ -63,50 +63,52 @@ export default {
 </script>
 
 <template>
-	<div class="card mb-4 shadow rounded-3">
-		<div class="card-header d-flex">
-			<LocaleText t="API Keys"></LocaleText>
-			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()">
-				<input class="form-check-input" type="checkbox"
-				       v-model="this.value"
-				       @change="this.toggleDashboardAPIKeys()"
-				       role="switch" id="allowAPIKeysSwitch">
-				<label class="form-check-label" for="allowAPIKeysSwitch">
-					<LocaleText t="Enabled" v-if="this.value"></LocaleText>
-					<LocaleText t="Disabled" v-else></LocaleText>
-					
-					
-				</label>
+	<div class="card rounded-3">
+		<div class="card-body position-relative d-flex flex-column gap-2" >
+			<div class="d-flex align-items-center">
+				<h5 class="mb-0">
+					<LocaleText t="API Keys"></LocaleText>
+				</h5>
+				<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()" >
+					<input class="form-check-input" type="checkbox"
+					       v-model="this.value"
+					       @change="this.toggleDashboardAPIKeys()"
+					       role="switch" id="allowAPIKeysSwitch">
+					<label class="form-check-label" for="allowAPIKeysSwitch">
+						<LocaleText t="Enabled" v-if="this.value"></LocaleText>
+						<LocaleText t="Disabled" v-else></LocaleText>
+					</label>
+				</div>
 			</div>
-		</div>
-		<div class="card-body position-relative d-flex flex-column gap-2" v-if="this.value">
-			<button class="ms-auto btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
-			        @click="this.newDashboardAPIKey = true"
-			        v-if="!this.store.getActiveCrossServer()"
-			>
-				<i class="bi bi-plus-circle-fill me-2"></i> 
-				<LocaleText t="API Key"></LocaleText>
-			</button>
-			<div class="card" style="height: 300px" v-if="this.apiKeys.length === 0">
-				<div class="card-body d-flex text-muted">
+			<div v-if="this.value" class="d-flex flex-column gap-2">
+				<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
+				        @click="this.newDashboardAPIKey = true"
+				        v-if="!this.store.getActiveCrossServer()"
+				>
+					<i class="bi bi-plus-circle-fill me-2"></i>
+					<LocaleText t="API Key"></LocaleText>
+				</button>
+				<div class="card" style="height: 300px" v-if="this.apiKeys.length === 0">
+					<div class="card-body d-flex text-muted">
 						<span class="m-auto">
 							<LocaleText t="No WGDashboard API Key"></LocaleText>
 						</span>
+					</div>
 				</div>
+				<div class="d-flex flex-column gap-2 position-relative" v-else style="min-height: 300px">
+					<TransitionGroup name="apiKey">
+						<DashboardAPIKey v-for="key in this.apiKeys" :apiKey="key"
+						                 :key="key.Key"
+						                 @deleted="(nkeys) => this.apiKeys = nkeys"></DashboardAPIKey>
+					</TransitionGroup>
+				</div>
+				<Transition name="zoomReversed">
+					<NewDashboardAPIKey v-if="this.newDashboardAPIKey"
+					                    @created="(data) => this.apiKeys = data"
+					                    @close="this.newDashboardAPIKey = false"
+					></NewDashboardAPIKey>
+				</Transition>
 			</div>
-			<div class="d-flex flex-column gap-2 position-relative" v-else style="min-height: 300px">
-				<TransitionGroup name="apiKey">
-					<DashboardAPIKey v-for="key in this.apiKeys" :apiKey="key"
-					                 :key="key.Key"
-					                 @deleted="(nkeys) => this.apiKeys = nkeys"></DashboardAPIKey>
-				</TransitionGroup>
-			</div>
-			<Transition name="zoomReversed">
-				<NewDashboardAPIKey v-if="this.newDashboardAPIKey"
-				                    @created="(data) => this.apiKeys = data"
-				 @close="this.newDashboardAPIKey = false"
-				></NewDashboardAPIKey>
-			</Transition>
 			
 		</div>
 	</div>

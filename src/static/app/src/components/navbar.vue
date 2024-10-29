@@ -58,7 +58,16 @@ export default {
 						            exact-active-class="active">
 							<i class="bi bi-gear me-2"></i>
 							<LocaleText t="Settings"></LocaleText>	
-						</RouterLink></li>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link rounded-3" 
+						   target="_blank"
+						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">
+							<i class="bi bi-question-circle me-2"></i>
+							<LocaleText t="Help"></LocaleText>
+						</a>
+					</li>
 				</ul>
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">

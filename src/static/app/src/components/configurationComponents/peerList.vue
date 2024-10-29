@@ -159,7 +159,7 @@ export default {
 				modalOpen: false
 			},
 			deleteConfiguration: {
-				modalOpen: true
+				modalOpen: false
 			}
 		}
 	},

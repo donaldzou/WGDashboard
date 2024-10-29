@@ -44,11 +44,11 @@ export default {
 </script>
 
 <template>
-	<div class="card mb-4 shadow rounded-3">
-		<p class="card-header">
-			<LocaleText t="Dashboard Language"></LocaleText>
-		</p>
-		<div class="card-body d-flex gap-2">
+	<div>
+		<small class="text-muted d-block mb-1">
+			<strong><LocaleText t="Language"></LocaleText></strong>
+		</small>
+		<div class="d-flex gap-2">
 			<div class="dropdown w-100">
 				<button class="btn bg-primary-subtle text-primary-emphasis dropdown-toggle w-100 rounded-3" 
 				        :disabled="!this.languages"

@@ -44,14 +44,19 @@ export default {
 
 <template>
 <div>
+	<h6>
+		<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
+	</h6>
 	<div class="d-flex align-items-center">
-		<strong>
-			<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
-		</strong>
-		<div class="form-check form-switch ms-3">
+
+		<div class="form-check form-switch">
 			<input class="form-check-input" type="checkbox"
 			       v-model="this.status"
 			       role="switch" id="allowMFAKeysSwitch">
+			<label for="allowMFAKeysSwitch">
+					<LocaleText t="Enabled" v-if="this.status"></LocaleText>
+					<LocaleText t="Disabled" v-else></LocaleText>
+				</label>
 		</div>
 		<button class="btn bg-warning-subtle text-warning-emphasis border-1 border-warning-subtle ms-auto rounded-3 shadow-sm" 
 		        v-if="this.status" @click="this.resetMFA()">
