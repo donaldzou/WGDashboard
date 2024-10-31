@@ -440,7 +440,7 @@ class WireguardConfiguration:
         def __str__(self):
             return self.message
 
-    def __init__(self, name: str = None, data: dict = None, backup: dict = None):
+    def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
         
         
         self.__parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
@@ -506,7 +506,7 @@ class WireguardConfiguration:
                 self.__initPeersList()
         
         print(f"[WGDashboard] Initialized Configuration: {name}")    
-        if self.getAutostartStatus() and not self.getStatus():
+        if self.getAutostartStatus() and not self.getStatus() and startup:
             self.toggleConfiguration()
             print(f"[WGDashboard] Autostart Configuration: {name}")
         
@@ -1442,7 +1442,7 @@ def _regexMatch(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
 
-def _getConfigurationList():
+def _getConfigurationList(startup: bool = False):
     for i in os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
@@ -1451,7 +1451,7 @@ def _getConfigurationList():
                     if WireguardConfigurations[i].configurationFileChanged():
                         WireguardConfigurations[i] = WireguardConfiguration(i)
                 else:
-                    WireguardConfigurations[i] = WireguardConfiguration(i)
+                    WireguardConfigurations[i] = WireguardConfiguration(i, startup=startup)
             except WireguardConfiguration.InvalidConfigurationFileException as e:
                 print(f"{i} have an invalid configuration file.")
     
@@ -2527,7 +2527,7 @@ _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
-_getConfigurationList()
+_getConfigurationList(startup=True)
 
 def startThreads():
     bgThread = threading.Thread(target=backGroundThread)

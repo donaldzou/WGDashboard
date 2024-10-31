@@ -31,7 +31,7 @@ const toggle = (c) => {
 	}
 }
 
-watch(data.value, () => {
+watch(data, () => {
 	updateAutostart()
 })
 
