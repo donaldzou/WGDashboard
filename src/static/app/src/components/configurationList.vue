@@ -31,7 +31,6 @@ export default {
 </script>
 
 <template>
-	
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
 			<div class="d-flex mb-4 configurationListTitle align-items-center gap-3">

@@ -44,9 +44,7 @@ export default {
 
 <template>
 <div>
-	<h6>
-		<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
-	</h6>
+	
 	<div class="d-flex align-items-center">
 
 		<div class="form-check form-switch">

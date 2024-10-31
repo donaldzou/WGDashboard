@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container"
+	<div class="col-md-3 col-lg-2 d-md-block p-2 navbar-container"
 	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
 	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
 	>

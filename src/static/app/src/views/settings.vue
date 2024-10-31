@@ -35,6 +35,11 @@ export default {
 		const dashboardConfigurationStore = DashboardConfigurationStore()
 		return {dashboardConfigurationStore}
 	},
+	data(){
+		return{
+			activeTab: "WireGuardConfiguration"
+		}
+	}
 }
 </script>
 
@@ -42,94 +47,139 @@ export default {
 	<div class="mt-md-5 mt-3 text-body mb-3">
 		<div class="container-md d-flex flex-column gap-4">
 			<div>
-				<h2>
-					<LocaleText t="WireGuard Configuration Settings"></LocaleText>
-				</h2>
+				
+				<ul class="nav nav-pills nav-justified align-items-center gap-2">
+					<li class="nav-item">
+						<a class="nav-link rounded-3"
+						   @click="this.activeTab = 'WGDashboard'"
+						   :class="{active: this.activeTab === 'WGDashboard'}"
+						   role="button">
+							<h6 class="my-2">
+								WGDashboard Settings
+							</h6>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link rounded-3"
+						   @click="this.activeTab = 'Peers'"
+						   :class="{active: this.activeTab === 'Peers'}"
+						   role="button">
+							<h6 class="my-2">
+								Peers Settings
+							</h6>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link rounded-3" 
+						   @click="this.activeTab = 'WireGuardConfiguration'"
+						   :class="{active: this.activeTab === 'WireGuardConfiguration'}"
+						   role="button">
+							<h6 class="my-2">
+								WireGuard Configuration Settings
+							</h6>
+						</a>
+					</li>
+				</ul>
 				<hr>
-				<div class="card rounded-3 mb-3">
-					<div class="card-body">
-						<DashboardSettingsInputWireguardConfigurationPath
-							targetData="wg_conf_path"
-							title="Configurations Directory"
-							:warning="true"
-							warning-text="Remember to remove / at the end of your path. e.g /etc/wireguard"
-						>
-						</DashboardSettingsInputWireguardConfigurationPath>
-					</div>
-				</div>
-				<div class="card rounded-3 mb-3">
-					<div class="card-body">
-						<DashboardSettingsWireguardConfigurationAutostart></DashboardSettingsWireguardConfigurationAutostart>
-					</div>
-				</div>
-				<div class="card rounded-3 mb-3">
-					<div class="card-body">
-						<h5>
-							<LocaleText t="Peer Default Settings"></LocaleText>
-						</h5>
-						<div>
-							<PeersDefaultSettingsInput
-								targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
-							<PeersDefaultSettingsInput
-								targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
-							<PeersDefaultSettingsInput
-								targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
-							<PeersDefaultSettingsInput
-								targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
-							<PeersDefaultSettingsInput
-								targetData="remote_endpoint" title="Peer Remote Endpoint"
-								:warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
-							></PeersDefaultSettingsInput>
+				<div>
+					<Transition name="fade2" mode="out-in">
+						<div class="d-flex gap-3 flex-column" v-if="activeTab === 'WireGuardConfiguration'">
+							<DashboardSettingsInputWireguardConfigurationPath
+								targetData="wg_conf_path"
+								title="Configurations Directory"
+								:warning="true"
+								warning-text="Remember to remove / at the end of your path. e.g /etc/wireguard"
+							>
+							</DashboardSettingsInputWireguardConfigurationPath>
+							<DashboardSettingsWireguardConfigurationAutostart></DashboardSettingsWireguardConfigurationAutostart>
 						</div>
-					</div>
-				</div>
-			</div>
-			<div>
-				<h2>
-					<LocaleText t="WGDashboard Settings"></LocaleText>
-				</h2>
-				<hr>
-				<div class="d-flex flex-column gap-3">
-					<div class="card rounded-3">
-						<div class="card-body">
-							<div class="row g-2">
-								<div class="col-sm">
-									<DashboardTheme></DashboardTheme>
+						<div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'Peers'">
+							<div class="card rounded-3">
+								<div class="card-header">
+									<h6 class="my-2">
+										<LocaleText t="Peer Default Settings"></LocaleText>
+									</h6>
 								</div>
-								<div class="col-sm">
-									<DashboardLanguage></DashboardLanguage>
+								<div class="card-body">
+									<div>
+										<PeersDefaultSettingsInput
+											targetData="peer_global_dns" title="DNS"></PeersDefaultSettingsInput>
+										<PeersDefaultSettingsInput
+											targetData="peer_endpoint_allowed_ip" title="Endpoint Allowed IPs"></PeersDefaultSettingsInput>
+										<PeersDefaultSettingsInput
+											targetData="peer_mtu" title="MTU"></PeersDefaultSettingsInput>
+										<PeersDefaultSettingsInput
+											targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
+										<PeersDefaultSettingsInput
+											targetData="remote_endpoint" title="Peer Remote Endpoint"
+											:warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
+										></PeersDefaultSettingsInput>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="card">
-						<div class="card-body">
-							<DashboardIPPortInput></DashboardIPPortInput>
-						</div>
-					</div>
-					<div class="card">
-						<div class="card-body d-flex flex-column gap-3">
-							<div>
-								<h5>
-									<LocaleText t="Account Settings"></LocaleText>
-								</h5>
-								<AccountSettingsInputUsername targetData="username"
-								                              title="Username"
-								></AccountSettingsInputUsername>
+						<div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'WGDashboard'">
+							<div class="card rounded-3">
+								<div class="card-header">
+									<h6 class="my-2">
+										<LocaleText t="Appearance"></LocaleText>
+									</h6>
+								</div>
+								<div class="card-body">
+									<div class="row g-2">
+										<div class="col-sm">
+											<DashboardTheme></DashboardTheme>
+										</div>
+										<div class="col-sm">
+											<DashboardLanguage></DashboardLanguage>
+										</div>
+									</div>
+								</div>
 							</div>
-							<div>
-								<h6>
-									<LocaleText t="Update Password"></LocaleText>
-								</h6>
-								<AccountSettingsInputPassword
-									targetData="password">
-								</AccountSettingsInputPassword>
+							<div class="card">
+								<div class="card-header">
+									<h6 class="my-2">
+										<LocaleText t="Dashboard IP Address & Listen Port"></LocaleText>
+									</h6>
+								</div>
+								<div class="card-body">
+									<DashboardIPPortInput></DashboardIPPortInput>
+								</div>
 							</div>
-
-							<AccountSettingsMFA v-if="!this.dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
+							<div class="card">
+								<div class="card-header">
+									<h6 class="my-2">
+										<LocaleText t="Account Settings"></LocaleText>
+									</h6>
+								</div>
+								<div class="card-body d-flex flex-column gap-3">
+									<div>
+										<AccountSettingsInputUsername targetData="username"
+										                              title="Username"
+										></AccountSettingsInputUsername>
+									</div>
+									<hr>
+									<div>
+										<AccountSettingsInputPassword
+											targetData="password">
+										</AccountSettingsInputPassword>
+									</div>
+								</div>
+							</div>
+							<div class="card">
+								<div class="card-header">
+									<h6 class="my-2">
+										<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
+									</h6>
+								</div>
+								<div class="card-body">
+									<AccountSettingsMFA v-if="!this.dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
+								</div>
+							</div>
+							<DashboardAPIKeys></DashboardAPIKeys>
 						</div>
-					</div>
-					<DashboardAPIKeys></DashboardAPIKeys>
+					</Transition>
+					
 				</div>
 			</div>
 		</div>

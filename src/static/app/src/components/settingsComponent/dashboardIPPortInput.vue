@@ -59,9 +59,6 @@ export default {
 
 <template>
 <div>
-	<h5>
-		<LocaleText t="Dashboard IP Address & Listen Port"></LocaleText>
-	</h5>
 	<div class="row g-2">
 		<div class="col-sm">
 			<div class="form-group">
