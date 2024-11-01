@@ -1,8 +1,10 @@
 name: Docker-Analyze
 
 on:
-  schedule:
-    - cron: "0 0 * * *"  # Daily at midnight UTC
+  #schedule:
+  #  - cron: "0 0 * * *"  # Daily at midnight UTC
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       trigger-build:
@@ -10,7 +12,7 @@ on:
         default: 'true'
 
 env:
-  DOCKER_IMAGE: dselen/wgdashboard
+  DOCKER_IMAGE: donaldzou/wgdashboard
 
 jobs:
   docker_analyze:

@@ -380,20 +380,29 @@ update_wgd() {
 	
 	new_ver=$($venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
 	printf "%s\n" "$dashes"
-	printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
-	read up
+
+	if [ "$commandConfirmed" = "true" ]; then
+		printf "[WGDashboard] Confirmation granted.\n"
+		up="Y"
+	else
+		printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
+		read up
+	fi
+
 	if [ "$up" = "Y" ] || [ "$up" = "y" ]; then
 		printf "[WGDashboard] Shutting down WGDashboard\n"
+
 		if check_wgd_status; then
 			stop_wgd
 		fi
-		mv wgd.sh wgd.sh.old
-		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
-		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
-		chmod +x ./wgd.sh
-		sudo ./wgd.sh install
-		printf "[WGDashboard] Update completed!\n"
-		printf "%s\n" "$dashes"
+
+		mv wgd.sh wgd.sh.old && \
+		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver" && \
+		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt && \
+		chmod +x ./wgd.sh && \
+		sudo ./wgd.sh install && \
+		printf "[WGDashboard] Update completed!\n" && \
+		printf "%s\n" "$dashes"; \
 		rm wgd.sh.old
 	else
 		printf "%s\n" "$dashes"
@@ -402,52 +411,55 @@ update_wgd() {
 	fi
 }
 
-if [ "$#" != 1 ];
-  then
-    help
-  else
-    if [ "$1" = "start" ]; then
-        if check_wgd_status; then
-          printf "%s\n" "$dashes"
-          printf "[WGDashboard] WGDashboard is already running.\n"
-          printf "%s\n" "$dashes"
-        else
-            start_wgd
-        fi
-      elif [ "$1" = "stop" ]; then
-        if check_wgd_status; then
-            printf "%s\n" "$dashes"
-            stop_wgd
-            printf "[WGDashboard] WGDashboard is stopped.\n"
-            printf "%s\n" "$dashes"
-            else
-              printf "%s\n" "$dashes"
-              printf "[WGDashboard] WGDashboard is not running.\n"
-              printf "%s\n" "$dashes"
-        fi
-      elif [ "$1" = "update" ]; then
-        update_wgd
-      elif [ "$1" = "install" ]; then
-        printf "%s\n" "$dashes"
-        install_wgd
-        printf "%s\n" "$dashes"
-      elif [ "$1" = "restart" ]; then
-         if check_wgd_status; then
-           printf "%s\n" "$dashes"
-           stop_wgd
-           printf "| WGDashboard is stopped.                                  |\n"
-           sleep 4
-           start_wgd
-        else
-          start_wgd
-        fi
-      elif [ "$1" = "debug" ]; then
-        if check_wgd_status; then
-          printf "| WGDashboard is already running.                          |\n"
-          else
-            start_wgd_debug
-        fi
-      else
-        help
-    fi
+if [ "$#" -lt 1 ]; then
+	help
+else
+	if [ "$2" = "-y" ] || [ "$2" = "-Y" ]; then
+		commandConfirmed="true"
+	fi
+
+	if [ "$1" = "start" ]; then
+		if check_wgd_status; then
+		printf "%s\n" "$dashes"
+		printf "[WGDashboard] WGDashboard is already running.\n"
+		printf "%s\n" "$dashes"
+		else
+			start_wgd
+		fi
+	elif [ "$1" = "stop" ]; then
+		if check_wgd_status; then
+			printf "%s\n" "$dashes"
+			stop_wgd
+			printf "[WGDashboard] WGDashboard is stopped.\n"
+			printf "%s\n" "$dashes"
+			else
+			printf "%s\n" "$dashes"
+			printf "[WGDashboard] WGDashboard is not running.\n"
+			printf "%s\n" "$dashes"
+		fi
+	elif [ "$1" = "update" ]; then
+		update_wgd
+	elif [ "$1" = "install" ]; then
+		printf "%s\n" "$dashes"
+		install_wgd
+		printf "%s\n" "$dashes"
+	elif [ "$1" = "restart" ]; then
+		if check_wgd_status; then
+		printf "%s\n" "$dashes"
+		stop_wgd
+		printf "| WGDashboard is stopped.                                  |\n"
+		sleep 4
+		start_wgd
+		else
+		start_wgd
+		fi
+	elif [ "$1" = "debug" ]; then
+		if check_wgd_status; then
+		printf "| WGDashboard is already running.                          |\n"
+		else
+			start_wgd_debug
+		fi
+	else
+		help
+	fi
 fi
