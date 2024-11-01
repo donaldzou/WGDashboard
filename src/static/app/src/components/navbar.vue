@@ -154,6 +154,7 @@ export default {
 
 .navbar-container{
 	height: 100vh;
+	
 }
 
 

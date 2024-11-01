@@ -436,7 +436,7 @@ export default {
 					<LocaleText t="CONFIGURATION"></LocaleText>
 				</small>
 				<div class="d-flex align-items-center gap-3">
-					<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
+					<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
 				</div>
 			</div>
 			<div class="card rounded-3 bg-transparent shadow-sm ms-auto">
@@ -470,9 +470,9 @@ export default {
 				</div>
 			</div>
 		</div>
+		<hr>
 		<div class="row mt-3 gy-2 gx-2 mb-2">
-			
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
 						<p class="mb-0 text-muted"><small>
@@ -482,7 +482,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
 						<p class="mb-0 text-muted"><small>
@@ -504,7 +504,7 @@ export default {
 			</div>
 		</div>
 		<div class="row gx-2 gy-2 mb-2">
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -519,7 +519,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -532,7 +532,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -545,7 +545,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>

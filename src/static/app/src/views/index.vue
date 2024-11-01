@@ -24,7 +24,7 @@ export default {
 	<div class="container-fluid flex-grow-1 main" :data-bs-theme="this.dashboardConfigurationStore.Configuration.Server.dashboard_theme">
 		<div class="row h-100">
 			<Navbar></Navbar>
-			<main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 overflow-y-scroll mb-0">
+			<main class="col-md-9 col-lg-10 overflow-y-scroll mb-0 pt-2">
 				<Suspense>
 					<RouterView v-slot="{Component}">
 						<Transition name="fade2" mode="out-in" appear>
