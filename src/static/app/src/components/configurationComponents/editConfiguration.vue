@@ -4,7 +4,6 @@ import {onMounted, reactive, ref, useTemplateRef, watch} from "vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import router from "@/router/index.js";
 const props = defineProps({
 	configurationInfo: Object
 })
@@ -33,7 +32,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed"])
+const emit = defineEmits(["changed", "close"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -54,6 +53,7 @@ watch(data, () => {
 	deep: true
 })
 
+const openBackupRestore = ref(false)
 </script>
 
 <template>
@@ -172,13 +172,12 @@ watch(data, () => {
 								       id="configuration_postdown">
 							</div>
 							<div class="d-flex align-items-center gap-2 mt-4">
-								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto px-3 py-2"
+								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
 								        @click="resetForm()"
 								        :disabled="!dataChanged || saving">
 									<i class="bi bi-arrow-clockwise"></i>
 								</button>
-
-								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
+								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
 								        :disabled="!dataChanged || saving"
 								        @click="saveForm()"
 								>

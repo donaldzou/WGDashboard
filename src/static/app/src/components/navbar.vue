@@ -39,13 +39,13 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container"
+	<div class="col-md-3 col-lg-2 d-md-block p-2 navbar-container"
 	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
 	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
 	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky ">
-				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand fw-light">WGDashboard</h5>
+				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand">WGDashboard</h5>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
@@ -58,7 +58,16 @@ export default {
 						            exact-active-class="active">
 							<i class="bi bi-gear me-2"></i>
 							<LocaleText t="Settings"></LocaleText>	
-						</RouterLink></li>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link rounded-3" 
+						   target="_blank"
+						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">
+							<i class="bi bi-question-circle me-2"></i>
+							<LocaleText t="Help"></LocaleText>
+						</a>
+					</li>
 				</ul>
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
@@ -66,10 +75,10 @@ export default {
 					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
-					<li class="nav-item">
+					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
-						            v-for="c in this.wireguardConfigurationsStore.Configurations">
+						            >
 							<span class="dot me-2" :class="{active: c.Status}"></span>
 							{{c.Name}}
 						</RouterLink>
@@ -92,7 +101,7 @@ export default {
 					</li>
 				</ul>
 				<hr class="text-body">
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 mb-3">
 					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
@@ -145,6 +154,7 @@ export default {
 
 .navbar-container{
 	height: 100vh;
+	
 }
 
 

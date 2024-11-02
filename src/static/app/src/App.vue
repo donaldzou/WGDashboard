@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {computed, watch} from "vue";
+import {v4} from "uuid";
 const store = DashboardConfigurationStore();
 store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
@@ -39,7 +40,7 @@ const getActiveCrossServer = computed(() => {
 	</nav>
 	<Suspense>
 		<RouterView v-slot="{ Component }">
-			<Transition name="app" mode="out-in" type="transition">
+			<Transition name="app" mode="out-in" type="transition" appear>
 				<Component :is="Component"></Component>
 			</Transition>
 		</RouterView>
@@ -49,17 +50,13 @@ const getActiveCrossServer = computed(() => {
 <style scoped>
 .app-enter-active,
 .app-leave-active {
-	transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+	transition: all 0.7s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
 
-.app-enter-from{
-	transform: translateY(20px);
+.app-enter-from,
+.app-leave-to{
 	opacity: 0;
-}
-
-.app-leave-to {
-	transform: translateY(-20px);
-	opacity: 0;
+	transform: scale(1.1);
 }
 
 @media screen and (min-width: 768px) {

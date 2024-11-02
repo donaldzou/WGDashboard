@@ -1,8 +1,10 @@
 <script>
 import LocaleText from "@/components/text/localeText.vue";
+import dayjs from "dayjs";
 
 export default {
 	name: "message",
+	methods: {dayjs},
 	components: {LocaleText},
 	props: {
 		message: Object
@@ -16,16 +18,22 @@ export default {
 </script>
 
 <template>
-	<div class="card shadow rounded-3 position-relative mb-2 message ms-auto" 
+	<div class="card shadow rounded-3 position-relative message ms-auto" 
 	     :class="{
 			'text-bg-danger': this.message.type === 'danger', 
 			'text-bg-success': this.message.type === 'success',
 			'text-bg-warning': this.message.type === 'warning'}"
 	     :id="this.message.id">
 		<div class="card-body">
-			<small class="fw-bold d-block" style="text-transform: uppercase">
-				<LocaleText t="FROM "></LocaleText>
-				{{this.message.from}}</small>
+			<div class="d-flex">
+				<small class="fw-bold d-block" style="text-transform: uppercase">
+					<LocaleText t="FROM "></LocaleText>
+					{{this.message.from}}
+				</small>
+				<small class="ms-auto">
+					{{dayjs().format("hh:mm A")}}
+				</small>
+			</div>
 			{{this.message.content}}
 		</div>
 	</div>

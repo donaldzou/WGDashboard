@@ -126,15 +126,18 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5">
+	<div class="mt-5 text-body">
 		<div class="container mb-4">
 			<div class="mb-4 d-flex align-items-center gap-4">
-				<RouterLink to="/" class="text-decoration-none">
-					<h3 class="mb-0 text-body">
-						<i class="bi bi-chevron-left me-4"></i> 
-						<LocaleText t="New Configuration"></LocaleText>
-					</h3>
+				<RouterLink to="/"
+				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-arrow-left-circle"></i>
+					</h2>
 				</RouterLink>
+				<h2 class="mb-0">
+					<LocaleText t="New Configuration"></LocaleText>
+				</h2>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
@@ -168,8 +171,7 @@ export default {
 				</div>
 				<div class="card rounded-3 shadow">
 					<div class="card-header">
-						<LocaleText t="Private Key"></LocaleText> & 
-						<LocaleText t="Public Key"></LocaleText>
+						<LocaleText t="Private Key"></LocaleText> & <LocaleText t="Public Key"></LocaleText>
 					</div>
 					<div class="card-body" style="font-family: var(--bs-font-monospace)">
 						<div class="mb-2">
@@ -286,13 +288,12 @@ export default {
 						 <i class="bi bi-check-circle-fill ms-2"></i>
 					</span>
 					<span v-else-if="!this.loading" class="d-flex w-100">
-						<LocaleText t="Save Configuration"></LocaleText>
-						 <i class="bi bi-save-fill ms-2"></i>
+						<i class="bi bi-save-fill me-2"></i>
+						<LocaleText t="Save"></LocaleText>
 					</span>
 					<span v-else class="d-flex w-100 align-items-center">
 						<LocaleText t="Saving..."></LocaleText>
 						<span class="ms-2 spinner-border spinner-border-sm" role="status">
-<!--						  <span class="visually-hidden">Loading...</span>-->
 						</span>
 					</span>
 					

@@ -78,16 +78,17 @@ export default {
 </script>
 
 <template>
-	<div class="d-flex flex-column">
-		<div class="row">
+	<form class="d-flex flex-column gap-2">
+		<div class="row g-2">
 			<div class="col-sm">
-				<div class="form-group mb-2">
+				<div class="form-group">
 					<label :for="'currentPassword_' + this.uuid" class="text-muted mb-1">
 						<strong><small>
 							<LocaleText t="Current Password"></LocaleText>
 						</small></strong>
 					</label>
-					<input type="password" class="form-control mb-2"
+					<input type="password" class="form-control"
+					       autocomplete="current-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.currentPassword"
 					       :id="'currentPassword_' + this.uuid">
@@ -95,13 +96,14 @@ export default {
 				</div>
 			</div>
 			<div class="col-sm">
-				<div class="form-group mb-2">
+				<div class="form-group">
 					<label :for="'newPassword_' + this.uuid" class="text-muted mb-1">
 						<strong><small>
 							<LocaleText t="New Password"></LocaleText>
 						</small></strong>
 					</label>
-					<input type="password" class="form-control mb-2"
+					<input type="password" class="form-control"
+					       autocomplete="new-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.newPassword"
 					       :id="'newPassword_' + this.uuid">
@@ -109,13 +111,14 @@ export default {
 				</div>
 			</div>
 			<div class="col-sm">
-				<div class="form-group mb-2">
+				<div class="form-group">
 					<label :for="'repeatNewPassword_' + this.uuid" class="text-muted mb-1">
 						<strong><small>
 							<LocaleText t="Repeat New Password"></LocaleText>
 						</small></strong>
 					</label>
-					<input type="password" class="form-control mb-2"
+					<input type="password" class="form-control"
+					       autocomplete="new-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.repeatNewPassword"
 					       :id="'repeatNewPassword_' + this.uuid">
@@ -128,7 +131,7 @@ export default {
 			<i class="bi bi-save2-fill me-2"></i>
 			<LocaleText t="Update Password"></LocaleText>
 		</button>
-	</div>
+	</form>
 </template>
 
 <style scoped>

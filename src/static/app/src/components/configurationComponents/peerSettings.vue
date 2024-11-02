@@ -231,19 +231,17 @@ export default {
 							</div>
 						</div>
 						<div class="d-flex align-items-center gap-2">
-							<button class="btn btn-secondary rounded-3 shadow"
+							<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto px-3 py-2"
 							        @click="this.reset()"
 							        :disabled="!this.dataChanged || this.saving">
-								<LocaleText t="Revert"></LocaleText>
-								 <i class="bi bi-arrow-clockwise ms-2"></i>
+								 <i class="bi bi-arrow-clockwise"></i>
 							</button>
 
-							<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
+							<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
 							        :disabled="!this.dataChanged || this.saving"
 							        @click="this.savePeer()"
 							>
-								<LocaleText t="Save Peer"></LocaleText>
-								<i class="bi bi-save-fill ms-2"></i></button>
+								<i class="bi bi-save-fill"></i></button>
 						</div>
 					</div>
 				</div>

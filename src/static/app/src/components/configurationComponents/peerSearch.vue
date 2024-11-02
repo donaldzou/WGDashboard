@@ -181,22 +181,45 @@ export default {
 					<div class="container-md d-flex h-100 w-100">
 						<div class="m-auto modal-dialog-centered dashboardModal">
 							<div class="card rounded-3 shadow w-100">
-								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
+								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
+									<h4 class="mb-0">
+										<LocaleText t="Other Settings"></LocaleText>
+									</h4>
 									<button type="button" class="btn-close ms-auto" @click="this.showMoreSettings = false"></button>
 								</div>
 								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column pt-0">
+									
 									<div>
 										<p class="text-muted fw-bold mb-2"><small>
-											<LocaleText t="Peer Jobs"></LocaleText>
+											<LocaleText t="Peers"></LocaleText>
 										</small></p>
 										<div class="list-group">
-											<a class="list-group-item list-group-item-action d-flex" role="button" 
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('selectPeers')">
+												<LocaleText t="Select Peers"></LocaleText>
+											</a>
+											<a class="list-group-item list-group-item-action d-flex" role="button"
 											   @click="this.$emit('jobsAll')">
 												<LocaleText t="Active Jobs"></LocaleText>
 											</a>
 											<a class="list-group-item list-group-item-action d-flex" role="button"
 											   @click="this.$emit('jobLogs')">
 												<LocaleText t="Logs"></LocaleText>
+											</a>
+										</div>
+									</div>
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Configuration"></LocaleText>
+										</small></p>
+										<div class="list-group">
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('backupRestore')">
+												<LocaleText t="Backup & Restore"></LocaleText>
+											</a>
+											<a class="list-group-item list-group-item-action d-flex text-danger fw-bold" role="button"
+											   @click="this.$emit('deleteConfiguration')">
+												<LocaleText t="Delete Configuration"></LocaleText>
 											</a>
 										</div>
 									</div>

@@ -45,7 +45,6 @@ export default {
 			handler(newValue){
 				if (newValue){
 					fetchGet("/api/getDashboardAPIKeys", {}, (res) => {
-						console.log(res)
 						if(res.status){
 							this.apiKeys = res.data
 						}else{
@@ -63,10 +62,12 @@ export default {
 </script>
 
 <template>
-	<div class="card mb-4 shadow rounded-3">
-		<div class="card-header d-flex">
-			<LocaleText t="API Keys"></LocaleText>
-			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()">
+	<div class="card rounded-3" >
+		<div class="card-header d-flex align-items-center" :class="{'border-bottom-0 rounded-3': !this.value}">
+			<h6 class="my-2">
+				<LocaleText t="API Keys"></LocaleText>
+			</h6>
+			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()" >
 				<input class="form-check-input" type="checkbox"
 				       v-model="this.value"
 				       @change="this.toggleDashboardAPIKeys()"
@@ -74,17 +75,15 @@ export default {
 				<label class="form-check-label" for="allowAPIKeysSwitch">
 					<LocaleText t="Enabled" v-if="this.value"></LocaleText>
 					<LocaleText t="Disabled" v-else></LocaleText>
-					
-					
 				</label>
 			</div>
 		</div>
 		<div class="card-body position-relative d-flex flex-column gap-2" v-if="this.value">
-			<button class="ms-auto btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
+			<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
 			        @click="this.newDashboardAPIKey = true"
 			        v-if="!this.store.getActiveCrossServer()"
 			>
-				<i class="bi bi-plus-circle-fill me-2"></i> 
+				<i class="bi bi-plus-circle-fill me-2"></i>
 				<LocaleText t="API Key"></LocaleText>
 			</button>
 			<div class="card" style="height: 300px" v-if="this.apiKeys.length === 0">
@@ -104,7 +103,7 @@ export default {
 			<Transition name="zoomReversed">
 				<NewDashboardAPIKey v-if="this.newDashboardAPIKey"
 				                    @created="(data) => this.apiKeys = data"
-				 @close="this.newDashboardAPIKey = false"
+				                    @close="this.newDashboardAPIKey = false"
 				></NewDashboardAPIKey>
 			</Transition>
 			

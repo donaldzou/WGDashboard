@@ -66,39 +66,48 @@ export default {
 </script>
 
 <template>
-	<div class="form-group">
-		<label :for="this.uuid" class="text-muted mb-1">
-			<strong><small>
-				<LocaleText :t="this.title"></LocaleText>
-			</small></strong>
-		</label>
-		<div class="d-flex gap-2 align-items-start">
-			<div class="flex-grow-1">
-				<input type="text" class="form-control rounded-3"
-				       :class="{'is-invalid': this.showInvalidFeedback, 'is-valid': this.isValid}"
-				       :id="this.uuid"
-				       v-model="this.value"
-				       @keydown="this.changed = true"
-				       :disabled="this.updating"
+	<div class="card">
+		<div class="card-header">
+			<h6 class="my-2">
+				<LocaleText t="Path"></LocaleText>
+			</h6>
+		</div>
+		<div class="card-body">
+			<div class="form-group">
+				<label :for="this.uuid" class="text-muted mb-1">
+					<strong><small>
+						<LocaleText :t="this.title"></LocaleText>
+					</small></strong>
+				</label>
+				<div class="d-flex gap-2 align-items-start">
+					<div class="flex-grow-1">
+						<input type="text" class="form-control rounded-3"
+						       :class="{'is-invalid': this.showInvalidFeedback, 'is-valid': this.isValid}"
+						       :id="this.uuid"
+						       v-model="this.value"
+						       @keydown="this.changed = true"
+						       :disabled="this.updating"
+						>
+						<div class="invalid-feedback fw-bold">{{this.invalidFeedback}}</div>
+					</div>
+					<button
+						@click="this.useValidation()"
+						:disabled="!this.changed"
+						class="ms-auto btn rounded-3 border-success-subtle bg-success-subtle text-success-emphasis">
+						<i class="bi bi-save2-fill" v-if="!this.updating"></i>
+						<span class="spinner-border spinner-border-sm" v-else></span>
+					</button>
+				</div>
+				<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1 mb-2"
+				     v-if="warning"
 				>
-				<div class="invalid-feedback fw-bold">{{this.invalidFeedback}}</div>
+					<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
+						<LocaleText :t="warningText"></LocaleText>
+					</small>
+				</div>
+
 			</div>
-			<button
-				@click="this.useValidation()"
-				:disabled="!this.changed"
-				class="ms-auto btn rounded-3 border-success-subtle bg-success-subtle text-success-emphasis">
-				<i class="bi bi-save2-fill" v-if="!this.updating"></i>
-				<span class="spinner-border spinner-border-sm" v-else></span>
-			</button>
 		</div>
-		<div class="px-2 py-1 text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2 d-inline-block mt-1 mb-2"
-		     v-if="warning"
-		>
-			<small><i class="bi bi-exclamation-triangle-fill me-2"></i>
-				<LocaleText :t="warningText"></LocaleText>
-			</small>
-		</div>
-		
 	</div>
 </template>
 

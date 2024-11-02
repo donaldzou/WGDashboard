@@ -32,8 +32,6 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			}else{
 				this.CrossServerConfiguration = JSON.parse(currentConfiguration)
 			}
-			
-			
 		},
 		syncCrossServerConfiguration(){
 			window.localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
@@ -82,7 +80,6 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		applyLocale(key){
 			if (this.Locale === null) 
 				return key
-			
 			const reg = Object.keys(this.Locale)
 			const match = reg.filter(x => {
 				return key.match(new RegExp('^' + x + '$', 'g')) !== null

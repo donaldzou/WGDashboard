@@ -42,7 +42,11 @@ import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogs
 import {ref} from "vue";
 import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
 import LocaleText from "@/components/text/localeText.vue";
-import EditConfiguration from "@/components/configurationComponents/peerScheduleJobsComponents/editConfiguration.vue";
+import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
+import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
+import ConfigurationBackupRestore
+	from "@/components/configurationComponents/configurationBackupRestore.vue";
+import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
 
 Chart.register(
 	ArcElement,
@@ -73,6 +77,9 @@ Chart.register(
 export default {
 	name: "peerList",
 	components: {
+		DeleteConfiguration,
+		ConfigurationBackupRestore,
+		SelectPeers,
 		EditConfiguration,
 		LocaleText,
 		PeerShareLinkModal,
@@ -143,6 +150,15 @@ export default {
 				selectedPeer: undefined
 			},
 			editConfiguration: {
+				modalOpen: false
+			},
+			selectPeers: {
+				modalOpen: false
+			},
+			backupRestore: {
+				modalOpen: false
+			},
+			deleteConfiguration: {
 				modalOpen: false
 			}
 		}
@@ -420,7 +436,7 @@ export default {
 					<LocaleText t="CONFIGURATION"></LocaleText>
 				</small>
 				<div class="d-flex align-items-center gap-3">
-					<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
+					<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
 				</div>
 			</div>
 			<div class="card rounded-3 bg-transparent shadow-sm ms-auto">
@@ -454,9 +470,9 @@ export default {
 				</div>
 			</div>
 		</div>
+		<hr>
 		<div class="row mt-3 gy-2 gx-2 mb-2">
-			
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
 						<p class="mb-0 text-muted"><small>
@@ -466,7 +482,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
 						<p class="mb-0 text-muted"><small>
@@ -488,7 +504,7 @@ export default {
 			</div>
 		</div>
 		<div class="row gx-2 gy-2 mb-2">
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -503,7 +519,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -516,7 +532,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -529,7 +545,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
@@ -592,6 +608,9 @@ export default {
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
 				@editConfiguration="this.editConfiguration.modalOpen = true"
+				@selectPeers="this.selectPeers.modalOpen = true"
+				@backupRestore="this.backupRestore.modalOpen = true"
+				@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
 				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
@@ -658,14 +677,33 @@ export default {
 				:configurationInfo="this.configurationInfo"
 				v-if="this.editConfiguration.modalOpen"></EditConfiguration>
 		</Transition>
+		<Transition name="zoom">
+			<SelectPeers
+				@refresh="this.getPeers()"
+				v-if="this.selectPeers.modalOpen"
+				:configurationPeers="this.configurationPeers"
+				@close="this.selectPeers.modalOpen = false"
+			></SelectPeers>
+		</Transition>
+		
+		<Transition name="zoom">
+			<DeleteConfiguration
+				@backup="backupRestore.modalOpen = true"
+				@close="deleteConfiguration.modalOpen = false"
+				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+		</Transition>
+		<Transition name="zoom">
+			<ConfigurationBackupRestore
+				@close="backupRestore.modalOpen = false"
+				@refreshPeersList="this.getPeers()"
+				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 .peerNav .nav-link{
 	&.active{
-		//background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-		//color: white;
 		background-color: #efefef;
 	}
 }

@@ -70,6 +70,7 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 		async getConfigurations(){
 			await fetchGet("/api/getWireguardConfigurations", {}, (res) => {
 				if (res.status)  this.Configurations = res.data
+				// this.Configurations = []
 			});
 		},
 		regexCheckIP(ip){

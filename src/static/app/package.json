@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build": "vite build",
     "buildcommitpush": "./build.sh",
     "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && electron-builder --mac --win",
     "preview": "vite preview"

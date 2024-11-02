@@ -224,6 +224,12 @@ install_wgd(){
     _checkWireguard
     sudo chmod -R 755 /etc/wireguard/
     
+    if [ ! -d "/etc/wireguard/WGDashboard_Backup" ]
+    	then
+    		printf "[WGDashboard] Creating /etc/wireguard/WGDashboard_Backup folder\n"
+            mkdir "/etc/wireguard/WGDashboard_Backup"
+    fi
+    
     if [ ! -d "log" ]
 	  then 
 		printf "[WGDashboard] Creating ./log folder\n"
@@ -321,6 +327,7 @@ stop_wgd() {
 	fi
 }
 
+# ============= Docker Functions =============
 startwgd_docker() {
 	_checkWireguard
 	printf "[WGDashboard][Docker] WireGuard configuration started\n"
@@ -351,8 +358,6 @@ start_core() {
 	done
 }
 
-
-
 newconf_wgd() {
     local wg_port_listen=$wg_port
     local wg_addr_range=$wg_net
@@ -368,6 +373,8 @@ PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
 PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
 EOF
 }
+
+# ============= Docker Functions =============
 
 start_wgd_debug() {
 	printf "%s\n" "$dashes"

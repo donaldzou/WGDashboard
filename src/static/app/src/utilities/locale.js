@@ -2,7 +2,6 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 
 export const GetLocale = (key) => {
 	const store = DashboardConfigurationStore()
-	
 	if (store.Locale === null)
 		return key
 	const reg = Object.keys(store.Locale)
@@ -10,6 +9,7 @@ export const GetLocale = (key) => {
 		return key.match(new RegExp('^' + x + '$', 'gi')) !== null
 	})
 	if (match.length === 0 || match.length > 1){
+		// console.log(`[Translation Needed] Language: ${store.Configuration.Server.dashboard_language} \nKey: ${key}`)
 		return key
 	}
 	return key.replace(new RegExp(match[0], 'gi'), store.Locale[match[0]])

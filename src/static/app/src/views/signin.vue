@@ -26,7 +26,6 @@ export default {
 				}),
 				fetchGet("/api/getDashboardVersion", {}, (res) => {
 					version = res.data
-					
 				})
 			]);
 		}
