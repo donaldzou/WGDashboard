@@ -1,8 +1,8 @@
 name: Docker-Build
 
 on:
-  schedule:
-    - cron: "0 0 * * *"  # Daily at midnight UTC
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       trigger-build:
