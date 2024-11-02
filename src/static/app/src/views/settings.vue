@@ -37,7 +37,21 @@ export default {
 	},
 	data(){
 		return{
-			activeTab: "WGDashboard"
+			activeTab: "WGDashboard",
+			tabs: [
+				{
+					id: "WGDashboard",
+					title: "WGDashboard Settings"
+				},
+				{
+					id: "Peers",
+					title: "Peers Settings"
+				},
+				{
+					id: "WireGuardConfiguration",
+					title: "WireGuard Configuration Settings"
+				}
+			]
 		}
 	}
 }
@@ -47,35 +61,14 @@ export default {
 	<div class="mt-md-5 mt-3 text-body mb-3">
 		<div class="container-md d-flex flex-column gap-4">
 			<div>
-				
 				<ul class="nav nav-pills nav-justified align-items-center gap-2">
-					<li class="nav-item">
+					<li class="nav-item" v-for="t in this.tabs">
 						<a class="nav-link rounded-3"
-						   @click="this.activeTab = 'WGDashboard'"
-						   :class="{active: this.activeTab === 'WGDashboard'}"
+						   @click="this.activeTab = t.id"
+						   :class="{active: this.activeTab === t.id}"
 						   role="button">
 							<h6 class="my-2">
-								WGDashboard Settings
-							</h6>
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link rounded-3"
-						   @click="this.activeTab = 'Peers'"
-						   :class="{active: this.activeTab === 'Peers'}"
-						   role="button">
-							<h6 class="my-2">
-								Peers Settings
-							</h6>
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link rounded-3" 
-						   @click="this.activeTab = 'WireGuardConfiguration'"
-						   :class="{active: this.activeTab === 'WireGuardConfiguration'}"
-						   role="button">
-							<h6 class="my-2">
-								WireGuard Configuration Settings
+								<LocaleText :t="t.title"></LocaleText>
 							</h6>
 						</a>
 					</li>

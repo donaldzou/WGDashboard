@@ -208,7 +208,7 @@ const submitRestore = async () => {
 							<LocaleText t="Invalid port."></LocaleText>
 						</li>
 						<li>
-							<LocaleText t="Port is assigned to existing WireGuard Configuration.    "></LocaleText>
+							<LocaleText t="Port is assigned to existing WireGuard Configuration."></LocaleText>
 						</li>
 					</ul>
 				</div>

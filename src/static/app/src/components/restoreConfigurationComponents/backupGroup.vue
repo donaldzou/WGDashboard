@@ -36,9 +36,7 @@ onMounted(() => {
 					</samp>
 				</h6>
 				<small class="text-muted">
-					{{backups.length}} 
-					<LocaleText t="Backups" v-if="backups.length > 1"></LocaleText>
-					<LocaleText t="Backup" v-else></LocaleText>
+					<LocaleText :t="backups.length + (backups.length > 1 ? ' Backups':' Backup')"></LocaleText>
 				</small>
 			</div>
 			<h5 class="ms-auto mb-0 dropdownIcon text-muted" :class="{active: showBackups}">

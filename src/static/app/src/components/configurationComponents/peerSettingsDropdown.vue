@@ -164,20 +164,23 @@ export default {
 			</template>
 			<template v-else>
 				<li class="confirmDelete">
-					<small style="white-space: break-spaces" class="mb-2 d-block fw-bold">Are you sure to delete this peer?</small>
+					<p style="white-space: break-spaces" class="mb-2 d-block fw-bold">
+						<LocaleText t="Are you sure to delete this peer?"></LocaleText>
+					</p>
 					<div class="d-flex w-100 gap-2">
+						<button
+							@click="this.deletePeer()"
+							:disabled="this.deleteBtnDisabled"
+							class="flex-grow-1 ms-auto btn btn-sm bg-danger">
+							<LocaleText t="Yes"></LocaleText>
+						</button>
 						<button
 							:disabled="this.deleteBtnDisabled"
 							@click="this.confirmDelete = false"
 							class="flex-grow-1 btn btn-sm bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
 							<LocaleText t="No"></LocaleText>
 						</button>
-						<button 
-							@click="this.deletePeer()"
-							:disabled="this.deleteBtnDisabled"
-							class="flex-grow-1 ms-auto btn btn-sm bg-danger">
-							<LocaleText t="Yes"></LocaleText>
-						</button>
+						
 					</div>
 				</li>
 			</template>

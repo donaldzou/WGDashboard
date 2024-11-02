@@ -50,7 +50,8 @@ const createBackup = () => {
 					<button 
 						@click="createBackup()"
 						class="btn bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 w-100">
-						<i class="bi bi-plus-circle-fill me-2"></i> Create Backup
+						<i class="bi bi-plus-circle-fill me-2"></i>
+						<LocaleText t="Create Backup"></LocaleText>
 					</button>
 				</div>
 				<div class="position-relative d-flex flex-column gap-3">
@@ -65,7 +66,8 @@ const createBackup = () => {
 						     key="noBackups"
 						>
 							<div class="card-body text-center text-muted">
-								<i class="bi bi-x-circle-fill me-2"></i> No backup yet, click the button above to create backup.
+								<i class="bi bi-x-circle-fill me-2"></i>
+								<LocaleText t="No backup yet, click the button above to create backup."></LocaleText>
 							</div>
 						</div>
 						<Backup

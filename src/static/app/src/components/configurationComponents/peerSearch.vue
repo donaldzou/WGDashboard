@@ -219,7 +219,7 @@ export default {
 											</a>
 											<a class="list-group-item list-group-item-action d-flex text-danger fw-bold" role="button"
 											   @click="this.$emit('deleteConfiguration')">
-												<LocaleText t="Delete"></LocaleText>
+												<LocaleText t="Delete Configuration"></LocaleText>
 											</a>
 										</div>
 									</div>

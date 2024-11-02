@@ -4,6 +4,7 @@ import {computed, ref} from "vue";
 import {fetchPost} from "@/utilities/fetch.js";
 import {useRoute} from "vue-router";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 const props = defineProps(["b", "delay"])
 const deleteConfirmation = ref(false)
 const restoreConfirmation = ref(false)
@@ -59,18 +60,20 @@ const showContent = ref(false);
 					v-if="deleteConfirmation"
 					class="position-absolute w-100 h-100 confirmationContainer start-0 top-0 rounded-3 d-flex p-2">
 					<div class="m-auto">
-						<h5>Are you sure to delete this backup?</h5>
+						<h5>
+							<LocaleText t="Are you sure to delete this backup?"></LocaleText>
+						</h5>
 						<div class="d-flex gap-2 align-items-center justify-content-center">
 							<button class="btn btn-danger rounded-3" 
 							        :disabled="loading"
 							        @click='deleteBackup()'>
-								Yes
+								<LocaleText t="Yes"></LocaleText>
 							</button>
 							<button
 								@click="deleteConfirmation = false"
 								:disabled="loading"
 								class="btn bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3">
-								No
+								<LocaleText t="No"></LocaleText>
 							</button>
 						</div>
 					</div>
@@ -81,19 +84,21 @@ const showContent = ref(false);
 					v-if="restoreConfirmation"
 					class="position-absolute w-100 h-100 confirmationContainer start-0 top-0 rounded-3 d-flex p-2">
 					<div class="m-auto">
-						<h5>Are you sure to restore this backup?</h5>
+						<h5>
+							<LocaleText t="Are you sure to restore this backup?"></LocaleText>
+						</h5>
 						<div class="d-flex gap-2 align-items-center justify-content-center">
 							<button
 								:disabled="loading"
 								@click="restoreBackup()"
 								class="btn btn-success rounded-3">
-								Yes
+								<LocaleText t="Yes"></LocaleText>
 							</button>
 							<button
 								@click="restoreConfirmation = false"
 								:disabled="loading"
 								class="btn bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3">
-								No
+								<LocaleText t="No"></LocaleText>
 							</button>
 						</div>
 					</div>
@@ -102,13 +107,13 @@ const showContent = ref(false);
 			<div class="d-flex gap-3">
 				<div class="d-flex flex-column">
 					<small class="text-muted">
-						Backup
+						<LocaleText t="Backup"></LocaleText>
 					</small>
 					<samp>{{b.filename}}</samp>
 				</div>
 				<div class="d-flex flex-column">
 					<small class="text-muted">
-						Backup Date
+						<LocaleText t="Backup Date"></LocaleText>
 					</small>
 					{{dayjs(b.backupDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss")}}
 				</div>
@@ -130,7 +135,7 @@ const showContent = ref(false);
 				<a role="button" class="card-header d-flex text-decoration-none align-items-center" 
 				   :class="{'border-bottom-0': !showContent}"
 				   style="cursor: pointer" @click="showContent = !showContent">
-					<small>.conf File
+					<small>.conf <LocaleText t="File"></LocaleText>
 						</small>
 					<i class="bi bi-chevron-down ms-auto"></i>
 				</a>
@@ -144,7 +149,7 @@ const showContent = ref(false);
 			<div class="d-flex">
 				<span>
 					<i class="bi bi-database me-1"></i>
-					Database
+					<LocaleText t="Database File"></LocaleText>
 				</span>
 				<i class="bi ms-auto"
 					:class="[b.database ? 'text-success bi-check-circle-fill' : 'text-danger bi-x-circle-fill']"

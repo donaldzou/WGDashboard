@@ -45,6 +45,12 @@ export default {
 						<i class="bi bi-plus-circle"></i>
 					</h2>
 				</RouterLink>
+				<RouterLink to="/restore_configuration"
+				            class="btn btn-dark btn-brand p-2 shadow ms-2" style="border-radius: 100%">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-clock-history "></i>
+					</h2>
+				</RouterLink>
 				
 			</div>
 			<TransitionGroup name="fade" tag="div" class="d-flex flex-column gap-3 mb-4">

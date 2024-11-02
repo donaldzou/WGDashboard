@@ -19,7 +19,7 @@ const selectedConfiguration = ref("")
 	<div class="mt-5 text-body">
 		<div class="container mb-4">
 			<div class="mb-5 d-flex align-items-center gap-4">
-				<RouterLink to="/new_configuration"
+				<RouterLink to="/"
 				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
 					<h2 class="mb-0" style="line-height: 0">
 						<i class="bi bi-arrow-left-circle"></i>

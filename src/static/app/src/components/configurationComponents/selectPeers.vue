@@ -115,18 +115,20 @@ const clearDownload = () => {
 						<div class="d-flex w-100 align-items-center gap-2">
 							<div class="d-flex gap-3">
 								<a role="button"
-								   v-if="!downloadConfirmation"
+								   v-if="!downloadConfirmation && selectedPeers.length !== configurationPeers.map(x => x.id).length"
 								   @click="selectedPeers = configurationPeers.map(x => x.id)"
 								   class="text-decoration-none text-body">
 									<small>
-										<i class="bi bi-check-all me-2"></i>Select All
+										<i class="bi bi-check-all me-2"></i>
+										<LocaleText t="Select All"></LocaleText>
 									</small>
 								</a>
 								<a role="button" class="text-decoration-none text-body"
 								   @click="selectedPeers = []"
 								   v-if="selectedPeers.length > 0 && !downloadConfirmation">
 									<small>
-										<i class="bi bi-x-circle-fill me-2"></i>Clear
+										<i class="bi bi-x-circle-fill me-2"></i>
+										<LocaleText t="Clear Selection"></LocaleText>
 									</small>
 								</a>
 							</div>
@@ -143,7 +145,7 @@ const clearDownload = () => {
 					<div class="card-body px-4 flex-grow-1 d-flex gap-2 flex-column position-relative" 
 					     ref="card-body"
 					     style="overflow-y: scroll">
-						<button type="button" class="btn w-100 peerBtn text-start rounded-3"
+						<button type="button" class="btn w-100 peerBtn text-start rounded-3 d-flex align-items-center gap-3"
 						        @click="togglePeers(p.id)"
 						        :class="{active: selectedPeers.find(x => x === p.id)}"
 						        :key="p.id"
@@ -151,31 +153,28 @@ const clearDownload = () => {
 						        ref="sp"
 						        :data-id="p.id"
 						        v-for="p in searchPeers">
-							<div class="d-flex align-items-center gap-3">
-								<span v-if="!downloadConfirmation">
+							<span v-if="!downloadConfirmation">
 									<i class="bi"
 									   :class="[ selectedPeers.find(x => x === p.id) ? 'bi-check-circle-fill':'bi-circle']"
 									></i>
 								</span>
-								<div class="d-flex flex-column">
-									<small class="fw-bold">
-										{{p.name ? p.name : "Untitled Peer"}}
-									</small>
-									<small class="text-muted">
-										<samp>{{p.id}}</samp>
-									</small>
-								</div>
-								<span v-if="downloadConfirmation" class="ms-auto">
-									<div class="spinner-border spinner-border-sm" role="status" 
-									     v-if="!downloaded.success.find(x => x === p.id) && !downloaded.failed.find(x => x === p.id)">
-										<span class="visually-hidden">Loading...</span>
-									</div>
-									<i class="bi"
-									   v-else
-									   :class="[downloaded.failed.find(x => x === p.id) ? 'bi-x-circle-fill':'bi-check-circle-fill']"
-									></i>
+							<span class="d-flex flex-column">
+								<small class="fw-bold">
+									{{p.name ? p.name : "Untitled Peer"}}
+								</small>
+								<small class="text-muted">
+									<samp>{{p.id}}</samp>
+								</small>
+							</span>
+							<span v-if="downloadConfirmation" class="ms-auto">
+								<span class="spinner-border spinner-border-sm" role="status"
+								     v-if="!downloaded.success.find(x => x === p.id) && !downloaded.failed.find(x => x === p.id)">
 								</span>
-							</div>
+								<i class="bi"
+								   v-else
+								   :class="[downloaded.failed.find(x => x === p.id) ? 'bi-x-circle-fill':'bi-check-circle-fill']"
+								></i>
+							</span>
 						</button>
 					</div>
 					<div class="card-footer px-4 py-3 gap-2 d-flex align-items-center">
@@ -187,7 +186,8 @@ const clearDownload = () => {
 								<i class="bi bi-download"></i>
 							</button>
 							<span v-if="selectedPeers.length > 0" class="flex-grow-1 text-center">
-								<i class="bi bi-check-circle-fill me-2"></i> {{selectedPeers.length}} Peer{{selectedPeers.length > 1 ? 's':''}}
+								<i class="bi bi-check-circle-fill me-2"></i>
+								<LocaleText :t="selectedPeers.length + ' Peer' + (selectedPeers.length > 1 ? 's':'')"></LocaleText>
 							</span>
 							<button class="btn bg-danger-subtle text-danger-emphasis border-danger-subtle ms-auto rounded-3"
 							        @click="deleteConfirmation = true"
@@ -198,16 +198,16 @@ const clearDownload = () => {
 						</template>
 						<template v-else-if="downloadConfirmation">
 							<strong v-if="downloaded.failed.length + downloaded.success.length < selectedPeers.length" class="flex-grow-1 text-center">
-								Downloading {{selectedPeers.length}} Peer{{selectedPeers.length > 1 ? 's':''}}...
+								<LocaleText t="Downloading" /> <LocaleText :t="selectedPeers.length + ' Peer' + (selectedPeers.length > 1 ? 's':'')"></LocaleText>...
 							</strong>
 							<template v-else>
 								<strong>
-									Download Finished
+									<LocaleText t="Download Finished"></LocaleText>
 								</strong>
 								<button 
 									@click="clearDownload()"
 									class="btn bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle rounded-3 ms-auto">
-									Done
+									<LocaleText t="Done"></LocaleText>
 								</button>
 							</template>
 						</template>
@@ -216,16 +216,16 @@ const clearDownload = () => {
 							        :disabled="selectedPeers.length === 0 || submitting"
 							        @click="submitDelete()"
 							>
-								Yes
+								<LocaleText t="Yes"></LocaleText>
 							</button>
 							<strong v-if="selectedPeers.length > 0" class="flex-grow-1 text-center">
-								Are you sure to delete {{selectedPeers.length}} Peer{{selectedPeers.length > 1 ? 's':''}}?
+								<LocaleText t="Are you sure to delete"></LocaleText> <LocaleText :t="selectedPeers.length + ' Peer' + (selectedPeers.length > 1 ? 's':'')"></LocaleText>?
 							</strong>
 							<button class="btn bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle ms-auto rounded-3"
 							        :disabled="selectedPeers.length === 0 || submitting"
 							        @click="deleteConfirmation = false"
 							>
-								No
+								<LocaleText t="No"></LocaleText>
 							</button>
 						</template>
 					</div>

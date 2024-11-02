@@ -59,15 +59,23 @@ const emits = defineEmits(["backup"])
 				<div class="card rounded-3 shadow flex-grow-1 bg-danger-subtle border-danger-subtle" id="deleteConfigurationContainer">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
 						<h5 class="mb-0">
-							Are you sure to delete this configuration?
+							<LocaleText t="Are you sure to delete this configuration?"></LocaleText>
 						</h5>
 						<button type="button" class="btn-close ms-auto" @click="$emit('close')"></button>
 					</div>
-					<div class="card-body px-4">
-						<p class="text-muted">
-							Once you deleted, all connected peers will get disconnected; Both configuration file 
-							(<code>.conf</code>) and database table related to this configuration will get deleted.
+					<div class="card-body px-4 text-muted">
+						<p class="mb-0">
+							<LocaleText t="Once you deleted this configuration:"></LocaleText>
 						</p>
+						<ul>
+							<li>
+								<LocaleText t="All connected peers will get disconnected"></LocaleText>
+							</li>
+							<li>
+								<LocaleText t="Both configuration file (.conf) and database table related to this configuration will get deleted"></LocaleText>
+							</li>
+						</ul>
+						 
 						<div class="alert"
 						     :class="[loading ? 'alert-secondary' : (backups.length > 0 ? 'alert-success' : 'alert-danger')]">
 							<div v-if="loading">
@@ -80,13 +88,12 @@ const emits = defineEmits(["backup"])
 							</div>
 							<div v-else class="d-flex align-items-center gap-2">
 								<i class="bi bi-x-circle-fill me-2"></i>
-								<LocaleText t="This configuration have no backup."></LocaleText>
-								
+								<LocaleText t="This configuration have no backup"></LocaleText>
 								<a role="button" 
 								   @click="emits('backup')"
 								   class="ms-auto btn btn-sm btn-primary rounded-3">
 									<i class="bi bi-clock-history me-2"></i>
-									Backup
+									<LocaleText t="Backup"></LocaleText>
 								</a>
 								<a role="button"
 								   @click="getBackup()"
@@ -96,7 +103,9 @@ const emits = defineEmits(["backup"])
 							</div>
 						</div>
 						<hr>
-						<p>If you're sure, please type in the configuration name below and click Delete.</p>
+						<p>
+							<LocaleText t="If you're sure, please type in the configuration name below and click Delete"></LocaleText>
+						</p>
 						<input class="form-control rounded-3 mb-3" 
 						       :placeholder="configurationName"
 						       v-model="input"
@@ -105,7 +114,7 @@ const emits = defineEmits(["backup"])
 						        @click="deleteConfiguration()"
 						        :disabled="input !== configurationName || deleting">
 							<i class="bi bi-trash-fill me-2 rounded-3"></i>
-							Delete
+							<LocaleText t="Delete"></LocaleText>
 						</button>
 					</div>
 				</div>

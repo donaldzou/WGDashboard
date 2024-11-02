@@ -138,12 +138,6 @@ export default {
 				<h2 class="mb-0">
 					<LocaleText t="New Configuration"></LocaleText>
 				</h2>
-				<RouterLink to="/restore_configuration"
-				            class="btn btn-dark btn-brand p-2 shadow ms-auto" style="border-radius: 100%">
-					<h2 class="mb-0" style="line-height: 0">
-						<i class="bi bi-clock-history"></i>
-					</h2>
-				</RouterLink>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
