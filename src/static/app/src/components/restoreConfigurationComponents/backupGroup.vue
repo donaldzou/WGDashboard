@@ -1,6 +1,7 @@
 <script setup>
 import {onMounted, ref} from "vue";
 import dayjs from "dayjs";
+import LocaleText from "@/components/text/localeText.vue";
 
 const props = defineProps({
 	configurationName: String,
@@ -35,7 +36,9 @@ onMounted(() => {
 					</samp>
 				</h6>
 				<small class="text-muted">
-					{{backups.length}} {{backups.length > 1 ? "Backups": "Backup" }}
+					{{backups.length}} 
+					<LocaleText t="Backups" v-if="backups.length > 1"></LocaleText>
+					<LocaleText t="Backup" v-else></LocaleText>
 				</small>
 			</div>
 			<h5 class="ms-auto mb-0 dropdownIcon text-muted" :class="{active: showBackups}">
@@ -59,7 +62,8 @@ onMounted(() => {
 					</small>
 					<small >
 						<i class="bi bi-database me-2"></i>
-						{{b.database? "Yes" : "No" }}
+						<LocaleText t="Yes" v-if="b.database"></LocaleText>
+						<LocaleText t="No" v-else></LocaleText>
 					</small>
 					<small class="text-muted ms-auto">
 						<i class="bi bi-chevron-right"></i>

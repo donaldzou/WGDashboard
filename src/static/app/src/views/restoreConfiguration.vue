@@ -41,7 +41,9 @@ const selectedConfiguration = ref("")
 							<i class="bi bi-1-circle-fill"></i>
 						</h1>
 						<div>
-							<h4 class="mb-0">Step 1</h4>
+							<h4 class="mb-0">
+								<LocaleText t="Step 1"></LocaleText>
+							</h4>
 							<small class="text-muted">
 								<LocaleText t="Select a backup you want to restore" v-if="!confirm"></LocaleText>
 								<LocaleText t="Click to change a backup" v-else></LocaleText>
@@ -50,7 +52,9 @@ const selectedConfiguration = ref("")
 					</div>
 					<Transition name="zoomReversed">
 						<div class="ms-sm-auto" v-if="confirm">
-							<small class="text-muted">Selected Backup</small>
+							<small class="text-muted">
+								<LocaleText t="Selected Backup"></LocaleText>
+							</small>
 							<h6>
 								<samp>{{selectedConfigurationBackup.filename}}</samp>
 							</h6>
@@ -58,21 +62,7 @@ const selectedConfiguration = ref("")
 					</Transition>
 				</div>
 				<div id="step1Detail" v-if="!confirm">
-<!--					<div class="mb-4">-->
-<!--						<h5>Backup of existing WireGuard Configurations</h5>-->
-<!--						<hr>-->
-<!--						<div class="d-flex gap-3 flex-column">-->
-<!--							<BackupGroup-->
-<!--								@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"-->
-<!--								:open="selectedConfiguration === c"-->
-<!--								:selectedConfigurationBackup="selectedConfigurationBackup"-->
-<!--								v-for="c in Object.keys(backups.ExistingConfigurations)"-->
-<!--								:configuration-name="c" :backups="backups.ExistingConfigurations[c]"></BackupGroup>-->
-<!--						</div>-->
-<!--					</div>-->
 					<div class="mb-4">
-<!--						<h5>Backup of non-existing WireGuard Configurations</h5>-->
-<!--						<hr>-->
 						<div class="d-flex gap-3 flex-column">
 							<BackupGroup
 								@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"
@@ -83,7 +73,9 @@ const selectedConfiguration = ref("")
 							<div v-if="Object.keys(backups.NonExistingConfigurations).length === 0">
 								<div class="card rounded-3">
 									<div class="card-body">
-										<p class="mb-0">You don't have any configuration to restore</p>
+										<p class="mb-0">
+											<LocaleText t="You don't have any configuration to restore"></LocaleText>
+										</p>
 									</div>
 								</div>
 							</div>

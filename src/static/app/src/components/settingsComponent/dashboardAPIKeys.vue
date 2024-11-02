@@ -45,7 +45,6 @@ export default {
 			handler(newValue){
 				if (newValue){
 					fetchGet("/api/getDashboardAPIKeys", {}, (res) => {
-						console.log(res)
 						if(res.status){
 							this.apiKeys = res.data
 						}else{

@@ -105,14 +105,14 @@ const availableIPAddress = computed(() => {
 const peersCount = computed(() => {
 	if (props.selectedConfigurationBackup.database){
 		let l = props.selectedConfigurationBackup.databaseContent.split("\n")
-		return l.filter(x => x.search('INSERT INTO "(.*)"') >= 0).length
+		return l.filter(x => x.search(`INSERT INTO "${newConfiguration.ConfigurationName}"`) >= 0).length
 	}
 	return 0
 })
 const restrictedPeersCount = computed(() => {
 	if (props.selectedConfigurationBackup.database){
 		let l = props.selectedConfigurationBackup.databaseContent.split("\n")
-		return l.filter(x => x.search('INSERT INTO "(.*)_restrict_access"') >= 0).length
+		return l.filter(x => x.search(`INSERT INTO "${newConfiguration.ConfigurationName}_restrict_access"`) >= 0).length
 	}
 	return 0
 })
@@ -136,7 +136,7 @@ const submitRestore = async () => {
 	<form class="d-flex flex-column gap-3">
 		<div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
 			<h4 class="mb-0">
-				<LocaleText t="Configuration File"></LocaleText>
+				<LocaleText t="Configuration"></LocaleText>
 			</h4>
 		</div>
 		<div>
@@ -220,7 +220,7 @@ const submitRestore = async () => {
 					<LocaleText t="IP Address/CIDR"></LocaleText>
 				</small>
 				<small class="ms-auto" :class="[availableIPAddress > 0 ? 'text-success':'text-danger']">
-					{{availableIPAddress}} Available IP Address
+					<LocaleText :t="availableIPAddress + ' Available IP Address'"></LocaleText>
 				</small>
 			</label>
 			<input type="text" class="form-control"
@@ -299,14 +299,16 @@ const submitRestore = async () => {
 				<div class="col-sm">
 					<div class="card text-bg-success rounded-3">
 						<div class="card-body">
-							<i class="bi bi-person-fill me-2"></i> Contain <strong>{{peersCount}}</strong> Peer{{peersCount > 1 ? 's':''}}
+							<i class="bi bi-person-fill me-2"></i>
+							<LocaleText t="Contain"></LocaleText> <strong>{{peersCount}}</strong> <LocaleText t="Peer" v-if="peersCount > 1"></LocaleText><LocaleText t="Peer" v-else></LocaleText>
 						</div>
 					</div>
 				</div>
 				<div class="col-sm">
 					<div class="card text-bg-warning rounded-3">
 						<div class="card-body">
-							<i class="bi bi-person-fill-lock me-2"></i> Contain <strong>{{restrictedPeersCount}}</strong> Restricted Peer{{restrictedPeersCount > 1 ? 's':''}}
+							<i class="bi bi-person-fill-lock me-2"></i>
+							<LocaleText t="Contain"></LocaleText> <strong>{{restrictedPeersCount}}</strong> <LocaleText t="Restricted Peers" v-if="restrictedPeersCount > 1" /><LocaleText t="Restricted Peers" v-else></LocaleText>
 						</div>
 					</div>
 				</div>
@@ -318,7 +320,8 @@ const submitRestore = async () => {
 			:disabled="!validateForm || loading"
 		        @click="submitRestore()"
 		>
-			<i class="bi bi-clock-history me-2"></i> {{ !loading ? 'Restore':'Restoring...'}}
+			<i class="bi bi-clock-history me-2"></i>
+			<LocaleText :t="!loading ? 'Restore':'Restoring...'"></LocaleText>
 		</button>
 	</div>
 </div>

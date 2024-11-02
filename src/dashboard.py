@@ -1388,7 +1388,7 @@ class DashboardConfig:
             elif type(value) in [int, float]:
                 self.__config[section][key] = str(value)
             elif type(value) is list:
-                self.__config[section][key] = "||".join(value)
+                self.__config[section][key] = "||".join(value).strip("||")
             else:
                 self.__config[section][key] = value
             return self.SaveConfig(), ""
@@ -1416,7 +1416,7 @@ class DashboardConfig:
             return True, False
         
         if section == "WireGuardConfiguration" and key == "autostart":
-            return True, self.__config[section][key].split("||")
+            return True, list(filter(lambda x: len(x) > 0, self.__config[section][key].split("||")))
 
         return True, self.__config[section][key]
 
@@ -1894,7 +1894,7 @@ def API_updateDashboardConfigurationItem():
             WireguardConfigurations.clear()
             _getConfigurationList()
             
-    return ResponseObject()
+    return ResponseObject(True, data=DashboardConfig.GetConfig(data["section"], data["key"])[1])
 
 @app.get(f'{APP_PREFIX}/api/getDashboardAPIKeys')
 def API_getDashboardAPIKeys():

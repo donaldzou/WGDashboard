@@ -13,13 +13,17 @@ const configurations = computed(() => {
 })
 
 const updateAutostart = async () => {
-	console.log(data.value)
 	await fetchPost("/api/updateDashboardConfigurationItem", {
 		section: "WireGuardConfiguration",
 		key: "autostart",
 		value: data.value
 	}, async (res) => {
-		console.log(res);
+		if (res.status){
+			store.newMessage("Server", "Start up configurations saved", "success")
+			data.value = res.data
+		}else{
+			store.newMessage("Server", "Start up configurations failed to save", "danger")
+		}
 	})
 }
 
@@ -29,12 +33,8 @@ const toggle = (c) => {
 	}else{
 		data.value.push(c)
 	}
-}
-
-watch(data, () => {
 	updateAutostart()
-})
-
+}
 </script>
 
 <template>

@@ -78,7 +78,7 @@ export default {
 </script>
 
 <template>
-	<div class="d-flex flex-column gap-2">
+	<form class="d-flex flex-column gap-2">
 		<div class="row g-2">
 			<div class="col-sm">
 				<div class="form-group">
@@ -88,6 +88,7 @@ export default {
 						</small></strong>
 					</label>
 					<input type="password" class="form-control"
+					       autocomplete="current-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.currentPassword"
 					       :id="'currentPassword_' + this.uuid">
@@ -102,6 +103,7 @@ export default {
 						</small></strong>
 					</label>
 					<input type="password" class="form-control"
+					       autocomplete="new-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.newPassword"
 					       :id="'newPassword_' + this.uuid">
@@ -116,6 +118,7 @@ export default {
 						</small></strong>
 					</label>
 					<input type="password" class="form-control"
+					       autocomplete="new-password"
 					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
 					       v-model="this.value.repeatNewPassword"
 					       :id="'repeatNewPassword_' + this.uuid">
@@ -128,7 +131,7 @@ export default {
 			<i class="bi bi-save2-fill me-2"></i>
 			<LocaleText t="Update Password"></LocaleText>
 		</button>
-	</div>
+	</form>
 </template>
 
 <style scoped>
