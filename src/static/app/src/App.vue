@@ -2,20 +2,17 @@
 import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {computed, watch} from "vue";
-import {v4} from "uuid";
 const store = DashboardConfigurationStore();
 store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
 	store.IsElectronApp = true;
 	store.CrossServerConfiguration.Enable = true;
 }
-
 watch(store.CrossServerConfiguration, () => {
 	store.syncCrossServerConfiguration()
 }, {
 	deep: true
 });
-
 const getActiveCrossServer = computed(() => {
 	if (store.ActiveServerConfiguration){
 		return store.CrossServerConfiguration.ServerList[store.ActiveServerConfiguration]
@@ -35,7 +32,8 @@ const getActiveCrossServer = computed(() => {
 			<a role="button" class="navbarBtn text-body"
 			   @click="store.ShowNavBar = !store.ShowNavBar"
 			   style="line-height: 0; font-size: 2rem">
-				<i class="bi bi-list"></i></a>
+				<i class="bi bi-list"></i>
+			</a>
 		</div>
 	</nav>
 	<Suspense>
@@ -52,18 +50,14 @@ const getActiveCrossServer = computed(() => {
 .app-leave-active {
 	transition: all 0.7s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
-
 .app-enter-from,
 .app-leave-to{
 	opacity: 0;
 	transform: scale(1.1);
 }
-
 @media screen and (min-width: 768px) {
 	.navbar{
 		display: none;
 	}
 }
-
-
 </style>

@@ -32,38 +32,34 @@ Chart.register(
 	PointElement
 );
 import dayjs from "dayjs";
-import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
-import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
-import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
-import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
-// import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
-// import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
 import {defineAsyncComponent, ref} from "vue";
-import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
 import LocaleText from "@/components/text/localeText.vue";
-import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
-import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
-import ConfigurationBackupRestore
-	from "@/components/configurationComponents/configurationBackupRestore.vue";
-import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
-
 export default {
 	name: "peerList",
 	components: {
-		DeleteConfiguration,
-		ConfigurationBackupRestore,
-		SelectPeers,
-		EditConfiguration,
+		DeleteConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/deleteConfiguration.vue")),
+		ConfigurationBackupRestore:
+			defineAsyncComponent(() => import("@/components/configurationComponents/configurationBackupRestore.vue")),
+		SelectPeers:
+			defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue")),
+		EditConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue")),
 		LocaleText,
-		PeerShareLinkModal,
+		PeerShareLinkModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerShareLinkModal.vue")),
 		PeerJobsLogsModal: 
 			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue")),
 		PeerJobsAllModal:
 			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue")),
-		PeerJobs, 
-		PeerCreate,
-		PeerQRCode, 
-		PeerSettings, 
+		PeerJobs: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobs.vue")), 
+		PeerCreate:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerCreate.vue")),
+		PeerQRCode:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue")), 
+		PeerSettings:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerSettings.vue")), 
 		PeerSearch, 
 		Peer, 
 		Line, 
