@@ -1,22 +1,22 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import {cookie} from "../utilities/cookie.js";
-import Index from "@/views/index.vue"
-import Signin from "@/views/signin.vue";
-import ConfigurationList from "@/components/configurationList.vue";
+// import Index from "@/views/index.vue"
+// import Signin from "@/views/signin.vue";
+// import ConfigurationList from "@/components/configurationList.vue";
 import {fetchGet} from "@/utilities/fetch.js";
-import Settings from "@/views/settings.vue";
+// import Settings from "@/views/settings.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import Setup from "@/views/setup.vue";
-import NewConfiguration from "@/views/newConfiguration.vue";
-import Configuration from "@/views/configuration.vue";
-import PeerList from "@/components/configurationComponents/peerList.vue";
-import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
-import Ping from "@/views/ping.vue";
-import Traceroute from "@/views/traceroute.vue";
-import Totp from "@/components/setupComponent/totp.vue";
-import Share from "@/views/share.vue";
-import RestoreConfiguration from "@/views/restoreConfiguration.vue";
+// import Setup from "@/views/setup.vue";
+// import NewConfiguration from "@/views/newConfiguration.vue";
+// import Configuration from "@/views/configuration.vue";
+// import PeerList from "@/components/configurationComponents/peerList.vue";
+// import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
+// import Ping from "@/views/ping.vue";
+// import Traceroute from "@/views/traceroute.vue";
+// import Totp from "@/components/setupComponent/totp.vue";
+// import Share from "@/views/share.vue";
+// import RestoreConfiguration from "@/views/restoreConfiguration.vue";
 
 const checkAuth = async () => {
 	let result = false
@@ -39,7 +39,7 @@ const router = createRouter({
 		{
 			name: "Index",
 			path: '/',
-			component: Index,
+			component: () => import('@/views/index.vue'),
 			meta: {
 				requiresAuth: true,
 			},
@@ -47,7 +47,7 @@ const router = createRouter({
 				{
 					name: "Configuration List",
 					path: '',
-					component: ConfigurationList,
+					component: () => import('@/components/configurationList.vue'),
 					meta: {
 						title: "WireGuard Configurations"
 					}
@@ -55,7 +55,7 @@ const router = createRouter({
 				{
 					name: "Settings",
 					path: '/settings',
-					component: Settings,
+					component: () => import('@/views/settings.vue'),
 					meta: {
 						title: "Settings"
 					}
@@ -63,17 +63,17 @@ const router = createRouter({
 				{
 					path: '/ping',
 					name: "Ping",
-					component: Ping,
+					component: () => import('@/views/ping.vue'),
 				},
 				{
 					path: '/traceroute',
 					name: "Traceroute",
-					component: Traceroute,
+					component: () => import('@/views/traceroute.vue'),
 				},
 				{
 					name: "New Configuration",
 					path: '/new_configuration',
-					component: NewConfiguration,
+					component: () => import('@/views/newConfiguration.vue'),
 					meta: {
 						title: "New Configuration"
 					}
@@ -81,7 +81,7 @@ const router = createRouter({
 				{
 					name: "Restore Configuration",
 					path: '/restore_configuration',
-					component: RestoreConfiguration,
+					component: () => import('@/views/restoreConfiguration.vue'),
 					meta: {
 						title: "Restore Configuration"
 					}
@@ -89,7 +89,7 @@ const router = createRouter({
 				{
 					name: "Configuration",
 					path: '/configuration/:id',
-					component: Configuration,
+					component: () => import('@/views/configuration.vue'),
 					meta: {
 						title: "Configuration"
 					},
@@ -97,12 +97,12 @@ const router = createRouter({
 						{
 							name: "Peers List",
 							path: 'peers',
-							component: PeerList
+							component: () => import('@/components/configurationComponents/peerList.vue')
 						},
 						{
 							name: "Peers Create",
 							path: 'create',
-							component: PeerCreate
+							component: () => import('@/components/configurationComponents/peerCreate.vue')
 						},
 					]
 				},
@@ -110,27 +110,31 @@ const router = createRouter({
 			]
 		},
 		{
-			path: '/signin', component: Signin,
+			path: '/signin', 
+			component: () => import('@/views/signin.vue'),
 			meta: {
 				title: "Sign In"
 			}
 		},
 		{
-			path: '/welcome', component: Setup,
+			path: '/welcome', 
+			component: () => import("@/views/setup.vue"),
 			meta: {
 				requiresAuth: true,
 				title: "Welcome to WGDashboard"
 			},
 		},
 		{
-			path: '/2FASetup', component: Totp,
+			path: '/2FASetup', 
+			component: () => import("@/components/setupComponent/totp.vue"),
 			meta: {
 				requiresAuth: true,
 				title: "Multi-Factor Authentication Setup"
 			},
 		},
 		{
-			path: '/share', component: Share,
+			path: '/share', 
+			component: () => import("@/views/share.vue"),
 			meta: {
 				title: "Share"
 			}
