@@ -1,5 +1,4 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-
 export const GetLocale = (key) => {
 	const store = DashboardConfigurationStore()
 	if (store.Locale === null)

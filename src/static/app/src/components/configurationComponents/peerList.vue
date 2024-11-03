@@ -8,38 +8,37 @@ import { Line, Bar } from 'vue-chartjs'
 import Fuse from "fuse.js";
 import {
 	Chart,
-	ArcElement,
 	LineElement,
-	BarElement,
-	PointElement,
+	BarElement, 
 	BarController,
-	BubbleController,
-	DoughnutController,
 	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
 	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
 	Legend,
 	Title,
-	Tooltip
+	Tooltip,
+	CategoryScale,
+	PointElement
 } from 'chart.js';
+Chart.register(
+	LineElement,
+	BarElement,
+	BarController,
+	LineController,
+	LinearScale,
+	Legend,
+	Title,
+	Tooltip,
+	CategoryScale,
+	PointElement
+);
 import dayjs from "dayjs";
 import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
 import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
 import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
 import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
-import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
-import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
-import {ref} from "vue";
+// import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
+// import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
+import {defineAsyncComponent, ref} from "vue";
 import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
 import LocaleText from "@/components/text/localeText.vue";
 import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
@@ -47,32 +46,6 @@ import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
 import ConfigurationBackupRestore
 	from "@/components/configurationComponents/configurationBackupRestore.vue";
 import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
-
-Chart.register(
-	ArcElement,
-	LineElement,
-	BarElement,
-	PointElement,
-	BarController,
-	BubbleController,
-	DoughnutController,
-	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
-	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
-	Legend,
-	Title,
-	Tooltip
-);
 
 export default {
 	name: "peerList",
@@ -83,8 +56,19 @@ export default {
 		EditConfiguration,
 		LocaleText,
 		PeerShareLinkModal,
-		PeerJobsLogsModal,
-		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+		PeerJobsLogsModal: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue")),
+		PeerJobsAllModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue")),
+		PeerJobs, 
+		PeerCreate,
+		PeerQRCode, 
+		PeerSettings, 
+		PeerSearch, 
+		Peer, 
+		Line, 
+		Bar
+	},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -447,13 +431,10 @@ export default {
 						</small></p>
 						<div class="form-check form-switch ms-auto">
 							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								
 								<LocaleText t="Turning Off..." v-if="!this.configurationInfo.Status && this.configurationToggling"></LocaleText>
 								<LocaleText t="Turning On..." v-else-if="this.configurationInfo.Status && this.configurationToggling"></LocaleText>
 								<LocaleText t="On" v-else-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
 								<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
-								
-								
 								<span v-if="this.configurationToggling"
 								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 							</label>
