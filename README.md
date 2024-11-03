@@ -6,8 +6,6 @@
   <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
-
-
 <p align="center">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
     <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
