@@ -296,5 +296,17 @@
 	"Download Finished": "下载完成",
 	"Done": "完成",
 	"Are you sure to delete": "您确定要删除",
-	"Are you sure to delete this peer\\?": "您确定要删除此端点吗？"
+	"Are you sure to delete this peer\\?": "您确定要删除此端点吗？",
+	"Configuration deleted": "配置删除成功",
+	"Configuration saved": "",
+	"WGDashboard language update failed": "WGDashboard 语言更新失败",
+	"Configuration restored": "配置恢复成功",
+	"Allowed IP already taken by another peer": "允许的 IP 地址已经被别的端点占用",
+	"Failed to allow access of peer (.*)": "此端点解除限制访问失败：$1",
+	"Failed to save configuration through WireGuard": "使用 WireGuard 保存配置失败",
+	"Allow access successfully": "解除限制访问成功",
+	"Deleted ([0-9]{1,}) peer\\(s\\)": "删除了$1个端点",
+	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "成功删除了$1个端点，失败删除了$2个端点",
+	"Restricted ([0-9]{1,}) peer\\(s\\)": "限制访问了$1个端点",
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "成功限制访问了$1个端点，失败限制访问了$2个端点"
 }

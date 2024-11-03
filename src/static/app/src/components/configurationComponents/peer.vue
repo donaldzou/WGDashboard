@@ -67,7 +67,7 @@ export default {
 			</h6>
 			<div class="mb-1">
 				<small class="text-muted">
-					Public Key
+					<LocaleText t="Public Key"></LocaleText>
 				</small>
 				<small class="d-block">
 					<samp>{{Peer.id}}</samp>

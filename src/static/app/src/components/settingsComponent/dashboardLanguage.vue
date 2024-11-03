@@ -29,7 +29,7 @@ export default {
 					this.store.Configuration.Server.dashboard_language = lang_id;
 					this.store.Locale = res.data
 				}else{
-					this.store.newMessage("Server", "Dashboard language update failed", "danger")
+					this.store.newMessage("Server", "WGDashboard language update failed", "danger")
 				}
 			})
 		}

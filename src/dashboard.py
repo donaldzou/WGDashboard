@@ -760,7 +760,7 @@ class WireguardConfiguration:
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
         self.__getPeers()
-        return ResponseObject(True, "Allow access successfully!")
+        return ResponseObject(True, "Allow access successfully")
 
     def restrictPeers(self, listOfPublicKeys):
         numOfRestrictedPeers = 0
@@ -1049,7 +1049,7 @@ class WireguardConfiguration:
         with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
             original = f.readlines()
             original = [l.rstrip("\n") for l in original]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost", "PrivateKey"]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost"]
             start = original.index("[Interface]")
             for line in range(start+1, len(original)):
                 if original[line] == "[Peer]":
@@ -1733,7 +1733,6 @@ def API_addWireguardConfiguration():
                                   "Address")
 
     if "Backup" in data.keys():
-        
         if not os.path.exists(os.path.join(
                 DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
                 'WGDashboard_Backup',
@@ -1769,7 +1768,6 @@ def API_updateWireguardConfiguration():
     for i in requiredKeys:
         if i not in data.keys():
             return ResponseObject(False, "Please provide these following field: " + ", ".join(requiredKeys))
-    
     name = data.get("Name")
     if name not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
@@ -2080,7 +2078,7 @@ def API_addPeers(configName):
     
             config = WireguardConfigurations.get(configName)
             if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
-                return ResponseObject(False, "Please provide at lease public_key and allowed_ips")
+                return ResponseObject(False, "Please provide at least public_key and allowed_ips")
             if not config.getStatus():
                 config.toggleConfiguration()
     
