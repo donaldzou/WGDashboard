@@ -1,6 +1,6 @@
 > [!NOTE]
 > **Help Wanted 🎉**: Localizing WGDashboard to other languages! If you're willing to help, please visit https://github.com/donaldzou/WGDashboard/issues/397. Many thanks!
-<hr>
+<hr> 
 
 <p align="center">
   <img alt="WGDashboard" src="./src/static/img/logo.png" width="128">
