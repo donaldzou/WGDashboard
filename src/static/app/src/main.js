@@ -9,7 +9,7 @@ import {createApp, markRaw} from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
-import router from './router'
+import router from './router/router.js'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet} from "@/utilities/fetch.js";
 
