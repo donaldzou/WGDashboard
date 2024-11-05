@@ -52,8 +52,6 @@ watch(data, () => {
 }, {
 	deep: true
 })
-
-const openBackupRestore = ref(false)
 </script>
 
 <template>

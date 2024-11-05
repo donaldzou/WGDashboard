@@ -5,10 +5,11 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import {GetLocale} from "@/utilities/locale.js";
+import HelpModal from "@/components/navbarComponents/helpModal.vue";
 
 export default {
 	name: "navbar",
-	components: {LocaleText},
+	components: {HelpModal, LocaleText},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -18,7 +19,8 @@ export default {
 		return {
 			updateAvailable: false,
 			updateMessage: "Checking for update...",
-			updateUrl: ""
+			updateUrl: "",
+			openHelpModal: false,
 		}
 	},
 	mounted() {
@@ -61,9 +63,13 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link rounded-3" 
-						   target="_blank"
-						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">
+<!--						<a class="nav-link rounded-3" -->
+<!--						   target="_blank"-->
+<!--						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">-->
+<!--							<i class="bi bi-question-circle me-2"></i>-->
+<!--							<LocaleText t="Help"></LocaleText>-->
+<!--						</a>-->
+						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>
 						</a>
@@ -122,12 +128,12 @@ export default {
 						</small>
 					</li>
 				</ul>
-				
 			</div>
 		</nav>
+		<Transition name="zoom">
+			<HelpModal v-if="this.openHelpModal" @close="openHelpModal = false;"></HelpModal>
+		</Transition>
 	</div>
-	
-	
 </template>
 
 <style scoped>

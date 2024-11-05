@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {computed, watch} from "vue";
 const store = DashboardConfigurationStore();
+import "@/utilities/wireguard.js"
 store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
 	store.IsElectronApp = true;

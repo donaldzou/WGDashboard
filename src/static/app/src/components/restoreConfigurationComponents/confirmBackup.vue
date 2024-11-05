@@ -7,6 +7,7 @@ import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {useRouter} from "vue-router";
 
+
 const props = defineProps({
 	selectedConfigurationBackup: Object
 })
@@ -36,12 +37,12 @@ const loading = ref(false)
 const errorMessage = ref("")
 const store = WireguardConfigurationsStore()
 
-const wireguardGenerateKeypair = () => {
-	const wg = window.wireguard.generateKeypair();
-	newConfiguration.PrivateKey = wg.privateKey;
-	newConfiguration.PublicKey = wg.publicKey;
-	newConfiguration.PresharedKey = wg.presharedKey;
-}
+// const wireguardGenerateKeypair = () => {
+// 	const wg = window.wireguard.generateKeypair();
+// 	newConfiguration.PrivateKey = wg.privateKey;
+// 	newConfiguration.PublicKey = wg.publicKey;
+// 	newConfiguration.PresharedKey = wg.presharedKey;
+// }
 
 const validateConfigurationName = computed(() => {
 	return /^[a-zA-Z0-9_=+.-]{1,15}$/.test(newConfiguration.ConfigurationName) 
@@ -51,7 +52,7 @@ const validateConfigurationName = computed(() => {
 
 const validatePrivateKey = computed(() => {
 	try{
-		wireguard.generatePublicKey(newConfiguration.PrivateKey)
+		window.wireguard.generatePublicKey(newConfiguration.PrivateKey)
 	}catch (e) {
 		return false
 	}
@@ -87,7 +88,7 @@ onMounted(() => {
 	})
 	watch(() => validatePrivateKey, (newVal) => {
 		if (newVal){
-			newConfiguration.PublicKey = wireguard.generatePublicKey(newConfiguration.PrivateKey)
+			newConfiguration.PublicKey = window.wireguard.generatePublicKey(newConfiguration.PrivateKey)
 		}
 	}, {
 		immediate: true
