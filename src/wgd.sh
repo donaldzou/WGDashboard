@@ -227,7 +227,7 @@ install_wgd(){
     if [ ! -d "/etc/wireguard/WGDashboard_Backup" ]
     	then
     		printf "[WGDashboard] Creating /etc/wireguard/WGDashboard_Backup folder\n"
-            mkdir "/etc/wireguard/WGDashboard_Backup"
+            sudo mkdir "/etc/wireguard/WGDashboard_Backup"
     fi
     
     if [ ! -d "log" ]
