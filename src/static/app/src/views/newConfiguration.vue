@@ -165,7 +165,6 @@ export default {
 									</li>
 								</ul>
 							</div>
-							
 						</div>
 					</div>
 				</div>
@@ -199,9 +198,7 @@ export default {
 							       v-model="this.newConfiguration.PublicKey" disabled
 							>
 						</div>
-						
 					</div>
-					
 				</div>
 				<div class="card rounded-3 shadow">
 					<div class="card-header">

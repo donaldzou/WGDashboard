@@ -4,6 +4,8 @@ import {onMounted, reactive, ref, useTemplateRef, watch} from "vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import UpdateConfigurationName
+	from "@/components/configurationComponents/editConfigurationComponents/updateConfigurationName.vue";
 const props = defineProps({
 	configurationInfo: Object
 })
@@ -47,6 +49,8 @@ const saveForm = ()  => {
 		}
 	})
 }
+const updateConfigurationName = ref(false)
+
 watch(data, () => {
 	dataChanged.value = JSON.stringify(data) !== JSON.stringify(props.configurationInfo);
 }, {
@@ -67,120 +71,137 @@ watch(data, () => {
 					</div>
 					<div class="card-body px-4 pb-4">
 						<div class="d-flex gap-2 flex-column">
-							<div class="d-flex align-items-center">
+							<div class="d-flex align-items-center gap-3" v-if="!updateConfigurationName">
 								<small class="text-muted">
 									<LocaleText t="Name"></LocaleText>
 								</small>
-								<small class="ms-auto"><samp>{{data.Name}}</samp></small>
-							</div>
-							<div class="d-flex align-items-center">
-								<small class="text-muted">
-									<LocaleText t="Public Key"></LocaleText>
-								</small>
-								<small class="ms-auto"><samp>{{data.PublicKey}}</samp></small>
-							</div>
-							<hr>
-							<div>
-								<label for="configuration_private_key" class="form-label d-flex">
-									<small class="text-muted d-block">
-										<LocaleText t="Private Key"></LocaleText>
-									</small>
-									<div class="form-check form-switch ms-auto">
-										<input class="form-check-input"
-										       type="checkbox" role="switch" id="editPrivateKeySwitch"
-										       v-model="editPrivateKey"
-										>
-										<label class="form-check-label" for="editPrivateKeySwitch">
-											<small>Edit</small>
-										</label>
-									</div>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving || !editPrivateKey"
-								       :class="{'is-invalid': !reqField.PrivateKey}"
-								       @keyup="genKey()"
-								       v-model="data.PrivateKey"
-								       id="configuration_private_key">
-							</div>
-							<div>
-								<label for="configuration_ipaddress_cidr" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="IP Address/CIDR"></LocaleText>
-									</small>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.Address"
-								       id="configuration_ipaddress_cidr">
-							</div>
-							<div>
-								<label for="configuration_listen_port" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="Listen Port"></LocaleText>
-									</small>
-								</label>
-								<input type="number" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.ListenPort"
-								       id="configuration_listen_port">
-
-							</div>
-							<div>
-								<label for="configuration_preup" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="PreUp"></LocaleText>
-									</small>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.PreUp"
-								       id="configuration_preup">
-							</div>
-							<div>
-								<label for="configuration_predown" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="PreDown"></LocaleText>
-									</small>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.PreDown"
-								       id="configuration_predown">
-							</div>
-							<div>
-								<label for="configuration_postup" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="PostUp"></LocaleText>
-									</small>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.PostUp"
-								       id="configuration_postup">
-							</div>
-							<div>
-								<label for="configuration_postdown" class="form-label">
-									<small class="text-muted">
-										<LocaleText t="PostDown"></LocaleText>
-									</small>
-								</label>
-								<input type="text" class="form-control form-control-sm rounded-3"
-								       :disabled="saving"
-								       v-model="data.PostDown"
-								       id="configuration_postdown">
-							</div>
-							<div class="d-flex align-items-center gap-2 mt-4">
-								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
-								        @click="resetForm()"
-								        :disabled="!dataChanged || saving">
-									<i class="bi bi-arrow-clockwise"></i>
+								<small>{{data.Name}}</small>
+								<button 
+									@click="updateConfigurationName = true"
+									class="btn btn-sm bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 ms-auto">
+									Update Name
 								</button>
-								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
-								        :disabled="!dataChanged || saving"
-								        @click="saveForm()"
-								>
-									<i class="bi bi-save-fill"></i></button>
 							</div>
+							<UpdateConfigurationName
+								@close="updateConfigurationName = false"
+								:configuration-name="data.Name"
+								v-if="updateConfigurationName"></UpdateConfigurationName>
+							
+							<template v-else>
+								<hr>
+								<div class="d-flex align-items-center gap-3">
+									<small class="text-muted" style="word-break: keep-all">
+										<LocaleText t="Public Key"></LocaleText>
+									</small>
+									<small class="ms-auto"  style="word-break: break-all">
+										{{data.PublicKey}}
+									</small>
+								</div>
+								<hr>
+								<div>
+									<div class="d-flex">
+										<label for="configuration_private_key" class="form-label">
+											<small class="text-muted d-block">
+												<LocaleText t="Private Key"></LocaleText>
+											</small>
+										</label>
+										<div class="form-check form-switch ms-auto">
+											<input class="form-check-input"
+											       type="checkbox" role="switch" id="editPrivateKeySwitch"
+											       v-model="editPrivateKey"
+											>
+											<label class="form-check-label" for="editPrivateKeySwitch">
+												<small>Edit</small>
+											</label>
+										</div>
+									</div>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving || !editPrivateKey"
+									       :class="{'is-invalid': !reqField.PrivateKey}"
+									       @keyup="genKey()"
+									       v-model="data.PrivateKey"
+									       id="configuration_private_key">
+								</div>
+								<div>
+									<label for="configuration_ipaddress_cidr" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="IP Address/CIDR"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.Address"
+									       id="configuration_ipaddress_cidr">
+								</div>
+								<div>
+									<label for="configuration_listen_port" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="Listen Port"></LocaleText>
+										</small>
+									</label>
+									<input type="number" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.ListenPort"
+									       id="configuration_listen_port">
+
+								</div>
+								<div>
+									<label for="configuration_preup" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="PreUp"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.PreUp"
+									       id="configuration_preup">
+								</div>
+								<div>
+									<label for="configuration_predown" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="PreDown"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.PreDown"
+									       id="configuration_predown">
+								</div>
+								<div>
+									<label for="configuration_postup" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="PostUp"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.PostUp"
+									       id="configuration_postup">
+								</div>
+								<div>
+									<label for="configuration_postdown" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="PostDown"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.PostDown"
+									       id="configuration_postdown">
+								</div>
+								<div class="d-flex align-items-center gap-2 mt-4">
+									<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
+									        @click="resetForm()"
+									        :disabled="!dataChanged || saving">
+										<i class="bi bi-arrow-clockwise"></i>
+									</button>
+									<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
+									        :disabled="!dataChanged || saving"
+									        @click="saveForm()"
+									>
+										<i class="bi bi-save-fill"></i></button>
+								</div>
+							</template>
 						</div>
 					</div>
 				</div>
