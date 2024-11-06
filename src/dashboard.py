@@ -720,12 +720,48 @@ class WireguardConfiguration:
                 self.Peers.append(Peer(i, self))
             
     def addPeers(self, peers: list):
-        for p in peers:
-            subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}", 
-                                    shell=True, stderr=subprocess.STDOUT)
-        subprocess.check_output(
-            f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)    
-        self.getPeersList()
+        try:
+            for i in peers:
+                newPeer = {
+                    "id": i['id'],
+                    "private_key": i['private_key'],
+                    "DNS": i['DNS'],
+                    "endpoint_allowed_ip": i['endpoint_allowed_ip'],
+                    "name": i['name'],
+                    "total_receive": 0,
+                    "total_sent": 0,
+                    "total_data": 0,
+                    "endpoint": "N/A",
+                    "status": "stopped",
+                    "latest_handshake": "N/A",
+                    "allowed_ip": i.get("allowed_ip", "N/A"),
+                    "cumu_receive": 0,
+                    "cumu_sent": 0,
+                    "cumu_data": 0,
+                    "traffic": [],
+                    "mtu": i['mtu'],
+                    "keepalive": i['keepalive'],
+                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                    "preshared_key": i["preshared_key"]
+                }
+                sqlUpdate(
+                    """
+                    INSERT INTO '%s'
+                        VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                    """ % self.Name
+                    , newPeer)
+            for p in peers:
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
+                                        shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            self.getPeersList()
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
         
     def searchPeer(self, publicKey):
         for i in self.Peers:
@@ -2098,16 +2134,12 @@ def API_addPeers(configName):
                 dns_addresses = DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1]
             if len(endpoint_allowed_ip) == 0:
                 endpoint_allowed_ip = DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1]
-            
-    
             config = WireguardConfigurations.get(configName)
             if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
                 return ResponseObject(False, "Please provide at least public_key and allowed_ips")
             if not config.getStatus():
                 config.toggleConfiguration()
-    
             availableIps = _getWireguardConfigurationAvailableIP(configName)
-    
             if bulkAdd:
                 if type(preshared_key_bulkAdd) is not bool:
                     preshared_key_bulkAdd = False
@@ -2119,7 +2151,6 @@ def API_addPeers(configName):
                 if bulkAddAmount > len(availableIps[1]):
                     return ResponseObject(False,
                                           f"The maximum number of peers can add is {len(availableIps[1])}")
-    
                 keyPairs = []
                 for i in range(bulkAddAmount):
                     newPrivateKey = _generatePrivateKey()[1]
@@ -2128,18 +2159,15 @@ def API_addPeers(configName):
                         "id": _generatePublicKey(newPrivateKey)[1],
                         "preshared_key": (_generatePrivateKey()[1] if preshared_key_bulkAdd else ""),
                         "allowed_ip": availableIps[1][i],
-                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                        "DNS": dns_addresses,
+                        "endpoint_allowed_ip": endpoint_allowed_ip,
+                        "mtu": mtu,
+                        "keepalive": keep_alive
                     })
                 if len(keyPairs) == 0:
                     return ResponseObject(False, "Generating key pairs by bulk failed")
                 config.addPeers(keyPairs)
-    
-                for kp in keyPairs:
-                    found, peer = config.searchPeer(kp['id'])
-                    if found:
-                        if not peer.updatePeer(kp['name'], kp['private_key'], kp['preshared_key'], dns_addresses,
-                                               kp['allowed_ip'], endpoint_allowed_ip, mtu, keep_alive):
-                            return ResponseObject(False, "Failed to add peers in bulk")
                 return ResponseObject()
     
             else:
@@ -2152,11 +2180,20 @@ def API_addPeers(configName):
                     if i not in availableIps[1]:
                         return ResponseObject(False, f"This IP is not available: {i}")
     
-                config.addPeers([{"id": public_key, "allowed_ip": ','.join(allowed_ips)}])
-                found, peer = config.searchPeer(public_key)
-                if found:
-                    return peer.updatePeer(name, private_key, preshared_key, dns_addresses, ",".join(allowed_ips),
-                                           endpoint_allowed_ip, mtu, keep_alive)
+                status = config.addPeers([
+                    {
+                        "name": name,
+                        "id": public_key,
+                        "private_key": private_key,
+                        "allowed_ip": ','.join(allowed_ips),
+                        "preshared_key": preshared_key,
+                        "endpoint_allowed_ip": endpoint_allowed_ip,
+                        "DNS": dns_addresses,
+                        "mtu": mtu,
+                        "keepalive": keep_alive
+                    }]
+                )
+                return ResponseObject(status)
         except Exception as e:
             print(e)
             return ResponseObject(False, "Add peers failed. Please see data for specific issue")
