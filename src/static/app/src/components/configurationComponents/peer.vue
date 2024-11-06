@@ -93,6 +93,7 @@ export default {
 					<Transition name="slide-fade">
 						<PeerSettingsDropdown 
 							@qrcode="(file) => this.$emit('qrcode', file)"
+							@configurationFile="(file) => this.$emit('configurationFile', file)"
 							@setting="this.$emit('setting')"
 							@jobs="this.$emit('jobs')"
 							@refresh="this.$emit('refresh')"

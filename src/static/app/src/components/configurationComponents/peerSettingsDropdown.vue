@@ -40,12 +40,12 @@ export default {
 				}
 			})
 		},
-		downloadQRCode(){
+		downloadQRCode(emit){
 			fetchGet("/api/downloadPeer/"+this.$route.params.id, {
 				id: this.Peer.id
 			}, (res) => {
 				if (res.status){
-					this.$emit("qrcode", res.data.file)					
+					this.$emit(emit, res.data.file)					
 				}else{
 					this.dashboardStore.newMessage("Server", res.message, "danger")
 				}
@@ -108,7 +108,6 @@ export default {
 							<LocaleText t="Download & QR Code is not available due to no private key set for this peer"></LocaleText>
 						</small>
 					</li>
-
 				</template>
 				<template v-else>
 					<li class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
@@ -116,8 +115,12 @@ export default {
 							<i class="me-auto bi bi-download"></i>
 						</a>
 						<a class="dropdown-item text-center px-0 rounded-3" role="button"
-						   @click="this.downloadQRCode()">
+						   @click="this.downloadQRCode('qrcode')">
 							<i class="me-auto bi bi-qr-code"></i>
+						</a>
+						<a class="dropdown-item text-center px-0 rounded-3" role="button"
+						   @click="this.downloadQRCode('configurationFile')">
+							<i class="me-auto bi bi-body-text"></i>
 						</a>
 						<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">
 							<i class="me-auto bi bi-share"></i>

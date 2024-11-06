@@ -57,7 +57,9 @@ export default {
 		PeerCreate:
 			defineAsyncComponent(() => import("@/components/configurationComponents/peerCreate.vue")),
 		PeerQRCode:
-			defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue")), 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue")),
+		PeerConfigurationFile:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerConfigurationFile.vue")),
 		PeerSettings:
 			defineAsyncComponent(() => import("@/components/configurationComponents/peerSettings.vue")), 
 		PeerSearch, 
@@ -113,6 +115,10 @@ export default {
 				selectedPeer: undefined
 			},
 			peerQRCode: {
+				modalOpen: false,
+				peerConfigData: undefined
+			},
+			peerConfigurationFile: {
 				modalOpen: false,
 				peerConfigData: undefined
 			},
@@ -599,6 +605,7 @@ export default {
 					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
+					      @configurationFile="(file) => {this.peerConfigurationFile.peerConfigData = file; this.peerConfigurationFile.modalOpen = true;}"
 					></Peer>
 				</div>
 			</TransitionGroup>
@@ -674,6 +681,13 @@ export default {
 				@close="backupRestore.modalOpen = false"
 				@refreshPeersList="this.getPeers()"
 				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
+		</Transition>
+		<Transition name="zoom">
+			<PeerConfigurationFile
+				@close="peerConfigurationFile.modalOpen = false"
+				v-if="peerConfigurationFile.modalOpen"
+				:configurationFile="peerConfigurationFile.peerConfigData"
+			></PeerConfigurationFile>
 		</Transition>
 	</div>
 </template>
