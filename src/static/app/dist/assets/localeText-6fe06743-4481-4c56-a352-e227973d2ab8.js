@@ -1,0 +1,1 @@
+import{_ as t,G as e,t as o}from"./index-666cea4c-52cc-4477-8c4d-2d0ff48c6d52.js";const s={name:"localeText",props:{t:""},computed:{getLocaleText(){return e(this.t)}}};function a(c,r,n,p,_,i){return o(this.getLocaleText)}const x=t(s,[["render",a]]);export{x as L};

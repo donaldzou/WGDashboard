@@ -3,6 +3,11 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import {proxy} from "./proxy.js";
 import vue from '@vitejs/plugin-vue'
+import {v4} from "uuid";
+
+const hash = () => {
+    return Math.floor(Math.random() * 90000) + 10000
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
@@ -25,9 +30,9 @@ export default defineConfig(({mode}) => {
         outDir: '../../../../WGDashboard-Desktop',
         rollupOptions: {
           output: {
-            entryFileNames: `assets/[name].js`,
-            chunkFileNames: `assets/[name].js`,
-            assetFileNames: `assets/[name].[ext]`
+            entryFileNames: `assets/[name]-${v4()}.js`,
+            chunkFileNames: `assets/[name]-${v4()}.js`,
+            assetFileNames: `assets/[name]-${v4()}.[ext]`
           }
         }
       }
@@ -55,9 +60,9 @@ export default defineConfig(({mode}) => {
       outDir: 'dist',
       rollupOptions: {
         output: {
-          entryFileNames: `assets/[name].js`,
-          chunkFileNames: `assets/[name].js`,
-          assetFileNames: `assets/[name].[ext]`
+          entryFileNames: `assets/[name]-${v4()}.js`,
+          chunkFileNames: `assets/[name]-${v4()}.js`,
+          assetFileNames: `assets/[name]-${v4()}.[ext]`
         }
       }
     }
