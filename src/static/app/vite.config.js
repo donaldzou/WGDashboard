@@ -53,9 +53,9 @@ export default defineConfig(({mode}) => {
 			outDir: 'dist',
 			rollupOptions: {
 				output: {
-					entryFileNames: `assets/[name].js?v=${version}`,
-					chunkFileNames: `assets/[name].js?v=${version}`,
-					assetFileNames: `assets/[name].[ext]?v=${version}`
+					entryFileNames: `assets/[name].${version}.js`,
+					chunkFileNames: `assets/[name].${version}.js`,
+					assetFileNames: `assets/[name].${version}.[ext]`
 				}
 			}
 		}
