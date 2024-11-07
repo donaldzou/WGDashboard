@@ -1,6 +1,6 @@
 services:
   wireguard-dashboard:
-    image: test:latest
+    image: donaldzou/wgdashboard:latest
     restart: unless-stopped
     container_name: wgdashboard
     environment:
