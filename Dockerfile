@@ -8,6 +8,9 @@ ARG wg_port="51820"
 # Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
 ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
+
+ENV enable="none"
+
 ENV isolate="none"
 ENV public_ip="0.0.0.0"
 
@@ -54,4 +57,5 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
+
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

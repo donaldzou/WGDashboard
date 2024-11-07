@@ -17,8 +17,10 @@ ensure_installation() {
   . "${WGDASH}/src/venv/bin/activate"
 
 
+
   [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/psutil" ] && echo "Moving PIP dependency: psutil" && mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
   [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/bcrypt" ] && echo "Moving PIP dependency: bcrypt" && mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+
 
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
@@ -76,6 +78,7 @@ set_envvars() {
 
     # Determine the public IP and update if necessary
     echo "{$public_ip}"
+
     if [ "${public_ip}" = "0.0.0.0" ]; then
       default_ip=$(curl -s ifconfig.me)
 
@@ -143,10 +146,12 @@ start_core() {
       echo "Found: $interface, stopping isolation checking."
       break
     else
+
       if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
         echo "Ignoring ${interface}"
 
       elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
         echo "Isolating interface:" "$interface"
 
         upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
@@ -166,12 +171,13 @@ start_core() {
   done
   
   # Removing isolation for the configurations that did not match.
-  for interface in "${non_isolate[@]}"; do\
 
+  for interface in "${non_isolate[@]}"; do
     if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
         echo "Ignoring ${interface}"
 
     elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
       echo "Removing isolation, if isolation is present for:" "$interface"
 
       sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
@@ -181,6 +187,7 @@ start_core() {
     fi
 
   done
+
 }
 
 ensure_blocking() {
