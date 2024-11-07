@@ -3,7 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import {proxy} from "./proxy.js";
 import vue from '@vitejs/plugin-vue'
-import { version } from './package.json'
+import {v1} from "uuid";
 
 export default defineConfig(({mode}) => {
 	if (mode === 'electron'){
@@ -23,9 +23,9 @@ export default defineConfig(({mode}) => {
 				outDir: '../../../../WGDashboard-Desktop',
 				rollupOptions: {
 					output: {
-						entryFileNames: `assets/[name].js?v=${version}`,
-						chunkFileNames: `assets/[name].js?v=${version}`,
-						assetFileNames: `assets/[name].[ext]?v=${version}`
+						entryFileNames: `assets/[name]-[hash].js`,
+						chunkFileNames: `assets/[name]-[hash].js`,
+						assetFileNames: `assets/[name]-[hash].[ext]`
 					}
 				}
 			}
@@ -53,9 +53,9 @@ export default defineConfig(({mode}) => {
 			outDir: 'dist',
 			rollupOptions: {
 				output: {
-					entryFileNames: `assets/[name].${version}.js`,
-					chunkFileNames: `assets/[name].${version}.js`,
-					assetFileNames: `assets/[name].${version}.[ext]`
+					entryFileNames: `assets/[name]-[hash].js`,
+					chunkFileNames: `assets/[name]-[hash].js`,
+					assetFileNames: `assets/[name]-[hash].[ext]`
 				}
 			}
 		}

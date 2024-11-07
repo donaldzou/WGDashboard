@@ -27,7 +27,7 @@ import threading
 
 from flask.json.provider import DefaultJSONProvider
 
-DASHBOARD_VERSION = 'v4.1'
+DASHBOARD_VERSION = 'v4.1.0'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
@@ -35,7 +35,7 @@ if not os.path.isdir(DB_PATH):
 DASHBOARD_CONF = os.path.join(CONFIGURATION_PATH, 'wg-dashboard.ini')
 WG_CONF_PATH = None
 UPDATE = None
-app = Flask("WGDashboard")
+app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
