@@ -76,20 +76,4 @@ export default {
 		border-radius: 50% !important;
 	}
 }
-
-
-@media screen and (max-width: 768px) {
-	.configurationListTitle{
-		flex-direction: column;
-		gap: 0.5rem;
-		
-		h3 span{
-			margin-left: auto !important;
-		}
-		
-		.btn{
-			width: 100%;
-		}
-	}
-}
 </style>

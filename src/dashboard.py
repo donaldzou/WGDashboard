@@ -1029,8 +1029,8 @@ class WireguardConfiguration:
         files.sort(key=lambda x: x[1], reverse=True)
         
         for f, ct in files:
-            if _regexMatch(f"^({self.Name})_(.*)\.(conf)$", f):
-                s = re.search(f"^({self.Name})_(.*)\.(conf)$", f)
+            if _regexMatch(f"^({self.Name})_(.*)\\.(conf)$", f):
+                s = re.search(f"^({self.Name})_(.*)\\.(conf)$", f)
                 date = s.group(2)
                 d = {
                     "filename": f,
@@ -2531,11 +2531,7 @@ def API_Locale_Update():
 
 @app.get(f'{APP_PREFIX}/')
 def index():
-    """
-    Index page related
-    @return: Template
-    """
-    return render_template('index.html', APP_PREFIX=APP_PREFIX)
+    return render_template('index.html')
 
 def backGroundThread():
     global WireguardConfigurations

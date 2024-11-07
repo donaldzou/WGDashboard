@@ -63,12 +63,6 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
-<!--						<a class="nav-link rounded-3" -->
-<!--						   target="_blank"-->
-<!--						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">-->
-<!--							<i class="bi bi-question-circle me-2"></i>-->
-<!--							<LocaleText t="Help"></LocaleText>-->
-<!--						</a>-->
 						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>
@@ -153,9 +147,6 @@ export default {
 		display: block !important;
 		animation-name: zoomInFade
 	}
-
-	
-	
 }
 
 .navbar-container{
