@@ -16,8 +16,11 @@ ensure_installation() {
   python3 -m venv "${WGDASH}"/src/venv
   . "${WGDASH}/src/venv/bin/activate"
 
-  mv  /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-  mv  /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+
+
+  [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/psutil" ] && echo "Moving PIP dependency: psutil" && mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+  [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/bcrypt" ] && echo "Moving PIP dependency: bcrypt" && mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+
 
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
@@ -74,6 +77,8 @@ set_envvars() {
     fi
 
     # Determine the public IP and update if necessary
+    echo "{$public_ip}"
+
     if [ "${public_ip}" = "0.0.0.0" ]; then
       default_ip=$(curl -s ifconfig.me)
 
@@ -141,7 +146,12 @@ start_core() {
       echo "Found: $interface, stopping isolation checking."
       break
     else
-      if [ -f "/etc/wireguard/${interface}.conf" ]; then
+
+      if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
+        echo "Ignoring ${interface}"
+
+      elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
         echo "Isolating interface:" "$interface"
 
         upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
@@ -161,9 +171,13 @@ start_core() {
   done
   
   # Removing isolation for the configurations that did not match.
-  for interface in "${non_isolate[@]}"; do
 
-    if [ -f "/etc/wireguard/${interface}.conf" ]; then
+  for interface in "${non_isolate[@]}"; do
+    if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
+        echo "Ignoring ${interface}"
+
+    elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
       echo "Removing isolation, if isolation is present for:" "$interface"
 
       sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
@@ -174,37 +188,6 @@ start_core() {
 
   done
 
-  # The following section takes care of enabling wireguard interfaces on startup. Using arrays and given arguments.
-  #
-  # WILL BE REMOVED IN FUTURE WHEN WGDASHBOARD ITSELF SUPPORTS THIS!!
-  #
-
-  IFS=',' read -r -a enable_array <<< "${enable}"
-
-  for interface in "${enable_array[@]}"; do
-
-    if [ "$interface" = "none" ]; then
-      echo "Found: $interface, stopping enabling checking."
-      break
-    else
-      echo "Enabling interface:" "$interface"
-      
-      local fileperms
-      fileperms=$(stat -c "%a" /etc/wireguard/"${interface}".conf)
-      if [ "$fileperms" -eq 644 ]; then
-        echo "Configuration is world accessible, adjusting."
-        chmod 600 "/etc/wireguard/${interface}.conf"    
-      fi
-
-      if [ -f "/etc/wireguard/${interface}.conf" ]; then
-        wg-quick up "$interface"
-      else
-        echo "No corresponding configuration file found for $interface doing nothing."
-      fi
-
-    fi
-    
-  done
 }
 
 ensure_blocking() {

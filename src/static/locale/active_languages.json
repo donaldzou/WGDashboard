@@ -1,33 +1,28 @@
 [
 	{
+		"lang_id": "cs",
+		"lang_name": "Czech",
+		"lang_name_localized": "Česky"
+	},
+	{
+		"lang_id": "de-de",
+		"lang_name": "German",
+		"lang_name_localized": "Deutsch"
+	},
+	{
 		"lang_id": "en",
 		"lang_name": "English",
 		"lang_name_localized": "English"
 	},
 	{
-		"lang_id": "zh-CN",
-		"lang_name": "Chinese (Simplified)",
-		"lang_name_localized": "中文（简体）"
-	},
-	{
-		"lang_id": "zh-HK",
-		"lang_name": "Chinese (Traditional)",
-		"lang_name_localized": "中文（繁體）"
-	},
-	{
-		"lang_id": "uk",
-		"lang_name": "Ukrainian",
-		"lang_name_localized": "Українська"
-	},
-	{
-		"lang_id": "de",
-		"lang_name": "German",
-		"lang_name_localized": "Deutsch"
-	},
-	{
-		"lang_id": "it-IT",
+		"lang_id": "it-it",
 		"lang_name": "Italian",
 		"lang_name_localized": "Italiano"
+	},
+	{
+		"lang_id": "nl-nl",
+		"lang_name": "Dutch",
+		"lang_name_localized": "Nederlands"
 	},
 	{
 		"lang_id": "ru",
@@ -35,8 +30,18 @@
 		"lang_name_localized": "Русский"
 	},
 	{
-		"lang_id": "cs",
-		"lang_name": "Czech",
-		"lang_name_localized": "Česky"
+		"lang_id": "uk",
+		"lang_name": "Ukrainian",
+		"lang_name_localized": "Українська"
+	},
+	{
+		"lang_id": "zh-cn",
+		"lang_name": "Chinese (Simplified)",
+		"lang_name_localized": "中文（简体）"
+	},
+	{
+		"lang_id": "zh-hk",
+		"lang_name": "Chinese (Traditional)",
+		"lang_name_localized": "中文（繁體）"
 	}
 ]
