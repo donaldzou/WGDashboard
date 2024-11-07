@@ -1500,7 +1500,9 @@ def _regexMatch(regex, text):
     return pattern.search(text) is not None
 
 def _getConfigurationList(startup: bool = False):
-    for i in os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
+    confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+    confs.sort()
+    for i in confs:
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             try:
@@ -1618,8 +1620,11 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
         try:
             cursor = sqldb.cursor()
             return cursor.execute(statement, paramters)
+
         except sqlite3.OperationalError as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            return []
+
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:

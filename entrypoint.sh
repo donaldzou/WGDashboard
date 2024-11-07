@@ -147,10 +147,12 @@ start_core() {
       break
     else
 
+
       if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
         echo "Ignoring ${interface}"
 
       elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
 
         echo "Isolating interface:" "$interface"
 
@@ -172,11 +174,13 @@ start_core() {
   
   # Removing isolation for the configurations that did not match.
 
+
   for interface in "${non_isolate[@]}"; do
     if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
         echo "Ignoring ${interface}"
 
     elif [ -f "/etc/wireguard/${interface}.conf" ]; then
+
 
       echo "Removing isolation, if isolation is present for:" "$interface"
 
