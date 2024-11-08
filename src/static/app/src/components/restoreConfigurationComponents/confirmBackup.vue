@@ -37,13 +37,6 @@ const loading = ref(false)
 const errorMessage = ref("")
 const store = WireguardConfigurationsStore()
 
-// const wireguardGenerateKeypair = () => {
-// 	const wg = window.wireguard.generateKeypair();
-// 	newConfiguration.PrivateKey = wg.privateKey;
-// 	newConfiguration.PublicKey = wg.publicKey;
-// 	newConfiguration.PresharedKey = wg.presharedKey;
-// }
-
 const validateConfigurationName = computed(() => {
 	return /^[a-zA-Z0-9_=+.-]{1,15}$/.test(newConfiguration.ConfigurationName) 
 		&& newConfiguration.ConfigurationName.length > 0 
@@ -121,11 +114,14 @@ const dashboardStore = DashboardConfigurationStore()
 const router = useRouter();
 const submitRestore = async () => {
 	if (validateForm.value){
+		loading.value = true;
 		await fetchPost("/api/addWireguardConfiguration", newConfiguration, async (res) => {
 			if (res.status){
 				dashboardStore.newMessage("Server", "Configuration restored", "success")
 				await store.getConfigurations()
 				await router.push(`/configuration/${newConfiguration.ConfigurationName}/peers`)
+			}else{
+				loading.value = false;
 			}
 		})
 	}
@@ -316,6 +312,7 @@ const submitRestore = async () => {
 			</div>
 		</div>
 	</div>
+<!--	TODO: Fix loading state, same with bulk delete-->
 	<div class="d-flex">
 		<button class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto"
 			:disabled="!validateForm || loading"

@@ -19,7 +19,7 @@ export default {
 </script>
 
 <template>
-	<input :type="type" v-model="this.data[this.id]" class="form-control" 
+	<input :type="type" v-model="this.data[this.id]" class="form-control rounded-3" 
 	       :id="this.id" :name="this.id"
 	       autocomplete="on"
 	       :placeholder="this.getLocaleText" required>

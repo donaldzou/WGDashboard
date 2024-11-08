@@ -73,8 +73,7 @@ const createBackup = () => {
 						<Backup
 							@refresh="loadBackup()"
 							@refreshPeersList="emit('refreshPeersList')"
-							:b="b" v-for="(b, index) in backups"
-							:delay="index*0.05"
+							:b="b" v-for="b in backups"
 							:key="b.filename"
 						></Backup>
 					</TransitionGroup>

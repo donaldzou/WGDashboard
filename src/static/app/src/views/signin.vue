@@ -98,7 +98,7 @@ export default {
 </script>
 
 <template>
-	<div class="container-fluid login-container-fluid d-flex main flex-column py-4 text-body" 
+	<div class="container-fluid login-container-fluid d-flex main flex-column py-4 text-body h-100" 
 	     style="overflow-y: scroll"
 	     :data-bs-theme="this.theme">
 		<div class="login-box m-auto" >
@@ -127,15 +127,17 @@ export default {
 						<label for="totp" class="text-left" style="font-size: 1rem"><i class="bi bi-lock-fill"></i></label>
 						<SignInTOTP :data="this.data"></SignInTOTP>
 					</div>
-					<button class="btn btn-lg btn-dark ms-auto mt-4 w-100 d-flex btn-brand signInBtn" ref="signInBtn">
-								<span v-if="!this.loading" class="d-flex w-100">
-									<LocaleText t="Sign In"></LocaleText>
-									<i class="ms-auto bi bi-chevron-right"></i>
-								</span>
-						<span v-else class="d-flex w-100 align-items-center">
-							<LocaleText t="Signing In..."></LocaleText>
-									<span class="spinner-border ms-auto spinner-border-sm" role="status"></span>
-								</span>
+					<button class="btn btn-lg btn-dark ms-auto mt-5 w-100 d-flex btn-brand signInBtn" 
+					        :disabled="this.loading"
+					        ref="signInBtn">
+							<span v-if="!this.loading" class="d-flex w-100">
+								<LocaleText t="Sign In"></LocaleText>
+								<i class="ms-auto bi bi-chevron-right"></i>
+							</span>
+							<span v-else class="d-flex w-100 align-items-center">
+								<LocaleText t="Signing In..."></LocaleText>
+								<span class="spinner-border ms-auto spinner-border-sm" role="status"></span>
+							</span>
 					</button>
 				</form>
 				<RemoteServerList v-else></RemoteServerList>
@@ -174,5 +176,9 @@ export default {
 	.login-box div{
 		width: auto !important;
 	}
+}
+
+.navbar{
+	display: none !important;
 }
 </style>

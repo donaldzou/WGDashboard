@@ -114,7 +114,8 @@ const emits = defineEmits(["backup"])
 						        @click="deleteConfiguration()"
 						        :disabled="input !== configurationName || deleting">
 							<i class="bi bi-trash-fill me-2 rounded-3"></i>
-							<LocaleText t="Delete"></LocaleText>
+							<LocaleText t="Delete" v-if="!deleting"></LocaleText>
+							<LocaleText t="Deleting..." v-else></LocaleText>
 						</button>
 					</div>
 				</div>

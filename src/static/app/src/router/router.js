@@ -113,7 +113,8 @@ const router = createRouter({
 			path: '/signin', 
 			component: () => import('@/views/signin.vue'),
 			meta: {
-				title: "Sign In"
+				title: "Sign In",
+				hideTopNav: true
 			}
 		},
 		{
@@ -121,7 +122,8 @@ const router = createRouter({
 			component: () => import("@/views/setup.vue"),
 			meta: {
 				requiresAuth: true,
-				title: "Welcome to WGDashboard"
+				title: "Welcome to WGDashboard",
+				hideTopNav: true
 			},
 		},
 		{
@@ -129,14 +131,16 @@ const router = createRouter({
 			component: () => import("@/components/setupComponent/totp.vue"),
 			meta: {
 				requiresAuth: true,
-				title: "Multi-Factor Authentication Setup"
+				title: "Multi-Factor Authentication Setup",
+				hideTopNav: true
 			},
 		},
 		{
 			path: '/share', 
 			component: () => import("@/views/share.vue"),
 			meta: {
-				title: "Share"
+				title: "Share",
+				hideTopNav: true
 			}
 		}
 	]
