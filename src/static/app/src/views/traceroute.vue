@@ -1,9 +1,12 @@
 <script>
 import {fetchGet} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import OSMap from "@/components/map/osmap.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "traceroute",
+	components: {LocaleText, OSMap},
 	data(){
 		return {
 			tracing: false,
@@ -40,56 +43,105 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3 text-body">
 		<div class="container-md">
-			<h3 class="mb-3 text-body">Traceroute</h3>
-			<div class="row">
-				<div class="col-sm-4 d-flex gap-2 flex-column">
-					<div>
-						<label class="mb-1 text-muted" for="ipAddress">
-							<small>IP Address</small></label>
-						<input 
-							id="ipAddress"
-							class="form-control"
-							v-model="this.ipAddress"
-							type="text" placeholder="Enter an IP Address you want to trace :)">
-					</div>
-					<button class="btn btn-primary rounded-3 mt-3"
-					        :disabled="!this.store.regexCheckIP(this.ipAddress) || this.tracing"
-					        @click="this.execute()">
-						<i class="bi bi-bullseye me-2"></i> {{this.tracing ? "Tracing...":"Trace It!"}}
-					</button>
+			<h3 class="mb-3 text-body">
+				<LocaleText t="Traceroute"></LocaleText>
+			</h3>
+			<div class="d-flex gap-2 flex-column mb-5">
+				<div>
+					<label class="mb-1 text-muted" for="ipAddress">
+						<small>
+							<LocaleText t="Enter IP Address / Hostname"></LocaleText>
+						</small></label>
+					<input
+						:disabled="this.tracing"
+						id="ipAddress"
+						class="form-control"
+						v-model="this.ipAddress"
+						@keyup.enter="this.execute()"
+						type="text">
 				</div>
-				<div class="col-sm-8 position-relative">
-					<TransitionGroup name="ping">
-						<div v-if="!this.tracerouteResult" key="pingPlaceholder">
-							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-							     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
-							     :style="{'animation-delay': `${x*0.05}s`}"
-							     v-for="x in 10" ></div>
-						</div>
-						<div v-else key="table" class="w-100">
-							<table class="table table-borderless rounded-3 w-100">
+				<button class="btn btn-primary rounded-3 mt-3 position-relative"
+				        :disabled="this.tracing || !this.ipAddress"
+				        @click="this.execute()">
+					<Transition name="slide">
+							<span v-if="!this.tracing" class="d-block">
+								<i class="bi bi-person-walking me-2"></i>Trace!
+							</span>
+						<span v-else class="d-block">
+								<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+								<span class="visually-hidden" role="status">Loading...</span>
+							</span>
+					</Transition>
+				</button>
+			</div>
+			<div class="position-relative">
+				<Transition name="ping">
+					<div v-if="!this.tracerouteResult" key="pingPlaceholder">
+						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
+						     style="height: 300px !important;"
+						></div>
+						
+						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
+						     :style="{'animation-delay': `${x*0.05}s`}"
+						     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
+						     v-for="x in 5" ></div>
+					</div>
+					<div v-else>
+						<OSMap :d="this.tracerouteResult" type="traceroute"></OSMap>
+						
+						<div key="table" class="w-100 mt-2">
+							<table class="table table-sm rounded-3 w-100">
 								<thead>
 								<tr>
-									<th scope="col">Hop</th>
-									<th scope="col">IP Address</th>
-									<th scope="col">Average / Min / Max Round Trip Time</th>
+									<th scope="col">
+										<LocaleText t="Hop"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="IP Address"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Average RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Min RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Max RTT (ms)"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Geolocation"></LocaleText>
+									</th>
 								</tr>
 								</thead>
 								<tbody>
-									<tr v-for="(hop, key) in this.tracerouteResult"
-										class="animate__fadeInUp animate__animated"
-									    :style="{'animation-delay': `${key * 0.05}s`}"
-									>
-										<td>{{hop.hop}}</td>
-										<td>{{hop.ip}}</td>
-										<td>{{hop.avg_rtt}} / {{hop.min_rtt}} / {{hop.max_rtt}}</td>
-									</tr>
+								<tr v-for="(hop, key) in this.tracerouteResult">
+									<td>
+										<small>{{hop.hop}}</small>
+									</td>
+									<td>
+										<small>{{hop.ip}}</small>
+									</td>
+									<td>
+										<small>{{hop.avg_rtt}}</small>
+									</td>
+									<td>
+										<small>{{hop.min_rtt}}</small>
+									</td>
+									<td>
+										<small>{{hop.max_rtt}}</small>
+									</td>
+									<td>
+									<span v-if="hop.geo.city && hop.geo.country">
+										<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
+									</span>
+									</td>
+								</tr>
 								</tbody>
-								
+
 							</table>
 						</div>
-					</TransitionGroup>
-				</div>
+					</div>
+				</Transition>
 			</div>
 		</div>
 	</div>
@@ -108,29 +160,40 @@ export default {
 
 .ping-leave-active{
 	position: absolute;
+	width: 100%;
 }
 
 .ping-enter-from,
 .ping-leave-to {
 	opacity: 0;
-	//transform: scale(0.9);
+	filter: blur(3px);
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .ping-leave-active {
 	position: absolute;
 }
 
 table th, table td{
-	padding: 0.9rem;
-}
-
-table tbody{
-	border-top: 1em solid transparent;
+	padding: 0.5rem;
 }
 
 .table > :not(caption) > * > *{
 	background-color: transparent !important;
+}
+
+.ping-move,
+.ping-enter-active,
+.ping-leave-active {
+	transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+}
+
+.ping-leave-active{
+	position: absolute;
+	width: 100%;
+}
+.ping-enter-from,
+.ping-leave-to {
+	opacity: 0;
+	filter: blur(3px);
 }
 </style>

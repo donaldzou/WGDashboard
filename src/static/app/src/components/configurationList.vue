@@ -2,10 +2,11 @@
 import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import ConfigurationCard from "@/components/configurationListComponents/configurationCard.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "configurationList",
-	components: {ConfigurationCard},
+	components: {LocaleText, ConfigurationCard},
 	async setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		return {wireguardConfigurationsStore}
@@ -30,28 +31,39 @@ export default {
 </script>
 
 <template>
-	
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
-			<div class="d-flex mb-4 configurationListTitle">
-				<h3 class="text-body d-flex">
-					<i class="bi bi-body-text me-2"></i>
-					<span>WireGuard Configurations</span></h3>
-				<RouterLink to="/new_configuration" class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto rounded-3">
-					<i class="bi bi-plus-circle-fill me-2"></i>
-					Configuration
+			<div class="d-flex mb-4 configurationListTitle align-items-center gap-3">
+				<h2 class="text-body d-flex">
+					<span>
+						<LocaleText t="WireGuard Configurations"></LocaleText>
+					</span>
+				</h2>
+				<RouterLink to="/new_configuration"
+				            class="btn btn-dark btn-brand rounded-3 p-2 shadow ms-auto rounded-3">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-plus-circle"></i>
+					</h2>
 				</RouterLink>
+				<RouterLink to="/restore_configuration"
+				            class="btn btn-dark btn-brand p-2 shadow ms-2" style="border-radius: 100%">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-clock-history "></i>
+					</h2>
+				</RouterLink>
+				
 			</div>
-			<Transition name="fade" mode="out-in">
-				<div v-if="this.configurationLoaded">
-					<p class="text-muted" v-if="this.wireguardConfigurationsStore.Configurations.length === 0">
-						You don't have any WireGuard configurations yet. Please check the configuration folder or change it in "Settings". By default the folder is "/etc/wireguard".
-					</p>
-					<div class="d-flex gap-3 flex-column mb-3" v-else>
-						<ConfigurationCard v-for="c in this.wireguardConfigurationsStore.Configurations" :key="c.Name" :c="c"></ConfigurationCard>
-					</div>
-				</div>
-			</Transition>
+			<TransitionGroup name="fade" tag="div" class="d-flex flex-column gap-3 mb-4">
+				<p class="text-muted" 
+				   key="noConfiguration"
+				   v-if="this.configurationLoaded && this.wireguardConfigurationsStore.Configurations.length === 0">
+					<LocaleText t="You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard."></LocaleText>
+				</p>
+				<ConfigurationCard v-for="(c, index) in this.wireguardConfigurationsStore.Configurations"
+				                   :delay="index*0.05 + 's'"
+				                   v-else-if="this.configurationLoaded"
+				                   :key="c.Name" :c="c"></ConfigurationCard>
+			</TransitionGroup>
 			
 		</div>
 	</div>
@@ -59,18 +71,9 @@ export default {
 </template>
 
 <style scoped>
-@media screen and (max-width: 768px) {
-	.configurationListTitle{
-		flex-direction: column;
-		gap: 0.5rem;
-		
-		h3 span{
-			margin-left: auto !important;
-		}
-		
-		.btn{
-			width: 100%;
-		}
+.configurationListTitle{
+	.btn{
+		border-radius: 50% !important;
 	}
 }
 </style>

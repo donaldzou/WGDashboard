@@ -3,9 +3,11 @@ import {parse} from "cidr-tools";
 import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "newConfiguration",
+	components: {LocaleText},
 	setup(){
 		const store = WireguardConfigurationsStore()
 		return {store}
@@ -48,9 +50,7 @@ export default {
 					if (res.status){
 						this.success = true
 						await this.store.getConfigurations()
-						setTimeout(() => {
-							this.$router.push('/')
-						}, 1000)
+						this.$router.push(`/configuration/${this.newConfiguration.ConfigurationName}/peers`)
 					}else{
 						this.error = true;
 						this.errorMessage = res.message;
@@ -126,21 +126,27 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5">
+	<div class="mt-md-5 mt-3 text-body">
 		<div class="container mb-4">
 			<div class="mb-4 d-flex align-items-center gap-4">
-				<RouterLink to="/" class="text-decoration-none">
-					<h3 class="mb-0 text-body">
-						<i class="bi bi-chevron-left me-4"></i> New Configuration
-					</h3>
+				<RouterLink to="/"
+				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-arrow-left-circle"></i>
+					</h2>
 				</RouterLink>
+				<h2 class="mb-0">
+					<LocaleText t="New Configuration"></LocaleText>
+				</h2>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
 				@submit="(e) => {e.preventDefault(); this.saveNewConfiguration();}"
 			>
 				<div class="card rounded-3 shadow">
-					<div class="card-header">Configuration Name</div>
+					<div class="card-header">
+						<LocaleText t="Configuration Name"></LocaleText>
+					</div>
 					<div class="card-body">
 						<input type="text" class="form-control" placeholder="ex. wg1" id="ConfigurationName" 
 						       v-model="this.newConfiguration.ConfigurationName"
@@ -149,21 +155,28 @@ export default {
 						<div class="invalid-feedback">
 							<div v-if="this.error">{{this.errorMessage}}</div>
 							<div v-else>
-								Configuration name is invalid. Possible reasons:
+								<LocaleText t="Configuration name is invalid. Possible reasons:"></LocaleText>
 								<ul class="mb-0">
-									<li>Configuration name already exist.</li>
-									<li>Configuration name can only contain 15 lower/uppercase alphabet, numbers, "_"(underscore), "="(equal), "+"(plus), "."(period/dot), "-"(dash/hyphen)</li>
+									<li>
+										<LocaleText t="Configuration name already exist."></LocaleText>
+									</li>
+									<li>
+										<LocaleText t="Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen."></LocaleText>
+									</li>
 								</ul>
 							</div>
-							
 						</div>
 					</div>
 				</div>
 				<div class="card rounded-3 shadow">
-					<div class="card-header">Private Key / Public Key / Pre-Shared Key</div>
+					<div class="card-header">
+						<LocaleText t="Private Key"></LocaleText> & <LocaleText t="Public Key"></LocaleText>
+					</div>
 					<div class="card-body" style="font-family: var(--bs-font-monospace)">
 						<div class="mb-2">
-							<label class="text-muted fw-bold mb-1"><small>PRIVATE KEY</small></label>
+							<label class="text-muted fw-bold mb-1"><small>
+								<LocaleText t="Private Key"></LocaleText>
+							</small></label>
 							<div class="input-group">
 								<input type="text" class="form-control" id="PrivateKey" required
 								       :disabled="this.loading"
@@ -178,17 +191,19 @@ export default {
 							</div>
 						</div>
 						<div>
-							<label class="text-muted fw-bold mb-1"><small>PUBLIC KEY</small></label>
+							<label class="text-muted fw-bold mb-1"><small>
+								<LocaleText t="Public Key"></LocaleText>
+							</small></label>
 							<input type="text" class="form-control" id="PublicKey"
 							       v-model="this.newConfiguration.PublicKey" disabled
 							>
 						</div>
-						
 					</div>
-					
 				</div>
 				<div class="card rounded-3 shadow">
-					<div class="card-header">Listen Port</div>
+					<div class="card-header">
+						<LocaleText t="Listen Port"></LocaleText>
+					</div>
 					<div class="card-body">
 						<input type="number" class="form-control" placeholder="0-65353" id="ListenPort" 
 						       min="1"
@@ -199,14 +214,14 @@ export default {
 						<div class="invalid-feedback">
 							<div v-if="this.error">{{this.errorMessage}}</div>
 							<div v-else>
-								Invalid port
+								<LocaleText t="Invalid port"></LocaleText>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="card rounded-3 shadow">
 					<div class="card-header d-flex align-items-center">
-						IP Address & Range
+						<LocaleText t="IP Address/CIDR"></LocaleText>
 						<span class="badge rounded-pill text-bg-success ms-auto">{{ numberOfAvailableIPs }} Available IPs</span>
 					</div>
 					<div class="card-body">
@@ -218,7 +233,7 @@ export default {
 						<div class="invalid-feedback">
 							<div v-if="this.error">{{this.errorMessage}}</div>
 							<div v-else>
-								IP address & range is invalid.
+								IP Address/CIDR is invalid
 							</div>
 							
 						</div>
@@ -229,7 +244,7 @@ export default {
 					<div class="accordion-item">
 						<h2 class="accordion-header">
 							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#newConfigurationOptionalAccordionCollapse">
-								Optional Settings
+								<LocaleText t="Optional Settings"></LocaleText>
 							</button>
 						</h2>
 						<div id="newConfigurationOptionalAccordionCollapse" 
@@ -263,22 +278,19 @@ export default {
 						</div>
 					</div>
 				</div>
-<!--				<RouterLink to="/new_configuration" class="btn btn-success rounded-3 shadow ms-auto rounded-3">-->
-<!--					<i class="bi bi-save me-2"></i>-->
-<!--					Save-->
-<!--				</RouterLink>-->
 				<button class="btn btn-dark btn-brand rounded-3 px-3 py-2 shadow ms-auto"
-				        :disabled="!this.goodToSubmit">
+				        :disabled="!this.goodToSubmit || this.loading || this.success">
 					<span v-if="this.success" class="d-flex w-100">
-						Success! <i class="bi bi-check-circle-fill ms-2"></i>
+						<LocaleText t="Success"></LocaleText>!
+						 <i class="bi bi-check-circle-fill ms-2"></i>
 					</span>
 					<span v-else-if="!this.loading" class="d-flex w-100">
-						Save Configuration <i class="bi bi-save-fill ms-2"></i>
+						<i class="bi bi-save-fill me-2"></i>
+						<LocaleText t="Save"></LocaleText>
 					</span>
 					<span v-else class="d-flex w-100 align-items-center">
-						Saving...
+						<LocaleText t="Saving..."></LocaleText>
 						<span class="ms-2 spinner-border spinner-border-sm" role="status">
-<!--						  <span class="visually-hidden">Loading...</span>-->
 						</span>
 					</span>
 					

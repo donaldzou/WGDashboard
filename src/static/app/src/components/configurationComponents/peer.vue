@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import "animate.css"
 import PeerSettingsDropdown from "@/components/configurationComponents/peerSettingsDropdown.vue";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peer",
-	components: {PeerSettingsDropdown},
+	components: {LocaleText, PeerSettingsDropdown},
 	props: {
 		Peer: Object
 	},
@@ -57,22 +58,31 @@ export default {
 			<div v-else class="border-0 card-header bg-transparent text-warning fw-bold" 
 			     style="font-size: 0.8rem">
 				<i class="bi-lock-fill me-2"></i>
-				Access Restricted
+				<LocaleText t="Access Restricted"></LocaleText>
 			</div>
 		</div>
 		<div class="card-body pt-1" style="font-size: 0.9rem">
 			<h6>
 				{{Peer.name ? Peer.name : 'Untitled Peer'}}
 			</h6>
-			<div class="mb-2">
-				<small class="text-muted">Public Key</small>
-				<p class="mb-0"><samp>{{Peer.id}}</samp></p>
+			<div class="mb-1">
+				<small class="text-muted">
+					<LocaleText t="Public Key"></LocaleText>
+				</small>
+				<small class="d-block">
+					<samp>{{Peer.id}}</samp>
+				</small>
+			</div>
+			<div>
+				<small class="text-muted">
+					<LocaleText t="Allowed IPs"></LocaleText>
+				</small>
+				<small class="d-block">
+					<samp>{{Peer.allowed_ip}}</samp>
+				</small>
 			</div>
 			<div class="d-flex align-items-end">
-				<div>
-					<small class="text-muted">Allowed IP</small>
-					<p class="mb-0"><samp>{{Peer.allowed_ip}}</samp></p>
-				</div>
+				
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"
 				     :class="{active: this.subMenuOpened}"
 				>
@@ -83,6 +93,7 @@ export default {
 					<Transition name="slide-fade">
 						<PeerSettingsDropdown 
 							@qrcode="(file) => this.$emit('qrcode', file)"
+							@configurationFile="(file) => this.$emit('configurationFile', file)"
 							@setting="this.$emit('setting')"
 							@jobs="this.$emit('jobs')"
 							@refresh="this.$emit('refresh')"
@@ -101,7 +112,7 @@ export default {
 <style scoped>
 
 .slide-fade-leave-active, .slide-fade-enter-active{
-	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 0.9);
+	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 1.3);
 }
 
 .slide-fade-enter-from,

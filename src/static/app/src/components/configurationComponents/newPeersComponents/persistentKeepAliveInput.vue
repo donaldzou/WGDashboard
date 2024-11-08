@@ -1,6 +1,9 @@
 <script>
+import LocaleText from "@/components/text/localeText.vue";
+
 export default {
 	name: "persistentKeepAliveInput",
+	components: {LocaleText},
 	props: {
 		data: Object,
 		saving: Boolean
@@ -11,7 +14,9 @@ export default {
 <template>
 <div>
 	<label for="peer_keep_alive" class="form-label">
-		<small class="text-muted">Persistent Keepalive</small>
+		<small class="text-muted">
+			<LocaleText t="Persistent Keepalive"></LocaleText>
+		</small>
 	</label>
 	<input type="number" class="form-control form-control-sm rounded-3"
 	       :disabled="this.saving"

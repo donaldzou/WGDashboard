@@ -1,10 +1,19 @@
 <script>
+import LocaleText from "@/components/text/localeText.vue";
+import {GetLocale} from "@/utilities/locale.js";
+
 export default {
 	name: "bulkAdd",
+	components: {LocaleText},
 	props: {
 		saving: Boolean,
 		data: Object,
 		availableIp: undefined
+	},
+	computed:{
+		bulkAddGetLocale(){
+			return GetLocale("How many peers you want to add?")
+		}
 	}
 }
 </script>
@@ -17,20 +26,22 @@ export default {
 			       :disabled="!this.availableIp"
 			       id="bulk_add" v-model="this.data.bulkAdd">
 			<label class="form-check-label me-2" for="bulk_add">
-				<small><strong>Bulk Add</strong></small>
+				<small><strong>
+					<LocaleText t="Bulk Add"></LocaleText>
+				</strong></small>
 			</label>
 		</div>
 		<p  :class="{'mb-0': !this.data.bulkAdd}"><small class="text-muted d-block">
-			By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP.
+			<LocaleText t="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></LocaleText>
 		</small></p>
 
 		<div class="form-group" v-if="this.data.bulkAdd">
 			<input class="form-control form-control-sm rounded-3 mb-1" type="number" min="1"
 			       :max="this.availableIp.length"
 			       v-model="this.data.bulkAddAmount"
-			       placeholder="How many peers you want to add?">
+			       :placeholder="this.bulkAddGetLocale">
 			<small class="text-muted">
-				You can add up to <strong>{{this.availableIp.length}}</strong> peers
+				<LocaleText :t="`You can add up to ` + this.availableIp.length + ' peers'"></LocaleText> 
 			</small>
 		</div>
 	</div>

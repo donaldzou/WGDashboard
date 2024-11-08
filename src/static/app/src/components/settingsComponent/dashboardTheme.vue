@@ -1,9 +1,11 @@
 <script>
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchPost} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dashboardTheme",
+	components: {LocaleText},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		return {dashboardConfigurationStore}
@@ -25,20 +27,24 @@ export default {
 </script>
 
 <template>
-	<div class="card mb-4 shadow rounded-3">
-		<p class="card-header">Dashboard Theme</p>
-		<div class="card-body d-flex gap-2">
+	<div >
+		<small class="text-muted mb-1 d-block">
+			<strong>
+				<LocaleText t="Theme"></LocaleText>
+			</strong>
+		</small>
+		<div class="d-flex gap-1">
 			<button class="btn bg-primary-subtle text-primary-emphasis flex-grow-1"
 			        @click="this.switchTheme('light')"
 			        :class="{active: this.dashboardConfigurationStore.Configuration.Server.dashboard_theme === 'light'}">
-				<i class="bi bi-sun-fill"></i>
-				Light
+				<i class="bi bi-sun-fill me-2"></i>
+				<LocaleText t="Light"></LocaleText>
 			</button>
 			<button class="btn bg-primary-subtle text-primary-emphasis flex-grow-1"
 			        @click="this.switchTheme('dark')"
 			        :class="{active: this.dashboardConfigurationStore.Configuration.Server.dashboard_theme === 'dark'}">
-				<i class="bi bi-moon-fill"></i>
-				Dark
+				<i class="bi bi-moon-fill me-2"></i>
+				<LocaleText t="Dark"></LocaleText>
 			</button>
 		</div>
 	</div>

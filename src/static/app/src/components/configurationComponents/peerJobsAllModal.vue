@@ -2,6 +2,7 @@
 import SchedulePeerJob from "@/components/configurationComponents/peerScheduleJobsComponents/schedulePeerJob.vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {v4} from "uuid";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "peerJobsAllModal",
@@ -9,7 +10,7 @@ export default {
 		const store = WireguardConfigurationsStore();
 		return {store}
 	},
-	components: {SchedulePeerJob},
+	components: {LocaleText, SchedulePeerJob},
 	props: {
 		configurationPeers: Array[Object]
 	},
@@ -32,7 +33,8 @@ export default {
 			<div class="m-auto modal-dialog-centered dashboardModal">
 				<div class="card rounded-3 shadow" style="width: 700px">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-						<h4 class="mb-0 fw-normal">All Active Jobs
+						<h4 class="mb-0 fw-normal">
+							<LocaleText t="All Active Jobs"></LocaleText>
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
@@ -71,7 +73,9 @@ export default {
 						     style="height: 153px"
 						     v-else>
 							<div class="card-body text-muted text-center d-flex">
-								<h6 class="m-auto">No active job at the moment.</h6>
+								<span class="m-auto">
+									<LocaleText t="No active job at the moment."></LocaleText>
+								</span>
 							</div>
 						</div>
 					</div>

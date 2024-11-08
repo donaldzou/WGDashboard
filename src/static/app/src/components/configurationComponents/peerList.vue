@@ -8,72 +8,65 @@ import { Line, Bar } from 'vue-chartjs'
 import Fuse from "fuse.js";
 import {
 	Chart,
-	ArcElement,
 	LineElement,
-	BarElement,
-	PointElement,
+	BarElement, 
 	BarController,
-	BubbleController,
-	DoughnutController,
 	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
 	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
 	Legend,
 	Title,
-	Tooltip
+	Tooltip,
+	CategoryScale,
+	PointElement
 } from 'chart.js';
-import dayjs from "dayjs";
-import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
-import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
-import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
-import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
-import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
-import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
-import {ref} from "vue";
-import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
-
 Chart.register(
-	ArcElement,
 	LineElement,
 	BarElement,
-	PointElement,
 	BarController,
-	BubbleController,
-	DoughnutController,
 	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
 	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
 	Legend,
 	Title,
-	Tooltip
+	Tooltip,
+	CategoryScale,
+	PointElement
 );
-
+import dayjs from "dayjs";
+import {defineAsyncComponent, ref} from "vue";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerList",
 	components: {
-		PeerShareLinkModal,
-		PeerJobsLogsModal,
-		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+		DeleteConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/deleteConfiguration.vue")),
+		ConfigurationBackupRestore:
+			defineAsyncComponent(() => import("@/components/configurationComponents/configurationBackupRestore.vue")),
+		SelectPeers:
+			defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue")),
+		EditConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue")),
+		LocaleText,
+		PeerShareLinkModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerShareLinkModal.vue")),
+		PeerJobsLogsModal: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue")),
+		PeerJobsAllModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue")),
+		PeerJobs: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobs.vue")), 
+		PeerCreate:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerCreate.vue")),
+		PeerQRCode:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue")),
+		PeerConfigurationFile:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerConfigurationFile.vue")),
+		PeerSettings:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerSettings.vue")), 
+		PeerSearch, 
+		Peer, 
+		Line, 
+		Bar
+	},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -125,6 +118,10 @@ export default {
 				modalOpen: false,
 				peerConfigData: undefined
 			},
+			peerConfigurationFile: {
+				modalOpen: false,
+				peerConfigData: undefined
+			},
 			peerCreate: {
 				modalOpen: false
 			},
@@ -137,6 +134,18 @@ export default {
 			peerShare:{
 				modalOpen: false,
 				selectedPeer: undefined
+			},
+			editConfiguration: {
+				modalOpen: false
+			},
+			selectPeers: {
+				modalOpen: false
+			},
+			backupRestore: {
+				modalOpen: false
+			},
+			deleteConfiguration: {
+				modalOpen: false
 			}
 		}
 	},
@@ -174,8 +183,7 @@ export default {
 			}, (res) => {
 				if (res.status){
 					this.dashboardConfigurationStore.newMessage("Server",
-						`${this.configurationInfo.Name} is 
-						${res.data ? 'is on':'is off'}`, "Success")
+						`${this.configurationInfo.Name} ${res.data ? 'is on':'is off'}`, "success")
 				}else{
 					this.dashboardConfigurationStore.newMessage("Server",
 						res.message, 'danger')
@@ -369,8 +377,12 @@ export default {
 				keys: ["name", "id", "allowed_ip"]
 			});
 
-			const result = this.wireguardConfigurationStore.searchString ? 
-				fuse.search(this.wireguardConfigurationStore.searchString).map(x => x.item) : this.configurationPeers;
+			const result = this.wireguardConfigurationStore.searchString ?
+				this.configurationPeers.filter(x => {
+					return x.name.includes(this.wireguardConfigurationStore.searchString) ||
+						x.id.includes(this.wireguardConfigurationStore.searchString) || 
+						x.allowed_ip.includes(this.wireguardConfigurationStore.searchString)
+				}) : this.configurationPeers;
 			
 			if (this.dashboardConfigurationStore.Configuration.Server.dashboard_sort === "restricted"){
 				return result.slice().sort((a, b) => {
@@ -406,21 +418,27 @@ export default {
 	<div v-if="!this.loading" class="container-md">
 		<div class="d-flex align-items-center">
 			<div>
-				<small CLASS="text-muted">CONFIGURATION</small>
+				<small CLASS="text-muted">
+					<LocaleText t="CONFIGURATION"></LocaleText>
+				</small>
 				<div class="d-flex align-items-center gap-3">
-					<h1 class="mb-0"><samp>{{this.configurationInfo.Name}}</samp></h1>
+					<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
 				</div>
 			</div>
 			<div class="card rounded-3 bg-transparent shadow-sm ms-auto">
 				<div class="card-body py-2 d-flex align-items-center">
 					<div>
-						<p class="mb-0 text-muted"><small>Status</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Status"></LocaleText>
+						</small></p>
 						<div class="form-check form-switch ms-auto">
 							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								{{this.configurationToggling ? 'Turning ':''}}
-								{{this.configurationInfo.Status ? "On":"Off"}}
+								<LocaleText t="Turning Off..." v-if="!this.configurationInfo.Status && this.configurationToggling"></LocaleText>
+								<LocaleText t="Turning On..." v-else-if="this.configurationInfo.Status && this.configurationToggling"></LocaleText>
+								<LocaleText t="On" v-else-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
+								<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
 								<span v-if="this.configurationToggling"
-								      class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 							</label>
 							<input class="form-check-input"
 							       style="cursor: pointer"
@@ -435,20 +453,24 @@ export default {
 				</div>
 			</div>
 		</div>
+		<hr>
 		<div class="row mt-3 gy-2 gx-2 mb-2">
-			
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Address</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Address"></LocaleText>
+						</small></p>
 						{{this.configurationInfo.Address}}
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Listen Port</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Listen Port"></LocaleText>
+						</small></p>
 						{{this.configurationInfo.ListenPort}}
 					</div>
 				</div>
@@ -456,51 +478,63 @@ export default {
 			<div style="word-break: break-all" class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body py-2">
-						<p class="mb-0 text-muted"><small>Public Key</small></p>
+						<p class="mb-0 text-muted"><small>
+							<LocaleText t="Public Key"></LocaleText>
+						</small></p>
 						<samp>{{this.configurationInfo.PublicKey}}</samp>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="row gx-2 gy-2 mb-2">
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Connected Peers</small></p>
-							<strong class="h4">{{configurationSummary.connectedPeers}}</strong>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Connected Peers"></LocaleText>
+							</small></p>
+							<strong class="h4">
+								{{configurationSummary.connectedPeers}} / {{configurationPeers.length}}
+							</strong>
 						</div>
 						<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Usage</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Usage"></LocaleText>
+							</small></p>
 							<strong class="h4">{{configurationSummary.totalUsage}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Received</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Received"></LocaleText>
+							</small></p>
 							<strong class="h4 text-primary">{{configurationSummary.totalReceive}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
 					</div>
 				</div>
 			</div>
-			<div class="col-6 col-lg-3">
+			<div class="col-12 col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm">
 					<div class="card-body d-flex">
 						<div>
-							<p class="mb-0 text-muted"><small>Total Sent</small></p>
+							<p class="mb-0 text-muted"><small>
+								<LocaleText t="Total Sent"></LocaleText>
+							</small></p>
 							<strong class="h4 text-success">{{configurationSummary.totalSent}} GB</strong>
 						</div>
 						<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
@@ -512,7 +546,9 @@ export default {
 			<div class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
 					<div class="card-header bg-transparent border-0">
-						<small class="text-muted">Peers Total Data Usage</small></div>
+						<small class="text-muted">
+							<LocaleText t="Peers Data Usage"></LocaleText>
+						</small></div>
 					<div class="card-body pt-1">
 						<Bar
 							:data="individualDataUsage"
@@ -523,7 +559,9 @@ export default {
 			</div>
 			<div class="col-sm col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Received Data Usage</small></div>
+					<div class="card-header bg-transparent border-0"><small class="text-muted">
+						<LocaleText t="Real Time Received Data Usage"></LocaleText>
+					</small></div>
 					<div class="card-body pt-1">
 						<Line
 							:options="chartOptions"
@@ -535,7 +573,9 @@ export default {
 			</div>
 			<div class="col-sm col-lg-3">
 				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">Real Time Sent Data Usage</small></div>
+					<div class="card-header bg-transparent border-0"><small class="text-muted">
+						<LocaleText t="Real Time Sent Data Usage"></LocaleText>
+					</small></div>
 					<div class="card-body  pt-1">
 						<Line
 							:options="chartOptions"
@@ -550,6 +590,10 @@ export default {
 			<PeerSearch
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
+				@editConfiguration="this.editConfiguration.modalOpen = true"
+				@selectPeers="this.selectPeers.modalOpen = true"
+				@backupRestore="this.backupRestore.modalOpen = true"
+				@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
 				:configuration="this.configurationInfo"></PeerSearch>
 			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
 				<div class="col-12 col-lg-6 col-xl-4"
@@ -561,6 +605,7 @@ export default {
 					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
+					      @configurationFile="(file) => {this.peerConfigurationFile.peerConfigData = file; this.peerConfigurationFile.modalOpen = true;}"
 					></Peer>
 				</div>
 			</TransitionGroup>
@@ -609,14 +654,47 @@ export default {
 				@close="this.peerShare.modalOpen = false; this.peerShare.selectedPeer = undefined;"
 				:peer="this.configurationPeers.find(x => x.id === this.peerShare.selectedPeer)"></PeerShareLinkModal>
 		</Transition>
+		<Transition name="zoom">
+			<EditConfiguration 
+				@close="this.editConfiguration.modalOpen = false"
+				@dataChanged="(d) => this.configurationInfo = d"
+				:configurationInfo="this.configurationInfo"
+				v-if="this.editConfiguration.modalOpen"></EditConfiguration>
+		</Transition>
+		<Transition name="zoom">
+			<SelectPeers
+				@refresh="this.getPeers()"
+				v-if="this.selectPeers.modalOpen"
+				:configurationPeers="this.configurationPeers"
+				@close="this.selectPeers.modalOpen = false"
+			></SelectPeers>
+		</Transition>
+		
+		<Transition name="zoom">
+			<DeleteConfiguration
+				@backup="backupRestore.modalOpen = true"
+				@close="deleteConfiguration.modalOpen = false"
+				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+		</Transition>
+		<Transition name="zoom">
+			<ConfigurationBackupRestore
+				@close="backupRestore.modalOpen = false"
+				@refreshPeersList="this.getPeers()"
+				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
+		</Transition>
+		<Transition name="zoom">
+			<PeerConfigurationFile
+				@close="peerConfigurationFile.modalOpen = false"
+				v-if="peerConfigurationFile.modalOpen"
+				:configurationFile="peerConfigurationFile.peerConfigData"
+			></PeerConfigurationFile>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 .peerNav .nav-link{
 	&.active{
-		//background: linear-gradient(var(--degree), var(--brandColor1) var(--distance2), var(--brandColor2) 100%);
-		//color: white;
 		background-color: #efefef;
 	}
 }

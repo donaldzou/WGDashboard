@@ -93,7 +93,9 @@ To build the image yourself, you need to do a couple things:<br>
 1. Clone the Github repository containing the source code of WGDashboard including the docker directory. For example do: `git clone https://github.com/donaldzou/WGDashboard.git`
 1. Navigate into the cloned repository.
 1. (Make sure you have Docker correctly installed, if not: [Click here](https://docs.docker.com/engine/install/)) and run: `docker build . -t <Image name>:<Image tag>` as an example: `docker build . -t dselen/wgdashboard:latest`.<br>
+
 This will make Docker compile the image from the resources in the directory you mention, in this case the source/root one. Let it compile, it takes only a couple seconds with a minute at most.
+
 1. If all went well, see your image with `docker images`. Example below:
 
 ```shell

@@ -12,10 +12,12 @@ import PersistentKeepAliveInput
 	from "@/components/configurationComponents/newPeersComponents/persistentKeepAliveInput.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import BulkAdd from "@/components/configurationComponents/newPeersComponents/bulkAdd.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "peerCreate",
 	components: {
+		LocaleText,
 		BulkAdd,
 		PersistentKeepAliveInput,
 		MtuInput,
@@ -24,7 +26,7 @@ export default {
 		return{
 			data: {
 				bulkAdd: false,
-				bulkAddAmount: "",
+				bulkAddAmount: 0,
 				name: "",
 				allowed_ips: [],
 				private_key: "",
@@ -33,7 +35,8 @@ export default {
 				endpoint_allowed_ip: this.dashboardStore.Configuration.Peers.peer_endpoint_allowed_ip,
 				keepalive: parseInt(this.dashboardStore.Configuration.Peers.peer_keep_alive),
 				mtu: parseInt(this.dashboardStore.Configuration.Peers.peer_mtu),
-				preshared_key: ""
+				preshared_key: "",
+				preshared_key_bulkAdd: false
 			},
 			availableIp: undefined,
 			availableIpSearchString: "",
@@ -59,7 +62,7 @@ export default {
 			fetchPost("/api/addPeers/" + this.$route.params.id, this.data, (res) => {
 				if (res.status){
 					this.$router.push(`/configuration/${this.$route.params.id}/peers`)
-					this.dashboardStore.newMessage("Server", "Peer create successfully", "success")
+					this.dashboardStore.newMessage("Server", "Peer created successfully", "success")
 				}else{
 					this.dashboardStore.newMessage("Server", res.message, "danger")
 				}
@@ -102,12 +105,18 @@ export default {
 <template>
 	<div class="container">
 		<div class="mb-4">
-			<RouterLink to="peers" is="div" class="d-flex align-items-center gap-4 text-decoration-none">
-				<h3 class="mb-0 text-body">
-					<i class="bi bi-chevron-left"></i>
-				</h3>
-				<h3 class="text-body mb-0">Add Peers</h3>
-			</RouterLink>
+			<div class="mb-5 d-flex align-items-center gap-4">
+				<RouterLink to="peers"
+				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
+					<h2 class="mb-0" style="line-height: 0">
+						<i class="bi bi-arrow-left-circle"></i>
+					</h2>
+				</RouterLink>
+				<h2 class="mb-0">
+					<LocaleText t="Add Peers"></LocaleText>
+				</h2>
+			</div>
+			
 		</div>
 		<div class="d-flex flex-column gap-2">
 			<BulkAdd :saving="saving" :data="this.data" :availableIp="this.availableIp"></BulkAdd>
@@ -119,15 +128,30 @@ export default {
 			<DnsInput :saving="saving" :data="data"></DnsInput>
 
 			<hr class="mb-0 mt-2">
-			<div class="row">
+			<div class="row gy-3">
 				<div class="col-sm" v-if="!this.data.bulkAdd">
 					<PresharedKeyInput :saving="saving" :data="data" :bulk="this.data.bulkAdd"></PresharedKeyInput>
 				</div>
+				
 				<div class="col-sm">
 					<MtuInput :saving="saving" :data="data"></MtuInput>
 				</div>
 				<div class="col-sm">
 					<PersistentKeepAliveInput :saving="saving" :data="data"></PersistentKeepAliveInput>
+				</div>
+				<div class="col-12" v-if="this.data.bulkAdd">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" role="switch"
+						       v-model="this.data.preshared_key_bulkAdd"
+						       id="bullAdd_PresharedKey_Switch" checked>
+						<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
+							<small class="fw-bold">
+								<LocaleText t="Pre-Shared Key"></LocaleText>
+								<LocaleText t="Enabled" v-if="this.data.preshared_key_bulkAdd"></LocaleText>
+								<LocaleText t="Disabled" v-else></LocaleText>
+							</small>
+						</label>
+					</div>
 				</div>
 			</div>
 			<div class="d-flex mt-2">
@@ -136,7 +160,8 @@ export default {
 				        @click="this.peerCreate()"
 				>
 					<i class="bi bi-plus-circle-fill me-2" v-if="!this.saving"></i>
-					{{this.saving ? 'Saving...': 'Add'}}
+					<LocaleText t="Adding..." v-if="this.saving"></LocaleText>
+					<LocaleText t="Add" v-else></LocaleText>
 				</button>
 			</div>
 		</div>

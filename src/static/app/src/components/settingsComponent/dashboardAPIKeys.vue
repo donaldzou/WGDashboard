@@ -4,10 +4,11 @@ import {v4} from "uuid";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import NewDashboardAPIKey from "@/components/settingsComponent/dashboardAPIKeysComponents/newDashboardAPIKey.vue";
 import DashboardAPIKey from "@/components/settingsComponent/dashboardAPIKeysComponents/dashboardAPIKey.vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dashboardAPIKeys",
-	components: {DashboardAPIKey, NewDashboardAPIKey},
+	components: {LocaleText, DashboardAPIKey, NewDashboardAPIKey},
 	setup(){
 		const store = DashboardConfigurationStore();
 		return {store};
@@ -33,7 +34,7 @@ export default {
 				}else{
 					this.value = this.store.Configuration.Peers[this.targetData];
 					this.store.newMessage("Server",
-						`API Keys function is failed ${this.value ? 'enabled':'disabled'}`, "danger")
+						`API Keys function is failed to ${this.value ? 'enabled':'disabled'}`, "danger")
 				}
 			})
 		},
@@ -44,7 +45,6 @@ export default {
 			handler(newValue){
 				if (newValue){
 					fetchGet("/api/getDashboardAPIKeys", {}, (res) => {
-						console.log(res)
 						if(res.status){
 							this.apiKeys = res.data
 						}else{
@@ -62,30 +62,34 @@ export default {
 </script>
 
 <template>
-	<div class="card mb-4 shadow rounded-3">
-		<div class="card-header d-flex">
-			API Keys
-			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()">
+	<div class="card rounded-3" >
+		<div class="card-header d-flex align-items-center" :class="{'border-bottom-0 rounded-3': !this.value}">
+			<h6 class="my-2">
+				<LocaleText t="API Keys"></LocaleText>
+			</h6>
+			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()" >
 				<input class="form-check-input" type="checkbox"
 				       v-model="this.value"
 				       @change="this.toggleDashboardAPIKeys()"
 				       role="switch" id="allowAPIKeysSwitch">
 				<label class="form-check-label" for="allowAPIKeysSwitch">
-					{{this.value ? 'Enabled':'Disabled'}}
+					<LocaleText t="Enabled" v-if="this.value"></LocaleText>
+					<LocaleText t="Disabled" v-else></LocaleText>
 				</label>
 			</div>
 		</div>
 		<div class="card-body position-relative d-flex flex-column gap-2" v-if="this.value">
-			<button class="ms-auto btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
+			<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm"
 			        @click="this.newDashboardAPIKey = true"
 			        v-if="!this.store.getActiveCrossServer()"
 			>
-				<i class="bi bi-key me-2"></i> Create
+				<i class="bi bi-plus-circle-fill me-2"></i>
+				<LocaleText t="API Key"></LocaleText>
 			</button>
 			<div class="card" style="height: 300px" v-if="this.apiKeys.length === 0">
 				<div class="card-body d-flex text-muted">
 						<span class="m-auto">
-							No Dashboard API Key
+							<LocaleText t="No WGDashboard API Key"></LocaleText>
 						</span>
 				</div>
 			</div>
@@ -99,7 +103,7 @@ export default {
 			<Transition name="zoomReversed">
 				<NewDashboardAPIKey v-if="this.newDashboardAPIKey"
 				                    @created="(data) => this.apiKeys = data"
-				 @close="this.newDashboardAPIKey = false"
+				                    @close="this.newDashboardAPIKey = false"
 				></NewDashboardAPIKey>
 			</Transition>
 			

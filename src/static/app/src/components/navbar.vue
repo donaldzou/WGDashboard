@@ -3,9 +3,13 @@ import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet} from "@/utilities/fetch.js";
+import LocaleText from "@/components/text/localeText.vue";
+import {GetLocale} from "@/utilities/locale.js";
+import HelpModal from "@/components/navbarComponents/helpModal.vue";
 
 export default {
 	name: "navbar",
+	components: {HelpModal, LocaleText},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -15,7 +19,17 @@ export default {
 		return {
 			updateAvailable: false,
 			updateMessage: "Checking for update...",
-			updateUrl: ""
+			updateUrl: "",
+			openHelpModal: false,
+		}
+	},
+	computed: {
+		getActiveCrossServer(){
+			if (this.dashboardConfigurationStore.ActiveServerConfiguration){
+				return new URL(this.dashboardConfigurationStore.CrossServerConfiguration.ServerList
+					[this.dashboardConfigurationStore.ActiveServerConfiguration].host)
+			}
+			return undefined
 		}
 	},
 	mounted() {
@@ -27,7 +41,7 @@ export default {
 				}
 				this.updateMessage = res.message
 			}else{
-				this.updateMessage = "Failed to check available update"
+				this.updateMessage = GetLocale("Failed to check available update")
 				console.log(`Failed to get update: ${res.message}`)
 			}
 		})
@@ -36,34 +50,51 @@ export default {
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-3 navbar-container"
+	<div class="col-md-3 col-lg-2 d-md-block p-2 navbar-container"
 	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
 	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
-	     style="height: calc(-50px + 100vh);">
+	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
-			<div class="sidebar-sticky pt-3">
+			<div class="sidebar-sticky ">
+				<div class="text-white text-center m-0 py-3 mb-3 btn-brand">
+					<h5 class="mb-0">
+						WGDashboard
+					</h5>
+					<small class="ms-auto" v-if="getActiveCrossServer !== undefined">
+						<i class="bi bi-hdd-rack-fill me-2"></i>{{getActiveCrossServer.host}}
+					</small>
+				</div>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
 						            to="/" exact-active-class="active">
 							<i class="bi bi-house me-2"></i>
-							Home</RouterLink></li>
+							<LocaleText t="Home"></LocaleText>	
+						</RouterLink></li>
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3" to="/settings" 
 						            exact-active-class="active">
 							<i class="bi bi-gear me-2"></i>
-							Settings</RouterLink></li>
+							<LocaleText t="Settings"></LocaleText>	
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
+							<i class="bi bi-question-circle me-2"></i>
+							<LocaleText t="Help"></LocaleText>
+						</a>
+					</li>
 				</ul>
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
 					<i class="bi bi-body-text me-2"></i>
-					Configurations
+					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
-					<li class="nav-item">
+					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
-						            v-for="c in this.wireguardConfigurationsStore.Configurations">
+						            >
 							<span class="dot me-2" :class="{active: c.Status}"></span>
 							{{c.Name}}
 						</RouterLink>
@@ -72,40 +103,47 @@ export default {
 				<hr class="text-body">
 				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
 					<i class="bi bi-tools me-2"></i>
-					Tools
+					<LocaleText t="Tools"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
-						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">Ping</RouterLink></li>
+						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="Ping"></LocaleText>
+						</RouterLink></li>
 					<li class="nav-item">
-						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">Traceroute</RouterLink>
+						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="Traceroute"></LocaleText>
+						</RouterLink>
 					</li>
 				</ul>
 				<hr class="text-body">
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 mb-3">
 					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
 						<i class="bi bi-box-arrow-left me-2"></i>
-						Sign Out</a>
+						<LocaleText t="Sign Out"></LocaleText>	
+					</a>
 					</li>
 					<li class="nav-item" style="font-size: 0.8rem">
-						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none" target="_blank">
+						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none rounded-3" target="_blank">
 							<small class="nav-link text-muted rounded-3" >
-								{{ this.updateMessage }}
+								<LocaleText :t="this.updateMessage"></LocaleText>
+								(<LocaleText t="Current Version:"></LocaleText> {{ dashboardConfigurationStore.Configuration.Server.version }})
 							</small>
 						</a>
-						<small class="nav-link text-muted" v-else>
-							{{ this.updateMessage }}
+						<small class="nav-link text-muted rounded-3" v-else>
+							<LocaleText :t="this.updateMessage"></LocaleText>
+							({{ dashboardConfigurationStore.Configuration.Server.version }})
 						</small>
 					</li>
 				</ul>
-				
 			</div>
 		</nav>
+		<Transition name="zoom">
+			<HelpModal v-if="this.openHelpModal" @close="openHelpModal = false;"></HelpModal>
+		</Transition>
 	</div>
-	
-	
 </template>
 
 <style scoped>
@@ -124,6 +162,23 @@ export default {
 		animation-name: zoomInFade
 	}
 }
+
+.navbar-container{
+	height: 100vh;
+	
+}
+
+
+@supports (height: 100dvh) {
+	@media screen and (max-width: 768px){
+		.navbar-container{
+			height: calc(100dvh - 50px);
+		}	
+	}
+	
+
+}
+
 
 @keyframes zoomInFade {
 	0%{

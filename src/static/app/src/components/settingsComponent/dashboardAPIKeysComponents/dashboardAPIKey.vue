@@ -1,9 +1,11 @@
 <script>
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dashboardAPIKey",
+	components: {LocaleText},
 	props: {
 		apiKey: Object
 	},
@@ -37,12 +39,18 @@ export default {
 	<div class="card rounded-3 shadow-sm">
 		<div class="card-body d-flex gap-3 align-items-center apiKey-card-body" v-if="!this.confirmDelete">
 			<div class="d-flex align-items-center gap-2">
-				<small class="text-muted">Key</small>
+				<small class="text-muted">
+					<LocaleText t="Key"></LocaleText>
+				</small>
 				<span style="word-break: break-all">{{this.apiKey.Key}}</span>
 			</div>
 			<div class="d-flex align-items-center gap-2 ms-auto">
-				<small class="text-muted">Expire At</small>
-				{{this.apiKey.ExpiredAt ? this.apiKey.ExpiredAt : 'Never'}}
+				<small class="text-muted">
+					<LocaleText t="Expire At"></LocaleText>
+				</small>
+				
+				<LocaleText t="Never Expire" v-if="!this.apiKey.ExpiredAt"></LocaleText>
+				<span>{{ this.apiKey.ExpiredAt }}</span>
 			</div>
 			<a role="button" class="btn btn-sm bg-danger-subtle text-danger-emphasis rounded-3"
 			   v-if="!this.store.getActiveCrossServer()"
@@ -52,7 +60,7 @@ export default {
 		</div>
 		<div v-else class="card-body d-flex gap-3 align-items-center justify-content-end" 
 		     v-if="!this.store.getActiveCrossServer()">
-			Are you sure to delete this API key?
+			<LocaleText t="Are you sure to delete this API key?"></LocaleText>
 			<a role="button" class="btn btn-sm bg-success-subtle text-success-emphasis rounded-3"
 				@click="this.deleteAPIKey()"
 			>

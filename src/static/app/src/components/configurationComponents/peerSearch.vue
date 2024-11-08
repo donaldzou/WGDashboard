@@ -2,10 +2,13 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
+import LocaleText from "@/components/text/localeText.vue";
+import {GetLocale} from "@/utilities/locale.js";
 
 
 export default {
 	name: "peerSearch",
+	components: {LocaleText},
 	setup(){
 		const store = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore()
@@ -18,16 +21,16 @@ export default {
 	data(){
 		return {
 			sort: {
-				status: "Status",
-				name: "Name",
-				allowed_ip: "Allowed IP",
-				restricted: "Restricted"
+				status: GetLocale("Status"),
+				name: GetLocale("Name"),
+				allowed_ip: GetLocale("Allowed IPs"),
+				restricted: GetLocale("Restricted")
 			},
 			interval: {
-				'5000': '5 Seconds',
-				'10000': '10 Seconds',
-				'30000': '30 Seconds',
-				'60000': '1 Minutes'
+				'5000': GetLocale('5 Seconds'),
+				'10000': GetLocale('10 Seconds'),
+				'30000': GetLocale('30 Seconds'),
+				'60000': GetLocale('1 Minutes')
 			},
 			searchString: "",
 			searchStringTimeout: undefined,
@@ -77,8 +80,10 @@ export default {
 			})
 		}
 	},
-	mounted() {
-		
+	computed: {
+		searchBarPlaceholder(){
+			return GetLocale("Search Peers...")
+		}
 	}
 }
 </script>
@@ -89,25 +94,33 @@ export default {
 			<RouterLink
 				to="create"
 				class="text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
-				<i class="bi bi-plus-lg me-2"></i>Peer
+				<i class="bi bi-plus-lg me-2"></i>
+				<LocaleText t="Peer"></LocaleText>
 			</RouterLink>
 			<button class="btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  shadow-sm"
 			        @click="this.downloadAllPeer()">
-				<i class="bi bi-download me-2"></i> Download All
+				<i class="bi bi-download me-2"></i>
+				<LocaleText t="Download All"></LocaleText>
 			</button>
-			<div class="flex-grow-1 mt-3 mt-md-0">
+			<div class="mt-3 mt-md-0 flex-grow-1">
+
 				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-100"
-				       placeholder="Search..."
+				       :placeholder="searchBarPlaceholder"
 				       id="searchPeers"
 				       @keyup="this.debounce()"
 				       v-model="this.searchString">
 			</div>
-			<button 
+			<button
 				@click="this.showDisplaySettings = true"
 				class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-			        type="button" aria-expanded="false">
+				type="button" aria-expanded="false">
 				<i class="bi bi-filter-circle me-2"></i>
-				Display
+				<LocaleText t="Display"></LocaleText>
+			</button>
+			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
+			        @click="this.$emit('editConfiguration')"
+			        type="button" aria-expanded="false">
+				<i class="bi bi-gear-fill"></i>
 			</button>
 			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
 			        @click="this.showMoreSettings = true"
@@ -122,15 +135,19 @@ export default {
 						<div class="m-auto modal-dialog-centered dashboardModal">
 							<div class="card rounded-3 shadow w-100">
 								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-									<h4 class="mb-0 fw-normal">Display
+									<h4 class="mb-0 fw-normal"><LocaleText t="Display"></LocaleText>
 									</h4>
 									<button type="button" class="btn-close ms-auto" @click="this.showDisplaySettings = false"></button>
 								</div>
 								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
 									<div>
-										<p class="text-muted fw-bold mb-2"><small>Sort by</small></p>
+										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Sort by"></LocaleText>
+										</small></p>
 										<div class="list-group">
-											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" role="button" @click="this.updateSort(key)">
+											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" 
+											   role="button" 
+											   @click="this.updateSort(key)">
 												<span class="me-auto">{{value}}</span>
 												<i class="bi bi-check text-primary"
 												   v-if="store.Configuration.Server.dashboard_sort === key"></i>
@@ -138,7 +155,9 @@ export default {
 										</div>
 									</div>
 									<div>
-										<p class="text-muted fw-bold mb-2"><small>Refresh interval</small></p>
+										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Refresh Interval"></LocaleText>
+										</small></p>
 										<div class="list-group">
 											<a v-for="(value, key) in this.interval"
 											   class="list-group-item list-group-item-action d-flex" role="button"
@@ -162,22 +181,45 @@ export default {
 					<div class="container-md d-flex h-100 w-100">
 						<div class="m-auto modal-dialog-centered dashboardModal">
 							<div class="card rounded-3 shadow w-100">
-								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-									<h4 class="mb-0 fw-normal">Configuration Settings
+								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
+									<h4 class="mb-0">
+										<LocaleText t="Other Settings"></LocaleText>
 									</h4>
 									<button type="button" class="btn-close ms-auto" @click="this.showMoreSettings = false"></button>
 								</div>
-								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
+								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column pt-0">
+									
 									<div>
-										<p class="text-muted fw-bold mb-2"><small>Peer Jobs</small></p>
+										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Peers"></LocaleText>
+										</small></p>
 										<div class="list-group">
-											<a class="list-group-item list-group-item-action d-flex" role="button" 
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('selectPeers')">
+												<LocaleText t="Select Peers"></LocaleText>
+											</a>
+											<a class="list-group-item list-group-item-action d-flex" role="button"
 											   @click="this.$emit('jobsAll')">
-												Active Jobs
+												<LocaleText t="Active Jobs"></LocaleText>
 											</a>
 											<a class="list-group-item list-group-item-action d-flex" role="button"
 											   @click="this.$emit('jobLogs')">
-												Logs
+												<LocaleText t="Logs"></LocaleText>
+											</a>
+										</div>
+									</div>
+									<div>
+										<p class="text-muted fw-bold mb-2"><small>
+											<LocaleText t="Configuration"></LocaleText>
+										</small></p>
+										<div class="list-group">
+											<a class="list-group-item list-group-item-action d-flex" role="button"
+											   @click="this.$emit('backupRestore')">
+												<LocaleText t="Backup & Restore"></LocaleText>
+											</a>
+											<a class="list-group-item list-group-item-action d-flex text-danger fw-bold" role="button"
+											   @click="this.$emit('deleteConfiguration')">
+												<LocaleText t="Delete Configuration"></LocaleText>
 											</a>
 										</div>
 									</div>

@@ -1,7 +1,9 @@
 <script>
 import QRCode from "qrcode";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerQRCode",
+	components: {LocaleText},
 	props: {
 		peerConfigData: String
 	},
@@ -19,7 +21,9 @@ export default {
 			<div class="m-auto modal-dialog-centered dashboardModal justify-content-center">
 				<div class="card rounded-3 shadow">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
-						<h4 class="mb-0">QR Code</h4>
+						<h4 class="mb-0">
+							<LocaleText t="QR Code"></LocaleText>
+						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body">

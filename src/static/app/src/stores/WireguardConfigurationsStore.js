@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {fetchGet} from "@/utilities/fetch.js";
 import isCidr from "is-cidr";
+import {GetLocale} from "@/utilities/locale.js";
 
 export const WireguardConfigurationsStore = defineStore('WireguardConfigurationsStore', {
 	state: () => ({
@@ -11,54 +12,54 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 			dropdowns: {
 				Field: [
 					{
-						display: "Total Received",
+						display: GetLocale("Total Received"),
 						value: "total_receive",
 						unit: "GB",
 						type: 'number'
 					},
 					{
-						display: "Total Sent",
+						display: GetLocale("Total Sent"),
 						value: "total_sent",
 						unit: "GB",
 						type: 'number'
 					},
 					{
-						display: "Total Data",
+						display: GetLocale("Total Usage"),
 						value: "total_data",
 						unit: "GB",
 						type: 'number'
 					},
 					{
-						display: "Date",
+						display: GetLocale("Date"),
 						value: "date",
 						type: 'date'
 					}
 				],
 				Operator: [
+					// {
+					// 	display: "equal",
+					// 	value: "eq"
+					// },
+					// {
+					// 	display: "not equal",
+					// 	value: "neq"
+					// },
 					{
-						display: "equal",
-						value: "eq"
-					},
-					{
-						display: "not equal",
-						value: "neq"
-					},
-					{
-						display: "larger than",
+						display: GetLocale("larger than"),
 						value: "lgt"
 					},
-					{
-						display: "less than",
-						value: "lst"
-					},
+					// {
+					// 	display: "less than",
+					// 	value: "lst"
+					// },
 				],
 				Action: [
 					{
-						display: "Restrict Peer",
+						display: GetLocale("Restrict Peer"),
 						value: "restrict"
 					},
 					{
-						display: "Delete Peer",
+						display: GetLocale("Delete Peer"),
 						value: "delete"
 					}
 				]
@@ -69,6 +70,7 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 		async getConfigurations(){
 			await fetchGet("/api/getWireguardConfigurations", {}, (res) => {
 				if (res.status)  this.Configurations = res.data
+				// this.Configurations = []
 			});
 		},
 		regexCheckIP(ip){
@@ -78,6 +80,10 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 		checkCIDR(ip){
 			return isCidr(ip) !== 0
 		},
-		
+		checkWGKeyLength(key){
+			console.log(key)
+			const reg = /^[A-Za-z0-9+/]{43}=?=?$/;
+			return reg.test(key)
+		}
 	}
 });

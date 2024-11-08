@@ -1,9 +1,11 @@
 <script>
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import LocaleText from "@/components/text/localeText.vue";
 
 export default {
 	name: "dnsInput",
+	components: {LocaleText},
 	props: {
 		
 		data: Object,
@@ -27,7 +29,7 @@ export default {
 				for(let ip in i){
 					if (!this.store.regexCheckIP(i[ip])){
 						if (!this.error){
-							this.dashboardStore.newMessage("WGDashboard", "DNS is invalid", "danger");
+							this.dashboardStore.newMessage("WGDashboard", "DNS format is incorrect", "danger");
 						}
 						this.error = true;
 						this.data.DNS = "";
@@ -50,7 +52,9 @@ export default {
 <template>
 	<div>
 		<label for="peer_DNS_textbox" class="form-label">
-			<small class="text-muted">DNS</small>
+			<small class="text-muted">
+				<LocaleText t="DNS"></LocaleText>
+			</small>
 		</label>
 		<input type="text" class="form-control form-control-sm rounded-3"
 		       :class="{'is-invalid': this.error}"
