@@ -29,7 +29,7 @@ onMounted(() => {
 						<button type="button" class="btn-close ms-auto" @click="$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4 d-flex flex-column gap-2">
-						<a class="card text-decoration-none" target="_blank" role="button" href="https://discord.com/invite/ZkJSPAaQ">
+						<a class="card text-decoration-none" target="_blank" role="button" href="https://discord.gg/72TwzjeuWm">
 							<div class="card-body d-flex gap-4 align-items-center">
 								<h1 class="mb-0">
 									<i class="bi bi-discord"></i>
