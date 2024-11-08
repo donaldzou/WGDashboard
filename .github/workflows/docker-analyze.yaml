@@ -1,0 +1,50 @@
+name: Docker-Analyze
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Daily at midnight UTC
+  workflow_dispatch:
+    inputs:
+      trigger-build:
+        description: 'Trigger a manual build and push'
+        default: 'true'
+
+env:
+  DOCKER_IMAGE: donaldzou/wgdashboard
+
+jobs:
+  docker_analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Install Docker Scout
+        run: |
+          echo "Installing Docker Scout..."
+          curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh -s --
+          echo "Docker Scout installed successfully."
+      - name: Analyze Docker image with Docker Scout
+        id: analyze-image
+        run: |
+          echo "Analyzing Docker image with Docker Scout..."
+          docker scout cves ${{ env.DOCKER_IMAGE }}:latest > scout-results.txt
+          cat scout-results.txt
+          echo "Docker Scout analysis completed."
+      - name: Fail if critical CVEs are found
+        run: |
+          if grep -q "0C" scout-results.txt; then
+            echo "No critical vulnerabilities found! Continueing."
+            exit 0
+          else
+            echo "At least one critical vulnerabilities found! Exiting."
+            exit 1
+          fi

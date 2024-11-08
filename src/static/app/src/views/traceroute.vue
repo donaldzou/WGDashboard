@@ -166,12 +166,9 @@ export default {
 .ping-enter-from,
 .ping-leave-to {
 	opacity: 0;
-	//transform: scale(1.1);
 	filter: blur(3px);
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .ping-leave-active {
 	position: absolute;
 }
@@ -184,7 +181,7 @@ table th, table td{
 	background-color: transparent !important;
 }
 
-.ping-move, /* apply transition to moving elements */
+.ping-move,
 .ping-enter-active,
 .ping-leave-active {
 	transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
@@ -197,7 +194,6 @@ table th, table td{
 .ping-enter-from,
 .ping-leave-to {
 	opacity: 0;
-	//transform: scale(1.1);
 	filter: blur(3px);
 }
 </style>

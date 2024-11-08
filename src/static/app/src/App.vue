@@ -1,41 +1,38 @@
 <script setup async>
-import { RouterView } from 'vue-router'
+import {RouterView, useRoute} from 'vue-router'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {computed, watch} from "vue";
-import {v4} from "uuid";
 const store = DashboardConfigurationStore();
+import "@/utilities/wireguard.js"
 store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
 	store.IsElectronApp = true;
 	store.CrossServerConfiguration.Enable = true;
 }
-
 watch(store.CrossServerConfiguration, () => {
 	store.syncCrossServerConfiguration()
 }, {
 	deep: true
 });
+const route = useRoute()
 
-const getActiveCrossServer = computed(() => {
-	if (store.ActiveServerConfiguration){
-		return store.CrossServerConfiguration.ServerList[store.ActiveServerConfiguration]
-	}
-	return undefined
-})
 </script>
 
 <template>
 	<div style="z-index: 9999; height: 5px" class="position-absolute loadingBar top-0 start-0"></div>
-	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark">
+	<nav class="navbar bg-dark sticky-top" data-bs-theme="dark" v-if="!route.meta.hideTopNav">
 		<div class="container-fluid d-flex text-body align-items-center">
-			<span class="navbar-brand mb-0 h1">WGDashboard</span>
-			<small class="ms-auto text-muted" v-if="getActiveCrossServer !== undefined">
-				<i class="bi bi-server me-2"></i>{{getActiveCrossServer.host}}
-			</small>
+			<RouterLink to="/" class="navbar-brand mb-0 h1">
+				<img src="../public/img/logo.png" alt="WGDashboard Logo" style="width: 32px">
+			</RouterLink>
 			<a role="button" class="navbarBtn text-body"
 			   @click="store.ShowNavBar = !store.ShowNavBar"
 			   style="line-height: 0; font-size: 2rem">
-				<i class="bi bi-list"></i></a>
+				<Transition name="fade2" mode="out-in">
+					<i class="bi bi-list" v-if="!store.ShowNavBar"></i>
+					<i class="bi bi-x-lg" v-else></i>
+				</Transition>
+			</a>
 		</div>
 	</nav>
 	<Suspense>
@@ -52,18 +49,14 @@ const getActiveCrossServer = computed(() => {
 .app-leave-active {
 	transition: all 0.7s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
-
 .app-enter-from,
 .app-leave-to{
 	opacity: 0;
 	transform: scale(1.1);
 }
-
 @media screen and (min-width: 768px) {
 	.navbar{
 		display: none;
 	}
 }
-
-
 </style>

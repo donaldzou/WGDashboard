@@ -1,5 +1,4 @@
-import itertools
-import random
+import itertools, random
 import shutil
 import sqlite3
 import configparser
@@ -7,7 +6,6 @@ import hashlib
 import ipaddress
 import json
 import traceback
-# Python Built-in Library
 import os
 import secrets
 import subprocess
@@ -17,44 +15,29 @@ import urllib.error
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
-
 import bcrypt
-# PIP installed library
 import ifcfg
 import psutil
 import pyotp
 from flask import Flask, request, render_template, session, g
 from json import JSONEncoder
 from flask_cors import CORS
-
 from icmplib import ping, traceroute
-
-# Import other python files
 import threading
 
 from flask.json.provider import DefaultJSONProvider
 
-
-DASHBOARD_VERSION = 'v4.1'
+DASHBOARD_VERSION = 'v4.1.0'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
     os.mkdir(DB_PATH)
 DASHBOARD_CONF = os.path.join(CONFIGURATION_PATH, 'wg-dashboard.ini')
-
-# WireGuard's configuration path
 WG_CONF_PATH = None
-# Dashboard Config Name
-# Upgrade Required
 UPDATE = None
-# Flask App Configuration
-
-app = Flask("WGDashboard")
+app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
-
-
-
 
 class ModelEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -63,11 +46,9 @@ class ModelEncoder(JSONEncoder):
         else:
             return super(ModelEncoder, self).default(o)
 
-
 '''
 Classes
 '''
-
 
 def ResponseObject(status=True, message=None, data=None) -> Flask.response_class:
     response = Flask.make_response(app, {
@@ -325,7 +306,20 @@ class PeerJobs:
                        self.Jobs))
         except Exception as e:
             return False, str(e)
-
+        
+    def updateJobConfigurationName(self, ConfigurationName: str, NewConfigurationName: str) -> tuple[bool, str]:
+        try:
+            with self.jobdb:
+                jobdbCursor = self.jobdb.cursor()
+                jobdbCursor.execute('''
+                        UPDATE PeerJobs SET Configuration = ? WHERE Configuration = ?
+                    ''', (NewConfigurationName, ConfigurationName, ))
+                self.jobdb.commit()
+            self.__getJobs()
+        except Exception as e:
+            return False, str(e)
+        
+    
     def runJob(self):
         needToDelete = []
         for job in self.Jobs:
@@ -357,6 +351,10 @@ class PeerJobs:
                             JobLogger.log(job.JobID, s["status"],
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                             )
+                else:
+                    needToDelete.append(job)
+            else:
+                needToDelete.append(job)
         for j in needToDelete:
             self.deleteJob(j)
 
@@ -540,10 +538,13 @@ class WireguardConfiguration:
 
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
-    def __createDatabase(self):
+    def __createDatabase(self, dbName = None):
+        if dbName is None:
+            dbName = self.Name
+        
         existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         existingTables = [t['name'] for t in existingTables]
-        if self.Name not in existingTables:
+        if dbName not in existingTables:
             sqlUpdate(
                 """
                 CREATE TABLE '%s'(
@@ -555,10 +556,10 @@ class WireguardConfiguration:
                     keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
                     PRIMARY KEY (id)
                 )
-                """ % self.Name
+                """ % dbName
             )
 
-        if f'{self.Name}_restrict_access' not in existingTables:
+        if f'{dbName}_restrict_access' not in existingTables:
             sqlUpdate(
                 """
                 CREATE TABLE '%s_restrict_access' (
@@ -570,9 +571,9 @@ class WireguardConfiguration:
                     keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
                     PRIMARY KEY (id)
                 )
-                """ % self.Name
+                """ % dbName
             )
-        if f'{self.Name}_transfer' not in existingTables:
+        if f'{dbName}_transfer' not in existingTables:
             sqlUpdate(
                 """
                 CREATE TABLE '%s_transfer' (
@@ -580,9 +581,9 @@ class WireguardConfiguration:
                     total_sent FLOAT NULL, total_data FLOAT NULL,
                     cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
                 )
-                """ % self.Name
+                """ % dbName
             )
-        if f'{self.Name}_deleted' not in existingTables:
+        if f'{dbName}_deleted' not in existingTables:
             sqlUpdate(
                 """
                 CREATE TABLE '%s_deleted' (
@@ -594,7 +595,7 @@ class WireguardConfiguration:
                     keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
                     PRIMARY KEY (id)
                 )
-                """ % self.Name
+                """ % dbName
             )
             
     def __dumpDatabase(self):
@@ -719,12 +720,48 @@ class WireguardConfiguration:
                 self.Peers.append(Peer(i, self))
             
     def addPeers(self, peers: list):
-        for p in peers:
-            subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}", 
-                                    shell=True, stderr=subprocess.STDOUT)
-        subprocess.check_output(
-            f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)    
-        self.getPeersList()
+        try:
+            for i in peers:
+                newPeer = {
+                    "id": i['id'],
+                    "private_key": i['private_key'],
+                    "DNS": i['DNS'],
+                    "endpoint_allowed_ip": i['endpoint_allowed_ip'],
+                    "name": i['name'],
+                    "total_receive": 0,
+                    "total_sent": 0,
+                    "total_data": 0,
+                    "endpoint": "N/A",
+                    "status": "stopped",
+                    "latest_handshake": "N/A",
+                    "allowed_ip": i.get("allowed_ip", "N/A"),
+                    "cumu_receive": 0,
+                    "cumu_sent": 0,
+                    "cumu_data": 0,
+                    "traffic": [],
+                    "mtu": i['mtu'],
+                    "keepalive": i['keepalive'],
+                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                    "preshared_key": i["preshared_key"]
+                }
+                sqlUpdate(
+                    """
+                    INSERT INTO '%s'
+                        VALUES (:id, :private_key, :DNS, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                    """ % self.Name
+                    , newPeer)
+            for p in peers:
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
+                                        shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            self.getPeersList()
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
         
     def searchPeer(self, publicKey):
         for i in self.Peers:
@@ -760,7 +797,7 @@ class WireguardConfiguration:
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
         self.__getPeers()
-        return ResponseObject(True, "Allow access successfully!")
+        return ResponseObject(True, "Allow access successfully")
 
     def restrictPeers(self, listOfPublicKeys):
         numOfRestrictedPeers = 0
@@ -976,7 +1013,7 @@ class WireguardConfiguration:
             os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
         time = datetime.now().strftime("%Y%m%d%H%M%S")
         shutil.copy(
-            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'),
+            self.__configPath,
             os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.conf')
         )
         with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
@@ -992,8 +1029,8 @@ class WireguardConfiguration:
         files.sort(key=lambda x: x[1], reverse=True)
         
         for f, ct in files:
-            if _regexMatch(f"^({self.Name})_(.*)\.(conf)$", f):
-                s = re.search(f"^({self.Name})_(.*)\.(conf)$", f)
+            if _regexMatch(f"^({self.Name})_(.*)\\.(conf)$", f):
+                s = re.search(f"^({self.Name})_(.*)\\.(conf)$", f)
                 date = s.group(2)
                 d = {
                     "filename": f,
@@ -1049,7 +1086,7 @@ class WireguardConfiguration:
         with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
             original = f.readlines()
             original = [l.rstrip("\n") for l in original]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost", "PrivateKey"]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost"]
             start = original.index("[Interface]")
             for line in range(start+1, len(original)):
                 if original[line] == "[Peer]":
@@ -1084,6 +1121,27 @@ class WireguardConfiguration:
         os.remove(self.__configPath)
         self.__dropDatabase()
         return True
+    
+    def renameConfiguration(self, newConfigurationName) -> tuple[bool, str]:
+        if newConfigurationName in WireguardConfigurations.keys():
+            return False, "Configuration name already exist"
+        try:
+            if self.getStatus():
+                self.toggleConfiguration()
+            self.__createDatabase(newConfigurationName)
+            sqlUpdate(f'INSERT INTO "{newConfigurationName}" SELECT * FROM "{self.Name}"')
+            sqlUpdate(f'INSERT INTO "{newConfigurationName}_restrict_access" SELECT * FROM "{self.Name}_restrict_access"')
+            sqlUpdate(f'INSERT INTO "{newConfigurationName}_deleted" SELECT * FROM "{self.Name}_deleted"')
+            sqlUpdate(f'INSERT INTO "{newConfigurationName}_transfer" SELECT * FROM "{self.Name}_transfer"')
+            AllPeerJobs.updateJobConfigurationName(self.Name, newConfigurationName)
+            shutil.copy(
+                self.__configPath,
+                os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{newConfigurationName}.conf')
+            )
+            self.deleteConfiguration()
+        except Exception as e:
+            return False, str(e)
+        return True, None
         
 class Peer:
     def __init__(self, tableData, configuration: WireguardConfiguration):
@@ -1430,7 +1488,6 @@ class DashboardConfig:
                     the_dict[section][key] = self.GetConfig(section, key)[1]
         return the_dict
 
-
 '''
 Private Functions
 '''
@@ -1443,7 +1500,9 @@ def _regexMatch(regex, text):
     return pattern.search(text) is not None
 
 def _getConfigurationList(startup: bool = False):
-    for i in os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
+    confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+    confs.sort()
+    for i in confs:
         if _regexMatch("^(.{1,}).(conf)$", i):
             i = i.replace('.conf', '')
             try:
@@ -1561,8 +1620,11 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
         try:
             cursor = sqldb.cursor()
             return cursor.execute(statement, paramters)
+
         except sqlite3.OperationalError as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            return []
+
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     with sqldb:
@@ -1583,12 +1645,9 @@ cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
 }})
 
-
 '''
 API Routes
 '''
-
-
 
 @app.before_request
 def auth_req():
@@ -1647,14 +1706,12 @@ def auth_req():
 def API_ValidateAPIKey():
     return ResponseObject(True)
 
-
 @app.get(f'{APP_PREFIX}/api/validateAuthentication')
 def API_ValidateAuthentication():
     token = request.cookies.get("authToken") + ""
     if token == "" or "username" not in session or session["username"] != token:
         return ResponseObject(False, "Invalid authentication.")
     return ResponseObject(True)
-
 
 @app.post(f'{APP_PREFIX}/api/authenticate')
 def API_AuthenticateLogin():
@@ -1691,19 +1748,16 @@ def API_AuthenticateLogin():
     else:
         return ResponseObject(False, "Sorry, your username or password is incorrect.")
 
-
 @app.get(f'{APP_PREFIX}/api/signout')
 def API_SignOut():
     resp = ResponseObject(True, "")
     resp.delete_cookie("authToken")
     return resp
 
-
 @app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
     _getConfigurationList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
-
 
 @app.route(f'{APP_PREFIX}/api/addWireguardConfiguration', methods=["POST"])
 def API_addWireguardConfiguration():
@@ -1733,7 +1787,6 @@ def API_addWireguardConfiguration():
                                   "Address")
 
     if "Backup" in data.keys():
-        
         if not os.path.exists(os.path.join(
                 DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
                 'WGDashboard_Backup',
@@ -1752,7 +1805,6 @@ def API_addWireguardConfiguration():
         WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data)
     return ResponseObject()
 
-
 @app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
 def API_toggleWireguardConfiguration():
     configurationName = request.args.get('configurationName')
@@ -1769,7 +1821,6 @@ def API_updateWireguardConfiguration():
     for i in requiredKeys:
         if i not in data.keys():
             return ResponseObject(False, "Please provide these following field: " + ", ".join(requiredKeys))
-    
     name = data.get("Name")
     if name not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
@@ -1789,6 +1840,21 @@ def API_deleteWireguardConfiguration():
     if status:
         WireguardConfigurations.pop(data.get("Name"))
     return ResponseObject(status)
+
+@app.post(f'{APP_PREFIX}/api/renameWireguardConfiguration')
+def API_renameWireguardConfiguration():
+    data = request.get_json()
+    keys = ["Name", "NewConfigurationName"]
+    for k in keys:
+        if (k not in data.keys() or data.get(k) is None or len(data.get(k)) == 0 or 
+                (k == "Name" and data.get(k) not in WireguardConfigurations.keys())): 
+            return ResponseObject(False, "Please provide the configuration name you want to rename")
+        
+    status, message = WireguardConfigurations[data.get("Name")].renameConfiguration(data.get("NewConfigurationName"))
+    if status:
+        WireguardConfigurations.pop(data.get("Name"))
+        WireguardConfigurations[data.get("NewConfigurationName")] = WireguardConfiguration(data.get("NewConfigurationName"))
+    return ResponseObject(status, message)
 
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationBackup')
 def API_getWireguardConfigurationBackup():
@@ -1878,7 +1944,6 @@ def API_restoreWireguardConfigurationBackup():
 def API_getDashboardConfiguration():
     return ResponseObject(data=DashboardConfig.toJson())
 
-
 @app.post(f'{APP_PREFIX}/api/updateDashboardConfigurationItem')
 def API_updateDashboardConfigurationItem():
     data = request.get_json()
@@ -1926,7 +1991,6 @@ def API_deleteDashboardAPIKey():
             return ResponseObject(True, data=DashboardConfig.DashboardAPIKeys)
     return ResponseObject(False, "Dashboard API Keys function is disbaled")
     
-
 @app.post(f'{APP_PREFIX}/api/updatePeerSettings/<configName>')
 def API_updatePeerSettings(configName):
     data = request.get_json()
@@ -1971,7 +2035,6 @@ def API_deletePeers(configName: str) -> ResponseObject:
         return configuration.deletePeers(peers)
 
     return ResponseObject(False, "Configuration does not exist")
-
 
 @app.post(f'{APP_PREFIX}/api/restrictPeers/<configName>')
 def API_restrictPeers(configName: str) -> ResponseObject:
@@ -2076,16 +2139,12 @@ def API_addPeers(configName):
                 dns_addresses = DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1]
             if len(endpoint_allowed_ip) == 0:
                 endpoint_allowed_ip = DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1]
-            
-    
             config = WireguardConfigurations.get(configName)
             if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
-                return ResponseObject(False, "Please provide at lease public_key and allowed_ips")
+                return ResponseObject(False, "Please provide at least public_key and allowed_ips")
             if not config.getStatus():
                 config.toggleConfiguration()
-    
             availableIps = _getWireguardConfigurationAvailableIP(configName)
-    
             if bulkAdd:
                 if type(preshared_key_bulkAdd) is not bool:
                     preshared_key_bulkAdd = False
@@ -2097,7 +2156,6 @@ def API_addPeers(configName):
                 if bulkAddAmount > len(availableIps[1]):
                     return ResponseObject(False,
                                           f"The maximum number of peers can add is {len(availableIps[1])}")
-    
                 keyPairs = []
                 for i in range(bulkAddAmount):
                     newPrivateKey = _generatePrivateKey()[1]
@@ -2106,18 +2164,15 @@ def API_addPeers(configName):
                         "id": _generatePublicKey(newPrivateKey)[1],
                         "preshared_key": (_generatePrivateKey()[1] if preshared_key_bulkAdd else ""),
                         "allowed_ip": availableIps[1][i],
-                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                        "DNS": dns_addresses,
+                        "endpoint_allowed_ip": endpoint_allowed_ip,
+                        "mtu": mtu,
+                        "keepalive": keep_alive
                     })
                 if len(keyPairs) == 0:
                     return ResponseObject(False, "Generating key pairs by bulk failed")
                 config.addPeers(keyPairs)
-    
-                for kp in keyPairs:
-                    found, peer = config.searchPeer(kp['id'])
-                    if found:
-                        if not peer.updatePeer(kp['name'], kp['private_key'], kp['preshared_key'], dns_addresses,
-                                               kp['allowed_ip'], endpoint_allowed_ip, mtu, keep_alive):
-                            return ResponseObject(False, "Failed to add peers in bulk")
                 return ResponseObject()
     
             else:
@@ -2130,17 +2185,25 @@ def API_addPeers(configName):
                     if i not in availableIps[1]:
                         return ResponseObject(False, f"This IP is not available: {i}")
     
-                config.addPeers([{"id": public_key, "allowed_ip": ','.join(allowed_ips)}])
-                found, peer = config.searchPeer(public_key)
-                if found:
-                    return peer.updatePeer(name, private_key, preshared_key, dns_addresses, ",".join(allowed_ips),
-                                           endpoint_allowed_ip, mtu, keep_alive)
+                status = config.addPeers([
+                    {
+                        "name": name,
+                        "id": public_key,
+                        "private_key": private_key,
+                        "allowed_ip": ','.join(allowed_ips),
+                        "preshared_key": preshared_key,
+                        "endpoint_allowed_ip": endpoint_allowed_ip,
+                        "DNS": dns_addresses,
+                        "mtu": mtu,
+                        "keepalive": keep_alive
+                    }]
+                )
+                return ResponseObject(status)
         except Exception as e:
             print(e)
             return ResponseObject(False, "Add peers failed. Please see data for specific issue")
 
     return ResponseObject(False, "Configuration does not exist")
-
 
 @app.get(f"{APP_PREFIX}/api/downloadPeer/<configName>")
 def API_downloadPeer(configName):
@@ -2152,8 +2215,6 @@ def API_downloadPeer(configName):
     if len(data['id']) == 0 or not peerFound:
         return ResponseObject(False, "Peer does not exist")
     return ResponseObject(data=peer.downloadPeer())
-    
-    
 
 @app.get(f"{APP_PREFIX}/api/downloadAllPeers/<configName>")
 def API_downloadAllPeers(configName):
@@ -2170,12 +2231,10 @@ def API_downloadAllPeers(configName):
         peerData.append(file)
     return ResponseObject(data=peerData)
 
-
 @app.get(f"{APP_PREFIX}/api/getAvailableIPs/<configName>")
 def API_getAvailableIPs(configName):
     status, ips = _getWireguardConfigurationAvailableIP(configName)
     return ResponseObject(status=status, data=ips)
-
 
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationInfo')
 def API_getConfigurationInfo():
@@ -2187,7 +2246,6 @@ def API_getConfigurationInfo():
         "configurationPeers": WireguardConfigurations[configurationName].getPeersList(),
         "configurationRestrictedPeers": WireguardConfigurations[configurationName].getRestrictedPeersList()
     })
-
 
 @app.get(f'{APP_PREFIX}/api/getDashboardTheme')
 def API_getDashboardTheme():
@@ -2247,12 +2305,9 @@ def API_getPeerScheduleJobLogs(configName):
         requestAll = True
     return ResponseObject(data=JobLogger.getLogs(requestAll, configName))
 
-
-
 '''
 Tools
 '''
-
 
 @app.get(f'{APP_PREFIX}/api/ping/getAllPeersIpAddress')
 def API_ping_getAllPeersIpAddress():
@@ -2481,11 +2536,7 @@ def API_Locale_Update():
 
 @app.get(f'{APP_PREFIX}/')
 def index():
-    """
-    Index page related
-    @return: Template
-    """
-    return render_template('index.html', APP_PREFIX=APP_PREFIX)
+    return render_template('index.html')
 
 def backGroundThread():
     global WireguardConfigurations

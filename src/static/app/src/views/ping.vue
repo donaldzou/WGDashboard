@@ -246,7 +246,7 @@ export default {
 		width: 100%;
 		height: 79.98px;
 	}
-	.ping-move, /* apply transition to moving elements */
+	.ping-move,
 	.ping-enter-active,
 	.ping-leave-active {
 		transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
@@ -259,7 +259,6 @@ export default {
 	.ping-enter-from,
 	.ping-leave-to {
 		opacity: 0;
-		//transform: scale(1.1);
 		filter: blur(3px);
 	}
 </style>

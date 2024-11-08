@@ -67,7 +67,7 @@ export default {
 			</h6>
 			<div class="mb-1">
 				<small class="text-muted">
-					Public Key
+					<LocaleText t="Public Key"></LocaleText>
 				</small>
 				<small class="d-block">
 					<samp>{{Peer.id}}</samp>
@@ -93,6 +93,7 @@ export default {
 					<Transition name="slide-fade">
 						<PeerSettingsDropdown 
 							@qrcode="(file) => this.$emit('qrcode', file)"
+							@configurationFile="(file) => this.$emit('configurationFile', file)"
 							@setting="this.$emit('setting')"
 							@jobs="this.$emit('jobs')"
 							@refresh="this.$emit('refresh')"

@@ -8,83 +8,65 @@ import { Line, Bar } from 'vue-chartjs'
 import Fuse from "fuse.js";
 import {
 	Chart,
-	ArcElement,
 	LineElement,
-	BarElement,
-	PointElement,
+	BarElement, 
 	BarController,
-	BubbleController,
-	DoughnutController,
 	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
 	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
 	Legend,
 	Title,
-	Tooltip
+	Tooltip,
+	CategoryScale,
+	PointElement
 } from 'chart.js';
-import dayjs from "dayjs";
-import PeerSettings from "@/components/configurationComponents/peerSettings.vue";
-import PeerQRCode from "@/components/configurationComponents/peerQRCode.vue";
-import PeerCreate from "@/components/configurationComponents/peerCreate.vue";
-import PeerJobs from "@/components/configurationComponents/peerJobs.vue";
-import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue";
-import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue";
-import {ref} from "vue";
-import PeerShareLinkModal from "@/components/configurationComponents/peerShareLinkModal.vue";
-import LocaleText from "@/components/text/localeText.vue";
-import EditConfiguration from "@/components/configurationComponents/editConfiguration.vue";
-import SelectPeers from "@/components/configurationComponents/selectPeers.vue";
-import ConfigurationBackupRestore
-	from "@/components/configurationComponents/configurationBackupRestore.vue";
-import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
-
 Chart.register(
-	ArcElement,
 	LineElement,
 	BarElement,
-	PointElement,
 	BarController,
-	BubbleController,
-	DoughnutController,
 	LineController,
-	PieController,
-	PolarAreaController,
-	RadarController,
-	ScatterController,
-	CategoryScale,
 	LinearScale,
-	LogarithmicScale,
-	RadialLinearScale,
-	TimeScale,
-	TimeSeriesScale,
-	Decimation,
-	Filler,
 	Legend,
 	Title,
-	Tooltip
+	Tooltip,
+	CategoryScale,
+	PointElement
 );
-
+import dayjs from "dayjs";
+import {defineAsyncComponent, ref} from "vue";
+import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerList",
 	components: {
-		DeleteConfiguration,
-		ConfigurationBackupRestore,
-		SelectPeers,
-		EditConfiguration,
+		DeleteConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/deleteConfiguration.vue")),
+		ConfigurationBackupRestore:
+			defineAsyncComponent(() => import("@/components/configurationComponents/configurationBackupRestore.vue")),
+		SelectPeers:
+			defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue")),
+		EditConfiguration:
+			defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue")),
 		LocaleText,
-		PeerShareLinkModal,
-		PeerJobsLogsModal,
-		PeerJobsAllModal, PeerJobs, PeerCreate, PeerQRCode, PeerSettings, PeerSearch, Peer, Line, Bar},
+		PeerShareLinkModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerShareLinkModal.vue")),
+		PeerJobsLogsModal: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue")),
+		PeerJobsAllModal:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue")),
+		PeerJobs: 
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerJobs.vue")), 
+		PeerCreate:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerCreate.vue")),
+		PeerQRCode:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue")),
+		PeerConfigurationFile:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerConfigurationFile.vue")),
+		PeerSettings:
+			defineAsyncComponent(() => import("@/components/configurationComponents/peerSettings.vue")), 
+		PeerSearch, 
+		Peer, 
+		Line, 
+		Bar
+	},
 	setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
@@ -133,6 +115,10 @@ export default {
 				selectedPeer: undefined
 			},
 			peerQRCode: {
+				modalOpen: false,
+				peerConfigData: undefined
+			},
+			peerConfigurationFile: {
 				modalOpen: false,
 				peerConfigData: undefined
 			},
@@ -447,13 +433,10 @@ export default {
 						</small></p>
 						<div class="form-check form-switch ms-auto">
 							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								
 								<LocaleText t="Turning Off..." v-if="!this.configurationInfo.Status && this.configurationToggling"></LocaleText>
 								<LocaleText t="Turning On..." v-else-if="this.configurationInfo.Status && this.configurationToggling"></LocaleText>
 								<LocaleText t="On" v-else-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
 								<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
-								
-								
 								<span v-if="this.configurationToggling"
 								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true"></span>
 							</label>
@@ -622,6 +605,7 @@ export default {
 					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
+					      @configurationFile="(file) => {this.peerConfigurationFile.peerConfigData = file; this.peerConfigurationFile.modalOpen = true;}"
 					></Peer>
 				</div>
 			</TransitionGroup>
@@ -697,6 +681,13 @@ export default {
 				@close="backupRestore.modalOpen = false"
 				@refreshPeersList="this.getPeers()"
 				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
+		</Transition>
+		<Transition name="zoom">
+			<PeerConfigurationFile
+				@close="peerConfigurationFile.modalOpen = false"
+				v-if="peerConfigurationFile.modalOpen"
+				:configurationFile="peerConfigurationFile.peerConfigData"
+			></PeerConfigurationFile>
 		</Transition>
 	</div>
 </template>

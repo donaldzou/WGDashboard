@@ -126,7 +126,7 @@ export default {
 </script>
 
 <template>
-	<div class="mt-5 text-body">
+	<div class="mt-md-5 mt-3 text-body">
 		<div class="container mb-4">
 			<div class="mb-4 d-flex align-items-center gap-4">
 				<RouterLink to="/"
@@ -165,7 +165,6 @@ export default {
 									</li>
 								</ul>
 							</div>
-							
 						</div>
 					</div>
 				</div>
@@ -199,9 +198,7 @@ export default {
 							       v-model="this.newConfiguration.PublicKey" disabled
 							>
 						</div>
-						
 					</div>
-					
 				</div>
 				<div class="card rounded-3 shadow">
 					<div class="card-header">

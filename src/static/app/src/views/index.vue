@@ -1,7 +1,5 @@
 <script>
 import Navbar from "@/components/navbar.vue";
-import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
-import {WireguardConfigurations} from "@/models/WireguardConfigurations.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import Message from "@/components/messageCentreComponent/message.vue";
 

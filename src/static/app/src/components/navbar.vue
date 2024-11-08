@@ -5,10 +5,11 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import {GetLocale} from "@/utilities/locale.js";
+import HelpModal from "@/components/navbarComponents/helpModal.vue";
 
 export default {
 	name: "navbar",
-	components: {LocaleText},
+	components: {HelpModal, LocaleText},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -18,7 +19,17 @@ export default {
 		return {
 			updateAvailable: false,
 			updateMessage: "Checking for update...",
-			updateUrl: ""
+			updateUrl: "",
+			openHelpModal: false,
+		}
+	},
+	computed: {
+		getActiveCrossServer(){
+			if (this.dashboardConfigurationStore.ActiveServerConfiguration){
+				return new URL(this.dashboardConfigurationStore.CrossServerConfiguration.ServerList
+					[this.dashboardConfigurationStore.ActiveServerConfiguration].host)
+			}
+			return undefined
 		}
 	},
 	mounted() {
@@ -45,7 +56,14 @@ export default {
 	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky ">
-				<h5 class="text-white text-center m-0 py-3 mb-3 btn-brand">WGDashboard</h5>
+				<div class="text-white text-center m-0 py-3 mb-3 btn-brand">
+					<h5 class="mb-0">
+						WGDashboard
+					</h5>
+					<small class="ms-auto" v-if="getActiveCrossServer !== undefined">
+						<i class="bi bi-hdd-rack-fill me-2"></i>{{getActiveCrossServer.host}}
+					</small>
+				</div>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
@@ -61,9 +79,7 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link rounded-3" 
-						   target="_blank"
-						   href="https://donaldzou.github.io/WGDashboard-Documentation/user-guides.html">
+						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>
 						</a>
@@ -122,12 +138,12 @@ export default {
 						</small>
 					</li>
 				</ul>
-				
 			</div>
 		</nav>
+		<Transition name="zoom">
+			<HelpModal v-if="this.openHelpModal" @close="openHelpModal = false;"></HelpModal>
+		</Transition>
 	</div>
-	
-	
 </template>
 
 <style scoped>
@@ -139,17 +155,12 @@ export default {
 		animation-fill-mode: both;
 		display: none;
 		animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
-
-		
 	}
 	.navbar-container.active{
 		animation-direction: normal;
 		display: block !important;
 		animation-name: zoomInFade
 	}
-
-	
-	
 }
 
 .navbar-container{
