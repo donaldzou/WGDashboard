@@ -43,5 +43,10 @@
 		"lang_id": "zh-hk",
 		"lang_name": "Chinese (Traditional)",
 		"lang_name_localized": "中文（繁體）"
+	},
+	{
+		"lang_id": "es-es",
+		"lang_name": "Spanish",
+		"lang_name_localized": "Español"
 	}
 ]
