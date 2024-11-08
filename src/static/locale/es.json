@@ -160,19 +160,5 @@
 	"Enter a password": "Ingresa una contraseña",
 	"(At least 8 characters and make sure is strong enough!)": "(Al menos 8 caracteres y asegúrate de que sea lo suficientemente fuerte!)",
 	"Repeat your password": "Repite tu contraseña",
-	"Create your account": "Crea tu cuenta",
-	"This settings will be kept inside your configuration file": "Estas configuraciones se mantendrán dentro de tu archivo de configuración",
-	"Keep default / change it later": "Mantén el valor predeterminado / cámbialo más tarde",
-	"Example": "Ejemplo",
-	"Skip this section": "Omitir esta sección",
-	"Port": "Puerto",
-	"Connection Type": "Tipo de conexión",
-	"Encryption": "Cifrado",
-	"Strict Transport Security": "Seguridad estricta de transporte",
-	"Enable": "Habilitar",
-	"Disable": "Deshabilitar",
-	"DNS over HTTPS": "DNS sobre HTTPS",
-	"Timezone": "Zona horaria",
-	"Login": "Iniciar sesión"
+	"Create your account": "Crea tu cuenta"
 }
-
