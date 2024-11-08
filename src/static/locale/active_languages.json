@@ -40,7 +40,6 @@
 		"lang_name_localized": "中文（简体）"
 	},
 	{
-<<<<<<< HEAD
 		"lang_id": "it-IT",
 		"lang_name": "Italian",
 		"lang_name_localized": "Italiano"
@@ -59,6 +58,5 @@
 		"lang_id": "zh-hk",
 		"lang_name": "Chinese (Traditional)",
 		"lang_name_localized": "中文（繁體）"
->>>>>>> c23242f18e10945fdffc464c30874c45b7d63fa0
 	}
 ]
