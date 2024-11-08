@@ -65,8 +65,7 @@ const copy = async () => {
 						
 						<textarea 
 							style="height: 300px"
-							class="form-control w-100 rounded-3 mt-2" 
-							disabled
+							class="form-control w-100 rounded-3 mt-2"
 							id="peerConfigurationFile"
 							:value="configurationFile"></textarea>
 					</div>
