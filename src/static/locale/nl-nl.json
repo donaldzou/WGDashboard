@@ -258,7 +258,7 @@
   "(.*) Available IP Address": "$1 Beschikbaar IP-adres",
   "Database File": "Databestand",
   "Contain": "Bevat",
-	"Restricted Peers?": "Beperkte Peers?",
+  "Restricted Peers?": "Beperkte Peers?",
   "Restore": "Herstellen",
   "Restoring": "Herstellen...",
   "WGDashboard Settings": "WGDashboard Instellingen",
