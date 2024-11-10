@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Path to the configuration file (exists because of previous function).
+config_file="/data/wg-dashboard.ini"
+
 echo "------------------------- START ----------------------------"
 echo "Starting the WireGuard Dashboard Docker container."
 
@@ -7,26 +10,39 @@ ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
   echo "Quick-installing..."
 
-  [ ! -d "/data/db" ] && echo "Creating database dir" && mkdir /data/db
-  ln -s /data/db "${WGDASH}/src/db"
+  if [ ! -d "/data/db" ]; then
+    echo "Creating database dir"
+    mkdir /data/db
+  fi
 
-  [ ! -f "/data/wg-dashboard.ini" ] && echo "Creating wg-dashboard.ini file" && touch /data/wg-dashboard.ini
-  ln -s /data/wg-dashboard.ini "${WGDASH}/src/wg-dashboard.ini"
+  if [ ! -d "${WGDASH}/src/db" ]; then
+    ln -s /data/db "${WGDASH}/src/db"
+  fi
+  
+  if [ ! -f "${config_file}" ]; then
+    echo "Creating wg-dashboard.ini file"
+    touch "${config_file}"
+  fi
+
+  if [ ! -f "${WGDASH}/src/wg-dashboard.ini" ]; then
+    ln -s "${config_file}" "${WGDASH}/src/wg-dashboard.ini"
+  fi
 
   python3 -m venv "${WGDASH}"/src/venv
   . "${WGDASH}/src/venv/bin/activate"
 
-
-
-  [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/psutil" ] && echo "Moving PIP dependency: psutil" && mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-  [ ! -d "${WGDASH}/src/venv/lib/python3.12/site-packages/bcrypt" ] && echo "Moving PIP dependency: bcrypt" && mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+  echo "Moving PIP dependency from ephemerality to runtime environment: psutil"
+  mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+  
+  echo "Moving PIP dependency from ephemerality to runtime environment: bcrypt"
+  mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
 
 
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
   ./wgd.sh install
 
-  echo "Looks like the installation succeeded."
+  echo "Looks like the installation succeeded. Moving on."
 
   # This first step is to ensure the wg0.conf file exists, and if not, then its copied over from the ephemeral container storage.
   # This is done so WGDashboard it works out of the box
@@ -50,52 +66,45 @@ ensure_installation() {
 set_envvars() {
   printf "\n------------- SETTING ENVIRONMENT VARIABLES ----------------\n"
 
-  # Path to the configuration file (exists because of previous function).
-  local config_file="/opt/wireguarddashboard/src/wg-dashboard.ini"
-
   # Check if the file is empty
-  if [ ! -s "$config_file" ]; then
+  if [ ! -s "${config_file}" ]; then
     echo "Config file is empty. Creating [Peers] section."
     
     # Create [Peers] section with initial values
     {
       echo "[Peers]"
-      echo "remote_endpoint = ${public_ip}"
       echo "peer_global_dns = ${global_dns}"
-    } > "$config_file"
+      echo "remote_endpoint = ${public_ip}"
+      #echo -e "\n[Server]"
+    } > "${config_file}"
 
   else
-    echo "Config file is not empty, enforcing environment variables."
-
-    # Check and update the DNS if it has changed
-    current_dns=$(grep "peer_global_dns = " "$config_file" | awk '{print $NF}')
-    if [ "${global_dns}" != "$current_dns" ]; then
-      echo "Changing default DNS."
-      sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" "$config_file"
-    else
-      echo "DNS is set correctly."
-    fi
-
-    # Determine the public IP and update if necessary
-    echo "{$public_ip}"
-
-    if [ "${public_ip}" = "0.0.0.0" ]; then
-      default_ip=$(curl -s ifconfig.me)
-
-      echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
-      sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" "$config_file"
-    else
-      current_ip=$(grep "remote_endpoint = " "$config_file" | awk '{print $NF}')
-    
-      if [ "${public_ip}" != "$current_ip" ]; then
-        echo "Setting the Public-IP using given variable: ${public_ip}"
-
-        sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" "$config_file"
-      fi
-
-    fi
-
+    echo "Config file is not empty, using pre-existing."
   fi
+
+  echo "Verifying current variables..."
+
+  # Check and update the DNS if it has changed
+  current_dns=$(grep "peer_global_dns = " "${config_file}" | awk '{print $NF}')
+  if [ "${global_dns}" == "$current_dns" ]; then
+    echo "DNS is correct, moving on."
+    
+  else
+    echo "Changing default DNS..."
+    sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" "${config_file}"
+  fi
+
+  if [ "${public_ip}" == "0.0.0.0" ]; then
+
+    default_ip=$(curl -s ifconfig.me)
+
+    echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
+    sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" "${config_file}"
+
+  else
+    echo "Public-IP is correct, moving on."
+  fi
+
 }
 
 # === CORE SERVICES ===
@@ -140,13 +149,16 @@ start_core() {
   done
 
   # Isolating the matches.
+  noneFound=0
+
   for interface in "${do_isolate[@]}"; do
 
     if [ "$interface" = "none" ] || [ "$interface" = "" ]; then
-      echo "Found: $interface, stopping isolation checking."
+      echo "Found none, stopping isolation checking."
+      noneFound=1
       break
-    else
 
+    else
 
       if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
         echo "Ignoring ${interface}"
@@ -176,12 +188,13 @@ start_core() {
 
 
   for interface in "${non_isolate[@]}"; do
-    if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
-        echo "Ignoring ${interface}"
+    if [ $noneFound -eq 1 ]; then
+      break
+
+    elif [ ! -f "/etc/wireguard/${interface}.conf" ]; then
+      echo "Ignoring ${interface}"
 
     elif [ -f "/etc/wireguard/${interface}.conf" ]; then
-
-
       echo "Removing isolation, if isolation is present for:" "$interface"
 
       sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
