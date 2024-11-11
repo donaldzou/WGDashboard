@@ -65,6 +65,8 @@ _determineOS(){
       OS=$ID
   elif [ -f /etc/redhat-release ]; then
       OS="redhat"
+  elif [ "$(uname)" = "OpenBSD" ]; then
+  	  OS="openbsd"
   else
       printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
       printf "%s\n" "$helpMsg"
@@ -491,6 +493,8 @@ else
 		else
 			start_wgd_debug
 		fi
+	elif [ "$1" = "os" ]; then
+    		_determineOS
 	else
 		help
 	fi
