@@ -1,36 +1,33 @@
+# Исходный образ Alpine Linux
 FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
 
-# Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
+# Определение переменных окружения
 ARG wg_net="10.0.0.1"
 ARG wg_port="51820"
 
-# Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
+# Переменные окружения, которые можно изменить во время выполнения контейнера
 ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV isolate="none"
 ENV public_ip="0.0.0.0"
+ENV WGDASH=/opt/wireguarddashboard
 
-# Doing package management operations, such as upgrading
+# Установка необходимых пакетов
 RUN apk update \
   && apk add --no-cache bash git tzdata \
   iptables ip6tables openrc curl wireguard-tools \
   sudo py3-psutil py3-bcrypt \
   && apk upgrade
 
-# Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
-ENV WGDASH=/opt/wireguarddashboard
+# Создание директорий для хранения данных и конфигурации
+RUN mkdir -p /data /configs ${WGDASH}/src \
+  && chmod 700 /data /configs
 
-# Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
-
-# Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir /data \
-  && mkdir /configs \
-  && mkdir -p ${WGDASH}/src
+# Копирование файлов WGDashboard в контейнер
 COPY ./src ${WGDASH}/src
 
-# Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
-# Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
+# Генерация шаблона конфигурации WireGuard с использованием аргументов
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN out_adapt=$(ip -o -4 route show to default | awk '{print $NF}') \
   && echo -e "[Interface]\n\
@@ -45,14 +42,19 @@ SaveConfig = true\n\
 DNS = ${global_dns}" > /configs/wg0.conf.template \
   && chmod 600 /configs/wg0.conf.template
 
-# Defining a way for Docker to check the health of the container. In this case: checking the gunicorn process.
+# Проверка работоспособности контейнера (процесс gunicorn и tail)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
-# Copy the basic entrypoint.sh script.
+# Копирование скрипта запуска
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Exposing the default WireGuard Dashboard port for web access.
+# Определение постоянных томов для сохранения данных и конфигураций
+VOLUME ["/data", "/configs", "/opt/wireguarddashboard/db"]
+
+# Открытие порта для WGDashboard
 EXPOSE 10086
 
+# Запуск скрипта entrypoint при запуске контейнера
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
