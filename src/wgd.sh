@@ -65,7 +65,7 @@ _determineOS(){
 		OS=$ID
 	elif [ -f /etc/redhat-release ]; then
 		OS="redhat"
-	elif [ "$(uname)" = "OpenBSD" ] && [ "$(uname)" = "7.6" ]; then
+	elif [ "$(uname)" = "OpenBSD" ] && [ "$(uname -r)" = "7.6" ]; then
 		OS="openbsd"
 	else
 		printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
