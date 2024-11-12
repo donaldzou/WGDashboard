@@ -60,19 +60,19 @@ _check_and_set_venv(){
 }
 
 _determineOS(){
-  if [ -f /etc/os-release ]; then
-      . /etc/os-release
-      OS=$ID
-  elif [ -f /etc/redhat-release ]; then
-      OS="redhat"
-  elif [ "$(uname)" = "OpenBSD" ]; then
-  	  OS="openbsd"
-  else
-      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-      printf "%s\n" "$helpMsg"
-      kill  $TOP_PID
-  fi
-   printf "[WGDashboard] OS: %s\n" "$OS"
+	if [ -f /etc/os-release ]; then
+		. /etc/os-release
+		OS=$ID
+	elif [ -f /etc/redhat-release ]; then
+		OS="redhat"
+	elif [ "$(uname)" = "OpenBSD" ] && [ "$(uname)" = "7.6" ]; then
+		OS="openbsd"
+	else
+		printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
+		printf "%s\n" "$helpMsg"
+		kill  $TOP_PID
+	fi
+	printf "[WGDashboard] OS: %s\n" "$OS"
 }
 
 _installPython(){
@@ -267,7 +267,7 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
-	  _checkWireguard
+	_checkWireguard
     sudo chmod -R 755 /etc/wireguard/
 
     if [ ! -d "db" ] 
