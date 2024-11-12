@@ -76,9 +76,12 @@ _determineOS(){
 }
 
 _installPython(){
+	
+	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
 		;;
 		centos|fedora|redhat|rhel|almalinux|rocky)
 			if command -v dnf &> /dev/null; then
@@ -116,6 +119,7 @@ _installPython(){
 }
 
 _installPythonVenv(){
+	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
 			ubuntu|debian)
@@ -130,6 +134,19 @@ _installPythonVenv(){
 			;;
 			alpine)
 				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
+			;;
+			openbsd)
+				if [ "$(uname -r)" = "7.4" ]; then
+					{ pkg_add -v py3-virtualenv-20.24.4; printf "\n\n"; } >> ./log/install.txt
+				elif [ "$(uname -r)" = "7.5" ]; then
+					{ pkg_add -v py3-virtualenv-20.25.1; printf "\n\n"; } >> ./log/install.txt
+				elif [ "$(uname -r)" = "7.6" ]; then
+					{ pkg_add -v py3-virtualenv-20.25.3; printf "\n\n"; } >> ./log/install.txt
+				else
+					printf "[WGDashboard] %s Current OpenBSD version is not supported. Please install Python 3 Virtual Environment manually\n" "$heavy_crossmark"
+					printf "%s\n" "$helpMsg"
+					kill  $TOP_PID
+				fi
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -155,6 +172,7 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
+	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
 		case "$OS" in
@@ -174,6 +192,19 @@ _installPythonPip(){
 			;;
 			alpine)
 				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
+			;;
+			openbsd)
+				if [ "$(uname -r)" = "7.4" ]; then
+					{ pkg_add -v py3-pip-23.2.1; printf "\n\n"; } >> ./log/install.txt
+				elif [ "$(uname -r)" = "7.5" ]; then
+					{ pkg_add -v py3-pip-24.0; printf "\n\n"; } >> ./log/install.txt
+				elif [ "$(uname -r)" = "7.6" ]; then
+					{ pkg_add -v py3-pip-24.2; printf "\n\n"; } >> ./log/install.txt
+				else
+					printf "[WGDashboard] %s Current OpenBSD version is not supported. Please install Python 3 Pip manually\n" "$heavy_crossmark"
+					printf "%s\n" "$helpMsg"
+					kill  $TOP_PID
+				fi
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
