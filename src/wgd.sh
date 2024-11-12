@@ -53,7 +53,7 @@ _check_and_set_venv(){
     if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
-    	kill  $TOP_PID
+    	kill $TOP_PID
     fi
     
     . ${VIRTUAL_ENV}/bin/activate
@@ -65,7 +65,7 @@ _determineOS(){
 		OS=$ID
 	elif [ -f /etc/redhat-release ]; then
 		OS="redhat"
-	elif [ "$(uname)" = "OpenBSD" ] && [ "$(uname -r)" = "7.6" ]; then
+	elif [ "$(uname)" = "OpenBSD" ]; then
 		OS="openbsd"
 	else
 		printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -88,8 +88,21 @@ _installPython(){
 			fi
 		;;
 		alpine)
-				{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
-			;;
+			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+		;;
+		openbsd)
+			if [ "$(uname -r)" = "7.6" ]; then
+				{ pkg_add -v python-3.11.10p0; printf "\n\n"; } >> ./log/install.txt
+			elif [ "$(uname -r)" = "7.5" ]; then
+				{ pkg_add -v python-3.11.8; printf "\n\n"; } >> ./log/install.txt
+			elif [ "$(uname -r)" = "7.4" ]; then
+				{ pkg_add -v python-3.11.5; printf "\n\n"; } >> ./log/install.txt
+			else
+				printf "[WGDashboard] %s Current OpenBSD version is not supported. Please install Python 3.10+ manually\n" "$heavy_crossmark"
+				printf "%s\n" "$helpMsg"
+                kill  $TOP_PID
+			fi
+		;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -474,7 +487,10 @@ else
 	elif [ "$1" = "update" ]; then
 		update_wgd
 	elif [ "$1" = "install" ]; then
-		printf "%s\n" "$dashes"
+		clear
+		printf "=================================================================================\n"
+	  	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
+	  	printf "=================================================================================\n"
 		install_wgd
 		printf "%s\n" "$dashes"
 	elif [ "$1" = "restart" ]; then
