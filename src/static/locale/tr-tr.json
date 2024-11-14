@@ -4,7 +4,7 @@
   "Password": "Parola",
   "OTP from your authenticator": "Kimlik doğrulama uygulamanızdan tek kullanımlık parola",
   "Sign In": "Giriş Yap",
-  "Signing In...": "Giriş Yapılıyor...",
+  "Signing In\\.\\.\\.": "Giriş Yapılıyor...",
   "Access Remote Server": "Uzak Sunuculara Eriş",
   "Server": "Sunucu",
   "Click": "Tıkla",
