@@ -298,7 +298,7 @@
 	"Are you sure to delete": "您确定要删除",
 	"Are you sure to delete this peer\\?": "您确定要删除此端点吗？",
 	"Configuration deleted": "配置删除成功",
-	"Configuration saved": "",
+	"Configuration saved": "配置保存成功",
 	"WGDashboard language update failed": "WGDashboard 语言更新失败",
 	"Configuration restored": "配置恢复成功",
 	"Allowed IP already taken by another peer": "允许的 IP 地址已经被别的端点占用",
