@@ -753,8 +753,17 @@ class WireguardConfiguration:
                     """ % self.Name
                     , newPeer)
             for p in peers:
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip']}",
+                presharedKeyExist = len(p['preshared_key']) > 0
+                rd = random.Random()
+                uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
+                if presharedKeyExist:
+                    with open(uid, "w+") as f:
+                        f.write(p['preshared_key'])
+                
+                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
+                if presharedKeyExist:
+                    os.remove(uid)
             subprocess.check_output(
                 f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             self.getPeersList()
@@ -783,14 +792,14 @@ class WireguardConfiguration:
                 
                 presharedKeyExist = len(p['preshared_key']) > 0
                 rd = random.Random()
-                uid = uuid.UUID(int=rd.getrandbits(128), version=4)
+                uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
                 if presharedKeyExist:
-                    with open(f"{uid}", "w+") as f:
+                    with open(uid, "w+") as f:
                         f.write(p['preshared_key'])
                         
                 subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
-                if presharedKeyExist: os.remove(str(uid))
+                if presharedKeyExist: os.remove(uid)
             else:
                 return ResponseObject(False, "Failed to allow access of peer " + i)
         if not self.__wgSave():
@@ -1206,18 +1215,18 @@ class Peer:
                 return ResponseObject(False, "Private key does not match with the public key")
         try:
             rd = random.Random()
-            uid = uuid.UUID(int=rd.getrandbits(128), version=4)
+            uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
             pskExist = len(preshared_key) > 0
             
             if pskExist:
-                with open(f"{uid}", "w+") as f:
+                with open(uid, "w+") as f:
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
                 f"wg set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
                 shell=True, stderr=subprocess.STDOUT)
             
-            if pskExist: os.remove(str(uid))
+            if pskExist: os.remove(uid)
             
             if len(updateAllowedIp.decode().strip("\n")) != 0:
                 return ResponseObject(False,
