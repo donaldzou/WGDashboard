@@ -36,8 +36,7 @@ for language in active_languages:
         # Print missing translations
         print("\t[Missing Translations]")
         if missing_translation:
-            print(",\n".join(f'\t\t"{key}": ""'
-                    for key in missing_translation))
+            print(",\n".join(f'\t\t"' + key + '": ""' for key in missing_translation))
         else:
             print("\t\tNo missing translations")
         

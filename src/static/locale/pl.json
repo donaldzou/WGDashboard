@@ -238,7 +238,7 @@
 	"IP Address": "Adres IP",
 	"Enter IP Address / Hostname": "Wpisz Adres IP / Nazwę Hosta",
 	"IP Address / Hostname": "Adres IP / Nazwa Hosta",
-	"Dashboard IP Address & Listen Port": "Adres IP Portalu WGDashboard oraz Port Nasłuchiwania",                
+	"Dashboard IP Address \\& Listen Port": "Adres IP Portalu WGDashboard oraz Port Nasłuchiwania",                
 	"Count": "Ilość",
 	"Geolocation": "Geolokalizacja",
 	"Is Alive": "Jest Online",
@@ -313,5 +313,6 @@
 	"Traceroute": "Trasa Pakietów (Traceroute)",        
 	"Autostart": "Automatyczny Start",                     
 	"Path": "Ścieżka"
+	
 }
 
