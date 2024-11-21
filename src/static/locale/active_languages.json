@@ -58,6 +58,10 @@
         "lang_id": "sv-se",
         "lang_name": "Swedish",
         "lang_name_localized": "Svenska"
-    }
-
+  },
+  {
+		"lang_id": "pl",
+		"lang_name": "Polish",
+		"lang_name_localized": "Polski"
+	}
 ]
