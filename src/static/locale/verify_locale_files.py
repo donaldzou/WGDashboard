@@ -11,41 +11,56 @@ print("="*(len(welcome) + 4))
 print(f"| {welcome} |")
 print("="*(len(welcome) + 4))
 print()
-print("Active Languages")
+print("Active Languages\n")
 
-status = {}
+status = False
 
 for language in active_languages:
-    print(f"[Language] {language['lang_name']}")
+    print(f"{language['lang_name']} | {language['lang_id']}")
+
+lang_ids = list(map(lambda x: x['lang_id'], active_languages))    
+print()
+
+lang_id = ""
+
+while not status:
+    lang_id = input("Please enter the language ID to verify: ")
+    if lang_id not in lang_ids:
+        print(f'{lang_id} is not a valid language ID')
+    elif lang_id == 'en':
+        print(f'{lang_id} is not a editable language')
+    else:
+        status = True
     
-    if language['lang_id'] != "en":
-        with open(f"{language['lang_id']}.json", "r") as f:
-            lang_file = json.load(f)
+
+with open(f"{lang_id}.json", "r") as f:
+    lang_file = json.load(f)
+
+# Identify missing and deprecated translations
+missing_translation = [
+    key for key in language_template
+    if key not in lang_file or not lang_file[key].strip()
+    ]
+
+deprecated_translation = [
+    key for key in lang_file
+    if key not in language_template
+    ]
+
+with open(f"{lang_id}.json", "w") as f:
+    new_lang_file = dict(lang_file)
+    for key in missing_translation:
+        new_lang_file[key] = ""
+
+    for key in deprecated_translation:
+        new_lang_file.pop(key)
+
+    f.write(json.dumps(new_lang_file, ensure_ascii=False, indent='\t'))
         
-        # Identify missing and deprecated translations
-        missing_translation = [
-            key for key in language_template
-            if key not in lang_file or not lang_file[key].strip()
-            ]
-        
-        deprecated_translation = [
-            key for key in lang_file
-            if key not in language_template
-            ]
-        
-        # Print missing translations
-        print("\t[Missing Translations]")
-        if missing_translation:
-            print(",\n".join(f'\t\t"' + key + '": ""' for key in missing_translation))
-        else:
-            print("\t\tNo missing translations")
-        
-        # Print deprecated translations
-        print("\n\t[Deprecated Translations]")
-        if deprecated_translation:
-            print("\n".join(f'\t\t"{key}": "{lang_file[key]}"'
-                    for key in deprecated_translation))
-        else:
-            print("\t\tNo deprecated translations")
-        
-        print()
+    
+# Print missing translations
+print(f"[Missing Translations] {len(missing_translation)} translation{'s' if len(missing_translation) > 1 else ''}")
+
+
+# Print deprecated translations
+print(f"[Deprecated Translations] {len(deprecated_translation)} translation{'s' if len(deprecated_translation) > 1 else ''}")

@@ -309,5 +309,4 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "成功刪除了$1個端點，失敗刪除了$2個端點",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "限制訪問了$1個端點",
 	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "成功限制訪問了$1個端點，失敗限制訪問了$2個端點"
-	
 }
