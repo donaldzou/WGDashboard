@@ -307,6 +307,6 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "Успешно удалено $1 клиентов. Не удалось удалить $2 ",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "Заблокировано $1 клиентов ",
 	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "Успешно аблокировано $1 клиентов. Не удалось заблокировать $2 ",
-	"Dashboard IP Address \\& Listen Port": "",
-	"Allow access successfully": ""
+	"Dashboard IP Address \\& Listen Port": "IP-адрес и порт панели мониторинга",
+	"Allow access successfully": "Доступ разрешён"
 }
