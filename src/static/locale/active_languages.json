@@ -53,5 +53,15 @@
 		"lang_id": "zh-hk",
 		"lang_name": "Chinese (Traditional)",
 		"lang_name_localized": "中文（繁體）"
+	},
+	{
+        "lang_id": "sv-se",
+        "lang_name": "Swedish",
+        "lang_name_localized": "Svenska"
+  	},
+	{
+		"lang_id": "pl",
+		"lang_name": "Polish",
+		"lang_name_localized": "Polski"
 	}
 ]
