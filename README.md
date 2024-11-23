@@ -29,8 +29,8 @@
   Join our Discord Server for quick help, or you wanna chat about this project!
 </p>
 <p align="center">
-  <a align="center" href="https://discord.gg/MXDBpuRB"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
-</p>
+  <a align="center" href="https://discord.gg/72TwzjeuWm"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
+</p> 
 
 
 <hr>

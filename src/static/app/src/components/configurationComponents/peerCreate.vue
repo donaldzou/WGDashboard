@@ -146,9 +146,7 @@ export default {
 						       id="bullAdd_PresharedKey_Switch" checked>
 						<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
 							<small class="fw-bold">
-								<LocaleText t="Pre-Shared Key"></LocaleText>
-								<LocaleText t="Enabled" v-if="this.data.preshared_key_bulkAdd"></LocaleText>
-								<LocaleText t="Disabled" v-else></LocaleText>
+								<LocaleText t="Pre-Shared Key"></LocaleText> <LocaleText t="Enabled" v-if="this.data.preshared_key_bulkAdd"></LocaleText><LocaleText t="Disabled" v-else></LocaleText>
 							</small>
 						</label>
 					</div>

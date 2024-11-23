@@ -15,6 +15,11 @@
 		"lang_name_localized": "English"
 	},
 	{
+		"lang_id": "es-es",
+		"lang_name": "Spanish",
+		"lang_name_localized": "Español"
+	},
+	{
 		"lang_id": "it-it",
 		"lang_name": "Italian",
 		"lang_name_localized": "Italiano"
@@ -48,5 +53,15 @@
 		"lang_id": "zh-hk",
 		"lang_name": "Chinese (Traditional)",
 		"lang_name_localized": "中文（繁體）"
+	},
+	{
+        "lang_id": "sv-se",
+        "lang_name": "Swedish",
+        "lang_name_localized": "Svenska"
+  	},
+	{
+		"lang_id": "pl",
+		"lang_name": "Polish",
+		"lang_name_localized": "Polski"
 	}
 ]
