@@ -308,5 +308,5 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "Usunięto $1 klienta/ów pomyślnie. Nie udało się usunąć $2 klienta/ów",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "Ograniczono $1 klienta/ów ",
 	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "Ograniczono $1 klienta/ów pomyślnie. Nie udało się ograniczyć $2 klienta/ów",
-	"Allow access successfully": ""
+	"Allow access successfully": "Pomyślnie udostępniono dostęp"
 }
