@@ -16,7 +16,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 import bcrypt
-import ifcfg
+# import ifcfg
 import psutil
 import pyotp
 from flask import Flask, request, render_template, session, g
