@@ -973,14 +973,13 @@ class WireguardConfiguration:
         self.getStatus()
         if self.Status:
             try:
-                check = subprocess.check_output(f"wg-quick down {self.Name}",
+                check = subprocess.call(f"wg-quick down {self.Name}",
                                                 shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         else:
             try:
-                check = subprocess.check_output(f"wg-quick up {self.Name}",
-                                                shell=True, stderr=subprocess.STDOUT)
+                check = subprocess.call(f"wg-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         self.getStatus()
