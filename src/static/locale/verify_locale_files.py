@@ -1,6 +1,7 @@
 import json
 active_languages = json.loads(open("active_languages.json", "r").read())
 language_template = json.loads(open("language_template.json", "r").read())
+
 if __name__ == "__main__":
     welcome = "WGDashboard Locale File Verification [by @donaldzou]"
     print("="*(len(welcome) + 4))
