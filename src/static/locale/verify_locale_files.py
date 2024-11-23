@@ -1,7 +1,4 @@
 import json
-import os.path
-
-from typing_extensions import deprecated
 
 active_languages = json.loads(open("active_languages.json", "r").read())
 language_template = json.loads(open("language_template.json", "r").read())
