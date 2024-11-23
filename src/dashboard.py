@@ -1303,6 +1303,15 @@ def regex_match(regex, text):
     pattern = re.compile(regex)
     return pattern.search(text) is not None
 
+def get_remote_endpoint():
+    # Thanks @NOXICS
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("1.1.1.1", 80))  # Connecting to a public IP
+        wgd_remote_endpoint = s.getsockname()[0]
+        return str(wgd_remote_endpoint)
+
 class DashboardAPIKey:
     def __init__(self, Key: str, CreatedAt: str, ExpiredAt: str):
         self.Key = Key
@@ -1345,7 +1354,7 @@ class DashboardConfig:
                 "peer_global_DNS": "1.1.1.1",
                 "peer_endpoint_allowed_ip": "0.0.0.0/0",
                 "peer_display_mode": "grid",
-                "remote_endpoint": ifcfg.default_interface()['inet'] if ifcfg.default_interface() else '',
+                "remote_endpoint": get_remote_endpoint(),
                 "peer_MTU": "1420",
                 "peer_keep_alive": "21"
             },
