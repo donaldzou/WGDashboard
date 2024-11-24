@@ -148,6 +148,7 @@ router.beforeEach(async (to, from, next) => {
 	dashboardConfigurationStore.ShowNavBar = false;
 	document.querySelector(".loadingBar").classList.remove("loadingDone")
 	document.querySelector(".loadingBar").classList.add("loading")
+	console.log(to.path)
 	if (to.meta.requiresAuth){
 		if (!dashboardConfigurationStore.getActiveCrossServer()){
 			if (await checkAuth()){
@@ -156,11 +157,8 @@ router.beforeEach(async (to, from, next) => {
 					await wireguardConfigurationsStore.getConfigurations();
 				}
 				dashboardConfigurationStore.Redirect = undefined;
-				if (to.path === "/signin"){
-					next("/")
-				}else{
-					next()
-				}
+				next()
+				
 			}else{
 				dashboardConfigurationStore.Redirect = to;
 				next("/signin")
@@ -174,7 +172,11 @@ router.beforeEach(async (to, from, next) => {
 			next()
 		}
 	}else {
-		next();
+		if (to.path === "/signin" && await checkAuth()){
+			next("/")
+		}else{
+			next()
+		}
 	}
 });
 

@@ -1,1 +1,0 @@
-import{_ as t,G as e,t as o}from"./index-GGmHnymX.js";const s={name:"localeText",props:{t:""},computed:{getLocaleText(){return e(this.t)}}};function a(c,r,n,p,_,i){return o(this.getLocaleText)}const x=t(s,[["render",a]]);export{x as L};

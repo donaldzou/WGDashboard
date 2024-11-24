@@ -1730,8 +1730,10 @@ def API_RequireAuthentication():
 @app.post(f'{APP_PREFIX}/api/authenticate')
 def API_AuthenticateLogin():
     data = request.get_json()
+    if not DashboardConfig.GetConfig("Server", "auth_req")[1]:
+        return ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
+    
     if DashboardConfig.APIAccessed:
-        
         authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
