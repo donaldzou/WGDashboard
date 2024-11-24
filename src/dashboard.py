@@ -1726,7 +1726,6 @@ def API_ValidateAuthentication():
 def API_AuthenticateLogin():
     data = request.get_json()
     if DashboardConfig.APIAccessed:
-        
         authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
@@ -1761,6 +1760,7 @@ def API_AuthenticateLogin():
 def API_SignOut():
     resp = ResponseObject(True, "")
     resp.delete_cookie("authToken")
+    session.clear()
     return resp
 
 @app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
