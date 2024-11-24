@@ -1327,7 +1327,7 @@ class DashboardConfig:
             open(DASHBOARD_CONF, "x")
         self.__config = configparser.ConfigParser(strict=False)
         self.__config.read_file(open(DASHBOARD_CONF, "r+"))
-        self.hiddenAttribute = ["totp_key"]
+        self.hiddenAttribute = ["totp_key", "auth_req"]
         self.__default = {
             "Account": {
                 "username": "admin",
@@ -1669,7 +1669,7 @@ API Routes
 @app.before_request
 def auth_req():
     if request.method.lower() == 'options':
-        return ResponseObject(True)
+        return ResponseObject(True)        
 
     DashboardConfig.APIAccessed = False
     if "api" in request.path:
@@ -1720,21 +1720,28 @@ def auth_req():
                 return response
 
 @app.route(f'{APP_PREFIX}/api/handshake', methods=["GET", "OPTIONS"])
-def API_ValidateAPIKey():
+def API_Handshake():
     return ResponseObject(True)
 
 @app.get(f'{APP_PREFIX}/api/validateAuthentication')
 def API_ValidateAuthentication():
-    token = request.cookies.get("authToken") + ""
-    if token == "" or "username" not in session or session["username"] != token:
-        return ResponseObject(False, "Invalid authentication.")
+    token = request.cookies.get("authToken")
+    if DashboardConfig.GetConfig("Server", "auth_req")[1]:
+        if token is None or token == "" or "username" not in session or session["username"] != token:
+            return ResponseObject(False, "Invalid authentication.")
     return ResponseObject(True)
+
+@app.get(f'{APP_PREFIX}/api/requireAuthentication')
+def API_RequireAuthentication():
+    return ResponseObject(data=DashboardConfig.GetConfig("Server", "auth_req")[1])
 
 @app.post(f'{APP_PREFIX}/api/authenticate')
 def API_AuthenticateLogin():
     data = request.get_json()
+    if not DashboardConfig.GetConfig("Server", "auth_req")[1]:
+        return ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
+    
     if DashboardConfig.APIAccessed:
-        
         authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
