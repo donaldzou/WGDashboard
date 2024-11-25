@@ -53,30 +53,33 @@ _check_and_set_venv(){
     if ! $venv_python --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
-    	kill  $TOP_PID
+    	kill $TOP_PID
     fi
     
     . ${VIRTUAL_ENV}/bin/activate
 }
 
 _determineOS(){
-  if [ -f /etc/os-release ]; then
-      . /etc/os-release
-      OS=$ID
-  elif [ -f /etc/redhat-release ]; then
-      OS="redhat"
-  else
-      printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-      printf "%s\n" "$helpMsg"
-      kill  $TOP_PID
-  fi
-   printf "[WGDashboard] OS: %s\n" "$OS"
+	if [ -f /etc/os-release ]; then
+		. /etc/os-release
+		OS=$ID
+	elif [ -f /etc/redhat-release ]; then
+		OS="redhat"
+	else
+		printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
+		printf "%s\n" "$helpMsg"
+		kill  $TOP_PID
+	fi
+	printf "[WGDashboard] OS: %s\n" "$OS"
 }
 
 _installPython(){
+	
+	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
 		;;
 		centos|fedora|redhat|rhel|almalinux|rocky)
 			if command -v dnf &> /dev/null; then
@@ -86,8 +89,8 @@ _installPython(){
 			fi
 		;;
 		alpine)
-				{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
-			;;
+			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+		;;
 	esac
 	
 	if ! python3 --version > /dev/null 2>&1
@@ -101,6 +104,7 @@ _installPython(){
 }
 
 _installPythonVenv(){
+	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
 			ubuntu|debian)
@@ -140,6 +144,7 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
+	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
 		case "$OS" in
@@ -265,7 +270,7 @@ install_wgd(){
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
-	  _checkWireguard
+	_checkWireguard
     sudo chmod -R 755 /etc/wireguard/
 
     if [ ! -d "db" ] 
@@ -472,7 +477,10 @@ else
 	elif [ "$1" = "update" ]; then
 		update_wgd
 	elif [ "$1" = "install" ]; then
-		printf "%s\n" "$dashes"
+		clear
+		printf "=================================================================================\n"
+	  	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
+	  	printf "=================================================================================\n"
 		install_wgd
 		printf "%s\n" "$dashes"
 	elif [ "$1" = "restart" ]; then
@@ -491,6 +499,8 @@ else
 		else
 			start_wgd_debug
 		fi
+	elif [ "$1" = "os" ]; then
+    		_determineOS
 	else
 		help
 	fi
