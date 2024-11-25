@@ -5,6 +5,7 @@ import configparser
 import hashlib
 import ipaddress
 import json
+import sys
 import traceback
 import os
 import secrets
@@ -29,10 +30,17 @@ from flask.json.provider import DefaultJSONProvider
 '''
 Classes Import
 '''
-from classes.DashboardLogger import DashboardLogger
-from classes.Log import Log
+sys.path.insert(1, './classes')
 
-DASHBOARD_VERSION = 'v4.1.1'
+from DashboardLogger import DashboardLogger
+from Log import Log
+from PeerJobLogger import PeerJobLogger
+from PeerJob import PeerJob
+from PeerJobs import PeerJobs
+from PeerShareLink import PeerShareLink
+from PeerShareLinks import PeerShareLinks
+
+DASHBOARD_VERSION = 'v4.2.0'
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
@@ -81,307 +89,25 @@ class CustomJsonEncoder(DefaultJSONProvider):
 
 
 app.json = CustomJsonEncoder(app)
-    
-class PeerJobLogger:
-    def __init__(self):
-        self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
-                                     check_same_thread=False)
-        self.loggerdb.row_factory = sqlite3.Row
-        self.logs:list(Log) = []
-        self.__createLogDatabase()
-        
-    def __createLogDatabase(self):
-        with self.loggerdb:
-            loggerdbCursor = self.loggerdb.cursor()
-        
-            existingTable = loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-            existingTable = [t['name'] for t in existingTable]
-    
-            if "JobLog" not in existingTable:
-                loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
-                if self.loggerdb.in_transaction:
-                    self.loggerdb.commit()
-    def log(self, JobID: str, Status: bool = True, Message: str = "") -> bool:
-        try:
-            with self.loggerdb:
-                loggerdbCursor = self.loggerdb.cursor()
-                loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
-                                            (str(uuid.uuid4()), JobID, Status, Message,))
-                if self.loggerdb.in_transaction:
-                    self.loggerdb.commit()
-        except Exception as e:
-            print(f"[WGDashboard] Peer Job Log Error: {str(e)}")
-            return False
-        return True
-    
-    def getLogs(self, all: bool = False, configName = None) -> list[Log]:
-        logs: list[Log] = []
-        try:
-            allJobs = AllPeerJobs.getAllJobs(configName)
-            allJobsID = ", ".join([f"'{x.JobID}'" for x in allJobs])
-            with self.loggerdb:
-                loggerdbCursor = self.loggerdb.cursor()
-                table = loggerdbCursor.execute(f"SELECT * FROM JobLog WHERE JobID IN ({allJobsID}) ORDER BY LogDate DESC").fetchall()
-                self.logs.clear()
-                for l in table:
-                    logs.append(
-                        Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
-        except Exception as e:
-            return logs
-        return logs
-            
-class PeerJob:
-    def __init__(self, JobID: str, Configuration: str, Peer: str,
-                 Field: str, Operator: str, Value: str, CreationDate: datetime, ExpireDate: datetime, Action: str):
-        self.Action = Action
-        self.ExpireDate = ExpireDate
-        self.CreationDate = CreationDate
-        self.Value = Value
-        self.Operator = Operator
-        self.Field = Field
-        self.Configuration = Configuration
-        self.Peer = Peer
-        self.JobID = JobID
 
-    def toJson(self):
-        return {
-            "JobID": self.JobID,
-            "Configuration": self.Configuration,
-            "Peer": self.Peer,
-            "Field": self.Field,
-            "Operator": self.Operator,
-            "Value": self.Value,
-            "CreationDate": self.CreationDate,
-            "ExpireDate": self.ExpireDate,
-            "Action": self.Action
-        }
+# class PeerShareLink:
+#     def __init__(self, ShareID:str, Configuration: str, Peer: str, ExpireDate: datetime, ShareDate: datetime):
+#         self.ShareID = ShareID
+#         self.Peer = Peer
+#         self.Configuration = Configuration
+#         self.ShareDate = ShareDate
+#         self.ExpireDate = ExpireDate
+#         
+#     
+#     def toJson(self):
+#         return {
+#             "ShareID": self.ShareID,
+#             "Peer": self.Peer,
+#             "Configuration": self.Configuration,
+#             "ExpireDate": self.ExpireDate
+#         }
 
-    def __dict__(self):
-        return self.toJson()
 
-class PeerJobs:
-
-    def __init__(self):
-        self.Jobs: list[PeerJob] = []
-        self.jobdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_job.db'),
-                                     check_same_thread=False)
-        self.jobdb.row_factory = sqlite3.Row
-        self.__createPeerJobsDatabase()
-        self.__getJobs()
-
-    def __getJobs(self):
-        self.Jobs.clear()
-        with self.jobdb:
-            jobdbCursor = self.jobdb.cursor()
-            jobs = jobdbCursor.execute("SELECT * FROM PeerJobs WHERE ExpireDate IS NULL").fetchall()
-            for job in jobs:
-                self.Jobs.append(PeerJob(
-                    job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
-                    job['CreationDate'], job['ExpireDate'], job['Action']))
-    
-    def getAllJobs(self, configuration: str = None):
-        if configuration is not None:
-            with self.jobdb:
-                jobdbCursor = self.jobdb.cursor()
-                jobs = jobdbCursor.execute(
-                    f"SELECT * FROM PeerJobs WHERE Configuration = ?", (configuration, )).fetchall()
-                j = []
-                for job in jobs:
-                    j.append(PeerJob(
-                        job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
-                        job['CreationDate'], job['ExpireDate'], job['Action']))
-                return j
-        return []
-
-    def __createPeerJobsDatabase(self):
-        with self.jobdb:
-            jobdbCursor = self.jobdb.cursor()
-        
-            existingTable = jobdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-            existingTable = [t['name'] for t in existingTable]
-    
-            if "PeerJobs" not in existingTable:
-                jobdbCursor.execute('''
-                CREATE TABLE PeerJobs (JobID VARCHAR NOT NULL, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
-                Field VARCHAR NOT NULL, Operator VARCHAR NOT NULL, Value VARCHAR NOT NULL, CreationDate DATETIME,
-                ExpireDate DATETIME, Action VARCHAR NOT NULL, PRIMARY KEY (JobID))
-                ''')
-                self.jobdb.commit()
-
-    def toJson(self):
-        return [x.toJson() for x in self.Jobs]
-
-    def searchJob(self, Configuration: str, Peer: str):
-        return list(filter(lambda x: x.Configuration == Configuration and x.Peer == Peer, self.Jobs))
-
-    def saveJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
-        try:
-            with self.jobdb:
-                jobdbCursor = self.jobdb.cursor()
-            
-                if (len(str(Job.CreationDate))) == 0:
-                    jobdbCursor.execute('''
-                    INSERT INTO PeerJobs VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%d %H:%M:%S','now'), NULL, ?)
-                    ''', (Job.JobID, Job.Configuration, Job.Peer, Job.Field, Job.Operator, Job.Value, Job.Action,))
-                    JobLogger.log(Job.JobID, Message=f"Job is created if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
-                    
-                else:
-                    currentJob = jobdbCursor.execute('SELECT * FROM PeerJobs WHERE JobID = ?', (Job.JobID, )).fetchone()
-                    if currentJob is not None:
-                        jobdbCursor.execute('''
-                            UPDATE PeerJobs SET Field = ?, Operator = ?, Value = ?, Action = ? WHERE JobID = ?
-                            ''', (Job.Field, Job.Operator, Job.Value, Job.Action, Job.JobID))
-                        JobLogger.log(Job.JobID, 
-                                      Message=f"Job is updated from if {currentJob['Field']} {currentJob['Operator']} {currentJob['value']} then {currentJob['Action']}; to if {Job.Field} {Job.Operator} {Job.Value} then {Job.Action}")
-                self.jobdb.commit()
-                self.__getJobs()
-        
-            return True, list(
-                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
-                       self.Jobs))
-        except Exception as e:
-            return False, str(e)
-
-    def deleteJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
-        try:
-            if (len(str(Job.CreationDate))) == 0:
-                return False, "Job does not exist"
-            with self.jobdb:
-                jobdbCursor = self.jobdb.cursor()
-                jobdbCursor.execute('''
-                    UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
-                ''', (Job.JobID,))
-                self.jobdb.commit()
-            JobLogger.log(Job.JobID, Message=f"Job is removed due to being deleted or finshed.")
-            self.__getJobs()
-            return True, list(
-                filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
-                       self.Jobs))
-        except Exception as e:
-            return False, str(e)
-        
-    def updateJobConfigurationName(self, ConfigurationName: str, NewConfigurationName: str) -> tuple[bool, str]:
-        try:
-            with self.jobdb:
-                jobdbCursor = self.jobdb.cursor()
-                jobdbCursor.execute('''
-                        UPDATE PeerJobs SET Configuration = ? WHERE Configuration = ?
-                    ''', (NewConfigurationName, ConfigurationName, ))
-                self.jobdb.commit()
-            self.__getJobs()
-        except Exception as e:
-            return False, str(e)
-        
-    
-    def runJob(self):
-        needToDelete = []
-        for job in self.Jobs:
-            c = WireguardConfigurations.get(job.Configuration)
-            if c is not None:
-                f, fp = c.searchPeer(job.Peer)
-                if f:
-                    if job.Field in ["total_receive", "total_sent", "total_data"]:
-                        s = job.Field.split("_")[1]
-                        x: float = getattr(fp, f"total_{s}") + getattr(fp, f"cumu_{s}")
-                        y: float = float(job.Value)
-                    else:
-                        x: datetime = datetime.now()
-                        y: datetime = datetime.strptime(job.Value, "%Y-%m-%d %H:%M:%S")
-                    runAction: bool = self.__runJob_Compare(x, y, job.Operator)
-                    if runAction:
-                        s = False
-                        if job.Action == "restrict":
-                            s = c.restrictPeers([fp.id]).get_json()
-                        elif job.Action == "delete":
-                            s = c.deletePeers([fp.id]).get_json()
-                
-                        if s['status'] is True:
-                            JobLogger.log(job.JobID, s["status"], 
-                                          f"Peer {fp.id} from {c.Name} is successfully {job.Action}ed."
-                            )
-                            needToDelete.append(job)
-                        else:
-                            JobLogger.log(job.JobID, s["status"],
-                                          f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
-                            )
-                else:
-                    needToDelete.append(job)
-            else:
-                needToDelete.append(job)
-        for j in needToDelete:
-            self.deleteJob(j)
-
-    def __runJob_Compare(self, x: float | datetime, y: float | datetime, operator: str):
-        if operator == "eq":
-            return x == y
-        if operator == "neq":
-            return x != y
-        if operator == "lgt":
-            return x > y
-        if operator == "lst":
-            return x < y
-
-class PeerShareLink:
-    def __init__(self, ShareID:str, Configuration: str, Peer: str, ExpireDate: datetime, ShareDate: datetime):
-        self.ShareID = ShareID
-        self.Peer = Peer
-        self.Configuration = Configuration
-        self.ShareDate = ShareDate
-        self.ExpireDate = ExpireDate
-        
-    
-    def toJson(self):
-        return {
-            "ShareID": self.ShareID,
-            "Peer": self.Peer,
-            "Configuration": self.Configuration,
-            "ExpireDate": self.ExpireDate
-        }
-
-class PeerShareLinks:
-    def __init__(self):
-        self.Links: list[PeerShareLink] = []
-        existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' and name = 'PeerShareLinks'").fetchall()
-        if len(existingTables) == 0:
-            sqlUpdate(
-                """
-                    CREATE TABLE PeerShareLinks (
-                        ShareID VARCHAR NOT NULL PRIMARY KEY, Configuration VARCHAR NOT NULL, Peer VARCHAR NOT NULL,
-                        ExpireDate DATETIME,
-                        SharedDate DATETIME DEFAULT (datetime('now', 'localtime'))
-                    )
-                """
-            )
-        self.__getSharedLinks()
-    def __getSharedLinks(self):
-        self.Links.clear()
-        allLinks = sqlSelect("SELECT * FROM PeerShareLinks WHERE ExpireDate IS NULL OR ExpireDate > datetime('now', 'localtime')").fetchall()
-        for link in allLinks:
-            self.Links.append(PeerShareLink(*link))
-    
-    def getLink(self, Configuration: str, Peer: str) -> list[PeerShareLink]:
-        self.__getSharedLinks()
-        return list(filter(lambda x : x.Configuration == Configuration and x.Peer == Peer, self.Links))
-    
-    def getLinkByID(self, ShareID: str) -> list[PeerShareLink]:
-        self.__getSharedLinks()
-        return list(filter(lambda x : x.ShareID == ShareID, self.Links))
-    
-    def addLink(self, Configuration: str, Peer: str, ExpireDate: datetime = None) -> tuple[bool, str]:
-        try:
-            newShareID = str(uuid.uuid4())
-            if len(self.getLink(Configuration, Peer)) > 0:
-                sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = datetime('now', 'localtime') WHERE Configuration = ? AND Peer = ?", (Configuration, Peer, ))
-            sqlUpdate("INSERT INTO PeerShareLinks (ShareID, Configuration, Peer, ExpireDate) VALUES (?, ?, ?, ?)", (newShareID, Configuration, Peer, ExpireDate, ))
-            self.__getSharedLinks()
-        except Exception as e:
-            return False, str(e)
-        return True, newShareID
-    
-    def updateLinkExpireDate(self, ShareID, ExpireDate: datetime = None) -> tuple[bool, str]:
-        sqlUpdate("UPDATE PeerShareLinks SET ExpireDate = ? WHERE ShareID = ?;", (ExpireDate, ShareID, ))
-        self.__getSharedLinks()
-        return True, ""
         
 class WireguardConfiguration:
     class InvalidConfigurationFileException(Exception):
@@ -2280,7 +2006,7 @@ def API_getPeerScheduleJobLogs(configName):
     requestAll = False
     if data is not None and data == "true":
         requestAll = True
-    return ResponseObject(data=JobLogger.getLogs(requestAll, configName))
+    return ResponseObject(data=JobLogger.getLogs(requestAll, configName, AllPeerJobs.getAllJobs(configName)))
 
 '''
 Tools
@@ -2538,7 +2264,7 @@ def peerJobScheduleBackgroundThread():
         print(f"[WGDashboard] Background Thread #2 Started", flush=True)
         time.sleep(10)
         while True:
-            AllPeerJobs.runJob()
+            AllPeerJobs.runJob(WireguardConfigurations)
             time.sleep(180)
 
 def gunicornConfig():
@@ -2546,9 +2272,9 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
-AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
-AllPeerJobs: PeerJobs = PeerJobs()
-JobLogger: PeerJobLogger = PeerJobLogger()
+AllPeerShareLinks: PeerShareLinks = PeerShareLinks(sqlSelect, sqlUpdate)
+AllPeerJobs: PeerJobs = PeerJobs(CONFIGURATION_PATH=CONFIGURATION_PATH)
+JobLogger: PeerJobLogger = PeerJobLogger(CONFIGURATION_PATH=CONFIGURATION_PATH)
 DashboardLogger: DashboardLogger = DashboardLogger(CONFIGURATION_PATH=CONFIGURATION_PATH)
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
