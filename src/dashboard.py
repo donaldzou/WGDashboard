@@ -521,21 +521,46 @@ class WireguardConfiguration:
         self.getRestrictedPeersList()
     
     def __parseConfigurationFile(self):
-        self.__parser.read_file(open(self.__configPath))
-        sections = self.__parser.sections()
-        if "Interface" not in sections:
-            raise self.InvalidConfigurationFileException(
-                "[Interface] section not found in " + os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'))
-        interfaceConfig = dict(self.__parser.items("Interface", True))
-        for i in dir(self):
-            if str(i) in interfaceConfig.keys():
-                if isinstance(getattr(self, i), bool):
-                    setattr(self, i, StringToBoolean(interfaceConfig[i]))
-                else:
-                    setattr(self, i, interfaceConfig[i])
-        if self.PrivateKey:
-            self.PublicKey = self.__getPublicKey()
-        self.Status = self.getStatus()
+        with open(self.__configPath, 'r') as f:
+            original = [l.rstrip("\n") for l in f.readlines()]
+            try:
+                start = original.index("[Interface]")
+                
+                # Clean
+                for i in range(start, len(original)):
+                    if original[i] == "[Peer]":
+                        break
+                    split = re.split(r'\s*=\s*', original[i], 1)
+                    if len(split) == 2:
+                        key = split[0]
+                        if key in dir(self):
+                            if isinstance(getattr(self, key), bool):
+                                setattr(self, key, False)
+                            else:
+                                setattr(self, key, "")
+                
+                # Set
+                for i in range(start, len(original)):
+                    if original[i] == "[Peer]":
+                        break
+                    split = re.split(r'\s*=\s*', original[i], 1)
+                    if len(split) == 2:
+                        key = split[0]
+                        value = split[1]
+                        if key in dir(self):
+                            if isinstance(getattr(self, key), bool):
+                                setattr(self, key, StringToBoolean(value))
+                            else:
+                                if len(getattr(self, key)) > 0:
+                                    setattr(self, key, f"{getattr(self, key)}, {value}")
+                                else:
+                                    setattr(self, key, value)  
+            except ValueError as e:
+                raise self.InvalidConfigurationFileException(
+                        "[Interface] section not found in " + self.__configPath)
+            if self.PrivateKey:
+                self.PublicKey = self.__getPublicKey()
+            self.Status = self.getStatus()
     
     def __dropDatabase(self):
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
@@ -871,21 +896,6 @@ class WireguardConfiguration:
         return ResponseObject(False,
                               f"Deleted {numOfDeletedPeers} peer(s) successfully. Failed to delete {numOfFailedToDeletePeers} peer(s)")
 
-    def __savePeers(self):
-        for i in self.Peers:
-            d = i.toJson()
-            sqlUpdate(
-                '''
-                UPDATE '%s' SET private_key = :private_key, 
-                    DNS = :DNS, endpoint_allowed_ip = :endpoint_allowed_ip, name = :name, 
-                    total_receive = :total_receive, total_sent = :total_sent, total_data = :total_data, 
-                    endpoint = :endpoint, status = :status, latest_handshake = :latest_handshake, 
-                    allowed_ip = :allowed_ip, cumu_receive = :cumu_receive, cumu_sent = :cumu_sent, 
-                    cumu_data = :cumu_data, mtu = :mtu, keepalive = :keepalive, 
-                    remote_endpoint = :remote_endpoint, preshared_key = :preshared_key WHERE id = :id
-                ''' % self.Name, d
-            )
-
     def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:
         try:
             subprocess.check_output(f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
@@ -988,6 +998,7 @@ class WireguardConfiguration:
                 check = subprocess.check_output(f"wg-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
+        self.__parseConfigurationFile()
         self.getStatus()
         return True, None
 
@@ -1098,32 +1109,29 @@ class WireguardConfiguration:
         original = []
         dataChanged = False
         with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
-            original = f.readlines()
-            original = [l.rstrip("\n") for l in original]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost"]
+            original = [l.rstrip("\n") for l in f.readlines()]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
             start = original.index("[Interface]")
-            for line in range(start+1, len(original)):
-                if original[line] == "[Peer]":
-                    break
+            try:
+                end = original.index("[Peer]")
+            except ValueError as e:
+                end = len(original)
+            new = ["[Interface]"]
+            peerFound = False
+            for line in range(start, end):
                 split = re.split(r'\s*=\s*', original[line], 1)
                 if len(split) == 2:
-                    key = split[0]
-                    value = split[1]
-                    if key in allowEdit and key in newData.keys() and value != newData[key]:
-                        split[1] = newData[key]
-                        original[line] = " = ".join(split)
-                        if isinstance(getattr(self, key), bool):
-                            setattr(self, key, StringToBoolean(newData[key]))
-                        else:
-                            setattr(self, key, str(newData[key]))
-                        dataChanged = True
-                    print(original[line])
-        if dataChanged:
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
-                f.write("\n".join(original))
+                    if split[0] not in allowEdit:
+                        new.append(original[line])
+            for key in allowEdit:
+                new.insert(1, f"{key} = {newData[key].strip()}")
+            new.append("")
+            for line in range(end, len(original)):
+                new.append(original[line])            
             self.backupConfigurationFile()
-        
-        
+            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
+                f.write("\n".join(new))
+                
         status, msg = self.toggleConfiguration()        
         if not status:
             return False, msg
