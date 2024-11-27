@@ -117,20 +117,6 @@ export default {
 							
 						</div>
 						<div class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
-<!--							<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.downloadPeer()">-->
-<!--								<i class="me-auto bi bi-download"></i>-->
-<!--							</a>-->
-<!--							<a class="dropdown-item text-center px-0 rounded-3" role="button"-->
-<!--							   @click="this.downloadQRCode('qrcode')">-->
-<!--								<i class="me-auto bi bi-qr-code"></i>-->
-<!--							</a>-->
-<!--							<a class="dropdown-item text-center px-0 rounded-3" role="button"-->
-<!--							   @click="this.downloadQRCode('configurationFile')">-->
-<!--								<i class="me-auto bi bi-body-text"></i>-->
-<!--							</a>-->
-<!--							<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">-->
-<!--								<i class="me-auto bi bi-share"></i>-->
-<!--							</a>-->
 							<PeerSettingsDropdownTool icon="bi-download" 
 							                          title="Download"
 							                          @click="this.downloadPeer()"></PeerSettingsDropdownTool>
