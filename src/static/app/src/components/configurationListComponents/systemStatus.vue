@@ -1,12 +1,20 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
+import CpuCore from "@/components/configurationListComponents/systemStatusComponents/cpuCore.vue";
 const data = ref(undefined)
+let interval = null;
+
 onMounted(() => {
-	setInterval(() => {
+	getData()
+	interval = setInterval(() => {
 		getData()
 	}, 10000)
+})
+
+onBeforeUnmount(() => {
+	clearInterval(interval)
 })
 
 const getData = () => {
@@ -22,7 +30,7 @@ const getData = () => {
 			<div class="d-flex align-items-center">
 				<h6 class="text-muted">
 					<i class="bi bi-cpu-fill me-2"></i>
-					<LocaleText t="CPU Usage"></LocaleText>
+					<LocaleText t="CPU"></LocaleText>
 				</h6>
 				<h6 class="ms-auto">
 					{{data.cpu.cpu_percent}}%
@@ -35,18 +43,17 @@ const getData = () => {
 				</span>
 			</div>
 			<div class="d-flex mt-2 gap-1">
-				<div class="flex-grow-1 square rounded-3 border"
-				     :style="{'background-color': `rgb(13 110 253 / ${cpu}%)`}"
-					v-for="cpu in data.cpu.cpu_percent_per_cpu">
-					
-				</div>
+				<CpuCore v-for="(cpu, count) in data.cpu.cpu_percent_per_cpu" 
+				         :key="count"
+					:core_number="count" :percentage="cpu"
+				></CpuCore>
 			</div>
 		</div>
 		<div class="col-lg-6 col-xl-3">
 			<div class="d-flex align-items-center">
 				<h6 class="text-muted">
 					<i class="bi bi-memory me-2"></i>
-					<LocaleText t="Memory Usage"></LocaleText>
+					<LocaleText t="Memory"></LocaleText>
 				</h6>
 				<h6 class="ms-auto">
 					{{data.memory.virtual_memory.percent}}%
@@ -63,7 +70,7 @@ const getData = () => {
 			<div class="d-flex align-items-center">
 				<h6 class="text-muted">
 					<i class="bi bi-memory me-2"></i>
-					<LocaleText t="Swap Memory Usage"></LocaleText>
+					<LocaleText t="Swap Memory"></LocaleText>
 				</h6>
 				<h6 class="ms-auto">
 					{{data.memory.swap_memory.percent}}%
@@ -97,7 +104,5 @@ const getData = () => {
 </template>
 
 <style scoped>
-.square{
-	aspect-ratio: 1/1;
-}
+
 </style>
