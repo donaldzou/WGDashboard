@@ -50,12 +50,15 @@ export default {
 		},
 		applyLocale(key){
 			return GetLocale(key)
+		},
+		formValid(){
+			return this.data.username && this.data.password && ((this.totpEnabled && this.data.totp) || !this.totpEnabled)
 		}
 	},
 	methods: {
 		GetLocale,
 		async auth(){
-			if (this.data.username && this.data.password && ((this.totpEnabled && this.data.totp) || !this.totpEnabled)){
+			if (this.formValid){
 				this.loading = true
 				await fetchPost("/api/authenticate", this.data, (response) => {
 					if (response.status){
@@ -71,8 +74,7 @@ export default {
 							}
 						}
 					}else{
-						this.loginError = true;
-						this.loginErrorMessage = response.message;
+						this.store.newMessage("Server", response.message, "danger")
 						document.querySelectorAll("input[required]").forEach(x => {
 							x.classList.remove("is-valid")
 							x.classList.add("is-invalid")
@@ -107,28 +109,53 @@ export default {
 					<LocaleText t="Welcome to"></LocaleText>
 				</h4>
 				<span class="dashboardLogo display-3"><strong>WGDashboard</strong></span>
-				<div class="alert alert-danger mt-2 mb-0" role="alert" v-if="loginError">
-					<LocaleText :t="this.loginErrorMessage"></LocaleText>
-				</div>
+<!--				<div class="alert alert-danger mt-2 mb-0 rounded-3" role="alert" v-if="loginError">-->
+<!--					<LocaleText :t="this.loginErrorMessage"></LocaleText>-->
+<!--				</div>-->
 				<form @submit="(e) => {e.preventDefault(); this.auth();}"
+				      class="mt-3"
 				      v-if="!this.store.CrossServerConfiguration.Enable">
-					<div class="form-group text-body">
-						<label for="username" class="text-left" style="font-size: 1rem">
-							<i class="bi bi-person-circle"></i></label>
-						<SignInInput id="username" :data="this.data" 
-						             type="text" placeholder="Username"></SignInInput>
+					<div class="form-floating mb-2">
+						<input type="text"
+						       required
+						       :disabled="loading"
+						       v-model="this.data.username"
+						       name="username"
+						       class="form-control rounded-3" id="username" placeholder="Username">
+						<label for="floatingInput" class="d-flex">
+							<i class="bi bi-person-circle me-2"></i>
+							<LocaleText t="Username"></LocaleText>	
+						</label>
 					</div>
-					<div class="form-group text-body">
-						<label for="password" class="text-left" style="font-size: 1rem"><i class="bi bi-key-fill"></i></label>
-						<SignInInput id="password" :data="this.data"
-						             type="password" placeholder="Password"></SignInInput>
+					<div class="form-floating mb-2">
+						<input type="password"
+						       required
+						       :disabled="loading"
+						       v-model="this.data.password"
+						       class="form-control rounded-3" id="password" placeholder="Password">
+						<label for="floatingInput" class="d-flex">
+							<i class="bi bi-key-fill me-2"></i>
+							<LocaleText t="Password"></LocaleText>	
+						</label>
 					</div>
-					<div class="form-group text-body" v-if="totpEnabled">
-						<label for="totp" class="text-left" style="font-size: 1rem"><i class="bi bi-lock-fill"></i></label>
-						<SignInTOTP :data="this.data"></SignInTOTP>
+					<div class="form-floating mb-2" v-if="this.totpEnabled">
+						<input type="text"
+						       id="totp"
+						       required
+						       :disabled="loading"
+						       placeholder="totp"
+						       v-model="this.data.totp"
+						       class="form-control rounded-3" 
+						       maxlength="6" 
+						       inputmode="numeric" 
+						       autocomplete="one-time-code">
+						<label for="floatingInput" class="d-flex">
+							<i class="bi bi-lock-fill me-2"></i>
+							<LocaleText t="OTP from your authenticator"></LocaleText>
+						</label>
 					</div>
-					<button class="btn btn-lg btn-dark ms-auto mt-5 w-100 d-flex btn-brand signInBtn" 
-					        :disabled="this.loading"
+					<button class="btn btn-lg btn-dark ms-auto mt-5 w-100 d-flex btn-brand signInBtn rounded-3" 
+					        :disabled="this.loading || !this.formValid"
 					        ref="signInBtn">
 							<span v-if="!this.loading" class="d-flex w-100">
 								<LocaleText t="Sign In"></LocaleText>

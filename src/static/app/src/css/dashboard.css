@@ -556,13 +556,6 @@ main {
     /*padding: 0.6rem 0.9em;*/
 }
 
-.login-box #username,
-.login-box #password,
-.login-box #totp
-{
-    padding: 0.6rem calc( 0.9rem + 32px);
-    height: inherit;
-}
 
 .login-box label[for="username"],
 .login-box label[for="password"],
