@@ -109,9 +109,6 @@ export default {
 					<LocaleText t="Welcome to"></LocaleText>
 				</h4>
 				<span class="dashboardLogo display-3"><strong>WGDashboard</strong></span>
-<!--				<div class="alert alert-danger mt-2 mb-0 rounded-3" role="alert" v-if="loginError">-->
-<!--					<LocaleText :t="this.loginErrorMessage"></LocaleText>-->
-<!--				</div>-->
 				<form @submit="(e) => {e.preventDefault(); this.auth();}"
 				      class="mt-3"
 				      v-if="!this.store.CrossServerConfiguration.Enable">
