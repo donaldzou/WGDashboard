@@ -2,7 +2,7 @@
 import {ref} from "vue";
 
 const props = defineProps({
-	core_number: Number,
+	mount: String,
 	percentage: Number,
 	align: Boolean
 })
@@ -14,7 +14,7 @@ const show = ref(false)
 	<div class="flex-grow-1 square rounded-3 border position-relative"
 	     @mouseenter="show = true"
 	     @mouseleave="show = false"
-	     :style="{'background-color': `rgb(13 110 253 / ${percentage*10}%)`}">
+	     :style="{'background-color': `rgb(25 135 84 / ${percentage}%)`}">
 		<Transition name="zoomReversed">
 			<div
 				v-if="show"
@@ -24,7 +24,7 @@ const show = ref(false)
 				:class="[align ? 'end-0':'start-0']"
 			>
 				<small class="text-muted me-2">
-					Core #{{core_number + 1}}
+					<samp>{{mount}}</samp>
 				</small>
 				<small class="fw-bold">
 					{{percentage}}%

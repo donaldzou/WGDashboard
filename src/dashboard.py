@@ -2489,8 +2489,8 @@ def API_Locale_Update():
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')
 def API_SystemStatus():
-    cpu_percpu = psutil.cpu_percent(interval=2, percpu=True)
-    cpu = psutil.cpu_percent(interval=2)
+    cpu_percpu = psutil.cpu_percent(interval=0.5, percpu=True)
+    cpu = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory()
     swap_memory = psutil.swap_memory()
     disks = psutil.disk_partitions()

@@ -120,6 +120,7 @@ export default {
 						       :disabled="loading"
 						       v-model="this.data.username"
 						       name="username"
+						       autocomplete="username"
 						       autofocus
 						       class="form-control rounded-3" id="username" placeholder="Username">
 						<label for="floatingInput" class="d-flex">
@@ -131,6 +132,7 @@ export default {
 						<input type="password"
 						       required
 						       :disabled="loading"
+						       autocomplete="current-password"
 						       v-model="this.data.password"
 						       class="form-control rounded-3" id="password" placeholder="Password">
 						<label for="floatingInput" class="d-flex">
