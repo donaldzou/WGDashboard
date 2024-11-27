@@ -104,11 +104,13 @@ export default {
 	     style="overflow-y: scroll"
 	     :data-bs-theme="this.theme">
 		<div class="login-box m-auto" >
-			<div class="m-auto" style="width: 700px;">
+			<div class="m-auto signInContainer" style="width: 700px;">
 				<h4 class="mb-0 text-body">
 					<LocaleText t="Welcome to"></LocaleText>
 				</h4>
-				<span class="dashboardLogo display-3"><strong>WGDashboard</strong></span>
+				<span class="dashboardLogo display-3">
+					<strong>WGDashboard</strong>
+				</span>
 				<form @submit="(e) => {e.preventDefault(); this.auth();}"
 				      class="mt-3"
 				      v-if="!this.store.CrossServerConfiguration.Enable">
@@ -118,6 +120,7 @@ export default {
 						       :disabled="loading"
 						       v-model="this.data.username"
 						       name="username"
+						       autofocus
 						       class="form-control rounded-3" id="username" placeholder="Username">
 						<label for="floatingInput" class="d-flex">
 							<i class="bi bi-person-circle me-2"></i>
@@ -202,7 +205,5 @@ export default {
 	}
 }
 
-.navbar{
-	display: none !important;
-}
+
 </style>

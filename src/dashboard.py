@@ -1636,6 +1636,7 @@ def auth_req():
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
                     and "locale" not in request.path
+                    and "systemStatus" not in request.path
             ):
                 response = Flask.make_response(app, {
                     "status": False,
@@ -2485,6 +2486,51 @@ def API_Locale_Update():
         return ResponseObject(False, "Please specify a lang_id")
     Locale.updateLanguage(data['lang_id'])
     return ResponseObject(data=Locale.getLanguage())
+
+@app.get(f'{APP_PREFIX}/api/systemStatus')
+def API_SystemStatus():
+    cpu_percpu = psutil.cpu_percent(interval=2, percpu=True)
+    cpu = psutil.cpu_percent(interval=2)
+    memory = psutil.virtual_memory()
+    swap_memory = psutil.swap_memory()
+    disks = psutil.disk_partitions()
+    network = psutil.net_io_counters(pernic=True, nowrap=True)
+    
+    status = {
+        "cpu": {
+            "cpu_percent": cpu,
+            "cpu_percent_per_cpu": cpu_percpu,
+        },
+        "memory": {
+            "virtual_memory": {
+                "total": memory.total,
+                "available": memory.available,
+                "percent": memory.percent
+            },
+            "swap_memory": {
+                "total": swap_memory.total,
+                "used": swap_memory.used,
+                "percent": swap_memory.percent
+            }
+        },
+        "disk": {},
+        "network": {}
+    }
+    for d in disks:
+        detail = psutil.disk_usage(d.mountpoint)
+        status['disk'][d.mountpoint] = {
+            "total": detail.total,
+            "used": detail.used,
+            "free": detail.free,
+            "percent": detail.percent
+        }
+    for i in network.keys():
+        status["network"][i] = {
+            "byte_sent": network[i].bytes_sent,
+            "byte_recv": network[i].bytes_recv
+        }
+    return ResponseObject(data=status)
+
 
 @app.get(f'{APP_PREFIX}/')
 def index():

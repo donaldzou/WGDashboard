@@ -3,10 +3,11 @@ import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import ConfigurationCard from "@/components/configurationListComponents/configurationCard.vue";
 import LocaleText from "@/components/text/localeText.vue";
+import SystemStatus from "@/components/configurationListComponents/systemStatus.vue";
 
 export default {
 	name: "configurationList",
-	components: {LocaleText, ConfigurationCard},
+	components: {SystemStatus, LocaleText, ConfigurationCard},
 	async setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		return {wireguardConfigurationsStore}
@@ -33,6 +34,7 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3">
 		<div class="container-md">
+			<SystemStatus></SystemStatus>
 			<div class="d-flex mb-4 configurationListTitle align-items-center gap-3">
 				<h2 class="text-body d-flex">
 					<span>
