@@ -28,7 +28,7 @@ const getData = () => {
 </script>
 
 <template>
-<div class="text-body row g-2">
+<div class="text-body row g-2 mb-2">
 	<div class="col-sm-6">
 		<div class="card rounded-3 h-100 shadow">
 			<div class="card-body p-4">
