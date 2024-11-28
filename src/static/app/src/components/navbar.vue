@@ -107,6 +107,11 @@ export default {
 				</h6>
 				<ul class="nav flex-column px-2">
 					<li class="nav-item">
+						<RouterLink to="/system_status" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="System Status"></LocaleText>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
 						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">
 							<LocaleText t="Ping"></LocaleText>
 						</RouterLink></li>
@@ -118,12 +123,13 @@ export default {
 				</ul>
 				<hr class="text-body">
 				<ul class="nav flex-column px-2 mb-3">
-					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
+					<li class="nav-item">
+						<a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
-						<i class="bi bi-box-arrow-left me-2"></i>
-						<LocaleText t="Sign Out"></LocaleText>	
-					</a>
+							<i class="bi bi-box-arrow-left me-2"></i>
+							<LocaleText t="Sign Out"></LocaleText>	
+						</a>
 					</li>
 					<li class="nav-item" style="font-size: 0.8rem">
 						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none rounded-3" target="_blank">

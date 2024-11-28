@@ -73,6 +73,14 @@ const router = createRouter({
 					}
 				},
 				{
+					name: "System Status",
+					path: '/system_status',
+					component: () => import("@/views/systemStatus.vue"),
+					meta: {
+						title: "System Status"
+					}
+				},
+				{
 					name: "Configuration",
 					path: '/configuration/:id',
 					component: () => import('@/views/configuration.vue'),

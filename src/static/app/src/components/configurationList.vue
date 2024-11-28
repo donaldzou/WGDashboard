@@ -3,7 +3,7 @@ import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import ConfigurationCard from "@/components/configurationListComponents/configurationCard.vue";
 import LocaleText from "@/components/text/localeText.vue";
-import SystemStatus from "@/components/configurationListComponents/systemStatus.vue";
+import SystemStatus from "@/components/systemStatusComponents/systemStatusWidget.vue";
 
 export default {
 	name: "configurationList",

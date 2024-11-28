@@ -2514,7 +2514,11 @@ def API_SystemStatus():
             }
         },
         "disk": {},
-        "network": {}
+        "network": {},
+        "process": {
+            "cpu_top_10": [],
+            "memory_top_10": []
+        }
     }
     for d in disks:
         detail = psutil.disk_usage(d.mountpoint)
@@ -2529,6 +2533,32 @@ def API_SystemStatus():
             "byte_sent": network[i].bytes_sent,
             "byte_recv": network[i].bytes_recv
         }
+        
+    processes = list(psutil.process_iter())
+    status["process"]["cpu_top_10"] = sorted(list(map(lambda x : {
+        "name": x.name(),
+        "command": " ".join(x.cmdline()),
+        "pid": x.pid,
+        "cpu_percent": x.cpu_percent()
+    }, processes)), key=lambda x : x['cpu_percent'], reverse=True)[:10]
+    status["process"]["memory_top_10"] = sorted(list(map(lambda x : {
+        "name": x.name(),
+        "command": " ".join(x.cmdline()),
+        "pid": x.pid,
+        "memory_percent": x.memory_percent()
+    }, processes)), key=lambda x : x['memory_percent'], reverse=True)[:10]
+    
+    
+    # for proc in psutil.process_iter():
+    #     try:
+    #         status["process"].append({
+    #             "pid": proc.pid,
+    #             "name": proc.name(),
+    #             "memory_percent": proc.memory_percent(),
+    #             "cpu_percent": proc.cpu_percent()
+    #         })
+    #     except (psutil.NoSuchProcess, psutil.AccessDenied):
+    #         pass
     return ResponseObject(data=status)
 
 
