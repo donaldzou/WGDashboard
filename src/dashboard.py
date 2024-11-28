@@ -1636,7 +1636,6 @@ def auth_req():
                     and "sharePeer/get" not in request.path
                     and "isTotpEnabled" not in request.path
                     and "locale" not in request.path
-                    and "systemStatus" not in request.path
             ):
                 response = Flask.make_response(app, {
                     "status": False,
