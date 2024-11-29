@@ -2008,7 +2008,10 @@ def API_sharePeer_create():
         return ResponseObject(False, "Please specify configuration and peers")
     activeLink = AllPeerShareLinks.getLink(Configuration, Peer)
     if len(activeLink) > 0:
-        return ResponseObject(False, "This peer is already sharing, please stop sharing first.")
+        return ResponseObject(True, 
+                              "This peer is already sharing. Please view data for shared link.",
+                                data=activeLink[0]
+        )
     status, message = AllPeerShareLinks.addLink(Configuration, Peer, ExpireDate)
     if not status:
         return ResponseObject(status, message)
