@@ -89,146 +89,81 @@ export default {
 </script>
 
 <template>
-	<div class="mb-3">
-		<div class="d-flex gap-2 z-3 peerSearchContainer">
-			<RouterLink
-				to="create"
-				class="text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
-				<i class="bi bi-plus-lg me-2"></i>
-				<LocaleText t="Peer"></LocaleText>
-			</RouterLink>
-			<button class="btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  shadow-sm"
+	<div class="d-flex flex-column gap-2 mb-3">
+		<div class="d-flex gap-2 z-3 peerSearchContainer justify-content-end">
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i>
 				<LocaleText t="Download All"></LocaleText>
 			</button>
-			<div class="mt-3 mt-md-0 flex-grow-1">
-
-				<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-100"
-				       :placeholder="searchBarPlaceholder"
-				       id="searchPeers"
-				       @keyup="this.debounce()"
-				       v-model="this.searchString">
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+			        @click="this.$emit('selectPeers')">
+				<i class="bi bi-check2-all me-2"></i>
+				<LocaleText t="Select Peers"></LocaleText>
+			</button>
+			<div class="dropdown">
+				<button
+					data-bs-toggle="dropdown"
+					class="btn w-100 btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm position-relative">
+					<i class="bi bi-sort-up me-2"></i>
+					<LocaleText t="Sort By"></LocaleText>
+					<span class="badge text-bg-primary ms-2">{{this.sort[store.Configuration.Server.dashboard_sort]}}</span>
+				</button>
+				<ul class="dropdown-menu rounded-3 shadow">
+					<li v-for="(value, key) in this.sort" >
+						<button class="dropdown-item d-flex align-items-center" @click="this.updateSort(key)">
+							<small>
+								{{ value }}
+							</small>
+							<small class="ms-auto">
+								<i class="bi bi-check-circle-fill"
+								   v-if="store.Configuration.Server.dashboard_sort === key"></i>
+							</small>
+						</button>
+					</li>
+				</ul>
 			</div>
-			<button
-				@click="this.showDisplaySettings = true"
-				class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-				type="button" aria-expanded="false">
-				<i class="bi bi-filter-circle me-2"></i>
-				<LocaleText t="Display"></LocaleText>
-			</button>
-			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-			        @click="this.$emit('editConfiguration')"
+			<div class="dropdown">
+				<button
+					data-bs-toggle="dropdown"
+					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm position-relative">
+					<i class="bi bi-arrow-repeat me-2"></i>
+					<LocaleText t="Refresh Interval"></LocaleText>
+					<span class="badge text-bg-primary ms-2">{{this.interval[store.Configuration.Server.dashboard_refresh_interval]}}</span>
+				</button>
+				<ul class="dropdown-menu rounded-3 shadow">
+					<li v-for="(value, key) in this.interval" >
+						<button class="dropdown-item d-flex align-items-center" @click="this.updateRefreshInterval(key)">
+							<small>
+								{{ value }}
+							</small>
+							<small class="ms-auto">
+								<i class="bi bi-check-circle-fill"
+								   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
+							</small>
+						</button>
+					</li>
+
+				</ul>
+			</div>
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+			        @click="this.$emit('jobsAll')"
 			        type="button" aria-expanded="false">
-				<i class="bi bi-gear-fill"></i>
+				<i class="bi bi-person-walking me-2"></i>
+				<LocaleText t="Active Jobs"></LocaleText>
 			</button>
-			<button class="btn text-secondary-emphasis bg-secondary-subtle rounded-3 border-1 border-secondary-subtle shadow-sm"
-			        @click="this.showMoreSettings = true"
-			        type="button" aria-expanded="false">
-				<i class="bi bi-three-dots"></i>
-			</button>
-			<Transition name="zoom">
-				<div
-					v-if="this.showDisplaySettings"
-					class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll displayModal">
-					<div class="container-md d-flex h-100 w-100">
-						<div class="m-auto modal-dialog-centered dashboardModal">
-							<div class="card rounded-3 shadow w-100">
-								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
-									<h4 class="mb-0 fw-normal"><LocaleText t="Display"></LocaleText>
-									</h4>
-									<button type="button" class="btn-close ms-auto" @click="this.showDisplaySettings = false"></button>
-								</div>
-								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column">
-									<div>
-										<p class="text-muted fw-bold mb-2"><small>
-											<LocaleText t="Sort by"></LocaleText>
-										</small></p>
-										<div class="list-group">
-											<a v-for="(value, key) in this.sort" class="list-group-item list-group-item-action d-flex" 
-											   role="button" 
-											   @click="this.updateSort(key)">
-												<span class="me-auto">{{value}}</span>
-												<i class="bi bi-check text-primary"
-												   v-if="store.Configuration.Server.dashboard_sort === key"></i>
-											</a>
-										</div>
-									</div>
-									<div>
-										<p class="text-muted fw-bold mb-2"><small>
-											<LocaleText t="Refresh Interval"></LocaleText>
-										</small></p>
-										<div class="list-group">
-											<a v-for="(value, key) in this.interval"
-											   class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.updateRefreshInterval(key)">
-												<span class="me-auto">{{value}}</span>
-												<i class="bi bi-check text-primary"
-												   v-if="store.Configuration.Server.dashboard_refresh_interval === key"></i>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</Transition>
-			<Transition name="zoom">
-				<div
-					v-if="this.showMoreSettings"
-					class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll displayModal">
-					<div class="container-md d-flex h-100 w-100">
-						<div class="m-auto modal-dialog-centered dashboardModal">
-							<div class="card rounded-3 shadow w-100">
-								<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
-									<h4 class="mb-0">
-										<LocaleText t="Other Settings"></LocaleText>
-									</h4>
-									<button type="button" class="btn-close ms-auto" @click="this.showMoreSettings = false"></button>
-								</div>
-								<div class="card-body px-4 pb-4 d-flex gap-3 flex-column pt-0">
-									
-									<div>
-										<p class="text-muted fw-bold mb-2"><small>
-											<LocaleText t="Peers"></LocaleText>
-										</small></p>
-										<div class="list-group">
-											<a class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.$emit('selectPeers')">
-												<LocaleText t="Select Peers"></LocaleText>
-											</a>
-											<a class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.$emit('jobsAll')">
-												<LocaleText t="Active Jobs"></LocaleText>
-											</a>
-											<a class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.$emit('jobLogs')">
-												<LocaleText t="Logs"></LocaleText>
-											</a>
-										</div>
-									</div>
-									<div>
-										<p class="text-muted fw-bold mb-2"><small>
-											<LocaleText t="Configuration"></LocaleText>
-										</small></p>
-										<div class="list-group">
-											<a class="list-group-item list-group-item-action d-flex" role="button"
-											   @click="this.$emit('backupRestore')">
-												<LocaleText t="Backup & Restore"></LocaleText>
-											</a>
-											<a class="list-group-item list-group-item-action d-flex text-danger fw-bold" role="button"
-											   @click="this.$emit('deleteConfiguration')">
-												<LocaleText t="Delete Configuration"></LocaleText>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</Transition>
+		</div>
+		<div class="d-flex gap-3 align-items-center">
+			<h6 class="mb-0">
+				<label for="searchPeers">
+					<i class="bi bi-search"></i>
+				</label>
+			</h6>
+			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-auto"
+			       :placeholder="searchBarPlaceholder"
+			       id="searchPeers"
+			       @keyup="this.debounce()"
+			       v-model="this.searchString">
 		</div>
 	</div>
 </template>
@@ -258,13 +193,27 @@ export default {
 	width: 400px !important;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 992px) {
 	.peerSearchContainer{
 		flex-direction: column;
 	}
 	
 	.peerSettingContainer .dashboardModal{
 		width: 100% !important;
+	}
+}
+
+.peerSearchContainer > *{
+	flex-grow: 1;
+}
+
+button{
+	text-align: left;
+	display: flex;
+	align-items: center;
+	
+	i{
+		margin-right: auto !important;
 	}
 }
 </style>

@@ -45,11 +45,11 @@ export default {
 						<i class="bi bi-arrow-down"></i><strong>
 						{{(Peer.cumu_receive + Peer.total_receive).toFixed(4)}}</strong> GB
 					</span>
-						<span class="text-success">
+					<span class="text-success">
 						<i class="bi bi-arrow-up"></i><strong>
 						{{(Peer.cumu_sent + Peer.total_sent).toFixed(4)}}</strong> GB
 					</span>
-						<span class="text-secondary" v-if="Peer.latest_handshake !== 'No Handshake'">
+					<span class="text-secondary" v-if="Peer.latest_handshake !== 'No Handshake'">
 						<i class="bi bi-arrows-angle-contract"></i>
 						{{getLatestHandshake}} ago
 					</span>

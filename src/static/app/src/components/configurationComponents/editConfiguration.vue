@@ -34,7 +34,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close"])
+const emit = defineEmits(["changed", "close", "backupRestore", "deleteConfiguration"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -193,13 +193,34 @@ watch(data, () => {
 									<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
 									        @click="resetForm()"
 									        :disabled="!dataChanged || saving">
-										<i class="bi bi-arrow-clockwise"></i>
+										<i class="bi bi-arrow-clockwise me-2"></i>
+										<LocaleText t="Reset"></LocaleText>
 									</button>
 									<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
 									        :disabled="!dataChanged || saving"
 									        @click="saveForm()"
 									>
-										<i class="bi bi-save-fill"></i></button>
+										<i class="bi bi-save-fill me-2"></i>
+										<LocaleText t="Save"></LocaleText>
+									</button>
+								</div>
+								<hr>
+								<h5 class="mb-3">Danger Zone</h5>
+								<div class="d-flex gap-2">
+									<button
+										@click="emit('backupRestore')"
+										style="flex-basis: 100%"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 ms-auto">
+										<i class="bi bi-copy me-2"></i>
+										<LocaleText t="Backup & Restore"></LocaleText>
+									</button>
+									<button
+										@click="emit('deleteConfiguration')"
+										style="flex-basis: 100%"
+										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 ms-auto">
+										<i class="bi bi-trash-fill me-2"></i>
+										<LocaleText t="Delete Configuration"></LocaleText>
+									</button>
 								</div>
 							</template>
 						</div>

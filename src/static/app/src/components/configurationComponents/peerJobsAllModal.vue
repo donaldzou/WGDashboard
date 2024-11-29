@@ -31,7 +31,7 @@ export default {
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
 			<div class="m-auto modal-dialog-centered dashboardModal">
-				<div class="card rounded-3 shadow" style="width: 700px">
+				<div class="card rounded-3 shadow" style="width: 900px">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
 						<h4 class="mb-0 fw-normal">
 							<LocaleText t="All Active Jobs"></LocaleText>
@@ -39,6 +39,12 @@ export default {
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4 pt-2 ">
+						<button class="btn bg-primary-subtle border-1 border-primary-subtle text-primary-emphasis rounded-3 shadow mb-2"
+
+						        @click="this.$emit('allLogs')">
+							<i class="bi bi-clock me-2"></i>
+							<LocaleText t="Logs"></LocaleText>
+						</button>
 						<div class="accordion" id="peerJobsLogsModalAccordion" v-if="this.getAllJobs.length > 0">
 							<div class="accordion-item" v-for="(p, index) in this.getAllJobs" :key="p.id">
 								<h2 class="accordion-header">
