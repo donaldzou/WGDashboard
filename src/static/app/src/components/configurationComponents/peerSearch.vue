@@ -90,17 +90,20 @@ export default {
 
 <template>
 	<div class="d-flex flex-column gap-2 mb-3">
-		<div class="d-flex gap-2 z-3 peerSearchContainer justify-content-end">
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
-			        @click="this.downloadAllPeer()">
-				<i class="bi bi-download me-2"></i>
-				<LocaleText t="Download All"></LocaleText>
-			</button>
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
-			        @click="this.$emit('selectPeers')">
-				<i class="bi bi-check2-all me-2"></i>
-				<LocaleText t="Select Peers"></LocaleText>
-			</button>
+		<div class="d-flex gap-3 align-items-center">
+			<h6 class="mb-0 ms-auto">
+				<label for="searchPeers">
+					<i class="bi bi-search"></i>
+				</label>
+			</h6>
+			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm"
+			       :placeholder="searchBarPlaceholder"
+			       id="searchPeers"
+			       @keyup="this.debounce()"
+			       v-model="this.searchString">
+		</div>
+		<div class="d-flex gap-2 z-3 peerSearchContainer">
+			
 			<div class="dropdown">
 				<button
 					data-bs-toggle="dropdown"
@@ -146,6 +149,16 @@ export default {
 
 				</ul>
 			</div>
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm ms-lg-auto"
+			        @click="this.downloadAllPeer()">
+				<i class="bi bi-download me-2"></i>
+				<LocaleText t="Download All"></LocaleText>
+			</button>
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+			        @click="this.$emit('selectPeers')">
+				<i class="bi bi-check2-all me-2"></i>
+				<LocaleText t="Select Peers"></LocaleText>
+			</button>
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
 			        @click="this.$emit('jobsAll')"
 			        type="button" aria-expanded="false">
@@ -153,18 +166,7 @@ export default {
 				<LocaleText t="Active Jobs"></LocaleText>
 			</button>
 		</div>
-		<div class="d-flex gap-3 align-items-center">
-			<h6 class="mb-0">
-				<label for="searchPeers">
-					<i class="bi bi-search"></i>
-				</label>
-			</h6>
-			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm w-auto"
-			       :placeholder="searchBarPlaceholder"
-			       id="searchPeers"
-			       @keyup="this.debounce()"
-			       v-model="this.searchString">
-		</div>
+		
 	</div>
 </template>
 
@@ -203,9 +205,6 @@ export default {
 	}
 }
 
-.peerSearchContainer > *{
-	flex-grow: 1;
-}
 
 button{
 	text-align: left;
@@ -213,7 +212,7 @@ button{
 	align-items: center;
 	
 	i{
-		margin-right: auto !important;
+		margin-right: 1rem !important;
 	}
 }
 </style>
