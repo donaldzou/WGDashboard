@@ -35,6 +35,7 @@ import dayjs from "dayjs";
 import {defineAsyncComponent, ref} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import PeerRow from "@/components/configurationComponents/peerRow.vue";
+import {GetLocale} from "@/utilities/locale.js";
 export default {
 	name: "peerList",
 	components: {
@@ -148,7 +149,9 @@ export default {
 			},
 			deleteConfiguration: {
 				modalOpen: false
-			}
+			},
+			searchStringTimeout: undefined,
+			searchString: "",
 		}
 	},
 	mounted() {
@@ -193,6 +196,18 @@ export default {
 				this.configurationInfo.Status = res.data
 				this.configurationToggling = false;
 			})
+		},
+		debounce(){
+			if (!this.searchStringTimeout){
+				this.searchStringTimeout = setTimeout(() => {
+					this.wireguardConfigurationStore.searchString = this.searchString;
+				}, 300)
+			}else{
+				clearTimeout(this.searchStringTimeout)
+				this.searchStringTimeout = setTimeout(() => {
+					this.wireguardConfigurationStore.searchString = this.searchString;
+				}, 300)
+			}
 		},
 		getPeers(id = this.$route.params.id){
 			fetchGet("/api/getWireguardConfigurationInfo",
@@ -372,6 +387,9 @@ export default {
 				}
 			}
 		},
+		searchBarPlaceholder(){
+			return GetLocale("Search Peers...")
+		},
 		searchPeers(){
 			const fuse = new Fuse(this.configurationPeers, {
 				keys: ["name", "id", "allowed_ip"]
@@ -426,7 +444,7 @@ export default {
 				</div>
 			</div>
 			<div class="ms-sm-auto d-flex gap-2 flex-column">
-				<div class="card rounded-3 bg-transparent shadow-sm">
+				<div class="card rounded-3 bg-transparent ">
 					<div class="card-body py-2 d-flex align-items-center">
 						<small class="text-muted">
 							<LocaleText t="Status"></LocaleText>
@@ -454,28 +472,23 @@ export default {
 				<div class="d-flex gap-2">
 					<RouterLink
 						to="create"
-						class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm">
+						class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ">
 						<i class="bi bi-plus-lg me-2"></i>
 						<LocaleText t="Peer"></LocaleText>
 					</RouterLink>
-					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 					        @click="editConfiguration.modalOpen = true"
 					        type="button" aria-expanded="false">
 						<i class="bi bi-gear-fill me-2"></i>
 						<LocaleText t="Configuration Settings"></LocaleText>
 					</button>
-<!--					<button-->
-<!--						class="titleBtn btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm py-2">-->
-<!--						<i class="bi bi-download me-2"></i>-->
-<!--						<LocaleText t="Download All"></LocaleText>-->
-<!--					</button>-->
 				</div>
 			</div>
 		</div>
 		<hr>
 		<div class="row mt-3 gy-2 gx-2 mb-2">
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm h-100">
+				<div class="card rounded-3 bg-transparent  h-100">
 					<div class="card-body py-2 d-flex flex-column justify-content-center">
 						<p class="mb-0 text-muted"><small>
 							<LocaleText t="Address"></LocaleText>
@@ -485,7 +498,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm  h-100">
+				<div class="card rounded-3 bg-transparent   h-100">
 					<div class="card-body py-2 d-flex flex-column justify-content-center">
 						<p class="mb-0 text-muted"><small>
 							<LocaleText t="Listen Port"></LocaleText>
@@ -495,7 +508,7 @@ export default {
 				</div>
 			</div>
 			<div style="word-break: break-all" class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent shadow-sm  h-100">
+				<div class="card rounded-3 bg-transparent   h-100">
 					<div class="card-body py-2 d-flex flex-column justify-content-center">
 						<p class="mb-0 text-muted"><small>
 							<LocaleText t="Public Key"></LocaleText>
@@ -507,7 +520,7 @@ export default {
 		</div>
 		<div class="row gx-2 gy-2 mb-2">
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm h-100">
+				<div class="card rounded-3 bg-transparent  h-100">
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>
@@ -522,7 +535,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm h-100">
+				<div class="card rounded-3 bg-transparent  h-100">
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>
@@ -535,7 +548,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm h-100">
+				<div class="card rounded-3 bg-transparent  h-100">
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>
@@ -548,7 +561,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm h-100">
+				<div class="card rounded-3 bg-transparent  h-100">
 					<div class="card-body d-flex">
 						<div>
 							<p class="mb-0 text-muted"><small>
@@ -563,7 +576,7 @@ export default {
 		</div>
 		<div class="row gx-2 gy-2 mb-3">
 			<div class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
+				<div class="card rounded-3 bg-transparent " style="height: 270px">
 					<div class="card-header bg-transparent border-0">
 						<small class="text-muted">
 							<LocaleText t="Peers Data Usage"></LocaleText>
@@ -577,7 +590,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
+				<div class="card rounded-3 bg-transparent " style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">
 						<LocaleText t="Real Time Received Data Usage"></LocaleText>
 					</small></div>
@@ -591,7 +604,7 @@ export default {
 				</div>
 			</div>
 			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent shadow-sm" style="height: 270px">
+				<div class="card rounded-3 bg-transparent " style="height: 270px">
 					<div class="card-header bg-transparent border-0"><small class="text-muted">
 						<LocaleText t="Real Time Sent Data Usage"></LocaleText>
 					</small></div>
@@ -606,7 +619,7 @@ export default {
 			</div>
 		</div>
 		<hr>
-		<div class="mb-3">
+		<div style="margin-bottom: 80px">
 			<PeerSearch
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
@@ -629,8 +642,31 @@ export default {
 					></Peer>
 				</div>
 			</TransitionGroup>
-			
 		</div>
+		<div class="fixed-bottom w-100 bottom-0 z-2 animate__animated animate__slideInUp" style="z-index: 1; animation-delay: 0.5s">
+			<div class="container-fluid">
+				<div class="row g-0">
+					<div class="col-md-3 col-lg-2"></div>
+					<div class="col-md-9 col-lg-10 d-flex justify-content-center py-2">
+						<div class="rounded-3 p-2 border shadow searchPeersContainer">
+							<div class="d-flex gap-3 align-items-center ps-2">
+								<h6 class="mb-0 ms-auto">
+									<label for="searchPeers">
+										<i class="bi bi-search"></i>
+									</label>
+								</h6>
+								<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "
+								       :placeholder="searchBarPlaceholder"
+								       id="searchPeers"
+								       @keyup="this.debounce()"
+								       v-model="this.searchString">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 		<Transition name="zoom">
 			<PeerSettings v-if="this.peerSetting.modalOpen"
 			              key="settings"
@@ -731,6 +767,17 @@ th, td{
 @media screen and (max-width: 576px) {
 	.titleBtn{
 		flex-basis: 100%;
+	}
+}
+
+.searchPeersContainer{
+	width: 100%;
+	backdrop-filter: blur(10px);
+}
+
+@media screen and (min-width: 768px){
+	.searchPeersContainer{
+		width: 400px;
 	}
 }
 </style>

@@ -89,30 +89,30 @@ export default {
 </script>
 
 <template>
-	<div class="d-flex flex-column gap-2 mb-3">
-		<div class="d-flex gap-3 align-items-center">
-			<h6 class="mb-0 ms-auto">
-				<label for="searchPeers">
-					<i class="bi bi-search"></i>
-				</label>
-			</h6>
-			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle shadow-sm"
-			       :placeholder="searchBarPlaceholder"
-			       id="searchPeers"
-			       @keyup="this.debounce()"
-			       v-model="this.searchString">
-		</div>
-		<div class="d-flex gap-2 z-3 peerSearchContainer">
+	<div class="d-flex flex-column gap-2 my-4">
+<!--		<div class="d-flex gap-3 align-items-center">-->
+<!--			<h6 class="mb-0 ms-auto">-->
+<!--				<label for="searchPeers">-->
+<!--					<i class="bi bi-search"></i>-->
+<!--				</label>-->
+<!--			</h6>-->
+<!--			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "-->
+<!--			       :placeholder="searchBarPlaceholder"-->
+<!--			       id="searchPeers"-->
+<!--			       @keyup="this.debounce()"-->
+<!--			       v-model="this.searchString">-->
+<!--		</div>-->
+		<div class="d-flex gap-2 peerSearchContainer">
 			
 			<div class="dropdown">
 				<button
 					data-bs-toggle="dropdown"
-					class="btn w-100 btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm position-relative">
+					class="btn w-100 btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  position-relative">
 					<i class="bi bi-sort-up me-2"></i>
 					<LocaleText t="Sort By"></LocaleText>
 					<span class="badge text-bg-primary ms-2">{{this.sort[store.Configuration.Server.dashboard_sort]}}</span>
 				</button>
-				<ul class="dropdown-menu rounded-3 shadow">
+				<ul class="dropdown-menu rounded-3 ">
 					<li v-for="(value, key) in this.sort" >
 						<button class="dropdown-item d-flex align-items-center" @click="this.updateSort(key)">
 							<small>
@@ -129,12 +129,12 @@ export default {
 			<div class="dropdown">
 				<button
 					data-bs-toggle="dropdown"
-					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm position-relative">
+					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  position-relative">
 					<i class="bi bi-arrow-repeat me-2"></i>
 					<LocaleText t="Refresh Interval"></LocaleText>
 					<span class="badge text-bg-primary ms-2">{{this.interval[store.Configuration.Server.dashboard_refresh_interval]}}</span>
 				</button>
-				<ul class="dropdown-menu rounded-3 shadow">
+				<ul class="dropdown-menu rounded-3 ">
 					<li v-for="(value, key) in this.interval" >
 						<button class="dropdown-item d-flex align-items-center" @click="this.updateRefreshInterval(key)">
 							<small>
@@ -149,17 +149,17 @@ export default {
 
 				</ul>
 			</div>
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm ms-lg-auto"
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  ms-lg-auto"
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i>
 				<LocaleText t="Download All"></LocaleText>
 			</button>
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 			        @click="this.$emit('selectPeers')">
 				<i class="bi bi-check2-all me-2"></i>
 				<LocaleText t="Select Peers"></LocaleText>
 			</button>
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle shadow-sm"
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 			        @click="this.$emit('jobsAll')"
 			        type="button" aria-expanded="false">
 				<i class="bi bi-person-walking me-2"></i>
@@ -206,7 +206,7 @@ export default {
 }
 
 
-button{
+.peerSearchContainer > button, .peerSearchContainer .dropdown > button{
 	text-align: left;
 	display: flex;
 	align-items: center;
