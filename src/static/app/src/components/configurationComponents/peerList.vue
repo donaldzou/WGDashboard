@@ -36,9 +36,11 @@ import {defineAsyncComponent, ref} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import PeerRow from "@/components/configurationComponents/peerRow.vue";
 import {GetLocale} from "@/utilities/locale.js";
+import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vue";
 export default {
 	name: "peerList",
 	components: {
+		PeerSearchBar,
 		PeerRow,
 		DeleteConfiguration:
 			defineAsyncComponent(() => import("@/components/configurationComponents/deleteConfiguration.vue")),
@@ -150,6 +152,7 @@ export default {
 			deleteConfiguration: {
 				modalOpen: false
 			},
+			peerSearchBarShow: false,
 			searchStringTimeout: undefined,
 			searchString: "",
 		}
@@ -196,18 +199,6 @@ export default {
 				this.configurationInfo.Status = res.data
 				this.configurationToggling = false;
 			})
-		},
-		debounce(){
-			if (!this.searchStringTimeout){
-				this.searchStringTimeout = setTimeout(() => {
-					this.wireguardConfigurationStore.searchString = this.searchString;
-				}, 300)
-			}else{
-				clearTimeout(this.searchStringTimeout)
-				this.searchStringTimeout = setTimeout(() => {
-					this.wireguardConfigurationStore.searchString = this.searchString;
-				}, 300)
-			}
 		},
 		getPeers(id = this.$route.params.id){
 			fetchGet("/api/getWireguardConfigurationInfo",
@@ -387,9 +378,7 @@ export default {
 				}
 			}
 		},
-		searchBarPlaceholder(){
-			return GetLocale("Search Peers...")
-		},
+		
 		searchPeers(){
 			const fuse = new Fuse(this.configurationPeers, {
 				keys: ["name", "id", "allowed_ip"]
@@ -621,6 +610,7 @@ export default {
 		<hr>
 		<div style="margin-bottom: 80px">
 			<PeerSearch
+				@search="this.peerSearchBarShow = true"
 				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
 				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
 				@editConfiguration="this.editConfiguration.modalOpen = true"
@@ -643,29 +633,11 @@ export default {
 				</div>
 			</TransitionGroup>
 		</div>
-		<div class="fixed-bottom w-100 bottom-0 z-2 animate__animated animate__slideInUp" style="z-index: 1; animation-delay: 0.5s">
-			<div class="container-fluid">
-				<div class="row g-0">
-					<div class="col-md-3 col-lg-2"></div>
-					<div class="col-md-9 col-lg-10 d-flex justify-content-center py-2">
-						<div class="rounded-3 p-2 border shadow searchPeersContainer">
-							<div class="d-flex gap-3 align-items-center ps-2">
-								<h6 class="mb-0 ms-auto">
-									<label for="searchPeers">
-										<i class="bi bi-search"></i>
-									</label>
-								</h6>
-								<input class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "
-								       :placeholder="searchBarPlaceholder"
-								       id="searchPeers"
-								       @keyup="this.debounce()"
-								       v-model="this.searchString">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<Transition name="slideUp">
+			<PeerSearchBar 
+				@close="peerSearchBarShow = false"
+				v-if="this.peerSearchBarShow"></PeerSearchBar>
+		</Transition>
 		
 		<Transition name="zoom">
 			<PeerSettings v-if="this.peerSetting.modalOpen"
@@ -770,14 +742,17 @@ th, td{
 	}
 }
 
-.searchPeersContainer{
-	width: 100%;
-	backdrop-filter: blur(10px);
+.slideUp-enter-active,
+.slideUp-leave-active{
+	transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
 
-@media screen and (min-width: 768px){
-	.searchPeersContainer{
-		width: 400px;
-	}
+.slideUp-enter-from,
+.slideUp-leave-to {
+	transform: translateY(100%);
+	filter: blur(3px);
 }
+
+
+
 </style>

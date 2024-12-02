@@ -149,7 +149,12 @@ export default {
 
 				</ul>
 			</div>
-			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  ms-lg-auto"
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ms-lg-auto"
+			        @click="this.$emit('search')">
+				<i class="bi bi-search me-2"></i>
+				<LocaleText t="Search"></LocaleText>
+			</button>
+			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"
 			        @click="this.downloadAllPeer()">
 				<i class="bi bi-download me-2"></i>
 				<LocaleText t="Download All"></LocaleText>
