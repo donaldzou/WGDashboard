@@ -2665,6 +2665,8 @@ def AmneziaWGEnabled():
     return which('awg') is not None and which('awg-quick') is not None
 
 def InitWireguardConfigurationsList(startup: bool = False):
+    print(AmneziaWGEnabled())
+    
     confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     confs.sort()
     for i in confs:
