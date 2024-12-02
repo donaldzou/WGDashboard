@@ -796,12 +796,12 @@ class WireguardConfiguration:
                     with open(uid, "w+") as f:
                         f.write(p['preshared_key'])
                 
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
+                subprocess.check_output(f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist:
                     os.remove(uid)
             subprocess.check_output(
-                f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+                f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             self.getPeersList()
             return True
         except Exception as e:
@@ -833,7 +833,7 @@ class WireguardConfiguration:
                     with open(uid, "w+") as f:
                         f.write(p['preshared_key'])
                         
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
+                subprocess.check_output(f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist: os.remove(uid)
             else:
@@ -853,7 +853,7 @@ class WireguardConfiguration:
             found, pf = self.searchPeer(p)
             if found:
                 try:
-                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                    subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
                     sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
@@ -884,7 +884,7 @@ class WireguardConfiguration:
             found, pf = self.searchPeer(p)
             if found:
                 try:
-                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                    subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
                     sqlUpdate("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
                     numOfDeletedPeers += 1
@@ -903,7 +903,7 @@ class WireguardConfiguration:
 
     def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:
         try:
-            subprocess.check_output(f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             return True, None
         except subprocess.CalledProcessError as e:
             return False, str(e)
@@ -912,7 +912,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            latestHandshake = subprocess.check_output(f"wg show {self.Name} latest-handshakes",
+            latestHandshake = subprocess.check_output(f"{self.Protocol} show {self.Name} latest-handshakes",
                                                       shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             return "stopped"
@@ -938,7 +938,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            data_usage = subprocess.check_output(f"wg show {self.Name} transfer",
+            data_usage = subprocess.check_output(f"{self.Protocol} show {self.Name} transfer",
                                                  shell=True, stderr=subprocess.STDOUT)
             data_usage = data_usage.decode("UTF-8").split("\n")
             data_usage = [p.split("\t") for p in data_usage]
@@ -979,7 +979,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            data_usage = subprocess.check_output(f"wg show {self.Name} endpoints",
+            data_usage = subprocess.check_output(f"{self.Protocol} show {self.Name} endpoints",
                                                  shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             return "stopped"
@@ -994,13 +994,13 @@ class WireguardConfiguration:
         self.getStatus()
         if self.Status:
             try:
-                check = subprocess.check_output(f"wg-quick down {self.Name}",
+                check = subprocess.check_output(f"{self.Protocol}-quick down {self.Name}",
                                                 shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         else:
             try:
-                check = subprocess.check_output(f"wg-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
+                check = subprocess.check_output(f"{self.Protocol}-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         self.__parseConfigurationFile()
@@ -1035,7 +1035,8 @@ class WireguardConfiguration:
                 "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
-            "TotalPeers": len(self.Peers)
+            "TotalPeers": len(self.Peers),
+            "Protocol": self.Protocol
         }
     
     def backupConfigurationFile(self):
@@ -1224,6 +1225,38 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         
         super().__init__(name, data, backup, startup, wg=False)
 
+    def toJson(self):
+        self.Status = self.getStatus()
+        return {
+            "Status": self.Status,
+            "Name": self.Name,
+            "PrivateKey": self.PrivateKey,
+            "PublicKey": self.PublicKey,
+            "Address": self.Address,
+            "ListenPort": self.ListenPort,
+            "PreUp": self.PreUp,
+            "PreDown": self.PreDown,
+            "PostUp": self.PostUp,
+            "PostDown": self.PostDown,
+            "SaveConfig": self.SaveConfig,
+            "DataUsage": {
+                "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
+                "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
+                "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
+            },
+            "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
+            "TotalPeers": len(self.Peers),
+            "Protocol": self.Protocol,
+            "Jc": self.Jc,
+            "Jmin": self.Jmin,
+            "Jmax": self.Jmax,
+            "S1": self.S1,
+            "S2": self.S2,
+            "H1": self.H1,
+            "H2": self.H2,
+            "H3": self.H3,
+            "H4": self.H4
+        }
 """
 Peer
 """      
@@ -1298,7 +1331,7 @@ class Peer:
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"wg set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
                 shell=True, stderr=subprocess.STDOUT)
             
             if pskExist: os.remove(uid)
@@ -1306,7 +1339,7 @@ class Peer:
             if len(updateAllowedIp.decode().strip("\n")) != 0:
                 return ResponseObject(False,
                                       "Update peer failed when updating Allowed IPs")
-            saveConfig = subprocess.check_output(f"wg-quick save {self.configuration.Name}",
+            saveConfig = subprocess.check_output(f"{self.configuration.Protocol}-quick save {self.configuration.Name}",
                                                  shell=True, stderr=subprocess.STDOUT)
             if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
                 return ResponseObject(False,
@@ -2626,6 +2659,11 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
+def AmneziaWGEnabled():
+    from shutil import which
+    
+    return which('awg') is not None and which('awg-quick') is not None
+
 def InitWireguardConfigurationsList(startup: bool = False):
     confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     confs.sort()
@@ -2641,19 +2679,22 @@ def InitWireguardConfigurationsList(startup: bool = False):
             except WireguardConfiguration.InvalidConfigurationFileException as e:
                 print(f"{i} have an invalid configuration file.")
 
-    confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
-    confs.sort()
-    for i in confs:
-        if RegexMatch("^(.{1,}).(conf)$", i):
-            i = i.replace('.conf', '')
-            try:
-                if i in WireguardConfigurations.keys():
-                    if WireguardConfigurations[i].configurationFileChanged():
-                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(i)
-                else:
-                    WireguardConfigurations[i] = AmneziaWireguardConfiguration(i, startup=startup)
-            except WireguardConfigurations.InvalidConfigurationFileException as e:
-                print(f"{i} have an invalid configuration file.")
+    if AmneziaWGEnabled():
+        confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
+        confs.sort()
+        for i in confs:
+            if RegexMatch("^(.{1,}).(conf)$", i):
+                i = i.replace('.conf', '')
+                try:
+                    if i in WireguardConfigurations.keys():
+                        if WireguardConfigurations[i].configurationFileChanged():
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(i)
+                    else:
+                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(i, startup=startup)
+                except WireguardConfigurations.InvalidConfigurationFileException as e:
+                    print(f"{i} have an invalid configuration file.")
+    else:
+        print("AmneziaWG is not installed")
 
 def InitAmneziaWireguardConfigurationsList(startup: bool = False):
     pass
