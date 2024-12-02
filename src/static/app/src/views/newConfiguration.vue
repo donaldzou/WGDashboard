@@ -24,7 +24,8 @@ export default {
 				PreUp: "",
 				PreDown: "",
 				PostUp: "",
-				PostDown: ""
+				PostDown: "",
+				Protocol: "wg"
 			},
 			numberOfAvailableIPs: "0",
 			error: false,
@@ -143,6 +144,34 @@ export default {
 			<form class="text-body d-flex flex-column gap-3"
 				@submit="(e) => {e.preventDefault(); this.saveNewConfiguration();}"
 			>
+				<div class="card rounded-3 shadow">
+					<div class="card-header">
+						<LocaleText t="Protocol"></LocaleText>
+					</div>
+					<div class="card-body d-flex gap-2 protocolBtnGroup">
+						<a 
+							@click="this.newConfiguration.Protocol = 'wg'"
+							:class="{'opacity-50': this.newConfiguration.Protocol !== 'wg'}"
+							class="btn btn-primary wireguardBg border-0 " style="flex-basis: 100%">
+							<i class="bi bi-check-circle-fill me-2" v-if="this.newConfiguration.Protocol === 'wg'"></i>
+							<i class="bi bi-circle me-2" v-else></i>
+							<strong>
+								WireGuard
+							</strong>
+						</a>
+						<a
+							@click="this.newConfiguration.Protocol = 'awg'"
+							:class="{'opacity-50': this.newConfiguration.Protocol !== 'awg'}"
+							class="btn btn-primary amneziawgBg border-0" style="flex-basis: 100%">
+							<i class="bi bi-check-circle-fill me-2" v-if="this.newConfiguration.Protocol === 'awg'"></i>
+							<i class="bi bi-circle me-2" v-else></i>
+							<strong>
+								AmneziaWG
+							</strong>
+						</a>
+					</div>
+				</div>
+				
 				<div class="card rounded-3 shadow">
 					<div class="card-header">
 						<LocaleText t="Configuration Name"></LocaleText>
@@ -303,5 +332,7 @@ export default {
 </template>
 
 <style scoped>
-
+.protocolBtnGroup a{
+	transition: all 0.2s ease-in-out;
+}
 </style>

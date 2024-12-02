@@ -666,7 +666,7 @@ class WireguardConfiguration:
         s, d = DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
         return self.Name in d
 
-    def __getRestrictedPeers(self):
+    def getRestrictedPeers(self):
         self.RestrictedPeers = []
         restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
         for i in restricted:
@@ -1012,7 +1012,7 @@ class WireguardConfiguration:
         return self.Peers
 
     def getRestrictedPeersList(self) -> list:
-        self.__getRestrictedPeers()
+        self.getRestrictedPeers()
         return self.RestrictedPeers
 
     def toJson(self):
@@ -1382,11 +1382,11 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                                         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
                                     """ % self.Name
                                     , newPeer)
-                                self.Peers.append(Peer(newPeer, self))
+                                self.Peers.append(AmneziaWGPeer(newPeer, self))
                             else:
                                 sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
                                           (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
-                                self.Peers.append(Peer(checkIfExist, self))
+                                self.Peers.append(AmneziaWGPeer(checkIfExist, self))
                 except Exception as e:
                     if __name__ == '__main__':
                         print(f"[WGDashboard] {self.Name} Error: {str(e)}")
@@ -1394,7 +1394,68 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             self.Peers.clear()
             checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
             for i in checkIfExist:
-                self.Peers.append(Peer(i, self))
+                self.Peers.append(AmneziaWGPeer(i, self))
+
+    def addPeers(self, peers: list):
+        try:
+            for i in peers:
+                newPeer = {
+                    "id": i['id'],
+                    "private_key": i['private_key'],
+                    "DNS": i['DNS'],
+                    "endpoint_allowed_ip": i['endpoint_allowed_ip'],
+                    "name": i['name'],
+                    "total_receive": 0,
+                    "total_sent": 0,
+                    "total_data": 0,
+                    "endpoint": "N/A",
+                    "status": "stopped",
+                    "latest_handshake": "N/A",
+                    "allowed_ip": i.get("allowed_ip", "N/A"),
+                    "cumu_receive": 0,
+                    "cumu_sent": 0,
+                    "cumu_data": 0,
+                    "traffic": [],
+                    "mtu": i['mtu'],
+                    "keepalive": i['keepalive'],
+                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                    "preshared_key": i["preshared_key"],
+                    "advanced_security": i['advanced_security']
+                }
+                sqlUpdate(
+                    """
+                    INSERT INTO '%s'
+                        VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                    """ % self.Name
+                    , newPeer)
+            for p in peers:
+                presharedKeyExist = len(p['preshared_key']) > 0
+                rd = random.Random()
+                uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
+                if presharedKeyExist:
+                    with open(uid, "w+") as f:
+                        f.write(p['preshared_key'])
+
+                subprocess.check_output(
+                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''} advanced-security {p['advanced_security']}",
+                                        shell=True, stderr=subprocess.STDOUT)
+                if presharedKeyExist:
+                    os.remove(uid)
+            subprocess.check_output(
+                f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            self.getPeersList()
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
+
+    def getRestrictedPeers(self):
+        self.RestrictedPeers = []
+        restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
+        for i in restricted:
+            self.RestrictedPeers.append(AmneziaWGPeer(i, self))
     
 """
 Peer
@@ -1422,8 +1483,8 @@ class Peer:
         self.remote_endpoint = tableData["remote_endpoint"]
         self.preshared_key = tableData["preshared_key"]
         
-        if configuration.Protocol == "awg":
-            self.advanced_security = tableData["advanced_security"]
+        
+            
         
         self.jobs: list[PeerJob] = []
         self.ShareLink: list[PeerShareLink] = []
@@ -1516,6 +1577,7 @@ MTU = {str(self.mtu)}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
+        
         peerConfiguration += f'''
 [Peer]
 PublicKey = {self.configuration.PublicKey}
@@ -1549,7 +1611,116 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             return False
         return True
+    
+class AmneziaWGPeer(Peer):
+    def __init__(self, tableData, configuration: AmneziaWireguardConfiguration):
+        self.advanced_security = tableData["advanced_security"]
+        super().__init__(tableData, configuration)
 
+    def downloadPeer(self) -> dict[str, str]:
+        filename = self.name
+        if len(filename) == 0:
+            filename = "UntitledPeer"
+        filename = "".join(filename.split(' '))
+        filename = f"{filename}_{self.configuration.Name}"
+        illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
+                            "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
+                            "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+        for i in illegal_filename:
+            filename = filename.replace(i, "")
+
+        peerConfiguration = f'''[Interface]
+PrivateKey = {self.private_key}
+Address = {self.allowed_ip}
+MTU = {str(self.mtu)}
+Jc = {self.configuration.Jc}
+Jmin = {self.configuration.Jmin}
+Jmax = {self.configuration.Jmax}
+S1 = {self.configuration.S1}
+S2 = {self.configuration.S2}
+H1 = {self.configuration.H1}
+H2 = {self.configuration.H2}
+H3 = {self.configuration.H3}
+H4 = {self.configuration.H4}
+'''
+        if len(self.DNS) > 0:
+            peerConfiguration += f"DNS = {self.DNS}\n"
+
+        peerConfiguration += f'''
+[Peer]
+PublicKey = {self.configuration.PublicKey}
+AllowedIPs = {self.endpoint_allowed_ip}
+Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
+PersistentKeepalive = {str(self.keepalive)}
+'''
+        if len(self.preshared_key) > 0:
+            peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
+        return {
+            "fileName": filename,
+            "file": peerConfiguration
+        }
+
+    def updatePeer(self, name: str, private_key: str,
+                   preshared_key: str,
+                   dns_addresses: str, allowed_ip: str, endpoint_allowed_ip: str, mtu: int,
+                   keepalive: int, advanced_security: str) -> ResponseObject:
+        if not self.configuration.getStatus():
+            self.configuration.toggleConfiguration()
+
+        existingAllowedIps = [item for row in list(
+            map(lambda x: [q.strip() for q in x.split(',')],
+                map(lambda y: y.allowed_ip,
+                    list(filter(lambda k: k.id != self.id, self.configuration.getPeersList()))))) for item in row]
+
+        if allowed_ip in existingAllowedIps:
+            return ResponseObject(False, "Allowed IP already taken by another peer")
+        if not ValidateIPAddressesWithRange(endpoint_allowed_ip):
+            return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect")
+        if len(dns_addresses) > 0 and not ValidateDNSAddress(dns_addresses):
+            return ResponseObject(False, f"DNS format is incorrect")
+        if mtu < 0 or mtu > 1460:
+            return ResponseObject(False, "MTU format is not correct")
+        if keepalive < 0:
+            return ResponseObject(False, "Persistent Keepalive format is not correct")
+        if advanced_security != "on" and advanced_security != "off":
+            return ResponseObject(False, "Advanced Security can only be on or off")
+        if len(private_key) > 0:
+            pubKey = GenerateWireguardPublicKey(private_key)
+            if not pubKey[0] or pubKey[1] != self.id:
+                return ResponseObject(False, "Private key does not match with the public key")
+        try:
+            rd = random.Random()
+            uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
+            pskExist = len(preshared_key) > 0
+
+            if pskExist:
+                with open(uid, "w+") as f:
+                    f.write(preshared_key)
+            newAllowedIPs = allowed_ip.replace(" ", "")
+            updateAllowedIp = subprocess.check_output(
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''} advanced-security {advanced_security}",
+                shell=True, stderr=subprocess.STDOUT)
+
+            if pskExist: os.remove(uid)
+
+            if len(updateAllowedIp.decode().strip("\n")) != 0:
+                return ResponseObject(False,
+                                      "Update peer failed when updating Allowed IPs")
+            saveConfig = subprocess.check_output(f"{self.configuration.Protocol}-quick save {self.configuration.Name}",
+                                                 shell=True, stderr=subprocess.STDOUT)
+            if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
+                return ResponseObject(False,
+                                      "Update peer failed when saving the configuration")
+            sqlUpdate(
+                '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
+                keepalive = ?, preshared_key = ?, advanced_security = ?  WHERE id = ?''' % self.configuration.Name,
+                (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
+                 keepalive, preshared_key, advanced_security, self.id,)
+            )
+            return ResponseObject()
+        except subprocess.CalledProcessError as exc:
+            return ResponseObject(False, exc.output.decode("UTF-8").strip())
+    
 """
 Dashboard API Key
 """
@@ -2161,8 +2332,13 @@ def API_updatePeerSettings(configName):
         wireguardConfig = WireguardConfigurations[configName]
         foundPeer, peer = wireguardConfig.searchPeer(id)
         if foundPeer:
+            if wireguardConfig.Protocol == 'wg':
+                return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
+                                       allowed_ip, endpoint_allowed_ip, mtu, keepalive)
+            
             return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                                   allowed_ip, endpoint_allowed_ip, mtu, keepalive)
+                allowed_ip, endpoint_allowed_ip, mtu, keepalive, data.get('advanced_security', 'off'))
+            
     return ResponseObject(False, "Peer does not exist")
 
 @app.post(f'{APP_PREFIX}/api/resetPeerData/<configName>')
@@ -2325,7 +2501,8 @@ def API_addPeers(configName):
                         "DNS": dns_addresses,
                         "endpoint_allowed_ip": endpoint_allowed_ip,
                         "mtu": mtu,
-                        "keepalive": keep_alive
+                        "keepalive": keep_alive,
+                        "advanced_security": data.get("advanced_security", "off")
                     })
                 if len(keyPairs) == 0:
                     return ResponseObject(False, "Generating key pairs by bulk failed")
@@ -2352,7 +2529,8 @@ def API_addPeers(configName):
                         "endpoint_allowed_ip": endpoint_allowed_ip,
                         "DNS": dns_addresses,
                         "mtu": mtu,
-                        "keepalive": keep_alive
+                        "keepalive": keep_alive,
+                        "advanced_security": data.get("advanced_security", "off")
                     }]
                 )
                 return ResponseObject(status)
