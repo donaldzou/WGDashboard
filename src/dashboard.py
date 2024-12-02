@@ -468,7 +468,7 @@ class WireguardConfiguration:
         self.SaveConfig: bool = True
         self.Name = name
         self.Protocol = "wg" if wg else "awg"
-        self.__configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf') if wg else os.path.join(DashboardConfig.GetConfig("Server", "awg_conf_path")[1], f'{self.Name}.conf')
+        self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf') if wg else os.path.join(DashboardConfig.GetConfig("Server", "awg_conf_path")[1], f'{self.Name}.conf')
         
         if name is not None:
             if data is not None and "Backup" in data.keys():
@@ -478,14 +478,14 @@ class WireguardConfiguration:
                         'WGDashboard_Backup',
                         data["Backup"].replace(".conf", ".sql")))
             else:
-                self.__createDatabase()
+                self.createDatabase()
             
             self.__parseConfigurationFile()
             self.__initPeersList()
             
         else:
             self.Name = data["ConfigurationName"]
-            self.__configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
+            self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
             
             for i in dir(self):
                 if str(i) in data.keys():
@@ -506,8 +506,8 @@ class WireguardConfiguration:
             }
             
             if "Backup" not in data.keys():
-                self.__createDatabase()
-                with open(self.__configPath, "w+") as configFile:
+                self.createDatabase()
+                with open(self.configPath, "w+") as configFile:
                     self.__parser.write(configFile)
                 self.__initPeersList()
         
@@ -526,7 +526,7 @@ class WireguardConfiguration:
         self.getRestrictedPeersList()
     
     def __parseConfigurationFile(self):
-        with open(self.__configPath, 'r') as f:
+        with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
             try:
                 start = original.index("[Interface]")
@@ -562,7 +562,7 @@ class WireguardConfiguration:
                                     setattr(self, key, value)  
             except ValueError as e:
                 raise self.InvalidConfigurationFileException(
-                        "[Interface] section not found in " + self.__configPath)
+                        "[Interface] section not found in " + self.configPath)
             if self.PrivateKey:
                 self.PublicKey = self.__getPublicKey()
             self.Status = self.getStatus()
@@ -574,7 +574,7 @@ class WireguardConfiguration:
 
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
-    def __createDatabase(self, dbName = None):
+    def createDatabase(self, dbName = None):
         if dbName is None:
             dbName = self.Name
         
@@ -645,7 +645,7 @@ class WireguardConfiguration:
                 
     def __importDatabase(self, sqlFilePath) -> bool:
         self.__dropDatabase()
-        self.__createDatabase()
+        self.createDatabase()
         if not os.path.exists(sqlFilePath):
             return False
         with open(sqlFilePath, 'r') as f:
@@ -673,15 +673,15 @@ class WireguardConfiguration:
             self.RestrictedPeers.append(Peer(i, self))
             
     def configurationFileChanged(self) :
-        mt = os.path.getmtime(self.__configPath)
+        mt = os.path.getmtime(self.configPath)
         changed = self.__configFileModifiedTime is None or self.__configFileModifiedTime != mt
         self.__configFileModifiedTime = mt
         return changed
         
-    def __getPeers(self):
+    def getPeers(self):
         if self.configurationFileChanged():
             self.Peers = []
-            with open(self.__configPath, 'r') as configFile:
+            with open(self.configPath, 'r') as configFile:
                 p = []
                 pCounter = -1
                 content = configFile.read().split('\n')
@@ -841,7 +841,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
         return ResponseObject(True, "Allow access successfully")
 
     def restrictPeers(self, listOfPublicKeys):
@@ -867,7 +867,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
 
         if numOfRestrictedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Restricted {numOfRestrictedPeers} peer(s)")
@@ -894,7 +894,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
 
         if numOfDeletedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
@@ -1008,7 +1008,7 @@ class WireguardConfiguration:
         return True, None
 
     def getPeersList(self):
-        self.__getPeers()
+        self.getPeers()
         return self.Peers
 
     def getRestrictedPeersList(self) -> list:
@@ -1044,7 +1044,7 @@ class WireguardConfiguration:
             os.mkdir(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup'))
         time = datetime.now().strftime("%Y%m%d%H%M%S")
         shutil.copy(
-            self.__configPath,
+            self.configPath,
             os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f'{self.Name}_{time}.conf')
         )
         with open(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
@@ -1089,7 +1089,7 @@ class WireguardConfiguration:
             return False
         targetContent = open(target, 'r').read()
         try:
-            with open(self.__configPath, 'w') as f:
+            with open(self.configPath, 'w') as f:
                 f.write(targetContent)
         except Exception as e:
             return False
@@ -1114,7 +1114,7 @@ class WireguardConfiguration:
             self.toggleConfiguration()
         original = []
         dataChanged = False
-        with open(self.__configPath, 'r') as f:
+        with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
             allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
             start = original.index("[Interface]")
@@ -1135,7 +1135,7 @@ class WireguardConfiguration:
             for line in range(end, len(original)):
                 new.append(original[line])            
             self.backupConfigurationFile()
-            with open(self.__configPath, 'w') as f:
+            with open(self.configPath, 'w') as f:
                 f.write("\n".join(new))
                 
         status, msg = self.toggleConfiguration()        
@@ -1146,7 +1146,7 @@ class WireguardConfiguration:
     def deleteConfiguration(self):
         if self.getStatus():
             self.toggleConfiguration()
-        os.remove(self.__configPath)
+        os.remove(self.configPath)
         self.__dropDatabase()
         return True
     
@@ -1156,14 +1156,14 @@ class WireguardConfiguration:
         try:
             if self.getStatus():
                 self.toggleConfiguration()
-            self.__createDatabase(newConfigurationName)
+            self.createDatabase(newConfigurationName)
             sqlUpdate(f'INSERT INTO "{newConfigurationName}" SELECT * FROM "{self.Name}"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_restrict_access" SELECT * FROM "{self.Name}_restrict_access"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_deleted" SELECT * FROM "{self.Name}_deleted"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_transfer" SELECT * FROM "{self.Name}_transfer"')
             AllPeerJobs.updateJobConfigurationName(self.Name, newConfigurationName)
             shutil.copy(
-                self.__configPath,
+                self.configPath,
                 os.path.join(self.__getProtocolPath(), f'{newConfigurationName}.conf')
             )
             self.deleteConfiguration()
@@ -1257,6 +1257,145 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             "H3": self.H3,
             "H4": self.H4
         }
+
+    def createDatabase(self, dbName = None):
+        if dbName is None:
+            dbName = self.Name
+
+        existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        existingTables = [t['name'] for t in existingTables]
+        if dbName not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s'(
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+
+        if f'{dbName}_restrict_access' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_restrict_access' (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL, 
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+        if f'{dbName}_transfer' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_transfer' (
+                    id VARCHAR NOT NULL, total_receive FLOAT NULL,
+                    total_sent FLOAT NULL, total_data FLOAT NULL,
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
+                )
+                """ % dbName
+            )
+        if f'{dbName}_deleted' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_deleted' (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+
+    def getPeers(self):
+        if self.configurationFileChanged():
+            self.Peers = []
+            with open(self.configPath, 'r') as configFile:
+                p = []
+                pCounter = -1
+                content = configFile.read().split('\n')
+                try:
+                    peerStarts = content.index("[Peer]")
+                    content = content[peerStarts:]
+                    for i in content:
+                        if not RegexMatch("#(.*)", i) and not RegexMatch(";(.*)", i):
+                            if i == "[Peer]":
+                                pCounter += 1
+                                p.append({})
+                                p[pCounter]["name"] = ""
+                            else:
+                                if len(i) > 0:
+                                    split = re.split(r'\s*=\s*', i, 1)
+                                    if len(split) == 2:
+                                        p[pCounter][split[0]] = split[1]
+
+                        if RegexMatch("#Name# = (.*)", i):
+                            split = re.split(r'\s*=\s*', i, 1)
+                            if len(split) == 2:
+                                p[pCounter]["name"] = split[1]
+
+                    for i in p:
+                        if "PublicKey" in i.keys():
+                            checkIfExist = sqlSelect("SELECT * FROM '%s' WHERE id = ?" % self.Name,
+                                                     ((i['PublicKey']),)).fetchone()
+                            if checkIfExist is None:
+                                newPeer = {
+                                    "id": i['PublicKey'],
+                                    "advanced_security": i.get('AdvancedSecurity', 'off'),
+                                    "private_key": "",
+                                    "DNS": DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
+                                    "endpoint_allowed_ip": DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
+                                        1],
+                                    "name": i.get("name"),
+                                    "total_receive": 0,
+                                    "total_sent": 0,
+                                    "total_data": 0,
+                                    "endpoint": "N/A",
+                                    "status": "stopped",
+                                    "latest_handshake": "N/A",
+                                    "allowed_ip": i.get("AllowedIPs", "N/A"),
+                                    "cumu_receive": 0,
+                                    "cumu_sent": 0,
+                                    "cumu_data": 0,
+                                    "traffic": [],
+                                    "mtu": DashboardConfig.GetConfig("Peers", "peer_mtu")[1],
+                                    "keepalive": DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1],
+                                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                                    "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
+                                }
+                                sqlUpdate(
+                                    """
+                                    INSERT INTO '%s'
+                                        VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                                    """ % self.Name
+                                    , newPeer)
+                                self.Peers.append(Peer(newPeer, self))
+                            else:
+                                sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
+                                          (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
+                                self.Peers.append(Peer(checkIfExist, self))
+                except Exception as e:
+                    if __name__ == '__main__':
+                        print(f"[WGDashboard] {self.Name} Error: {str(e)}")
+        else:
+            self.Peers.clear()
+            checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
+            for i in checkIfExist:
+                self.Peers.append(Peer(i, self))
+    
 """
 Peer
 """      
@@ -1282,6 +1421,10 @@ class Peer:
         self.keepalive = tableData["keepalive"]
         self.remote_endpoint = tableData["remote_endpoint"]
         self.preshared_key = tableData["preshared_key"]
+        
+        if configuration.Protocol == "awg":
+            self.advanced_security = tableData["advanced_security"]
+        
         self.jobs: list[PeerJob] = []
         self.ShareLink: list[PeerShareLink] = []
         self.getJobs()
@@ -2664,9 +2807,7 @@ def AmneziaWGEnabled():
     
     return which('awg') is not None and which('awg-quick') is not None
 
-def InitWireguardConfigurationsList(startup: bool = False):
-    print(AmneziaWGEnabled())
-    
+def InitWireguardConfigurationsList(startup: bool = False):    
     confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     confs.sort()
     for i in confs:
@@ -2695,8 +2836,6 @@ def InitWireguardConfigurationsList(startup: bool = False):
                         WireguardConfigurations[i] = AmneziaWireguardConfiguration(i, startup=startup)
                 except WireguardConfigurations.InvalidConfigurationFileException as e:
                     print(f"{i} have an invalid configuration file.")
-    else:
-        print("AmneziaWG is not installed")
 
 def InitAmneziaWireguardConfigurationsList(startup: bool = False):
     pass
