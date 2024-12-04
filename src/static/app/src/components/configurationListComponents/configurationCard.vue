@@ -49,7 +49,17 @@ export default {
 	<div class="card conf_card rounded-3 shadow text-decoration-none">
 		<RouterLink :to="'/configuration/' + c.Name + '/peers'" class="card-body d-flex align-items-center gap-3 flex-wrap text-decoration-none">
 			<h6 class="mb-0"><span class="dot" :class="{active: c.Status}"></span></h6>
-			<h6 class="card-title mb-0"><samp>{{c.Name}}</samp></h6>
+			<h6 class="card-title mb-0 d-flex align-items-center gap-3">
+				<samp>{{c.Name}}</samp>
+				<small>
+					<span class="badge wireguardBg" v-if="c.Protocol === 'wg'">
+						WireGuard
+					</span>
+					<span class="badge amneziawgBg" v-else>
+						AmneziaWG
+					</span>
+				</small>
+			</h6>
 			<h6 class="mb-0 ms-auto">
 				<i class="bi bi-chevron-right"></i>
 			</h6>

@@ -67,6 +67,7 @@ const selectedConfiguration = ref("")
 									@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"
 									:selectedConfigurationBackup="selectedConfigurationBackup"
 									:open="selectedConfiguration === c"
+									:protocol="[...new Set(backups.NonExistingConfigurations[c].map(x => x.protocol))]"
 									v-for="c in Object.keys(backups.NonExistingConfigurations)"
 									:configuration-name="c" :backups="backups.NonExistingConfigurations[c]"></BackupGroup>
 								<div v-if="Object.keys(backups.NonExistingConfigurations).length === 0">

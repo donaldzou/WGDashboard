@@ -145,49 +145,61 @@ watch(data, () => {
 									       id="configuration_listen_port">
 
 								</div>
-								<div>
-									<label for="configuration_preup" class="form-label">
+								<div v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreUp"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
 									<input type="text" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreUp"
-									       id="configuration_preup">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
-								<div>
-									<label for="configuration_predown" class="form-label">
+<!--								<div>-->
+<!--									<label for="configuration_predown" class="form-label">-->
+<!--										<small class="text-muted">-->
+<!--											<LocaleText t="PreDown"></LocaleText>-->
+<!--										</small>-->
+<!--									</label>-->
+<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
+<!--									       :disabled="saving"-->
+<!--									       v-model="data.PreDown"-->
+<!--									       id="configuration_predown">-->
+<!--								</div>-->
+<!--								<div>-->
+<!--									<label for="configuration_postup" class="form-label">-->
+<!--										<small class="text-muted">-->
+<!--											<LocaleText t="PostUp"></LocaleText>-->
+<!--										</small>-->
+<!--									</label>-->
+<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
+<!--									       :disabled="saving"-->
+<!--									       v-model="data.PostUp"-->
+<!--									       id="configuration_postup">-->
+<!--								</div>-->
+<!--								<div>-->
+<!--									<label for="configuration_postdown" class="form-label">-->
+<!--										<small class="text-muted">-->
+<!--											<LocaleText t="PostDown"></LocaleText>-->
+<!--										</small>-->
+<!--									</label>-->
+<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
+<!--									       :disabled="saving"-->
+<!--									       v-model="data.PostDown"-->
+<!--									       id="configuration_postdown">-->
+<!--								</div>-->
+								<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']" 
+								     v-if="configurationInfo.Protocol === 'awg'">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreDown"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
+									<input type="number" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreDown"
-									       id="configuration_predown">
-								</div>
-								<div>
-									<label for="configuration_postup" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostUp"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostUp"
-									       id="configuration_postup">
-								</div>
-								<div>
-									<label for="configuration_postdown" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostDown"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostDown"
-									       id="configuration_postdown">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
 								<div class="d-flex align-items-center gap-2 mt-4">
 									<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"

@@ -81,6 +81,14 @@ export default {
 					<samp>{{Peer.allowed_ip}}</samp>
 				</small>
 			</div>
+			<div v-if="Peer.advanced_security">
+				<small class="text-muted">
+					<LocaleText t="Advanced Security"></LocaleText>
+				</small>
+				<small class="d-block">
+					<samp>{{Peer.advanced_security}}</samp>
+				</small>
+			</div>
 			<div class="d-flex align-items-end">
 				
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"

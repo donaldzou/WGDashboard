@@ -425,9 +425,16 @@ export default {
 	<div v-if="!this.loading" class="container-md">
 		<div class="d-flex align-items-sm-center flex-column flex-sm-row gap-3">
 			<div>
-				<small CLASS="text-muted">
-					<LocaleText t="CONFIGURATION"></LocaleText>
-				</small>
+				<div class="text-muted d-flex align-items-center gap-2">
+					<h5 class="mb-0">
+						<span class="badge wireguardBg rounded-3 shadow" v-if="this.configurationInfo.Protocol === 'wg'">
+							WireGuard <LocaleText t="Configuration"></LocaleText>
+						</span>
+						<span class="badge amneziawgBg rounded-3 shadow" v-else>
+							AmneziaWG <LocaleText t="Configuration"></LocaleText>
+						</span>
+					</h5>
+				</div>
 				<div class="d-flex align-items-center gap-3">
 					<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
 				</div>
@@ -496,6 +503,7 @@ export default {
 					</div>
 				</div>
 			</div>
+			
 			<div style="word-break: break-all" class="col-12 col-lg-6">
 				<div class="card rounded-3 bg-transparent   h-100">
 					<div class="card-body py-2 d-flex flex-column justify-content-center">

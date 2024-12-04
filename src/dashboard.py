@@ -445,7 +445,7 @@ class WireguardConfiguration:
         def __str__(self):
             return self.message
 
-    def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
+    def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False, wg: bool = True):
         
         
         self.__parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
@@ -467,24 +467,25 @@ class WireguardConfiguration:
         self.PostDown: str = ""
         self.SaveConfig: bool = True
         self.Name = name
-        self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
+        self.Protocol = "wg" if wg else "awg"
+        self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf') if wg else os.path.join(DashboardConfig.GetConfig("Server", "awg_conf_path")[1], f'{self.Name}.conf')
         
         if name is not None:
             if data is not None and "Backup" in data.keys():
                 db = self.__importDatabase(
                     os.path.join(
-                        DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
+                        self.__getProtocolPath(),
                         'WGDashboard_Backup',
                         data["Backup"].replace(".conf", ".sql")))
             else:
-                self.__createDatabase()
+                self.createDatabase()
             
             self.__parseConfigurationFile()
             self.__initPeersList()
             
         else:
             self.Name = data["ConfigurationName"]
-            self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
+            self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
             
             for i in dir(self):
                 if str(i) in data.keys():
@@ -504,10 +505,23 @@ class WireguardConfiguration:
                 "SaveConfig": "true"
             }
             
+            if self.Protocol == 'awg':
+                self.__parser["Interface"]["Jc"] = self.Jc
+                self.__parser["Interface"]["Jc"] = self.Jc 
+                self.__parser["Interface"]["Jmin"] = self.Jmin
+                self.__parser["Interface"]["Jmax"] = self.Jmax
+                self.__parser["Interface"]["S1"] = self.S1 
+                self.__parser["Interface"]["S2"] = self.S2 
+                self.__parser["Interface"]["H1"] = self.H1 
+                self.__parser["Interface"]["H2"] = self.H2 
+                self.__parser["Interface"]["H3"] = self.H3 
+                self.__parser["Interface"]["H4"] = self.H4 
+                
             if "Backup" not in data.keys():
-                self.__createDatabase()
-                with open(self.__configPath, "w+") as configFile:
+                self.createDatabase()
+                with open(self.configPath, "w+") as configFile:
                     self.__parser.write(configFile)
+                    print(f"[WGDashboard] Configuration file {self.configPath} created")
                 self.__initPeersList()
         
         print(f"[WGDashboard] Initialized Configuration: {name}")    
@@ -515,13 +529,17 @@ class WireguardConfiguration:
             self.toggleConfiguration()
             print(f"[WGDashboard] Autostart Configuration: {name}")
                            
+    def __getProtocolPath(self):
+        return DashboardConfig.GetConfig("Server", "wg_conf_path")[1] if self.Protocol == "wg" \
+            else DashboardConfig.GetConfig("Server", "awg_conf_path")[1]
+    
     def __initPeersList(self):
         self.Peers: list[Peer] = []
         self.getPeersList()
         self.getRestrictedPeersList()
     
     def __parseConfigurationFile(self):
-        with open(self.__configPath, 'r') as f:
+        with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
             try:
                 start = original.index("[Interface]")
@@ -557,7 +575,7 @@ class WireguardConfiguration:
                                     setattr(self, key, value)  
             except ValueError as e:
                 raise self.InvalidConfigurationFileException(
-                        "[Interface] section not found in " + self.__configPath)
+                        "[Interface] section not found in " + self.configPath)
             if self.PrivateKey:
                 self.PublicKey = self.__getPublicKey()
             self.Status = self.getStatus()
@@ -569,7 +587,7 @@ class WireguardConfiguration:
 
         existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
-    def __createDatabase(self, dbName = None):
+    def createDatabase(self, dbName = None):
         if dbName is None:
             dbName = self.Name
         
@@ -640,7 +658,7 @@ class WireguardConfiguration:
                 
     def __importDatabase(self, sqlFilePath) -> bool:
         self.__dropDatabase()
-        self.__createDatabase()
+        self.createDatabase()
         if not os.path.exists(sqlFilePath):
             return False
         with open(sqlFilePath, 'r') as f:
@@ -661,22 +679,22 @@ class WireguardConfiguration:
         s, d = DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
         return self.Name in d
 
-    def __getRestrictedPeers(self):
+    def getRestrictedPeers(self):
         self.RestrictedPeers = []
         restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
         for i in restricted:
             self.RestrictedPeers.append(Peer(i, self))
             
     def configurationFileChanged(self) :
-        mt = os.path.getmtime(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'))
+        mt = os.path.getmtime(self.configPath)
         changed = self.__configFileModifiedTime is None or self.__configFileModifiedTime != mt
         self.__configFileModifiedTime = mt
         return changed
         
-    def __getPeers(self):
+    def getPeers(self):
         if self.configurationFileChanged():
             self.Peers = []
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as configFile:
+            with open(self.configPath, 'r') as configFile:
                 p = []
                 pCounter = -1
                 content = configFile.read().split('\n')
@@ -791,12 +809,12 @@ class WireguardConfiguration:
                     with open(uid, "w+") as f:
                         f.write(p['preshared_key'])
                 
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
+                subprocess.check_output(f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist:
                     os.remove(uid)
             subprocess.check_output(
-                f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+                f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             self.getPeersList()
             return True
         except Exception as e:
@@ -828,7 +846,7 @@ class WireguardConfiguration:
                     with open(uid, "w+") as f:
                         f.write(p['preshared_key'])
                         
-                subprocess.check_output(f"wg set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
+                subprocess.check_output(f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist: os.remove(uid)
             else:
@@ -836,7 +854,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
         return ResponseObject(True, "Allow access successfully")
 
     def restrictPeers(self, listOfPublicKeys):
@@ -848,7 +866,7 @@ class WireguardConfiguration:
             found, pf = self.searchPeer(p)
             if found:
                 try:
-                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                    subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
                     sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
@@ -862,7 +880,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
 
         if numOfRestrictedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Restricted {numOfRestrictedPeers} peer(s)")
@@ -879,7 +897,7 @@ class WireguardConfiguration:
             found, pf = self.searchPeer(p)
             if found:
                 try:
-                    subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
+                    subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
                     sqlUpdate("DELETE FROM '%s' WHERE id = ?" % self.Name, (pf.id,))
                     numOfDeletedPeers += 1
@@ -889,7 +907,7 @@ class WireguardConfiguration:
         if not self.__wgSave():
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
-        self.__getPeers()
+        self.getPeers()
 
         if numOfDeletedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
@@ -898,7 +916,7 @@ class WireguardConfiguration:
 
     def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:
         try:
-            subprocess.check_output(f"wg-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            subprocess.check_output(f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             return True, None
         except subprocess.CalledProcessError as e:
             return False, str(e)
@@ -907,7 +925,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            latestHandshake = subprocess.check_output(f"wg show {self.Name} latest-handshakes",
+            latestHandshake = subprocess.check_output(f"{self.Protocol} show {self.Name} latest-handshakes",
                                                       shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             return "stopped"
@@ -933,7 +951,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            data_usage = subprocess.check_output(f"wg show {self.Name} transfer",
+            data_usage = subprocess.check_output(f"{self.Protocol} show {self.Name} transfer",
                                                  shell=True, stderr=subprocess.STDOUT)
             data_usage = data_usage.decode("UTF-8").split("\n")
             data_usage = [p.split("\t") for p in data_usage]
@@ -974,7 +992,7 @@ class WireguardConfiguration:
         if not self.getStatus():
             self.toggleConfiguration()
         try:
-            data_usage = subprocess.check_output(f"wg show {self.Name} endpoints",
+            data_usage = subprocess.check_output(f"{self.Protocol} show {self.Name} endpoints",
                                                  shell=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             return "stopped"
@@ -989,13 +1007,13 @@ class WireguardConfiguration:
         self.getStatus()
         if self.Status:
             try:
-                check = subprocess.check_output(f"wg-quick down {self.Name}",
+                check = subprocess.check_output(f"{self.Protocol}-quick down {self.Name}",
                                                 shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         else:
             try:
-                check = subprocess.check_output(f"wg-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
+                check = subprocess.check_output(f"{self.Protocol}-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         self.__parseConfigurationFile()
@@ -1003,11 +1021,11 @@ class WireguardConfiguration:
         return True, None
 
     def getPeersList(self):
-        self.__getPeers()
+        self.getPeers()
         return self.Peers
 
     def getRestrictedPeersList(self) -> list:
-        self.__getRestrictedPeers()
+        self.getRestrictedPeers()
         return self.RestrictedPeers
 
     def toJson(self):
@@ -1030,25 +1048,26 @@ class WireguardConfiguration:
                 "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
-            "TotalPeers": len(self.Peers)
+            "TotalPeers": len(self.Peers),
+            "Protocol": self.Protocol
         }
     
     def backupConfigurationFile(self):
-        if not os.path.exists(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')):
-            os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
+        if not os.path.exists(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')):
+            os.mkdir(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup'))
         time = datetime.now().strftime("%Y%m%d%H%M%S")
         shutil.copy(
-            self.__configPath,
-            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.conf')
+            self.configPath,
+            os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f'{self.Name}_{time}.conf')
         )
-        with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
+        with open(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
             for l in self.__dumpDatabase():
                 f.write(l + "\n")
         
     def getBackups(self, databaseContent: bool = False) -> list[dict[str: str, str: str, str: str]]:
         backups = []
         
-        directory = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
+        directory = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')
         files = [(file, os.path.getctime(os.path.join(directory, file)))
                  for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
         files.sort(key=lambda x: x[1], reverse=True)
@@ -1060,12 +1079,12 @@ class WireguardConfiguration:
                 d = {
                     "filename": f,
                     "backupDate": date,
-                    "content": open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
+                    "content": open(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f), 'r').read()
                 }
                 if f.replace(".conf", ".sql") in list(os.listdir(directory)):
                     d['database'] = True
                     if databaseContent:
-                        d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
+                        d['databaseContent'] = open(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
                 backups.append(d)
         
         return backups
@@ -1077,13 +1096,13 @@ class WireguardConfiguration:
         self.backupConfigurationFile()
         if self.Status:
             self.toggleConfiguration()
-        target = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', backupFileName)
-        targetSQL = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', backupFileName.replace(".conf", ".sql"))
+        target = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backupFileName)
+        targetSQL = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backupFileName.replace(".conf", ".sql"))
         if not os.path.exists(target):
             return False
         targetContent = open(target, 'r').read()
         try:
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
+            with open(self.configPath, 'w') as f:
                 f.write(targetContent)
         except Exception as e:
             return False
@@ -1098,7 +1117,7 @@ class WireguardConfiguration:
         if backupFileName not in backups:
             return False
         try:
-            os.remove(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', backupFileName))
+            os.remove(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backupFileName))
         except Exception as e:
             return False
         return True
@@ -1108,9 +1127,11 @@ class WireguardConfiguration:
             self.toggleConfiguration()
         original = []
         dataChanged = False
-        with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
+        with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
             allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
+            if self.Protocol == 'awg':
+                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
             start = original.index("[Interface]")
             try:
                 end = original.index("[Peer]")
@@ -1124,12 +1145,12 @@ class WireguardConfiguration:
                     if split[0] not in allowEdit:
                         new.append(original[line])
             for key in allowEdit:
-                new.insert(1, f"{key} = {newData[key].strip()}")
+                new.insert(1, f"{key} = {str(newData[key]).strip()}")
             new.append("")
             for line in range(end, len(original)):
                 new.append(original[line])            
             self.backupConfigurationFile()
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
+            with open(self.configPath, 'w') as f:
                 f.write("\n".join(new))
                 
         status, msg = self.toggleConfiguration()        
@@ -1140,7 +1161,7 @@ class WireguardConfiguration:
     def deleteConfiguration(self):
         if self.getStatus():
             self.toggleConfiguration()
-        os.remove(self.__configPath)
+        os.remove(self.configPath)
         self.__dropDatabase()
         return True
     
@@ -1150,15 +1171,15 @@ class WireguardConfiguration:
         try:
             if self.getStatus():
                 self.toggleConfiguration()
-            self.__createDatabase(newConfigurationName)
+            self.createDatabase(newConfigurationName)
             sqlUpdate(f'INSERT INTO "{newConfigurationName}" SELECT * FROM "{self.Name}"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_restrict_access" SELECT * FROM "{self.Name}_restrict_access"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_deleted" SELECT * FROM "{self.Name}_deleted"')
             sqlUpdate(f'INSERT INTO "{newConfigurationName}_transfer" SELECT * FROM "{self.Name}_transfer"')
             AllPeerJobs.updateJobConfigurationName(self.Name, newConfigurationName)
             shutil.copy(
-                self.__configPath,
-                os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{newConfigurationName}.conf')
+                self.configPath,
+                os.path.join(self.__getProtocolPath(), f'{newConfigurationName}.conf')
             )
             self.deleteConfiguration()
         except Exception as e:
@@ -1202,6 +1223,256 @@ class WireguardConfiguration:
         return True, availableAddress
 
 """
+AmneziaWG Configuration
+"""
+
+class AmneziaWireguardConfiguration(WireguardConfiguration):
+    def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
+        self.Jc = 0
+        self.Jmin = 0
+        self.Jmax = 0
+        self.S1 = 0
+        self.S2 = 0
+        self.H1 = 1
+        self.H2 = 2
+        self.H3 = 3
+        self.H4 = 4
+        
+        super().__init__(name, data, backup, startup, wg=False)
+
+    def toJson(self):
+        self.Status = self.getStatus()
+        return {
+            "Status": self.Status,
+            "Name": self.Name,
+            "PrivateKey": self.PrivateKey,
+            "PublicKey": self.PublicKey,
+            "Address": self.Address,
+            "ListenPort": self.ListenPort,
+            "PreUp": self.PreUp,
+            "PreDown": self.PreDown,
+            "PostUp": self.PostUp,
+            "PostDown": self.PostDown,
+            "SaveConfig": self.SaveConfig,
+            "DataUsage": {
+                "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
+                "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
+                "Receive": sum(list(map(lambda x: x.cumu_receive + x.total_receive, self.Peers)))
+            },
+            "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
+            "TotalPeers": len(self.Peers),
+            "Protocol": self.Protocol,
+            "Jc": self.Jc,
+            "Jmin": self.Jmin,
+            "Jmax": self.Jmax,
+            "S1": self.S1,
+            "S2": self.S2,
+            "H1": self.H1,
+            "H2": self.H2,
+            "H3": self.H3,
+            "H4": self.H4
+        }
+
+    def createDatabase(self, dbName = None):
+        if dbName is None:
+            dbName = self.Name
+
+        existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        existingTables = [t['name'] for t in existingTables]
+        if dbName not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s'(
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+
+        if f'{dbName}_restrict_access' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_restrict_access' (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL, 
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+        if f'{dbName}_transfer' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_transfer' (
+                    id VARCHAR NOT NULL, total_receive FLOAT NULL,
+                    total_sent FLOAT NULL, total_data FLOAT NULL,
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
+                )
+                """ % dbName
+            )
+        if f'{dbName}_deleted' not in existingTables:
+            sqlUpdate(
+                """
+                CREATE TABLE '%s_deleted' (
+                    id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
+                    endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
+                    total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
+                    status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
+                    cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
+                    keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
+                    PRIMARY KEY (id)
+                )
+                """ % dbName
+            )
+
+    def getPeers(self):
+        if self.configurationFileChanged():
+            self.Peers = []
+            with open(self.configPath, 'r') as configFile:
+                p = []
+                pCounter = -1
+                content = configFile.read().split('\n')
+                try:
+                    peerStarts = content.index("[Peer]")
+                    content = content[peerStarts:]
+                    for i in content:
+                        if not RegexMatch("#(.*)", i) and not RegexMatch(";(.*)", i):
+                            if i == "[Peer]":
+                                pCounter += 1
+                                p.append({})
+                                p[pCounter]["name"] = ""
+                            else:
+                                if len(i) > 0:
+                                    split = re.split(r'\s*=\s*', i, 1)
+                                    if len(split) == 2:
+                                        p[pCounter][split[0]] = split[1]
+
+                        if RegexMatch("#Name# = (.*)", i):
+                            split = re.split(r'\s*=\s*', i, 1)
+                            if len(split) == 2:
+                                p[pCounter]["name"] = split[1]
+
+                    for i in p:
+                        if "PublicKey" in i.keys():
+                            checkIfExist = sqlSelect("SELECT * FROM '%s' WHERE id = ?" % self.Name,
+                                                     ((i['PublicKey']),)).fetchone()
+                            if checkIfExist is None:
+                                newPeer = {
+                                    "id": i['PublicKey'],
+                                    "advanced_security": i.get('AdvancedSecurity', 'off'),
+                                    "private_key": "",
+                                    "DNS": DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
+                                    "endpoint_allowed_ip": DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
+                                        1],
+                                    "name": i.get("name"),
+                                    "total_receive": 0,
+                                    "total_sent": 0,
+                                    "total_data": 0,
+                                    "endpoint": "N/A",
+                                    "status": "stopped",
+                                    "latest_handshake": "N/A",
+                                    "allowed_ip": i.get("AllowedIPs", "N/A"),
+                                    "cumu_receive": 0,
+                                    "cumu_sent": 0,
+                                    "cumu_data": 0,
+                                    "traffic": [],
+                                    "mtu": DashboardConfig.GetConfig("Peers", "peer_mtu")[1],
+                                    "keepalive": DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1],
+                                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                                    "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
+                                }
+                                sqlUpdate(
+                                    """
+                                    INSERT INTO '%s'
+                                        VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                                    """ % self.Name
+                                    , newPeer)
+                                self.Peers.append(AmneziaWGPeer(newPeer, self))
+                            else:
+                                sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
+                                          (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
+                                self.Peers.append(AmneziaWGPeer(checkIfExist, self))
+                except Exception as e:
+                    if __name__ == '__main__':
+                        print(f"[WGDashboard] {self.Name} Error: {str(e)}")
+        else:
+            self.Peers.clear()
+            checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
+            for i in checkIfExist:
+                self.Peers.append(AmneziaWGPeer(i, self))
+
+    def addPeers(self, peers: list):
+        try:
+            for i in peers:
+                newPeer = {
+                    "id": i['id'],
+                    "private_key": i['private_key'],
+                    "DNS": i['DNS'],
+                    "endpoint_allowed_ip": i['endpoint_allowed_ip'],
+                    "name": i['name'],
+                    "total_receive": 0,
+                    "total_sent": 0,
+                    "total_data": 0,
+                    "endpoint": "N/A",
+                    "status": "stopped",
+                    "latest_handshake": "N/A",
+                    "allowed_ip": i.get("allowed_ip", "N/A"),
+                    "cumu_receive": 0,
+                    "cumu_sent": 0,
+                    "cumu_data": 0,
+                    "traffic": [],
+                    "mtu": i['mtu'],
+                    "keepalive": i['keepalive'],
+                    "remote_endpoint": DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                    "preshared_key": i["preshared_key"],
+                    "advanced_security": i['advanced_security']
+                }
+                sqlUpdate(
+                    """
+                    INSERT INTO '%s'
+                        VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
+                        :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
+                        :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
+                    """ % self.Name
+                    , newPeer)
+            for p in peers:
+                presharedKeyExist = len(p['preshared_key']) > 0
+                rd = random.Random()
+                uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
+                if presharedKeyExist:
+                    with open(uid, "w+") as f:
+                        f.write(p['preshared_key'])
+
+                subprocess.check_output(
+                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''} advanced-security {p['advanced_security']}",
+                                        shell=True, stderr=subprocess.STDOUT)
+                if presharedKeyExist:
+                    os.remove(uid)
+            subprocess.check_output(
+                f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
+            self.getPeersList()
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
+
+    def getRestrictedPeers(self):
+        self.RestrictedPeers = []
+        restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
+        for i in restricted:
+            self.RestrictedPeers.append(AmneziaWGPeer(i, self))
+    
+"""
 Peer
 """      
 class Peer:
@@ -1226,6 +1497,10 @@ class Peer:
         self.keepalive = tableData["keepalive"]
         self.remote_endpoint = tableData["remote_endpoint"]
         self.preshared_key = tableData["preshared_key"]
+        
+        
+            
+        
         self.jobs: list[PeerJob] = []
         self.ShareLink: list[PeerShareLink] = []
         self.getJobs()
@@ -1275,7 +1550,7 @@ class Peer:
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"wg set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
                 shell=True, stderr=subprocess.STDOUT)
             
             if pskExist: os.remove(uid)
@@ -1283,7 +1558,7 @@ class Peer:
             if len(updateAllowedIp.decode().strip("\n")) != 0:
                 return ResponseObject(False,
                                       "Update peer failed when updating Allowed IPs")
-            saveConfig = subprocess.check_output(f"wg-quick save {self.configuration.Name}",
+            saveConfig = subprocess.check_output(f"{self.configuration.Protocol}-quick save {self.configuration.Name}",
                                                  shell=True, stderr=subprocess.STDOUT)
             if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
                 return ResponseObject(False,
@@ -1317,6 +1592,7 @@ MTU = {str(self.mtu)}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
+        
         peerConfiguration += f'''
 [Peer]
 PublicKey = {self.configuration.PublicKey}
@@ -1350,7 +1626,116 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             return False
         return True
+    
+class AmneziaWGPeer(Peer):
+    def __init__(self, tableData, configuration: AmneziaWireguardConfiguration):
+        self.advanced_security = tableData["advanced_security"]
+        super().__init__(tableData, configuration)
 
+    def downloadPeer(self) -> dict[str, str]:
+        filename = self.name
+        if len(filename) == 0:
+            filename = "UntitledPeer"
+        filename = "".join(filename.split(' '))
+        filename = f"{filename}_{self.configuration.Name}"
+        illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
+                            "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
+                            "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
+        for i in illegal_filename:
+            filename = filename.replace(i, "")
+
+        peerConfiguration = f'''[Interface]
+PrivateKey = {self.private_key}
+Address = {self.allowed_ip}
+MTU = {str(self.mtu)}
+Jc = {self.configuration.Jc}
+Jmin = {self.configuration.Jmin}
+Jmax = {self.configuration.Jmax}
+S1 = {self.configuration.S1}
+S2 = {self.configuration.S2}
+H1 = {self.configuration.H1}
+H2 = {self.configuration.H2}
+H3 = {self.configuration.H3}
+H4 = {self.configuration.H4}
+'''
+        if len(self.DNS) > 0:
+            peerConfiguration += f"DNS = {self.DNS}\n"
+
+        peerConfiguration += f'''
+[Peer]
+PublicKey = {self.configuration.PublicKey}
+AllowedIPs = {self.endpoint_allowed_ip}
+Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
+PersistentKeepalive = {str(self.keepalive)}
+'''
+        if len(self.preshared_key) > 0:
+            peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
+        return {
+            "fileName": filename,
+            "file": peerConfiguration
+        }
+
+    def updatePeer(self, name: str, private_key: str,
+                   preshared_key: str,
+                   dns_addresses: str, allowed_ip: str, endpoint_allowed_ip: str, mtu: int,
+                   keepalive: int, advanced_security: str) -> ResponseObject:
+        if not self.configuration.getStatus():
+            self.configuration.toggleConfiguration()
+
+        existingAllowedIps = [item for row in list(
+            map(lambda x: [q.strip() for q in x.split(',')],
+                map(lambda y: y.allowed_ip,
+                    list(filter(lambda k: k.id != self.id, self.configuration.getPeersList()))))) for item in row]
+
+        if allowed_ip in existingAllowedIps:
+            return ResponseObject(False, "Allowed IP already taken by another peer")
+        if not ValidateIPAddressesWithRange(endpoint_allowed_ip):
+            return ResponseObject(False, f"Endpoint Allowed IPs format is incorrect")
+        if len(dns_addresses) > 0 and not ValidateDNSAddress(dns_addresses):
+            return ResponseObject(False, f"DNS format is incorrect")
+        if mtu < 0 or mtu > 1460:
+            return ResponseObject(False, "MTU format is not correct")
+        if keepalive < 0:
+            return ResponseObject(False, "Persistent Keepalive format is not correct")
+        if advanced_security != "on" and advanced_security != "off":
+            return ResponseObject(False, "Advanced Security can only be on or off")
+        if len(private_key) > 0:
+            pubKey = GenerateWireguardPublicKey(private_key)
+            if not pubKey[0] or pubKey[1] != self.id:
+                return ResponseObject(False, "Private key does not match with the public key")
+        try:
+            rd = random.Random()
+            uid = str(uuid.UUID(int=rd.getrandbits(128), version=4))
+            pskExist = len(preshared_key) > 0
+
+            if pskExist:
+                with open(uid, "w+") as f:
+                    f.write(preshared_key)
+            newAllowedIPs = allowed_ip.replace(" ", "")
+            updateAllowedIp = subprocess.check_output(
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''} advanced-security {advanced_security}",
+                shell=True, stderr=subprocess.STDOUT)
+
+            if pskExist: os.remove(uid)
+
+            if len(updateAllowedIp.decode().strip("\n")) != 0:
+                return ResponseObject(False,
+                                      "Update peer failed when updating Allowed IPs")
+            saveConfig = subprocess.check_output(f"{self.configuration.Protocol}-quick save {self.configuration.Name}",
+                                                 shell=True, stderr=subprocess.STDOUT)
+            if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
+                return ResponseObject(False,
+                                      "Update peer failed when saving the configuration")
+            sqlUpdate(
+                '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
+                keepalive = ?, preshared_key = ?, advanced_security = ?  WHERE id = ?''' % self.configuration.Name,
+                (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
+                 keepalive, preshared_key, advanced_security, self.id,)
+            )
+            return ResponseObject()
+        except subprocess.CalledProcessError as exc:
+            return ResponseObject(False, exc.output.decode("UTF-8").strip())
+    
 """
 Dashboard API Key
 """
@@ -1384,6 +1769,7 @@ class DashboardConfig:
             },
             "Server": {
                 "wg_conf_path": "/etc/wireguard",
+                "awg_conf_path": "/etc/amnezia/amneziawg",
                 "app_prefix": "",
                 "app_ip": "0.0.0.0",
                 "app_port": "10086",
@@ -1708,17 +2094,21 @@ def API_SignOut():
 @app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
     InitWireguardConfigurationsList()
+    InitAmneziaWireguardConfigurationsList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 @app.route(f'{APP_PREFIX}/api/addWireguardConfiguration', methods=["POST"])
 def API_addWireguardConfiguration():
     data = request.get_json()
     requiredKeys = [
-        "ConfigurationName", "Address", "ListenPort", "PrivateKey"
+        "ConfigurationName", "Address", "ListenPort", "PrivateKey", "Protocol"
     ]
     for i in requiredKeys:
         if i not in data.keys():
             return ResponseObject(False, "Please provide all required parameters.")
+    
+    if data.get("Protocol") not in ProtocolsEnabled():
+        return ResponseObject(False, "Please provide a valid protocol: wg / awg.")
 
     # Check duplicate names, ports, address
     for i in WireguardConfigurations.values():
@@ -1738,22 +2128,27 @@ def API_addWireguardConfiguration():
                                   "Address")
 
     if "Backup" in data.keys():
-        if not os.path.exists(os.path.join(
-                DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
-                'WGDashboard_Backup',
-                data["Backup"])) or not os.path.exists(os.path.join(
-            DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
-            'WGDashboard_Backup',
-            data["Backup"].replace('.conf', '.sql'))):
-            return ResponseObject(False, "Backup file does not exist")
+        path = {
+            "wg": DashboardConfig.GetConfig("Server", "wg_conf_path")[1],
+            "awg": DashboardConfig.GetConfig("Server", "awg_conf_path")[1]
+        }
+     
+        if (os.path.exists(os.path.join(path['wg'], 'WGDashboard_Backup', data["Backup"])) and
+                os.path.exists(os.path.join(path['wg'], 'WGDashboard_Backup', data["Backup"].replace('.conf', '.sql')))):
+            protocol = "wg"
+        elif (os.path.exists(os.path.join(path['awg'], 'WGDashboard_Backup', data["Backup"])) and
+              os.path.exists(os.path.join(path['awg'], 'WGDashboard_Backup', data["Backup"].replace('.conf', '.sql')))):
+            protocol = "awg"
+        else:
+            return ResponseObject(False, "Backup does not exist")
         
         shutil.copy(
-            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', data["Backup"]),
-            os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{data["ConfigurationName"]}.conf')
+            os.path.join(path[protocol], 'WGDashboard_Backup', data["Backup"]),
+            os.path.join(path[protocol], f'{data["ConfigurationName"]}.conf')
         )
-        WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data, name=data['ConfigurationName'])
+        WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data, name=data['ConfigurationName']) if protocol == 'wg' else AmneziaWireguardConfiguration(data=data, name=data['ConfigurationName'])
     else:
-        WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data)
+        WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data) if data.get('Protocol') == 'wg' else AmneziaWireguardConfiguration(data=data)
     return ResponseObject()
 
 @app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
@@ -1825,30 +2220,32 @@ def API_getAllWireguardConfigurationBackup():
         b = WireguardConfigurations[i].getBackups(True)
         if len(b) > 0:
             data['ExistingConfigurations'][i] = WireguardConfigurations[i].getBackups(True)
-
-    directory = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
-    files = [(file, os.path.getctime(os.path.join(directory, file)))
-             for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
-    files.sort(key=lambda x: x[1], reverse=True)
-
-    for f, ct in files:
-        if RegexMatch(r"^(.*)_(.*)\.(conf)$", f):
-            s = re.search(r"^(.*)_(.*)\.(conf)$", f)
-            name = s.group(1)
-            if name not in existingConfiguration:
-                if name not in data['NonExistingConfigurations'].keys():
-                    data['NonExistingConfigurations'][name] = []
-                
-                date = s.group(2)
-                d = {
-                    "filename": f,
-                    "backupDate": date,
-                    "content": open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
-                }
-                if f.replace(".conf", ".sql") in list(os.listdir(directory)):
-                    d['database'] = True
-                    d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
-                data['NonExistingConfigurations'][name].append(d)
+            
+    for protocol in ProtocolsEnabled():
+        directory = os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup')
+        files = [(file, os.path.getctime(os.path.join(directory, file)))
+                 for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
+        files.sort(key=lambda x: x[1], reverse=True)
+    
+        for f, ct in files:
+            if RegexMatch(r"^(.*)_(.*)\.(conf)$", f):
+                s = re.search(r"^(.*)_(.*)\.(conf)$", f)
+                name = s.group(1)
+                if name not in existingConfiguration:
+                    if name not in data['NonExistingConfigurations'].keys():
+                        data['NonExistingConfigurations'][name] = []
+                    
+                    date = s.group(2)
+                    d = {
+                        "protocol": protocol,
+                        "filename": f,
+                        "backupDate": date,
+                        "content": open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
+                    }
+                    if f.replace(".conf", ".sql") in list(os.listdir(directory)):
+                        d['database'] = True
+                        d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
+                    data['NonExistingConfigurations'][name].append(d)
     return ResponseObject(data=data)
 
 @app.get(f'{APP_PREFIX}/api/createWireguardConfigurationBackup')
@@ -1908,7 +2305,9 @@ def API_updateDashboardConfigurationItem():
     if data['section'] == "Server":
         if data['key'] == 'wg_conf_path':
             WireguardConfigurations.clear()
+            WireguardConfigurations.clear()
             InitWireguardConfigurationsList()
+            InitAmneziaWireguardConfigurationsList()
             
     return ResponseObject(True, data=DashboardConfig.GetConfig(data["section"], data["key"])[1])
 
@@ -1958,8 +2357,13 @@ def API_updatePeerSettings(configName):
         wireguardConfig = WireguardConfigurations[configName]
         foundPeer, peer = wireguardConfig.searchPeer(id)
         if foundPeer:
+            if wireguardConfig.Protocol == 'wg':
+                return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
+                                       allowed_ip, endpoint_allowed_ip, mtu, keepalive)
+            
             return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                                   allowed_ip, endpoint_allowed_ip, mtu, keepalive)
+                allowed_ip, endpoint_allowed_ip, mtu, keepalive, data.get('advanced_security', 'off'))
+            
     return ResponseObject(False, "Peer does not exist")
 
 @app.post(f'{APP_PREFIX}/api/resetPeerData/<configName>')
@@ -2122,7 +2526,8 @@ def API_addPeers(configName):
                         "DNS": dns_addresses,
                         "endpoint_allowed_ip": endpoint_allowed_ip,
                         "mtu": mtu,
-                        "keepalive": keep_alive
+                        "keepalive": keep_alive,
+                        "advanced_security": data.get("advanced_security", "off")
                     })
                 if len(keyPairs) == 0:
                     return ResponseObject(False, "Generating key pairs by bulk failed")
@@ -2149,7 +2554,8 @@ def API_addPeers(configName):
                         "endpoint_allowed_ip": endpoint_allowed_ip,
                         "DNS": dns_addresses,
                         "mtu": mtu,
-                        "keepalive": keep_alive
+                        "keepalive": keep_alive,
+                        "advanced_security": data.get("advanced_security", "off")
                     }]
                 )
                 return ResponseObject(status)
@@ -2563,6 +2969,9 @@ def API_SystemStatus():
     #         pass
     return ResponseObject(data=status)
 
+@app.get(f'{APP_PREFIX}/api/protocolsEnabled')
+def API_ProtocolsEnabled():
+    return ResponseObject(data=ProtocolsEnabled())
 
 @app.get(f'{APP_PREFIX}/')
 def index():
@@ -2599,7 +3008,17 @@ def gunicornConfig():
     _, app_port = DashboardConfig.GetConfig("Server", "app_port")
     return app_ip, app_port
 
-def InitWireguardConfigurationsList(startup: bool = False):
+def ProtocolsEnabled() -> list[str]:
+    from shutil import which
+    protocols = []
+    if which('awg') is not None and which('awg-quick') is not None:
+        protocols.append("awg")
+    if which('wg') is not None and which('wg-quick') is not None:
+        protocols.append("wg")
+    return protocols
+    
+
+def InitWireguardConfigurationsList(startup: bool = False):    
     confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     confs.sort()
     for i in confs:
@@ -2614,6 +3033,24 @@ def InitWireguardConfigurationsList(startup: bool = False):
             except WireguardConfiguration.InvalidConfigurationFileException as e:
                 print(f"{i} have an invalid configuration file.")
 
+    if "awg" in ProtocolsEnabled():
+        confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
+        confs.sort()
+        for i in confs:
+            if RegexMatch("^(.{1,}).(conf)$", i):
+                i = i.replace('.conf', '')
+                try:
+                    if i in WireguardConfigurations.keys():
+                        if WireguardConfigurations[i].configurationFileChanged():
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(i)
+                    else:
+                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(i, startup=startup)
+                except WireguardConfigurations.InvalidConfigurationFileException as e:
+                    print(f"{i} have an invalid configuration file.")
+
+def InitAmneziaWireguardConfigurationsList(startup: bool = False):
+    pass
+
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
 AllPeerJobs: PeerJobs = PeerJobs()
 JobLogger: PeerJobLogger = PeerJobLogger()
@@ -2623,7 +3060,9 @@ _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
+AmneziaWireguardConfigurations: dict[str, AmneziaWireguardConfiguration] = {}
 InitWireguardConfigurationsList(startup=True)
+InitAmneziaWireguardConfigurationsList(startup=True)
 
 def startThreads():
     bgThread = threading.Thread(target=backGroundThread)
