@@ -2,15 +2,22 @@
 import {parse} from "cidr-tools";
 import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
-import {fetchPost} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {ref} from "vue";
 
 export default {
 	name: "newConfiguration",
 	components: {LocaleText},
-	setup(){
+	async setup(){
 		const store = WireguardConfigurationsStore()
-		return {store}
+		const protocols = ref([])
+		await fetchGet("/api/protocolsEnabled", {}, (res) => {
+			protocols.value = res.data
+		})
+		
+		
+		return {store, protocols}
 	},
 	data(){
 		return {
@@ -279,30 +286,31 @@ export default {
 						<div id="newConfigurationOptionalAccordionCollapse" 
 						     class="accordion-collapse collapse" data-bs-parent="#newConfigurationOptionalAccordion">
 							<div class="accordion-body d-flex flex-column gap-3">
-								<div class="card rounded-3">
-									<div class="card-header">PreUp</div>
+								<div class="card rounded-3" v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+									<div class="card-header">{{ key }}</div>
 									<div class="card-body">
-										<input type="text" class="form-control" id="preUp" v-model="this.newConfiguration.PreUp">
+										<input type="text" 
+										       class="form-control font-monospace" :id="key" v-model="this.newConfiguration[key]">
 									</div>
 								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PreDown</div>
-									<div class="card-body">
-										<input type="text" class="form-control" id="preDown" v-model="this.newConfiguration.PreDown">
-									</div>
-								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PostUp</div>
-									<div class="card-body">
-										<input type="text" class="form-control" id="postUp" v-model="this.newConfiguration.PostUp">
-									</div>
-								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PostDown</div>
-									<div class="card-body">
-										<input type="text" class="form-control" id="postDown" v-model="this.newConfiguration.PostDown">
-									</div>
-								</div>
+<!--								<div class="card rounded-3">-->
+<!--									<div class="card-header">PreDown</div>-->
+<!--									<div class="card-body">-->
+<!--										<input type="text" class="form-control" id="preDown" v-model="this.newConfiguration.PreDown">-->
+<!--									</div>-->
+<!--								</div>-->
+<!--								<div class="card rounded-3">-->
+<!--									<div class="card-header">PostUp</div>-->
+<!--									<div class="card-body">-->
+<!--										<input type="text" class="form-control" id="postUp" v-model="this.newConfiguration.PostUp">-->
+<!--									</div>-->
+<!--								</div>-->
+<!--								<div class="card rounded-3">-->
+<!--									<div class="card-header">PostDown</div>-->
+<!--									<div class="card-body">-->
+<!--										<input type="text" class="form-control" id="postDown" v-model="this.newConfiguration.PostDown">-->
+<!--									</div>-->
+<!--								</div>-->
 							</div>
 						</div>
 					</div>

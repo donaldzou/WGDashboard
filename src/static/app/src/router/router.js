@@ -180,11 +180,7 @@ router.beforeEach(async (to, from, next) => {
 			next()
 		}
 	}else {
-		if (to.path === "/signin" && await checkAuth()){
-			next("/")
-		}else{
-			next()
-		}
+		next()
 	}
 });
 
