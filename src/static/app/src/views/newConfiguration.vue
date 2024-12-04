@@ -32,7 +32,16 @@ export default {
 				PreDown: "",
 				PostUp: "",
 				PostDown: "",
-				Protocol: "wg"
+				Protocol: "wg",
+				Jc: 5,
+				Jmin: 49,
+				Jmax: 998,
+				S1: 17,
+				S2: 110,
+				H1: 0,
+				H2: 0,
+				H3: 0,
+				H4: 0
 			},
 			numberOfAvailableIPs: "0",
 			error: false,
@@ -42,9 +51,20 @@ export default {
 		}
 	},
 	created() {
-		this.wireguardGenerateKeypair();	
+		this.wireguardGenerateKeypair();
+		let hValue = []
+		while ([...new Set(hValue)].length !== 4){
+			hValue = [this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1)]
+		}
+		this.newConfiguration.H1 = hValue[0]
+		this.newConfiguration.H2 = hValue[1]
+		this.newConfiguration.H3 = hValue[2]
+		this.newConfiguration.H4 = hValue[3]
 	},
 	methods: {
+		rand(min, max){
+			return Math.floor(Math.random() * (max - min) + min);
+		},
 		wireguardGenerateKeypair(){
 			const wg = window.wireguard.generateKeypair();
 			this.newConfiguration.PrivateKey = wg.privateKey;
@@ -293,24 +313,16 @@ export default {
 										       class="form-control font-monospace" :id="key" v-model="this.newConfiguration[key]">
 									</div>
 								</div>
-<!--								<div class="card rounded-3">-->
-<!--									<div class="card-header">PreDown</div>-->
-<!--									<div class="card-body">-->
-<!--										<input type="text" class="form-control" id="preDown" v-model="this.newConfiguration.PreDown">-->
-<!--									</div>-->
-<!--								</div>-->
-<!--								<div class="card rounded-3">-->
-<!--									<div class="card-header">PostUp</div>-->
-<!--									<div class="card-body">-->
-<!--										<input type="text" class="form-control" id="postUp" v-model="this.newConfiguration.PostUp">-->
-<!--									</div>-->
-<!--								</div>-->
-<!--								<div class="card rounded-3">-->
-<!--									<div class="card-header">PostDown</div>-->
-<!--									<div class="card-body">-->
-<!--										<input type="text" class="form-control" id="postDown" v-model="this.newConfiguration.PostDown">-->
-<!--									</div>-->
-<!--								</div>-->
+
+								<div class="card rounded-3" 
+								     v-if="this.newConfiguration.Protocol === 'awg'"
+								     v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']">
+									<div class="card-header">{{ key }}</div>
+									<div class="card-body">
+										<input type="text"
+										       class="form-control font-monospace" :id="key" v-model="this.newConfiguration[key]">
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

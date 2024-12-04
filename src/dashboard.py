@@ -505,6 +505,18 @@ class WireguardConfiguration:
                 "SaveConfig": "true"
             }
             
+            if self.Protocol == 'awg':
+                self.__parser["Interface"]["Jc"] = self.Jc
+                self.__parser["Interface"]["Jc"] = self.Jc 
+                self.__parser["Interface"]["Jmin"] = self.Jmin
+                self.__parser["Interface"]["Jmax"] = self.Jmax
+                self.__parser["Interface"]["S1"] = self.S1 
+                self.__parser["Interface"]["S2"] = self.S2 
+                self.__parser["Interface"]["H1"] = self.H1 
+                self.__parser["Interface"]["H2"] = self.H2 
+                self.__parser["Interface"]["H3"] = self.H3 
+                self.__parser["Interface"]["H4"] = self.H4 
+                
             if "Backup" not in data.keys():
                 self.createDatabase()
                 with open(self.configPath, "w+") as configFile:
@@ -1118,6 +1130,8 @@ class WireguardConfiguration:
         with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
             allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
+            if self.Protocol == 'awg':
+                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
             start = original.index("[Interface]")
             try:
                 end = original.index("[Peer]")
@@ -1131,7 +1145,7 @@ class WireguardConfiguration:
                     if split[0] not in allowEdit:
                         new.append(original[line])
             for key in allowEdit:
-                new.insert(1, f"{key} = {newData[key].strip()}")
+                new.insert(1, f"{key} = {str(newData[key]).strip()}")
             new.append("")
             for line in range(end, len(original)):
                 new.append(original[line])            
