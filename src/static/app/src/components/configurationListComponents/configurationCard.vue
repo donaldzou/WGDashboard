@@ -2,10 +2,11 @@
 import {fetchGet} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
+import ProtocolBadge from "@/components/protocolBadge.vue";
 
 export default {
 	name: "configurationCard",
-	components: {LocaleText},
+	components: {ProtocolBadge, LocaleText},
 	props: {
 		c: {
 			Name: String,
@@ -49,15 +50,10 @@ export default {
 	<div class="card conf_card rounded-3 shadow text-decoration-none">
 		<RouterLink :to="'/configuration/' + c.Name + '/peers'" class="card-body d-flex align-items-center gap-3 flex-wrap text-decoration-none">
 			<h6 class="mb-0"><span class="dot" :class="{active: c.Status}"></span></h6>
-			<h6 class="card-title mb-0 d-flex align-items-center gap-3">
+			<h6 class="card-title mb-0 d-flex align-items-center gap-2">
 				<samp>{{c.Name}}</samp>
 				<small>
-					<span class="badge wireguardBg" v-if="c.Protocol === 'wg'">
-						WireGuard
-					</span>
-					<span class="badge amneziawgBg" v-else>
-						AmneziaWG
-					</span>
+					<ProtocolBadge :protocol="c.Protocol" :mini="true"></ProtocolBadge>
 				</small>
 			</h6>
 			<h6 class="mb-0 ms-auto">

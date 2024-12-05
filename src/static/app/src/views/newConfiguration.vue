@@ -4,7 +4,9 @@ import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {parseInterface, parsePeers} from "@/utilities/parseConfigurationFile.js";
 import {ref} from "vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export default {
 	name: "newConfiguration",
@@ -15,9 +17,9 @@ export default {
 		await fetchGet("/api/protocolsEnabled", {}, (res) => {
 			protocols.value = res.data
 		})
+		const dashboardStore = DashboardConfigurationStore();
 		
-		
-		return {store, protocols}
+		return {store, protocols, dashboardStore}
 	},
 	data(){
 		return {
@@ -47,7 +49,9 @@ export default {
 			error: false,
 			errorMessage: "",
 			success: false,
-			loading: false
+			loading: false,
+			parseInterfaceResult: undefined,
+			parsePeersResult: undefined
 		}
 	},
 	created() {
@@ -88,6 +92,34 @@ export default {
 					}
 				})
 			}
+		},
+		openFileUpload(){
+			document.querySelector("#fileUpload").click();
+		},
+		readFile(e){
+			const file = e.target.files[0];
+			if (!file) return false;
+			const reader = new FileReader();
+			reader.onload = (evt) => {
+				this.parseInterfaceResult = parseInterface(evt.target.result);
+				this.parsePeersResult = parsePeers(evt.target.result);
+				let appliedFields = 0;
+				if (this.parseInterfaceResult){
+					this.newConfiguration.ConfigurationName = file.name.replace('.conf', '')
+					for (let i of Object.keys(this.parseInterfaceResult)){
+						if (Object.keys(this.newConfiguration).includes(i)){
+							this.newConfiguration[i] = this.parseInterfaceResult[i];
+							appliedFields += 1;
+						}
+					}
+				}
+				if (appliedFields > 0){
+					this.dashboardStore.newMessage("WGDashboard", `Parse successful! Updated ${appliedFields} field(s)`, "success")
+				}else {
+					this.dashboardStore.newMessage("WGDashboard", `Parse failed`, "danger")
+				}
+			};
+			reader.readAsText(file);
 		}
 	},
 	computed: {
@@ -99,7 +131,7 @@ export default {
 			}) === undefined && elements.find(x => {
 				return x.classList.contains("is-invalid")
 			}) === undefined
-		}	
+		}
 	},
 	watch: {
 		'newConfiguration.Address'(newVal){
@@ -149,6 +181,10 @@ export default {
 				ele.classList.add("is-invalid")
 			}
 		}
+	},
+	mounted() {
+		const fileUpload = document.querySelector("#fileUpload");
+		fileUpload.addEventListener("change", this.readFile, false)
 	}
 }
 </script>
@@ -156,7 +192,7 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3 text-body">
 		<div class="container mb-4">
-			<div class="mb-4 d-flex align-items-center gap-4">
+			<div class="mb-4 d-flex align-items-center gap-4 align-items-center">
 				<RouterLink to="/"
 				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
 					<h2 class="mb-0" style="line-height: 0">
@@ -166,6 +202,15 @@ export default {
 				<h2 class="mb-0">
 					<LocaleText t="New Configuration"></LocaleText>
 				</h2>
+				<div class="d-flex gap-2 ms-auto">
+					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"
+					        @click="openFileUpload()"
+					        type="button" aria-expanded="false">
+						<i class="bi bi-upload me-2"></i>
+						<LocaleText t="Upload File"></LocaleText>
+					</button>
+					<input type="file" id="fileUpload" multiple class="d-none" accept="text/plain" />
+				</div>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
@@ -342,11 +387,8 @@ export default {
 						<span class="ms-2 spinner-border spinner-border-sm" role="status">
 						</span>
 					</span>
-					
 				</button>
 			</form>
-			
-			
 		</div>
 	</div>
 </template>

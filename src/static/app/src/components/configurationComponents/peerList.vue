@@ -37,9 +37,11 @@ import LocaleText from "@/components/text/localeText.vue";
 import PeerRow from "@/components/configurationComponents/peerRow.vue";
 import {GetLocale} from "@/utilities/locale.js";
 import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vue";
+import ProtocolBadge from "@/components/protocolBadge.vue";
 export default {
 	name: "peerList",
 	components: {
+		ProtocolBadge,
 		PeerSearchBar,
 		PeerRow,
 		DeleteConfiguration:
@@ -427,12 +429,7 @@ export default {
 			<div>
 				<div class="text-muted d-flex align-items-center gap-2">
 					<h5 class="mb-0">
-						<span class="badge wireguardBg rounded-3 shadow" v-if="this.configurationInfo.Protocol === 'wg'">
-							WireGuard <LocaleText t="Configuration"></LocaleText>
-						</span>
-						<span class="badge amneziawgBg rounded-3 shadow" v-else>
-							AmneziaWG <LocaleText t="Configuration"></LocaleText>
-						</span>
+						<ProtocolBadge :protocol="this.configurationInfo.Protocol"></ProtocolBadge>
 					</h5>
 				</div>
 				<div class="d-flex align-items-center gap-3">
