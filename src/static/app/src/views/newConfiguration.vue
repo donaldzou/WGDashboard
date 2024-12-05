@@ -222,6 +222,7 @@ export default {
 					</div>
 					<div class="card-body d-flex gap-2 protocolBtnGroup">
 						<a 
+							v-if="this.protocols.includes('wg')"
 							@click="this.newConfiguration.Protocol = 'wg'"
 							:class="{'opacity-50': this.newConfiguration.Protocol !== 'wg'}"
 							class="btn btn-primary wireguardBg border-0 " style="flex-basis: 100%">
@@ -233,6 +234,7 @@ export default {
 						</a>
 						<a
 							@click="this.newConfiguration.Protocol = 'awg'"
+							v-if="this.protocols.includes('awg')"
 							:class="{'opacity-50': this.newConfiguration.Protocol !== 'awg'}"
 							class="btn btn-primary amneziawgBg border-0" style="flex-basis: 100%">
 							<i class="bi bi-check-circle-fill me-2" v-if="this.newConfiguration.Protocol === 'awg'"></i>

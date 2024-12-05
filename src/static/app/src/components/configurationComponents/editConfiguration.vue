@@ -34,7 +34,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close", "backupRestore", "deleteConfiguration"])
+const emit = defineEmits(["changed", "close", "backupRestore", "deleteConfiguration", "editRaw"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -156,39 +156,6 @@ watch(data, () => {
 									       v-model="data[key]"
 									       :id="'configuration_' + key">
 								</div>
-<!--								<div>-->
-<!--									<label for="configuration_predown" class="form-label">-->
-<!--										<small class="text-muted">-->
-<!--											<LocaleText t="PreDown"></LocaleText>-->
-<!--										</small>-->
-<!--									</label>-->
-<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
-<!--									       :disabled="saving"-->
-<!--									       v-model="data.PreDown"-->
-<!--									       id="configuration_predown">-->
-<!--								</div>-->
-<!--								<div>-->
-<!--									<label for="configuration_postup" class="form-label">-->
-<!--										<small class="text-muted">-->
-<!--											<LocaleText t="PostUp"></LocaleText>-->
-<!--										</small>-->
-<!--									</label>-->
-<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
-<!--									       :disabled="saving"-->
-<!--									       v-model="data.PostUp"-->
-<!--									       id="configuration_postup">-->
-<!--								</div>-->
-<!--								<div>-->
-<!--									<label for="configuration_postdown" class="form-label">-->
-<!--										<small class="text-muted">-->
-<!--											<LocaleText t="PostDown"></LocaleText>-->
-<!--										</small>-->
-<!--									</label>-->
-<!--									<input type="text" class="form-control form-control-sm rounded-3"-->
-<!--									       :disabled="saving"-->
-<!--									       v-model="data.PostDown"-->
-<!--									       id="configuration_postdown">-->
-<!--								</div>-->
 								<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']" 
 								     v-if="configurationInfo.Protocol === 'awg'">
 									<label :for="'configuration_' + key" class="form-label">
@@ -218,22 +185,28 @@ watch(data, () => {
 								</div>
 								<hr>
 								<h5 class="mb-3">Danger Zone</h5>
-								<div class="d-flex gap-2">
+								<div class="d-flex gap-2 flex-column">
 									<button
 										@click="emit('backupRestore')"
-										style="flex-basis: 100%"
-										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 ms-auto">
-										<i class="bi bi-copy me-2"></i>
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 text-start d-flex">
+										<i class="bi bi-copy me-auto"></i>
 										<LocaleText t="Backup & Restore"></LocaleText>
 									</button>
 									<button
+										@click="emit('editRaw')"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 d-flex">
+										<i class="bi bi-pen me-auto"></i>
+										<LocaleText t="Edit Raw Configuration File"></LocaleText>
+									</button>
+									
+									<button
 										@click="emit('deleteConfiguration')"
-										style="flex-basis: 100%"
-										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 ms-auto">
-										<i class="bi bi-trash-fill me-2"></i>
+										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 d-flex mt-4">
+										<i class="bi bi-trash-fill me-auto"></i>
 										<LocaleText t="Delete Configuration"></LocaleText>
 									</button>
 								</div>
+								
 							</template>
 						</div>
 					</div>

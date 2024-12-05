@@ -38,9 +38,12 @@ import PeerRow from "@/components/configurationComponents/peerRow.vue";
 import {GetLocale} from "@/utilities/locale.js";
 import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vue";
 import ProtocolBadge from "@/components/protocolBadge.vue";
+import EditRawConfigurationFile
+	from "@/components/configurationComponents/editConfigurationComponents/editRawConfigurationFile.vue";
 export default {
 	name: "peerList",
 	components: {
+		EditRawConfigurationFile,
 		ProtocolBadge,
 		PeerSearchBar,
 		PeerRow,
@@ -152,6 +155,9 @@ export default {
 				modalOpen: false
 			},
 			deleteConfiguration: {
+				modalOpen: false
+			},
+			editRawConfigurationFile: {
 				modalOpen: false
 			},
 			peerSearchBarShow: false,
@@ -691,7 +697,8 @@ export default {
 				:peer="this.configurationPeers.find(x => x.id === this.peerShare.selectedPeer)"></PeerShareLinkModal>
 		</Transition>
 		<Transition name="zoom">
-			<EditConfiguration 
+			<EditConfiguration
+				@editRaw="this.editRawConfigurationFile.modalOpen = true"
 				@close="this.editConfiguration.modalOpen = false"
 				@dataChanged="(d) => this.configurationInfo = d"
 				@backupRestore="this.backupRestore.modalOpen = true"
@@ -713,6 +720,12 @@ export default {
 				@backup="backupRestore.modalOpen = true"
 				@close="deleteConfiguration.modalOpen = false"
 				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+		</Transition>
+		<Transition name="zoom">
+			<EditRawConfigurationFile
+				@close="editRawConfigurationFile.modalOpen = false"
+				v-if="editRawConfigurationFile.modalOpen">
+			</EditRawConfigurationFile>
 		</Transition>
 		<Transition name="zoom">
 			<ConfigurationBackupRestore
