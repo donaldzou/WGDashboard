@@ -278,7 +278,8 @@ _determinePypiMirror(){
         selected_url="${urls[choice-1]}"
         printf "[WGDashboard] Will download Python packages from %s\n" "$selected_url"
     else
-        printf "[WGDashboard] Will download Python packages from %s\n" "${urls[4]}"
+    	selected_url="${urls[0]}"
+        printf "[WGDashboard] Will download Python packages from %s\n" "${urls[0]}"
     fi
 }
 
