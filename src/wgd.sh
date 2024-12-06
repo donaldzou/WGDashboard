@@ -247,7 +247,7 @@ _checkPythonVersion(){
 _determinePypiMirror(){
 	printf "[WGDashboard] Pinging list of recommended Python Package Index mirror\n"
 	urls=(
-		"https://pypi.org"
+		"https://pypi.org/simple/"
         "https://pypi.tuna.tsinghua.edu.cn/simple/"
         "https://pypi.mirrors.ustc.edu.cn/simple/"
         "https://mirrors.aliyun.com/pypi/simple/"
