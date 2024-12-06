@@ -158,7 +158,7 @@ export default {
 				modalOpen: false
 			},
 			editRawConfigurationFile: {
-				modalOpen: true
+				modalOpen: false
 			},
 			peerSearchBarShow: false,
 			searchStringTimeout: undefined,
