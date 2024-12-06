@@ -260,7 +260,7 @@ _determinePypiMirror(){
 		# Extract the hostname from the URL
 		hostname=$(echo "$url" | awk -F/ '{print $3}')
 		# Ping the hostname once and extract the RTT
-		rtt=$(ping -c 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
+		rtt=$(ping -c 1 -W 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
 		# Handle cases where the hostname is not reachable
 		if [ -z "$rtt" ]; then
 			rtt="9999"
