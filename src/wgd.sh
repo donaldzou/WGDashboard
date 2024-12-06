@@ -244,6 +244,44 @@ _checkPythonVersion(){
 	fi
 }
 
+_determinePypiMirror(){
+	printf "[WGDashboard] Pinging list of recommended Python Package Index mirror"
+	urls=(
+        "https://pypi.tuna.tsinghua.edu.cn/simple/"
+        "https://pypi.mirrors.ustc.edu.cn/simple/"
+        "https://mirrors.aliyun.com/pypi/simple/"
+        "https://pypi.douban.com/simple/"
+        "https://pypi.org"
+    )
+    
+    # Function to extract hostname and ping it
+    index=1
+    for url in "${urls[@]}"; do
+		# Extract the hostname from the URL
+		hostname=$(echo "$url" | awk -F/ '{print $3}')
+		# Ping the hostname once and extract the RTT
+		rtt=$(ping -c 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
+		# Handle cases where the hostname is not reachable
+		if [ -z "$rtt" ]; then
+			rtt="9999"
+			printf "\t [%i] [FAILED] %s\n" "$index" "$url"
+		else
+			printf "\t [%i] %sms %s\n" "$index" "$rtt" "$url"
+		fi
+	
+		index=$((index+1))
+	done
+	
+	read -p "[WGDashboard] Enter the number of the Python Package Index mirror you would like to use (Hit Enter to skip and use default mirror): " choice
+	
+	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
+        selected_url="${urls[choice-1]}"
+        printf "[WGDashboard] Will download Python packages from %s\n" "$selected_url"
+    else
+        printf "[WGDashboard] Will download Python packages from %s\n" "${urls[4]}"
+    fi
+}
+
 install_wgd(){
     printf "[WGDashboard] Starting to install WGDashboard\n"
     
@@ -267,6 +305,7 @@ install_wgd(){
     	printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
     fi
     
+    _determinePypiMirror
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
@@ -281,9 +320,9 @@ install_wgd(){
     _check_and_set_venv
     printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
 	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
-    { date; python3 -m pip install --upgrade pip; printf "\n\n"; } >> ./log/install.txt
+    { date; python3 -m pip install --upgrade pip -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt
     printf "[WGDashboard] Installing latest Python dependencies\n"
-	{ date; python3 -m pip install -r requirements.txt ; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
+	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
     printf "[WGDashboard] WGDashboard installed successfully!\n"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
@@ -501,6 +540,8 @@ else
 		fi
 	elif [ "$1" = "os" ]; then
     		_determineOS
+    elif [ "$1" = "ping" ]; then
+        	_determinePypiMirror
 	else
 		help
 	fi
