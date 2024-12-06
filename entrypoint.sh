@@ -40,7 +40,7 @@ ensure_installation() {
 
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
-  ./wgd.sh install
+  ./wgd.sh docker_install
 
   echo "Looks like the installation succeeded. Moving on."
 

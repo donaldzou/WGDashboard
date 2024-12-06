@@ -245,42 +245,47 @@ _checkPythonVersion(){
 }
 
 _determinePypiMirror(){
-	printf "[WGDashboard] Pinging list of recommended Python Package Index mirror\n"
 	urls=(
 		"https://pypi.org/simple/"
-        "https://pypi.tuna.tsinghua.edu.cn/simple/"
-        "https://pypi.mirrors.ustc.edu.cn/simple/"
-        "https://mirrors.aliyun.com/pypi/simple/"
-        "https://pypi.douban.com/simple/"
-    )
-    
-    # Function to extract hostname and ping it
-    index=1
-    for url in "${urls[@]}"; do
-		# Extract the hostname from the URL
-		hostname=$(echo "$url" | awk -F/ '{print $3}')
-		# Ping the hostname once and extract the RTT
-		rtt=$(ping -c 1 -W 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
-		# Handle cases where the hostname is not reachable
-		if [ -z "$rtt" ]; then
-			rtt="9999"
-			printf "\t [%i] [FAILED] %s\n" "$index" "$url"
+		"https://pypi.tuna.tsinghua.edu.cn/simple/"
+		"https://pypi.mirrors.ustc.edu.cn/simple/"
+		"https://mirrors.aliyun.com/pypi/simple/"
+		"https://pypi.douban.com/simple/"
+	)
+	if [ "$1" = 0 ]; then
+		printf "[WGDashboard] Pinging list of recommended Python Package Index mirror\n"
+		
+		
+		# Function to extract hostname and ping it
+		index=1
+		for url in "${urls[@]}"; do
+			# Extract the hostname from the URL
+			hostname=$(echo "$url" | awk -F/ '{print $3}')
+			# Ping the hostname once and extract the RTT
+			rtt=$(ping -c 1 -W 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
+			# Handle cases where the hostname is not reachable
+			if [ -z "$rtt" ]; then
+				rtt="9999"
+				printf "\t [%i] [FAILED] %s\n" "$index" "$url"
+			else
+				printf "\t [%i] %sms %s\n" "$index" "$rtt" "$url"
+			fi
+		
+			index=$((index+1))
+		done
+		
+		read -p "[WGDashboard] Enter the number of the Python Package Index mirror you would like to use (Hit Enter to skip and use default mirror): " choice
+		
+		if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
+			selected_url="${urls[choice-1]}"
+			printf "[WGDashboard] Will download Python packages from %s\n" "$selected_url"
 		else
-			printf "\t [%i] %sms %s\n" "$index" "$rtt" "$url"
+			selected_url="${urls[0]}"
+			printf "[WGDashboard] Will download Python packages from %s\n" "${urls[0]}"
 		fi
-	
-		index=$((index+1))
-	done
-	
-	read -p "[WGDashboard] Enter the number of the Python Package Index mirror you would like to use (Hit Enter to skip and use default mirror): " choice
-	
-	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
-        selected_url="${urls[choice-1]}"
-        printf "[WGDashboard] Will download Python packages from %s\n" "$selected_url"
-    else
-    	selected_url="${urls[0]}"
-        printf "[WGDashboard] Will download Python packages from %s\n" "${urls[0]}"
-    fi
+	elif [ "$1" = 1 ]; then
+	    selected_url="${urls[0]}"
+	fi
 }
 
 install_wgd(){
@@ -306,7 +311,7 @@ install_wgd(){
     	printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
     fi
     
-    _determinePypiMirror
+    _determinePypiMirror "$1"
     _checkPythonVersion
     _installPythonVenv
     _installPythonPip
@@ -521,7 +526,14 @@ else
 		printf "=================================================================================\n"
 	  	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
 	  	printf "=================================================================================\n"
-		install_wgd
+		install_wgd 0
+		printf "%s\n" "$dashes"
+	elif [ "$1" = "docker_install" ]; then
+		clear
+		printf "=================================================================================\n"
+		printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
+		printf "=================================================================================\n"
+		install_wgd 1
 		printf "%s\n" "$dashes"
 	elif [ "$1" = "restart" ]; then
 		if check_wgd_status; then
