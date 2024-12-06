@@ -40,16 +40,10 @@ const getBackup = () => {
 		loading.value = false;
 	})
 }
-
-
 onMounted(() => {
 	getBackup()
 })
-
 const emits = defineEmits(["backup", "close"])
-
-
-
 </script>
 
 <template>
