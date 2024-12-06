@@ -537,6 +537,29 @@ class WireguardConfiguration:
         self.Peers: list[Peer] = []
         self.getPeersList()
         self.getRestrictedPeersList()
+        
+    def getRawConfigurationFile(self):
+        return open(self.configPath, 'r').read()
+    
+    def updateRawConfigurationFile(self, newRawConfiguration):
+        backupStatus, backup = self.backupConfigurationFile()
+        if not backupStatus:
+            return False, "Cannot create backup"
+    
+        if self.Status:
+            self.toggleConfiguration()
+        
+        with open(self.configPath, 'w') as f:
+            f.write(newRawConfiguration)
+        
+        status, err = self.toggleConfiguration()
+        if not status:
+            restoreStatus = self.restoreBackup(backup['filename'])
+            print(f"Restore status: {restoreStatus}")
+            self.toggleConfiguration()
+            return False, err
+        return True, None
+            
     
     def __parseConfigurationFile(self):
         with open(self.configPath, 'r') as f:
@@ -1052,7 +1075,7 @@ class WireguardConfiguration:
             "Protocol": self.Protocol
         }
     
-    def backupConfigurationFile(self):
+    def backupConfigurationFile(self) -> tuple[bool, dict[str, str]]:
         if not os.path.exists(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')):
             os.mkdir(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup'))
         time = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -1063,6 +1086,12 @@ class WireguardConfiguration:
         with open(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', f'{self.Name}_{time}.sql'), 'w+') as f:
             for l in self.__dumpDatabase():
                 f.write(l + "\n")
+        
+        return True, {
+            "filename": f'{self.Name}_{time}.conf',
+            "backupDate": datetime.now().strftime("%Y%m%d%H%M%S")
+        }
+                
         
     def getBackups(self, databaseContent: bool = False) -> list[dict[str: str, str: str, str: str]]:
         backups = []
@@ -1093,7 +1122,7 @@ class WireguardConfiguration:
         backups = list(map(lambda x : x['filename'], self.getBackups()))
         if backupFileName not in backups:
             return False
-        self.backupConfigurationFile()
+        # self.backupConfigurationFile()
         if self.Status:
             self.toggleConfiguration()
         target = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backupFileName)
@@ -2175,6 +2204,33 @@ def API_updateWireguardConfiguration():
     
     return ResponseObject(status, message=msg, data=WireguardConfigurations[name])
 
+@app.get(f'{APP_PREFIX}/api/getWireguardConfigurationRawFile')
+def API_GetWireguardConfigurationRawFile():
+    configurationName = request.args.get('configurationName')
+    if configurationName is None or len(
+            configurationName) == 0 or configurationName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please provide a valid configuration name")
+    
+    return ResponseObject(data={
+        "path": WireguardConfigurations[configurationName].configPath,
+        "content": WireguardConfigurations[configurationName].getRawConfigurationFile()
+    })
+
+@app.post(f'{APP_PREFIX}/api/updateWireguardConfigurationRawFile')
+def API_UpdateWireguardConfigurationRawFile():
+    data = request.get_json()
+    configurationName = data.get('configurationName')
+    rawConfiguration = data.get('rawConfiguration')
+    if configurationName is None or len(
+            configurationName) == 0 or configurationName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Please provide a valid configuration name")
+    if rawConfiguration is None or len(rawConfiguration) == 0:
+        return ResponseObject(False, "Please provide content")
+    
+    status, err = WireguardConfigurations[configurationName].updateRawConfigurationFile(rawConfiguration)
+
+    return ResponseObject(status=status, message=err)
+
 @app.post(f'{APP_PREFIX}/api/deleteWireguardConfiguration')
 def API_deleteWireguardConfiguration():
     data = request.get_json()
@@ -2253,7 +2309,7 @@ def API_createWireguardConfigurationBackup():
     configurationName = request.args.get('configurationName')
     if configurationName is None or configurationName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
-    return ResponseObject(status=WireguardConfigurations[configurationName].backupConfigurationFile(), 
+    return ResponseObject(status=WireguardConfigurations[configurationName].backupConfigurationFile()[0], 
                           data=WireguardConfigurations[configurationName].getBackups())
 
 @app.post(f'{APP_PREFIX}/api/deleteWireguardConfigurationBackup')
