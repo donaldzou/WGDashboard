@@ -156,7 +156,6 @@ router.beforeEach(async (to, from, next) => {
 	dashboardConfigurationStore.ShowNavBar = false;
 	document.querySelector(".loadingBar").classList.remove("loadingDone")
 	document.querySelector(".loadingBar").classList.add("loading")
-	console.log(to.path)
 	if (to.meta.requiresAuth){
 		if (!dashboardConfigurationStore.getActiveCrossServer()){
 			if (await checkAuth()){

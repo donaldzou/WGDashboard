@@ -204,6 +204,9 @@ export default {
 					this.dashboardConfigurationStore.newMessage("Server",
 						res.message, 'danger')
 				}
+				this.wireguardConfigurationStore.Configurations.find(x => x.Name === this.configurationInfo.Name).Status = res.data
+				console.log(this.wireguardConfigurationStore.Configurations.find(x => x.Name === this.configurationInfo.Name).Status)
+				
 				this.configurationInfo.Status = res.data
 				this.configurationToggling = false;
 			})

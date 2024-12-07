@@ -3108,7 +3108,6 @@ def ProtocolsEnabled() -> list[str]:
         protocols.append("wg")
     return protocols
     
-
 def InitWireguardConfigurationsList(startup: bool = False):    
     confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
     confs.sort()
@@ -3163,7 +3162,6 @@ def startThreads():
     scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
     scheduleJobThread.daemon = True
     scheduleJobThread.start()
-
 
 if __name__ == "__main__":
     startThreads()
