@@ -187,8 +187,9 @@ export default {
 			WGDashboard {{ this.version }} | Developed with ❤️ by 
 			<a href="https://github.com/donaldzou" target="_blank"><strong>Donald Zou</strong></a>
 		</small>
-		<div class="messageCentre text-body position-absolute end-0 m-3">
-			<TransitionGroup name="message" tag="div" class="position-relative">
+		<div class="messageCentre text-body position-absolute d-flex">
+			<TransitionGroup name="message" tag="div"
+			                 class="position-relative flex-sm-grow-0 flex-grow-1 d-flex align-items-end ms-sm-auto flex-column gap-2">
 				<Message v-for="m in getMessages.slice().reverse()"
 				         :message="m" :key="m.id"></Message>
 			</TransitionGroup>

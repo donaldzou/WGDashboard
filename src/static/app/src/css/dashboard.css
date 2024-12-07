@@ -1163,6 +1163,14 @@ pre.index-alert {
 
 .messageCentre{
     z-index: 9999;
+    top: 1rem;
+    right: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .messageCentre{
+        width: calc(100% - 2rem);
+    }
 }
 
 
