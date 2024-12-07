@@ -1,4 +1,5 @@
 import itertools, random, shutil, sqlite3, configparser, hashlib, ipaddress, json, traceback, os, secrets, subprocess
+import smtplib
 import time, re, urllib.error, uuid, bcrypt, psutil, pyotp, threading
 from datetime import datetime, timedelta
 from typing import Any
@@ -1824,6 +1825,13 @@ class DashboardConfig:
             "Database":{
                 "type": "sqlite"
             },
+            "Email":{
+                "server": "",
+                "port": "",
+                "encryption": "",
+                "username": "",
+                "email_password": ""
+            },
             "WireGuardConfiguration": {
                 "autostart": ""
             }
@@ -1965,6 +1973,32 @@ class DashboardConfig:
                 if key not in self.hiddenAttribute:
                     the_dict[section][key] = self.GetConfig(section, key)[1]
         return the_dict
+    
+"""
+Email Sender
+"""
+
+class EmailSender:
+    import smtplib
+    
+    def __init__(self):
+        self.Server = DashboardConfig.GetConfig("Email", "server")[1]
+        self.Port = DashboardConfig.GetConfig("Email", "port")[1]
+        self.Encryption = DashboardConfig.GetConfig("Email", "encryption")[1]
+        self.Username = DashboardConfig.GetConfig("Email", "username")[1]
+        self.Password = DashboardConfig.GetConfig("Email", "email_password")[1]
+        
+        self.login()
+    
+    def ready(self):
+        return self.Server and self.Port and self.Encryption and self.Username and self.Password
+    
+    def login(self):
+        if self.ready():
+            self.smtp = smtplib.SMTP(self.Server, port=int(self.Port))
+            if self.Encryption == "STARTTLS":
+                self.smtp.starttls()
+            self.smtp.login(self.Username, self.Password)
 
 """
 Database Connection Functions
@@ -1997,6 +2031,7 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
 
 
 DashboardConfig = DashboardConfig()
+EmailSender = EmailSender()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
