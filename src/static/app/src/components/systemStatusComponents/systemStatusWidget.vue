@@ -35,9 +35,9 @@ const getData = () => {
 					<LocaleText t="CPU"></LocaleText>
 				</h6>
 				<h6 class="ms-auto">
-							<span v-if="data">
-								{{ data.cpu.cpu_percent }}%
-							</span>
+					<span v-if="data">
+						{{ data.cpu.cpu_percent }}%
+					</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
@@ -45,7 +45,8 @@ const getData = () => {
 				<div class="progress-bar" :style="{width: `${data?.cpu.cpu_percent}%` }"></div>
 			</div>
 			<div class="d-flex mt-2 gap-1">
-				<CpuCore v-for="(cpu, count) in data?.cpu.cpu_percent_per_cpu"
+				<CpuCore
+					v-for="(cpu, count) in data?.cpu.cpu_percent_per_cpu"
 				         :key="count"
 				         :align="(count + 1) > Math.round(data?.cpu.cpu_percent_per_cpu.length / 2)"
 				         :core_number="count" :percentage="cpu"
@@ -59,9 +60,9 @@ const getData = () => {
 					<LocaleText t="Storage"></LocaleText>
 				</h6>
 				<h6 class="ms-auto">
-							<span v-if="data">
-								{{ data?.disk['/'].percent }}%
-							</span>
+					<span v-if="data">
+						{{ data?.disk['/'].percent }}%
+					</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
