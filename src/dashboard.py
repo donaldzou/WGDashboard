@@ -2031,7 +2031,7 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
 
 
 DashboardConfig = DashboardConfig()
-EmailSender = EmailSender()
+# EmailSender = EmailSender()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
