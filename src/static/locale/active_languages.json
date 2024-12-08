@@ -63,5 +63,10 @@
 		"lang_id": "pl",
 		"lang_name": "Polish",
 		"lang_name_localized": "Polski"
+	},
+	{
+		"lang_id": "fr-ca",
+		"lang_name": "French (Quebec)",
+		"lang_name_localized": "Français (Québec)"
 	}
 ]
