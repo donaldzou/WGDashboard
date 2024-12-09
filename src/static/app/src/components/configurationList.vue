@@ -49,8 +49,6 @@ export default {
 			return [...this.wireguardConfigurationsStore.Configurations]
 				.filter(x => x.Name.includes(this.searchKey) || x.PublicKey.includes(this.searchKey) || !this.searchKey)
 				.sort((a, b) => {
-				
-
 				if (this.currentSort.order === 'desc') {
 					return this.dotNotation(a, this.currentSort.key) < this.dotNotation(b, this.currentSort.key) ? 
 						1 : this.dotNotation(a, this.currentSort.key) > this.dotNotation(b, this.currentSort.key) ? -1 : 0;
