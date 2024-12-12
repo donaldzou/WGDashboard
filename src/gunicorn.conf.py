@@ -32,8 +32,8 @@ if os.path.exists("./ssl.ini"):
             certfile = cert
             keyfile = pem
             print(f"[Gunicorn][HTTPS] Found certificate and private key file", flush=True)
-            print(f"[Gunicorn][HTTPS] Certificate: ${certfile}", flush=True)
-            print(f"[Gunicorn][HTTPS] Private Key: ${keyfile}", flush=True)
+            print(f"[Gunicorn][HTTPS] Certificate: {certfile}", flush=True)
+            print(f"[Gunicorn][HTTPS] Private Key: {keyfile}", flush=True)
        
 
 print(f"[Gunicorn] WGDashboard w/ Gunicorn will be running on {bind}", flush=True)
