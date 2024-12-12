@@ -11,8 +11,9 @@ venv_python="./venv/bin/python3"
 venv_gunicorn="./venv/bin/gunicorn"
 pythonExecutable="python3"
 
-heavy_checkmark=$(printf "\xE2\x9C\x94")
-heavy_crossmark=$(printf "\xE2\x9C\x97")
+heavy_checkmark=$(printf "\xE2\x9C\x85")
+heavy_crossmark=$(printf "\xE2\x9D\x8C")
+install=$(printf "\xF0\x9F\x92\xBF")
 
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
@@ -46,7 +47,7 @@ help () {
 _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
-    	printf "[WGDashboard] Creating Python Virtual Environment under ./venv\n"
+    	printf "[WGDashboard] %s Creating Python Virtual Environment under ./venv\n" "$install"
         { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
     fi
     
@@ -74,9 +75,8 @@ _determineOS(){
 }
 
 _installPython(){
-	
 	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
-	
+	printf "[WGDashboard] %s Installing Python\n" "$install"
 	case "$OS" in
 		ubuntu|debian)
 			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
@@ -105,6 +105,7 @@ _installPython(){
 
 _installPythonVenv(){
 	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	printf "[WGDashboard] %s Installing Python Virtual Environment\n" "$install"
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
 			ubuntu|debian)
@@ -145,8 +146,10 @@ _installPythonVenv(){
 
 _installPythonPip(){
 	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
+		printf "[WGDashboard] %s Installing Python Package Manager (PIP)\n" "$install"
 		case "$OS" in
 			ubuntu|debian)
 				if [ "$pythonExecutable" = "python3" ]; then
@@ -186,24 +189,28 @@ _installPythonPip(){
 _checkWireguard(){
     if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
     then
+    	printf "[WGDashboard] %s Installing WireGuard\n" "$install"
         case "$OS" in
             ubuntu|debian)
                 { 
                     sudo apt update && sudo apt-get install -y wireguard; 
                     printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
+                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
             ;;
             centos|fedora|redhat|rhel|almalinux|rocky)
                 { 
                     sudo dnf install -y wireguard-tools;
                     printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
+                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
             ;;
             alpine)
                 { 
                     sudo apk update && sudo apk add wireguard-tools --no-cache;
                     printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
                 } &>> ./log/install.txt
+                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
             ;;
             *)
                 printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
@@ -212,7 +219,7 @@ _checkWireguard(){
             ;;
         esac
     else
-        printf "[WGDashboard] WireGuard is already installed.\n"
+        printf "[WGDashboard] %s WireGuard is already installed.\n" "$heavy_checkmark"
     fi
 }
 
@@ -224,6 +231,7 @@ _checkPythonVersion(){
 	version=$($pythonExecutable --version)
 	if [ $version_pass == "1" ]
 	  	then 
+	  		printf "[WGDashboard] %s Found compatible version of Python. Will be using %s to install WGDashboard.\n" "$heavy_checkmark" "$($pythonExecutable --version)"
 			return;
 	elif python3.10 --version > /dev/null 2>&1
 		then
@@ -245,7 +253,7 @@ _checkPythonVersion(){
 }
 
 _determinePypiMirror(){
-	printf "[WGDashboard] Pinging list of recommended Python Package Index mirror\n"
+	printf "[WGDashboard] %s Pinging list of recommended Python Package Index mirror\n" "$install"
 	urls=(
 		"https://pypi.org/simple/"
         "https://pypi.tuna.tsinghua.edu.cn/simple/"
@@ -256,6 +264,7 @@ _determinePypiMirror(){
     
     # Function to extract hostname and ping it
     index=1
+    printf "              ---------------------------------------------------------\n"
     for url in "${urls[@]}"; do
 		# Extract the hostname from the URL
 		hostname=$(echo "$url" | awk -F/ '{print $3}')
@@ -264,15 +273,20 @@ _determinePypiMirror(){
 		# Handle cases where the hostname is not reachable
 		if [ -z "$rtt" ]; then
 			rtt="9999"
-			printf "\t [%i] [FAILED] %s\n" "$index" "$url"
+			printf "              [%i] [FAILED] %s\n" "$index" "$url"
 		else
-			printf "\t [%i] %sms %s\n" "$index" "$rtt" "$url"
+			printf "              [%i] %sms %s\n" "$index" "$rtt" "$url"
 		fi
 	
 		index=$((index+1))
 	done
 	
-	read -p "[WGDashboard] Enter the number of the Python Package Index mirror you would like to use (Hit Enter to skip and use default mirror): " choice
+	printf "\n"
+	printf "              Which mirror you would like to use (Hit enter to use default): "
+	read -r choice
+	printf "              ---------------------------------------------------------\n"
+	
+	
 	
 	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
         selected_url="${urls[choice-1]}"
@@ -312,19 +326,29 @@ install_wgd(){
     _installPythonPip
 	_checkWireguard
     sudo chmod -R 755 /etc/wireguard/
-
-    if [ ! -d "db" ] 
-		then 
-			printf "[WGDashboard] Creating ./db folder\n"
-			mkdir "db"
-    fi
+    
     _check_and_set_venv
-    printf "[WGDashboard] Upgrading Python Package Manage (PIP)\n"
+    printf "[WGDashboard] %s Upgrading Python Package Manage (PIP)\n" "$install"
 	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
     { date; python3 -m pip install --upgrade pip -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt
-    printf "[WGDashboard] Installing latest Python dependencies\n"
+    printf "[WGDashboard] %s Installing latest Python dependencies\n" "$install"
 	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
-    printf "[WGDashboard] WGDashboard installed successfully!\n"
+    
+    if [ ! -d "db" ] 
+		then 
+			mkdir "db"
+			printf "[WGDashboard] %s Created ./db folder\n" "$heavy_checkmark"
+	else
+		printf "[WGDashboard] %s Found existing ./db folder\n" "$heavy_checkmark"
+	fi  
+	if [ ! -f "ssl.ini" ]
+		then
+			printf "[SSL]\ncertificate_path = \nprivate_key_path = \n" >> ssl.ini
+			printf "[WGDashboard] %s Created ssl.ini\n" "$heavy_checkmark"
+	else
+			printf "[WGDashboard] %s Found existing ssl.ini\n" "$heavy_checkmark"
+	fi
+    printf "[WGDashboard] %s WGDashboard installed successfully!\n" "$heavy_checkmark"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
 
