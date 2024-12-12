@@ -22,10 +22,10 @@ log_level = "debug"
 capture_output = True
 errorlog = f"./log/error_{date}.log"
 
-if os.path.exists("./ssl.ini"):
+if os.path.exists("./ssl-tls.ini"):
     sslConfig = configparser.ConfigParser()
-    sslConfig.read_file(open('./ssl.ini', 'r'))
-    if sslConfig.has_section('SSL'):
+    sslConfig.read_file(open('./ssl-tls.ini', 'r'))
+    if sslConfig.has_section('SSL/TLS'):
         cert = sslConfig.get('SSL', 'certificate_path')
         pem = sslConfig.get('SSL', 'private_key_path')
         if cert and pem and len(cert) > 0 and len(pem) > 0:
