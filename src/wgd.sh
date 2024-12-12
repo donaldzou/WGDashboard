@@ -295,7 +295,7 @@ install_wgd(){
 			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
 			printf "[WGDashboard] %s Created ssl-tls.ini\n" "$heavy_checkmark"
 	else
-			printf "[WGDashboard] %s Found existing ssl.ini\n" "$heavy_checkmark"
+			printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$heavy_checkmark"
 	fi
     printf "[WGDashboard] %s WGDashboard installed successfully!\n" "$heavy_checkmark"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
