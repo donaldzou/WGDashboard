@@ -16,6 +16,7 @@ from Utilities import (
 
 
 DASHBOARD_VERSION = 'v4.2.0'
+
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
@@ -2153,6 +2154,7 @@ def API_AuthenticateLogin():
 def API_SignOut():
     resp = ResponseObject(True, "")
     resp.delete_cookie("authToken")
+    session.clear()
     return resp
 
 @app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
