@@ -31,9 +31,11 @@ if os.path.exists("./ssl.ini"):
         if cert and pem and len(cert) > 0 and len(pem) > 0:
             certfile = cert
             keyfile = pem
-            print(f"[WGDashboard] HTTPS enable", flush=True)
+            print(f"[Gunicorn][HTTPS] Found certificate and private key file", flush=True)
+            print(f"[Gunicorn][HTTPS] Certificate: ${certfile}", flush=True)
+            print(f"[Gunicorn][HTTPS] Private Key: ${keyfile}", flush=True)
        
 
-print(f"[WGDashboard] WGDashboard w/ Gunicorn will be running on {bind}", flush=True)
-print(f"[WGDashboard] Access log file is at {accesslog}", flush=True)
-print(f"[WGDashboard] Error log file is at {errorlog}", flush=True)
+print(f"[Gunicorn] WGDashboard w/ Gunicorn will be running on {bind}", flush=True)
+print(f"[Gunicorn] Access log file is at {accesslog}", flush=True)
+print(f"[Gunicorn] Error log file is at {errorlog}", flush=True)
