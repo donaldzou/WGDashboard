@@ -24,6 +24,7 @@ else
   cb_work_dir=/etc/letsencrypt
   cb_config_dir=/var/lib/letsencrypt
 fi
+selected_url="https://pypi.org/simple/"
 
 dashes='------------------------------------------------------------'
 equals='============================================================'
@@ -289,10 +290,10 @@ install_wgd(){
 	else
 		printf "[WGDashboard] %s Found existing ./db folder\n" "$heavy_checkmark"
 	fi  
-	if [ ! -f "ssl.ini" ]
+	if [ ! -f "ssl-tls.ini" ]
 		then
-			printf "[SSL]\ncertificate_path = \nprivate_key_path = \n" >> ssl.ini
-			printf "[WGDashboard] %s Created ssl.ini\n" "$heavy_checkmark"
+			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
+			printf "[WGDashboard] %s Created ssl-tls.ini\n" "$heavy_checkmark"
 	else
 			printf "[WGDashboard] %s Found existing ssl.ini\n" "$heavy_checkmark"
 	fi
