@@ -292,7 +292,7 @@ install_wgd(){
 	fi  
 	if [ ! -f "ssl-tls.ini" ]
 		then
-			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
+			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \nca_certificate_path = \n" >> ssl-tls.ini
 			printf "[WGDashboard] %s Created ssl-tls.ini\n" "$heavy_checkmark"
 	else
 			printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$heavy_checkmark"
