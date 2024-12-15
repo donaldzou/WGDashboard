@@ -1223,7 +1223,7 @@ class Peer:
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"wg set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs}{f' preshared-key {uid}' if pskExist else ''}",
+                f"wg set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'}",
                 shell=True, stderr=subprocess.STDOUT)
             
             if pskExist: os.remove(uid)
