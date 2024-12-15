@@ -30,7 +30,13 @@
 </p>
 <p align="center">
   <a align="center" href="https://discord.gg/72TwzjeuWm"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
-</p> 
+</p>
+<p align="center">
+  Alternatively, you can also reach out at our Matrix.org Chatroom :)
+</p>
+<p align="center">
+  <a href="https://app.element.io/#/room/#wgd:matrix.org">Matrix.org Chatroom</a>
+</p>
 
 
 <hr>
