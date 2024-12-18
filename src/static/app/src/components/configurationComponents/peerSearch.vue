@@ -112,7 +112,7 @@ export default {
 					<LocaleText t="Sort By"></LocaleText>
 					<span class="badge text-bg-primary ms-2">{{this.sort[store.Configuration.Server.dashboard_sort]}}</span>
 				</button>
-				<ul class="dropdown-menu rounded-3 ">
+				<ul class="dropdown-menu rounded-3">
 					<li v-for="(value, key) in this.sort" >
 						<button class="dropdown-item d-flex align-items-center" @click="this.updateSort(key)">
 							<small>
@@ -156,22 +156,21 @@ export default {
 			</button>
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"
 			        @click="this.downloadAllPeer()">
-				<i class="bi bi-download me-2"></i>
-				<LocaleText t="Download All"></LocaleText>
+				<i class="bi bi-download me-2 me-lg-0 me-xl-2"></i>
+				<LocaleText t="Download All" class="d-sm-block d-lg-none d-xl-block"></LocaleText>
 			</button>
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 			        @click="this.$emit('selectPeers')">
-				<i class="bi bi-check2-all me-2"></i>
-				<LocaleText t="Select Peers"></LocaleText>
+				<i class="bi bi-check2-all me-2 me-lg-0 me-xl-2"></i>
+				<LocaleText t="Select Peers" class="d-sm-block d-lg-none d-xl-block"></LocaleText>
 			</button>
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 			        @click="this.$emit('jobsAll')"
 			        type="button" aria-expanded="false">
-				<i class="bi bi-person-walking me-2"></i>
-				<LocaleText t="Active Jobs"></LocaleText>
+				<i class="bi bi-person-walking me-2 me-lg-0 me-xl-2"></i>
+				<LocaleText t="Active Jobs" class="d-sm-block d-lg-none d-xl-block"></LocaleText>
 			</button>
 		</div>
-		
 	</div>
 </template>
 
@@ -216,8 +215,5 @@ export default {
 	display: flex;
 	align-items: center;
 	
-	i{
-		margin-right: 1rem !important;
-	}
 }
 </style>

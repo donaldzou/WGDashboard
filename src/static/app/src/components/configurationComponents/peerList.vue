@@ -40,9 +40,11 @@ import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vu
 import ProtocolBadge from "@/components/protocolBadge.vue";
 import EditRawConfigurationFile
 	from "@/components/configurationComponents/editConfigurationComponents/editRawConfigurationFile.vue";
+import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
 export default {
 	name: "peerList",
 	components: {
+		PeerIntersectionObserver,
 		EditRawConfigurationFile,
 		ProtocolBadge,
 		PeerSearchBar,
@@ -163,15 +165,16 @@ export default {
 			peerSearchBarShow: false,
 			searchStringTimeout: undefined,
 			searchString: "",
+			showPeersCount: 0,
+			showPeersThreshold: 10,
+			observer: undefined
 		}
-	},
-	mounted() {
-		
 	},
 	watch: {
 		'$route': {
 			immediate: true,
 			handler(){
+				this.showPeersCount = 20;
 				clearInterval(this.dashboardConfigurationStore.Peers.RefreshInterval);
 				this.loading = true;
 				let id = this.$route.params.id;
@@ -274,12 +277,16 @@ export default {
 						}
 					}
 				});
+			
 		},
 		setPeerInterval(){
 			this.dashboardConfigurationStore.Peers.RefreshInterval = setInterval(() => {
 				this.getPeers()
 			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
 		},
+		disableMutationObserver(){
+			
+		}
 	},
 	computed: {
 		configurationSummary(){
@@ -389,7 +396,6 @@ export default {
 				}
 			}
 		},
-		
 		searchPeers(){
 			const fuse = new Fuse(this.configurationPeers, {
 				keys: ["name", "id", "allowed_ip"]
@@ -403,7 +409,7 @@ export default {
 				}) : this.configurationPeers;
 			
 			if (this.dashboardConfigurationStore.Configuration.Server.dashboard_sort === "restricted"){
-				return result.slice().sort((a, b) => {
+				return result.sort((a, b) => {
 					if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]
 						< b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] ){
 						return 1;
@@ -413,10 +419,10 @@ export default {
 						return -1;
 					}
 					return 0;
-				});
+				}).slice(0, this.showPeersCount);
 			}
 			
-			return result.slice().sort((a, b) => {
+			return result.sort((a, b) => {
 				if ( a[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort]
 					< b[this.dashboardConfigurationStore.Configuration.Server.dashboard_sort] ){
 					return -1;
@@ -426,323 +432,326 @@ export default {
 					return 1;
 				}
 				return 0;
-			});
-		}
+			}).slice(0, this.showPeersCount)
+		},
 	}
 }
 </script>
 
 <template>
-	<div v-if="!this.loading" class="container-md">
-		<div class="d-flex align-items-sm-center flex-column flex-sm-row gap-3">
-			<div>
-				<div class="text-muted d-flex align-items-center gap-2">
-					<h5 class="mb-0">
-						<ProtocolBadge :protocol="this.configurationInfo.Protocol"></ProtocolBadge>
-					</h5>
+	<div>
+		<div v-if="!this.loading" class="container-md" id="peerList">
+			<div class="d-flex align-items-sm-center flex-column flex-sm-row gap-3">
+				<div>
+					<div class="text-muted d-flex align-items-center gap-2">
+						<h5 class="mb-0">
+							<ProtocolBadge :protocol="this.configurationInfo.Protocol"></ProtocolBadge>
+						</h5>
+					</div>
+					<div class="d-flex align-items-center gap-3">
+						<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
+					</div>
 				</div>
-				<div class="d-flex align-items-center gap-3">
-					<h1 class="mb-0 display-4"><samp>{{this.configurationInfo.Name}}</samp></h1>
-				</div>
-			</div>
-			<div class="ms-sm-auto d-flex gap-2 flex-column">
-				<div class="card rounded-3 bg-transparent ">
-					<div class="card-body py-2 d-flex align-items-center">
-						<small class="text-muted">
-							<LocaleText t="Status"></LocaleText>
-						</small>
-						<div class="dot ms-2" :class="{active: this.configurationInfo.Status}"></div>
-						<div class="form-check form-switch mb-0 ms-auto pe-0 me-0">
-							<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
-								<LocaleText t="On" v-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
-								<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
-								<span v-if="this.configurationToggling"
-								      class="spinner-border spinner-border-sm ms-2" aria-hidden="true">
+				<div class="ms-sm-auto d-flex gap-2 flex-column">
+					<div class="card rounded-3 bg-transparent ">
+						<div class="card-body py-2 d-flex align-items-center">
+							<small class="text-muted">
+								<LocaleText t="Status"></LocaleText>
+							</small>
+							<div class="dot ms-2" :class="{active: this.configurationInfo.Status}"></div>
+							<div class="form-check form-switch mb-0 ms-auto pe-0 me-0">
+								<label class="form-check-label" style="cursor: pointer" :for="'switch' + this.configurationInfo.id">
+									<LocaleText t="On" v-if="this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
+									<LocaleText t="Off" v-else-if="!this.configurationInfo.Status && !this.configurationToggling"></LocaleText>
+									<span v-if="this.configurationToggling"
+									      class="spinner-border spinner-border-sm ms-2" aria-hidden="true">
 								</span>
-							</label>
-							<input class="form-check-input"
-							       style="cursor: pointer"
-							       :disabled="this.configurationToggling"
-							       type="checkbox" role="switch" :id="'switch' + this.configurationInfo.id"
-							       @change="this.toggle()"
-							       v-model="this.configurationInfo.Status"
-							>
+								</label>
+								<input class="form-check-input"
+								       style="cursor: pointer"
+								       :disabled="this.configurationToggling"
+								       type="checkbox" role="switch" :id="'switch' + this.configurationInfo.id"
+								       @change="this.toggle()"
+								       v-model="this.configurationInfo.Status"
+								>
+							</div>
+
 						</div>
-						
 					</div>
-				</div>
-				<div class="d-flex gap-2">
-					<RouterLink
-						to="create"
-						class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ">
-						<i class="bi bi-plus-lg me-2"></i>
-						<LocaleText t="Peer"></LocaleText>
-					</RouterLink>
-					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
-					        @click="editConfiguration.modalOpen = true"
-					        type="button" aria-expanded="false">
-						<i class="bi bi-gear-fill me-2"></i>
-						<LocaleText t="Configuration Settings"></LocaleText>
-					</button>
-				</div>
-			</div>
-		</div>
-		<hr>
-		<div class="row mt-3 gy-2 gx-2 mb-2">
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent  h-100">
-					<div class="card-body py-2 d-flex flex-column justify-content-center">
-						<p class="mb-0 text-muted"><small>
-							<LocaleText t="Address"></LocaleText>
-						</small></p>
-						{{this.configurationInfo.Address}}
+					<div class="d-flex gap-2">
+						<RouterLink
+							to="create"
+							class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ">
+							<i class="bi bi-plus-lg me-2"></i>
+							<LocaleText t="Peer"></LocaleText>
+						</RouterLink>
+						<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
+						        @click="editConfiguration.modalOpen = true"
+						        type="button" aria-expanded="false">
+							<i class="bi bi-gear-fill me-2"></i>
+							<LocaleText t="Configuration Settings"></LocaleText>
+						</button>
 					</div>
 				</div>
 			</div>
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent   h-100">
-					<div class="card-body py-2 d-flex flex-column justify-content-center">
-						<p class="mb-0 text-muted"><small>
-							<LocaleText t="Listen Port"></LocaleText>
-						</small></p>
-						{{this.configurationInfo.ListenPort}}
-					</div>
-				</div>
-			</div>
-			
-			<div style="word-break: break-all" class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent   h-100">
-					<div class="card-body py-2 d-flex flex-column justify-content-center">
-						<p class="mb-0 text-muted"><small>
-							<LocaleText t="Public Key"></LocaleText>
-						</small></p>
-						<samp>{{this.configurationInfo.PublicKey}}</samp>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row gx-2 gy-2 mb-2">
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent  h-100">
-					<div class="card-body d-flex">
-						<div>
+			<hr>
+			<div class="row mt-3 gy-2 gx-2 mb-2">
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent  h-100">
+						<div class="card-body py-2 d-flex flex-column justify-content-center">
 							<p class="mb-0 text-muted"><small>
-								<LocaleText t="Connected Peers"></LocaleText>
+								<LocaleText t="Address"></LocaleText>
 							</small></p>
-							<strong class="h4">
-								{{configurationSummary.connectedPeers}} / {{configurationPeers.length}}
-							</strong>
+							{{this.configurationInfo.Address}}
 						</div>
-						<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
 					</div>
 				</div>
-			</div>
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent  h-100">
-					<div class="card-body d-flex">
-						<div>
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent   h-100">
+						<div class="card-body py-2 d-flex flex-column justify-content-center">
 							<p class="mb-0 text-muted"><small>
-								<LocaleText t="Total Usage"></LocaleText>
+								<LocaleText t="Listen Port"></LocaleText>
 							</small></p>
-							<strong class="h4">{{configurationSummary.totalUsage}} GB</strong>
+							{{this.configurationInfo.ListenPort}}
 						</div>
-						<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
 					</div>
 				</div>
-			</div>
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent  h-100">
-					<div class="card-body d-flex">
-						<div>
+
+				<div style="word-break: break-all" class="col-12 col-lg-6">
+					<div class="card rounded-3 bg-transparent   h-100">
+						<div class="card-body py-2 d-flex flex-column justify-content-center">
 							<p class="mb-0 text-muted"><small>
-								<LocaleText t="Total Received"></LocaleText>
+								<LocaleText t="Public Key"></LocaleText>
 							</small></p>
-							<strong class="h4 text-primary">{{configurationSummary.totalReceive}} GB</strong>
+							<samp>{{this.configurationInfo.PublicKey}}</samp>
 						</div>
-						<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
 					</div>
 				</div>
 			</div>
-			<div class="col-12 col-lg-3">
-				<div class="card rounded-3 bg-transparent  h-100">
-					<div class="card-body d-flex">
-						<div>
-							<p class="mb-0 text-muted"><small>
-								<LocaleText t="Total Sent"></LocaleText>
-							</small></p>
-							<strong class="h4 text-success">{{configurationSummary.totalSent}} GB</strong>
+			<div class="row gx-2 gy-2 mb-2">
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent  h-100">
+						<div class="card-body d-flex">
+							<div>
+								<p class="mb-0 text-muted"><small>
+									<LocaleText t="Connected Peers"></LocaleText>
+								</small></p>
+								<strong class="h4">
+									{{configurationSummary.connectedPeers}} / {{configurationPeers.length}}
+								</strong>
+							</div>
+							<i class="bi bi-ethernet ms-auto h2 text-muted"></i>
 						</div>
-						<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
+					</div>
+				</div>
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent  h-100">
+						<div class="card-body d-flex">
+							<div>
+								<p class="mb-0 text-muted"><small>
+									<LocaleText t="Total Usage"></LocaleText>
+								</small></p>
+								<strong class="h4">{{configurationSummary.totalUsage}} GB</strong>
+							</div>
+							<i class="bi bi-arrow-down-up ms-auto h2 text-muted"></i>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent  h-100">
+						<div class="card-body d-flex">
+							<div>
+								<p class="mb-0 text-muted"><small>
+									<LocaleText t="Total Received"></LocaleText>
+								</small></p>
+								<strong class="h4 text-primary">{{configurationSummary.totalReceive}} GB</strong>
+							</div>
+							<i class="bi bi-arrow-down ms-auto h2 text-muted"></i>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-lg-3">
+					<div class="card rounded-3 bg-transparent  h-100">
+						<div class="card-body d-flex">
+							<div>
+								<p class="mb-0 text-muted"><small>
+									<LocaleText t="Total Sent"></LocaleText>
+								</small></p>
+								<strong class="h4 text-success">{{configurationSummary.totalSent}} GB</strong>
+							</div>
+							<i class="bi bi-arrow-up ms-auto h2 text-muted"></i>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="row gx-2 gy-2 mb-3">
-			<div class="col-12 col-lg-6">
-				<div class="card rounded-3 bg-transparent " style="height: 270px">
-					<div class="card-header bg-transparent border-0">
-						<small class="text-muted">
-							<LocaleText t="Peers Data Usage"></LocaleText>
+			<div class="row gx-2 gy-2 mb-3">
+				<div class="col-12 col-lg-6">
+					<div class="card rounded-3 bg-transparent " style="height: 270px">
+						<div class="card-header bg-transparent border-0">
+							<small class="text-muted">
+								<LocaleText t="Peers Data Usage"></LocaleText>
+							</small></div>
+						<div class="card-body pt-1">
+							<Bar
+								:data="individualDataUsage"
+								:options="individualDataUsageChartOption"
+								style="width: 100%; height: 200px;  max-height: 200px"></Bar>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm col-lg-3">
+					<div class="card rounded-3 bg-transparent " style="height: 270px">
+						<div class="card-header bg-transparent border-0"><small class="text-muted">
+							<LocaleText t="Real Time Received Data Usage"></LocaleText>
 						</small></div>
-					<div class="card-body pt-1">
-						<Bar
-							:data="individualDataUsage"
-							:options="individualDataUsageChartOption"
-							style="width: 100%; height: 200px;  max-height: 200px"></Bar>
+						<div class="card-body pt-1">
+							<Line
+								:options="chartOptions"
+								:data="receiveData"
+								style="width: 100%; height: 200px; max-height: 200px"
+							></Line>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm col-lg-3">
+					<div class="card rounded-3 bg-transparent " style="height: 270px">
+						<div class="card-header bg-transparent border-0"><small class="text-muted">
+							<LocaleText t="Real Time Sent Data Usage"></LocaleText>
+						</small></div>
+						<div class="card-body  pt-1">
+							<Line
+								:options="chartOptions"
+								:data="sentData"
+								style="width: 100%; height: 200px; max-height: 200px"
+							></Line>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent " style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">
-						<LocaleText t="Real Time Received Data Usage"></LocaleText>
-					</small></div>
-					<div class="card-body pt-1">
-						<Line
-							:options="chartOptions"
-							:data="receiveData"
-							style="width: 100%; height: 200px; max-height: 200px"
-						></Line>
+			<hr>
+			<div style="margin-bottom: 80px">
+				<PeerSearch
+					@search="this.peerSearchBarShow = true"
+					@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
+					@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
+					@editConfiguration="this.editConfiguration.modalOpen = true"
+					@selectPeers="this.selectPeers.modalOpen = true"
+					@backupRestore="this.backupRestore.modalOpen = true"
+					@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
+					:configuration="this.configurationInfo"></PeerSearch>
+				<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
+					<div class="col-12 col-lg-6 col-xl-4"
+					     :key="peer.id"
+					     v-for="peer in this.searchPeers">
+						<Peer :Peer="peer"
+						      @share="this.peerShare.selectedPeer = peer.id; this.peerShare.modalOpen = true;"
+						      @refresh="this.getPeers()"
+						      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
+						      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
+						      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
+						      @configurationFile="(file) => {this.peerConfigurationFile.peerConfigData = file; this.peerConfigurationFile.modalOpen = true;}"
+						></Peer>
 					</div>
-				</div>
+				</TransitionGroup>
 			</div>
-			<div class="col-sm col-lg-3">
-				<div class="card rounded-3 bg-transparent " style="height: 270px">
-					<div class="card-header bg-transparent border-0"><small class="text-muted">
-						<LocaleText t="Real Time Sent Data Usage"></LocaleText>
-					</small></div>
-					<div class="card-body  pt-1">
-						<Line
-							:options="chartOptions"
-							:data="sentData"
-							style="width: 100%; height: 200px; max-height: 200px"
-						></Line>
-					</div>
-				</div>
-			</div>
+			<Transition name="slideUp">
+				<PeerSearchBar
+					@close="peerSearchBarShow = false"
+					v-if="this.peerSearchBarShow"></PeerSearchBar>
+			</Transition>
+
+			<Transition name="zoom">
+				<PeerSettings v-if="this.peerSetting.modalOpen"
+				              key="settings"
+				              :selectedPeer="this.peerSetting.selectedPeer"
+				              @refresh="this.getPeers()"
+				              @close="this.peerSetting.modalOpen = false">
+				</PeerSettings>
+			</Transition>
+			<Transition name="zoom">
+				<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData"
+				            key="qrcode"
+				            @close="this.peerQRCode.modalOpen = false"
+				            v-if="peerQRCode.modalOpen"></PeerQRCode>
+			</Transition>
+			<Transition name="zoom">
+				<PeerJobs
+					@refresh="this.getPeers()"
+					v-if="this.peerScheduleJobs.modalOpen"
+					:selectedPeer="this.peerScheduleJobs.selectedPeer"
+					@close="this.peerScheduleJobs.modalOpen = false">
+				</PeerJobs>
+			</Transition>
+			<Transition name="zoom">
+				<PeerJobsAllModal
+					v-if="this.peerScheduleJobsAll.modalOpen"
+					@refresh="this.getPeers()"
+					@allLogs="peerScheduleJobsLogs.modalOpen = true"
+					@close="this.peerScheduleJobsAll.modalOpen = false"
+					:configurationPeers="this.configurationPeers"
+				>
+				</PeerJobsAllModal>
+			</Transition>
+			<Transition name="zoom">
+				<PeerJobsLogsModal v-if="this.peerScheduleJobsLogs.modalOpen"
+
+				                   @close="this.peerScheduleJobsLogs.modalOpen = false"
+				                   :configurationInfo="this.configurationInfo"
+				>
+				</PeerJobsLogsModal>
+			</Transition>
+			<Transition name="zoom">
+				<PeerShareLinkModal
+					v-if="this.peerShare.modalOpen"
+					@close="this.peerShare.modalOpen = false; this.peerShare.selectedPeer = undefined;"
+					:peer="this.configurationPeers.find(x => x.id === this.peerShare.selectedPeer)"></PeerShareLinkModal>
+			</Transition>
+			<Transition name="zoom">
+				<EditConfiguration
+					@editRaw="this.editRawConfigurationFile.modalOpen = true"
+					@close="this.editConfiguration.modalOpen = false"
+					@dataChanged="(d) => this.configurationInfo = d"
+					@backupRestore="this.backupRestore.modalOpen = true"
+					@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
+					:configurationInfo="this.configurationInfo"
+					v-if="this.editConfiguration.modalOpen"></EditConfiguration>
+			</Transition>
+			<Transition name="zoom">
+				<SelectPeers
+					@refresh="this.getPeers()"
+					v-if="this.selectPeers.modalOpen"
+					:configurationPeers="this.configurationPeers"
+					@close="this.selectPeers.modalOpen = false"
+				></SelectPeers>
+			</Transition>
+
+			<Transition name="zoom">
+				<DeleteConfiguration
+					@backup="backupRestore.modalOpen = true"
+					@close="deleteConfiguration.modalOpen = false"
+					v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
+			</Transition>
+			<Transition name="zoom">
+				<EditRawConfigurationFile
+					@close="editRawConfigurationFile.modalOpen = false"
+					v-if="editRawConfigurationFile.modalOpen">
+				</EditRawConfigurationFile>
+			</Transition>
+			<Transition name="zoom">
+				<ConfigurationBackupRestore
+					@close="backupRestore.modalOpen = false"
+					@refreshPeersList="this.getPeers()"
+					v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
+			</Transition>
+			<Transition name="zoom">
+				<PeerConfigurationFile
+					@close="peerConfigurationFile.modalOpen = false"
+					v-if="peerConfigurationFile.modalOpen"
+					:configurationFile="peerConfigurationFile.peerConfigData"
+				></PeerConfigurationFile>
+			</Transition>
 		</div>
-		<hr>
-		<div style="margin-bottom: 80px">
-			<PeerSearch
-				@search="this.peerSearchBarShow = true"
-				@jobsAll="this.peerScheduleJobsAll.modalOpen = true"
-				@jobLogs="this.peerScheduleJobsLogs.modalOpen = true"
-				@editConfiguration="this.editConfiguration.modalOpen = true"
-				@selectPeers="this.selectPeers.modalOpen = true"
-				@backupRestore="this.backupRestore.modalOpen = true"
-				@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
-				:configuration="this.configurationInfo"></PeerSearch>
-			<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
-				<div class="col-12 col-lg-6 col-xl-4"
-				     :key="peer.id"
-				     v-for="peer in this.searchPeers">
-					<Peer :Peer="peer"
-					      @share="this.peerShare.selectedPeer = peer.id; this.peerShare.modalOpen = true;"
-					      @refresh="this.getPeers()"
-					      @jobs="peerScheduleJobs.modalOpen = true; peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
-					      @setting="peerSetting.modalOpen = true; peerSetting.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
-					      @qrcode="(file) => {this.peerQRCode.peerConfigData = file; this.peerQRCode.modalOpen = true;}"
-					      @configurationFile="(file) => {this.peerConfigurationFile.peerConfigData = file; this.peerConfigurationFile.modalOpen = true;}"
-					></Peer>
-				</div>
-			</TransitionGroup>
-		</div>
-		<Transition name="slideUp">
-			<PeerSearchBar 
-				@close="peerSearchBarShow = false"
-				v-if="this.peerSearchBarShow"></PeerSearchBar>
-		</Transition>
-		
-		<Transition name="zoom">
-			<PeerSettings v-if="this.peerSetting.modalOpen"
-			              key="settings"
-			              :selectedPeer="this.peerSetting.selectedPeer"
-			              @refresh="this.getPeers()"
-			              @close="this.peerSetting.modalOpen = false">
-			</PeerSettings>
-		</Transition>
-		<Transition name="zoom">
-			<PeerQRCode :peerConfigData="this.peerQRCode.peerConfigData"
-			            key="qrcode"
-			            @close="this.peerQRCode.modalOpen = false"
-			            v-if="peerQRCode.modalOpen"></PeerQRCode>
-		</Transition>
-		<Transition name="zoom">
-			<PeerJobs
-				@refresh="this.getPeers()"
-				v-if="this.peerScheduleJobs.modalOpen"
-				:selectedPeer="this.peerScheduleJobs.selectedPeer"
-				@close="this.peerScheduleJobs.modalOpen = false">
-			</PeerJobs>
-		</Transition>
-		<Transition name="zoom">
-			<PeerJobsAllModal 
-				v-if="this.peerScheduleJobsAll.modalOpen"
-				@refresh="this.getPeers()"
-				@allLogs="peerScheduleJobsLogs.modalOpen = true"
-				@close="this.peerScheduleJobsAll.modalOpen = false"
-			                   :configurationPeers="this.configurationPeers"
-			>
-			</PeerJobsAllModal>
-		</Transition>
-		<Transition name="zoom">
-			<PeerJobsLogsModal v-if="this.peerScheduleJobsLogs.modalOpen"
-			                   
-				@close="this.peerScheduleJobsLogs.modalOpen = false" 
-				               :configurationInfo="this.configurationInfo"
-			>
-			</PeerJobsLogsModal>
-		</Transition>
-		<Transition name="zoom">
-			<PeerShareLinkModal 
-				v-if="this.peerShare.modalOpen"
-				@close="this.peerShare.modalOpen = false; this.peerShare.selectedPeer = undefined;"
-				:peer="this.configurationPeers.find(x => x.id === this.peerShare.selectedPeer)"></PeerShareLinkModal>
-		</Transition>
-		<Transition name="zoom">
-			<EditConfiguration
-				@editRaw="this.editRawConfigurationFile.modalOpen = true"
-				@close="this.editConfiguration.modalOpen = false"
-				@dataChanged="(d) => this.configurationInfo = d"
-				@backupRestore="this.backupRestore.modalOpen = true"
-				@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
-				:configurationInfo="this.configurationInfo"
-				v-if="this.editConfiguration.modalOpen"></EditConfiguration>
-		</Transition>
-		<Transition name="zoom">
-			<SelectPeers
-				@refresh="this.getPeers()"
-				v-if="this.selectPeers.modalOpen"
-				:configurationPeers="this.configurationPeers"
-				@close="this.selectPeers.modalOpen = false"
-			></SelectPeers>
-		</Transition>
-		
-		<Transition name="zoom">
-			<DeleteConfiguration
-				@backup="backupRestore.modalOpen = true"
-				@close="deleteConfiguration.modalOpen = false"
-				v-if="deleteConfiguration.modalOpen"></DeleteConfiguration>
-		</Transition>
-		<Transition name="zoom">
-			<EditRawConfigurationFile
-				@close="editRawConfigurationFile.modalOpen = false"
-				v-if="editRawConfigurationFile.modalOpen">
-			</EditRawConfigurationFile>
-		</Transition>
-		<Transition name="zoom">
-			<ConfigurationBackupRestore
-				@close="backupRestore.modalOpen = false"
-				@refreshPeersList="this.getPeers()"
-				v-if="backupRestore.modalOpen"></ConfigurationBackupRestore>
-		</Transition>
-		<Transition name="zoom">
-			<PeerConfigurationFile
-				@close="peerConfigurationFile.modalOpen = false"
-				v-if="peerConfigurationFile.modalOpen"
-				:configurationFile="peerConfigurationFile.peerConfigData"
-			></PeerConfigurationFile>
-		</Transition>
+		<PeerIntersectionObserver @loadMore="this.showPeersCount += this.showPeersThreshold"></PeerIntersectionObserver>
 	</div>
 </template>
 
@@ -762,18 +771,6 @@ th, td{
 		flex-basis: 100%;
 	}
 }
-
-.slideUp-enter-active,
-.slideUp-leave-active{
-	transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
-}
-
-.slideUp-enter-from,
-.slideUp-leave-to {
-	transform: translateY(100%);
-	filter: blur(3px);
-}
-
 
 
 </style>

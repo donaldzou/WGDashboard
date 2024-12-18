@@ -95,20 +95,22 @@ export default {
 				
 			</div>
 			<div class="text-body filter mb-3 d-flex gap-2 flex-column flex-md-row" v-if="this.configurationLoaded">
-				<div class="d-flex align-items-center gap-3 align-items-center ">
+				<div class="d-flex align-items-center gap-3 align-items-center mb-3 mb-md-0">
 					<small class="text-muted">
 						<LocaleText t="Sort By"></LocaleText>
 					</small>
-					<a role="button" 
-					   @click="updateSort(sv)"
-					   :class="{'bg-primary-subtle text-primary-emphasis': this.currentSort.key === sv}"
-					   class="px-2 py-1 rounded-3" v-for="(s, sv) in this.sort">
-						<small>
-							<i class="bi me-2" 
-							   :class="[this.currentSort.order === 'asc' ? 'bi-sort-up' : 'bi-sort-down']" 
-							   v-if="this.currentSort.key === sv"></i>{{s}}
-						</small>
-					</a>
+					<div class="d-flex ms-auto ms-lg-0">
+						<a role="button"
+						   @click="updateSort(sv)"
+						   :class="{'bg-primary-subtle text-primary-emphasis': this.currentSort.key === sv}"
+						   class="px-2 py-1 rounded-3" v-for="(s, sv) in this.sort">
+							<small>
+								<i class="bi me-2"
+								   :class="[this.currentSort.order === 'asc' ? 'bi-sort-up' : 'bi-sort-down']"
+								   v-if="this.currentSort.key === sv"></i>{{s}}
+							</small>
+						</a>
+					</div>
 				</div>
 				<div class="d-flex align-items-center ms-md-auto">
 					<label for="configurationSearch" class="text-muted">
