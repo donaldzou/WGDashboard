@@ -2,6 +2,7 @@
 import {onBeforeUnmount, onMounted, ref} from "vue";
 const observer = ref(undefined);
 const emits = defineEmits(['loadMore'])
+const props = defineProps(['peerListLength', 'showPeersCount'])
 
 onMounted(() => {
 	observer.value = new IntersectionObserver((entries) => {
@@ -23,7 +24,12 @@ onBeforeUnmount(() =>{
 </script>
 
 <template>
-	<div style="margin-bottom: 20px; height: 1px" id="loadMore"></div>
+	<div class="text-center">
+		<small v-if="peerListLength < showPeersCount" class="text-muted">
+			That's it, no more peers
+		</small>
+		<div style="margin-bottom: 20px; height: 1px" id="loadMore"></div>
+	</div>
 </template>
 
 <style scoped>

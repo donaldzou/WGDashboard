@@ -751,7 +751,10 @@ export default {
 				></PeerConfigurationFile>
 			</Transition>
 		</div>
-		<PeerIntersectionObserver @loadMore="this.showPeersCount += this.showPeersThreshold"></PeerIntersectionObserver>
+		<PeerIntersectionObserver 
+			:showPeersCount="this.showPeersCount"
+			:peerListLength="this.searchPeers.length"
+			@loadMore="this.showPeersCount += this.showPeersThreshold"></PeerIntersectionObserver>
 	</div>
 </template>
 
