@@ -1277,3 +1277,35 @@ samp{
     background: rgb(125,32,32);
     background: linear-gradient(90deg, rgba(125,32,32,1) 0%, rgba(255,56,56,1) 100%);
 }
+
+.slideUp-enter-active,
+.slideUp-leave-active{
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.slideUp-enter-from,
+.slideUp-leave-to {
+    transform: translateY(100%);
+    filter: blur(3px);
+}
+
+
+.peerList-move,
+.peerList-enter-active,
+.peerList-leave-active{
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.peerList-enter-from{
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.peerList-leave-to{
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+.peerList-leave-active {
+    position: absolute;
+}

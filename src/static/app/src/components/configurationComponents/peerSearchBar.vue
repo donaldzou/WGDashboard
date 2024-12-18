@@ -73,16 +73,4 @@ onMounted(() => {
 .searchPeersContainer{
 	width: 100%;
 }
-
-
-.slideUp-enter-active,
-.slideUp-leave-active{
-	transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
-}
-
-.slideUp-enter-from,
-.slideUp-leave-to {
-	transform: translateY(100%);
-	filter: blur(3px);
-}
 </style>

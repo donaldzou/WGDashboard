@@ -165,7 +165,7 @@ export default {
 			peerSearchBarShow: false,
 			searchStringTimeout: undefined,
 			searchString: "",
-			showPeersCount: 0,
+			showPeersCount: 10,
 			showPeersThreshold: 10,
 			observer: undefined
 		}
@@ -639,7 +639,7 @@ export default {
 					@backupRestore="this.backupRestore.modalOpen = true"
 					@deleteConfiguration="this.deleteConfiguration.modalOpen = true"
 					:configuration="this.configurationInfo"></PeerSearch>
-				<TransitionGroup name="list" tag="div" class="row gx-2 gy-2 z-0">
+				<TransitionGroup name="peerList" tag="div" class="row gx-2 gy-2 z-0 position-relative">
 					<div class="col-12 col-lg-6 col-xl-4"
 					     :key="peer.id"
 					     v-for="peer in this.searchPeers">
