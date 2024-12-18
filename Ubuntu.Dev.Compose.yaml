@@ -1,0 +1,27 @@
+services:
+  wireguard-dashboard:
+    build:
+      context: .
+      dockerfile: Ubuntu.Dev.Dockerfile
+    #image: donaldzou/wgdashboard:latest
+    restart: unless-stopped
+    container_name: wgdashboard
+      #environment:
+      #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
+      #- global_dns=        # <--- Set global DNS address, default: 1.1.1.1.
+      #- isolate=           # <--- Set the interfaces that will disallow peer communication, default: 'none'.
+    #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
+    ports:
+      - 10086:10086/tcp
+      - 51820:51820/udp
+    volumes:
+      - conf:/etc/wireguard
+      - data:/data
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+volumes:
+  conf:
+  data:
