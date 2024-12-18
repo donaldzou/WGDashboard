@@ -212,14 +212,14 @@ ensure_blocking() {
   echo -e "\nEnsuring container continuation."
 
   # Find and tail the latest error and access logs if they exist
-  local logdir="/opt/wireguarddashboard/src/log"
+  local logdir="${WGDASH}/src/log"
   
   latestErrLog=$(find "$logdir" -name "error_*.log" -type f -print | sort -r | head -n 1)
-  latestAccLog=$(find "$logdir" -name "access_*.log" -type f -print | sort -r | head -n 1)
+  #latestAccLog=$(find "$logdir" -name "access_*.log" -type f -print | sort -r | head -n 1) # Removed access line due to console spam.
 
   # Only tail the logs if they are found
   if [ -n "$latestErrLog" ] || [ -n "$latestAccLog" ]; then
-    tail -f "$latestErrLog" "$latestAccLog"
+    tail -f "$latestErrLog"
   else
     echo "No log files found to tail."
   fi

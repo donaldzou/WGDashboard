@@ -1,5 +1,34 @@
+FROM golang:1.23 AS compiler
+WORKDIR /go
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git make bash build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-tools.git && \
+    git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git
+RUN cd /go/amneziawg-tools/src && make
+
+RUN cd /go/amneziawg-go && \
+    go get -u ./... && \
+    go mod tidy && \
+    make && \
+    chmod +x /go/amneziawg-go/amneziawg-go /go/amneziawg-tools/src/wg /go/amneziawg-tools/src/wg-quick/linux.bash
+RUN echo "DONE AmneziaWG"
+
+### INTERMEDIATE STAGE
+FROM scratch AS bins
+COPY --from=compiler /go/amneziawg-go/amneziawg-go /amneziawg-go
+COPY --from=compiler /go/amneziawg-tools/src/wg /awg
+COPY --from=compiler /go/amneziawg-tools/src/wg-quick/linux.bash /awg-quick
+
+# FINAL STAGE
 FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
+
+COPY --from=bins /amneziawg-go /usr/bin/amneziawg-go
+COPY --from=bins /awg /usr/bin/awg
+COPY --from=bins /awg-quick /usr/bin/awg-quick
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ARG wg_net="10.0.0.1"

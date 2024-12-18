@@ -30,7 +30,7 @@ export default {
 						</Transition>
 					</RouterView>
 				</Suspense>
-				<div class="messageCentre text-body position-fixed d-flex">
+				<div class="messageCentre text-body position-absolute d-flex">
 					<TransitionGroup name="message" tag="div" 
 					                 class="position-relative flex-sm-grow-0 flex-grow-1 d-flex align-items-end ms-sm-auto flex-column gap-2">
 						<Message v-for="m in getMessages.slice().reverse()"
@@ -43,11 +43,6 @@ export default {
 </template>
 
 <style scoped>
-	.messageCentre{
-		top: 1rem;
-		right: 1rem;
-		width: calc(100% - 2rem);
-	}
 	main{
 		height: 100vh;
 	}

@@ -16,11 +16,13 @@ import DashboardLanguage from "@/components/settingsComponent/dashboardLanguage.
 import DashboardIPPortInput from "@/components/settingsComponent/dashboardIPPortInput.vue";
 import DashboardSettingsWireguardConfigurationAutostart
 	from "@/components/settingsComponent/dashboardSettingsWireguardConfigurationAutostart.vue";
+import DashboardEmailSettings from "@/components/settingsComponent/dashboardEmailSettings.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
+		DashboardEmailSettings,
 		DashboardSettingsWireguardConfigurationAutostart,
 		DashboardIPPortInput,
 		DashboardLanguage,
@@ -170,6 +172,7 @@ export default {
 								</div>
 							</div>
 							<DashboardAPIKeys></DashboardAPIKeys>
+							<DashboardEmailSettings></DashboardEmailSettings>
 						</div>
 					</Transition>
 					

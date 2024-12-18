@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@volar/language-server": "2.4.0-alpha.18",
-    "@vue/language-server": "2.0.28",
-    "ag-charts-vue3": "^10.3.1",
-    "dayjs": "^1.11.12"
-  }
-}

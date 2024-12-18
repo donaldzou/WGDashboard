@@ -6,6 +6,7 @@ import {parse} from "cidr-tools";
 import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {useRouter} from "vue-router";
+import ProtocolBadge from "@/components/protocolBadge.vue";
 
 
 const props = defineProps({
@@ -14,7 +15,8 @@ const props = defineProps({
 
 const newConfiguration = reactive({
 	ConfigurationName: props.selectedConfigurationBackup.filename.split("_")[0],
-	Backup: props.selectedConfigurationBackup.filename
+	Backup: props.selectedConfigurationBackup.filename,
+	Protocol: props.selectedConfigurationBackup.protocol
 })
 
 const lineSplit = props.selectedConfigurationBackup.content.split("\n");
@@ -135,6 +137,16 @@ const submitRestore = async () => {
 			<h4 class="mb-0">
 				<LocaleText t="Configuration"></LocaleText>
 			</h4>
+		</div>
+		<div>
+			<label class="text-muted mb-1">
+				<small>
+					<LocaleText t="Protocol"></LocaleText>
+				</small>
+			</label>
+			<h5 class="mb-0">
+				<ProtocolBadge :protocol="selectedConfigurationBackup.protocol" :mini="true"></ProtocolBadge>
+			</h5>
 		</div>
 		<div>
 			<label class="text-muted mb-1" for="ConfigurationName"><small>

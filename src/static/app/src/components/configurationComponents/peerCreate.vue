@@ -36,7 +36,8 @@ export default {
 				keepalive: parseInt(this.dashboardStore.Configuration.Peers.peer_keep_alive),
 				mtu: parseInt(this.dashboardStore.Configuration.Peers.peer_mtu),
 				preshared_key: "",
-				preshared_key_bulkAdd: false
+				preshared_key_bulkAdd: false,
+				advanced_security: "off",
 			},
 			availableIp: undefined,
 			availableIpSearchString: "",
@@ -85,6 +86,9 @@ export default {
 				});
 			}
 			return status;
+		},
+		getProtocol(){
+			return this.store.Configurations.find(x => x.Name === this.$route.params.id).Protocol;
 		}
 	},
 	watch: {
@@ -152,6 +156,36 @@ export default {
 					</div>
 				</div>
 			</div>
+			<hr>
+			<div v-if="this.getProtocol === 'awg'">
+				<h5>
+					<LocaleText t="AmneziaWG Peer Setting"></LocaleText>
+				</h5>
+				<div >
+					<label class="form-label d-block"><small class="text-muted">
+						<LocaleText t="Advanced Security"></LocaleText>
+					</small></label>
+					
+					<div class="btn-group" role="group">
+						<input type="radio" class="btn-check" 
+						       v-model="this.data.advanced_security"
+						       value="on"
+						       name="advanced_security_radio" id="advanced_security_on" autocomplete="off">
+						<label class="btn btn-outline-primary  btn-sm" for="advanced_security_on">
+							<LocaleText t="On"></LocaleText>
+						</label>
+
+						<input type="radio"
+						       v-model="this.data.advanced_security"
+						       value="off"
+						       class="btn-check" name="advanced_security_radio" id="advanced_security_off" autocomplete="off">
+						<label class="btn btn-outline-primary btn-sm" for="advanced_security_off">
+							<LocaleText t="Off"></LocaleText>
+						</label>
+					</div>
+				</div>
+			</div>
+			<hr>
 			<div class="d-flex mt-2">
 				<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
 				        :disabled="!this.allRequireFieldsFilled || this.saving"

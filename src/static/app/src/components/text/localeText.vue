@@ -15,7 +15,9 @@ export default {
 </script>
 
 <template>
-	{{ this.getLocaleText }}
+	<span>
+		{{ this.getLocaleText }}
+	</span>
 </template>
 
 <style scoped>

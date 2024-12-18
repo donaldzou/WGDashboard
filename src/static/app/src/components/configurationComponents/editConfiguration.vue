@@ -34,7 +34,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close"])
+const emit = defineEmits(["changed", "close", "backupRestore", "deleteConfiguration", "editRaw"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -145,62 +145,68 @@ watch(data, () => {
 									       id="configuration_listen_port">
 
 								</div>
-								<div>
-									<label for="configuration_preup" class="form-label">
+								<div v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreUp"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
 									<input type="text" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreUp"
-									       id="configuration_preup">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
-								<div>
-									<label for="configuration_predown" class="form-label">
+								<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']" 
+								     v-if="configurationInfo.Protocol === 'awg'">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreDown"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
+									<input type="number" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreDown"
-									       id="configuration_predown">
-								</div>
-								<div>
-									<label for="configuration_postup" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostUp"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostUp"
-									       id="configuration_postup">
-								</div>
-								<div>
-									<label for="configuration_postdown" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostDown"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostDown"
-									       id="configuration_postdown">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
 								<div class="d-flex align-items-center gap-2 mt-4">
 									<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
 									        @click="resetForm()"
 									        :disabled="!dataChanged || saving">
-										<i class="bi bi-arrow-clockwise"></i>
+										<i class="bi bi-arrow-clockwise me-2"></i>
+										<LocaleText t="Reset"></LocaleText>
 									</button>
 									<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
 									        :disabled="!dataChanged || saving"
 									        @click="saveForm()"
 									>
-										<i class="bi bi-save-fill"></i></button>
+										<i class="bi bi-save-fill me-2"></i>
+										<LocaleText t="Save"></LocaleText>
+									</button>
 								</div>
+								<hr>
+								<h5 class="mb-3">Danger Zone</h5>
+								<div class="d-flex gap-2 flex-column">
+									<button
+										@click="emit('backupRestore')"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 text-start d-flex">
+										<i class="bi bi-copy me-auto"></i>
+										<LocaleText t="Backup & Restore"></LocaleText>
+									</button>
+									<button
+										@click="emit('editRaw')"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 d-flex">
+										<i class="bi bi-pen me-auto"></i>
+										<LocaleText t="Edit Raw Configuration File"></LocaleText>
+									</button>
+									
+									<button
+										@click="emit('deleteConfiguration')"
+										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 d-flex mt-4">
+										<i class="bi bi-trash-fill me-auto"></i>
+										<LocaleText t="Delete Configuration"></LocaleText>
+									</button>
+								</div>
+								
 							</template>
 						</div>
 					</div>
