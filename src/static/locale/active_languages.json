@@ -4,6 +4,11 @@
 		"lang_name": "Czech",
 		"lang_name_localized": "Česky"
 	},
+        {
+                "lang_id": "fr-fr",
+                "lang_name": "french",
+                "lang_name_localized": "Français"
+        },
 	{
 		"lang_id": "de-de",
 		"lang_name": "German",
