@@ -1,7 +1,7 @@
 <script setup>
 import dayjs from "dayjs";
 import {computed, ref} from "vue";
-import {fetchPost} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {useRoute} from "vue-router";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
@@ -41,6 +41,17 @@ const restoreBackup = () => {
 			store.newMessage("Server", "Backup restored with " + props.b.filename, "success")
 		}else{
 			store.newMessage("Server", "Backup failed to restore", "danger")
+		}
+	})
+}
+
+const downloadBackup = () => {
+	fetchGet("/api/downloadWireguardConfigurationBackup", {
+		configurationName: route.params.id,
+		backupFileName: props.b.filename
+	}, (res) => {
+		if (res.status){
+			window.open(`/fileDownload?file=${res.data}`, '_blank')
 		}
 	})
 }
@@ -118,6 +129,11 @@ const showContent = ref(false);
 					{{dayjs(b.backupDate, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss")}}
 				</div>
 				<div class="d-flex gap-2 align-items-center ms-auto">
+					<button
+						@click="downloadBackup()"
+						class="btn bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 btn-sm">
+						<i class="bi bi-download"></i>
+					</button>
 					<button 
 						@click="restoreConfirmation = true"
 						class="btn bg-warning-subtle text-warning-emphasis border-warning-subtle rounded-3 btn-sm">

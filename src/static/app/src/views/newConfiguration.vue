@@ -207,7 +207,7 @@ export default {
 					        @click="openFileUpload()"
 					        type="button" aria-expanded="false">
 						<i class="bi bi-upload me-2"></i>
-						<LocaleText t="Upload File"></LocaleText>
+						<LocaleText t="Open File"></LocaleText>
 					</button>
 					<input type="file" id="fileUpload" multiple class="d-none" accept="text/plain" />
 				</div>

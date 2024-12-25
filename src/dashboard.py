@@ -1,9 +1,10 @@
 import itertools, random, shutil, sqlite3, configparser, hashlib, ipaddress, json, traceback, os, secrets, subprocess
 import smtplib
 import time, re, urllib.error, uuid, bcrypt, psutil, pyotp, threading
+from zipfile import ZipFile
 from datetime import datetime, timedelta
 from typing import Any
-from flask import Flask, request, render_template, session, g
+from flask import Flask, request, render_template, session, g, send_file
 from json import JSONEncoder
 from flask_cors import CORS
 from icmplib import ping, traceroute
@@ -1124,7 +1125,6 @@ class WireguardConfiguration:
         backups = list(map(lambda x : x['filename'], self.getBackups()))
         if backupFileName not in backups:
             return False
-        # self.backupConfigurationFile()
         if self.Status:
             self.toggleConfiguration()
         target = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backupFileName)
@@ -1153,6 +1153,27 @@ class WireguardConfiguration:
             return False
         return True
     
+    def downloadBackup(self, backupFileName: str) -> tuple[bool, str]:
+        backup = list(filter(lambda x : x['filename'] == backupFileName, self.getBackups()))
+        if len(backup) == 0:
+            return False, None
+        zip = f'{str(uuid.UUID(int=random.Random().getrandbits(128), version=4))}.zip'
+        with ZipFile(os.path.join('download', zip), 'w') as zipF:
+            zipF.write(
+                os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backup[0]['filename']),
+                os.path.basename(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backup[0]['filename']))
+            )
+            if backup[0]['database']:
+                zipF.write(
+                    os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backup[0]['filename'].replace('.conf', '.sql')),
+                    os.path.basename(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup', backup[0]['filename'].replace('.conf', '.sql')))
+                )
+        
+        return True, zip
+
+
+
+
     def updateConfigurationSettings(self, newData: dict) -> tuple[bool, str]:
         if self.Status:
             self.toggleConfiguration()
@@ -1231,7 +1252,7 @@ class WireguardConfiguration:
                     try:
                         existedAddress.append(ipaddress.ip_address(a.replace(" ", "")))
                     except ValueError as error:
-                        print(f"[WGDashboard] Error: {configName} peer {p.id} have invalid ip")
+                        print(f"[WGDashboard] Error: {self.Name} peer {p.id} have invalid ip")
         for p in self.getRestrictedPeersList():
             if len(p.allowed_ip) > 0:
                 add = p.allowed_ip.split(',')
@@ -2078,15 +2099,16 @@ def auth_req():
             DashboardConfig.APIAccessed = True
         else:
             DashboardConfig.APIAccessed = False
-            if ('/static/' not in request.path and "username" not in session 
+            whiteList = [
+                '/static/', 'validateAuthentication', 'authenticate', 'getDashboardConfiguration',
+                'getDashboardTheme', 'getDashboardVersion', 'sharePeer/get', 'isTotpEnabled', 'locale',
+                '/fileDownload'
+            ]
+            
+            if ("username" not in session 
                     and (f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}/" != request.path 
-                         and f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}" != request.path)
-                    and "validateAuthentication" not in request.path and "authenticate" not in request.path
-                    and "getDashboardConfiguration" not in request.path and "getDashboardTheme" not in request.path
-                    and "getDashboardVersion" not in request.path
-                    and "sharePeer/get" not in request.path
-                    and "isTotpEnabled" not in request.path
-                    and "locale" not in request.path
+                    and f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}" != request.path)
+                    and len(list(filter(lambda x : x not in request.path, whiteList))) == len(whiteList)
             ):
                 response = Flask.make_response(app, {
                     "status": False,
@@ -2364,6 +2386,15 @@ def API_deleteWireguardConfigurationBackup():
         return ResponseObject(False, "Configuration does not exist")
     
     return ResponseObject(WireguardConfigurations[configurationName].deleteBackup(backupFileName))
+
+@app.get(f'{APP_PREFIX}/api/downloadWireguardConfigurationBackup')
+def API_downloadWireguardConfigurationBackup():
+    configurationName = request.args.get('configurationName')
+    backupFileName = request.args.get('backupFileName')
+    if configurationName is None or configurationName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration does not exist")
+    status, zip = WireguardConfigurations[configurationName].downloadBackup(backupFileName)
+    return ResponseObject(status, data=zip)
 
 @app.post(f'{APP_PREFIX}/api/restoreWireguardConfigurationBackup')
 def API_restoreWireguardConfigurationBackup():
@@ -2761,6 +2792,20 @@ def API_getPeerScheduleJobLogs(configName):
     return ResponseObject(data=JobLogger.getLogs(requestAll, configName))
 
 '''
+File Download
+'''
+@app.get(f'{APP_PREFIX}/fileDownload')
+def API_download():
+    file = request.args.get('file')
+    if file is None or len(file) == 0:
+        return ResponseObject(False, "Please specify a file")
+    if os.path.exists(os.path.join('download', file)):
+        return send_file(os.path.join('download', file), as_attachment=True)
+    else:
+        return ResponseObject(False, "File does not exist")
+
+
+'''
 Tools
 '''
 
@@ -3110,20 +3155,21 @@ def ProtocolsEnabled() -> list[str]:
         protocols.append("wg")
     return protocols
     
-def InitWireguardConfigurationsList(startup: bool = False):    
-    confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
-    confs.sort()
-    for i in confs:
-        if RegexMatch("^(.{1,}).(conf)$", i):
-            i = i.replace('.conf', '')
-            try:
-                if i in WireguardConfigurations.keys():
-                    if WireguardConfigurations[i].configurationFileChanged():
-                        WireguardConfigurations[i] = WireguardConfiguration(i)
-                else:
-                    WireguardConfigurations[i] = WireguardConfiguration(i, startup=startup)
-            except WireguardConfiguration.InvalidConfigurationFileException as e:
-                print(f"{i} have an invalid configuration file.")
+def InitWireguardConfigurationsList(startup: bool = False):
+    if os.path.exists(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
+        confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+        confs.sort()
+        for i in confs:
+            if RegexMatch("^(.{1,}).(conf)$", i):
+                i = i.replace('.conf', '')
+                try:
+                    if i in WireguardConfigurations.keys():
+                        if WireguardConfigurations[i].configurationFileChanged():
+                            WireguardConfigurations[i] = WireguardConfiguration(i)
+                    else:
+                        WireguardConfigurations[i] = WireguardConfiguration(i, startup=startup)
+                except WireguardConfiguration.InvalidConfigurationFileException as e:
+                    print(f"{i} have an invalid configuration file.")
 
     if "awg" in ProtocolsEnabled():
         confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])

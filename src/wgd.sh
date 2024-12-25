@@ -283,35 +283,46 @@ _determinePypiMirror(){
 	
 	printf "\n"
 	printf "              Which mirror you would like to use (Hit enter to use default): "
-	read -r choice
-	printf "              ---------------------------------------------------------\n"
-	
+	read -r choice	
 	
 	
 	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
         selected_url="${urls[choice-1]}"
-        printf "[WGDashboard] Will download Python packages from %s\n" "$selected_url"
+        printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "$selected_url"
     else
     	selected_url="${urls[0]}"
-        printf "[WGDashboard] Will download Python packages from %s\n" "${urls[0]}"
+        printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "${urls[0]}"
     fi
 }
 
 install_wgd(){
     printf "[WGDashboard] Starting to install WGDashboard\n"
-    
-    if [ ! -d "/etc/wireguard/WGDashboard_Backup" ]
-    	then
-    		printf "[WGDashboard] Creating /etc/wireguard/WGDashboard_Backup folder\n"
-            sudo mkdir "/etc/wireguard/WGDashboard_Backup"
-    fi
-    
-    if [ ! -d "log" ]
-	  then 
-		printf "[WGDashboard] Creating ./log folder\n"
-		mkdir "log"
-	fi
     _determineOS
+    
+	if [ ! -d "log" ] 
+	then 
+			mkdir "log"
+			printf "[WGDashboard] %s Created ./log folder\n" "$heavy_checkmark"
+	else
+		printf "[WGDashboard] %s Found existing ./log folder\n" "$heavy_checkmark"
+	fi
+	
+	if [ ! -d "download" ]
+	then 
+		mkdir "download"
+		printf "[WGDashboard] %s Created ./download folder\n" "$heavy_checkmark"
+	else
+		printf "[WGDashboard] %s Found existing ./download folder\n" "$heavy_checkmark"
+	fi
+    
+    if [ ! -d "db" ] 
+	then 
+		mkdir "db"
+		printf "[WGDashboard] %s Created ./db folder\n" "$heavy_checkmark"
+	else
+		printf "[WGDashboard] %s Found existing ./db folder\n" "$heavy_checkmark"
+	fi
+    
     if ! python3 --version > /dev/null 2>&1
     then
     	printf "[WGDashboard] Python is not installed, trying to install now\n"
@@ -334,13 +345,7 @@ install_wgd(){
     printf "[WGDashboard] %s Installing latest Python dependencies\n" "$install"
 	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
     
-    if [ ! -d "db" ] 
-		then 
-			mkdir "db"
-			printf "[WGDashboard] %s Created ./db folder\n" "$heavy_checkmark"
-	else
-		printf "[WGDashboard] %s Found existing ./db folder\n" "$heavy_checkmark"
-	fi  
+      
 	if [ ! -f "ssl-tls.ini" ]
 		then
 			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
