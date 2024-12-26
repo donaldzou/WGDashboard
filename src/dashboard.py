@@ -1629,8 +1629,10 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
         try:
             cursor = sqldb.cursor()
             return cursor.execute(statement, paramters)
-
         except sqlite3.OperationalError as error:
+            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            return []
+        except Exception as e:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
             return []
 
@@ -1645,6 +1647,9 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             sqldb.commit()
         except sqlite3.OperationalError as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+        except Exception as e:
+            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            return []
 
 DashboardConfig = DashboardConfig()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
