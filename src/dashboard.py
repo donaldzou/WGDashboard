@@ -116,7 +116,6 @@ class DashboardLogger:
                 self.loggerdb.commit()
     
     def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
-        pass
         try:
             with self.loggerdb:
                 loggerdbCursor = self.loggerdb.cursor()
@@ -289,7 +288,7 @@ class PeerJobs:
         except Exception as e:
             return False, str(e)
 
-    def deleteJob(self, Job: PeerJob) -> tuple[bool, list] | tuple[bool, str]:
+    def deleteJob(self, Job: PeerJob, deletedFrom = 'Job Runner') -> tuple[bool, list] | tuple[bool, str]:
         try:
             if (len(str(Job.CreationDate))) == 0:
                 return False, "Job does not exist"
@@ -299,7 +298,7 @@ class PeerJobs:
                     UPDATE PeerJobs SET ExpireDate = strftime('%Y-%m-%d %H:%M:%S','now') WHERE JobID = ?
                 ''', (Job.JobID,))
                 self.jobdb.commit()
-            JobLogger.log(Job.JobID, Message=f"Job is removed due to being deleted or finshed.")
+            JobLogger.log(Job.JobID, Message=f"Job is removed by {deletedFrom} due to being deleted or finshed.")
             self.__getJobs()
             return True, list(
                 filter(lambda x: x.Configuration == Job.Configuration and x.Peer == Job.Peer and x.JobID == Job.JobID,
@@ -352,9 +351,15 @@ class PeerJobs:
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                             )
                 else:
-                    needToDelete.append(job)
+                    JobLogger.log(job.JobID, s["status"],
+                      f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed."
+                    )
+                    # needToDelete.append(job)
             else:
-                needToDelete.append(job)
+                JobLogger.log(job.JobID, s["status"],
+                  f"Somehow can't find this peer {job.Peer} from {job.Configuration} failed {job.Action}ed."
+                )
+                # needToDelete.append(job)
         for j in needToDelete:
             self.deleteJob(j)
 
@@ -1622,6 +1627,7 @@ def _getWireguardConfigurationAvailableIP(configName: str, all: bool = False) ->
 
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
+sqldb.isolation_level = None
 cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
@@ -1629,8 +1635,7 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
         try:
             cursor = sqldb.cursor()
             return cursor.execute(statement, paramters)
-
-        except sqlite3.OperationalError as error:
+        except Exception as e:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
             return []
 
@@ -1643,8 +1648,9 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             s = f'BEGIN TRANSACTION;{statement};END TRANSACTION;'
             cursor.execute(statement, paramters)
             sqldb.commit()
-        except sqlite3.OperationalError as error:
+        except Exception as e:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            return []
 
 DashboardConfig = DashboardConfig()
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
@@ -2299,7 +2305,7 @@ def API_deletePeerScheduleJob():
 
     s, p = AllPeerJobs.deleteJob(PeerJob(
         job['JobID'], job['Configuration'], job['Peer'], job['Field'], job['Operator'], job['Value'],
-        job['CreationDate'], job['ExpireDate'], job['Action']))
+        job['CreationDate'], job['ExpireDate'], job['Action']), 'API Call')
     if s:
         return ResponseObject(s, data=p)
     return ResponseObject(s, message=p)
