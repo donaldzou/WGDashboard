@@ -2026,30 +2026,40 @@ class EmailSender:
 Database Connection Functions
 """
 
-sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-sqldb.row_factory = sqlite3.Row
-cursor = sqldb.cursor()
+# sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+# sqldb.row_factory = sqlite3.Row
+# cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
+    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
+    sqldb.row_factory = sqlite3.Row
+    cursor = sqldb.cursor()
+    
     with sqldb:
         try:
             cursor = sqldb.cursor()
+            sqldb.close()
             return cursor.execute(statement, paramters)
-
-        except sqlite3.OperationalError as error:
+        except Exception as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+            sqldb.close()
             return []
+    
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
+    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
+    sqldb.row_factory = sqlite3.Row
+    cursor = sqldb.cursor()
     with sqldb:
         cursor = sqldb.cursor()
         try:
             statement = statement.rstrip(';')
             s = f'BEGIN TRANSACTION;{statement};END TRANSACTION;'
             cursor.execute(statement, paramters)
-            sqldb.commit()
-        except sqlite3.OperationalError as error:
+            # sqldb.commit()
+        except Exception as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+        sqldb.close()
 
 
 DashboardConfig = DashboardConfig()
