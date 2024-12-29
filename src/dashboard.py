@@ -414,7 +414,7 @@ class PeerShareLinks:
             self.Links.append(PeerShareLink(*link))
     
     def getLink(self, Configuration: str, Peer: str) -> list[PeerShareLink]:
-        self.__getSharedLinks()
+        # self.__getSharedLinks()
         return list(filter(lambda x : x.Configuration == Configuration and x.Peer == Peer, self.Links))
     
     def getLinkByID(self, ShareID: str) -> list[PeerShareLink]:
@@ -2026,25 +2026,25 @@ class EmailSender:
 Database Connection Functions
 """
 
-# sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-# sqldb.row_factory = sqlite3.Row
+sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
+sqldb.row_factory = sqlite3.Row
 # cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
-    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
-    sqldb.row_factory = sqlite3.Row
-    cursor = sqldb.cursor()
     
+    
+    # sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
+    # sqldb.row_factory = sqlite3.Row
+    # cursor = sqldb.cursor()
+    result = []
     with sqldb:
         try:
+            print("[WGDashboard] SQLite Select" + " | Statement: " + statement)
             cursor = sqldb.cursor()
-            sqldb.close()
-            return cursor.execute(statement, paramters)
+            result = cursor.execute(statement, paramters)
         except Exception as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
-            sqldb.close()
-            return []
-    
+    return result
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
@@ -2059,7 +2059,7 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             # sqldb.commit()
         except Exception as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
-        sqldb.close()
+    sqldb.close()
 
 
 DashboardConfig = DashboardConfig()
