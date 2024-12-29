@@ -1098,35 +1098,42 @@ class WireguardConfiguration:
         original = []
         dataChanged = False
         with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'r') as f:
-            original = f.readlines()
-            original = [l.rstrip("\n") for l in original]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPost"]
+            original = [l.rstrip("\n") for l in f.readlines()]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
             start = original.index("[Interface]")
-            for line in range(start+1, len(original)):
-                if original[line] == "[Peer]":
-                    break
+            try:
+                end = original.index("[Peer]")
+            except ValueError as e:
+                end = len(original)
+
+            new = ["[Interface]"]
+            peerFound = False
+            for line in range(start, end):
                 split = re.split(r'\s*=\s*', original[line], 1)
                 if len(split) == 2:
-                    key = split[0]
-                    value = split[1]
-                    if key in allowEdit and key in newData.keys() and value != newData[key]:
-                        split[1] = newData[key]
-                        original[line] = " = ".join(split)
-                        if isinstance(getattr(self, key), bool):
-                            setattr(self, key, _strToBool(newData[key]))
-                        else:
-                            setattr(self, key, str(newData[key]))
-                        dataChanged = True
-                    print(original[line])
-        if dataChanged:
-            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
-                f.write("\n".join(original))
+                    if split[0] not in allowEdit:
+                        new.append(original[line])
+            for key in allowEdit:
+                new.insert(1, f"{key} = {str(newData[key]).strip()}")
+            new.append("")
+            for line in range(end, len(original)):
+                new.append(original[line])
             self.backupConfigurationFile()
-        
-        
+            print(f"[WGDashboard] Edited Configuration -- {self.Name}.conf")
+            print("\n".join(new))
+            with open(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf'), 'w') as f:
+                f.write("\n".join(new))
+            
         status, msg = self.toggleConfiguration()        
         if not status:
             return False, msg
+        
+        for i in allowEdit:
+            if isinstance(getattr(self, i), bool):
+                setattr(self, i, _strToBool(newData[i]))
+            else:
+                setattr(self, i, str(newData[i]))
+            
         return True, ""
     
     def deleteConfiguration(self):
