@@ -1638,13 +1638,13 @@ sqldb.isolation_level = None
 cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
-    with sqldb:
-        try:
-            cursor = sqldb.cursor()
-            return cursor.execute(statement, paramters)
-        except Exception as e:
-            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
-            return []
+    try:
+        cursor = sqldb.cursor()
+        return cursor.execute(statement, paramters)
+    except Exception as e:
+        print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+        return []
+       
 
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
