@@ -563,7 +563,6 @@ class WireguardConfiguration:
             return False, err
         return True, None
             
-    
     def __parseConfigurationFile(self):
         with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
@@ -1094,8 +1093,7 @@ class WireguardConfiguration:
             "filename": f'{self.Name}_{time}.conf',
             "backupDate": datetime.now().strftime("%Y%m%d%H%M%S")
         }
-                
-        
+                     
     def getBackups(self, databaseContent: bool = False) -> list[dict[str: str, str: str, str: str]]:
         backups = []
         
@@ -1171,9 +1169,6 @@ class WireguardConfiguration:
         
         return True, zip
 
-
-
-
     def updateConfigurationSettings(self, newData: dict) -> tuple[bool, str]:
         if self.Status:
             self.toggleConfiguration()
@@ -1208,6 +1203,11 @@ class WireguardConfiguration:
         status, msg = self.toggleConfiguration()        
         if not status:
             return False, msg
+        for i in allowEdit:
+            if isinstance(getattr(self, i), bool):
+                setattr(self, i, _strToBool(newData[i]))
+            else:
+                setattr(self, i, str(newData[i]))
         return True, ""
     
     def deleteConfiguration(self):
@@ -1274,6 +1274,29 @@ class WireguardConfiguration:
                             break
         return True, availableAddress
 
+    def getRealtimeTrafficUsage(self):
+        stats = psutil.net_io_counters(pernic=True, nowrap=True)
+        if self.Name in stats.keys():
+            stat = stats[self.Name]
+            recv1 = stat.bytes_recv
+            sent1 = stat.bytes_sent
+            time.sleep(1)
+            stats = psutil.net_io_counters(pernic=True, nowrap=True)
+            if self.Name in stats.keys():
+                stat = stats[self.Name]
+                recv2 = stat.bytes_recv
+                sent2 = stat.bytes_sent
+                net_in = round((recv2 - recv1) / 1024 / 1024, 3)
+                net_out = round((sent2 - sent1) / 1024 / 1024, 3)
+                return {
+                    "sent": net_out,
+                    "recv": net_in
+                }
+            else:
+                return { "sent": 0, "recv": 0 }
+        else:
+            return { "sent": 0, "recv": 0 }
+            
 """
 AmneziaWG Configuration
 """
@@ -2039,7 +2062,6 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     result = []
     with sqldb:
         try:
-            print("[WGDashboard] SQLite Select" + " | Statement: " + statement)
             cursor = sqldb.cursor()
             result = cursor.execute(statement, paramters)
         except Exception as error:
@@ -2326,6 +2348,13 @@ def API_renameWireguardConfiguration():
         WireguardConfigurations.pop(data.get("Name"))
         WireguardConfigurations[data.get("NewConfigurationName")] = WireguardConfiguration(data.get("NewConfigurationName"))
     return ResponseObject(status, message)
+
+@app.get(f'{APP_PREFIX}/api/getWireguardConfigurationRealtimeTraffic')
+def API_getWireguardConfigurationRealtimeTraffic():
+    configurationName = request.args.get('configurationName')
+    if configurationName is None or configurationName not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration does not exist")
+    return ResponseObject(data=WireguardConfigurations[configurationName].getRealtimeTrafficUsage())
 
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationBackup')
 def API_getWireguardConfigurationBackup():

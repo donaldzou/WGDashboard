@@ -79,7 +79,7 @@ export default {
 		Line, 
 		Bar
 	},
-	setup(){
+	async setup(){
 		const dashboardConfigurationStore = DashboardConfigurationStore();
 		const wireguardConfigurationStore = WireguardConfigurationsStore();
 		const interval = ref(undefined)
@@ -284,9 +284,6 @@ export default {
 				this.getPeers()
 			}, parseInt(this.dashboardConfigurationStore.Configuration.Server.dashboard_refresh_interval))
 		},
-		disableMutationObserver(){
-			
-		}
 	},
 	computed: {
 		configurationSummary(){

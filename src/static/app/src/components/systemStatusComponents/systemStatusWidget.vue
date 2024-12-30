@@ -1,11 +1,14 @@
 <script setup>
-import {onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import CpuCore from "@/components/systemStatusComponents/cpuCore.vue";
 import StorageMount from "@/components/systemStatusComponents/storageMount.vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
-const data = ref(undefined)
+const dashboardStore = DashboardConfigurationStore()
+
+// const data = ref(undefined)
 let interval = null;
 
 onMounted(() => {
@@ -21,9 +24,13 @@ onBeforeUnmount(() => {
 
 const getData = () => {
 	fetchGet("/api/systemStatus", {}, (res) => {
-		data.value = res.data
+		dashboardStore.SystemStatus = res.data
 	})
 }
+
+const data = computed(() => {
+	return dashboardStore.SystemStatus
+})
 </script>
 
 <template>

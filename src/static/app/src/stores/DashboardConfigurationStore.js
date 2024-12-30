@@ -16,6 +16,7 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			Enable: false,
 			ServerList: {}
 		},
+		SystemStatus: undefined,
 		ActiveServerConfiguration: undefined,
 		IsElectronApp: false,
 		ShowNavBar: false,

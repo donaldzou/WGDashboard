@@ -24,12 +24,7 @@ onBeforeUnmount(() =>{
 </script>
 
 <template>
-	<div class="text-center">
-		<small v-if="peerListLength < showPeersCount" class="text-muted">
-			That's it, no more peers
-		</small>
-		<div style="margin-bottom: 20px; height: 1px" id="loadMore"></div>
-	</div>
+	<div style="margin-bottom: 20px; height: 1px" id="loadMore"></div>
 </template>
 
 <style scoped>
