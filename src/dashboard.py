@@ -479,6 +479,9 @@ class WireguardConfiguration:
             
             self.__parseConfigurationFile()
             self.__initPeersList()
+
+        if not os.path.exists(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')):
+            os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
             
         else:
             self.Name = data["ConfigurationName"]
