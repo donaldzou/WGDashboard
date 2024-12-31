@@ -526,6 +526,9 @@ class WireguardConfiguration:
                     self.__parser.write(configFile)
                     print(f"[WGDashboard] Configuration file {self.configPath} created")
                 self.__initPeersList()
+
+        if not os.path.exists(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')):
+            os.mkdir(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup'))
         
         print(f"[WGDashboard] Initialized Configuration: {name}")    
         if self.getAutostartStatus() and not self.getStatus() and startup:
