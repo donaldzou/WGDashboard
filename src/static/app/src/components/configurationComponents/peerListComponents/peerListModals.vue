@@ -1,6 +1,12 @@
 <script setup>
 import {defineAsyncComponent} from "vue";
-import LocaleText from "@/components/text/localeText.vue";
+const props = defineProps({
+	configurationModals: Object,
+	configurationModalSelectedPeer: Object
+})
+const emits = defineEmits(["refresh"])
+
+
 const DeleteConfigurationModal = defineAsyncComponent(() => import("@/components/configurationComponents/deleteConfiguration.vue"))
 const ConfigurationBackupRestoreModal = defineAsyncComponent(() => import("@/components/configurationComponents/configurationBackupRestore.vue"))
 const SelectPeersModal = defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue"))
@@ -15,7 +21,14 @@ const PeerSettingsModal = defineAsyncComponent(() => import("@/components/config
 </script>
 
 <template>
-
+	<Transition name="zoom">
+		<PeerSettingsModal v-if="configurationModals.peerSetting.modalOpen"
+		              key="settings"
+		              :selectedPeer="configurationModalSelectedPeer"
+		              @refresh="emits('refresh')"
+		              @close="configurationModals.peerSetting.modalOpen = false">
+		</PeerSettingsModal>
+	</Transition>
 </template>
 
 <style scoped>

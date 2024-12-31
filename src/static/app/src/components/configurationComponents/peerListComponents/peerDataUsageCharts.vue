@@ -54,12 +54,21 @@ const fetchRealtimeTraffic = async () => {
 	}, (res) => {
 		let timestamp = dayjs().format("hh:mm:ss A")
 		
-		historySentData.value.timestamp.push(timestamp)
-		historySentData.value.data.push(res.data.sent)
+		if (res.data.sent !== 0 && res.data.recv !== 0){
+			historySentData.value.timestamp.push(timestamp)
+			historySentData.value.data.push(res.data.sent)
 
-		historyReceivedData.value.timestamp.push(timestamp)
-		historyReceivedData.value.data.push(res.data.recv)
+			historyReceivedData.value.timestamp.push(timestamp)
+			historyReceivedData.value.data.push(res.data.recv)
+		}else{
+			if (historySentData.value.data.length > 0 && historyReceivedData.value.data.length > 0){
+				historySentData.value.timestamp.push(timestamp)
+				historySentData.value.data.push(res.data.sent)
 
+				historyReceivedData.value.timestamp.push(timestamp)
+				historyReceivedData.value.data.push(res.data.recv)
+			}
+		}
 	})
 }
 const toggleFetchRealtimeTraffic = () => {
@@ -89,16 +98,17 @@ onBeforeUnmount(() => {
 	fetchRealtimeTrafficInterval.value = undefined;
 })
 const peersDataUsageChartData = computed(() => {
+	let data = props.configurationPeers.filter(x => (x.cumu_data + x.total_data) > 0)
+	
 	return {
-		labels: props.configurationPeers.map(x => {
+		labels: data.map(x => {
 			if (x.name) return x.name
 			return `Untitled Peer - ${x.id}`
 		}),
 		datasets: [{
 			label: 'Total Data Usage',
-			data: props.configurationPeers.map(x => x.cumu_data + x.total_data),
-			backgroundColor: props.configurationPeers.map(x => `#ffc107`),
-			barThickness: 50,
+			data: data.map(x => x.cumu_data + x.total_data),
+			backgroundColor: data.map(x => `#ffc107`),
 			tooltip: {
 				callbacks: {
 					label: (tooltipItem) => {
@@ -133,6 +143,7 @@ const peersRealtimeReceivedData = computed(() => {
 				data: [...historyReceivedData.value.data],
 				fill: false,
 				borderColor: '#0d6efd',
+				backgroundColor: '#0d6efd',
 				tension: 0
 			},
 		],
@@ -160,7 +171,7 @@ const peersDataUsageChartOption = computed(() => {
 			y:{
 				ticks: {
 					callback: (val, index) => {
-						return `${val} GB`
+						return `${Math.round((val + Number.EPSILON) * 1000) / 1000} GB`
 					}
 				},
 				grid: {
@@ -191,18 +202,17 @@ const realtimePeersChartOption = computed(() => {
 					display: false,
 				},
 				grid: {
-					display: false
+					display: true
 				},
 			},
 			y:{
 				ticks: {
 					callback: (val, index) => {
-						return `${Math.round((val + Number.EPSILON) * 1000) / 1000
-						} MB/s`
+						return `${Math.round((val + Number.EPSILON) * 1000) / 1000} MB/s`
 					}
 				},
 				grid: {
-					display: false
+					display: true
 				},
 			}
 		}
@@ -228,9 +238,14 @@ const realtimePeersChartOption = computed(() => {
 		</div>
 		<div class="col-sm col-lg-6">
 			<div class="card rounded-3 bg-transparent " style="height: 270px">
-				<div class="card-header bg-transparent border-0"><small class="text-muted">
-					<LocaleText t="Real Time Received Data Usage"></LocaleText>
-				</small></div>
+				<div class="card-header bg-transparent border-0 d-flex align-items-center">
+					<small class="text-muted">
+						<LocaleText t="Real Time Received Data Usage"></LocaleText>
+					</small>
+					<small class="text-primary fw-bold ms-auto" v-if="historyReceivedData.data.length > 0">
+						{{historyReceivedData.data[historyReceivedData.data.length - 1]}} MB/s
+					</small>
+				</div>
 				<div class="card-body pt-1">
 					<Line
 						:options="realtimePeersChartOption"
@@ -242,14 +257,18 @@ const realtimePeersChartOption = computed(() => {
 		</div>
 		<div class="col-sm col-lg-6">
 			<div class="card rounded-3 bg-transparent " style="height: 270px">
-				<div class="card-header bg-transparent border-0"><small class="text-muted">
-					<LocaleText t="Real Time Sent Data Usage"></LocaleText>
-				</small></div>
+				<div class="card-header bg-transparent border-0 d-flex align-items-center">
+					<small class="text-muted">
+						<LocaleText t="Real Time Sent Data Usage"></LocaleText>
+					</small>
+					<small class="text-success fw-bold ms-auto"  v-if="historySentData.data.length > 0">
+						{{historySentData.data[historySentData.data.length - 1]}} MB/s
+					</small>
+				</div>
 				<div class="card-body  pt-1">
 					<Line
 						:options="realtimePeersChartOption"
 						:data="peersRealtimeSentData"
-						
 						style="width: 100%; height: 200px; max-height: 200px"
 					></Line>
 				</div>

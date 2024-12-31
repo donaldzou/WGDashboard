@@ -2060,12 +2060,12 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     # sqldb.row_factory = sqlite3.Row
     # cursor = sqldb.cursor()
     result = []
-    with sqldb:
-        try:
-            cursor = sqldb.cursor()
-            result = cursor.execute(statement, paramters)
-        except Exception as error:
-            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
+    # with sqldb:
+    try:
+        cursor = sqldb.cursor()
+        result = cursor.execute(statement, paramters)
+    except Exception as error:
+        print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
     return result
 
 def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:

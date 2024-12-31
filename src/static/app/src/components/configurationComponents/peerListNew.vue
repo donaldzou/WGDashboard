@@ -1,5 +1,5 @@
 <script setup async>
-import {computed, onBeforeUnmount, ref, watch} from "vue";
+import {computed, defineAsyncComponent, onBeforeUnmount, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {fetchGet} from "@/utilities/fetch.js";
 import ProtocolBadge from "@/components/protocolBadge.vue";
@@ -7,12 +7,20 @@ import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import PeerDataUsageCharts from "@/components/configurationComponents/peerListComponents/peerDataUsageCharts.vue";
+import PeerSearch from "@/components/configurationComponents/peerSearch.vue";
+import Peer from "@/components/configurationComponents/peer.vue";
+import PeerListModals from "@/components/configurationComponents/peerListComponents/peerListModals.vue";
+
+// Async Components
+const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
+
 const dashboardStore = DashboardConfigurationStore()
 const wireguardConfigurationStore = WireguardConfigurationsStore()
 const route = useRoute()
 const configurationInfo = ref({})
 const configurationPeers = ref([])
 const configurationToggling = ref(false)
+const configurationModalSelectedPeer = ref("")
 const configurationModals = ref({
 	peerSetting: {
 		modalOpen: false,
@@ -54,6 +62,7 @@ const configurationModals = ref({
 		modalOpen: false
 	}
 })
+const peerSearchBar = ref(false)
 
 // Fetch Peer =====================================
 const fetchPeerList = async () => {
@@ -130,10 +139,46 @@ const configurationSummary = computed(() => {
 				.map(x => x.total_sent + x.cumu_sent).reduce((a, b) => a + b, 0).toFixed(4) : 0
 	}
 })
+
+const showPeersCount = ref(10)
+const searchPeers = computed(() => {
+	const result = wireguardConfigurationStore.searchString ?
+		configurationPeers.value.filter(x => {
+			return x.name.includes(wireguardConfigurationStore.searchString) ||
+				x.id.includes(wireguardConfigurationStore.searchString) ||
+				x.allowed_ip.includes(wireguardConfigurationStore.searchString)
+		}) : configurationPeers.value;
+
+	if (dashboardStore.Configuration.Server.dashboard_sort === "restricted"){
+		return result.sort((a, b) => {
+			if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+				< b[dashboardStore.Configuration.Server.dashboard_sort] ){
+				return 1;
+			}
+			if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+				> b[dashboardStore.Configuration.Server.dashboard_sort]){
+				return -1;
+			}
+			return 0;
+		}).slice(0, showPeersCount.value);
+	}
+
+	return result.sort((a, b) => {
+		if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+			< b[dashboardStore.Configuration.Server.dashboard_sort] ){
+			return -1;
+		}
+		if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+			> b[dashboardStore.Configuration.Server.dashboard_sort]){
+			return 1;
+		}
+		return 0;
+	}).slice(0, showPeersCount.value)
+})
 </script>
 
 <template>
-<div class="container-md" >
+<div class="container-fluid" >
 	<div class="d-flex align-items-sm-center flex-column flex-sm-row gap-3">
 		<div>
 			<div class="text-muted d-flex align-items-center gap-2">
@@ -279,6 +324,40 @@ const configurationSummary = computed(() => {
 		:configurationPeers="configurationPeers"
 		:configurationInfo="configurationInfo"
 	></PeerDataUsageCharts>
+	<hr>
+	<div style="margin-bottom: 80px">
+		<PeerSearch
+			@search="peerSearchBar = true"
+			@jobsAll="configurationModals.peerScheduleJobsAll.modalOpen = true"
+			@jobLogs="configurationModals.peerScheduleJobsLogs.modalOpen = true"
+			@editConfiguration="configurationModals.editConfiguration.modalOpen = true"
+			@selectPeers="configurationModals.selectPeers.modalOpen = true"
+			@backupRestore="configurationModals.backupRestore.modalOpen = true"
+			@deleteConfiguration="configurationModals.deleteConfiguration.modalOpen = true"
+			:configuration="configurationInfo">
+		</PeerSearch>
+		<TransitionGroup name="peerList" tag="div" class="row gx-2 gy-2 z-0 position-relative">
+			<div class="col-12 col-lg-6 col-xl-4"
+			     :key="peer.id"
+			     v-for="peer in searchPeers">
+				<Peer :Peer="peer"
+				      @share="configurationModals.peerShare.selectedPeer = peer.id; this.peerShare.modalOpen = true;"
+				      @refresh="fetchPeerList()"
+				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModals.peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
+				      @setting="configurationModals.peerSetting.modalOpen = true; configurationModalSelectedPeer = peer"
+				      @qrcode="(file) => {configurationModals.peerQRCode.peerConfigData = file; configurationModals.peerQRCode.modalOpen = true;}"
+				      @configurationFile="(file) => {configurationModals.peerConfigurationFile.peerConfigData = file; configurationModals.peerConfigurationFile.modalOpen = true;}"
+				></Peer>
+			</div>
+		</TransitionGroup>
+	</div>
+	<Transition name="slideUp">
+		<PeerSearchBar @close="peerSearchBar = false" v-if="peerSearchBar"></PeerSearchBar>
+	</Transition>
+	<PeerListModals 
+		:configurationModals="configurationModals"
+		:configurationModalSelectedPeer="configurationModalSelectedPeer"
+	></PeerListModals>
 </div>
 </template>
 
