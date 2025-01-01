@@ -467,8 +467,10 @@ class WireguardConfiguration:
         self.Name = name
         self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
         
-        if not os.path.exists(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')):
-            os.mkdir(os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup'))
+        
+        backupPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
+        if not os.path.exists(backupPath):
+            os.mkdir(backupPath)
         
         if name is not None:
             if data is not None and "Backup" in data.keys():
