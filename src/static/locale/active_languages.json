@@ -5,11 +5,6 @@
 		"lang_name_localized": "Česky"
 	},
         {
-                "lang_id": "fr-fr",
-                "lang_name": "french",
-                "lang_name_localized": "Français"
-        },
-	{
 		"lang_id": "de-de",
 		"lang_name": "German",
 		"lang_name_localized": "Deutsch"
@@ -24,6 +19,11 @@
 		"lang_name": "Spanish",
 		"lang_name_localized": "Español"
 	},
+	{
+                "lang_id": "fr-fr",
+                "lang_name": "french",
+                "lang_name_localized": "Français"
+        },
 	{
 		"lang_id": "it-it",
 		"lang_name": "Italian",
