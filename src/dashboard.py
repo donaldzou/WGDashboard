@@ -467,6 +467,11 @@ class WireguardConfiguration:
         self.Name = name
         self.__configPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], f'{self.Name}.conf')
         
+        
+        backupPath = os.path.join(DashboardConfig.GetConfig("Server", "wg_conf_path")[1], 'WGDashboard_Backup')
+        if not os.path.exists(backupPath):
+            os.mkdir(backupPath)
+        
         if name is not None:
             if data is not None and "Backup" in data.keys():
                 db = self.__importDatabase(
@@ -479,6 +484,7 @@ class WireguardConfiguration:
             
             self.__parseConfigurationFile()
             self.__initPeersList()
+
             
         else:
             self.Name = data["ConfigurationName"]
@@ -2431,8 +2437,7 @@ def API_traceroute_execute():
                                   data=json.dumps([x['ip'] for x in result]))
                 d = r.json()
                 for i in range(len(result)):
-                    result[i]['geo'] = d[i]
-                
+                    result[i]['geo'] = d[i]    
             except Exception as e:
                 print(e)
             return ResponseObject(data=result)
