@@ -20,7 +20,7 @@ const route = useRoute()
 const configurationInfo = ref({})
 const configurationPeers = ref([])
 const configurationToggling = ref(false)
-const configurationModalSelectedPeer = ref("")
+const configurationModalSelectedPeer = ref({})
 const configurationModals = ref({
 	peerSetting: {
 		modalOpen: false,
@@ -345,7 +345,7 @@ const searchPeers = computed(() => {
 				      @refresh="fetchPeerList()"
 				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModals.peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
 				      @setting="configurationModals.peerSetting.modalOpen = true; configurationModalSelectedPeer = peer"
-				      @qrcode="(file) => {configurationModals.peerQRCode.peerConfigData = file; configurationModals.peerQRCode.modalOpen = true;}"
+				      @qrcode="(file) => {configurationModalSelectedPeer = peer; configurationModals.peerQRCode.modalOpen = true;}"
 				      @configurationFile="(file) => {configurationModals.peerConfigurationFile.peerConfigData = file; configurationModals.peerConfigurationFile.modalOpen = true;}"
 				></Peer>
 			</div>

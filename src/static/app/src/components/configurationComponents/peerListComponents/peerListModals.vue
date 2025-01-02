@@ -22,12 +22,20 @@ const PeerSettingsModal = defineAsyncComponent(() => import("@/components/config
 
 <template>
 	<Transition name="zoom">
-		<PeerSettingsModal v-if="configurationModals.peerSetting.modalOpen"
-		              key="settings"
-		              :selectedPeer="configurationModalSelectedPeer"
-		              @refresh="emits('refresh')"
-		              @close="configurationModals.peerSetting.modalOpen = false">
+		<PeerSettingsModal 
+			v-if="configurationModals.peerSetting.modalOpen"
+			key="settings"
+			:selectedPeer="configurationModalSelectedPeer"
+			@refresh="emits('refresh')"
+			@close="configurationModals.peerSetting.modalOpen = false">
 		</PeerSettingsModal>
+	</Transition>
+	<Transition name="zoom">
+		<PeerQRCodeModal 
+			v-if="configurationModals.peerQRCode.modalOpen"
+			:selectedPeer="configurationModalSelectedPeer"
+			@close="configurationModals.peerQRCode.modalOpen = false">
+		</PeerQRCodeModal>
 	</Transition>
 </template>
 
