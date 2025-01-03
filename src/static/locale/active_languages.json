@@ -55,9 +55,9 @@
 		"lang_name_localized": "中文（繁體）"
 	},
 	{
-        "lang_id": "sv-se",
-        "lang_name": "Swedish",
-        "lang_name_localized": "Svenska"
+        	"lang_id": "sv-se",
+        	"lang_name": "Swedish",
+        	"lang_name_localized": "Svenska"
   	},
 	{
 		"lang_id": "pl",
