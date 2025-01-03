@@ -20,6 +20,11 @@
 		"lang_name_localized": "Español"
 	},
 	{
+		"lang_id": "fr-ca",
+		"lang_name": "French (Quebec)",
+		"lang_name_localized": "Français (Québec)"
+	},
+	{
 		"lang_id": "it-it",
 		"lang_name": "Italian",
 		"lang_name_localized": "Italiano"
@@ -63,10 +68,5 @@
 		"lang_id": "pl",
 		"lang_name": "Polish",
 		"lang_name_localized": "Polski"
-	},
-	{
-		"lang_id": "fr-ca",
-		"lang_name": "French (Quebec)",
-		"lang_name_localized": "Français (Québec)"
 	}
 ]
