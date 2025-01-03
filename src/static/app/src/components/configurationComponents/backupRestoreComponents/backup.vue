@@ -37,7 +37,7 @@ const restoreBackup = () => {
 		loading.value = false;
 		restoreConfirmation.value = false;
 		if (res.status){
-			emit("refresh")
+			emit("refreshPeersList")
 			store.newMessage("Server", "Backup restored with " + props.b.filename, "success")
 		}else{
 			store.newMessage("Server", "Backup failed to restore", "danger")

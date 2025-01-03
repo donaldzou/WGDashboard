@@ -13,6 +13,9 @@ import PeerListModals from "@/components/configurationComponents/peerListCompone
 
 // Async Components
 const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
+const PeerJobsAllModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue"))
+const PeerJobsLogsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue"))
+const EditConfigurationModal = defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue"))
 
 const dashboardStore = DashboardConfigurationStore()
 const wireguardConfigurationStore = WireguardConfigurationsStore()
@@ -341,12 +344,12 @@ const searchPeers = computed(() => {
 			     :key="peer.id"
 			     v-for="peer in searchPeers">
 				<Peer :Peer="peer"
-				      @share="configurationModals.peerShare.selectedPeer = peer.id; this.peerShare.modalOpen = true;"
+				      @share="configurationModals.peerShare.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @refresh="fetchPeerList()"
-				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModals.peerScheduleJobs.selectedPeer = this.configurationPeers.find(x => x.id === peer.id)"
+				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @setting="configurationModals.peerSetting.modalOpen = true; configurationModalSelectedPeer = peer"
-				      @qrcode="(file) => {configurationModalSelectedPeer = peer; configurationModals.peerQRCode.modalOpen = true;}"
-				      @configurationFile="(file) => {configurationModals.peerConfigurationFile.peerConfigData = file; configurationModals.peerConfigurationFile.modalOpen = true;}"
+				      @qrcode="configurationModalSelectedPeer = peer; configurationModals.peerQRCode.modalOpen = true;"
+				      @configurationFile="configurationModalSelectedPeer = peer; configurationModals.peerConfigurationFile.modalOpen = true;"
 				></Peer>
 			</div>
 		</TransitionGroup>
@@ -357,7 +360,37 @@ const searchPeers = computed(() => {
 	<PeerListModals 
 		:configurationModals="configurationModals"
 		:configurationModalSelectedPeer="configurationModalSelectedPeer"
+		@refresh="fetchPeerList()"
 	></PeerListModals>
+	<TransitionGroup name="zoom">
+		<PeerJobsAllModal
+			key="PeerJobsAllModal"
+			v-if="configurationModals.peerScheduleJobsAll.modalOpen"
+			@refresh="fetchPeerList()"
+			@allLogs="configurationModals.peerScheduleJobsLogs.modalOpen = true"
+			@close="configurationModals.peerScheduleJobsAll.modalOpen = false"
+			:configurationPeers="configurationPeers"
+		>
+		</PeerJobsAllModal>
+		<PeerJobsLogsModal
+			key="PeerJobsLogsModal"
+			v-if="configurationModals.peerScheduleJobsLogs.modalOpen" 
+			@close="configurationModals.peerScheduleJobsLogs.modalOpen = false"
+			:configurationInfo="configurationInfo">
+		</PeerJobsLogsModal>
+		<EditConfigurationModal
+			key="EditConfigurationModal"
+			@editRaw="configurationModals.editRawConfigurationFile.modalOpen = true"
+			@close="configurationModals.editConfiguration.modalOpen = false"
+			@dataChanged="(d) => configurationInfo = d"
+			@refresh="fetchPeerList()"
+			@backupRestore="configurationModals.backupRestore.modalOpen = true"
+			@deleteConfiguration="configurationModals.deleteConfiguration.modalOpen = true"
+			:configurationInfo="configurationInfo"
+			v-if="configurationModals.editConfiguration.modalOpen">
+		</EditConfigurationModal>
+		
+	</TransitionGroup>
 </div>
 </template>
 

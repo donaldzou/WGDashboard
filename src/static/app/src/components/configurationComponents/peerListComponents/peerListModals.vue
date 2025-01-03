@@ -21,22 +21,40 @@ const PeerSettingsModal = defineAsyncComponent(() => import("@/components/config
 </script>
 
 <template>
-	<Transition name="zoom">
+	<TransitionGroup name="zoom">
 		<PeerSettingsModal 
 			v-if="configurationModals.peerSetting.modalOpen"
-			key="settings"
+			key="PeerSettingsModal"
 			:selectedPeer="configurationModalSelectedPeer"
 			@refresh="emits('refresh')"
 			@close="configurationModals.peerSetting.modalOpen = false">
 		</PeerSettingsModal>
-	</Transition>
-	<Transition name="zoom">
-		<PeerQRCodeModal 
+		<PeerQRCodeModal
+			key="PeerQRCodeModal"
 			v-if="configurationModals.peerQRCode.modalOpen"
 			:selectedPeer="configurationModalSelectedPeer"
 			@close="configurationModals.peerQRCode.modalOpen = false">
 		</PeerQRCodeModal>
-	</Transition>
+		<PeerJobsModal
+			key="PeerJobsModal"
+			@refresh="emits('refresh')"
+			v-if="configurationModals.peerScheduleJobs.modalOpen"
+			:selectedPeer="configurationModalSelectedPeer"
+			@close="configurationModals.peerScheduleJobs.modalOpen = false">
+		</PeerJobsModal>
+		<PeerShareLinkModal
+			key="PeerShareLinkModal"
+			v-if="configurationModals.peerShare.modalOpen"
+			@close="configurationModals.peerShare.modalOpen = false;"
+			:selectedPeer="configurationModalSelectedPeer">
+		</PeerShareLinkModal>
+		<PeerConfigurationFileModal
+			@close="configurationModals.peerConfigurationFile.modalOpen = false"
+			v-if="configurationModals.peerConfigurationFile.modalOpen"
+			:selectedPeer="configurationModalSelectedPeer"
+		></PeerConfigurationFileModal>
+	</TransitionGroup>
+
 </template>
 
 <style scoped>

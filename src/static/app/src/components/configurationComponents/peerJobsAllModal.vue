@@ -14,11 +14,6 @@ export default {
 	props: {
 		configurationPeers: Array[Object]
 	},
-	methods:{
-		getuuid(){
-			return v4();
-		}	
-	},
 	computed:{
 		getAllJobs(){
 			return this.configurationPeers.filter(x => x.jobs.length > 0)

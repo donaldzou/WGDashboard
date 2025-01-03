@@ -10,7 +10,7 @@ import LocaleText from "@/components/text/localeText.vue";
 export default {
 	name: "peerShareLinkModal",
 	props: {
-		peer: Object
+		selectedPeer: Object
 	},
 	components: {
 		LocaleText,
@@ -27,14 +27,14 @@ export default {
 		return {store}
 	},
 	mounted() {
-		this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
+		this.dataCopy = JSON.parse(JSON.stringify(this.selectedPeer.ShareLink)).at(0);
 	},
 	watch: {
-		'peer.ShareLink': {
+		'selectedPeer.ShareLink': {
 			deep: true,
 			handler(newVal, oldVal){
 				if (oldVal.length !== newVal.length){
-					this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
+					this.dataCopy = JSON.parse(JSON.stringify(this.selectedPeer.ShareLink)).at(0);
 				}
 			}
 		}
@@ -44,12 +44,12 @@ export default {
 		startSharing(){
 			this.loading = true;
 			fetchPost("/api/sharePeer/create", {
-				Configuration: this.peer.configuration.Name,
-				Peer: this.peer.id,
+				Configuration: this.selectedPeer.configuration.Name,
+				Peer: this.selectedPeer.id,
 				ExpireDate: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss")
 			}, (res) => {
 				if (res.status){
-					this.peer.ShareLink = res.data;
+					this.selectedPeer.ShareLink = res.data;
 					this.dataCopy = res.data.at(0);
 				}else{
 					this.store.newMessage("Server", 
@@ -62,7 +62,7 @@ export default {
 			fetchPost("/api/sharePeer/update", this.dataCopy, (res) => {
 				if (res.status){
 					this.dataCopy = res.data.at(0)
-					this.peer.ShareLink = res.data;
+					this.selectedPeer.ShareLink = res.data;
 					this.store.newMessage("Server", "Link expire date updated", "success")
 				}else{
 					this.store.newMessage("Server",
@@ -113,7 +113,7 @@ export default {
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
-					<div class="card-body px-4 pb-4" v-if="this.peer.ShareLink">
+					<div class="card-body px-4 pb-4" v-if="this.selectedPeer.ShareLink">
 						<div v-if="!this.dataCopy">
 							<h6 class="mb-3 text-muted">
 								<LocaleText t="Currently the peer is not sharing"></LocaleText>

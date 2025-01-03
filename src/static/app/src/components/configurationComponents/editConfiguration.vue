@@ -6,6 +6,10 @@ import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import UpdateConfigurationName
 	from "@/components/configurationComponents/editConfigurationComponents/updateConfigurationName.vue";
+import EditRawConfigurationFile
+	from "@/components/configurationComponents/editConfigurationComponents/editRawConfigurationFile.vue";
+import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
+import ConfigurationBackupRestore from "@/components/configurationComponents/configurationBackupRestore.vue";
 const props = defineProps({
 	configurationInfo: Object
 })
@@ -15,13 +19,11 @@ const saving = ref(false)
 const data = reactive(JSON.parse(JSON.stringify(props.configurationInfo)))
 const editPrivateKey = ref(false)
 const dataChanged = ref(false)
-const confirmChanges = ref(false)
 const reqField = reactive({
 	PrivateKey: true,
 	IPAddress: true,
 	ListenPort: true
 })
-const editConfigurationContainer = useTemplateRef("editConfigurationContainer")
 const genKey = () => {
 	if (wgStore.checkWGKeyLength(data.PrivateKey)){
 		reqField.PrivateKey = true;
@@ -34,7 +36,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close", "backupRestore", "deleteConfiguration", "editRaw"])
+const emit = defineEmits(["changed", "close", "refresh"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -56,10 +58,34 @@ watch(data, () => {
 }, {
 	deep: true
 })
+
+const editRawConfigurationFileModal = ref(false)
+const backupRestoreModal = ref(false)
+const deleteConfigurationModal = ref(false)
+
 </script>
 
 <template>
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll" ref="editConfigurationContainer">
+		<TransitionGroup name="zoom">
+			<EditRawConfigurationFile
+				name="EditRawConfigurationFile"
+				v-if="editRawConfigurationFileModal"
+				@close="editRawConfigurationFileModal = false">
+			</EditRawConfigurationFile>
+			<DeleteConfiguration
+				key="DeleteConfiguration"
+				@backup="backupRestoreModal = true"
+				@close="deleteConfigurationModal = false"
+				v-if="deleteConfigurationModal">
+			</DeleteConfiguration>
+			<ConfigurationBackupRestore
+				@close="backupRestoreModal = false"
+				@refreshPeersList="emit('refresh')"
+				v-if="backupRestoreModal">
+			</ConfigurationBackupRestore>
+		</TransitionGroup>
+		
 		<div class="container d-flex h-100 w-100">
 			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 700px">
 				<div class="card rounded-3 shadow flex-grow-1">
@@ -187,20 +213,20 @@ watch(data, () => {
 								<h5 class="mb-3">Danger Zone</h5>
 								<div class="d-flex gap-2 flex-column">
 									<button
-										@click="emit('backupRestore')"
+										@click="backupRestoreModal = true"
 										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 text-start d-flex">
 										<i class="bi bi-copy me-auto"></i>
 										<LocaleText t="Backup & Restore"></LocaleText>
 									</button>
 									<button
-										@click="emit('editRaw')"
+										@click="editRawConfigurationFileModal = true"
 										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 d-flex">
 										<i class="bi bi-pen me-auto"></i>
 										<LocaleText t="Edit Raw Configuration File"></LocaleText>
 									</button>
 									
 									<button
-										@click="emit('deleteConfiguration')"
+										@click="deleteConfigurationModal = true"
 										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 d-flex mt-4">
 										<i class="bi bi-trash-fill me-auto"></i>
 										<LocaleText t="Delete Configuration"></LocaleText>

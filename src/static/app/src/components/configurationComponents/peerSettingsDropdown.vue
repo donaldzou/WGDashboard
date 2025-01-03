@@ -122,10 +122,10 @@ export default {
 							                          @click="this.downloadPeer()"></PeerSettingsDropdownTool>
 							<PeerSettingsDropdownTool icon="bi-qr-code" 
 							                          title="QR Code"
-							                          @click="this.downloadQRCode('qrcode')"></PeerSettingsDropdownTool>
+							                          @click="this.$emit('qrcode')"></PeerSettingsDropdownTool>
 							<PeerSettingsDropdownTool icon="bi-body-text" 
 							                          title="Configuration File"
-							                          @click="this.downloadQRCode('configurationFile')"></PeerSettingsDropdownTool>
+							                          @click="this.$emit('configurationFile')"></PeerSettingsDropdownTool>
 							<PeerSettingsDropdownTool icon="bi-share" 
 							                          title="Share"
 							                          @click="this.$emit('share')"></PeerSettingsDropdownTool>
