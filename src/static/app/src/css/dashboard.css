@@ -153,11 +153,11 @@
     color: #74b7ff;
 }
 
-[data-bs-theme="dark"] .nav-link:hover{
+[data-bs-theme="dark"] .nav-link:hover, [data-bs-theme="dark"] .nav-link.active{
     background-color: #323844;
 }
 
-.nav-link:hover {
+.nav-link:hover, .nav-link.active {
     background-color: #e8e8e8;
 }
 
@@ -1204,12 +1204,12 @@ pre.index-alert {
 
 .login-container-fluid{
     background: linear-gradient(var(--bgdegree), #009fff1a var(--distance2), #ff4b001a 100%);
-    animation: login 8s ease-in-out infinite;
+    animation: login 8s ease-in-out forwards;
 }
 
 .login-container-fluid[data-bs-theme="dark"]{
     background: linear-gradient(var(--bgdegree), #003555 var(--distance2), #521800 100%);
-    animation: login 8s ease-in-out infinite;
+    animation: login 8s ease-in-out forwards;
 }
 
 @keyframes login {

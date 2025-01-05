@@ -31,12 +31,13 @@ export default {
 				</strong></small>
 			</label>
 		</div>
-		<p  :class="{'mb-0': !this.data.bulkAdd}"><small class="text-muted d-block">
+		<p :class="{'mb-0': !this.data.bulkAdd}"><small class="text-muted d-block">
 			<LocaleText t="By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP."></LocaleText>
 		</small></p>
 
 		<div class="form-group" v-if="this.data.bulkAdd">
 			<input class="form-control form-control-sm rounded-3 mb-1" type="number" min="1"
+			       id="bulk_add_count"
 			       :max="this.availableIp.length"
 			       v-model="this.data.bulkAddAmount"
 			       :placeholder="this.bulkAddGetLocale">

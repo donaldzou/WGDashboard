@@ -2,6 +2,8 @@ import os.path
 
 import dashboard, configparser
 from datetime import datetime
+import multiprocessing
+
 
 global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger
 app_host, app_port = dashboard.gunicornConfig()

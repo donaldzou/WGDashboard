@@ -175,6 +175,7 @@ export default {
 					<div class="form-check form-switch ms-auto">
 						<input
 							v-model="this.store.CrossServerConfiguration.Enable"
+							:disabled="loading"
 							class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
 						<label class="form-check-label" for="flexSwitchCheckChecked">
 							<LocaleText t="Access Remote Server"></LocaleText>

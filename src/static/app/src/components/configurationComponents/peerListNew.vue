@@ -10,12 +10,16 @@ import PeerDataUsageCharts from "@/components/configurationComponents/peerListCo
 import PeerSearch from "@/components/configurationComponents/peerSearch.vue";
 import Peer from "@/components/configurationComponents/peer.vue";
 import PeerListModals from "@/components/configurationComponents/peerListComponents/peerListModals.vue";
+import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
+
 
 // Async Components
 const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
 const PeerJobsAllModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue"))
 const PeerJobsLogsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue"))
 const EditConfigurationModal = defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue"))
+const SelectPeersModal = defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue"))
+const PeerAddModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerAddModal.vue"))
 
 const dashboardStore = DashboardConfigurationStore()
 const wireguardConfigurationStore = WireguardConfigurationsStore()
@@ -25,6 +29,9 @@ const configurationPeers = ref([])
 const configurationToggling = ref(false)
 const configurationModalSelectedPeer = ref({})
 const configurationModals = ref({
+	peerNew: {
+		modalOpen: false	
+	},
 	peerSetting: {
 		modalOpen: false,
 	},
@@ -144,6 +151,7 @@ const configurationSummary = computed(() => {
 })
 
 const showPeersCount = ref(10)
+const showPeersThreshold = 20;
 const searchPeers = computed(() => {
 	const result = wireguardConfigurationStore.searchString ?
 		configurationPeers.value.filter(x => {
@@ -219,12 +227,13 @@ const searchPeers = computed(() => {
 				</div>
 			</div>
 			<div class="d-flex gap-2">
-				<RouterLink
-					to="create"
+				<a
+					role="button"
+					@click="configurationModals.peerNew.modalOpen = true"
 					class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ">
-					<i class="bi bi-plus-lg me-2"></i>
+					<i class="bi bi-plus-circle me-2"></i>
 					<LocaleText t="Peer"></LocaleText>
-				</RouterLink>
+				</a>
 				<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle "
 				        @click="configurationModals.editConfiguration.modalOpen = true"
 				        type="button" aria-expanded="false">
@@ -330,6 +339,7 @@ const searchPeers = computed(() => {
 	<hr>
 	<div style="margin-bottom: 80px">
 		<PeerSearch
+			v-if="configurationPeers.length > 0"
 			@search="peerSearchBar = true"
 			@jobsAll="configurationModals.peerScheduleJobsAll.modalOpen = true"
 			@jobLogs="configurationModals.peerScheduleJobsLogs.modalOpen = true"
@@ -353,6 +363,7 @@ const searchPeers = computed(() => {
 				></Peer>
 			</div>
 		</TransitionGroup>
+		
 	</div>
 	<Transition name="slideUp">
 		<PeerSearchBar @close="peerSearchBar = false" v-if="peerSearchBar"></PeerSearchBar>
@@ -363,6 +374,13 @@ const searchPeers = computed(() => {
 		@refresh="fetchPeerList()"
 	></PeerListModals>
 	<TransitionGroup name="zoom">
+		<Suspense key="PeerAddModal">
+			<PeerAddModal
+				v-if="configurationModals.peerNew.modalOpen"
+				@close="configurationModals.peerNew.modalOpen = false"
+				@addedPeers="configurationModals.peerNew.modalOpen = false; fetchPeerList()"
+			></PeerAddModal>
+		</Suspense>
 		<PeerJobsAllModal
 			key="PeerJobsAllModal"
 			v-if="configurationModals.peerScheduleJobsAll.modalOpen"
@@ -389,11 +407,34 @@ const searchPeers = computed(() => {
 			:configurationInfo="configurationInfo"
 			v-if="configurationModals.editConfiguration.modalOpen">
 		</EditConfigurationModal>
-		
+		<SelectPeersModal
+			@refresh="fetchPeerList()"
+			v-if="configurationModals.selectPeers.modalOpen"
+			:configurationPeers="configurationPeers"
+			@close="configurationModals.selectPeers.modalOpen = false"
+		></SelectPeersModal>
 	</TransitionGroup>
+	<PeerIntersectionObserver
+		:showPeersCount="showPeersCount"
+		:peerListLength="searchPeers.length"
+		@loadMore="showPeersCount += showPeersThreshold"></PeerIntersectionObserver>
 </div>
 </template>
 
 <style scoped>
+.peerNav .nav-link{
+	&.active{
+		background-color: #efefef;
+	}
+}
 
+th, td{
+	background-color: transparent !important;
+}
+
+@media screen and (max-width: 576px) {
+	.titleBtn{
+		flex-basis: 100%;
+	}
+}
 </style>

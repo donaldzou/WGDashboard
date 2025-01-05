@@ -81,7 +81,6 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 			return isCidr(ip) !== 0
 		},
 		checkWGKeyLength(key){
-			console.log(key)
 			const reg = /^[A-Za-z0-9+/]{43}=?=?$/;
 			return reg.test(key)
 		}

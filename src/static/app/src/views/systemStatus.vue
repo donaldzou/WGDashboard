@@ -169,7 +169,7 @@ const getData = () => {
 			<div class="card-body p-4 d-flex gap-3 flex-column">
 				<div class="d-flex align-items-center">
 					<h3 class="text-muted mb-0">
-						<i class="bi bi-cpu-fill me-2"></i>
+						<i class="bi bi-device-ssd-fill me-2"></i>
 						<LocaleText t="Storage"></LocaleText>
 					</h3>
 					<h3 class="ms-auto mb-0">

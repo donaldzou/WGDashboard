@@ -78,7 +78,7 @@ export default {
 
 <template>
 	<div class="mt-md-5 mt-3">
-		<div class="container-md">
+		<div class="container-fluid">
 			<SystemStatus></SystemStatus>
 			<div class="d-flex mb-4 configurationListTitle align-items-md-center gap-3 flex-column flex-md-row">
 				<h2 class="text-body d-flex mb-0">
