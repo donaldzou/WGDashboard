@@ -14,7 +14,7 @@ from Utilities import (
     ValidateIPAddressesWithRange, ValidateIPAddresses, ValidateDNSAddress,
     GenerateWireguardPublicKey, GenerateWireguardPrivateKey
 )
-
+from Email import EmailSender
 
 DASHBOARD_VERSION = 'v4.2.0'
 
@@ -92,6 +92,7 @@ Dashboard Logger Class
 class DashboardLogger:
     def __init__(self):
         self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
+                                        isolation_level=None,
                                         check_same_thread=False)
         self.loggerdb.row_factory = sqlite3.Row
         self.__createLogDatabase()
@@ -107,19 +108,19 @@ class DashboardLogger:
             if self.loggerdb.in_transaction:
                 self.loggerdb.commit()
     
-    def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:
-        pass
+    def log(self, URL: str = "", IP: str = "", Status: str = "true", Message: str = "") -> bool:    
         try:
-            with self.loggerdb:
-                loggerdbCursor = self.loggerdb.cursor()
-                loggerdbCursor.execute(
-                    "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?)", (str(uuid.uuid4()), URL, IP, Status, Message,))
-                if self.loggerdb.in_transaction:
-                    self.loggerdb.commit()
-                return True
+            loggerdbCursor = self.loggerdb.cursor()
+            loggerdbCursor.execute(
+                "INSERT INTO DashboardLog (LogID, URL, IP, Status, Message) VALUES (?, ?, ?, ?, ?);", (str(uuid.uuid4()), URL, IP, Status, Message,))
+            loggerdbCursor.close()
+            self.loggerdb.commit()
+            return True
         except Exception as e:
             print(f"[WGDashboard] Access Log Error: {str(e)}")
             return False
+
+       
 
 """
 Peer Job Logger
@@ -1878,7 +1879,8 @@ class DashboardConfig:
                 "port": "",
                 "encryption": "",
                 "username": "",
-                "email_password": ""
+                "email_password": "",
+                "send_from": ""
             },
             "WireGuardConfiguration": {
                 "autostart": ""
@@ -1919,22 +1921,22 @@ class DashboardConfig:
         sqlUpdate("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
         self.DashboardAPIKeys = self.__getAPIKeys()
     
-    def __configValidation(self, key, value: Any) -> [bool, str]:
-        if type(value) is str and len(value) == 0:
+    def __configValidation(self, section : str, key: str, value: Any) -> [bool, str]:
+        if type(value) is str and len(value) == 0 and section not in ['Email', 'WireGuardConfiguration']:
             return False, "Field cannot be empty!"
-        if key == "peer_global_dns":
+        if section == "Peers" and key == "peer_global_dns":
             return ValidateDNSAddress(value)
-        if key == "peer_endpoint_allowed_ip":
+        if section == "Peers" and key == "peer_endpoint_allowed_ip":
             value = value.split(",")
             for i in value:
                 try:
                     ipaddress.ip_network(i, strict=False)
                 except Exception as e:
                     return False, str(e)
-        if key == "wg_conf_path":
+        if section == "Server" and key == "wg_conf_path":
             if not os.path.exists(value):
                 return False, f"{value} is not a valid path"
-        if key == "password":
+        if section == "Account" and key == "password":
             if self.GetConfig("Account", "password")[0]:
                 if not self.__checkPassword(
                         value["currentPassword"], self.GetConfig("Account", "password")[1].encode("utf-8")):
@@ -1954,7 +1956,7 @@ class DashboardConfig:
             return False, None
 
         if not init:
-            valid, msg = self.__configValidation(key, value)
+            valid, msg = self.__configValidation(section, key, value)
             if not valid:
                 return False, msg
 
@@ -2021,32 +2023,7 @@ class DashboardConfig:
                 if key not in self.hiddenAttribute:
                     the_dict[section][key] = self.GetConfig(section, key)[1]
         return the_dict
-    
-"""
-Email Sender
-"""
-
-class EmailSender:
-    import smtplib
-    
-    def __init__(self):
-        self.Server = DashboardConfig.GetConfig("Email", "server")[1]
-        self.Port = DashboardConfig.GetConfig("Email", "port")[1]
-        self.Encryption = DashboardConfig.GetConfig("Email", "encryption")[1]
-        self.Username = DashboardConfig.GetConfig("Email", "username")[1]
-        self.Password = DashboardConfig.GetConfig("Email", "email_password")[1]
-        
-        self.login()
-    
-    def ready(self):
-        return self.Server and self.Port and self.Encryption and self.Username and self.Password
-    
-    def login(self):
-        if self.ready():
-            self.smtp = smtplib.SMTP(self.Server, port=int(self.Port))
-            if self.Encryption == "STARTTLS":
-                self.smtp.starttls()
-            self.smtp.login(self.Username, self.Password)
+            
 
 """
 Database Connection Functions
@@ -2054,16 +2031,9 @@ Database Connection Functions
 
 sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
 sqldb.row_factory = sqlite3.Row
-# cursor = sqldb.cursor()
 
 def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
-    
-    
-    # sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
-    # sqldb.row_factory = sqlite3.Row
-    # cursor = sqldb.cursor()
     result = []
-    # with sqldb:
     try:
         cursor = sqldb.cursor()
         result = cursor.execute(statement, paramters)
@@ -2086,9 +2056,8 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
     sqldb.close()
 
-
 DashboardConfig = DashboardConfig()
-# EmailSender = EmailSender()
+EmailSender = EmailSender(DashboardConfig)
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
@@ -3008,7 +2977,6 @@ def API_Welcome_VerifyTotpLink():
         DashboardConfig.SetConfig("Account", "enable_totp", "true")
     return ResponseObject(totp == data['totp'])
 
-
 @app.post(f'{APP_PREFIX}/api/Welcome_Finish')
 def API_Welcome_Finish():
     data = request.get_json()
@@ -3039,7 +3007,6 @@ class Locale:
         with open(os.path.join(f"{self.localePath}active_languages.json"), "r") as f:
             self.activeLanguages = json.loads(''.join(f.readlines()))
         
-    
     def getLanguage(self) -> dict | None:
         currentLanguage = DashboardConfig.GetConfig("Server", "dashboard_language")[1]
         if currentLanguage == "en":
@@ -3056,7 +3023,6 @@ class Locale:
         else:
             DashboardConfig.SetConfig("Server", "dashboard_language", lang_id)
         
-    
 Locale = Locale()
 
 @app.get(f'{APP_PREFIX}/api/locale')
@@ -3074,6 +3040,19 @@ def API_Locale_Update():
         return ResponseObject(False, "Please specify a lang_id")
     Locale.updateLanguage(data['lang_id'])
     return ResponseObject(data=Locale.getLanguage())
+
+@app.get(f'{APP_PREFIX}/api/email/ready')
+def API_Email_Ready():
+    return ResponseObject(EmailSender.ready())
+
+@app.post(f'{APP_PREFIX}/api/email/send')
+def API_Email_Send():
+    data = request.get_json()
+    if "receiver" not in data.keys():
+        return ResponseObject(False, "Please at least specify receiver")
+    
+    s, m = EmailSender.send(data.get('receiver'), data.get('subject', ''), data.get('body', ''))
+    return ResponseObject(s, m)
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')
 def API_SystemStatus():
