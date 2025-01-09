@@ -82,7 +82,6 @@ export default {
 				</small>
 			</div>
 			<div class="d-flex align-items-end">
-				
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"
 				     :class="{active: this.subMenuOpened}"
 				>
