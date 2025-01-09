@@ -2286,10 +2286,10 @@ def API_getDashboardVersion():
 @app.post(f'{APP_PREFIX}/api/savePeerScheduleJob/')
 def API_savePeerScheduleJob():
     data = request.json
-    if "Job" not in data.keys() not in WireguardConfigurations.keys():
+    if "Job" not in data.keys():
         return ResponseObject(False, "Please specify job")
     job: dict = data['Job']
-    if "Peer" not in job.keys() or "Configuration" not in job.keys():
+    if "Peer" not in job.keys() or "Configuration" not in job.keys() or job['Configuration'] not in WireguardConfigurations.keys():
         return ResponseObject(False, "Please specify peer and configuration")
     configuration = WireguardConfigurations.get(job['Configuration'])
     f, fp = configuration.searchPeer(job['Peer'])
@@ -2306,10 +2306,10 @@ def API_savePeerScheduleJob():
 @app.post(f'{APP_PREFIX}/api/deletePeerScheduleJob/')
 def API_deletePeerScheduleJob():
     data = request.json
-    if "Job" not in data.keys() not in WireguardConfigurations.keys():
+    if "Job" not in data.keys():
         return ResponseObject(False, "Please specify job")
     job: dict = data['Job']
-    if "Peer" not in job.keys() or "Configuration" not in job.keys():
+    if "Peer" not in job.keys() or "Configuration" not in job.keys() or job['Configuration'] not in WireguardConfigurations.keys():
         return ResponseObject(False, "Please specify peer and configuration")
     configuration = WireguardConfigurations.get(job['Configuration'])
     f, fp = configuration.searchPeer(job['Peer'])
