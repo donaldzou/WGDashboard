@@ -2306,7 +2306,7 @@ def API_savePeerScheduleJob():
 @app.post(f'{APP_PREFIX}/api/deletePeerScheduleJob/')
 def API_deletePeerScheduleJob():
     data = request.json
-    if "Job" not in data.keys() not in WireguardConfigurations.keys():
+    if "Job" not in data.keys() and "Job" not in WireguardConfigurations.keys():
         return ResponseObject(False, "Please specify job")
     job: dict = data['Job']
     if "Peer" not in job.keys() or "Configuration" not in job.keys():
