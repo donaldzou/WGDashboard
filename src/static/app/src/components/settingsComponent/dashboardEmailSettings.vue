@@ -41,9 +41,9 @@ const checkEmailReady = async () => {
 const sendTestEmail = async () => {
 	testing.value = true
 	await fetchPost("/api/email/send", {
-		receiver: testEmailReceiver.value,
-		subject: "WGDashboard Testing Email",
-		body: "Test 1, 2, 3! Hello World :)"
+		Receiver: testEmailReceiver.value,
+		Subject: "WGDashboard Testing Email",
+		Body: "Test 1, 2, 3! Hello World :)"
 	}, (res) => {
 		if (res.status){
 			store.newMessage("Server", "Test email sent successfully!", "success")
@@ -151,10 +151,12 @@ const sendTestEmail = async () => {
 					</div>
 				</div>
 			</form>
-			<hr>
-			<form 
+			<hr v-if="emailIsReady">
+			<form
+				v-if="emailIsReady"
 				@submit="(e) => {e.preventDefault(); sendTestEmail()}"
 				class="input-group mb-3">
+				
 				<input type="email" class="form-control rounded-start-3" 
 				       v-model="testEmailReceiver"
 				       :disabled="testing"

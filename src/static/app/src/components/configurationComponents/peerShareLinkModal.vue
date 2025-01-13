@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import LocaleText from "@/components/text/localeText.vue";
+import PeerShareWithEmail from "@/components/configurationComponents/peerShareLinkComponents/peerShareWithEmail.vue";
 
 
 export default {
@@ -13,6 +14,7 @@ export default {
 		selectedPeer: Object
 	},
 	components: {
+		PeerShareWithEmail,
 		LocaleText,
 		VueDatePicker
 	},
@@ -105,7 +107,7 @@ export default {
 <template>
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
-			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 500px">
+			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 700px">
 				<div class="card rounded-3 shadow flex-grow-1">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
 						<h4 class="mb-0">
@@ -163,6 +165,16 @@ export default {
 								<LocaleText t="Stop Sharing..." v-if="this.loading"></LocaleText>
 								<LocaleText t="Stop Sharing" v-else></LocaleText>
 							</button>
+							<hr>
+							<Suspense>
+								<PeerShareWithEmail :selectedPeer="selectedPeer" :dataCopy="dataCopy"></PeerShareWithEmail>
+								<template #fallback>
+									<h6 class="text-muted">
+										<span class="spinner-border me-2 spinner-border-sm" role="status"></span>
+										<LocaleText t="Checking SMTP Configuration..."></LocaleText>
+									</h6>
+								</template>
+							</Suspense>
 						</div>
 					</div>
 				</div>

@@ -1,9 +1,12 @@
 import itertools, random, shutil, sqlite3, configparser, hashlib, ipaddress, json, traceback, os, secrets, subprocess
 import smtplib
 import time, re, urllib.error, uuid, bcrypt, psutil, pyotp, threading
+from uuid import uuid4
 from zipfile import ZipFile
 from datetime import datetime, timedelta
 from typing import Any
+
+from jinja2 import Template
 from flask import Flask, request, render_template, session, g, send_file
 from json import JSONEncoder
 from flask_cors import CORS
@@ -3048,10 +3051,29 @@ def API_Email_Ready():
 @app.post(f'{APP_PREFIX}/api/email/send')
 def API_Email_Send():
     data = request.get_json()
-    if "receiver" not in data.keys():
+    if "Receiver" not in data.keys():
         return ResponseObject(False, "Please at least specify receiver")
     
-    s, m = EmailSender.send(data.get('receiver'), data.get('subject', ''), data.get('body', ''))
+    body = data.get('Body', '')
+    if "ConfigurationName" in data.keys() and "Peer" in data.keys():
+        if data.get('ConfigurationName') in WireguardConfigurations.keys():
+            configuration = WireguardConfigurations.get(data.get('ConfigurationName'))
+            attachmentName = ""
+            if configuration is not None:
+                fp, p = configuration.searchPeer(data.get('Peer'))
+                print(fp)
+                if fp:
+                    template = Template(body)
+                    download = p.downloadPeer()
+                    body = template.render(peer=p.toJson(), configurationFile=download)
+                    if data.get('IncludeAttachment', False):
+                        u = str(uuid4())
+                        with open(os.path.join('./attachments', download['fileName'],), 'w+') as f:
+                            f.write(download['file'])   
+                        attachmentName = f'{u}.conf'
+    
+    s, m = EmailSender.send(data.get('Receiver'), data.get('Subject', ''), body,  
+                            data.get('IncludeAttachment', False), download['fileName'])
     return ResponseObject(s, m)
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')

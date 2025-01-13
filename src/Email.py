@@ -33,6 +33,7 @@ class EmailSender:
         return self.DashboardConfig.GetConfig("Email", "send_from")[1]
 
     def ready(self):
+        print(self.Server())
         return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0
 
     def send(self, receiver, subject, body, includeAttachment = False, attachmentName = ""):
@@ -47,7 +48,7 @@ class EmailSender:
                 message['Subject'] = subject
                 message['From'] = formataddr((Header(self.SendFrom()).encode(), self.Username()))
                 message["To"] = receiver
-                message.attach(MIMEText(body, "html"))
+                message.attach(MIMEText(body, "plain"))
 
                 if includeAttachment and len(attachmentName) > 0:
                     attachmentPath = os.path.join('./attachments', attachmentName)
@@ -66,3 +67,4 @@ class EmailSender:
                 return True, None
             except Exception as e:
                 return False, f"Send failed | Reason: {e}"
+        return False, "SMTP not configured"
