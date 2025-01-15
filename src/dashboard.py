@@ -1883,7 +1883,8 @@ class DashboardConfig:
                 "encryption": "",
                 "username": "",
                 "email_password": "",
-                "send_from": ""
+                "send_from": "",
+                "email_template": ""
             },
             "WireGuardConfiguration": {
                 "autostart": ""
@@ -3053,15 +3054,14 @@ def API_Email_Send():
     data = request.get_json()
     if "Receiver" not in data.keys():
         return ResponseObject(False, "Please at least specify receiver")
-    
     body = data.get('Body', '')
+    download = None
     if "ConfigurationName" in data.keys() and "Peer" in data.keys():
         if data.get('ConfigurationName') in WireguardConfigurations.keys():
             configuration = WireguardConfigurations.get(data.get('ConfigurationName'))
             attachmentName = ""
             if configuration is not None:
                 fp, p = configuration.searchPeer(data.get('Peer'))
-                print(fp)
                 if fp:
                     template = Template(body)
                     download = p.downloadPeer()
@@ -3073,8 +3073,33 @@ def API_Email_Send():
                         attachmentName = f'{u}.conf'
     
     s, m = EmailSender.send(data.get('Receiver'), data.get('Subject', ''), body,  
-                            data.get('IncludeAttachment', False), download['fileName'])
+                            data.get('IncludeAttachment', False), (download.get('fileName', '') if download else ''))
     return ResponseObject(s, m)
+
+@app.post(f'{APP_PREFIX}/api/email/previewBody')
+def API_Email_PreviewBody():
+    data = request.get_json()
+    body = data.get('Body', '')
+    if len(body) == 0:
+        return ResponseObject(False, "Nothing to preview") 
+    if ("ConfigurationName" not in data.keys() 
+            or "Peer" not in data.keys() or data.get('ConfigurationName') not in WireguardConfigurations.keys()):
+        return ResponseObject(False, "Please specify configuration and peer")
+    
+    configuration = WireguardConfigurations.get(data.get('ConfigurationName'))
+    fp, p = configuration.searchPeer(data.get('Peer'))
+    if not fp:
+        return ResponseObject(False, "Peer does not exist")
+
+    try:
+        template = Template(body)
+        download = p.downloadPeer()
+        body = template.render(peer=p.toJson(), configurationFile=download)
+        return ResponseObject(data=body)
+    except Exception as e:
+        return ResponseObject(False, message=str(e))
+
+    
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')
 def API_SystemStatus():

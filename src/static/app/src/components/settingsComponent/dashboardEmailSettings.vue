@@ -7,7 +7,7 @@ const store = DashboardConfigurationStore()
 
 onMounted(() => {
 	checkEmailReady()
-	document.querySelectorAll("#emailAccount input, #emailAccount select").forEach(x => {
+	document.querySelectorAll("#emailAccount input, #emailAccount select, #email_template").forEach(x => {
 		x.addEventListener("change", async () => {
 			let id = x.attributes.getNamedItem('id').value;
 			await fetchPost("/api/updateDashboardConfigurationItem", {
@@ -67,7 +67,7 @@ const sendTestEmail = async () => {
 				</span>
 			</h6>
 		</div>
-		<div class="card-body">
+		<div class="card-body d-flex flex-column gap-3">
 			<form @submit="(e) => e.preventDefault(e)" id="emailAccount">
 				<div class="row gx-2 gy-2">
 					<div class="col-12 col-lg-4">
@@ -152,26 +152,46 @@ const sendTestEmail = async () => {
 				</div>
 			</form>
 			<hr v-if="emailIsReady">
-			<form
-				v-if="emailIsReady"
-				@submit="(e) => {e.preventDefault(); sendTestEmail()}"
-				class="input-group mb-3">
-				
-				<input type="email" class="form-control rounded-start-3" 
-				       v-model="testEmailReceiver"
-				       :disabled="testing"
-				       placeholder="Test Email Receiver">
-				<button class="btn bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-end-3"
-				        type="submit" value="Submit"
-				        :disabled="testEmailReceiver.length === 0 || testing"
-				        id="button-addon2">
-					<i class="bi bi-send me-2" v-if="!testing"></i>
-					<span class="spinner-border spinner-border-sm me-2" v-else>
+			<div v-if="emailIsReady">
+				<label class="text-muted mb-1" for="test_email">
+					<small class="fw-bold">
+						<LocaleText t="Send Test Email"></LocaleText>
+					</small>
+				</label>
+				<form
+					
+					@submit="(e) => {e.preventDefault(); sendTestEmail()}"
+					class="input-group">
+
+					<input type="email" class="form-control rounded-start-3"
+					       id="test_email"
+					       placeholder="john@example.com"
+					       v-model="testEmailReceiver"
+					       :disabled="testing">
+					<button class="btn bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-end-3"
+					        type="submit" value="Submit"
+					        :disabled="testEmailReceiver.length === 0 || testing"
+					        id="button-addon2">
+						<i class="bi bi-send me-2" v-if="!testing"></i>
+						<span class="spinner-border spinner-border-sm me-2" v-else>
 						<span class="visually-hidden">Loading...</span>
 					</span>
-					<LocaleText :t="!testing ? 'Send Test Email':'Sending...'"></LocaleText>
-				</button>
-			</form>
+						<LocaleText :t="!testing ? 'Send':'Sending...'"></LocaleText>
+					</button>
+				</form>
+			</div>
+			<hr>
+			<div>
+				<label class="text-muted mb-1" for="email_template">
+					<small class="fw-bold">
+						<LocaleText t="Email Body Template"></LocaleText>
+					</small>
+				</label>
+				<textarea class="form-control rounded-3 font-monospace"
+				          v-model="store.Configuration.Email.email_template"
+				          id="email_template"
+				          style="min-height: 400px"></textarea>
+			</div>
 		</div>
 	</div>
 </template>

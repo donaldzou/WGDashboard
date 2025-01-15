@@ -21,7 +21,8 @@ export default {
 	data(){
 		return {
 			dataCopy: undefined,
-			loading: false
+			loading: false,
+			fullscreen: false
 		}
 	},
 	setup(){
@@ -107,7 +108,7 @@ export default {
 <template>
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
-			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 700px">
+			<div class="m-auto modal-dialog-centered dashboardModal" :style="[ this.fullscreen ? 'width: 100%' : 'width: 700px']">
 				<div class="card rounded-3 shadow flex-grow-1">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
 						<h4 class="mb-0">
@@ -167,7 +168,9 @@ export default {
 							</button>
 							<hr>
 							<Suspense>
-								<PeerShareWithEmail :selectedPeer="selectedPeer" :dataCopy="dataCopy"></PeerShareWithEmail>
+								<PeerShareWithEmail 
+									@fullscreen="(f) => { this.fullscreen = f; }"
+									:selectedPeer="selectedPeer" :dataCopy="dataCopy"></PeerShareWithEmail>
 								<template #fallback>
 									<h6 class="text-muted">
 										<span class="spinner-border me-2 spinner-border-sm" role="status"></span>
