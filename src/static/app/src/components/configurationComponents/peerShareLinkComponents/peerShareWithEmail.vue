@@ -42,7 +42,6 @@ const placeholderTranslate = (key) => {
 }
 const emits = defineEmits(['fullscreen'])
 watch(livePreview, () => {
-	console.log(livePreview.value)
 	emits('fullscreen', livePreview.value)
 })
 
