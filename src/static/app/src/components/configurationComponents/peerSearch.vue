@@ -75,7 +75,9 @@ export default {
 		},
 		downloadAllPeer(){
 			fetchGet(`/api/downloadAllPeers/${this.configuration.Name}`, {}, (res) => {
-				console.log(res);
+				res.data.forEach(x => {
+					x.fileName = x.fileName + '.conf'
+				})
 				window.wireguard.generateZipFiles(res, this.configuration.Name)
 			})
 		}

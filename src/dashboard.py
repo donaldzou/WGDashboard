@@ -1660,12 +1660,17 @@ class Peer:
         if len(filename) == 0:
             filename = "UntitledPeer"
         filename = "".join(filename.split(' '))
-        filename = f"{filename}_{self.configuration.Name}"
+        filename = f"{filename}"
         illegal_filename = [".", ",", "/", "?", "<", ">", "\\", ":", "*", '|' '\"', "com1", "com2", "com3",
                             "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4",
                             "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "con", "nul", "prn"]
         for i in illegal_filename:
             filename = filename.replace(i, "")
+        
+        finalFilename = ""
+        for i in filename:
+            if re.match("^[a-zA-Z0-9_=+.-]{1,15}$", i):
+                finalFilename += i
 
         peerConfiguration = f'''[Interface]
 PrivateKey = {self.private_key}
@@ -1685,7 +1690,7 @@ PersistentKeepalive = {str(self.keepalive)}
         if len(self.preshared_key) > 0:
             peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
         return {
-            "fileName": filename,
+            "fileName": finalFilename,
             "file": peerConfiguration
         }
 
@@ -2724,7 +2729,7 @@ def API_downloadAllPeers(configName):
     untitledPeer = 0
     for i in configuration.Peers:
         file = i.downloadPeer()
-        if file["fileName"] == "UntitledPeer_" + configName:
+        if file["fileName"] == "UntitledPeer":
             file["fileName"] = str(untitledPeer) + "_" + file["fileName"]
             untitledPeer += 1
         peerData.append(file)
