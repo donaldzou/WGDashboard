@@ -24,6 +24,7 @@ export default {
 				key: "Name",
 				order: "asc"
 			},
+			currentDisplay: "List",
 			searchKey: ""
 		}
 	},
@@ -33,6 +34,13 @@ export default {
 		}else{
 			this.currentSort = JSON.parse(window.localStorage.getItem('ConfigurationListSort'))
 		}
+
+		if (!window.localStorage.getItem('ConfigurationListDisplay')){
+			window.localStorage.setItem('ConfigurationListDisplay', this.currentDisplay)
+		}else{
+			this.currentDisplay = window.localStorage.getItem('ConfigurationListDisplay')
+		}
+		
 		
 		await this.wireguardConfigurationsStore.getConfigurations();
 		this.configurationLoaded = true;
@@ -47,7 +55,7 @@ export default {
 	computed: {
 		configurations(){
 			return [...this.wireguardConfigurationsStore.Configurations]
-				.filter(x => x.Name.includes(this.searchKey) || x.PublicKey.includes(this.searchKey) || !this.searchKey)
+				.filter(x => x.Name.toLowerCase().includes(this.searchKey) || x.PublicKey.includes(this.searchKey) || !this.searchKey)
 				.sort((a, b) => {
 				if (this.currentSort.order === 'desc') {
 					return this.dotNotation(a, this.currentSort.key) < this.dotNotation(b, this.currentSort.key) ? 
@@ -61,7 +69,11 @@ export default {
 	},
 	methods: {
 		dotNotation(object, dotNotation){
-			return dotNotation.split('.').reduce((o, key) => o && o[key], object)
+			let result = dotNotation.split('.').reduce((o, key) => o && o[key], object)
+			if (typeof result === "string"){
+				return result.toLowerCase()
+			}
+			return result
 		},
 		updateSort(key){
 			if (this.currentSort.key === key){
@@ -71,6 +83,12 @@ export default {
 				this.currentSort.key = key
 			}
 			window.localStorage.setItem('ConfigurationListSort', JSON.stringify(this.currentSort))
+		},
+		updateDisplay(key){
+			if (this.currentDisplay !== key){
+				this.currentDisplay = key
+				window.localStorage.setItem('ConfigurationListDisplay', this.currentDisplay)
+			}
 		}
 	}
 }
@@ -112,6 +130,23 @@ export default {
 						</a>
 					</div>
 				</div>
+				<div class="align-items-center gap-3 align-items-center mb-3 mb-md-0 d-none d-lg-flex ">
+					<small class="text-muted">
+						<LocaleText t="Display as"></LocaleText>
+					</small>
+					<div class="d-flex ms-auto ms-lg-0">
+						<a role="button"
+						   @click="updateDisplay(x.name)"
+						   v-for="x in [{name: 'List', key: 'list'}, {name: 'Grid', key: 'grid'}]"
+						   :class="{'bg-primary-subtle text-primary-emphasis': this.currentDisplay === x.name}"
+						   class="px-2 py-1 rounded-3">
+							<small>
+								<i class="bi me-2" :class="'bi-' + x.key"></i> {{x.name}}
+							</small>
+						</a>
+						
+					</div>
+				</div>
 				<div class="d-flex align-items-center ms-md-auto">
 					<label for="configurationSearch" class="text-muted">
 						<i class="bi bi-search me-2"></i>
@@ -122,17 +157,19 @@ export default {
 				</div>
 			</div>
 			
-			<TransitionGroup name="fade" tag="div" class="d-flex flex-column gap-3 mb-4">
-				<p class="text-muted" 
+			<div class="row g-3 mb-2">
+				<p class="text-muted col-12" 
 				   key="noConfiguration"
 				   v-if="this.configurationLoaded && this.wireguardConfigurationsStore.Configurations.length === 0">
 					<LocaleText t="You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard."></LocaleText>
 				</p>
-				<ConfigurationCard v-for="(c, index) in configurations"
-				                   :delay="index*0.05 + 's'"
-				                   v-else-if="this.configurationLoaded"
-				                   :key="c.Name" :c="c"></ConfigurationCard>
-			</TransitionGroup>
+				<ConfigurationCard 
+					:display="this.currentDisplay"
+					v-for="(c, index) in configurations"
+                   :delay="index*0.05 + 's'"
+                   v-else-if="this.configurationLoaded"
+                   :key="c.Name" :c="c"></ConfigurationCard>
+			</div>
 			
 		</div>
 	</div>

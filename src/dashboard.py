@@ -3148,31 +3148,24 @@ def API_SystemStatus():
             "byte_recv": network[i].bytes_recv
         }
         
-    processes = list(psutil.process_iter())
-    status["process"]["cpu_top_10"] = sorted(list(map(lambda x : {
-        "name": x.name(),
-        "command": " ".join(x.cmdline()),
-        "pid": x.pid,
-        "cpu_percent": x.cpu_percent()
-    }, processes)), key=lambda x : x['cpu_percent'], reverse=True)[:10]
-    status["process"]["memory_top_10"] = sorted(list(map(lambda x : {
-        "name": x.name(),
-        "command": " ".join(x.cmdline()),
-        "pid": x.pid,
-        "memory_percent": x.memory_percent()
-    }, processes)), key=lambda x : x['memory_percent'], reverse=True)[:10]
-    
-    
-    # for proc in psutil.process_iter():
-    #     try:
-    #         status["process"].append({
-    #             "pid": proc.pid,
-    #             "name": proc.name(),
-    #             "memory_percent": proc.memory_percent(),
-    #             "cpu_percent": proc.cpu_percent()
-    #         })
-    #     except (psutil.NoSuchProcess, psutil.AccessDenied):
-    #         pass
+    while True:
+        try:
+            processes = list(psutil.process_iter())
+            status["process"]["cpu_top_10"] = sorted(list(map(lambda x : {
+                "name": x.name(),
+                "command": " ".join(x.cmdline()),
+                "pid": x.pid,
+                "cpu_percent": x.cpu_percent()
+            }, processes)), key=lambda x : x['cpu_percent'], reverse=True)[:10]
+            status["process"]["memory_top_10"] = sorted(list(map(lambda x : {
+                "name": x.name(),
+                "command": " ".join(x.cmdline()),
+                "pid": x.pid,
+                "memory_percent": x.memory_percent()
+            }, processes)), key=lambda x : x['memory_percent'], reverse=True)[:10]
+            break
+        except Exception as e:
+            continue
     return ResponseObject(data=status)
 
 @app.get(f'{APP_PREFIX}/api/protocolsEnabled')
