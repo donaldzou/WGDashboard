@@ -351,12 +351,12 @@ class PeerJobs:
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                             )
                 else:
-                    JobLogger.log(job.JobID, s["status"],
+                    JobLogger.log(job.JobID, False,
                       f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed."
                     )
                     # needToDelete.append(job)
             else:
-                JobLogger.log(job.JobID, s["status"],
+                JobLogger.log(job.JobID, False,
                   f"Somehow can't find this peer {job.Peer} from {job.Configuration} failed {job.Action}ed."
                 )
                 # needToDelete.append(job)
