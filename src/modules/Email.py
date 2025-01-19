@@ -11,8 +11,8 @@ class EmailSender:
     def __init__(self, DashboardConfig):
         self.smtp = None
         self.DashboardConfig = DashboardConfig
-        if not os.path.exists('./attachments'):
-            os.mkdir('./attachments')
+        if not os.path.exists('../attachments'):
+            os.mkdir('../attachments')
         
     def Server(self):
         return self.DashboardConfig.GetConfig("Email", "server")[1]
@@ -51,10 +51,10 @@ class EmailSender:
                 message.attach(MIMEText(body, "plain"))
 
                 if includeAttachment and len(attachmentName) > 0:
-                    attachmentPath = os.path.join('./attachments', attachmentName)
+                    attachmentPath = os.path.join('../attachments', attachmentName)
                     if os.path.exists(attachmentPath):
                         attachment = MIMEBase("application", "octet-stream")
-                        with open(os.path.join('attachments', attachmentName), 'rb') as f:
+                        with open(os.path.join('../attachments', attachmentName), 'rb') as f:
                             attachment.set_payload(f.read())
                         encoders.encode_base64(attachment)
                         attachment.add_header("Content-Disposition", f"attachment; filename= {attachmentName}",)
