@@ -33,13 +33,6 @@ app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
-class ModelEncoder(JSONEncoder):
-    def default(self, o: Any) -> Any:
-        if hasattr(o, 'toJson'):
-            return o.toJson()
-        else:
-            return super(ModelEncoder, self).default(o)
-
 class CustomJsonEncoder(DefaultJSONProvider):
     def __init__(self, app):
         super().__init__(app)
@@ -61,57 +54,6 @@ def ResponseObject(status=True, message=None, data=None) -> Flask.response_class
     })
     response.content_type = "application/json"
     return response       
-
-"""
-Peer Job Logger
-"""
-# class PeerJobLogger:
-#     def __init__(self):
-#         self.loggerdb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard_log.db'),
-#                                      check_same_thread=False)
-#         self.loggerdb.row_factory = sqlite3.Row
-#         self.logs:list(Log) = []
-#         self.__createLogDatabase()
-#         
-#     def __createLogDatabase(self):
-#         with self.loggerdb:
-#             loggerdbCursor = self.loggerdb.cursor()
-#         
-#             existingTable = loggerdbCursor.execute("SELECT name from sqlite_master where type='table'").fetchall()
-#             existingTable = [t['name'] for t in existingTable]
-#     
-#             if "JobLog" not in existingTable:
-#                 loggerdbCursor.execute("CREATE TABLE JobLog (LogID VARCHAR NOT NULL, JobID NOT NULL, LogDate DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now', 'localtime')), Status VARCHAR NOT NULL, Message VARCHAR, PRIMARY KEY (LogID))")
-#                 if self.loggerdb.in_transaction:
-#                     self.loggerdb.commit()
-#     def log(self, JobID: str, Status: bool = True, Message: str = "") -> bool:
-#         try:
-#             with self.loggerdb:
-#                 loggerdbCursor = self.loggerdb.cursor()
-#                 loggerdbCursor.execute(f"INSERT INTO JobLog (LogID, JobID, Status, Message) VALUES (?, ?, ?, ?)",
-#                                             (str(uuid.uuid4()), JobID, Status, Message,))
-#                 if self.loggerdb.in_transaction:
-#                     self.loggerdb.commit()
-#         except Exception as e:
-#             print(f"[WGDashboard] Peer Job Log Error: {str(e)}")
-#             return False
-#         return True
-#     
-#     def getLogs(self, all: bool = False, configName = None) -> list[Log]:
-#         logs: list[Log] = []
-#         try:
-#             allJobs = AllPeerJobs.getAllJobs(configName)
-#             allJobsID = ", ".join([f"'{x.JobID}'" for x in allJobs])
-#             with self.loggerdb:
-#                 loggerdbCursor = self.loggerdb.cursor()
-#                 table = loggerdbCursor.execute(f"SELECT * FROM JobLog WHERE JobID IN ({allJobsID}) ORDER BY LogDate DESC").fetchall()
-#                 self.logs.clear()
-#                 for l in table:
-#                     logs.append(
-#                         Log(l["LogID"], l["JobID"], l["LogDate"], l["Status"], l["Message"]))
-#         except Exception as e:
-#             return logs
-#         return logs
 
 """
 Peer Job
@@ -807,7 +749,7 @@ class WireguardConfiguration:
         for i in listOfPublicKeys:
             p = sqlSelect("SELECT * FROM '%s_restrict_access' WHERE id = ?" % self.Name, (i,)).fetchone()
             if p is not None:
-                sqlUpdate("INSERT INTO '%s' SELECT * FROM %s_restrict_access WHERE id = ?"
+                sqlUpdate("INSERT INTO '%s' SELECT * FROM '%s_restrict_access' WHERE id = ?"
                                % (self.Name, self.Name,), (p['id'],))
                 sqlUpdate("DELETE FROM '%s_restrict_access' WHERE id = ?"
                                % self.Name, (p['id'],))
@@ -841,7 +783,7 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
+                    sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM '%s' WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
                     sqlUpdate("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))

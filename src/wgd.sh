@@ -502,13 +502,13 @@ update_wgd() {
 			stop_wgd
 		fi
 
-		mv wgd.sh wgd.sh.old && \
-		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver" && \
-		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt && \
-		chmod +x ./wgd.sh && \
-		sudo ./wgd.sh install && \
-		printf "[WGDashboard] Update completed!\n" && \
-		printf "%s\n" "$dashes"; \
+		mv wgd.sh wgd.sh.old
+		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
+		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
+		chmod +x ./wgd.sh
+		sudo ./wgd.sh install
+		printf "[WGDashboard] Update completed!\n"
+		printf "%s\n" "$dashes"
 		rm wgd.sh.old
 	else
 		printf "%s\n" "$dashes"
