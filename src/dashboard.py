@@ -351,15 +351,13 @@ class PeerJobs:
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                             )
                 else:
-                    JobLogger.log(job.JobID, s["status"],
+                    JobLogger.log(job.JobID,False,
                       f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed."
                     )
-                    # needToDelete.append(job)
             else:
-                JobLogger.log(job.JobID, s["status"],
+                JobLogger.log(job.JobID, False,
                   f"Somehow can't find this peer {job.Peer} from {job.Configuration} failed {job.Action}ed."
                 )
-                # needToDelete.append(job)
         for j in needToDelete:
             self.deleteJob(j)
 
@@ -796,7 +794,7 @@ class WireguardConfiguration:
         for i in listOfPublicKeys:
             p = sqlSelect("SELECT * FROM '%s_restrict_access' WHERE id = ?" % self.Name, (i,)).fetchone()
             if p is not None:
-                sqlUpdate("INSERT INTO '%s' SELECT * FROM %s_restrict_access WHERE id = ?"
+                sqlUpdate("INSERT INTO '%s' SELECT * FROM '%s_restrict_access' WHERE id = ?"
                                % (self.Name, self.Name,), (p['id'],))
                 sqlUpdate("DELETE FROM '%s_restrict_access' WHERE id = ?"
                                % self.Name, (p['id'],))
@@ -830,7 +828,7 @@ class WireguardConfiguration:
                 try:
                     subprocess.check_output(f"wg set {self.Name} peer {pf.id} remove",
                                             shell=True, stderr=subprocess.STDOUT)
-                    sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM %s WHERE id = ?" %
+                    sqlUpdate("INSERT INTO '%s_restrict_access' SELECT * FROM '%s' WHERE id = ?" %
                                    (self.Name, self.Name,), (pf.id,))
                     sqlUpdate("UPDATE '%s_restrict_access' SET status = 'stopped' WHERE id = ?" %
                                    (self.Name,), (pf.id,))
@@ -1647,7 +1645,7 @@ def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
     try:
         cursor = sqldb.cursor()
         return cursor.execute(statement, paramters)
-    except Exception as e:
+    except Exception as error:
         print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
         return []
        
@@ -1661,7 +1659,7 @@ def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
             s = f'BEGIN TRANSACTION;{statement};END TRANSACTION;'
             cursor.execute(statement, paramters)
             sqldb.commit()
-        except Exception as e:
+        except Exception as error:
             print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
             return []
 
