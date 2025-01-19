@@ -61,7 +61,7 @@ export default {
 	},
 	mounted() {
 		this.$el.querySelectorAll("input").forEach(x => {
-			x.addEventListener("keyup", () => {
+			x.addEventListener("change", () => {
 				this.dataChanged = true;
 			});
 		})
@@ -197,6 +197,30 @@ export default {
 												       :disabled="this.saving"
 												       v-model="this.data.keepalive"
 												       id="peer_keep_alive">
+											</div>
+											<div v-if="this.data.advanced_security">
+												<label for="peer_advance_security" class="form-label d-block">
+													<small class="text-muted">
+														<LocaleText t="Advanced Security"></LocaleText>
+													</small>
+												</label>
+												<div class="btn-group" role="group">
+													<input type="radio" class="btn-check"
+													       v-model="this.data.advanced_security"
+													       value="on"
+													       name="advanced_security_radio" id="advanced_security_on" autocomplete="off">
+													<label class="btn btn-outline-primary  btn-sm" for="advanced_security_on">
+														<LocaleText t="On"></LocaleText>
+													</label>
+
+													<input type="radio"
+													       v-model="this.data.advanced_security"
+													       value="off"
+													       class="btn-check" name="advanced_security_radio" id="advanced_security_off" autocomplete="off">
+													<label class="btn btn-outline-primary btn-sm" for="advanced_security_off">
+														<LocaleText t="Off"></LocaleText>
+													</label>
+												</div>
 											</div>
 										</div>
 									</div>

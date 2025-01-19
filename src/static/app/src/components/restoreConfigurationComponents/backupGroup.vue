@@ -2,12 +2,14 @@
 import {onMounted, ref} from "vue";
 import dayjs from "dayjs";
 import LocaleText from "@/components/text/localeText.vue";
+import ProtocolBadge from "@/components/protocolBadge.vue";
 
 const props = defineProps({
 	configurationName: String,
 	backups: Array,
 	open: false,
-	selectedConfigurationBackup: Object
+	selectedConfigurationBackup: Object,
+	protocol: Array
 })
 
 const emit = defineEmits(["select"])
@@ -28,18 +30,20 @@ onMounted(() => {
 
 <template>
 	<div class="card rounded-3 shadow-sm">
-		<a role="button" class="card-body d-flex align-items-center text-decoration-none" @click="showBackups = !showBackups">
-			<div class="d-flex gap-3 align-items-center">
-				<h6 class="mb-0">
-					<samp>
-						{{configurationName}}
-					</samp>
-				</h6>
-				<small class="text-muted">
-					<LocaleText :t="backups.length + (backups.length > 1 ? ' Backups':' Backup')"></LocaleText>
-				</small>
-			</div>
-			<h5 class="ms-auto mb-0 dropdownIcon text-muted" :class="{active: showBackups}">
+		<a role="button" class="card-body d-flex align-items-center text-decoration-none  d-flex gap-3" @click="showBackups = !showBackups">
+			<h6 class="mb-0 d-flex align-items-center gap-3">
+				<samp>
+					{{configurationName}}
+				</samp>
+
+				<ProtocolBadge
+					v-for="p in protocol"
+					:protocol="p"></ProtocolBadge>
+			</h6>
+			<small class="text-muted ms-auto d-block">
+				<LocaleText :t="backups.length + (backups.length > 1 ? ' Backups':' Backup')"></LocaleText>
+			</small>
+			<h5 class="mb-0 dropdownIcon text-muted" :class="{active: showBackups}">
 				<i class="bi bi-chevron-down"></i>
 			</h5>
 		</a>

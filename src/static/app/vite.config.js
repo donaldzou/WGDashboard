@@ -44,7 +44,8 @@ export default defineConfig(({mode}) => {
 		},
 		server:{
 			proxy: {
-				'/api': proxy
+				'/api': proxy,
+				'/fileDownload':proxy
 			},
 			host: '0.0.0.0'
 		},

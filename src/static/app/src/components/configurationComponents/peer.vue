@@ -35,7 +35,7 @@ export default {
 </script>
 
 <template>
-	<div class="card shadow-sm rounded-3 peerCard bg-transparent"
+	<div class="card shadow-sm rounded-3 peerCard"
 		:class="{'border-warning': Peer.restricted}">
 		<div>
 			<div v-if="!Peer.restricted" class="card-header bg-transparent d-flex align-items-center gap-2 border-0">
@@ -45,11 +45,11 @@ export default {
 						<i class="bi bi-arrow-down"></i><strong>
 						{{(Peer.cumu_receive + Peer.total_receive).toFixed(4)}}</strong> GB
 					</span>
-						<span class="text-success">
+					<span class="text-success">
 						<i class="bi bi-arrow-up"></i><strong>
 						{{(Peer.cumu_sent + Peer.total_sent).toFixed(4)}}</strong> GB
 					</span>
-						<span class="text-secondary" v-if="Peer.latest_handshake !== 'No Handshake'">
+					<span class="text-secondary" v-if="Peer.latest_handshake !== 'No Handshake'">
 						<i class="bi bi-arrows-angle-contract"></i>
 						{{getLatestHandshake}} ago
 					</span>
@@ -81,6 +81,14 @@ export default {
 					<samp>{{Peer.allowed_ip}}</samp>
 				</small>
 			</div>
+			<div v-if="Peer.advanced_security">
+				<small class="text-muted">
+					<LocaleText t="Advanced Security"></LocaleText>
+				</small>
+				<small class="d-block">
+					<samp>{{Peer.advanced_security}}</samp>
+				</small>
+			</div>
 			<div class="d-flex align-items-end">
 				<div class="ms-auto px-2 rounded-3 subMenuBtn"
 				     :class="{active: this.subMenuOpened}"
@@ -91,8 +99,8 @@ export default {
 					</a>
 					<Transition name="slide-fade">
 						<PeerSettingsDropdown 
-							@qrcode="(file) => this.$emit('qrcode', file)"
-							@configurationFile="(file) => this.$emit('configurationFile', file)"
+							@qrcode="this.$emit('qrcode')"
+							@configurationFile="this.$emit('configurationFile')"
 							@setting="this.$emit('setting')"
 							@jobs="this.$emit('jobs')"
 							@refresh="this.$emit('refresh')"

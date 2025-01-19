@@ -153,11 +153,11 @@
     color: #74b7ff;
 }
 
-[data-bs-theme="dark"] .nav-link:hover{
+[data-bs-theme="dark"] .nav-link:hover, [data-bs-theme="dark"] .nav-link.active{
     background-color: #323844;
 }
 
-.nav-link:hover {
+.nav-link:hover, .nav-link.active {
     background-color: #e8e8e8;
 }
 
@@ -556,13 +556,6 @@ main {
     /*padding: 0.6rem 0.9em;*/
 }
 
-.login-box #username,
-.login-box #password,
-.login-box #totp
-{
-    padding: 0.6rem calc( 0.9rem + 32px);
-    height: inherit;
-}
 
 .login-box label[for="username"],
 .login-box label[for="password"],
@@ -575,15 +568,6 @@ main {
     padding: 0;
 }
 
-
-
-/*label[for="password"]{*/
-
-
-/*    transform: translateY(32px) translateX(16px);*/
-
-
-/*}*/
 
 .modal-content {
     border-radius: 10px;
@@ -1179,6 +1163,14 @@ pre.index-alert {
 
 .messageCentre{
     z-index: 9999;
+    top: 1rem;
+    right: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .messageCentre{
+        width: calc(100% - 2rem);
+    }
 }
 
 
@@ -1212,12 +1204,12 @@ pre.index-alert {
 
 .login-container-fluid{
     background: linear-gradient(var(--bgdegree), #009fff1a var(--distance2), #ff4b001a 100%);
-    animation: login 8s ease-in-out infinite;
+    animation: login 8s ease-in-out forwards;
 }
 
 .login-container-fluid[data-bs-theme="dark"]{
     background: linear-gradient(var(--bgdegree), #003555 var(--distance2), #521800 100%);
-    animation: login 8s ease-in-out infinite;
+    animation: login 8s ease-in-out forwards;
 }
 
 @keyframes login {
@@ -1273,4 +1265,47 @@ pre.index-alert {
 
 samp{
     word-wrap: anywhere;
+}
+
+.amneziawgBg{
+    background: rgb(145,199,193);
+    background: linear-gradient(90deg, rgba(145,199,193,1) 0%, rgba(107,95,161,1) 50%, rgba(227,142,65,1) 100%);
+}
+
+.wireguardBg{
+
+    background: rgb(125,32,32);
+    background: linear-gradient(90deg, rgba(125,32,32,1) 0%, rgba(255,56,56,1) 100%);
+}
+
+.slideUp-enter-active,
+.slideUp-leave-active{
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.slideUp-enter-from,
+.slideUp-leave-to {
+    transform: translateY(100%);
+    filter: blur(3px);
+}
+
+
+.peerList-move,
+.peerList-enter-active,
+.peerList-leave-active{
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.peerList-enter-from{
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.peerList-leave-to{
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+.peerList-leave-active {
+    position: absolute;
 }

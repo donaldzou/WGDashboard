@@ -1,15 +1,35 @@
 <script>
 import QRCode from "qrcode";
 import LocaleText from "@/components/text/localeText.vue";
+import {fetchGet} from "@/utilities/fetch.js";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 export default {
 	name: "peerQRCode",
 	components: {LocaleText},
 	props: {
-		peerConfigData: String
+		selectedPeer: Object
+	},
+	setup(){
+		const dashboardStore = DashboardConfigurationStore();
+		return {dashboardStore}
+	},
+	data(){
+		return{
+			loading: true
+		}
 	},
 	mounted() {
-		QRCode.toCanvas(document.querySelector("#qrcode"), this.peerConfigData ,  (error) => {
-			if (error) console.error(error)
+		fetchGet("/api/downloadPeer/"+this.$route.params.id, {
+			id: this.selectedPeer.id
+		}, (res) => {
+			this.loading = false;
+			if (res.status){
+				QRCode.toCanvas(document.querySelector("#qrcode"), res.data.file,  (error) => {
+					if (error) console.error(error)
+				})
+			}else{
+				this.dashboardStore.newMessage("Server", res.message, "danger")
+			}
 		})
 	}
 }
@@ -26,8 +46,13 @@ export default {
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
-					<div class="card-body">
-						<canvas id="qrcode" class="rounded-3 shadow" ref="qrcode"></canvas>
+					<div class="card-body p-4">
+						<div style="width: 292px; height: 292px;" class="d-flex">
+							<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster" :class="{'d-none': loading}"></canvas>
+							<div class="spinner-border m-auto" role="status" v-if="loading">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

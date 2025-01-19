@@ -2,15 +2,24 @@
 import {parse} from "cidr-tools";
 import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
-import {fetchPost} from "@/utilities/fetch.js";
+import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {parseInterface, parsePeers} from "@/utilities/parseConfigurationFile.js";
+import {ref} from "vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export default {
 	name: "newConfiguration",
 	components: {LocaleText},
-	setup(){
+	async setup(){
 		const store = WireguardConfigurationsStore()
-		return {store}
+		const protocols = ref([])
+		await fetchGet("/api/protocolsEnabled", {}, (res) => {
+			protocols.value = res.data
+		})
+		const dashboardStore = DashboardConfigurationStore();
+		
+		return {store, protocols, dashboardStore}
 	},
 	data(){
 		return {
@@ -24,19 +33,42 @@ export default {
 				PreUp: "",
 				PreDown: "",
 				PostUp: "",
-				PostDown: ""
+				PostDown: "",
+				Protocol: "wg",
+				Jc: 5,
+				Jmin: 49,
+				Jmax: 998,
+				S1: 17,
+				S2: 110,
+				H1: 0,
+				H2: 0,
+				H3: 0,
+				H4: 0
 			},
 			numberOfAvailableIPs: "0",
 			error: false,
 			errorMessage: "",
 			success: false,
-			loading: false
+			loading: false,
+			parseInterfaceResult: undefined,
+			parsePeersResult: undefined
 		}
 	},
 	created() {
-		this.wireguardGenerateKeypair();	
+		this.wireguardGenerateKeypair();
+		let hValue = []
+		while ([...new Set(hValue)].length !== 4){
+			hValue = [this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1), this.rand(1, (2**31) - 1)]
+		}
+		this.newConfiguration.H1 = hValue[0]
+		this.newConfiguration.H2 = hValue[1]
+		this.newConfiguration.H3 = hValue[2]
+		this.newConfiguration.H4 = hValue[3]
 	},
 	methods: {
+		rand(min, max){
+			return Math.floor(Math.random() * (max - min) + min);
+		},
 		wireguardGenerateKeypair(){
 			const wg = window.wireguard.generateKeypair();
 			this.newConfiguration.PrivateKey = wg.privateKey;
@@ -60,6 +92,34 @@ export default {
 					}
 				})
 			}
+		},
+		openFileUpload(){
+			document.querySelector("#fileUpload").click();
+		},
+		readFile(e){
+			const file = e.target.files[0];
+			if (!file) return false;
+			const reader = new FileReader();
+			reader.onload = (evt) => {
+				this.parseInterfaceResult = parseInterface(evt.target.result);
+				this.parsePeersResult = parsePeers(evt.target.result);
+				let appliedFields = 0;
+				if (this.parseInterfaceResult){
+					this.newConfiguration.ConfigurationName = file.name.replace('.conf', '')
+					for (let i of Object.keys(this.parseInterfaceResult)){
+						if (Object.keys(this.newConfiguration).includes(i)){
+							this.newConfiguration[i] = this.parseInterfaceResult[i];
+							appliedFields += 1;
+						}
+					}
+				}
+				if (appliedFields > 0){
+					this.dashboardStore.newMessage("WGDashboard", `Parse successful! Updated ${appliedFields} field(s)`, "success")
+				}else {
+					this.dashboardStore.newMessage("WGDashboard", `Parse failed`, "danger")
+				}
+			};
+			reader.readAsText(file);
 		}
 	},
 	computed: {
@@ -71,7 +131,7 @@ export default {
 			}) === undefined && elements.find(x => {
 				return x.classList.contains("is-invalid")
 			}) === undefined
-		}	
+		}
 	},
 	watch: {
 		'newConfiguration.Address'(newVal){
@@ -121,6 +181,10 @@ export default {
 				ele.classList.add("is-invalid")
 			}
 		}
+	},
+	mounted() {
+		const fileUpload = document.querySelector("#fileUpload");
+		fileUpload.addEventListener("change", this.readFile, false)
 	}
 }
 </script>
@@ -128,7 +192,7 @@ export default {
 <template>
 	<div class="mt-md-5 mt-3 text-body">
 		<div class="container mb-4">
-			<div class="mb-4 d-flex align-items-center gap-4">
+			<div class="mb-4 d-flex align-items-center gap-4 align-items-center">
 				<RouterLink to="/"
 				            class="btn btn-dark btn-brand p-2 shadow" style="border-radius: 100%">
 					<h2 class="mb-0" style="line-height: 0">
@@ -138,11 +202,50 @@ export default {
 				<h2 class="mb-0">
 					<LocaleText t="New Configuration"></LocaleText>
 				</h2>
+				<div class="d-flex gap-2 ms-auto">
+					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"
+					        @click="openFileUpload()"
+					        type="button" aria-expanded="false">
+						<i class="bi bi-upload me-2"></i>
+						<LocaleText t="Open File"></LocaleText>
+					</button>
+					<input type="file" id="fileUpload" multiple class="d-none" accept="text/plain" />
+				</div>
 			</div>
 			
 			<form class="text-body d-flex flex-column gap-3"
 				@submit="(e) => {e.preventDefault(); this.saveNewConfiguration();}"
 			>
+				<div class="card rounded-3 shadow">
+					<div class="card-header">
+						<LocaleText t="Protocol"></LocaleText>
+					</div>
+					<div class="card-body d-flex gap-2 protocolBtnGroup">
+						<a 
+							v-if="this.protocols.includes('wg')"
+							@click="this.newConfiguration.Protocol = 'wg'"
+							:class="{'opacity-50': this.newConfiguration.Protocol !== 'wg'}"
+							class="btn btn-primary wireguardBg border-0 " style="flex-basis: 100%">
+							<i class="bi bi-check-circle-fill me-2" v-if="this.newConfiguration.Protocol === 'wg'"></i>
+							<i class="bi bi-circle me-2" v-else></i>
+							<strong>
+								WireGuard
+							</strong>
+						</a>
+						<a
+							@click="this.newConfiguration.Protocol = 'awg'"
+							v-if="this.protocols.includes('awg')"
+							:class="{'opacity-50': this.newConfiguration.Protocol !== 'awg'}"
+							class="btn btn-primary amneziawgBg border-0" style="flex-basis: 100%">
+							<i class="bi bi-check-circle-fill me-2" v-if="this.newConfiguration.Protocol === 'awg'"></i>
+							<i class="bi bi-circle me-2" v-else></i>
+							<strong>
+								AmneziaWG
+							</strong>
+						</a>
+					</div>
+				</div>
+				
 				<div class="card rounded-3 shadow">
 					<div class="card-header">
 						<LocaleText t="Configuration Name"></LocaleText>
@@ -250,28 +353,21 @@ export default {
 						<div id="newConfigurationOptionalAccordionCollapse" 
 						     class="accordion-collapse collapse" data-bs-parent="#newConfigurationOptionalAccordion">
 							<div class="accordion-body d-flex flex-column gap-3">
-								<div class="card rounded-3">
-									<div class="card-header">PreUp</div>
+								<div class="card rounded-3" v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+									<div class="card-header">{{ key }}</div>
 									<div class="card-body">
-										<input type="text" class="form-control" id="preUp" v-model="this.newConfiguration.PreUp">
+										<input type="text" 
+										       class="form-control font-monospace" :id="key" v-model="this.newConfiguration[key]">
 									</div>
 								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PreDown</div>
+
+								<div class="card rounded-3" 
+								     v-if="this.newConfiguration.Protocol === 'awg'"
+								     v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']">
+									<div class="card-header">{{ key }}</div>
 									<div class="card-body">
-										<input type="text" class="form-control" id="preDown" v-model="this.newConfiguration.PreDown">
-									</div>
-								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PostUp</div>
-									<div class="card-body">
-										<input type="text" class="form-control" id="postUp" v-model="this.newConfiguration.PostUp">
-									</div>
-								</div>
-								<div class="card rounded-3">
-									<div class="card-header">PostDown</div>
-									<div class="card-body">
-										<input type="text" class="form-control" id="postDown" v-model="this.newConfiguration.PostDown">
+										<input type="text"
+										       class="form-control font-monospace" :id="key" v-model="this.newConfiguration[key]">
 									</div>
 								</div>
 							</div>
@@ -293,15 +389,14 @@ export default {
 						<span class="ms-2 spinner-border spinner-border-sm" role="status">
 						</span>
 					</span>
-					
 				</button>
 			</form>
-			
-			
 		</div>
 	</div>
 </template>
 
 <style scoped>
-
+.protocolBtnGroup a{
+	transition: all 0.2s ease-in-out;
+}
 </style>

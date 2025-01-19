@@ -55,13 +55,13 @@ export default {
 			this.allowedIpFormatError = false;
 		},
 		availableIp(){
-			if (this.availableIp !== undefined && this.availableIp.length > 0){
-				this.addAllowedIp(this.availableIp[0])
-			}
+			
 		}
 	},
 	mounted() {
-		
+		if (this.availableIp !== undefined && this.availableIp.length > 0 && this.data.allowed_ips.length === 0){
+			this.addAllowedIp(this.availableIp[0])
+		}
 	}
 }
 </script>
@@ -90,6 +90,7 @@ export default {
 				       :placeholder="this.inputGetLocale"
 				       :class="{'is-invalid': this.allowedIpFormatError}"
 				       v-model="customAvailableIp"
+				       id="peer_allowed_ip_textbox"
 				       :disabled="bulk">
 				<button class="btn btn-outline-success btn-sm rounded-end-3"
 				        :disabled="bulk || !this.customAvailableIp"

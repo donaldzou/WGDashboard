@@ -60,7 +60,6 @@ export const fetchPost = async (url, body, callback) => {
 		if (!x.ok){
 			if (x.status !== 200){
 				if (x.status === 401){
-					
 					store.newMessage("WGDashboard", "Sign in session ended, please sign in again", "warning")
 				}
 				throw new Error(x.statusText)
