@@ -1432,10 +1432,6 @@ class Peer:
         self.keepalive = tableData["keepalive"]
         self.remote_endpoint = tableData["remote_endpoint"]
         self.preshared_key = tableData["preshared_key"]
-        
-        
-            
-        
         self.jobs: list[PeerJob] = []
         self.ShareLink: list[PeerShareLink] = []
         self.getJobs()
@@ -1488,8 +1484,7 @@ class Peer:
                 f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'}",
                 shell=True, stderr=subprocess.STDOUT)
             
-            if pskExist: os.remove(uid)
-            
+            if pskExist: os.remove(uid)     
             if len(updateAllowedIp.decode().strip("\n")) != 0:
                 return ResponseObject(False,
                                       "Update peer failed when updating Allowed IPs")
@@ -1600,7 +1595,6 @@ H4 = {self.configuration.H4}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
-
         peerConfiguration += f'''
 [Peer]
 PublicKey = {self.configuration.PublicKey}
@@ -2048,7 +2042,6 @@ def API_SignOut():
 @app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
 def API_getWireguardConfigurations():
     InitWireguardConfigurationsList()
-    InitAmneziaWireguardConfigurationsList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
 @app.route(f'{APP_PREFIX}/api/addWireguardConfiguration', methods=["POST"])
@@ -2303,9 +2296,7 @@ def API_updateDashboardConfigurationItem():
         if data['key'] == 'wg_conf_path':
             WireguardConfigurations.clear()
             WireguardConfigurations.clear()
-            InitWireguardConfigurationsList()
-            InitAmneziaWireguardConfigurationsList()
-            
+            InitWireguardConfigurationsList()            
     return ResponseObject(True, data=DashboardConfig.GetConfig(data["section"], data["key"])[1])
 
 @app.get(f'{APP_PREFIX}/api/getDashboardAPIKeys')
@@ -3105,9 +3096,6 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 except WireguardConfigurations.InvalidConfigurationFileException as e:
                     print(f"{i} have an invalid configuration file.")
 
-def InitAmneziaWireguardConfigurationsList(startup: bool = False):
-    pass
-
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
 AllPeerJobs: PeerJobs = PeerJobs()
 JobLogger: PeerJobLogger = PeerJobLogger(CONFIGURATION_PATH, AllPeerJobs)
@@ -3119,13 +3107,11 @@ _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 AmneziaWireguardConfigurations: dict[str, AmneziaWireguardConfiguration] = {}
 InitWireguardConfigurationsList(startup=True)
-InitAmneziaWireguardConfigurationsList(startup=True)
 
 def startThreads():
     bgThread = threading.Thread(target=backGroundThread)
     bgThread.daemon = True
     bgThread.start()
-    
     scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
     scheduleJobThread.daemon = True
     scheduleJobThread.start()
