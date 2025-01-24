@@ -2948,74 +2948,77 @@ def API_Email_PreviewBody():
     except Exception as e:
         return ResponseObject(False, message=str(e))
 
-    
+from modules.SystemStatus import SystemStatus
+SystemStatus = SystemStatus()
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')
 def API_SystemStatus():
-    cpu_percpu = psutil.cpu_percent(interval=0.5, percpu=True)
-    cpu = psutil.cpu_percent(interval=0.5)
-    memory = psutil.virtual_memory()
-    swap_memory = psutil.swap_memory()
-    disks = psutil.disk_partitions()
-    network = psutil.net_io_counters(pernic=True, nowrap=True)
-    
-    status = {
-        "cpu": {
-            "cpu_percent": cpu,
-            "cpu_percent_per_cpu": cpu_percpu,
-        },
-        "memory": {
-            "virtual_memory": {
-                "total": memory.total,
-                "available": memory.available,
-                "percent": memory.percent
-            },
-            "swap_memory": {
-                "total": swap_memory.total,
-                "used": swap_memory.used,
-                "percent": swap_memory.percent
-            }
-        },
-        "disk": {},
-        "network": {},
-        "process": {
-            "cpu_top_10": [],
-            "memory_top_10": []
-        }
-    }
-    for d in disks:
-        detail = psutil.disk_usage(d.mountpoint)
-        status['disk'][d.mountpoint] = {
-            "total": detail.total,
-            "used": detail.used,
-            "free": detail.free,
-            "percent": detail.percent
-        }
-    for i in network.keys():
-        status["network"][i] = {
-            "byte_sent": network[i].bytes_sent,
-            "byte_recv": network[i].bytes_recv
-        }
-        
-    while True:
-        try:
-            processes = list(psutil.process_iter())
-            status["process"]["cpu_top_10"] = sorted(list(map(lambda x : {
-                "name": x.name(),
-                "command": " ".join(x.cmdline()),
-                "pid": x.pid,
-                "cpu_percent": x.cpu_percent()
-            }, processes)), key=lambda x : x['cpu_percent'], reverse=True)[:10]
-            status["process"]["memory_top_10"] = sorted(list(map(lambda x : {
-                "name": x.name(),
-                "command": " ".join(x.cmdline()),
-                "pid": x.pid,
-                "memory_percent": x.memory_percent()
-            }, processes)), key=lambda x : x['memory_percent'], reverse=True)[:10]
-            break
-        except Exception as e:
-            continue
-    return ResponseObject(data=status)
+    # cpu_percpu = psutil.cpu_percent(interval=0.5, percpu=True)
+    # cpu = psutil.cpu_percent(interval=0.5)
+    # memory = psutil.virtual_memory()
+    # swap_memory = psutil.swap_memory()
+    # disks = psutil.disk_partitions()
+    # network = psutil.net_io_counters(pernic=True, nowrap=True)
+    # 
+    # 
+    # status = {
+    #     "cpu": {
+    #         "cpu_percent": cpu,
+    #         "cpu_percent_per_cpu": cpu_percpu,
+    #     },
+    #     "memory": {
+    #         "virtual_memory": {
+    #             "total": memory.total,
+    #             "available": memory.available,
+    #             "percent": memory.percent
+    #         },
+    #         "swap_memory": {
+    #             "total": swap_memory.total,
+    #             "used": swap_memory.used,
+    #             "percent": swap_memory.percent
+    #         }
+    #     },
+    #     "disk": {},
+    #     "network": {},
+    #     "process": {
+    #         "cpu_top_10": [],
+    #         "memory_top_10": []
+    #     },
+    #     "SystemStatus": systemStatus
+    # }
+    # for d in disks:
+    #     detail = psutil.disk_usage(d.mountpoint)
+    #     status['disk'][d.mountpoint] = {
+    #         "total": detail.total,
+    #         "used": detail.used,
+    #         "free": detail.free,
+    #         "percent": detail.percent
+    #     }
+    # for i in network.keys():
+    #     status["network"][i] = {
+    #         "byte_sent": network[i].bytes_sent,
+    #         "byte_recv": network[i].bytes_recv
+    #     }
+    #     
+    # while True:
+    #     try:
+    #         processes = list(psutil.process_iter())
+    #         status["process"]["cpu_top_10"] = sorted(list(map(lambda x : {
+    #             "name": x.name(),
+    #             "command": " ".join(x.cmdline()),
+    #             "pid": x.pid,
+    #             "cpu_percent": x.cpu_percent()
+    #         }, processes)), key=lambda x : x['cpu_percent'], reverse=True)[:10]
+    #         status["process"]["memory_top_10"] = sorted(list(map(lambda x : {
+    #             "name": x.name(),
+    #             "command": " ".join(x.cmdline()),
+    #             "pid": x.pid,
+    #             "memory_percent": x.memory_percent()
+    #         }, processes)), key=lambda x : x['memory_percent'], reverse=True)[:10]
+    #         break
+    #     except Exception as e:
+    #         continue
+    return ResponseObject(data=SystemStatus)
 
 @app.get(f'{APP_PREFIX}/api/protocolsEnabled')
 def API_ProtocolsEnabled():

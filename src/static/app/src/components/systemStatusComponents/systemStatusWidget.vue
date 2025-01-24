@@ -7,8 +7,6 @@ import StorageMount from "@/components/systemStatusComponents/storageMount.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 const dashboardStore = DashboardConfigurationStore()
-
-// const data = ref(undefined)
 let interval = null;
 
 onMounted(() => {
@@ -43,19 +41,19 @@ const data = computed(() => {
 				</h6>
 				<h6 class="ms-auto">
 					<span v-if="data">
-						{{ data.cpu.cpu_percent }}%
+						{{ data.CPU.cpu_percent }}%
 					</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
 			<div class="progress" role="progressbar" style="height: 6px">
-				<div class="progress-bar" :style="{width: `${data?.cpu.cpu_percent}%` }"></div>
+				<div class="progress-bar" :style="{width: `${data?.CPU.cpu_percent}%` }"></div>
 			</div>
 			<div class="d-flex mt-2 gap-1">
 				<CpuCore
-					v-for="(cpu, count) in data?.cpu.cpu_percent_per_cpu"
+					v-for="(cpu, count) in data?.CPU.cpu_percent_per_cpu"
 				         :key="count"
-				         :align="(count + 1) > Math.round(data?.cpu.cpu_percent_per_cpu.length / 2)"
+				         :align="(count + 1) > Math.round(data?.CPU.cpu_percent_per_cpu.length / 2)"
 				         :core_number="count" :percentage="cpu"
 				></CpuCore>
 			</div>
@@ -68,20 +66,20 @@ const data = computed(() => {
 				</h6>
 				<h6 class="ms-auto">
 					<span v-if="data">
-						{{ data?.disk['/'].percent }}%
+						{{ data?.Disks.find(x => x.mountPoint === '/').percent }}%
 					</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
 			<div class="progress" role="progressbar" style="height: 6px">
-				<div class="progress-bar bg-success" :style="{width: `${data?.disk['/'].percent}%` }"></div>
+				<div class="progress-bar bg-success" :style="{width: `${data?.Disks.find(x => x.mountPoint === '/').percent}%` }"></div>
 			</div>
 			<div class="d-flex mt-2 gap-1">
-				<StorageMount v-for="(disk, count) in Object.keys(data?.disk)"
+				<StorageMount v-for="(disk, count) in data?.Disks"
 				              v-if="data"
-				              :key="count"
-				              :align="(count + 1) > Math.round(Object.keys(data?.disk).length / 2)"
-				              :mount="disk" :percentage="data?.disk[disk].percent"
+				              :key="disk.mountPoint"
+				              :align="(count + 1) > Math.round(data?.Disks.length / 2)"
+				              :mount="disk"
 				></StorageMount>
 			</div>
 		</div>
@@ -93,13 +91,13 @@ const data = computed(() => {
 				</h6>
 				<h6 class="ms-auto">
 							<span v-if="data">
-								{{ data?.memory.virtual_memory.percent }}%
+								{{ data?.Memory.VirtualMemory.percent }}%
 							</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
 			<div class="progress" role="progressbar" style="height: 6px">
-				<div class="progress-bar bg-info" :style="{width: `${data?.memory.virtual_memory.percent}%` }"></div>
+				<div class="progress-bar bg-info" :style="{width: `${data?.Memory.VirtualMemory.percent}%` }"></div>
 			</div>
 		</div>
 		<div class="col-md-6 col-sm-12 col-xl-3">
@@ -110,13 +108,13 @@ const data = computed(() => {
 				</h6>
 				<h6 class="ms-auto">
 							<span v-if="data">
-								{{ data?.memory.swap_memory.percent }}%
+								{{ data?.Memory.SwapMemory.percent }}%
 							</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
 			</div>
 			<div class="progress" role="progressbar" style="height: 6px">
-				<div class="progress-bar bg-warning" :style="{width: `${data?.memory.swap_memory.percent}%` }"></div>
+				<div class="progress-bar bg-warning" :style="{width: `$ data?.Memory.SwapMemory.percent}%` }"></div>
 			</div>
 		</div>
 	</div>

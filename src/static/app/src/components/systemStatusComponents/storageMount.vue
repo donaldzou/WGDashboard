@@ -2,8 +2,7 @@
 import {computed, ref} from "vue";
 
 const props = defineProps({
-	mount: String,
-	percentage: Number,
+	mount: Object,
 	align: Boolean,
 	square: Boolean
 })
@@ -19,7 +18,7 @@ const squareHeight = computed(() => {
 	<div class="flex-grow-1 square rounded-3 border position-relative"
 	     @mouseenter="show = true"
 	     @mouseleave="show = false"
-	     :style="{'background-color': `rgb(25 135 84 / ${percentage}%)`}">
+	     :style="{'background-color': `rgb(25 135 84 / ${mount.percent}%)`}">
 		<Transition name="zoomReversed">
 			<div
 				v-if="show"
@@ -29,10 +28,10 @@ const squareHeight = computed(() => {
 				:class="[align ? 'end-0':'start-0']"
 			>
 				<small class="text-muted me-2">
-					<samp>{{mount}}</samp>
+					<samp>{{mount.mountPoint}}</samp>
 				</small>
 				<small class="fw-bold">
-					{{percentage}}%
+					{{mount.percent}}%
 				</small>
 			</div>
 		</Transition>

@@ -10,7 +10,7 @@ const props = defineProps(["process", "cpu"])
 			<samp>{{process.command ? process.command : process.name}}</samp>
 		</small>
 		<small class="ms-auto">
-			{{cpu ? process.cpu_percent : (Math.round((process.memory_percent + Number.EPSILON) * 10) / 10)}}%
+			{{(Math.round((process.percent + Number.EPSILON) * 10) / 10)}}%
 		</small>
 	</div>
 </template>
