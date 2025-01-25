@@ -2,7 +2,7 @@
 Peer Job Logger
 """
 import sqlite3, os, uuid
-from Log import Log
+import Log
 
 class PeerJobLogger:
     def __init__(self, CONFIGURATION_PATH, AllPeerJobs):
