@@ -88,7 +88,6 @@ const getData = () => {
 		}else{
 			let bytes_recv_diff = historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 1] - historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 2]
 			let bytes_sent_diff = historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 1] - historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 2]
-			console.log(bytes_recv_diff, bytes_sent_diff)
 			historicalNetworkSpeed.value.bytes_recv.push(Math.round((bytes_recv_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
 			historicalNetworkSpeed.value.bytes_sent.push(Math.round((bytes_sent_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
 		}
@@ -178,7 +177,7 @@ const cpuHistoricalChartData = computed(() => {
 				label: GetLocale('CPU Usage'),
 				data: [...historicalCpuUsage.value],
 				fill: 'start',
-				backgroundColor: '#0d6efd50',
+				backgroundColor: '#0d6efd90',
 				borderColor: '#0d6efd',
 				tension: 0,
 				pointRadius: 2,
@@ -197,7 +196,7 @@ const memoryHistoricalChartData = computed(() => {
 				data: [...historicalVirtualMemoryUsage.value],
 				fill: 1,
 				borderColor: '#0dcaf0',
-				backgroundColor: '#0dcaf050',
+				backgroundColor: '#0dcaf090',
 				tension: 0,
 				pointRadius: 2,
 				borderWidth: 1,
@@ -206,7 +205,7 @@ const memoryHistoricalChartData = computed(() => {
 				label: GetLocale('Swap Memory Usage'),
 				data: [...historicalSwapMemoryUsage.value],
 				fill: 'start',
-				backgroundColor: '#ffc10750',
+				backgroundColor: '#ffc10790',
 				borderColor: '#ffc107',
 				tension: 0,
 				pointRadius: 2,
@@ -366,11 +365,12 @@ const networkSpeedHistoricalChartData = computed(() => {
 	<div class="col-sm-12">
 		<div class="card rounded-3 h-100 shadow">
 			<div class="card-body p-4 d-flex gap-3 flex-column">
-				<div class="d-flex align-items-center">
+				<div class="d-flex align-items-center gap-3">
 					<h3 class="text-muted mb-0">
 						<i class="bi bi-ethernet me-2"></i>
 						<LocaleText t="Network"></LocaleText>
 					</h3>
+					
 					<h3 class="ms-auto mb-0">
 						<span v-if="data">
 							<LocaleText :t="Object.keys(data.NetworkInterfaces).length + ' Interface' + (Object.keys(data.NetworkInterfaces).length > 1 ? 's':'')"></LocaleText>
@@ -378,10 +378,22 @@ const networkSpeedHistoricalChartData = computed(() => {
 						<span v-else class="spinner-border"></span>
 					</h3>
 				</div>
+				<div>
+					<h5 class="mb-0 text-end" v-if="data">
+						<span class="text-info">
+								<i class="bi bi-arrow-down"></i>
+								{{ historicalNetworkSpeed.bytes_recv[historicalNetworkSpeed.bytes_recv.length - 1] }} MB/s
+							</span>
+						<span class="text-warning">
+								<i class="bi bi-arrow-up"></i>
+								{{ historicalNetworkSpeed.bytes_sent[historicalNetworkSpeed.bytes_sent.length - 1] }} MB/s
+							</span>
+					</h5>
+				</div>
 				<Line
 					:options="networkSpeedChartOption"
 					:data="networkSpeedHistoricalChartData"
-					style="width: 100%; height: 200px; max-height: 200px"
+					style="width: 100%; height: 300px; max-height: 300px"
 				></Line>
 				<div v-if="data" class="row g-3">
 					<div v-for="key in Object.keys(data.NetworkInterfaces).sort()"
