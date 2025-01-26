@@ -76,10 +76,10 @@ const getData = () => {
 		historicalSwapMemoryUsage.value.push(res.data.Memory.SwapMemory.percent)
 		
 		historicalNetworkData.value.bytes_recv.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_recv).reduce((x, y) => x.bytes_recv + y.bytes_recv)
+			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_recv).reduce((x, y) => x + y)
 		)
 		historicalNetworkData.value.bytes_sent.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_sent).reduce((x, y) => x.bytes_sent + y.bytes_sent)
+			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_sent).reduce((x, y) => x + y)
 		)
 
 		if (historicalNetworkData.value.bytes_recv.length === 1 && historicalNetworkData.value.bytes_sent.length === 1){
