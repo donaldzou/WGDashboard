@@ -75,7 +75,8 @@ set_envvars() {
       echo "[Peers]"
       echo "peer_global_dns = ${global_dns}"
       echo "remote_endpoint = ${public_ip}"
-      #echo -e "\n[Server]"
+      echo -e "\n[Server]"
+      echo "app_port = ${wgd_port}"
     } > "${config_file}"
 
   else
@@ -87,24 +88,32 @@ set_envvars() {
   # Check and update the DNS if it has changed
   current_dns=$(grep "peer_global_dns = " "${config_file}" | awk '{print $NF}')
   if [ "${global_dns}" == "$current_dns" ]; then
-    echo "DNS is correct, moving on."
+    echo "DNS is set correctly, moving on."
     
   else
     echo "Changing default DNS..."
     sed -i "s/^peer_global_dns = .*/peer_global_dns = ${global_dns}/" "${config_file}"
   fi
 
-  if [ "${public_ip}" == "0.0.0.0" ]; then
-
+  current_public_ip=$(grep "remote_endpoint = " "${config_file}" | awk '{print $NF}')
+  if [ "${public_ip}" == "" ]; then
     default_ip=$(curl -s ifconfig.me)
 
     echo "Trying to fetch the Public-IP using ifconfig.me: ${default_ip}"
     sed -i "s/^remote_endpoint = .*/remote_endpoint = ${default_ip}/" "${config_file}"
-
+  elif [ "${current_public_ip}" != "${public_ip}" ]; then
+    sed -i "s/^remote_endpoint = .*/remote_endpoint = ${public_ip}/" "${config_file}"
   else
     echo "Public-IP is correct, moving on."
   fi
 
+  current_wgd_port=$(grep "app_port = " "${config_file}" | awk '{print $NF}')
+  if [ "${current_wgd_port}" == "${wgd_port}" ]; then
+    echo "Current WGD port is set correctly, moving on."
+  else
+    echo "Changing default WGD port..."
+    sed -i "s/^app_port = .*/app_port = ${wgd_port}/" "${config_file}"
+  fi
 }
 
 # === CORE SERVICES ===
@@ -116,95 +125,6 @@ start_core() {
   . "${WGDASH}"/src/venv/bin/activate
   cd "${WGDASH}"/src || return
   bash wgd.sh start
-
-  # Isolated peers feature, first converting the existing configuration files and the given names to arrays.
-  #
-  # WILL BE REMOVED IN FUTURE WHEN WGDASHBOARD ITSELF SUPPORTS THIS!!
-  #
-
-  local configurations=(/etc/wireguard/*)
-  IFS=',' read -r -a do_isolate <<< "${isolate}"
-  non_isolate=()
-
-  # Checking if there are matches between the two arrays.
-  for config in "${configurations[@]}"; do
-    config=$(echo "$config" | sed -e 's|.*/etc/wireguard/||' -e 's|\.conf$||')
-
-    local found
-    found=false
-
-    for interface in "${do_isolate[@]}"; do
-
-      if [[ "$config" == "$interface" ]]; then
-        found=true
-        break
-      fi
-
-    done
-
-    if [ "$found" = false ]; then
-      non_isolate+=("$config")
-    fi
-
-  done
-
-  # Isolating the matches.
-  noneFound=0
-
-  for interface in "${do_isolate[@]}"; do
-
-    if [ "$interface" = "none" ] || [ "$interface" = "" ]; then
-      echo "Found none, stopping isolation checking."
-      noneFound=1
-      break
-
-    else
-
-      if [ ! -f "/etc/wireguard/${interface}.conf" ]; then
-        echo "Ignoring ${interface}"
-
-      elif [ -f "/etc/wireguard/${interface}.conf" ]; then
-
-
-        echo "Isolating interface:" "$interface"
-
-        upblocking=$(grep -c "PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
-        downblocking=$(grep -c "PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf)
-
-        if [ "$upblocking" -lt 1 ] && [ "$downblocking" -lt 1 ]; then
-          sed -i "/PostUp =/a PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf
-          sed -i "/PreDown =/a PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP" /etc/wireguard/"${interface}".conf
-        fi
-
-      else
-        echo "Configuration for $interface in enforce isolation does not seem to exist, continuing."
-      fi
-
-    fi
-
-  done
-  
-  # Removing isolation for the configurations that did not match.
-
-
-  for interface in "${non_isolate[@]}"; do
-    if [ $noneFound -eq 1 ]; then
-      break
-
-    elif [ ! -f "/etc/wireguard/${interface}.conf" ]; then
-      echo "Ignoring ${interface}"
-
-    elif [ -f "/etc/wireguard/${interface}.conf" ]; then
-      echo "Removing isolation, if isolation is present for:" "$interface"
-
-      sed -i "/PostUp = iptables -I FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
-      sed -i "/PreDown = iptables -D FORWARD -i ${interface} -o ${interface} -j DROP/d" /etc/wireguard/"${interface}".conf
-    else
-      echo "Configuration for $interface in removing isolation does not seem to exist, continuing."
-    fi
-
-  done
-
 }
 
 ensure_blocking() {
