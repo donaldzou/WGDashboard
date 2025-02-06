@@ -1,4 +1,10 @@
 [
+
+	{
+		"lang_id": "ar-sa",
+		"lang_name": "Arabic",
+		"lang_name_localized": "العربية"
+	},
 	{
 		"lang_id": "cs",
 		"lang_name": "Czech",
@@ -68,11 +74,6 @@
 		"lang_id": "pl",
 		"lang_name": "Polish",
 		"lang_name_localized": "Polski"
-	},
-
-	{
-		"lang_id": "ar-sa",
-		"lang_name": "Arabic",
-		"lang_name_localized": "العربية"
 	}
+
 ]
