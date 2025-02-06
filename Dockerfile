@@ -85,5 +85,6 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
+WORKDIR $WGDASH
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

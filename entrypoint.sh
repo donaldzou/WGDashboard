@@ -7,7 +7,7 @@ trap 'stop_service' SIGTERM
 
 stop_service() {
   echo "[WGDashboard] Stopping WGDashboard..."
-  ./wgd.sh stop
+  bash ./wgd.sh stop
   exit 0
 }
 
@@ -17,6 +17,12 @@ echo "Starting the WireGuard Dashboard Docker container."
 ensure_installation() {
   # When using a custom directory to store the files, this part moves over and makes sure the installation continues.
   echo "Quick-installing..."
+
+  chmod +x "${WGDASH}"/src/wgd.sh
+  cd "${WGDASH}"/src || exit
+
+  echo "Removing clear command from wgd.sh for better Docker logging."
+  sed -i '/clear/d' ./wgd.sh
 
   if [ ! -d "/data/db" ]; then
     echo "Creating database dir"
@@ -45,9 +51,6 @@ ensure_installation() {
   echo "Moving PIP dependency from ephemerality to runtime environment: bcrypt"
   mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
 
-
-  chmod +x "${WGDASH}"/src/wgd.sh
-  cd "${WGDASH}"/src || exit
   ./wgd.sh install
 
   echo "Looks like the installation succeeded. Moving on."
@@ -129,10 +132,7 @@ start_core() {
   printf "\n---------------------- STARTING CORE -----------------------\n"
 
   echo "Activating Python venv and executing the WireGuard Dashboard service."
-
-  . "${WGDASH}"/src/venv/bin/activate
-  cd "${WGDASH}"/src || return
-  bash wgd.sh start
+  bash ./wgd.sh start
 }
 
 ensure_blocking() {
@@ -143,17 +143,14 @@ ensure_blocking() {
   local logdir="${WGDASH}/src/log"
 
   latestErrLog=$(find "$logdir" -name "error_*.log" -type f -print | sort -r | head -n 1)
-  #latestAccLog=$(find "$logdir" -name "access_*.log" -type f -print | sort -r | head -n 1) # Removed access line due to console spam.
 
   # Only tail the logs if they are found
-  if [ -n "$latestErrLog" ] || [ -n "$latestAccLog" ]; then
-    tail -f "$latestErrLog"
+  if [ -n "$latestErrLog" ]; then
+    tail -f "$latestErrLog" &
+    wait $!
   else
-    echo "No log files found to tail."
+    echo "No log files found to tail. Something went wrong, exiting..."
   fi
-
-  # Blocking command to keep the container running as a last resort.
-  sleep infinity
 }
 
 # Execute functions for the WireGuard Dashboard services, then set the environment variables
