@@ -38,7 +38,8 @@ ARG wg_port="51820"
 ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV isolate="none"
-ENV public_ip="0.0.0.0"
+ENV public_ip=""
+ENV wgd_port="10086"
 
 # Doing package management operations, such as upgrading
 RUN apk update \
@@ -48,14 +49,15 @@ RUN apk update \
   && apk upgrade
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
-ENV WGDASH=/opt/wireguarddashboard
+ENV WGDASH=/opt/wgdashboard
 
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
 RUN mkdir /data \
   && mkdir /configs \
-  && mkdir -p ${WGDASH}/src
+  && mkdir -p ${WGDASH}/src \
+  && mkdir -p /etc/amnezia/amneziawg
 COPY ./src ${WGDASH}/src
 
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
