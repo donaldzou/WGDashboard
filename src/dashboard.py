@@ -2467,17 +2467,16 @@ def API_addPeers(configName):
             bulkAdd: bool = data.get("bulkAdd", False)
             bulkAddAmount: int = data.get('bulkAddAmount', 0)
             preshared_key_bulkAdd: bool = data.get('preshared_key_bulkAdd', False)
-    
-    
+
             public_key: str = data.get('public_key', "")
             allowed_ips: list[str] = data.get('allowed_ips', "")
+            override_allowed_ips: bool = data.get('override_allowed_ips', False)
             
             endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1])
             dns_addresses: str = data.get('DNS', DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1])
             mtu: int = data.get('mtu', int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1]))
             keep_alive: int = data.get('keepalive', int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]))
-            preshared_key: str = data.get('preshared_key', "")
-            
+            preshared_key: str = data.get('preshared_key', "")            
     
             if type(mtu) is not int or mtu < 0 or mtu > 1460:
                 mtu = int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1])
@@ -2528,11 +2527,12 @@ def API_addPeers(configName):
                     return ResponseObject(False, f"This peer already exist")
                 name = data.get("name", "")
                 private_key = data.get("private_key", "")
-    
-                for i in allowed_ips:
-                    if i not in availableIps[1]:
-                        return ResponseObject(False, f"This IP is not available: {i}")
-    
+
+                if not override_allowed_ips:
+                    for i in allowed_ips:
+                        if i not in availableIps[1]:
+                            return ResponseObject(False, f"This IP is not available: {i}")
+
                 status = config.addPeers([
                     {
                         "name": name,

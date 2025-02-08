@@ -40,14 +40,20 @@ export default {
 	},
 	methods: {
 		addAllowedIp(ip){
-			if(this.store.checkCIDR(ip)){
-				this.data.allowed_ips.push(ip);
-				this.customAvailableIp = ''
-				return true;
+			let list = ip.split(',')
+			for (let i = 0; i < list.length; i++){
+				let ipaddress = list[i].trim();
+				if(this.store.checkCIDR(ipaddress)){
+					this.data.allowed_ips.push(ipaddress);
+				}else{
+					this.allowedIpFormatError = true;
+					this.dashboardStore.newMessage('WGDashboard', 
+						`This Allowed IP address is invalid: ${ipaddress}`, 'danger')
+					return false;
+				}
 			}
-			this.allowedIpFormatError = true;
-			this.dashboardStore.newMessage('WGDashboard', 'Allowed IPs is invalid', 'danger')
-			return false;
+			this.customAvailableIp = ''
+			return true;
 		}
 	},
 	watch: {
@@ -68,21 +74,33 @@ export default {
 
 <template>
 	<div :class="{inactiveField: this.bulk}">
-		<label for="peer_allowed_ip_textbox" class="form-label">
-			<small class="text-muted">
-				<LocaleText t="Allowed IPs"></LocaleText>
-				<code>
-					<LocaleText t="(Required)"></LocaleText>
-				</code></small>
-		</label>
-		<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ips.length > 0}">
-			<TransitionGroup name="list">
+		<div class="d-flex">
+			<label for="peer_allowed_ip_textbox" class="form-label">
+				<small class="text-muted">
+					<LocaleText t="Allowed IPs"></LocaleText> <code><LocaleText t="(Required)"></LocaleText></code>
+				</small>
+			</label>
+			<div class="form-check form-switch ms-auto">
+				<input class="form-check-input" type="checkbox" 
+				       v-model="this.data.override_allowed_ips"
+				       role="switch" id="disableIPValidation">
+				<label class="form-check-label" for="disableIPValidation">
+					<small>
+						<LocaleText t="Disable Allowed IPs Validation"></LocaleText>
+					</small>
+				</label>
+			</div>
+		</div>
+		<div class="d-flex">
+			<div class="d-flex gap-2 flex-wrap" :class="{'mb-2': this.data.allowed_ips.length > 0}">
+				<TransitionGroup name="list">
 				<span class="badge rounded-pill text-bg-success" v-for="(ip, index) in this.data.allowed_ips" :key="ip">
 					{{ip}}
 					<a role="button" @click="this.data.allowed_ips.splice(index, 1)">
 						<i class="bi bi-x-circle-fill ms-1"></i></a>
 				</span>
-			</TransitionGroup>
+				</TransitionGroup>
+			</div>
 		</div>
 		<div class="d-flex gap-2 align-items-center">
 			<div class="input-group">
@@ -92,7 +110,8 @@ export default {
 				       v-model="customAvailableIp"
 				       id="peer_allowed_ip_textbox"
 				       :disabled="bulk">
-				<button class="btn btn-outline-success btn-sm rounded-end-3"
+				<button class="btn btn-sm rounded-end-3"
+				        :class="[this.customAvailableIp ? 'btn-success':'btn-outline-success']"
 				        :disabled="bulk || !this.customAvailableIp"
 				        @click="this.addAllowedIp(this.customAvailableIp)"
 				        type="button" id="button-addon2">
