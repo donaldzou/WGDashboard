@@ -654,7 +654,11 @@ class WireguardConfiguration:
             for i in checkIfExist:
                 self.Peers.append(Peer(i, self))
             
-    def addPeers(self, peers: list):
+    def addPeers(self, peers: list) -> tuple[bool, dict]:
+        result = {
+            "message": None,
+            "peers": []
+        }
         try:
             for i in peers:
                 newPeer = {
@@ -687,6 +691,7 @@ class WireguardConfiguration:
                         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
                     """ % self.Name
                     , newPeer)
+                
             for p in peers:
                 presharedKeyExist = len(p['preshared_key']) > 0
                 rd = random.Random()
@@ -702,10 +707,14 @@ class WireguardConfiguration:
             subprocess.check_output(
                 f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             self.getPeersList()
-            return True
+            for p in peers:
+                p = self.searchPeer(p['id'])
+                if p[0]:
+                    result['peers'].append(p[1])
+            return True, result
         except Exception as e:
-            print(str(e))
-            return False
+            result['message'] = str(e)
+            return False, result
         
     def searchPeer(self, publicKey):
         for i in self.Peers:
@@ -2469,7 +2478,7 @@ def API_addPeers(configName):
             preshared_key_bulkAdd: bool = data.get('preshared_key_bulkAdd', False)
 
             public_key: str = data.get('public_key', "")
-            allowed_ips: list[str] = data.get('allowed_ips', "")
+            allowed_ips: list[str] = data.get('allowed_ips', [])
             override_allowed_ips: bool = data.get('override_allowed_ips', False)
             
             endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1])
@@ -2487,8 +2496,8 @@ def API_addPeers(configName):
             if len(endpoint_allowed_ip) == 0:
                 endpoint_allowed_ip = DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1]
             config = WireguardConfigurations.get(configName)
-            if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
-                return ResponseObject(False, "Please provide at least public_key and allowed_ips")
+            # if not bulkAdd and (len(public_key) == 0 or len(allowed_ips) == 0):
+            #     return ResponseObject(False, "Please provide at least public_key and allowed_ips")
             if not config.getStatus():
                 config.toggleConfiguration()
             availableIps = config.getAvailableIP()
@@ -2519,21 +2528,31 @@ def API_addPeers(configName):
                     })
                 if len(keyPairs) == 0:
                     return ResponseObject(False, "Generating key pairs by bulk failed")
-                config.addPeers(keyPairs)
-                return ResponseObject()
+                status, result = config.addPeers(keyPairs)
+                return ResponseObject(status=status, message=result['message'], data=result['peers'])
     
             else:
                 if config.searchPeer(public_key)[0] is True:
                     return ResponseObject(False, f"This peer already exist")
                 name = data.get("name", "")
                 private_key = data.get("private_key", "")
+                
+                if len(public_key) == 0 and len(private_key) == 0:
+                    private_key = GenerateWireguardPrivateKey()[1]
+                    public_key = GenerateWireguardPublicKey(private_key)[1]
+                
+                if len(allowed_ips) == 0:
+                    if availableIps[0]:
+                        allowed_ips = [availableIps[1][0]]
+                    else:
+                        return ResponseObject(False, "No more available IP can assign") 
 
                 if not override_allowed_ips:
                     for i in allowed_ips:
                         if i not in availableIps[1]:
                             return ResponseObject(False, f"This IP is not available: {i}")
 
-                status = config.addPeers([
+                status, result = config.addPeers([
                     {
                         "name": name,
                         "id": public_key,
@@ -2547,7 +2566,7 @@ def API_addPeers(configName):
                         "advanced_security": data.get("advanced_security", "off")
                     }]
                 )
-                return ResponseObject(status)
+                return ResponseObject(status=status, message=result['message'], data=result['peers'])
         except Exception as e:
             print(e)
             return ResponseObject(False, "Add peers failed. Please see data for specific issue")

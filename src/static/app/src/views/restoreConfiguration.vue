@@ -45,6 +45,7 @@ const openFileUpload = () => {
 				<h2 class="mb-0">
 					<LocaleText t="Restore Configuration"></LocaleText>
 				</h2>
+				
 <!--				<div class="d-flex gap-2 ms-auto">-->
 <!--					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"-->
 <!--					        @click="openFileUpload()"-->
@@ -54,6 +55,7 @@ const openFileUpload = () => {
 <!--					</button>-->
 <!--				</div>-->
 			</div>
+			
 			<Transition name="fade" appear>
 				<div v-if="backups">
 					<div class="d-flex mb-5 align-items-center steps" role="button"
