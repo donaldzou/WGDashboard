@@ -55,7 +55,7 @@ export default {
 	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky ">
-				<div class="text-white text-center m-0 py-3 mb-3 btn-brand">
+				<div class="text-white text-center m-0 py-3 mb-2 btn-brand">
 					<h5 class="mb-0">
 						WGDashboard
 					</h5>
@@ -63,7 +63,7 @@ export default {
 						<i class="bi bi-hdd-rack-fill me-2"></i>{{getActiveCrossServer.host}}
 					</small>
 				</div>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
 						            to="/" exact-active-class="active">
@@ -84,12 +84,11 @@ export default {
 						</a>
 					</li>
 				</ul>
-				<hr class="text-body">
-				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
-					<i class="bi bi-body-text me-2"></i>
+				<hr class="text-body my-2">
+				<h6 class="sidebar-heading px-3 mt-3 mb-1 text-muted text-center">
 					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
 					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
@@ -99,12 +98,11 @@ export default {
 						</RouterLink>
 					</li>
 				</ul>
-				<hr class="text-body">
-				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
-					<i class="bi bi-tools me-2"></i>
+				<hr class="text-body my-2">
+				<h6 class="sidebar-heading px-3 mt-3 mb-1 text-muted text-center">
 					<LocaleText t="Tools"></LocaleText>
 				</h6>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
 					<li class="nav-item">
 						<RouterLink to="/system_status" class="nav-link rounded-3" active-class="active">
 							<LocaleText t="System Status"></LocaleText>
@@ -120,7 +118,7 @@ export default {
 						</RouterLink>
 					</li>
 				</ul>
-				<hr class="text-body">
+				<hr class="text-body my-2">
 				<ul class="nav flex-column px-2 mb-3">
 					<li class="nav-item">
 						<a class="nav-link text-danger rounded-3" 

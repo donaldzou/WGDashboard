@@ -493,7 +493,6 @@ class WireguardConfiguration:
                 )
                 """ % dbName
             )
-
         if f'{dbName}_restrict_access' not in existingTables:
             sqlUpdate(
                 """
@@ -691,7 +690,6 @@ class WireguardConfiguration:
                         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
                     """ % self.Name
                     , newPeer)
-                
             for p in peers:
                 presharedKeyExist = len(p['preshared_key']) > 0
                 rd = random.Random()
@@ -1171,7 +1169,6 @@ class WireguardConfiguration:
 """
 AmneziaWG Configuration
 """
-
 class AmneziaWireguardConfiguration(WireguardConfiguration):
     def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
         self.Jc = 0
@@ -1357,7 +1354,11 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             for i in checkIfExist:
                 self.Peers.append(AmneziaWGPeer(i, self))
 
-    def addPeers(self, peers: list):
+    def addPeers(self, peers: list) -> tuple[bool, dict]:
+        result = {
+            "message": None,
+            "peers": []
+        }
         try:
             for i in peers:
                 newPeer = {
@@ -1407,10 +1408,14 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             subprocess.check_output(
                 f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
             self.getPeersList()
-            return True
+            for p in peers:
+                p = self.searchPeer(p['id'])
+                if p[0]:
+                    result['peers'].append(p[1])
+            return True, result
         except Exception as e:
-            print(str(e))
-            return False
+            result['message'] = str(e)
+            return False, result
 
     def getRestrictedPeers(self):
         self.RestrictedPeers = []
@@ -1528,7 +1533,7 @@ class Peer:
         
         finalFilename = ""
         for i in filename:
-            if re.match("^[a-zA-Z0-9_=+.-]{1,15}$", i):
+            if re.match("^[a-zA-Z0-9_=+.-]$", i):
                 finalFilename += i
 
         peerConfiguration = f'''[Interface]
@@ -1590,6 +1595,11 @@ class AmneziaWGPeer(Peer):
         for i in illegal_filename:
             filename = filename.replace(i, "")
 
+        finalFilename = ""
+        for i in filename:
+            if re.match("^[a-zA-Z0-9_=+.-]$", i):
+                finalFilename += i
+
         peerConfiguration = f'''[Interface]
 PrivateKey = {self.private_key}
 Address = {self.allowed_ip}
@@ -1616,7 +1626,7 @@ PersistentKeepalive = {str(self.keepalive)}
         if len(self.preshared_key) > 0:
             peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
         return {
-            "fileName": filename,
+            "fileName": finalFilename,
             "file": peerConfiguration
         }
 
@@ -2793,10 +2803,9 @@ def API_traceroute_execute():
                                   data=json.dumps([x['ip'] for x in result]))
                 d = r.json()
                 for i in range(len(result)):
-                    result[i]['geo'] = d[i]
-                
+                    result[i]['geo'] = d[i]  
             except Exception as e:
-                print(e)
+                return ResponseObject(data=result, message="Failed to request IP address geolocation")
             return ResponseObject(data=result)
         except Exception as exp:
             return ResponseObject(False, exp)
@@ -2817,8 +2826,7 @@ def API_getDashboardUpdate():
             else:
                 return ResponseObject(message="You're on the latest version")
         return ResponseObject(False)
-        
-    except urllib.error.HTTPError and urllib.error.URLError as e:
+    except Exception as e:
         return ResponseObject(False, f"Request to GitHub API failed.")
 
 '''
@@ -2980,7 +2988,7 @@ def API_ProtocolsEnabled():
 def index():
     return render_template('index.html')
 
-def backGroundThread():
+def peerInformationBackgroundThread():
     global WireguardConfigurations
     print(f"[WGDashboard] Background Thread #1 Started", flush=True)
     time.sleep(10)
@@ -3064,11 +3072,9 @@ AmneziaWireguardConfigurations: dict[str, AmneziaWireguardConfiguration] = {}
 InitWireguardConfigurationsList(startup=True)
 
 def startThreads():
-    bgThread = threading.Thread(target=backGroundThread)
-    bgThread.daemon = True
+    bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)
     bgThread.start()
-    scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread)
-    scheduleJobThread.daemon = True
+    scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread, daemon=True)
     scheduleJobThread.start()
 
 if __name__ == "__main__":
