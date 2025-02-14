@@ -15,6 +15,7 @@ from Utilities import (
     ValidateIPAddressesWithRange, ValidateDNSAddress,
     GenerateWireguardPublicKey, GenerateWireguardPrivateKey
 )
+from packaging import version
 from modules.Email import EmailSender
 from modules.Log import Log
 from modules.DashboardLogger import DashboardLogger
@@ -2821,7 +2822,7 @@ def API_getDashboardUpdate():
         tagName = data.get('tag_name')
         htmlUrl = data.get('html_url')
         if tagName is not None and htmlUrl is not None:
-            if tagName != DASHBOARD_VERSION:
+            if version.parse(tagName) > version.parse(DASHBOARD_VERSION):
                 return ResponseObject(message=f"{tagName} is now available for update!", data=htmlUrl)
             else:
                 return ResponseObject(message="You're on the latest version")
