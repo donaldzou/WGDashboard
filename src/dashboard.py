@@ -1807,6 +1807,7 @@ class DashboardConfig:
         if section == "Peers" and key == "peer_endpoint_allowed_ip":
             value = value.split(",")
             for i in value:
+                i = i.strip()
                 try:
                     ipaddress.ip_network(i, strict=False)
                 except Exception as e:
