@@ -31,6 +31,7 @@ Chart.register(
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import dayjs from "dayjs";
+import {useRoute, useRouter} from "vue-router";
 const props = defineProps({
 	configurationPeers: Array,
 	configurationInfo: Object
@@ -45,12 +46,12 @@ const historyReceivedData = ref({
 	timestamp: [],
 	data: []
 })
-
+const route = useRoute()
 const dashboardStore = DashboardConfigurationStore()
 const fetchRealtimeTrafficInterval = ref(undefined)
 const fetchRealtimeTraffic = async () => {
 	await fetchGet("/api/getWireguardConfigurationRealtimeTraffic", {
-		configurationName: "wg1"
+		configurationName: route.params.id
 	}, (res) => {
 		let timestamp = dayjs().format("hh:mm:ss A")
 		

@@ -19,9 +19,6 @@ const getUrl = (url) => {
 	if (apiKey){
 		return `${apiKey.host}${url}`
 	}
-	
-	// console.log("URL fetching: ", import.meta.env.MODE === 'development' ? url
-	// 	: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`)
 	return import.meta.env.MODE === 'development' ? url 
 		: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`
 }
@@ -36,7 +33,6 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		if (!x.ok){
 			if (x.status !== 200){
 				if (x.status === 401){
-					
 					store.newMessage("WGDashboard", "Sign in session ended, please sign in again", "warning")
 				}
 				throw new Error(x.statusText)
@@ -46,7 +42,7 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		}
 	}).then(x => callback ? callback(x) : undefined).catch(x => {
 		console.log(x)
-			router.push({path: '/signin'})
+		router.push({path: '/signin'})
 	})
 }
 
