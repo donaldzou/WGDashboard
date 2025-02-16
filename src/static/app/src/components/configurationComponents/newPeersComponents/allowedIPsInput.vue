@@ -172,11 +172,11 @@ export default {
 									<span class="me-auto"><small>{{ip}}</small></span>
 								</a>
 							</div>
-							<div v-if="this.searchAvailableIps.length === 0">
-								<small class="px-3 text-muted">
-									<LocaleText t="No available IP containing"></LocaleText>
-									"{{this.availableIpSearchString}}"</small>
+							<div v-if="this.searchAvailableIps.length === 0" class="px-3 py-2">
+								<small class="text-muted" v-if="this.availableIpSearchString"><LocaleText t="No available IP containing"></LocaleText>"{{this.availableIpSearchString}}"</small>
+								<small class="text-muted" v-else><LocaleText t="No more IP address available in this subnet"></LocaleText></small>
 							</div>
+							
 						</div>
 					</li>
 				</ul>

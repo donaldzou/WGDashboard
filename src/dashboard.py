@@ -1134,16 +1134,13 @@ class WireguardConfiguration:
                     availableAddress[ca] = network.num_addresses
                     for p in existedAddress:
                         if p.version == network.version and p.subnet_of(network):
-                            availableAddress[ca] -= 1
-
-                    # map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts())
-                    
+                            availableAddress[ca] -= 1                    
             except Exception as e:
                 print(e)
                 print(f"[WGDashboard] Error: Failed to parse IP address {ca} from {self.Name}")
         return True, availableAddress
     
-    def getAvailableIP(self, threshold = 255) -> tuple[bool, list[str]] | tuple[bool, None]:
+    def getAvailableIP(self, threshold = 255):
         if len(self.Address) < 0:
             return False, None
         existedAddress = set()
@@ -1166,11 +1163,16 @@ class WireguardConfiguration:
                 if len(caSplit) == 2:
                     network = ipaddress.ip_network(ca, False)
                     existedAddress.add(ipaddress.ip_network(caSplit[0]).compressed)
-                    availableAddress[ca] = list(islice(filter(lambda ip : ip not in existedAddress,
-                        map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts())), threshold))
+                    if threshold == -1:
+                        availableAddress[ca] = filter(lambda ip : ip not in existedAddress,
+                                map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts()))
+                    else:
+                        availableAddress[ca] = list(islice(filter(lambda ip : ip not in existedAddress,
+                                map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts())), threshold))
             except Exception as e:
                 print(e)
                 print(f"[WGDashboard] Error: Failed to parse IP address {ca} from {self.Name}")
+        print("Generated IP")
         return True, availableAddress
 
     def getRealtimeTrafficUsage(self):
@@ -1829,9 +1831,11 @@ class DashboardConfig:
         self.DashboardAPIKeys = self.__getAPIKeys()
     
     def __configValidation(self, section : str, key: str, value: Any) -> [bool, str]:
-        if type(value) is str and len(value) == 0 and section not in ['Email', 'WireGuardConfiguration']:
+        if (type(value) is str and len(value) == 0 
+                and section not in ['Email', 'WireGuardConfiguration'] and 
+                (section == 'Peer' and key == 'peer_global_dns')):
             return False, "Field cannot be empty!"
-        if section == "Peers" and key == "peer_global_dns":
+        if section == "Peers" and key == "peer_global_dns" and len(value) > 0:
             return ValidateDNSAddress(value)
         if section == "Peers" and key == "peer_endpoint_allowed_ip":
             value = value.split(",")
@@ -2343,7 +2347,6 @@ def API_updateDashboardConfigurationItem():
         data["section"], data["key"], data['value'])
     if not valid:
         return ResponseObject(False, msg)
-    
     if data['section'] == "Server":
         if data['key'] == 'wg_conf_path':
             WireguardConfigurations.clear()
@@ -2539,7 +2542,8 @@ def API_addPeers(configName):
             config = WireguardConfigurations.get(configName)
             if not config.getStatus():
                 config.toggleConfiguration()
-            ipStatus, availableIps = config.getAvailableIP()
+            ipStatus, availableIps = config.getAvailableIP(-1)
+            ipCountStatus, numberOfAvailableIPs = config.getNumberOfAvailableIP()
             defaultIPSubnet = list(availableIps.keys())[0]
             if bulkAdd:
                 if type(preshared_key_bulkAdd) is not bool:
@@ -2550,27 +2554,32 @@ def API_addPeers(configName):
                     return ResponseObject(False, "No more available IP can assign")
                 if len(availableIps.keys()) == 0:
                     return ResponseObject(False, "This configuration does not have any IP address available")
-                
-                
-                if bulkAddAmount > len(availableIps[defaultIPSubnet]):
+                if bulkAddAmount > sum(list(numberOfAvailableIPs.values())):
                     return ResponseObject(False,
-                                          f"The maximum number of peers can add is {len(availableIps[defaultIPSubnet])}")
+                            f"The maximum number of peers can add is {sum(list(numberOfAvailableIPs.values()))}")
                 keyPairs = []
-                for i in range(bulkAddAmount):
-                    newPrivateKey = GenerateWireguardPrivateKey()[1]
-                    keyPairs.append({
-                        "private_key": newPrivateKey,
-                        "id": GenerateWireguardPublicKey(newPrivateKey)[1],
-                        "preshared_key": (GenerateWireguardPrivateKey()[1] if preshared_key_bulkAdd else ""),
-                        "allowed_ip": availableIps[defaultIPSubnet][i],
-                        "name": f"BulkPeer #{(i + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-                        "DNS": dns_addresses,
-                        "endpoint_allowed_ip": endpoint_allowed_ip,
-                        "mtu": mtu,
-                        "keepalive": keep_alive,
-                        "advanced_security": data.get("advanced_security", "off")
-                    })
-                if len(keyPairs) == 0:
+                addedCount = 0
+                for subnet in availableIps.keys():
+                    for ip in availableIps[subnet]:
+                        newPrivateKey = GenerateWireguardPrivateKey()[1]
+                        addedCount += 1
+                        keyPairs.append({
+                            "private_key": newPrivateKey,
+                            "id": GenerateWireguardPublicKey(newPrivateKey)[1],
+                            "preshared_key": (GenerateWireguardPrivateKey()[1] if preshared_key_bulkAdd else ""),
+                            "allowed_ip": ip,
+                            "name": f"BulkPeer_{(addedCount + 1)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                            "DNS": dns_addresses,
+                            "endpoint_allowed_ip": endpoint_allowed_ip,
+                            "mtu": mtu,
+                            "keepalive": keep_alive,
+                            "advanced_security": data.get("advanced_security", "off")
+                        })
+                        if addedCount == bulkAddAmount:
+                            break
+                    if addedCount == bulkAddAmount:
+                        break
+                if len(keyPairs) == 0 or (bulkAdd and len(keyPairs) != bulkAddAmount):
                     return ResponseObject(False, "Generating key pairs by bulk failed")
                 status, result = config.addPeers(keyPairs)
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
@@ -2587,17 +2596,23 @@ def API_addPeers(configName):
                 
                 if len(allowed_ips) == 0:
                     if ipStatus:
-                        allowed_ips = [availableIps[defaultIPSubnet][0]]
+                        for subnet in availableIps.keys():
+                            for ip in availableIps[subnet]:
+                                allowed_ips = [ip]
+                                break
+                            break  
                     else:
                         return ResponseObject(False, "No more available IP can assign") 
 
                 if allowed_ips_validation:
                     for i in allowed_ips:
                         found = False
-                        for key in availableIps.keys():
-                            if i in availableIps[key]:
+                        for subnet in availableIps.keys():
+                            network = ipaddress.ip_network(subnet, False)
+                            ap = ipaddress.ip_network(i)
+                            if network.version == ap.version and ap.subnet_of(network):
                                 found = True
-                                break
+                        
                         if not found:
                             return ResponseObject(False, f"This IP is not available: {i}")
 
