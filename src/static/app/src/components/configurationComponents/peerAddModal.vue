@@ -106,35 +106,56 @@ watch(() => {
 							<NameInput :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></NameInput>
 							<PrivatePublicKeyInput :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></PrivatePublicKeyInput>
 							<AllowedIPsInput :availableIp="availableIp" :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></AllowedIPsInput>
-							<EndpointAllowedIps :saving="saving" :data="peerData"></EndpointAllowedIps>
-							<DnsInput :saving="saving" :data="peerData"></DnsInput>
+							
 						</div>
 						<hr>
-						<div class="row gy-3">
-							<div class="col-sm" v-if="!peerData.bulkAdd">
-								<PresharedKeyInput :saving="saving" :data="peerData" :bulk="peerData.bulkAdd"></PresharedKeyInput>
-							</div>
+						<div class="accordion mb-3" id="peerAddModalAccordion">
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed rounded-3" type="button" 
+									        data-bs-toggle="collapse" data-bs-target="#peerAddModalAccordionAdvancedOptions">
+										<LocaleText t="Advanced Options"></LocaleText>
+									</button>
+								</h2>
+								<div id="peerAddModalAccordionAdvancedOptions" 
+								     class="accordion-collapse collapse collapsed" data-bs-parent="#peerAddModalAccordion">
+									<div class="accordion-body rounded-bottom-3">
+										<div class="d-flex flex-column gap-2">
+											<DnsInput :saving="saving" :data="peerData"></DnsInput>
+											<EndpointAllowedIps :saving="saving" :data="peerData"></EndpointAllowedIps>
+											<div class="row gy-3">
+												<div class="col-sm" v-if="!peerData.bulkAdd">
+													<PresharedKeyInput :saving="saving" :data="peerData" :bulk="peerData.bulkAdd"></PresharedKeyInput>
+												</div>
 
-							<div class="col-sm">
-								<MtuInput :saving="saving" :data="peerData"></MtuInput>
-							</div>
-							<div class="col-sm">
-								<PersistentKeepAliveInput :saving="saving" :data="peerData"></PersistentKeepAliveInput>
-							</div>
-							<div class="col-12" v-if="peerData.bulkAdd">
-								<div class="form-check form-switch">
-									<input class="form-check-input" type="checkbox" role="switch"
-									       v-model="peerData.preshared_key_bulkAdd"
-									       id="bullAdd_PresharedKey_Switch" checked>
-									<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
-										<small class="fw-bold">
-											<LocaleText t="Pre-Shared Key"></LocaleText> <LocaleText t="Enabled" v-if="peerData.preshared_key_bulkAdd"></LocaleText><LocaleText t="Disabled" v-else></LocaleText>
-										</small>
-									</label>
+												<div class="col-sm">
+													<MtuInput :saving="saving" :data="peerData"></MtuInput>
+												</div>
+												<div class="col-sm">
+													<PersistentKeepAliveInput :saving="saving" :data="peerData"></PersistentKeepAliveInput>
+												</div>
+												<div class="col-12" v-if="peerData.bulkAdd">
+													<div class="form-check form-switch">
+														<input class="form-check-input" type="checkbox" role="switch"
+														       v-model="peerData.preshared_key_bulkAdd"
+														       id="bullAdd_PresharedKey_Switch" checked>
+														<label class="form-check-label" for="bullAdd_PresharedKey_Switch">
+															<small class="fw-bold">
+																<LocaleText t="Pre-Shared Key"></LocaleText> <LocaleText t="Enabled" v-if="peerData.preshared_key_bulkAdd"></LocaleText><LocaleText t="Disabled" v-else></LocaleText>
+															</small>
+														</label>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
 								</div>
 							</div>
+							
+							
 						</div>
-						<hr>
+						
 						<div v-if="getProtocol === 'awg'">
 							<h5>
 								<LocaleText t="AmneziaWG Peer Setting"></LocaleText>

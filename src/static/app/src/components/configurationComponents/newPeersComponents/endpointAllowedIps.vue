@@ -50,10 +50,7 @@ export default {
 	<div>
 		<label for="peer_endpoint_allowed_ips" class="form-label">
 			<small class="text-muted">
-				<LocaleText t="Endpoint Allowed IPs"></LocaleText>
-				<code>
-					<LocaleText t="(Required)"></LocaleText>
-				</code></small>
+				<LocaleText t="Endpoint Allowed IPs"></LocaleText> <code><LocaleText t="(Required)"></LocaleText></code></small>
 		</label>
 		<input type="text" class="form-control form-control-sm rounded-3"
 		       :class="{'is-invalid': error}"
