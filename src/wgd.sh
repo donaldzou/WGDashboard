@@ -281,9 +281,10 @@ _determinePypiMirror(){
 		index=$((index+1))
 	done
 	
+	msleep=5
 	printf "\n"
-	printf "              Which mirror you would like to use (Hit enter to use default): "
-	read -r choice	
+	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default): "
+	read -t ${msleep} -r choice   
 	
 	
 	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
