@@ -54,7 +54,6 @@ const fetchRealtimeTraffic = async () => {
 		configurationName: route.params.id
 	}, (res) => {
 		let timestamp = dayjs().format("hh:mm:ss A")
-		
 		if (res.data.sent !== 0 && res.data.recv !== 0){
 			historySentData.value.timestamp.push(timestamp)
 			historySentData.value.data.push(res.data.sent)

@@ -91,13 +91,8 @@ const router = createRouter({
 						{
 							name: "Peers List",
 							path: 'peers',
-							component: () => import('@/components/configurationComponents/peerListNew.vue')
-						},
-						{
-							name: "Peers Create",
-							path: 'create',
-							component: () => import('@/components/configurationComponents/peerCreate.vue')
-						},
+							component: () => import('@/components/configurationComponents/peerList.vue')
+						}
 					]
 				},
 

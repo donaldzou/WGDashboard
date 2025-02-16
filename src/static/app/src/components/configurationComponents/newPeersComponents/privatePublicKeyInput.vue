@@ -80,10 +80,7 @@ export default {
 		<div>
 			<label for="peer_private_key_textbox" class="form-label">
 				<small class="text-muted">
-					<LocaleText t="Private Key"></LocaleText>
-					<code>
-						<LocaleText t="(Required for QR Code and Download)"></LocaleText>
-					</code></small>
+					<LocaleText t="Private Key"></LocaleText> <code><LocaleText t="(Required for QR Code and Download)"></LocaleText></code></small>
 			</label>
 			<div class="input-group">
 				<input type="text" class="form-control form-control-sm rounded-start-3"
@@ -100,15 +97,14 @@ export default {
 			</div>
 		</div>
 		<div>
-			<div class="d-flex">
-				<label for="public_key" class="form-label">
+			<div class="d-flex flex-column flex-md-row mb-2">
+				<label for="public_key" class="form-label mb-0">
 					<small class="text-muted">
-						<LocaleText t="Public Key"></LocaleText>
-						<code>
+						<LocaleText t="Public Key"></LocaleText> <code>
 							<LocaleText t="(Required)"></LocaleText>
 						</code></small>
 				</label>
-				<div class="form-check form-switch ms-auto">
+				<div class="form-check form-switch ms-md-auto">
 					<input class="form-check-input" type="checkbox" role="switch"
 					       :disabled="this.bulk"
 					       id="enablePublicKeyEdit" v-model="this.editKey">

@@ -32,7 +32,7 @@ const peerData = ref({
 	preshared_key: "",
 	preshared_key_bulkAdd: false,
 	advanced_security: "off",
-	override_allowed_ips: false,
+	allowed_ips_validation: true,
 })
 const availableIp = ref([])
 const saving = ref(false)

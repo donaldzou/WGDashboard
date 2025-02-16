@@ -1,6 +1,8 @@
 <script>
 import LocaleText from "@/components/text/localeText.vue";
 import {GetLocale} from "@/utilities/locale.js";
+import {useRoute} from "vue-router";
+import {fetchGet} from "@/utilities/fetch.js";
 
 export default {
 	name: "bulkAdd",
@@ -10,9 +12,37 @@ export default {
 		data: Object,
 		availableIp: undefined
 	},
+	data(){
+		return {
+			numberOfAvailableIPs: null
+		}	
+	},
 	computed:{
 		bulkAddGetLocale(){
 			return GetLocale("How many peers you want to add?")
+		},
+		getNumberOfAvailableIPs(){
+			if (!this.numberOfAvailableIPs){
+				return '...'
+			}else{
+				return Object.values(this.numberOfAvailableIPs).reduce((x, y) => {
+					return x + y
+				})
+			}
+		}
+	},
+	watch: {
+		'data.bulkAdd': {
+			immediate: true,
+			handler(newVal){
+				if (newVal){
+					fetchGet("/api/getNumberOfAvailableIPs/" + this.$route.params.id, {}, (res) => {
+						if (res.status){
+							this.numberOfAvailableIPs = res.data
+						}
+					})
+				}
+			}
 		}
 	}
 }
@@ -42,7 +72,9 @@ export default {
 			       v-model="this.data.bulkAddAmount"
 			       :placeholder="this.bulkAddGetLocale">
 			<small class="text-muted">
-				<LocaleText :t="`You can add up to ` + this.availableIp.length + ' peers'"></LocaleText> 
+				<LocaleText :t="`You can add up to ` + 
+				    getNumberOfAvailableIPs
+				 + ' peers'"></LocaleText> 
 			</small>
 		</div>
 	</div>
