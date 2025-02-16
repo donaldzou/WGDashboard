@@ -256,16 +256,16 @@ _determinePypiMirror(){
 	printf "[WGDashboard] %s Pinging list of recommended Python Package Index mirror\n" "$install"
 	urls=(
 		"https://pypi.org/simple/"
-        "https://pypi.tuna.tsinghua.edu.cn/simple/"
-        "https://pypi.mirrors.ustc.edu.cn/simple/"
-        "https://mirrors.aliyun.com/pypi/simple/"
-        "https://pypi.douban.com/simple/"
-    )
-    
-    # Function to extract hostname and ping it
-    index=1
-    printf "              ---------------------------------------------------------\n"
-    for url in "${urls[@]}"; do
+		"https://pypi.tuna.tsinghua.edu.cn/simple/"
+		"https://pypi.mirrors.ustc.edu.cn/simple/"
+		"https://mirrors.aliyun.com/pypi/simple/"
+		"https://pypi.douban.com/simple/"
+	)
+
+	# Function to extract hostname and ping it
+	index=1
+	printf "              ---------------------------------------------------------\n"
+	for url in "${urls[@]}"; do
 		# Extract the hostname from the URL
 		hostname=$(echo "$url" | awk -F/ '{print $3}')
 		# Ping the hostname once and extract the RTT
@@ -275,25 +275,39 @@ _determinePypiMirror(){
 			rtt="9999"
 			printf "              [%i] [FAILED] %s\n" "$index" "$url"
 		else
+			rtt=${rtt//.*/}
 			printf "              [%i] %sms %s\n" "$index" "$rtt" "$url"
 		fi
-	
+		rtthost[$index]=$rtt
 		index=$((index+1))
 	done
+
+	for i in "${!rtthost[@]}"; do
+		[[ -z ${rtthost[i]} ]] && continue  # Skip unset or empty values
+		if [[ -z $min_val || ${rtthost[i]} -lt $min_val ]]; then
+			min_val=${rtthost[i]}
+			min_idx=$i
+		fi
+	done
+	min_idx=$((min_idx - 1))
 	
 	msleep=5
 	printf "\n"
-	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default): "
-	read -t ${msleep} -r choice   
-	
-	
+	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default: ${urls[$min_idx]}): "
+	read -t ${msleep} -r choice
+	printf "\n"
+
+	if [[ -z "$choice" ]]; then
+		choice=${min_dix}
+	fi
+
 	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
-        selected_url="${urls[choice-1]}"
-        printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "$selected_url"
-    else
-    	selected_url="${urls[0]}"
-        printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "${urls[0]}"
-    fi
+		selected_url="${urls[choice-1]}"
+		printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "$selected_url"
+	else
+		selected_url="${urls[0]}"
+		printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "${urls[0]}"
+	fi
 }
 
 install_wgd(){
