@@ -1133,7 +1133,7 @@ class WireguardConfiguration:
                     existedAddress.add(ipaddress.ip_network(caSplit[0]))
                     availableAddress[ca] = network.num_addresses
                     for p in existedAddress:
-                        if p.subnet_of(network):
+                        if p.version == network.version and p.subnet_of(network):
                             availableAddress[ca] -= 1
 
                     # map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts())
