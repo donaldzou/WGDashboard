@@ -42,6 +42,17 @@ export default {
 		<div>
 			<div v-if="!Peer.restricted" class="card-header bg-transparent d-flex align-items-center gap-2 border-0">
 				<div class="dot ms-0" :class="{active: Peer.status === 'running'}"></div>
+				<div
+					style="font-size: 0.8rem; color: #28a745"
+					class="d-flex align-items-center"
+					v-if="dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list' && Peer.status === 'running'">
+					<i class="bi bi-box-arrow-in-right me-2"></i>
+					<span>
+						{{ Peer.endpoint }}
+					</span>
+				</div>
+				
+				
 				<div style="font-size: 0.8rem" class="ms-auto d-flex gap-2">
 					<span class="text-primary">
 						<i class="bi bi-arrow-down"></i><strong>
