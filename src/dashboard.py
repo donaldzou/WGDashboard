@@ -1763,6 +1763,7 @@ class DashboardConfig:
                 "auth_req": "true",
                 "version": DASHBOARD_VERSION,
                 "dashboard_refresh_interval": "60000",
+                "dashboard_peer_list_display": "grid",
                 "dashboard_sort": "status",
                 "dashboard_theme": "dark",
                 "dashboard_api_key": "false",

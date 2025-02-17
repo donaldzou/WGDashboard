@@ -4,6 +4,7 @@ import { onClickOutside } from '@vueuse/core'
 import "animate.css"
 import PeerSettingsDropdown from "@/components/configurationComponents/peerSettingsDropdown.vue";
 import LocaleText from "@/components/text/localeText.vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 export default {
 	name: "peer",
 	components: {LocaleText, PeerSettingsDropdown},
@@ -18,10 +19,11 @@ export default {
 	setup(){
 		const target = ref(null);
 		const subMenuOpened = ref(false)
+		const dashboardStore = DashboardConfigurationStore()
 		onClickOutside(target, event => {
 			subMenuOpened.value = false;
 		});
-		return {target, subMenuOpened}
+		return {target, subMenuOpened, dashboardStore}
 	},
 	computed: {
 		getLatestHandshake(){
@@ -65,54 +67,58 @@ export default {
 			<h6>
 				{{Peer.name ? Peer.name : 'Untitled Peer'}}
 			</h6>
-			<div class="mb-1">
-				<small class="text-muted">
-					<LocaleText t="Public Key"></LocaleText>
-				</small>
-				<small class="d-block">
-					<samp>{{Peer.id}}</samp>
-				</small>
-			</div>
-			<div>
-				<small class="text-muted">
-					<LocaleText t="Allowed IPs"></LocaleText>
-				</small>
-				<small class="d-block">
-					<samp>{{Peer.allowed_ip}}</samp>
-				</small>
-			</div>
-			<div v-if="Peer.advanced_security">
-				<small class="text-muted">
-					<LocaleText t="Advanced Security"></LocaleText>
-				</small>
-				<small class="d-block">
-					<samp>{{Peer.advanced_security}}</samp>
-				</small>
-			</div>
-			<div class="d-flex align-items-end">
-				
-				<div class="ms-auto px-2 rounded-3 subMenuBtn"
-				     :class="{active: this.subMenuOpened}"
-				>
-					<a role="button" class="text-body"
-					   @click="this.subMenuOpened = true">
-						<h5 class="mb-0"><i class="bi bi-three-dots"></i></h5>
-					</a>
-					<Transition name="slide-fade">
-						<PeerSettingsDropdown 
-							@qrcode="this.$emit('qrcode')"
-							@configurationFile="this.$emit('configurationFile')"
-							@setting="this.$emit('setting')"
-							@jobs="this.$emit('jobs')"
-							@refresh="this.$emit('refresh')"
-							@share="this.$emit('share')"
-							:Peer="Peer"
-							v-if="this.subMenuOpened"
-							ref="target"
-						></PeerSettingsDropdown>
-					</Transition>
+			<div class="d-flex"
+			     :class="[dashboardStore.Configuration.Server.dashboard_peer_list_display === 'grid' ? 'gap-1 flex-column' : 'flex-row gap-3']">
+				<div :class="{'d-flex gap-2 align-items-center' : dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list'}">
+					<small class="text-muted">
+						<LocaleText t="Public Key"></LocaleText>
+					</small>
+					<small class="d-block">
+						<samp>{{Peer.id}}</samp>
+					</small>
+				</div>
+				<div :class="{'d-flex gap-2 align-items-center' : dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list'}">
+					<small class="text-muted">
+						<LocaleText t="Allowed IPs"></LocaleText>
+					</small>
+					<small class="d-block">
+						<samp>{{Peer.allowed_ip}}</samp>
+					</small>
+				</div>
+				<div v-if="Peer.advanced_security"
+				     :class="{'d-flex gap-2 align-items-center' : dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list'}">
+					<small class="text-muted">
+						<LocaleText t="Advanced Security"></LocaleText>
+					</small>
+					<small class="d-block">
+						<samp>{{Peer.advanced_security}}</samp>
+					</small>
+				</div>
+				<div class="d-flex align-items-end ms-auto">
+					<div class="ms-auto px-2 rounded-3 subMenuBtn"
+					     :class="{active: this.subMenuOpened}"
+					>
+						<a role="button" class="text-body"
+						   @click="this.subMenuOpened = true">
+							<h5 class="mb-0"><i class="bi bi-three-dots"></i></h5>
+						</a>
+						<Transition name="slide-fade">
+							<PeerSettingsDropdown
+								@qrcode="this.$emit('qrcode')"
+								@configurationFile="this.$emit('configurationFile')"
+								@setting="this.$emit('setting')"
+								@jobs="this.$emit('jobs')"
+								@refresh="this.$emit('refresh')"
+								@share="this.$emit('share')"
+								:Peer="Peer"
+								v-if="this.subMenuOpened"
+								ref="target"
+							></PeerSettingsDropdown>
+						</Transition>
+					</div>
 				</div>
 			</div>
+			
 		</div>
 	</div>
 </template>

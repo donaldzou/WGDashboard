@@ -350,7 +350,8 @@ const searchPeers = computed(() => {
 			:configuration="configurationInfo">
 		</PeerSearch>
 		<TransitionGroup name="peerList" tag="div" class="row gx-2 gy-2 z-0 position-relative">
-			<div class="col-12 col-lg-6 col-xl-4"
+			<div class="col-12"
+			     :class="{'col-lg-6 col-xl-4': dashboardStore.Configuration.Server.dashboard_peer_list_display === 'grid'}"
 			     :key="peer.id"
 			     v-for="peer in searchPeers">
 				<Peer :Peer="peer"

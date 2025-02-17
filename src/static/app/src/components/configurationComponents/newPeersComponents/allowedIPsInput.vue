@@ -157,6 +157,7 @@ export default {
 							<small class="text-muted">Subnet</small>
 							<button 
 								v-for="key in Object.keys(this.availableIp)"
+								:key="key"
 								@click="this.selectedSubnet = key"
 								:class="{'bg-primary-subtle': this.selectedSubnet === key}"
 								class="btn btn-sm text-primary-emphasis rounded-3">
@@ -167,7 +168,7 @@ export default {
 					</li>
 					<li>
 						<div class="overflow-y-scroll" style="height: 270px;">
-							<div v-for="ip in this.searchAvailableIps" style="">
+							<div v-for="ip in this.searchAvailableIps" style="" :key="ip">
 								<a class="dropdown-item d-flex" role="button" @click="this.addAllowedIp(ip)">
 									<span class="me-auto"><small>{{ip}}</small></span>
 								</a>

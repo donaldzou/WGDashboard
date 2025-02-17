@@ -44,7 +44,7 @@ await fetchGet("/api/getAvailableIPs/" + route.params.id, {}, (res) => {
 	}
 })
 
-const emits = defineEmits(['close'])
+const emits = defineEmits(['close', 'addedPeers'])
 
 const getProtocol = computed(() => {
 	return wireguardStore.Configurations.find(x => x.Name === route.params.id).Protocol;

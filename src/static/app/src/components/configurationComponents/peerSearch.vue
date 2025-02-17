@@ -32,6 +32,10 @@ export default {
 				'30000': GetLocale('30 Seconds'),
 				'60000': GetLocale('1 Minutes')
 			},
+			display: {
+				grid: GetLocale('Grid'),
+				list: GetLocale('List')
+			},
 			searchString: "",
 			searchStringTimeout: undefined,
 			showDisplaySettings: false,
@@ -73,6 +77,17 @@ export default {
 				}
 			})
 		},
+		updateDisplay(display){
+			fetchPost("/api/updateDashboardConfigurationItem", {
+				section: "Server",
+				key: "dashboard_peer_list_display",
+				value: display
+			}, (res) => {
+				if (res.status){
+					this.store.getConfiguration();
+				}
+			})	
+		},
 		downloadAllPeer(){
 			fetchGet(`/api/downloadAllPeers/${this.configuration.Name}`, {}, (res) => {
 				res.data.forEach(x => {
@@ -81,31 +96,13 @@ export default {
 				window.wireguard.generateZipFiles(res, this.configuration.Name)
 			})
 		}
-	},
-	computed: {
-		searchBarPlaceholder(){
-			return GetLocale("Search Peers...")
-		}
 	}
 }
 </script>
 
 <template>
 	<div class="d-flex flex-column gap-2 my-4">
-<!--		<div class="d-flex gap-3 align-items-center">-->
-<!--			<h6 class="mb-0 ms-auto">-->
-<!--				<label for="searchPeers">-->
-<!--					<i class="bi bi-search"></i>-->
-<!--				</label>-->
-<!--			</h6>-->
-<!--			<input class="form-control form-control-sm rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "-->
-<!--			       :placeholder="searchBarPlaceholder"-->
-<!--			       id="searchPeers"-->
-<!--			       @keyup="this.debounce()"-->
-<!--			       v-model="this.searchString">-->
-<!--		</div>-->
 		<div class="d-flex gap-2 peerSearchContainer">
-			
 			<div class="dropdown">
 				<button
 					data-bs-toggle="dropdown"
@@ -136,7 +133,7 @@ export default {
 					<LocaleText t="Refresh Interval"></LocaleText>
 					<span class="badge text-bg-primary ms-2">{{this.interval[store.Configuration.Server.dashboard_refresh_interval]}}</span>
 				</button>
-				<ul class="dropdown-menu rounded-3 ">
+				<ul class="dropdown-menu rounded-3">
 					<li v-for="(value, key) in this.interval" >
 						<button class="dropdown-item d-flex align-items-center" @click="this.updateRefreshInterval(key)">
 							<small>
@@ -148,9 +145,31 @@ export default {
 							</small>
 						</button>
 					</li>
-
 				</ul>
 			</div>
+			<div class="dropdown">
+				<button
+					data-bs-toggle="dropdown"
+					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  position-relative">
+					<i class="bi me-2" :class="'bi-' + store.Configuration.Server.dashboard_peer_list_display"></i>
+					<LocaleText t="Display"></LocaleText>
+					<span class="badge text-bg-primary ms-2">{{this.display[store.Configuration.Server.dashboard_peer_list_display]}}</span>
+				</button>
+				<ul class="dropdown-menu rounded-3">
+					<li v-for="(value, key) in this.display" >
+						<button class="dropdown-item d-flex align-items-center" @click="this.updateDisplay(key)">
+							<small>
+								{{ value }}
+							</small>
+							<small class="ms-auto">
+								<i class="bi bi-check-circle-fill"
+								   v-if="store.Configuration.Server.dashboard_peer_list_display === key"></i>
+							</small>
+						</button>
+					</li>
+				</ul>
+			</div>
+			
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ms-lg-auto"
 			        @click="this.$emit('search')">
 				<i class="bi bi-search me-2"></i>
