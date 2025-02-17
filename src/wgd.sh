@@ -15,6 +15,8 @@ heavy_checkmark=$(printf "\xE2\x9C\x85")
 heavy_crossmark=$(printf "\xE2\x9D\x8C")
 install=$(printf "\xF0\x9F\x92\xBF")
 
+msleep=15
+
 PID_FILE=./gunicorn.pid
 environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
 if [[ $CONFIGURATION_PATH ]]; then
@@ -291,7 +293,6 @@ _determinePypiMirror(){
 	done
 	min_idx=$((min_idx - 1))
 	
-	msleep=5
 	printf "\n"
 	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default: ${urls[$min_idx]}): "
 	read -t ${msleep} -r choice
