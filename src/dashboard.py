@@ -1152,7 +1152,7 @@ class WireguardConfiguration:
                 if len(ppip) == 2:
                     try:
                         check = ipaddress.ip_network(ppip[0])
-                        existedAddress.add(pip)
+                        existedAddress.add(check.compressed)
                     except Exception as e:
                         print(f"[WGDashboard] Error: {self.Name} peer {p.id} have invalid ip")
         configurationAddresses = self.Address.split(',')
