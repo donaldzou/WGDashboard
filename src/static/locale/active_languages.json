@@ -35,6 +35,11 @@
 		"lang_name_localized": "Italiano"
 	},
 	{
+		"lang_id": "ko",
+		"lang_name": "Korean",
+		"lang_name_localized": "한국어"
+	},
+	{
 		"lang_id": "nl-nl",
 		"lang_name": "Dutch",
 		"lang_name_localized": "Nederlands"
