@@ -205,7 +205,7 @@
 	"Please specify one or more peers": "하나 이상의 피어를 지정하세요",
 	"Share link failed to create. Reason: (.*)": "공유 링크 생성에 실패했습니다. 이유: $1",
 	"Link expire date updated": "링크 만료 날짜가 업데이트되었습니다",
-	"Link expire date failed to update. Reason: (.*)": "링크 만료 날짜 업데이트 실패. 이유: $1",
+	"Link expire date failed to update. Reason: (.*)": "링크 만료 날짜 업데이트에 실패했습니다. 이유: $1",
 	"Peer job saved": "피어 작업이 저장되었습니다",
 	"Please specify job": "작업을 지정하세요",
 	"Please specify peer and configuration": "피어와 구성을 지정하세요",
