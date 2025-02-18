@@ -73,5 +73,10 @@
 		"lang_id": "pl",
 		"lang_name": "Polish",
 		"lang_name_localized": "Polski"
+	},
+	{
+		"lang_id": "ko",
+		"lang_name": "Korean",
+		"lang_name_localized": "한국어"
 	}
 ]
