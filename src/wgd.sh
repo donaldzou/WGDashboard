@@ -50,7 +50,7 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] %s Creating Python Virtual Environment under ./venv\n" "$install"
-        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
+        { $pythonExecutable -m venv $VIRTUAL_ENV; } &>> ./log/install.txt
     fi
     
     if ! $venv_python --version > /dev/null 2>&1
@@ -77,21 +77,24 @@ _determineOS(){
 }
 
 _installPython(){
-	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	printf "[WGDashboard] %s Installing Python\n" "$install"
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 		centos|fedora|redhat|rhel|almalinux|rocky)
 			if command -v dnf &> /dev/null; then
-				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
+				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt
 			else
-				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
+				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } &>> ./log/install.txt
 			fi
 		;;
 		alpine)
-			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } &>> ./log/install.txt
+		;;
+		arch)
+			{ sudo pacman -Syu python3 net-tools; printf "\n\n"; } &>> ./log/install.txt
 		;;
 	esac
 	
@@ -106,7 +109,7 @@ _installPython(){
 }
 
 _installPythonVenv(){
-	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	printf "[WGDashboard] %s Installing Python Virtual Environment\n" "$install"
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
@@ -115,13 +118,16 @@ _installPythonVenv(){
 			;;
 			centos|fedora|redhat|rhel|almalinux|rocky)
 				if command -v dnf &> /dev/null; then
-					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			alpine)
-				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } &>> ./log/install.txt
+			;;
+			arch)
+				{ echo "Python Virtual Environment is installed by default from version Python3.3"; printf "\n\n"; } &>> ./log/install.txt # https://wiki.archlinux.org/title/Python/Virtual_environment
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -147,7 +153,7 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
-	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
@@ -162,13 +168,16 @@ _installPythonPip(){
 			;;
 			centos|fedora|redhat|rhel|almalinux|rocky)
 				if [ "$pythonExecutable" = "python3" ]; then
-					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			alpine)
-				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } &>> ./log/install.txt
+			;;
+			arch)
+				{ sudo pacman -Syu python-pip; printf "\n\n"; } &>> ./log/install.txt
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -214,6 +223,12 @@ _checkWireguard(){
                 } &>> ./log/install.txt
                 printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
             ;;
+			arch)
+				{ 
+					sudo pacman -Syu wireguard-tools; printf "\n\n"; 
+				} &>> ./log/install.txt
+				printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
+			;;
             *)
                 printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
                 printf "%s\n" "$helpMsg"
@@ -441,7 +456,7 @@ stop_wgd() {
 startwgd_docker() {
 	_checkWireguard
 	printf "[WGDashboard][Docker] WireGuard configuration started\n"
-	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
+	{ date; start_core ; printf "\n\n"; } &>> ./log/install.txt
     gunicorn_start
 }
 
@@ -520,7 +535,7 @@ update_wgd() {
 
 		mv wgd.sh wgd.sh.old
 		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
-		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
+		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } &>> ./log/update.txt
 		chmod +x ./wgd.sh
 		sudo ./wgd.sh install
 		printf "[WGDashboard] Update completed!\n"
