@@ -50,7 +50,7 @@ _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
     	printf "[WGDashboard] %s Creating Python Virtual Environment under ./venv\n" "$install"
-        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
+        { $pythonExecutable -m venv $VIRTUAL_ENV; } &>> ./log/install.txt
     fi
     
     if ! $venv_python --version > /dev/null 2>&1
@@ -77,21 +77,21 @@ _determineOS(){
 }
 
 _installPython(){
-	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	printf "[WGDashboard] %s Installing Python\n" "$install"
 	case "$OS" in
 		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
+			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt 
 		;;
 		centos|fedora|redhat|rhel|almalinux|rocky)
 			if command -v dnf &> /dev/null; then
-				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
+				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } &>> ./log/install.txt
 			else
-				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
+				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } &>> ./log/install.txt
 			fi
 		;;
 		alpine)
-			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } &>> ./log/install.txt
 		;;
 	esac
 	
@@ -106,7 +106,7 @@ _installPython(){
 }
 
 _installPythonVenv(){
-	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	printf "[WGDashboard] %s Installing Python Virtual Environment\n" "$install"
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
@@ -115,13 +115,13 @@ _installPythonVenv(){
 			;;
 			centos|fedora|redhat|rhel|almalinux|rocky)
 				if command -v dnf &> /dev/null; then
-					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
+					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			alpine)
-				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } &>> ./log/install.txt
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -147,7 +147,7 @@ _installPythonVenv(){
 }
 
 _installPythonPip(){
-	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
+	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } &>> ./log/install.txt 
 	
 	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
 	then
@@ -162,13 +162,13 @@ _installPythonPip(){
 			;;
 			centos|fedora|redhat|rhel|almalinux|rocky)
 				if [ "$pythonExecutable" = "python3" ]; then
-					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				else
-					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
+					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } &>> ./log/install.txt
 				fi
 			;;
 			alpine)
-				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
+				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } &>> ./log/install.txt
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -356,18 +356,18 @@ install_wgd(){
     
     _check_and_set_venv
     printf "[WGDashboard] %s Upgrading Python Package Manage (PIP)\n" "$install"
-	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
-    { date; python3 -m pip install --upgrade pip -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt
+	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } &>> ./log/install.txt
+    { date; python3 -m pip install --upgrade pip -i "$selected_url"; printf "\n\n"; } &>> ./log/install.txt
     printf "[WGDashboard] %s Installing latest Python dependencies\n" "$install"
-	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
+	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } &>> ./log/install.txt #This all works on the default installation.
     
       
 	if [ ! -f "ssl-tls.ini" ]
 		then
-			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
+			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" &>> ssl-tls.ini
 			printf "[WGDashboard] %s Created ssl-tls.ini\n" "$heavy_checkmark"
 	else
-			printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$heavy_checkmark"
+			=printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$heavy_checkmark"
 	fi
     printf "[WGDashboard] %s WGDashboard installed successfully!\n" "$heavy_checkmark"
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
@@ -441,7 +441,7 @@ stop_wgd() {
 startwgd_docker() {
 	_checkWireguard
 	printf "[WGDashboard][Docker] WireGuard configuration started\n"
-	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
+	{ date; start_core ; printf "\n\n"; } &>> ./log/install.txt
     gunicorn_start
 }
 
@@ -520,7 +520,7 @@ update_wgd() {
 
 		mv wgd.sh wgd.sh.old
 		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
-		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
+		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } &>> ./log/update.txt
 		chmod +x ./wgd.sh
 		sudo ./wgd.sh install
 		printf "[WGDashboard] Update completed!\n"
