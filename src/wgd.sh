@@ -91,7 +91,10 @@ _installPython(){
 			fi
 		;;
 		alpine)
-			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } >> ./log/install.txt
+			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } &>> ./log/install.txt
+		;;
+		arch)
+			{ sudo pacman -Syu python3 net-tools; printf "\n\n"; } &>> ./log/install.txt
 		;;
 	esac
 	
@@ -122,6 +125,9 @@ _installPythonVenv(){
 			;;
 			alpine)
 				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
+			;;
+			arch)
+				{ echo "Python Virtual Environment is installed by default from version Python3.3"; printf "\n\n"; } &>> ./log/install.txt # https://wiki.archlinux.org/title/Python/Virtual_environment
 			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
@@ -170,6 +176,9 @@ _installPythonPip(){
 			alpine)
 				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
 			;;
+			arch)
+				{ sudo pacman -Syu python-pip; printf "\n\n"; } &>> ./log/install.txt
+			;;
 			*)
 				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
 				printf "%s\n" "$helpMsg"
@@ -214,6 +223,12 @@ _checkWireguard(){
                 } &>> ./log/install.txt
                 printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
             ;;
+			arch)
+				{ 
+					sudo pacman -Syu wireguard-tools; printf "\n\n"; 
+				} &>> ./log/install.txt
+				printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
+			;;
             *)
                 printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
                 printf "%s\n" "$helpMsg"
