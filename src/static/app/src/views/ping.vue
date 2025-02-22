@@ -3,10 +3,15 @@ import {fetchGet} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
 import OSMap from "@/components/map/osmap.vue";
+import { io } from "socket.io-client"
+import {v4} from "uuid";
+import {ref} from "vue";
+import OsmapSocket from "@/components/map/osmapSocket.vue";
+
 
 export default {
 	name: "ping",
-	components: {OSMap, LocaleText},
+	components: {OsmapSocket, OSMap, LocaleText},
 	data(){
 		return {
 			loading: false,
@@ -14,43 +19,63 @@ export default {
 			selectedConfiguration: undefined,
 			selectedPeer: undefined,
 			selectedIp: undefined,
-			count: 4,
 			pingResult: undefined,
-			pinging: false
+			
 		}
 	},
 	setup(){
 		const store = DashboardConfigurationStore();
-		return {store}
+		let sio;
+		const socketResult = ref({
+			pingTotalSentCount: 0,
+			pingReceivedSentCount: 0,
+			pingLostCount: 0,
+			pingResults: []
+		})
+		const count = ref(4)
+		const pinging = ref(false)
+		try{
+			sio = io();
+			sio.connect()
+			console.info("Successfully connected to socket.io")
+		}catch (e){
+			console.assert("Failed to connect socket.io")
+		}
+		sio.on('pingResponse', (...arg) => {
+			let data = arg[0].data
+			data.id = v4().toString()
+			socketResult.value.pingResults.push(data)
+			if (socketResult.value.pingResults.length === count.value){
+				pinging.value = false
+			}
+		})
+		return {store, sio, socketResult, count, pinging}
+	},
+	beforeUnmount() {
+		if(this.sio && this.sio.connected){
+			this.sio.disconnect()
+			console.info("Successfully disconnected from socket.io")
+		}	
 	},
 	mounted() {
 		fetchGet("/api/ping/getAllPeersIpAddress", {}, (res)=> {
 			if (res.status){
 				this.loading = true;
 				this.cips = res.data;
-				console.log(this.cips)
 			}
 		});
 	},
 	methods: {
-		execute(){
-			if (this.selectedIp){
+		executeSocket(){
+			if (this.sio.connected){
+				this.socketResult.pingResults = [];
 				this.pinging = true;
-				this.pingResult = undefined
-				fetchGet("/api/ping/execute", {
+				this.sio.emit('ping', {
 					ipAddress: this.selectedIp,
 					count: this.count
-				}, (res) => {
-					if (res.status){
-						this.pingResult = res.data
-					}else{
-						this.store.newMessage("Server", res.message, "danger")
-					}
-					this.pinging = false
-				})
-				
+				});
 			}
-{}		}	
+		}
 	},
 	watch: {
 		selectedConfiguration(){
@@ -147,7 +172,7 @@ export default {
 					</div>
 					<button class="btn btn-primary rounded-3 mt-3 position-relative" 
 					        :disabled="!this.selectedIp || this.pinging"
-					        @click="this.execute()">
+					        @click="this.executeSocket()">
 						<Transition name="slide">
 							<span v-if="!this.pinging" class="d-block">
 								<i class="bi bi-person-walking me-2"></i>Ping!
@@ -157,83 +182,129 @@ export default {
 								<span class="visually-hidden" role="status">Loading...</span>
 							</span>
 						</Transition>
-						
-						
-						
 					</button>
 				</div>
 				
-				<div class="col-sm-8 position-relative">
-					<Transition name="ping">
-						<div v-if="!this.pingResult" key="pingPlaceholder">
-							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
+				<div class="col-sm-8 position-relative d-flex flex-column gap-2 animate__fadeIn animate__animated ">
+					<Suspense>
+						<OsmapSocket :d="this.socketResult.pingResults"
+						             key="OSMap"
+						             type="traceroute"></OsmapSocket>
+						<template #fallback>
+							<div class="bg-body-secondary rounded-3 mb-3 d-flex"
+							     key="OSMapPlaceholder"
 							     style="height: 300px"
-							></div>
-							<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-							      :class="{'animate__animated animate__flash animate__slower animate__infinite': this.pinging}"
-							     :style="{'animation-delay': `${x*0.15}s`}"
-							     v-for="x in 4" ></div>
-							
-						</div>
-
-						<div v-else key="pingResult" class="d-flex flex-column gap-2 w-100">
-							<OSMap :d="this.pingResult" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'"></OSMap>
-							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.15s">
-								<div class="card-body row">
-									<div class="col-sm">
-										<p class="mb-0 text-muted">
+							>
+								<div class="spinner-border m-auto"
+								     style="animation-duration: 2s"
+								     role="status">
+									<span class="visually-hidden">Loading...</span>
+								</div>
+							</div>
+						</template>
+					</Suspense>
+					<div key="pingResultTable">
+						<div key="table" class="w-100 mt-2">
+							<table class="table table-sm rounded-3 w-100">
+								<thead>
+								<tr>
+									
+									<th scope="col">
+										<LocaleText t="IP Address"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Is Alive?"></LocaleText>
+									</th>
+									<th scope="col">
+										<LocaleText t="Round-Trip Time (ms)"></LocaleText>
+									</th>
+									
+									<th scope="col">
+										<LocaleText t="Geolocation"></LocaleText>
+									</th>
+								</tr>
+								</thead>
+								<tbody>
+									<tr v-for="(hop, key) in socketResult.pingResults">
+										<td>
+											<small>{{hop.address}}</small>
+										</td>
+										<td>
 											<small>
-												<LocaleText t="IP Address"></LocaleText>
+												<i class="bi" 
+												   :class="[hop.is_alive ? 'bi-check-circle-fill text-success' :
+												    'bi-x-circle-fill text-danger']"></i>
 											</small>
-										</p>
-										{{this.pingResult.address}}
-									</div>
-									<div class="col-sm" v-if="this.pingResult.geo && this.pingResult.geo.status === 'success'">
-										<p class="mb-0 text-muted">
+										</td>
+										<td>
+											<small>{{ hop.is_alive ? hop.max_rtt : ''}}</small>
+										</td>
+										<td>
+											<small v-if="hop.geo && hop.geo.status === 'success'">
+												{{ hop.geo.city }}, {{ hop.geo.country }}</small>
+										</td>
+									</tr>
+									<tr v-if="socketResult.pingResults.length === 0">
+										<td colspan="4" class="text-muted text-center">
 											<small>
-												<LocaleText t="Geolocation"></LocaleText>
+												<LocaleText t="Ping results will show here"></LocaleText>
 											</small>
-										</p>
-										{{this.pingResult.geo.city}}, {{this.pingResult.geo.country}}
-									</div>
-								</div>
-							</div>
-							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.3s">
-								<div class="card-body">
-									<p class="mb-0 text-muted"><small>Is Alive</small></p>
-									<span :class="[this.pingResult.is_alive ? 'text-success':'text-danger']">
-												<i class="bi me-1"
-												   :class="[this.pingResult.is_alive ? 'bi-check-circle-fill' : 'bi-x-circle-fill']"></i>
-												{{this.pingResult.is_alive ? "Yes": "No"}}
-									</span>
-								</div>
-							</div>
-							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.45s">
-								<div class="card-body">
-									<p class="mb-0 text-muted"><small>
-										<LocaleText t="Average / Min / Max Round Trip Time"></LocaleText>
-									</small></p>
-									<samp>{{this.pingResult.avg_rtt}}ms / 
-										{{this.pingResult.min_rtt}}ms / 
-										{{this.pingResult.max_rtt}}ms
-									</samp>
-								</div>
-							</div>
-							<div class="card rounded-3 bg-transparent shadow-sm animate__animated animate__fadeIn" style="animation-delay: 0.6s">
-								<div class="card-body">
-									<p class="mb-0 text-muted"><small>
-										<LocaleText t="Sent / Received / Lost Package"></LocaleText>
-									</small></p>
-									<samp>{{this.pingResult.package_sent}} /
-										{{this.pingResult.package_received}} /
-										{{this.pingResult.package_loss}}
-									</samp>
-								</div>
-							</div>
+										</td>
+									</tr>
+									<tr class="bg-body-tertiary border-top fw-bold" style="border-top: 2px solid !important;">
+										<td>
+											<small>
+												<LocaleText t="Sent Package(s)"></LocaleText>
+											</small>
+										</td>
+										<td>
+											<small>
+												<LocaleText t="Received Package(s)"></LocaleText>
+											</small>
+										</td>
+										<td>
+											<small>
+												<LocaleText t="Lost Package(s)"></LocaleText>
+											</small>
+										</td>
+										<td colspan="2">
+											<small>
+												<LocaleText t="Average / Min / Max Round Trip Time"></LocaleText>
+											</small>
+										</td>
+									</tr>
+									<tr>
+										<td class="">
+											<small>
+												{{ this.socketResult.pingResults.length }}
+											</small>
+										</td>
+										<td class="">
+											<small>
+												{{ this.socketResult.pingResults.filter(x => x.is_alive).length }}
+											</small>
+										</td>
+										<td class="">
+											<small>
+												{{ this.socketResult.pingResults.filter(x => !x.is_alive).length }}
+											</small>
+										</td>
+										<td colspan="2">
+											<small v-if="this.socketResult.pingResults.filter(x => x.is_alive).length > 0">
+												{{ (this.socketResult.pingResults.filter(x => x.is_alive).map(x => x.max_rtt)
+													.reduce((x, y) => x + y) / this.socketResult.pingResults.filter(x => x.is_alive).length ).toFixed(3)}}ms / 
+												{{ Math.min(...this.socketResult.pingResults.filter(x => x.is_alive).map(x => x.max_rtt)) }}ms / 
+												{{ Math.max(...this.socketResult.pingResults.filter(x => x.is_alive).map(x => x.max_rtt)) }}ms
+											</small>
+											<small v-else>
+												0ms / 0ms / 0ms
+											</small>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
-					</Transition>
-					
-
+					</div>
 				</div>
 			</div>
 		</div>
@@ -260,5 +331,12 @@ export default {
 	.ping-leave-to {
 		opacity: 0;
 		filter: blur(3px);
+	}
+	table th, table td{
+		padding: 0.5rem;
+	}
+
+	.table > :not(caption) > * > *{
+		background-color: transparent !important;
 	}
 </style>

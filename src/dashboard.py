@@ -5,6 +5,8 @@ from zipfile import ZipFile
 from datetime import datetime, timedelta
 from typing import Any
 from jinja2 import Template
+from flask_socketio import SocketIO, emit, disconnect
+import functools
 from flask import Flask, request, render_template, session, send_file
 from json import JSONEncoder
 from flask_cors import CORS
@@ -35,6 +37,7 @@ DASHBOARD_CONF = os.path.join(CONFIGURATION_PATH, 'wg-dashboard.ini')
 WG_CONF_PATH = None
 UPDATE = None
 app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
+socketio = SocketIO(app, cors_allowed_origins='*')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
@@ -58,7 +61,15 @@ def ResponseObject(status=True, message=None, data=None) -> Flask.response_class
         "data": data
     })
     response.content_type = "application/json"
-    return response       
+    return response
+
+def ResponseObjectSocket(status=True, message=None, data=None) -> Flask.response_class:
+    response = {
+        "status": status,
+        "message": message,
+        "data": data
+    }
+    return response
 
 
 
@@ -1982,6 +1993,16 @@ cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
 API Routes
 '''
 
+@socketio.on('connect')
+def handle_connect():
+    if "username" not in session:
+        print('disconnected')
+        disconnect()
+    else:
+        print('connected')
+    
+    
+
 @app.before_request
 def auth_req():
     if request.method.lower() == 'options':
@@ -2796,6 +2817,46 @@ def API_ping_getAllPeersIpAddress():
 
 import requests
 
+def getIPAddressGeolocation(ipAddress):
+    try:
+        r = requests.get(f"http://ip-api.com/json/{ipAddress}?field=city")
+        return r.json()
+    except Exception as e:
+        return None
+
+@socketio.on("ping")
+def SocketIO_Ping(json):
+    data = dict(json)
+    geo = {}
+    
+    if 'ipAddress' in data.keys() and 'count' in data.keys() and len(data['ipAddress']) > 0 and data['count'] > 0:
+        ip = data['ipAddress']
+        count = data['count']
+        for i in range(count):
+            print(ip, count)
+            result = ping(ip, count=1, source=None)
+            if result.address not in geo.keys():
+                geo[result.address] = getIPAddressGeolocation(result.address)
+            
+            data = {
+                "address": result.address,
+                "is_alive": result.is_alive,
+                "min_rtt": result.min_rtt,
+                "avg_rtt": result.avg_rtt,
+                "max_rtt": result.max_rtt,
+                "package_sent": result.packets_sent,
+                "package_received": result.packets_received,
+                "package_loss": result.packet_loss,
+                "geo": geo[result.address]
+            }
+            
+            emit('pingResponse', ResponseObjectSocket(True, data=data))
+            time.sleep(1)
+            
+    else:
+        emit('pingResponse', ResponseObjectSocket(False, "Please provide IP Address and Ping Count"))
+        
+
 @app.get(f'{APP_PREFIX}/api/ping/execute')
 def API_ping_execute():
     if "ipAddress" in request.args.keys() and "count" in request.args.keys():
@@ -2816,8 +2877,6 @@ def API_ping_execute():
                     "package_loss": result.packet_loss,
                     "geo": None
                 }
-                
-                
                 try:
                     r = requests.get(f"http://ip-api.com/json/{result.address}?field=city")
                     data['geo'] = r.json()

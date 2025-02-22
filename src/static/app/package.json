@@ -30,6 +30,7 @@
     "qrcode": "^1.5.3",
     "qrcodejs": "^1.0.0",
     "simple-code-editor": "^2.0.9",
+    "socket.io-client": "^4.8.1",
     "uuid": "^9.0.1",
     "vue": "^3.4.29",
     "vue-chartjs": "^5.3.0",

@@ -85,6 +85,7 @@ export default {
 				const lineFeature = new Feature({
 					geometry: lineString
 				});
+				console.log(lineString)
 				vectorSource.addFeature(lineFeature);
 				const vectorLayer = new Vector({
 					source: vectorSource,
