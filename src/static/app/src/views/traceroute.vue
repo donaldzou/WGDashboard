@@ -3,20 +3,48 @@ import {fetchGet} from "@/utilities/fetch.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import OSMap from "@/components/map/osmap.vue";
 import LocaleText from "@/components/text/localeText.vue";
+import {io} from "socket.io-client";
+import {ref} from "vue";
+import {v4} from "uuid";
+import OsmapSocket from "@/components/map/osmapSocket.vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export default {
 	name: "traceroute",
-	components: {LocaleText, OSMap},
+	components: {OsmapSocket, LocaleText, OSMap},
 	data(){
 		return {
-			tracing: false,
-			ipAddress: undefined,
-			tracerouteResult: undefined
+			ipAddress: undefined
 		}
 	},
 	setup(){
-		const store = WireguardConfigurationsStore();
-		return {store}
+		const store = DashboardConfigurationStore();
+		let sio;
+		let tracing = ref(false)
+		const tracerouteResult = ref([])
+		try{
+			sio = io();
+			sio.connect()
+			console.info("Successfully connected to socket.io")
+		}catch (e){
+			console.assert("Failed to connect socket.io")
+		}
+		sio.on('tracerouteResponse', (...arg) => {
+			let data = arg[0]
+			if (data.status && tracing.value){
+				console.log(data.data)
+				data.data.id = v4().toString()
+				tracerouteResult.value.push(data.data)
+			}else{
+				store.newMessage("Server", data.message, "danger")
+				tracing.value = false
+			}
+		})
+		sio.on('tracerouteResponseEnd', () => {
+			tracing.value = false
+		})
+		
+		return {store, sio, tracerouteResult, tracing}
 	},
 	methods: {
 		execute(){
@@ -32,6 +60,15 @@ export default {
 						this.store.newMessage("Server", res.message, "danger")
 					}
 					this.tracing = false
+				})
+			}
+		},
+		executeSocket(){
+			if (this.ipAddress && this.sio.connected){
+				this.tracerouteResult = []
+				this.tracing = true;
+				this.sio.emit('traceroute', {
+					ipAddress: this.ipAddress
 				})
 			}
 		}
@@ -62,7 +99,7 @@ export default {
 				</div>
 				<button class="btn btn-primary rounded-3 position-relative flex-grow-1"
 				        :disabled="this.tracing || !this.ipAddress"
-				        @click="this.execute()">
+				        @click="this.executeSocket()">
 					<Transition name="slide">
 							<span v-if="!this.tracing" class="d-block">
 								<i class="bi bi-person-walking me-2"></i>Trace!
@@ -75,84 +112,74 @@ export default {
 				</button>
 			</div>
 			<div class="position-relative">
-				<Transition name="ping">
-					<div v-if="!this.tracerouteResult" key="pingPlaceholder">
-						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-						     style="height: 300px !important;"
-						></div>
-						
-						<div class="pingPlaceholder bg-body-secondary rounded-3 mb-3"
-						     :style="{'animation-delay': `${x*0.05}s`}"
-						     :class="{'animate__animated animate__flash animate__slower animate__infinite': this.tracing}"
-						     v-for="x in 5" ></div>
-					</div>
-					<div v-else>
-						<OSMap :d="this.tracerouteResult" type="traceroute"></OSMap>
-						
-						<div key="table" class="w-100 mt-2">
-							<table class="table table-sm rounded-3 w-100">
-								<thead>
-								<tr>
-									<th scope="col">
-										<LocaleText t="Hop"></LocaleText>
-									</th>
-									<th scope="col">
-										<LocaleText t="IP Address"></LocaleText>
-									</th>
-									<th scope="col">
-										<LocaleText t="Average RTT (ms)"></LocaleText>
-									</th>
-									<th scope="col">
-										<LocaleText t="Min RTT (ms)"></LocaleText>
-									</th>
-									<th scope="col">
-										<LocaleText t="Max RTT (ms)"></LocaleText>
-									</th>
-									<th scope="col">
-										<LocaleText t="Geolocation"></LocaleText>
-									</th>
-								</tr>
-								</thead>
-								<tbody>
-								<tr v-for="(hop, key) in this.tracerouteResult">
-									<td>
-										<small>{{hop.hop}}</small>
-									</td>
-									<td>
-										<small>
-											<samp>{{hop.ip}}</samp>
-										</small>
-									</td>
-									<td>
-										<small>
-											<samp>{{hop.avg_rtt}}</samp>
-										</small>
-									</td>
-									<td>
-										<small>
-											<samp>{{hop.min_rtt}}</samp>
-										</small>
-									</td>
-									<td>
-										<small>
-											<samp>{{hop.max_rtt}}</samp>
-										</small>
-									</td>
-									<td>
-										<span v-if="hop.geo.city && hop.geo.country">
-											<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
-										</span>
-										<span v-else>
-											-
-										</span>
-									</td>
-								</tr>
-								</tbody>
-
-							</table>
-						</div>
-					</div>
-				</Transition>
+				<OsmapSocket :d="this.tracerouteResult" type="traceroute"></OsmapSocket>
+				<div key="table" class="w-100 mt-2">
+					<table class="table table-sm rounded-3 w-100">
+						<thead>
+						<tr>
+							<th scope="col">
+								<LocaleText t="Hop"></LocaleText>
+							</th>
+							<th scope="col">
+								<LocaleText t="IP Address"></LocaleText>
+							</th>
+							<th scope="col">
+								<LocaleText t="Average RTT (ms)"></LocaleText>
+							</th>
+							<th scope="col">
+								<LocaleText t="Min RTT (ms)"></LocaleText>
+							</th>
+							<th scope="col">
+								<LocaleText t="Max RTT (ms)"></LocaleText>
+							</th>
+							<th scope="col">
+								<LocaleText t="Geolocation"></LocaleText>
+							</th>
+						</tr>
+						</thead>
+						<tbody>
+						<TransitionGroup name="ping">
+							<tr v-for="(hop) in this.tracerouteResult" :key="hop.id">
+								<td>
+									<small>{{hop.hop}}</small>
+								</td>
+								<td>
+									<small>
+										{{hop.ip}}
+									</small>
+								</td>
+								<td>
+									<small>
+										{{hop.avg_rtt}}
+									</small>
+								</td>
+								<td>
+									<small>
+										{{hop.min_rtt}}
+									</small>
+								</td>
+								<td>
+									<small>
+										{{hop.max_rtt}}
+									</small>
+								</td>
+								<td>
+								<span v-if="hop.geo && hop.geo.status === 'success'">
+									<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
+								</span>
+								</td>
+							</tr>
+						</TransitionGroup>
+						<tr v-if="tracerouteResult.length === 0">
+							<td colspan="6" class="text-muted text-center">
+								<small>
+									<LocaleText t="Traceroute results will show here"></LocaleText>
+								</small>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>

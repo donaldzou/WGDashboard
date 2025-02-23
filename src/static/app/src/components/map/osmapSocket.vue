@@ -94,7 +94,6 @@ if (osmAvailable.value){
 					lineStringFeature.setGeometry(lineString)
 					sourceVector.removeFeature(lineStringFeature)
 					sourceVector.addFeature(lineStringFeature)
-					console.log(lineStringFeature)
 					sourceVector.addFeature(new Feature({
 						geometry: new Point(cord),
 						last: false,

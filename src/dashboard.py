@@ -2819,25 +2819,102 @@ import requests
 
 def getIPAddressGeolocation(ipAddress):
     try:
+        print("Requesting: " + ipAddress)
         r = requests.get(f"http://ip-api.com/json/{ipAddress}?field=city")
         return r.json()
     except Exception as e:
         return None
 
+# This will be a modified version of icmplib.traceroute for socket
+@socketio.on('traceroute')
+def SocketIO_Traceroute(json):
+    data = dict(json)
+    if 'ipAddress' in data.keys():
+        from icmplib.utils import is_hostname, is_ipv6_address, is_ipv4_address, resolve, unique_identifier
+        from icmplib.models import ICMPRequest, Hop
+        from icmplib.sockets import ICMPv6Socket, ICMPv4Socket
+        from icmplib.exceptions import TimeExceeded, ICMPLibError
+        address = data.get('ipAddress')
+        
+        try:
+            if is_hostname(address):
+                address = resolve(address)[0]
+            if is_ipv6_address(address):
+                _Socket = ICMPv6Socket
+            else:
+                _Socket = ICMPv4Socket
+        except Exception as e:
+            emit('tracerouteResponse', ResponseObjectSocket(False, str(e)))
+            return
+        id = unique_identifier()
+        ttl = 1
+        host_reached = False
+        hops = []
+        max_hops = 30
+        timeout = 2
+        with _Socket() as sock:
+            while not host_reached and ttl <= max_hops:
+                reply = None
+                packets_sent = 0
+                rtts = []
+                for sequence in range(2):
+                    request = ICMPRequest(destination=address, id=id, sequence=sequence, ttl=ttl)
+                    try:
+                        sock.send(request)
+                        packets_sent += 1
+                        reply = sock.receive(request, timeout)
+                        rtt = (reply.time - request.time) * 1000
+                        rtts.append(rtt)
+                        reply.raise_for_status()
+                        host_reached = True
+                    except TimeExceeded:
+                        time.sleep(0.05)
+                    except ICMPLibError:
+                        break
+                if reply:
+                    hop = Hop(address=reply.source, packets_sent=packets_sent, rtts=rtts, distance=ttl)
+                    hops.append(hop)
+                    result = {
+                        "hop": hop.distance,
+                        "ip": hop.address,
+                        "avg_rtt": hop.avg_rtt,
+                        "min_rtt": hop.min_rtt,
+                        "max_rtt": hop.max_rtt,
+                        "geo": getIPAddressGeolocation(hop.address)
+                    }
+                    
+                else:
+                    result = {
+                        "hop": ttl,
+                        "ip": "*",
+                        "avg_rtt": "*",
+                        "min_rtt": "*",
+                        "max_rtt": "*",
+                        "geo": None
+                    }
+                emit('tracerouteResponse', ResponseObjectSocket(True, data=result))
+                ttl += 1
+        emit('tracerouteResponseEnd')
+
+    else:
+        emit('tracerouteResponse', ResponseObjectSocket(False, "Please provide IP Address/Hostname"))
+
+
 @socketio.on("ping")
 def SocketIO_Ping(json):
     data = dict(json)
     geo = {}
-    
     if 'ipAddress' in data.keys() and 'count' in data.keys() and len(data['ipAddress']) > 0 and data['count'] > 0:
         ip = data['ipAddress']
         count = data['count']
         for i in range(count):
             print(ip, count)
-            result = ping(ip, count=1, source=None)
+            try:
+                result = ping(ip, count=1, source=None)
+            except Exception as e:
+                emit('pingResponse', ResponseObjectSocket(False, str(e))) 
             if result.address not in geo.keys():
                 geo[result.address] = getIPAddressGeolocation(result.address)
-            
             data = {
                 "address": result.address,
                 "is_alive": result.is_alive,
@@ -2849,10 +2926,9 @@ def SocketIO_Ping(json):
                 "package_loss": result.packet_loss,
                 "geo": geo[result.address]
             }
-            
             emit('pingResponse', ResponseObjectSocket(True, data=data))
             time.sleep(1)
-            
+        emit('pingResponseEnd')
     else:
         emit('pingResponse', ResponseObjectSocket(False, "Please provide IP Address and Ping Count"))
         

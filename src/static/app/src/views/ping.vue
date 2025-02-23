@@ -20,7 +20,6 @@ export default {
 			selectedPeer: undefined,
 			selectedIp: undefined,
 			pingResult: undefined,
-			
 		}
 	},
 	setup(){
@@ -42,12 +41,17 @@ export default {
 			console.assert("Failed to connect socket.io")
 		}
 		sio.on('pingResponse', (...arg) => {
-			let data = arg[0].data
-			data.id = v4().toString()
-			socketResult.value.pingResults.push(data)
-			if (socketResult.value.pingResults.length === count.value){
+			let data = arg[0]
+			if (data.status && pinging.value){
+				data.data.id = v4().toString()
+				socketResult.value.pingResults.push(data.data)
+			}else{
+				store.newMessage("Server", data.message, "danger")
 				pinging.value = false
 			}
+		})
+		sio.on('pingResponseEnd', () => {
+			pinging.value = false
 		})
 		return {store, sio, socketResult, count, pinging}
 	},
@@ -157,7 +161,6 @@ export default {
 							<small>
 								<LocaleText t="Count"></LocaleText>
 							</small></label>
-						
 						<div class="d-flex gap-3 align-items-center">
 							<button  @click="this.count--" 
 							         :disabled="this.count === 1"
@@ -216,7 +219,7 @@ export default {
 										<LocaleText t="Is Alive?"></LocaleText>
 									</th>
 									<th scope="col">
-										<LocaleText t="Round-Trip Time (ms)"></LocaleText>
+										<LocaleText t="RTT"></LocaleText>
 									</th>
 									
 									<th scope="col">
@@ -225,25 +228,27 @@ export default {
 								</tr>
 								</thead>
 								<tbody>
-									<tr v-for="(hop, key) in socketResult.pingResults">
-										<td>
-											<small>{{hop.address}}</small>
-										</td>
-										<td>
-											<small>
-												<i class="bi" 
-												   :class="[hop.is_alive ? 'bi-check-circle-fill text-success' :
+									<TransitionGroup name="ping">
+										<tr v-for="hop in socketResult.pingResults" :key="hop.id">
+											<td>
+												<small>{{hop.address}}</small>
+											</td>
+											<td>
+												<small>
+													<i class="bi"
+													   :class="[hop.is_alive ? 'bi-check-circle-fill text-success' :
 												    'bi-x-circle-fill text-danger']"></i>
-											</small>
-										</td>
-										<td>
-											<small>{{ hop.is_alive ? hop.max_rtt : ''}}</small>
-										</td>
-										<td>
-											<small v-if="hop.geo && hop.geo.status === 'success'">
-												{{ hop.geo.city }}, {{ hop.geo.country }}</small>
-										</td>
-									</tr>
+												</small>
+											</td>
+											<td>
+												<small>{{ hop.is_alive ? hop.max_rtt : ''}}</small>
+											</td>
+											<td>
+												<small v-if="hop.geo && hop.geo.status === 'success'">
+													{{ hop.geo.city }}, {{ hop.geo.country }}</small>
+											</td>
+										</tr>
+									</TransitionGroup>
 									<tr v-if="socketResult.pingResults.length === 0">
 										<td colspan="4" class="text-muted text-center">
 											<small>
