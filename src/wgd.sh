@@ -73,18 +73,21 @@ _check_and_set_venv() {
   source "$VENV_DIR/bin/activate"
 }
 
-_determineOS(){
-	if [ -f /etc/os-release ]; then
-		. /etc/os-release
-		OS=$ID
-	elif [ -f /etc/redhat-release ]; then
-		OS="redhat"
-	else
-		printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-		printf "%s\n" "$helpMsg"
-		kill  $TOP_PID
-	fi
-	printf "[WGDashboard] OS: %s\n" "$OS"
+# Detect the operating system
+_determineOS() {
+  if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    OS="$ID"
+  elif [[ -f /etc/redhat-release ]]; then
+    OS="redhat"
+  else
+    printf "[WGDashboard] %s Unsupported OS detected.\n" "$HEAVY_CROSSMARK"
+    printf "[WGDashboard] This script supports Debian-based, Red Hat-based OS, with experimental support for Alpine Linux.\n"
+    printf "%b\n" "$HELP_MSG"
+    kill "$TOP_PID"
+  fi
+
+  printf "[WGDashboard] OS detected: %s\n" "$OS"
 }
 
 _installPython(){
