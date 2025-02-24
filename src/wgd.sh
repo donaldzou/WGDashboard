@@ -90,36 +90,40 @@ _determineOS() {
   printf "[WGDashboard] OS detected: %s\n" "$OS"
 }
 
-_installPython(){
-	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
-	printf "[WGDashboard] %s Installing Python\n" "$install"
-	case "$OS" in
-		ubuntu|debian)
-			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
-		;;
-		centos|fedora|redhat|rhel|almalinux|rocky)
-			if command -v dnf &> /dev/null; then
-				{ sudo dnf install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt
-			else
-				{ sudo yum install -y python3 net-tools ; printf "\n\n"; } >> ./log/install.txt
-			fi
-		;;
-		alpine)
-			{ sudo apk update; sudo apk add python3 net-tools --no-cache; printf "\n\n"; } &>> ./log/install.txt
-		;;
-		arch)
-			{ sudo pacman -Syu python3 net-tools; printf "\n\n"; } &>> ./log/install.txt
-		;;
-	esac
-	
-	if ! python3 --version > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s Python is still not installed, halting script now.\n" "$heavy_crossmark"
-		printf "%s\n" "$helpMsg"
-		kill  $TOP_PID
-	else
-		printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
-	fi
+_installPython() {
+  # Log the start of Python installation
+  printf "\n\n[Installing Python] [%s]\n\n" "$(date)" | tee -a ./log/install.txt
+
+  printf "[WGDashboard] %s Installing Python...\n" "$INSTALL"
+
+  case "$OS" in
+    ubuntu|debian)
+      sudo apt update && sudo apt-get install -y python3 net-tools | tee -a ./log/install.txt
+      ;;
+    centos|fedora|redhat|rhel|almalinux|rocky)
+      PACKAGE_MANAGER=$(command -v dnf || command -v yum)
+      sudo "$PACKAGE_MANAGER" install -y python3 net-tools | tee -a ./log/install.txt
+      ;;
+    alpine)
+      sudo apk update && sudo apk add python3 net-tools --no-cache | tee -a ./log/install.txt
+      ;;
+    arch)
+      sudo pacman -Syu python3 net-tools | tee -a ./log/install.txt
+      ;;
+    *)
+      printf "[WGDashboard] %s Unsupported OS for Python installation.\n" "$HEAVY_CROSSMARK"
+      exit 1
+      ;;
+  esac
+
+  # Verify if Python is installed
+  if ! command -v python3 &>/dev/null; then
+    printf "[WGDashboard] %s Python installation failed! Stopping script.\n" "$HEAVY_CROSSMARK"
+    printf "%s\n" "$HELP_MSG"
+    kill "$TOP_PID"
+  else
+    printf "[WGDashboard] %s Python is successfully installed.\n" "$HEAVY_CHECKMARK"
+  fi
 }
 
 _installPythonVenv(){
