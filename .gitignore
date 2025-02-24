@@ -1,44 +1,5 @@
-.vscode
-.DS_Store
-.idea
-src/db
-__pycache__
-src/test.py
-*.db
-src/wg-dashboard.ini
-src/static/pic.xd
-*.conf
-private_key.txt
-public_key.txt
-venv/**
-log/**
-release/*
-src/db/wgdashboard.db
-.jshintrc
-node_modules/**
-*/proxy.js
-src/static/app/proxy.js
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-.DS_Store
-dist-ssr
-coverage
-*.local
-
-/cypress/videos/
-/cypress/screenshots/
-
-# Editor directories and files
-.vscode/*
+# IDEs and editor settings
+.vscode/
 !.vscode/extensions.json
 .idea
 *.suo
@@ -47,6 +8,56 @@ coverage
 *.sln
 *.sw?
 
-*.tsbuildinfo
-.vite/*
+# System files
+.DS_Store
 
+# Node.js dependencies
+node_modules/
+
+# Python
+**/__pycache__/
+venv/
+
+# Database files
+*.db
+src/db/
+src/db/wgdashboard.db
+
+# Sensitive and configuration files
+*.conf
+private_key.txt
+public_key.txt
+src/wg-dashboard.ini
+
+# Temporary files and logs
+log/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build and coverage
+dist-ssr/
+coverage/
+release/*
+
+# Project-specific files
+src/test.py
+src/static/pic.xd
+*/proxy.js
+src/static/app/proxy.js
+
+# Tools and cache
+.vite/
+*.tsbuildinfo
+
+# Cypress files
+/cypress/videos/
+/cypress/screenshots/
+
+# Other files
+*.local
+.jshintrc
