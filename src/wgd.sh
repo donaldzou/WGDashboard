@@ -126,48 +126,41 @@ _installPython() {
   fi
 }
 
-_installPythonVenv(){
-	{ printf "\n\n [Installing Python Venv] [%s] \n\n""$(date)"; } >> ./log/install.txt 
-	printf "[WGDashboard] %s Installing Python Virtual Environment\n" "$install"
-	if [ "$pythonExecutable" = "python3" ]; then
-		case "$OS" in
-			ubuntu|debian)
-				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
-			;;
-			centos|fedora|redhat|rhel|almalinux|rocky)
-				if command -v dnf &> /dev/null; then
-					{ sudo dnf install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-				else
-					{ sudo yum install -y python3-virtualenv; printf "\n\n"; } >> ./log/install.txt
-				fi
-			;;
-			alpine)
-				{ sudo apk update; sudo apk add py3-virtualenv ; printf "\n\n"; } >> ./log/install.txt
-			;;
-			arch)
-				{ echo "Python Virtual Environment is installed by default from version Python3.3"; printf "\n\n"; } &>> ./log/install.txt # https://wiki.archlinux.org/title/Python/Virtual_environment
-			;;
-			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-				printf "%s\n" "$helpMsg"
-				kill  $TOP_PID
-			;;
-		esac
-	else
-		case "$OS" in
-			ubuntu|debian)
-				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
-			;;
-		esac
-	fi
-	
-	if ! $pythonExecutable -m venv -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s Python Virtual Environment is still not installed, halting script now.\n" "$heavy_crossmark"
-		printf "%s\n" "$helpMsg"
-	else
-		printf "[WGDashboard] %s Python Virtual Environment is installed\n" "$heavy_checkmark"
-	fi
+_installPythonVenv() {
+  # Log installation start
+  printf "\n\n[Installing Python Venv] [%s]\n\n" "$(date)" | tee -a ./log/install.txt
+  printf "[WGDashboard] %s Installing Python Virtual Environment...\n" "$INSTALL"
+
+  case "$OS" in
+    ubuntu|debian)
+      sudo apt update && sudo apt-get install -y python3-venv | tee -a ./log/install.txt
+      ;;
+    centos|fedora|redhat|rhel|almalinux|rocky)
+      PACKAGE_MANAGER=$(command -v dnf || command -v yum)
+      sudo "$PACKAGE_MANAGER" install -y python3-virtualenv | tee -a ./log/install.txt
+      ;;
+    alpine)
+      sudo apk update && sudo apk add py3-virtualenv --no-cache | tee -a ./log/install.txt
+      ;;
+    arch)
+      echo "Python Virtual Environment is installed by default from version Python3.3" | tee -a ./log/install.txt # https://wiki.archlinux.org/title/Python/Virtual_environment
+      ;;
+    *)
+      printf "[WGDashboard] %s Unsupported OS detected.\n" "$HEAVY_CROSSMARK"
+      printf "[WGDashboard] This script only supports Debian-based, Red Hat-based OS, with experimental support for Alpine Linux.\n"
+      printf "%b\n" "$HELP_MSG"
+      kill "$TOP_PID"
+      ;;
+  esac
+
+  # Verify if Python Virtual Environment is installed
+  if ! "$PYTHON_EXECUTABLE" -m venv -h &>/dev/null; then
+    printf "[WGDashboard] %s Python Virtual Environment installation failed! Stopping script.\n" "$HEAVY_CROSSMARK"
+    printf "%s\n" "$HELP_MSG"
+    kill "$TOP_PID"
+  else
+    printf "[WGDashboard] %s Python Virtual Environment is successfully installed.\n" "$HEAVY_CHECKMARK"
+  fi
 }
 
 _installPythonPip(){
