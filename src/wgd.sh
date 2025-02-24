@@ -586,58 +586,91 @@ start_wgd_debug() {
 }
 
 update_wgd() {
-	_determineOS
-	if ! python3 --version > /dev/null 2>&1
-	then
-		printf "[WGDashboard] Python is not installed, trying to install now\n"
-		_installPython
-	else
-		printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
-	fi
-	
-	_checkPythonVersion
-	_installPythonVenv
-	_installPythonPip	
-	
-	new_ver=$($venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
-	printf "%s\n" "$dashes"
+  _determineOS
 
-	if [ "$commandConfirmed" = "true" ]; then
-		printf "[WGDashboard] Confirmation granted.\n"
-		up="Y"
-	else
-		printf "[WGDashboard] Are you sure you want to update to the %s? (Y/N): " "$new_ver"
-		read up
-	fi
+  # Ensure Python is installed
+  if ! command -v python3 &>/dev/null; then
+    printf "[WGDashboard] %s Python is missing, attempting installation.\n" "$INSTALL"
+    _installPython
+  else
+    printf "[WGDashboard] %s Python is installed.\n" "$HEAVY_CHECKMARK"
+  fi
 
-	if [ "$up" = "Y" ] || [ "$up" = "y" ]; then
-		printf "[WGDashboard] Shutting down WGDashboard\n"
+  # Verify and set up Python environment
+  _checkPythonVersion
+  _installPythonVenv
+  _installPythonPip
 
-		if check_wgd_status; then
-			stop_wgd
-		fi
+  printf "[WGDashboard] Checking for latest version...\n"
 
-		mv wgd.sh wgd.sh.old
-		printf "[WGDashboard] Downloading %s from GitHub..." "$new_ver"
-		{ date; git stash; git pull https://github.com/donaldzou/WGDashboard.git $new_ver --force; } >> ./log/update.txt
-		chmod +x ./wgd.sh
-		sudo ./wgd.sh install
-		printf "[WGDashboard] Update completed!\n"
-		printf "%s\n" "$dashes"
-		rm wgd.sh.old
-	else
-		printf "%s\n" "$dashes"
-		printf "[WGDashboard] Update Canceled.\n"
-		printf "%s\n" "$dashes"
-	fi
+  # Fetch latest version from GitHub API
+  local new_ver
+  new_ver=$(curl -s "https://api.github.com/repos/donaldzou/WGDashboard/releases/latest" | jq -r '.tag_name')
+
+  # Validate API response
+  if [[ -z "$new_ver" || "$new_ver" == "null" ]]; then
+    printf "[WGDashboard] %s Failed to fetch the latest version. Please check your internet connection.\n" "$HEAVY_CROSSMARK"
+    return 1
+  fi
+
+  printf "%s\n" "$DASHES"
+
+  # Handle confirmation (for automated updates)
+  local up
+  if [[ "$commandConfirmed" == "true" ]]; then
+    printf "[WGDashboard] Auto-confirmation enabled.\n"
+    up="Y"
+  else
+    read -rp "[WGDashboard] Update to version %s? (Y/N): " "$new_ver" up
+  fi
+
+  if [[ "$up" =~ ^[Yy]$ ]]; then
+    printf "[WGDashboard] Shutting down WGDashboard for update...\n"
+
+    if check_wgd_status; then
+      stop_wgd
+    fi
+
+    printf "[WGDashboard] Backing up current script...\n"
+    mv wgd.sh wgd.sh.old
+
+    # Download latest version
+    printf "[WGDashboard] Downloading latest version: %s from GitHub...\n" "$new_ver"
+    { date; curl -L "https://github.com/donaldzou/WGDashboard/archive/refs/tags/$new_ver.tar.gz" -o latest_wgd.tar.gz; } | tee -a ./log/update.txt
+
+    # Extract and install
+    tar -xzf latest_wgd.tar.gz --strip-components=1
+    chmod +x ./wgd.sh
+    rm -f latest_wgd.tar.gz
+
+    printf "[WGDashboard] Running installation script...\n"
+    sudo ./wgd.sh install
+
+    printf "[WGDashboard] Cleaning up old files...\n"
+    rm -f wgd.sh.old
+
+    printf "[WGDashboard] %s WGDashboard successfully updated to %s!\n" "$HEAVY_CHECKMARK" "$new_ver"
+    printf "%s\n" "$DASHES"
+  else
+    printf "%s\n" "$DASHES"
+    printf "[WGDashboard] Update was canceled.\n"
+    printf "%s\n" "$DASHES"
+  fi
 }
 
-if [ "$#" -lt 1 ]; then
-	help
-else
-	if [ "$2" = "-y" ] || [ "$2" = "-Y" ]; then
-		commandConfirmed="true"
-	fi
+# Enable case-insensitive matching for Bash (Optional)
+shopt -s nocasematch
+
+# Show help if no arguments are passed
+if [[ "$#" -lt 1 ]]; then
+  help
+  exit 1
+fi
+
+# Handle `-y` confirmation argument
+if [[ "${2,,}" == "-y" ]]; then
+  commandConfirmed="true"
+fi
 
 # Command handling using `case`
 case "$1" in
