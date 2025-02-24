@@ -397,20 +397,23 @@ install_wgd(){
     printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
 }
 
-check_wgd_status(){
-  if test -f "$PID_FILE"; then
-    if ps aux | grep -v grep | grep $(cat ./gunicorn.pid)  > /dev/null; then
-    return 0
-    else
-      return 1
-    fi
-  else
-    if ps aux | grep -v grep | grep '[p]ython3 '$app_name > /dev/null; then
-      return 0
-    else
-      return 1
+check_wgd_status() {
+  # Check if the PID file exists
+  if [[ -f "$PID_FILE" ]]; then
+    pid=$(<"$PID_FILE")  # Read PID without using `cat`
+    
+    # Check if the process exists
+    if pgrep -F "$PID_FILE" &>/dev/null; then
+      return 0  # Process is running
     fi
   fi
+
+  # Fallback: Check if the APP_NAME process is running
+  if pgrep -f "python3 $APP_NAME" &>/dev/null; then
+    return 0  # Process is running
+  fi
+
+  return 1  # Process not running
 }
 
 certbot_create_ssl () {
