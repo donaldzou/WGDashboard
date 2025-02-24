@@ -163,49 +163,52 @@ _installPythonVenv() {
   fi
 }
 
-_installPythonPip(){
-	{ printf "\n\n [Installing Python Pip] [%s] \n\n""$(date)"; } >> ./log/install.txt 
-	
-	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s Installing Python Package Manager (PIP)\n" "$install"
-		case "$OS" in
-			ubuntu|debian)
-				if [ "$pythonExecutable" = "python3" ]; then
-					{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
-				else
-					{ sudo apt update ; sudo apt-get install -y ${pythonExecutable}-distutil python3-pip; printf "\n\n"; } &>> ./log/install.txt
-				fi
-			;;
-			centos|fedora|redhat|rhel|almalinux|rocky)
-				if [ "$pythonExecutable" = "python3" ]; then
-					{ sudo dnf install -y python3-pip; printf "\n\n"; } >> ./log/install.txt
-				else
-					{ sudo dnf install -y ${pythonExecutable}-pip; printf "\n\n"; } >> ./log/install.txt
-				fi
-			;;
-			alpine)
-				{ sudo apk update; sudo apk add py3-pip --no-cache; printf "\n\n"; } >> ./log/install.txt
-			;;
-			arch)
-				{ sudo pacman -Syu python-pip; printf "\n\n"; } &>> ./log/install.txt
-			;;
-			*)
-				printf "[WGDashboard] %s Sorry, your OS is not supported. Currently the install script only support Debian-based, Red Hat-based OS. With experimental support for Alpine Linux.\n" "$heavy_crossmark"
-				printf "%s\n" "$helpMsg"
-				kill  $TOP_PID
-			;;
-		esac
-    fi
-    	
-	if ! $pythonExecutable -m pip -h > /dev/null 2>&1
-	then
-		printf "[WGDashboard] %s Python Package Manager (PIP) is still not installed, halting script now.\n" "$heavy_crossmark"
-		printf "%s\n" "$helpMsg"
-		kill  $TOP_PID
-	else
-		printf "[WGDashboard] %s Python Package Manager (PIP) is installed\n" "$heavy_checkmark"
-	fi
+_installPythonPip() {
+  # Log installation start
+  printf "\n\n[Installing Python Pip] [%s]\n\n" "$(date)" | tee -a ./log/install.txt
+
+  # Check if pip is already installed
+  if ! "$PYTHON_EXECUTABLE" -m pip -h &>/dev/null; then
+    printf "[WGDashboard] %s Installing Python Package Manager (PIP)...\n" "$INSTALL"
+
+    case "$OS" in
+      ubuntu|debian)
+        sudo apt update
+
+        # Install pip based on the Python version
+        if [ "$PYTHON_EXECUTABLE" = "python3" ]; then
+          sudo apt-get install -y python3-pip | tee -a ./log/install.txt
+        else
+          sudo apt-get install -y "${PYTHON_EXECUTABLE}-distutils" python3-pip | tee -a ./log/install.txt
+        fi
+        ;;
+      centos|fedora|redhat|rhel|almalinux|rocky)
+        PACKAGE_MANAGER=$(command -v dnf || command -v yum)
+        sudo "$PACKAGE_MANAGER" install -y python3-pip | tee -a ./log/install.txt
+        ;;
+      alpine)
+        sudo apk update && sudo apk add py3-pip --no-cache | tee -a ./log/install.txt
+        ;;
+      arch)
+        sudo pacman -Syu python-pip | tee -a ./log/install.txt
+        ;;
+      *)
+        printf "[WGDashboard] %s Unsupported OS detected.\n" "$HEAVY_CROSSMARK"
+        printf "[WGDashboard] This script only supports Debian-based, Red Hat-based OS, with experimental support for Alpine Linux.\n"
+        printf "%b\n" "$HELP_MSG"
+        kill "$TOP_PID"
+        ;;
+    esac
+  fi
+
+  # Verify if pip was successfully installed
+  if ! "$PYTHON_EXECUTABLE" -m pip -h &>/dev/null; then
+    printf "[WGDashboard] %s Python Package Manager (PIP) installation failed! Stopping script.\n" "$HEAVY_CROSSMARK"
+    printf "%s\n" "$HELP_MSG"
+    kill "$TOP_PID"
+  else
+    printf "[WGDashboard] %s Python Package Manager (PIP) is successfully installed.\n" "$HEAVY_CHECKMARK"
+  fi
 }
 
 _checkWireguard(){
