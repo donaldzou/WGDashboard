@@ -416,60 +416,89 @@ check_wgd_status() {
   return 1  # Process not running
 }
 
-certbot_create_ssl () {
-	certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir $cb_work_dir --config-dir $cb_config_dir --domain "$SERVERURL"
-}
-
-certbot_renew_ssl () {
-	certbot renew --work-dir $cb_work_dir --config-dir $cb_config_dir
-}
-
-gunicorn_start () {
-  printf "%s\n" "$dashes"
-  printf "[WGDashboard] Starting WGDashboard with Gunicorn in the background.\n"
-  d=$(date '+%Y%m%d%H%M%S')
-  if [[ $USER == root ]]; then
-    export PATH=$PATH:/usr/local/bin:$HOME/.local/bin
+certbot_create_ssl() {
+  if ! command -v certbot &>/dev/null; then
+    printf "[WGDashboard] %s Certbot is not installed. Please install it before running this command.\n" "$HEAVY_CROSSMARK"
+    return 1
   fi
+
+  certbot certonly --config ./certbot.ini --email "$EMAIL" --work-dir "$CB_WORK_DIR" --config-dir "$CB_CONFIG_DIR" --domain "$SERVERURL"
+}
+
+certbot_renew_ssl() {
+  if ! command -v certbot &>/dev/null; then
+    printf "[WGDashboard] %s Certbot is not installed. Please install it before running this command.\n" "$HEAVY_CROSSMARK"
+    return 1
+  fi
+
+  certbot renew --work-dir "$CB_WORK_DIR" --config-dir "$CB_CONFIG_DIR"
+}
+
+gunicorn_start() {
+  printf "%s\n" "$DASHES"
+  printf "[WGDashboard] Starting WGDashboard with Gunicorn in the background...\n"
+
+  # Ensure environment is correctly set for root users
+  if [[ $USER == "root" ]]; then
+    export PATH="$PATH:/usr/local/bin:$HOME/.local/bin"
+  fi
+
+  # Activate virtual environment and start Gunicorn
   _check_and_set_venv
-  sudo "$venv_gunicorn" --config ./gunicorn.conf.py
-  sleep 5
-  checkPIDExist=0
-  while [ $checkPIDExist -eq 0 ]
-  do
-  		if test -f './gunicorn.pid'; then
-  			checkPIDExist=1
-  			printf "[WGDashboard] Checking if WGDashboard w/ Gunicorn started successfully\n"
-  		fi
-  		sleep 2
+  sudo "$VENV_GUNICORN" --config ./gunicorn.conf.py &  
+
+  # Wait for Gunicorn to create the PID file
+  for i in {1..10}; do
+    if [[ -f "./gunicorn.pid" ]]; then
+      printf "[WGDashboard] WGDashboard with Gunicorn started successfully\n"
+      printf "%s\n" "$DASHES"
+      return 0
+    fi
+    sleep 1
   done
-  printf "[WGDashboard] WGDashboard w/ Gunicorn started successfully\n"
-  printf "%s\n" "$dashes"
+
+  printf "[WGDashboard] %s Failed to start WGDashboard with Gunicorn!\n" "$HEAVY_CROSSMARK"
+  return 1
 }
 
-gunicorn_stop () {
-	sudo kill $(cat ./gunicorn.pid)
+gunicorn_stop() {
+  if [[ -f "./gunicorn.pid" ]]; then
+    sudo kill "$(cat ./gunicorn.pid)" && rm -f ./gunicorn.pid
+    printf "[WGDashboard] %s Gunicorn stopped successfully.\n" "$HEAVY_CHECKMARK"
+  else
+    printf "[WGDashboard] %s Gunicorn is not running.\n" "$HEAVY_CROSSMARK"
+    return 1
+  fi
 }
 
-start_wgd () {
-	_checkWireguard
-    gunicorn_start
+start_wgd() {
+  _checkWireguard
+  gunicorn_start
 }
 
 stop_wgd() {
-	if test -f "$PID_FILE"; then
-		gunicorn_stop
-	else
-		kill "$(ps aux | grep "[p]ython3 $app_name" | awk '{print $2}')"
-	fi
+  if [[ -f "$PID_FILE" ]]; then
+    gunicorn_stop
+  else
+    if pkill -f "python3 $APP_NAME"; then
+      printf "[WGDashboard] %s WGDashboard process stopped successfully.\n" "$HEAVY_CHECKMARK"
+    else
+      printf "[WGDashboard] %s No running WGDashboard process found.\n" "$HEAVY_CROSSMARK"
+      return 1
+    fi
+  fi
 }
 
 # ============= Docker Functions =============
+
 startwgd_docker() {
-	_checkWireguard
-	printf "[WGDashboard][Docker] WireGuard configuration started\n"
-	{ date; start_core ; printf "\n\n"; } >> ./log/install.txt
-    gunicorn_start
+  _checkWireguard
+  printf "[WGDashboard][Docker] WireGuard configuration started\n"
+  
+  # Log start operation
+  { date; start_core; printf "\n\n"; } | tee -a ./log/install.txt
+  
+  gunicorn_start
 }
 
 start_core() {
@@ -488,11 +517,22 @@ start_core() {
 }
 
 newconf_wgd() {
-    local wg_port_listen=$wg_port
-    local wg_addr_range=$wg_net
-    private_key=$(wg genkey)
-    public_key=$(echo "$private_key" | wg pubkey)
-    cat <<EOF >"/etc/wireguard/wg0.conf"
+  local wg_port_listen="$wg_port"
+  local wg_addr_range="$wg_net"
+
+  # Generate WireGuard keys
+  local private_key public_key
+  private_key=$(wg genkey)
+  public_key=$(echo "$private_key" | wg pubkey)
+
+  # Ensure WireGuard config directory exists
+  if [[ ! -d "/etc/wireguard" ]]; then
+    mkdir -p /etc/wireguard
+    chmod 700 /etc/wireguard
+  fi
+
+  # Create WireGuard configuration
+  cat <<EOF >"/etc/wireguard/wg0.conf"
 [Interface]
 PrivateKey = $private_key
 Address = $wg_addr_range
@@ -501,16 +541,19 @@ SaveConfig = true
 PostUp = /opt/wireguarddashboard/src/iptable-rules/postup.sh
 PreDown = /opt/wireguarddashboard/src/iptable-rules/postdown.sh
 EOF
+
+  chmod 600 /etc/wireguard/wg0.conf
+  printf "[WGDashboard] %s New WireGuard configuration created: /etc/wireguard/wg0.conf\n" "$HEAVY_CHECKMARK"
 }
 
 # ============= Docker Functions =============
 
 start_wgd_debug() {
-	printf "%s\n" "$dashes"
-	_checkWireguard
-	printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
-	sudo "$venv_python" "$app_name"
-	printf "%s\n" "$dashes"
+  printf "%s\n" "$DASHES"
+  _checkWireguard
+  printf "[WGDashboard] Starting WGDashboard in the foreground...\n"
+  sudo "$VENV_PYTHON" "$APP_NAME"
+  printf "%s\n" "$DASHES"
 }
 
 update_wgd() {
