@@ -510,18 +510,39 @@ startwgd_docker() {
 }
 
 start_core() {
-	# Re-assign config_files to ensure it includes any newly created configurations
-	local config_files=$(find /etc/wireguard -type f -name "*.conf")
-	
-	# Set file permissions
-	find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
-	find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
-	
-	# Start WireGuard for each config file
-	for file in $config_files; do
-		config_name=$(basename "$file" ".conf")
-		wg-quick up "$config_name"
-	done
+  # Ensure WireGuard is installed
+  if ! command -v wg &>/dev/null || ! command -v wg-quick &>/dev/null; then
+    printf "[WGDashboard] %s WireGuard is not installed! Exiting...\n" "$HEAVY_CROSSMARK"
+    return 1
+  fi
+
+  # Find all WireGuard config files
+  local config_files
+  config_files=$(find /etc/wireguard -type f -name "*.conf")
+
+  # Ensure configurations exist
+  if [[ -z "$config_files" ]]; then
+    printf "[WGDashboard] %s No WireGuard configurations found in /etc/wireguard.\n" "$HEAVY_CROSSMARK"
+    return 1
+  fi
+
+  # Set secure file permissions
+  find /etc/wireguard -type f -name "*.conf" -exec chmod 600 {} \;
+  find "$iptable_dir" -type f -name "*.sh" -exec chmod +x {} \;
+  
+  # Start each WireGuard configuration
+  local file config_name
+  for file in $config_files; do
+    config_name=$(basename "$file" ".conf")
+    
+    printf "[WGDashboard] Starting WireGuard configuration: %s\n" "$config_name"
+    
+    if ! wg-quick up "$config_name"; then
+      printf "[WGDashboard] %s Failed to start %s. Check logs for details.\n" "$HEAVY_CROSSMARK" "$config_name"
+    else
+      printf "[WGDashboard] %s Successfully started %s.\n" "$HEAVY_CHECKMARK" "$config_name"
+    fi
+  done
 }
 
 newconf_wgd() {
