@@ -278,61 +278,67 @@ _checkPythonVersion() {
   kill "$TOP_PID"
 }
 
-_determinePypiMirror(){
-	printf "[WGDashboard] %s Pinging list of recommended Python Package Index mirror\n" "$install"
-	urls=(
-		"https://pypi.org/simple/"
-		"https://pypi.tuna.tsinghua.edu.cn/simple/"
-		"https://pypi.mirrors.ustc.edu.cn/simple/"
-		"https://mirrors.aliyun.com/pypi/simple/"
-		"https://pypi.douban.com/simple/"
-	)
+_determinePypiMirror() {
+  printf "[WGDashboard] %s Pinging recommended Python Package Index mirrors...\n" "$INSTALL"
 
-	# Function to extract hostname and ping it
-	index=1
-	printf "              ---------------------------------------------------------\n"
-	for url in "${urls[@]}"; do
-		# Extract the hostname from the URL
-		hostname=$(echo "$url" | awk -F/ '{print $3}')
-		# Ping the hostname once and extract the RTT
-		rtt=$(ping -c 1 -W 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
-		# Handle cases where the hostname is not reachable
-		if [ -z "$rtt" ]; then
-			rtt="9999"
-			printf "              [%i] [FAILED] %s\n" "$index" "$url"
-		else
-			rtt=${rtt//.*/}
-			printf "              [%i] %sms %s\n" "$index" "$rtt" "$url"
-		fi
-		rtthost[$index]=$rtt
-		index=$((index+1))
-	done
+  declare -A rtthost  # Using an associative array for cleaner RTT management
+  urls=(
+    "https://pypi.org/simple/"
+    "https://pypi.tuna.tsinghua.edu.cn/simple/"
+    "https://pypi.mirrors.ustc.edu.cn/simple/"
+    "https://mirrors.aliyun.com/pypi/simple/"
+    "https://pypi.douban.com/simple/"
+  )
 
-	for i in "${!rtthost[@]}"; do
-		[[ -z ${rtthost[i]} ]] && continue  # Skip unset or empty values
-		if [[ -z $min_val || ${rtthost[i]} -lt $min_val ]]; then
-			min_val=${rtthost[i]}
-			min_idx=$i
-		fi
-	done
-	min_idx=$((min_idx - 1))
-	
-	printf "\n"
-	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default: ${urls[$min_idx]}): "
-	read -t ${msleep} -r choice
-	printf "\n"
+  # Print separator
+  printf "%s\n" "$DASHES"
 
-	if [[ -z "$choice" ]]; then
-		choice=${min_dix}
-	fi
+  # Ping each mirror and determine RTT
+  for i in "${!urls[@]}"; do
+    hostname=$(echo "${urls[i]}" | awk -F/ '{print $3}')
+    rtt=$(ping -c 1 -W 1 "$hostname" 2>/dev/null | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print int($1)}')
 
-	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
-		selected_url="${urls[choice-1]}"
-		printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "$selected_url"
-	else
-		selected_url="${urls[0]}"
-		printf "[WGDashboard] %s Will download Python packages from %s\n" "$heavy_checkmark" "${urls[0]}"
-	fi
+    if [[ -z "$rtt" ]]; then
+      rtt=9999  # Assign high value if unreachable
+      printf " [%d] [FAILED] %s\n" "$((i+1))" "${urls[i]}"
+    else
+      printf " [%d] %dms %s\n" "$((i+1))" "$rtt" "${urls[i]}"
+    fi
+
+    rtthost[$i]=$rtt
+  done
+
+  # Find the mirror with the lowest RTT
+  min_val=9999
+  min_idx=0
+
+  for i in "${!rtthost[@]}"; do
+    if [[ ${rtthost[$i]} -lt $min_val ]]; then
+      min_val=${rtthost[$i]}
+      min_idx=$i
+    fi
+  done
+
+  # Prompt user for mirror selection
+  printf "\n"
+  printf " Which mirror would you like to use (Hit enter or wait ${MSLEEP} seconds to use default: %s): " "${urls[min_idx]}"
+  
+  read -t "$MSLEEP" -r choice
+  printf "\n"
+
+  # Handle response or timeout
+  if [[ -z "$choice" ]]; then
+    choice=$((min_idx + 1))  # Set to lowest RTT mirror if no input is given
+  fi
+  
+  # Validate user input and set final mirror
+  if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
+    selected_url="${urls[choice-1]}"
+  else
+    selected_url="${urls[min_idx]}"
+  fi
+
+  printf "[WGDashboard] %s Will download Python packages from %s\n" "$HEAVY_CHECKMARK" "$selected_url"
 }
 
 install_wgd(){
