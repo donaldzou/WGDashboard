@@ -1,51 +1,64 @@
 #!/bin/bash
-
-# wgd.sh - Copyright(C) 2024 Donald Zou [https://github.com/donaldzou]
+# wgd.sh - Copyright (C) 2024 Donald Zou [https://github.com/donaldzou]
 # Under Apache-2.0 License
+
+set -e  # Stop script execution on error
+
 #trap "kill $TOP_PID"
 export TOP_PID=$$
 
-app_name="dashboard.py"
-app_official_name="WGDashboard"
-venv_python="./venv/bin/python3"
-venv_gunicorn="./venv/bin/gunicorn"
-pythonExecutable="python3"
+APP_SCRIPT="dashboard.py"
+APP_NAME="WGDashboard"
 
-heavy_checkmark=$(printf "\xE2\x9C\x85")
-heavy_crossmark=$(printf "\xE2\x9D\x8C")
-install=$(printf "\xF0\x9F\x92\xBF")
+VENV_DIR="./venv"
+VENV_PYTHON="$VENV_DIR/bin/python3"
+VENV_GUNICORN="$VENV_DIR/bin/gunicorn"
+PYTHON_EXECUTABLE="python3"
 
-msleep=15
+# Emojis for messages
+HEAVY_CHECKMARK=$(printf "\xE2\x9C\x85")  # ✔️
+HEAVY_CROSSMARK=$(printf "\xE2\x9D\x8C")  # ❌
+INSTALL=$(printf "\xF0\x9F\x92\xBF")      # 💾
 
-PID_FILE=./gunicorn.pid
-environment=$(if [[ $ENVIRONMENT ]]; then echo $ENVIRONMENT; else echo 'develop'; fi)
-if [[ $CONFIGURATION_PATH ]]; then
-  cb_work_dir=$CONFIGURATION_PATH/letsencrypt/work-dir
-  cb_config_dir=$CONFIGURATION_PATH/letsencrypt/config-dir
-else
-  cb_work_dir=/etc/letsencrypt
-  cb_config_dir=/var/lib/letsencrypt
-fi
+MSLEEP=15
+PID_FILE="./gunicorn.pid"
 
-dashes='------------------------------------------------------------'
-equals='============================================================'
-helpMsg="[WGDashboard] Please check ./log/install.txt for more details. For further assistance, please open a ticket on https://github.com/donaldzou/WGDashboard/issues/new/choose, I'm more than happy to help :)"
-help () {
-  printf "=================================================================================\n"
-  printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
-  printf "=================================================================================\n"
-  printf "| Usage: ./wgd.sh <option>                                                      |\n"
-  printf "|                                                                               |\n"
-  printf "| Available options:                                                            |\n"
-  printf "|    start: To start WGDashboard.                                               |\n"
-  printf "|    stop: To stop WGDashboard.                                                 |\n"
-  printf "|    debug: To start WGDashboard in debug mode (i.e run in foreground).         |\n"
-  printf "|    update: To update WGDashboard to the newest version from GitHub.           |\n"
-  printf "|    install: To install WGDashboard.                                           |\n"
-  printf "| Thank you for using! Your support is my motivation ;)                         |\n"
-  printf "=================================================================================\n"
+# Set ENVIRONMENT variable, default to "develop" if not defined
+ENVIRONMENT="${ENVIRONMENT:-develop}"
+
+# Define configuration directories, with fallback defaults
+CB_WORK_DIR="${CONFIGURATION_PATH:-/etc}/letsencrypt/work-dir"
+CB_CONFIG_DIR="${CONFIGURATION_PATH:-/var/lib}/letsencrypt/config-dir"
+
+# Aesthetic separators
+DASHES="--------------------------------------------------------------------------------"
+EQUALS="================================================================================"
+
+HELP_MSG="[$APP_NAME] Please check ./log/install.txt for details.\n\
+For further assistance, open a ticket at:\n\
+https://github.com/donaldzou/WGDashboard/issues/new/choose\n\
+I'm happy to help! :)"
+
+help() {
+  cat <<EOF
+$EQUALS
+ +         <WGDashboard> by Donald Zou - https://github.com/donaldzou         +
+$EQUALS
+ | Usage: ./wgd.sh <option>                                                   |
+ |                                                                            |
+ | Available options:                                                         |
+ |    start:    Start WGDashboard.                                            |
+ |    stop:     Stop WGDashboard.                                             |
+ |    debug:    Start WGDashboard in debug mode (run in foreground).          |
+ |    update:   Update WGDashboard to the newest version from GitHub.         |
+ |    install:  Install WGDashboard.                                          |
+ |                                                                            |
+ | Thank you for using! Your support is my motivation! ;)                     |
+$EQUALS
+EOF
 }
 
+# Ensure the Python virtual environment exists
 _check_and_set_venv(){
     VIRTUAL_ENV="./venv"
     if [ ! -d $VIRTUAL_ENV ]; then
