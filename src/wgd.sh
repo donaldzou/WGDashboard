@@ -211,76 +211,71 @@ _installPythonPip() {
   fi
 }
 
-_checkWireguard(){
-    if ! command -v wg > /dev/null 2>&1 || ! command -v wg-quick > /dev/null 2>&1
-    then
-    	printf "[WGDashboard] %s Installing WireGuard\n" "$install"
-        case "$OS" in
-            ubuntu|debian)
-                { 
-                    sudo apt update && sudo apt-get install -y wireguard; 
-                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
-                } &>> ./log/install.txt
-                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
-            ;;
-            centos|fedora|redhat|rhel|almalinux|rocky)
-                { 
-                    sudo dnf install -y wireguard-tools;
-                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
-                } &>> ./log/install.txt
-                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
-            ;;
-            alpine)
-                { 
-                    sudo apk update && sudo apk add wireguard-tools --no-cache;
-                    printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
-                } &>> ./log/install.txt
-                printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
-            ;;
-			arch)
-				{ 
-					sudo pacman -Syu wireguard-tools; printf "\n\n"; 
-				} &>> ./log/install.txt
-				printf "[WGDashboard] %s WireGuard is successfully installed.\n" "$heavy_checkmark"
-			;;
-            *)
-                printf "[WGDashboard] %s Sorry, your OS is not supported. Currently, the install script only supports Debian-based, Red Hat-based, and Alpine Linux.\n" "$heavy_crossmark"
-                printf "%s\n" "$helpMsg"
-                kill $TOP_PID
-            ;;
-        esac
+_checkWireguard() {
+  # Check if WireGuard is installed
+  if ! command -v wg &>/dev/null || ! command -v wg-quick &>/dev/null; then
+    printf "[WGDashboard] %s Installing WireGuard...\n" "$INSTALL"
+
+    case "$OS" in
+      ubuntu|debian)
+        sudo apt update && sudo apt-get install -y wireguard | tee -a ./log/install.txt
+        ;;
+      centos|fedora|redhat|rhel|almalinux|rocky)
+        PACKAGE_MANAGER=$(command -v dnf || command -v yum)
+        sudo "$PACKAGE_MANAGER" install -y wireguard-tools | tee -a ./log/install.txt
+        ;;
+      alpine)
+        sudo apk update && sudo apk add wireguard-tools --no-cache | tee -a ./log/install.txt
+        ;;
+      arch)
+        sudo pacman -Syu wireguard-tools | tee -a ./log/install.txt
+        ;;
+      *)
+        printf "[WGDashboard] %s Unsupported OS detected.\n" "$HEAVY_CROSSMARK"
+        printf "[WGDashboard] This script supports Debian-based, Red Hat-based OS, and Alpine Linux.\n"
+        printf "%b\n" "$HELP_MSG"
+        kill "$TOP_PID"
+        ;;
+    esac
+
+    # Confirm WireGuard installation
+    if command -v wg &>/dev/null && command -v wg-quick &>/dev/null; then
+      printf "[WGDashboard] %s WireGuard is successfully installed on %s.\n" "$HEAVY_CHECKMARK" "$OS"
     else
-        printf "[WGDashboard] %s WireGuard is already installed.\n" "$heavy_checkmark"
+      printf "[WGDashboard] %s WireGuard installation failed! Stopping script.\n" "$HEAVY_CROSSMARK"
+      printf "%s\n" "$HELP_MSG"
+      kill "$TOP_PID"
     fi
+  else
+    printf "[WGDashboard] %s WireGuard is already installed.\n" "$HEAVY_CHECKMARK"
+  fi
 }
 
+_checkPythonVersion() {
+  # Get Python version
+  PYTHON_VERSION=$($PYTHON_EXECUTABLE --version 2>/dev/null)
+  
+  # Check if the current Python version is compatible (>= 3.10)
+  version_pass=$($PYTHON_EXECUTABLE -c 'import sys; print(int(sys.version_info >= (3, 10)))')
 
+  if [[ "$version_pass" == "1" ]]; then
+    printf "[WGDashboard] %s Found compatible Python version (%s). Using it to install WGDashboard.\n" "$HEAVY_CHECKMARK" "$PYTHON_VERSION"
+    return 
+  fi
 
+  # Compatible Python versions list
+  for ver in 3.12 3.11 3.10; do
+    if command -v python$ver &>/dev/null; then
+      PYTHON_EXECUTABLE="python$ver"
+      printf "[WGDashboard] %s Found Python %s. Using it to install WGDashboard.\n" "$HEAVY_CHECKMARK" "$ver"
+      return
+    fi
+  done
 
-_checkPythonVersion(){
-	version_pass=$($pythonExecutable -c 'import sys; print("1") if (sys.version_info.major == 3 and sys.version_info.minor >= 10) else print("0");')
-	version=$($pythonExecutable --version)
-	if [ $version_pass == "1" ]
-	  	then 
-	  		printf "[WGDashboard] %s Found compatible version of Python. Will be using %s to install WGDashboard.\n" "$heavy_checkmark" "$($pythonExecutable --version)"
-			return;
-	elif python3.10 --version > /dev/null 2>&1
-		then
-	 		printf "[WGDashboard] %s Found Python 3.10. Will be using [python3.10] to install WGDashboard.\n" "$heavy_checkmark"
-	 		pythonExecutable="python3.10"
-	elif python3.11 --version > /dev/null 2>&1
-    	 then
-    	 	printf "[WGDashboard] %s Found Python 3.11. Will be using [python3.11] to install WGDashboard.\n" "$heavy_checkmark"
-    	 	pythonExecutable="python3.11"
-    elif python3.12 --version > /dev/null 2>&1
-    	 then
-    	 	printf "[WGDashboard] %s Found Python 3.12. Will be using [python3.12] to install WGDashboard.\n" "$heavy_checkmark"
-    	 	pythonExecutable="python3.12"
-	else
-		printf "[WGDashboard] %s Could not find a compatible version of Python. Current Python is %s.\n" "$heavy_crossmark" "$version"
-		printf "[WGDashboard] WGDashboard required Python 3.10, 3.11 or 3.12. Halting install now.\n"
-		kill $TOP_PID
-	fi
+  # If no compatible Python version is found, exit with error
+  printf "[WGDashboard] %s No compatible Python version found. Detected: %s\n" "$HEAVY_CROSSMARK" "$PYTHON_VERSION"
+  printf "[WGDashboard] WGDashboard requires Python 3.10, 3.11, or 3.12. Halting installation.\n"
+  kill "$TOP_PID"
 }
 
 _determinePypiMirror(){
