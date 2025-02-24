@@ -639,55 +639,73 @@ else
 		commandConfirmed="true"
 	fi
 
-	if [ "$1" = "start" ]; then
-		if check_wgd_status; then
-		printf "%s\n" "$dashes"
-		printf "[WGDashboard] WGDashboard is already running.\n"
-		printf "%s\n" "$dashes"
-		else
-			start_wgd
-		fi
-	elif [ "$1" = "stop" ]; then
-		if check_wgd_status; then
-			printf "%s\n" "$dashes"
-			stop_wgd
-			printf "[WGDashboard] WGDashboard is stopped.\n"
-			printf "%s\n" "$dashes"
-			else
-			printf "%s\n" "$dashes"
-			printf "[WGDashboard] WGDashboard is not running.\n"
-			printf "%s\n" "$dashes"
-		fi
-	elif [ "$1" = "update" ]; then
-		update_wgd
-	elif [ "$1" = "install" ]; then
-		clear
-		printf "=================================================================================\n"
-	  	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
-	  	printf "=================================================================================\n"
-		install_wgd
-		printf "%s\n" "$dashes"
-	elif [ "$1" = "restart" ]; then
-		if check_wgd_status; then
-		printf "%s\n" "$dashes"
-		stop_wgd
-		printf "| WGDashboard is stopped.                                  |\n"
-		sleep 4
-		start_wgd
-		else
-		start_wgd
-		fi
-	elif [ "$1" = "debug" ]; then
-		if check_wgd_status; then
-		printf "| WGDashboard is already running.                          |\n"
-		else
-			start_wgd_debug
-		fi
-	elif [ "$1" = "os" ]; then
-    		_determineOS
-    elif [ "$1" = "ping" ]; then
-        	_determinePypiMirror
-	else
-		help
-	fi
-fi
+# Command handling using `case`
+case "$1" in
+  start)
+    if check_wgd_status; then
+      printf "%s\n" "$DASHES"
+      printf "[WGDashboard] WGDashboard is already running.\n"
+      printf "%s\n" "$DASHES"
+    else
+      start_wgd
+    fi
+    ;;
+
+  stop)
+    printf "%s\n" "$DASHES"
+    if check_wgd_status; then
+      stop_wgd
+      printf "[WGDashboard] WGDashboard has been stopped.\n"
+    else
+      printf "[WGDashboard] WGDashboard is not running.\n"
+    fi
+    printf "%s\n" "$DASHES"
+    ;;
+
+  restart)
+    printf "%s\n" "$DASHES"
+    if check_wgd_status; then
+      stop_wgd
+      printf "[WGDashboard] WGDashboard has been stopped. Restarting now...\n"
+      sleep 3
+    fi
+    start_wgd
+    printf "[WGDashboard] WGDashboard restarted successfully!\n"
+    printf "%s\n" "$DASHES"
+    ;;
+
+  update)
+    update_wgd
+    ;;
+
+  install)
+    clear
+    printf "%s\n" "$EQUALS"
+    printf " +         <WGDashboard> by Donald Zou - https://github.com/donaldzou         +\n"
+    printf "%s\n" "$EQUALS"
+    install_wgd
+    printf "%s\n" "$DASHES"
+    ;;
+
+  debug)
+    if check_wgd_status; then
+      printf "[WGDashboard] WGDashboard is already running.\n"
+    else
+      start_wgd_debug
+    fi
+    ;;
+
+  os)
+    _determineOS
+    ;;
+
+  ping)
+    _determinePypiMirror
+    ;;
+
+  *)
+    printf "[WGDashboard] Unknown command: %s\n" "$1"
+    help
+    exit 1
+    ;;
+esac
