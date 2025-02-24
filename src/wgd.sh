@@ -341,66 +341,68 @@ _determinePypiMirror() {
   printf "[WGDashboard] %s Will download Python packages from %s\n" "$HEAVY_CHECKMARK" "$selected_url"
 }
 
-install_wgd(){
-    printf "[WGDashboard] Starting to install WGDashboard\n"
-    _determineOS
-    
-	if [ ! -d "log" ] 
-	then 
-			mkdir "log"
-			printf "[WGDashboard] %s Created ./log folder\n" "$heavy_checkmark"
-	else
-		printf "[WGDashboard] %s Found existing ./log folder\n" "$heavy_checkmark"
-	fi
-	
-	if [ ! -d "download" ]
-	then 
-		mkdir "download"
-		printf "[WGDashboard] %s Created ./download folder\n" "$heavy_checkmark"
-	else
-		printf "[WGDashboard] %s Found existing ./download folder\n" "$heavy_checkmark"
-	fi
-    
-    if [ ! -d "db" ] 
-	then 
-		mkdir "db"
-		printf "[WGDashboard] %s Created ./db folder\n" "$heavy_checkmark"
-	else
-		printf "[WGDashboard] %s Found existing ./db folder\n" "$heavy_checkmark"
-	fi
-    
-    if ! python3 --version > /dev/null 2>&1
-    then
-    	printf "[WGDashboard] Python is not installed, trying to install now\n"
-    	_installPython
+install_wgd() {
+  printf "[WGDashboard] Starting installation of WGDashboard...\n"
+
+  # Ensure OS is determined before proceeding
+  _determineOS
+
+  # Create required directories if they do not exist
+  for dir in log download db; do
+    if [[ ! -d "$dir" ]]; then
+      mkdir "$dir"
+      printf "[WGDashboard] %s Created ./%s folder\n" "$HEAVY_CHECKMARK" "$dir"
     else
-    	printf "[WGDashboard] %s Python is installed\n" "$heavy_checkmark"
+      printf "[WGDashboard] %s Found existing ./%s folder\n" "$HEAVY_CHECKMARK" "$dir"
     fi
-    
-    _determinePypiMirror
-    _checkPythonVersion
-    _installPythonVenv
-    _installPythonPip
-	_checkWireguard
-    sudo chmod -R 755 /etc/wireguard/
-    
-    _check_and_set_venv
-    printf "[WGDashboard] %s Upgrading Python Package Manage (PIP)\n" "$install"
-	{ date; python3 -m ensurepip --upgrade; printf "\n\n"; } >> ./log/install.txt
-    { date; python3 -m pip install --upgrade pip -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt
-    printf "[WGDashboard] %s Installing latest Python dependencies\n" "$install"
-	{ date; python3 -m pip install -r requirements.txt  -i "$selected_url"; printf "\n\n"; } >> ./log/install.txt #This all works on the default installation.
-    
-      
-	if [ ! -f "ssl-tls.ini" ]
-		then
-			printf "[SSL/TLS]\ncertificate_path = \nprivate_key_path = \n" >> ssl-tls.ini
-			printf "[WGDashboard] %s Created ssl-tls.ini\n" "$heavy_checkmark"
-	else
-			printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$heavy_checkmark"
-	fi
-    printf "[WGDashboard] %s WGDashboard installed successfully!\n" "$heavy_checkmark"
-    printf "[WGDashboard] Enter ./wgd.sh start to start the dashboard\n"
+  done
+
+  # Verify Python installation before proceeding
+  if ! command -v python3 &>/dev/null; then
+    printf "[WGDashboard] %s Python is not installed, attempting installation...\n" "$INSTALL"
+    _installPython
+  else
+    printf "[WGDashboard] %s Python is already installed\n" "$HEAVY_CHECKMARK"
+  fi
+
+  _determinePypiMirror
+  _checkPythonVersion
+  _installPythonVenv
+  _installPythonPip
+  _checkWireguard
+
+  # Ensure correct permissions for WireGuard directory
+  sudo chmod -R 755 /etc/wireguard/
+
+  # Activate virtual environment
+  _check_and_set_venv
+
+  # Upgrade PIP to the latest version
+  printf "[WGDashboard] %s Upgrading Python Package Manager (PIP)...\n" "$INSTALL"
+  python3 -m ensurepip --upgrade | tee -a ./log/install.txt
+  python3 -m pip install --upgrade pip -i "$selected_url" | tee -a ./log/install.txt
+
+  # Install required Python dependencies
+  printf "[WGDashboard] %s Installing latest Python dependencies...\n" "$INSTALL"
+  if ! python3 -m pip install -r requirements.txt -i "$selected_url" | tee -a ./log/install.txt; then
+    printf "[WGDashboard] %s Failed to install dependencies. Check ./log/install.txt for details.\n" "$HEAVY_CROSSMARK"
+    exit 1
+  fi
+
+  # Ensure SSL/TLS configuration file exists
+  if [[ ! -f "ssl-tls.ini" ]]; then
+    cat <<EOF > ssl-tls.ini
+[SSL/TLS]
+certificate_path =
+private_key_path =
+EOF
+    printf "[WGDashboard] %s Created ssl-tls.ini\n" "$HEAVY_CHECKMARK"
+  else
+    printf "[WGDashboard] %s Found existing ssl-tls.ini\n" "$HEAVY_CHECKMARK"
+  fi
+
+  printf "[WGDashboard] %s WGDashboard installed successfully!\n" "$HEAVY_CHECKMARK"
+  printf "[WGDashboard] Run './wgd.sh start' to start the dashboard.\n"
 }
 
 check_wgd_status() {
