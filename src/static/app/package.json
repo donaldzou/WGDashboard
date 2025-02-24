@@ -4,40 +4,40 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "buildcommitpush": "./build.sh",
-    "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && electron-builder --mac --win",
+    "build:commit:push": "./build.sh",
+    "build:electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && electron-builder --mac --win",
+    "dev": "vite",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vue/language-server": "^2.1.10",
-    "@vuepic/vue-datepicker": "^9.0.1",
-    "@vueuse/core": "^10.9.0",
-    "@vueuse/shared": "^10.9.0",
+    "@vuepic/vue-datepicker": "^11.0.1",
+    "@vueuse/core": "^12.7.0",
     "animate.css": "^4.1.1",
-    "bootstrap": "^5.3.2",
+    "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "cidr-tools": "^7.0.4",
-    "dayjs": "^1.11.12",
-    "electron-builder": "^24.13.3",
-    "fuse.js": "^7.0.0",
-    "i": "^0.3.7",
-    "is-cidr": "^5.0.3",
-    "npm": "^10.5.0",
-    "ol": "^10.2.1",
-    "pinia": "^2.1.7",
-    "qrcode": "^1.5.3",
-    "qrcodejs": "^1.0.0",
+    "cidr-tools": "^11.0.3",
+    "dayjs": "^1.11.13",
+    "fuse.js": "^7.1.0",
+    "is-cidr": "^5.1.1",
+    "ol": "^10.4.0",
+    "pinia": "^3.0.1",
+    "qrcode": "^1.5.4",
     "simple-code-editor": "^2.0.9",
     "socket.io-client": "^4.8.1",
-    "uuid": "^9.0.1",
-    "vue": "^3.4.29",
-    "vue-chartjs": "^5.3.0",
-    "vue-router": "^4.2.5"
+    "uuid": "^11.1.0",
+    "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.2",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
-    "vite": "^5.0.10"
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/language-server": "^2.2.4",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=10.5.0"
   }
 }
