@@ -59,20 +59,18 @@ EOF
 }
 
 # Ensure the Python virtual environment exists
-_check_and_set_venv(){
-    VIRTUAL_ENV="./venv"
-    if [ ! -d $VIRTUAL_ENV ]; then
-    	printf "[WGDashboard] %s Creating Python Virtual Environment under ./venv\n" "$install"
-        { $pythonExecutable -m venv $VIRTUAL_ENV; } >> ./log/install.txt
-    fi
-    
-    if ! $venv_python --version > /dev/null 2>&1
-    then
-    	printf "[WGDashboard] %s Python Virtual Environment under ./venv failed to create. Halting now.\n" "$heavy_crossmark"	
-    	kill $TOP_PID
-    fi
-    
-    . ${VIRTUAL_ENV}/bin/activate
+_check_and_set_venv() {
+  if [[ ! -d $VENV_DIR ]]; then
+    printf "[WGDashboard] %s Creating Python Virtual Environment at %s\n" "$INSTALL" "$VENV_DIR"
+    { $PYTHON_EXECUTABLE -m venv "$VENV_DIR"; } >> ./log/install.txt
+  fi
+
+  if ! "$VENV_PYTHON" --version &>/dev/null; then
+    printf "[WGDashboard] %s Failed to create Python Virtual Environment at %s. Halting.\n" "$HEAVY_CROSSMARK" "$VENV_DIR"
+    kill "$TOP_PID"
+  fi
+
+  source "$VENV_DIR/bin/activate"
 }
 
 _determineOS(){
