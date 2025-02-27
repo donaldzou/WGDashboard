@@ -308,5 +308,5 @@
 	"By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP\\.": "Při hromadném importu bude jméno každého peera vygenerované automaticky, a povolená IP adresa bude nastavena na další v pořadí",
 	"How many peers you want to add\\?": "Kolik peerů chcete přidat?",
 	"Adding\\.\\.\\.": "Přidávám...",
-	"Dashboard IP Address \\& Listen Port": ""
+	"Dashboard IP Address \\& Listen Port": "Dashboard IP adresa a otevřený port"
 }
