@@ -40,6 +40,11 @@
 		"lang_name_localized": "Русский"
 	},
 	{
+		"lang_id": "th",
+		"lang_name": "Thai",
+		"lang_name_localized": "ภาษาไทย"
+	},
+	{
 		"lang_id": "tr-tr",
 		"lang_name": "Turkish",
 		"lang_name_localized": "Türkçe"
@@ -60,18 +65,13 @@
 		"lang_name_localized": "中文（繁體）"
 	},
 	{
-    "lang_id": "sv-se",
-    "lang_name": "Swedish",
-    "lang_name_localized": "Svenska"
-  },
+    		"lang_id": "sv-se",
+    		"lang_name": "Swedish",
+    		"lang_name_localized": "Svenska"
+  	},
 	{
 		"lang_id": "pl",
 		"lang_name": "Polish",
 		"lang_name_localized": "Polski"
-	},
-	{
-		"lang_id": "th",
-		"lang_name": "ภาษาไทย",
-		"lang_name_localized": "Thai"
 	}
 ]
