@@ -1619,9 +1619,7 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             print(e)
             return False
-        if self.configuration.Status:
-            self.configuration.toggleConfiguration()
-        self.configuration.toggleConfiguration()
+        
         return True
     
 class AmneziaWGPeer(Peer):
@@ -2435,7 +2433,13 @@ def API_resetPeerData(configName):
     foundPeer, peer = wgc.searchPeer(id)
     if not foundPeer:
         return ResponseObject(False, "Configuration/Peer does not exist")
-    return ResponseObject(status=peer.resetDataUsage(type))
+    
+    resetStatus = peer.resetDataUsage(type)
+    if resetStatus:
+        wgc.restrictPeers([id])
+        wgc.allowAccessPeers([id])
+    
+    return ResponseObject(status=resetStatus)
 
 @app.post(f'{APP_PREFIX}/api/deletePeers/<configName>')
 def API_deletePeers(configName: str) -> ResponseObject:
