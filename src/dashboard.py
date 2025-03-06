@@ -1600,13 +1600,24 @@ PersistentKeepalive = {str(self.keepalive)}
         try:
             if type == "total":
                 sqlUpdate("UPDATE '%s' SET total_data = 0, cumu_data = 0, total_receive = 0, cumu_receive = 0, total_sent = 0, cumu_sent = 0  WHERE id = ?" % self.configuration.Name, (self.id, ))
+                self.total_data = 0
+                self.total_receive = 0
+                self.total_sent = 0
+                self.cumu_data = 0
+                self.cumu_sent = 0
+                self.cumu_receive = 0
             elif type == "receive":
                 sqlUpdate("UPDATE '%s' SET total_receive = 0, cumu_receive = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                self.cumu_receive = 0
+                self.total_receive = 0
             elif type == "sent":
                 sqlUpdate("UPDATE '%s' SET total_sent = 0, cumu_sent = 0 WHERE id = ?" % self.configuration.Name, (self.id, ))
+                self.cumu_sent = 0
+                self.total_sent = 0
             else:
                 return False
         except Exception as e:
+            print(e)
             return False
         return True
     
