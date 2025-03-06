@@ -1619,6 +1619,9 @@ PersistentKeepalive = {str(self.keepalive)}
         except Exception as e:
             print(e)
             return False
+        if self.configuration.Status:
+            self.configuration.toggleConfiguration()
+        self.configuration.toggleConfiguration()
         return True
     
 class AmneziaWGPeer(Peer):
