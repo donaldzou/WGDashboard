@@ -32,7 +32,6 @@ DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
     os.mkdir(DB_PATH)
 DASHBOARD_CONF = os.path.join(CONFIGURATION_PATH, 'wg-dashboard.ini')
-WG_CONF_PATH = None
 UPDATE = None
 app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
@@ -45,7 +44,7 @@ class CustomJsonEncoder(DefaultJSONProvider):
     def default(self, o):
         if callable(getattr(o, "toJson", None)):
             return o.toJson()
-        return super().default(self, o)
+        return super().default(self)
 app.json = CustomJsonEncoder(app)
 
 '''
@@ -319,6 +318,7 @@ class WireguardConfiguration:
         self.Name: str = ""
         self.PrivateKey: str = ""
         self.PublicKey: str = ""
+        
         self.ListenPort: str = ""
         self.Address: str = ""
         self.DNS: str = ""
