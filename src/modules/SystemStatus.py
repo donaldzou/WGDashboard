@@ -1,7 +1,4 @@
-from asyncio.subprocess import Process
-
 import psutil
-
 class SystemStatus:
     def __init__(self):
         self.CPU = CPU()
