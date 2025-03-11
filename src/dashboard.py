@@ -311,7 +311,7 @@ class WireguardConfiguration:
     def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False, wg: bool = True):
         
         
-        self.__parser: configparser.ConfigParser = configparser.ConfigParser(strict=False)
+        self.__parser: configparser.ConfigParser = configparser.RawConfigParser(strict=False)
         self.__parser.optionxform = str
         self.__configFileModifiedTime = None
         
@@ -361,10 +361,10 @@ class WireguardConfiguration:
                 "PrivateKey": self.PrivateKey,
                 "Address": self.Address,
                 "ListenPort": self.ListenPort,
-                "PreUp": self.PreUp,
-                "PreDown": self.PreDown,
-                "PostUp": self.PostUp,
-                "PostDown": self.PostDown,
+                "PreUp": f"{self.PreUp}",
+                "PreDown": f"{self.PreDown}",
+                "PostUp": f"{self.PostUp}",
+                "PostDown": f"{self.PostDown}",
                 "SaveConfig": "true"
             }
             

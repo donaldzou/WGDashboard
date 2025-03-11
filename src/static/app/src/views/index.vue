@@ -46,7 +46,6 @@ export default {
 	main{
 		height: 100vh;
 	}
-	
 	@supports (height: 100dvh) {
 		@media screen and (max-width: 768px) {
 			main{
@@ -54,6 +53,4 @@ export default {
 			}
 		}
 	}
-	
-	
 </style>
