@@ -59,8 +59,6 @@ def ResponseObject(status=True, message=None, data=None) -> Flask.response_class
     response.content_type = "application/json"
     return response       
 
-
-
 """
 Peer Jobs
 """
@@ -1021,7 +1019,7 @@ class WireguardConfiguration:
             return False
         return True
     
-    def downloadBackup(self, backupFileName: str) -> tuple[bool, str]:
+    def downloadBackup(self, backupFileName: str) -> tuple[bool, str] | tuple[bool, None]:
         backup = list(filter(lambda x : x['filename'] == backupFileName, self.getBackups()))
         if len(backup) == 0:
             return False, None
@@ -1819,7 +1817,6 @@ class DashboardConfig:
         self.APIAccessed = False
         self.SetConfig("Server", "version", DASHBOARD_VERSION)
     
-    
     def __createAPIKeyTable(self):
         existingTable = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
         if len(existingTable) == 0:
@@ -1948,7 +1945,7 @@ class DashboardConfig:
                 if key not in self.hiddenAttribute:
                     the_dict[section][key] = self.GetConfig(section, key)[1]
         return the_dict
-            
+
 
 """
 Database Connection Functions

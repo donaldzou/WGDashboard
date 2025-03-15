@@ -44,3 +44,16 @@
 - [🪜 Usage﻿](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
 - [📖 API Documentation﻿](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
 - [And much more...](https://donaldzou.github.io/WGDashboard-Documentation/)
+
+# Screenshots
+
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/sign-in.png" alt=""/>
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/cross-server.png" alt=""/>
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/index.png" alt=""/>
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/new-configuration.png" alt="" />
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/settings.png" alt="" />
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/light-dark.png" alt="" />
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/configuration.png" alt=""/>
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/add-peers.png" alt="" />
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/ping.png" alt=""/>
+<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/traceroute.png" alt=""/>
