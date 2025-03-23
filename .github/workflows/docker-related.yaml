@@ -51,3 +51,4 @@ jobs:
           image: ${{ env.DOCKER_IMAGE }}:latest
           summary: true
           only-severities: critical,high,medium,low,unspecified
+          github-token: ${{ secrets.GH_TOKEN }}
