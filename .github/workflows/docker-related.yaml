@@ -10,7 +10,7 @@ on:
         default: 'true'
 
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/wgdashboard
+  DOCKER_IMAGE: donaldzou/wgdashboard
 
 jobs:
   docker_build_analyze:
