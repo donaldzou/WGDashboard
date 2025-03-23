@@ -1,4 +1,4 @@
-name: Docker-Build
+name: Docker Scan and Build
 
 on:
   push:
@@ -10,10 +10,10 @@ on:
         default: 'true'
 
 env:
-  DOCKER_IMAGE: donaldzou/wgdashboard
+  DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/wgdashboard
 
 jobs:
-  docker_build:
+  docker_build_analyze:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -42,3 +42,12 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
+
+      - name: Docker Scout
+        id: docker-scout
+        uses: docker/scout-action@v1
+        with:
+          command: quickview,cves
+          image: image://${{ env.DOCKER_IMAGE }}:latest
+          summary: true
+          only-severities: critical,high,medium,low,unspecified
