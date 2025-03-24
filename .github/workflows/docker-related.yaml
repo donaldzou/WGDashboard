@@ -53,6 +53,7 @@ jobs:
         with:
           command: cves
           image: ${{ env.DOCKER_IMAGE }}:latest
-          summary: true
+          summary: false
+          write-comment: false
           only-severities: critical,high,medium,low,unspecified
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
