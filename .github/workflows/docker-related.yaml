@@ -47,7 +47,7 @@ jobs:
         id: docker-scout
         uses: docker/scout-action@v1
         with:
-          command: quickview,cves
+          command: cves
           image: ${{ env.DOCKER_IMAGE }}:latest
           summary: true
           only-severities: critical,high,medium,low,unspecified
