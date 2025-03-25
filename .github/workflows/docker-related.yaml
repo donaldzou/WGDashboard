@@ -53,7 +53,7 @@ jobs:
         with:
           command: cves
           dockerhub-user: ${{ secrets.DOCKER_HUB_USERNAME }}
-          dockerhub-pasword: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          dockerhub-password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           image: ${{ env.DOCKER_IMAGE }}:latest
           summary: false
           write-comment: false
