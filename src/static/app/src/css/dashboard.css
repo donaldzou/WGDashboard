@@ -113,8 +113,8 @@
 }
 
 .btn-brand:hover, .dashboardLogo:hover{
-    --brandColor1: #009dff;
-    --brandColor2: #ff875b;
+    --brandColor1: rgba(0, 157, 255, 1);
+    --brandColor2: rgba(255, 135, 91, 1);
     --distance2: 30%;
 }
 

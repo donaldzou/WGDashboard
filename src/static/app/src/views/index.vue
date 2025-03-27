@@ -49,7 +49,7 @@ export default {
 	@supports (height: 100dvh) {
 		@media screen and (max-width: 768px) {
 			main{
-				height: calc(100dvh - 50px);
+				height: calc(100dvh - 58px);
 			}
 		}
 	}

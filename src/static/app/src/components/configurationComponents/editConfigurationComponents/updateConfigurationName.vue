@@ -28,7 +28,7 @@ const rename = async () => {
 		loading.value = true
 		clearInterval(dashboardConfigurationStore.Peers.RefreshInterval)
 		await fetchPost("/api/renameWireguardConfiguration", {
-			Name: props.configurationName,
+			ConfigurationName: props.configurationName,
 			NewConfigurationName: newConfigurationName.data
 		}, async (res) => {
 			if (res.status){

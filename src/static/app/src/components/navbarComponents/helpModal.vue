@@ -1,7 +1,6 @@
 <script setup>
 import LocaleText from "@/components/text/localeText.vue";
 import {onMounted, ref} from "vue";
-import {fetchGet} from "@/utilities/fetch.js";
 
 const discordLoading = ref(true)
 const discord = ref(undefined)

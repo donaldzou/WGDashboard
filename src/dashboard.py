@@ -2218,27 +2218,25 @@ def API_UpdateWireguardConfigurationRawFile():
 @app.post(f'{APP_PREFIX}/api/deleteWireguardConfiguration')
 def API_deleteWireguardConfiguration():
     data = request.get_json()
-    if "Name" not in data.keys() or data.get("Name") is None or data.get("Name") not in WireguardConfigurations.keys():
+    if "ConfigurationName" not in data.keys() or data.get("ConfigurationName") is None or data.get("ConfigurationName") not in WireguardConfigurations.keys():
         return ResponseObject(False, "Please provide the configuration name you want to delete")
-    
-    status = WireguardConfigurations[data.get("Name")].deleteConfiguration()
-    
+    status = WireguardConfigurations[data.get("ConfigurationName")].deleteConfiguration()
     if status:
-        WireguardConfigurations.pop(data.get("Name"))
+        WireguardConfigurations.pop(data.get("ConfigurationName"))
     return ResponseObject(status)
 
 @app.post(f'{APP_PREFIX}/api/renameWireguardConfiguration')
 def API_renameWireguardConfiguration():
     data = request.get_json()
-    keys = ["Name", "NewConfigurationName"]
+    keys = ["ConfigurationName", "NewConfigurationName"]
     for k in keys:
         if (k not in data.keys() or data.get(k) is None or len(data.get(k)) == 0 or 
-                (k == "Name" and data.get(k) not in WireguardConfigurations.keys())): 
+                (k == "ConfigurationName" and data.get(k) not in WireguardConfigurations.keys())): 
             return ResponseObject(False, "Please provide the configuration name you want to rename")
         
-    status, message = WireguardConfigurations[data.get("Name")].renameConfiguration(data.get("NewConfigurationName"))
+    status, message = WireguardConfigurations[data.get("ConfigurationName")].renameConfiguration(data.get("NewConfigurationName"))
     if status:
-        WireguardConfigurations.pop(data.get("Name"))
+        WireguardConfigurations.pop(data.get("ConfigurationName"))
         WireguardConfigurations[data.get("NewConfigurationName")] = WireguardConfiguration(data.get("NewConfigurationName"))
     return ResponseObject(status, message)
 

@@ -308,5 +308,7 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\)": "删除了$1个端点",
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "成功删除了$1个端点，失败删除了$2个端点",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "限制访问了$1个端点",
-	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "成功限制访问了$1个端点，失败限制访问了$2个端点"
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "成功限制访问了$1个端点，失败限制访问了$2个端点",
+	"Hi! How can I help you today\\?": "您好！有什么可以帮到您的吗？",
+	"What do you want to ask\\?": "您想问些什么？"
 }

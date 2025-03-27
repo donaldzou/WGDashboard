@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "marked": "^15.0.7",
+    "openai": "^4.89.0"
+  }
+}

@@ -5,10 +5,11 @@ import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import {GetLocale} from "@/utilities/locale.js";
 import HelpModal from "@/components/navbarComponents/helpModal.vue";
+import AgentModal from "@/components/navbarComponents/agentModal.vue";
 
 export default {
 	name: "navbar",
-	components: {HelpModal, LocaleText},
+	components: {HelpModal, LocaleText, AgentModal},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -20,6 +21,7 @@ export default {
 			updateMessage: "Checking for update...",
 			updateUrl: "",
 			openHelpModal: false,
+			openAgentModal: true,
 		}
 	},
 	computed: {
@@ -78,7 +80,7 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
+						<a class="nav-link rounded-3" role="button" @click="openAgentModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>
 						</a>
@@ -146,19 +148,23 @@ export default {
 		<Transition name="zoom">
 			<HelpModal v-if="this.openHelpModal" @close="openHelpModal = false;"></HelpModal>
 		</Transition>
+		<Transition name="slideIn">
+			<AgentModal v-if="this.openAgentModal" @close="openAgentModal = false"></AgentModal>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 @media screen and (max-width: 768px) {
 	.navbar-container{
-		position: absolute;
+		position: absolute !important;
 		z-index: 1000;
 		animation-duration: 0.4s;
 		animation-fill-mode: both;
 		display: none;
 		animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
 	}
+	
 	.navbar-container.active{
 		animation-direction: normal;
 		display: block !important;
@@ -168,14 +174,14 @@ export default {
 
 .navbar-container{
 	height: 100vh;
-	
+	position: relative;
 }
 
 
 @supports (height: 100dvh) {
 	@media screen and (max-width: 768px){
 		.navbar-container{
-			height: calc(100dvh - 50px);
+			height: calc(100dvh - 58px);
 		}	
 	}
 	
@@ -194,5 +200,17 @@ export default {
 		transform: translateY(0px);
 		filter: blur(0px);
 	}
+}
+
+.slideIn-enter-active,
+.slideIn-leave-active{
+	transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.slideIn-enter-from,
+.slideIn-leave-to {
+	transform: translateX(30px);
+	filter: blur(3px);
+	opacity: 0;
 }
 </style>

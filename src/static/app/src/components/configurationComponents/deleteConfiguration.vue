@@ -16,7 +16,7 @@ const deleteConfiguration = () => {
 	clearInterval(store.Peers.RefreshInterval)
 	deleting.value = true;
 	fetchPost("/api/deleteWireguardConfiguration", {
-		Name: configurationName
+		ConfigurationName: configurationName
 	}, (res) => {
 		if (res.status){
 			router.push('/')
@@ -30,7 +30,6 @@ const deleteConfiguration = () => {
 
 const loading = ref(true)
 const backups = ref([])
-let timeout = undefined;
 const getBackup = () => {
 	loading.value = true;
 	fetchGet("/api/getWireguardConfigurationBackup", {

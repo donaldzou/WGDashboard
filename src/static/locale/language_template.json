@@ -308,5 +308,7 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\)": "",
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "",
-	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": ""
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "",
+	"Hi! How can I help you today\\?": "",
+	"What do you want to ask\\?": ""
 }
