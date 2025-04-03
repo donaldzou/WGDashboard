@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import {fetchGet, fetchPost} from "@/utilities/fetch.js";
+import {fetchGet} from "@/utilities/fetch.js";
 import {v4} from "uuid";
 import {GetLocale} from "@/utilities/locale.js";
 
@@ -20,7 +20,10 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		ActiveServerConfiguration: undefined,
 		IsElectronApp: false,
 		ShowNavBar: false,
-		Locale: undefined
+		Locale: undefined,
+		HelpAgent: {
+			Enable: false
+		}
 	}),
 	actions: {
 		initCrossServerConfiguration(){
@@ -92,5 +95,10 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			}
 			return this.Locale[match[0]]
 		}
+	},
+	persist: {
+		pick: [
+			'HelpAgent.Enable'
+		]
 	}
 });

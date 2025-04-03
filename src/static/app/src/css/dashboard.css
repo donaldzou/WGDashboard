@@ -1309,3 +1309,18 @@ samp{
 .peerList-leave-active {
     position: absolute;
 }
+
+.agent-message-move, /* apply transition to moving elements */
+.agent-message-enter-active,
+.agent-message-leave-active {
+    transition: all 0.5s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+.agent-message-enter-from,
+.agent-message-leave-to {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(30px);
+}
+.agent-message-leave-active {
+    position: absolute;
+}

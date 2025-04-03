@@ -21,7 +21,7 @@ export default {
 			updateMessage: "Checking for update...",
 			updateUrl: "",
 			openHelpModal: false,
-			openAgentModal: true,
+			openAgentModal: false,
 		}
 	},
 	computed: {
@@ -209,7 +209,7 @@ export default {
 
 .slideIn-enter-from,
 .slideIn-leave-to {
-	transform: translateX(30px);
+	transform: translateY(30px);
 	filter: blur(3px);
 	opacity: 0;
 }
