@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
   <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
-  <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23E7E7E7&title=Visitor&edge_flat=false"/></a>
+  <a href="https://hits.seeyoufarm.com"><img alt="Static Badge" src="https://img.shields.io/badge/231_%2F_329728-green?style=flat&logo=github&label=Visitors"></a>
   <img src="https://img.shields.io/docker/pulls/donaldzou/wgdashboard?logo=docker&label=Docker%20Image%20Pulls&labelColor=ffffff">
 </p>
 <p align="center">Monitoring WireGuard is not convenient, in most case, you'll need to login to your server and type <code>wg show</code>. That's why this project is being created, to view and manage all WireGuard configurations in a easy way.</p>
