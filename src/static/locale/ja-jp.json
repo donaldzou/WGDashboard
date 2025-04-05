@@ -306,7 +306,7 @@
 	"Failed to save configuration through WireGuard": "WireGuardによる設定の保存に失敗しました。",
 	"Allow access successfully": "アクセス許可に成功しました",
 	"Deleted ([0-9]{1,}) peer\\(s\\)": "$1 個のピアを削除しました ",
-	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "$1 個のピアの削除に成功し、 $1 個のピアの削除に失敗しました",
+	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "$1 個のピアの削除に成功し、 $2 個のピアの削除に失敗しました",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "$1 個のピアを制限しました",
-	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "$1 個のピアの制限に成功し、 $1 個のピアの制限に失敗しました"
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "$1 個のピアの制限に成功し、 $2 個のピアの制限に失敗しました"
 }
