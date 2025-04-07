@@ -28,7 +28,7 @@
 </p>
 <p align="center"><b>This project is supported by</b></p>
 <p align="center">
-  <a href="https://www.digitalocean.com/">
+  <a href="https://m.do.co/c/a84cb9aac585">
     <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
   </a>
 </p>
