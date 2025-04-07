@@ -41,26 +41,26 @@ const store = DashboardConfigurationStore()
 					</a>
 				</div>
 			</div>
-			<div class="d-flex flex-column p-3 gap-2">
-				<div class="d-flex w-100">
-					<h5 class="mb-0">
-						<LocaleText t="WGDashboard Help Bot"></LocaleText>
-					</h5>
-					<div class="form-check form-switch ms-auto mb-0">
-						<input class="form-check-input"
-						       v-model="store.HelpAgent.Enable"
-						       type="checkbox" role="switch" id="enableHelpAgent">
-						<label class="form-check-label fw-bold" for="enableHelpAgent">
-							<LocaleText :t="store.HelpAgent.Enable ? 'Enabled':'Disabled'"></LocaleText>
-						</label>
-					</div>
-				</div>
-				<small class="text-muted" v-if="!store.HelpAgent.Enable">
-					By using this service, you're agreed to send your messages to a Large Language Model (LLM) hosted on DigitalOcean. Your messages will not store on the server in any type of form, you can verify it on <a href="https://github.com/donaldzou/WGDashboard-Bot-Middleware" target="_blank">here</a>. For more information, please contact me through GitHub or email.
-				</small>
-			</div>
+<!--			<div class="d-flex flex-column p-3 gap-2">-->
+<!--				<div class="d-flex w-100">-->
+<!--					<h5 class="mb-0">-->
+<!--						<LocaleText t="WGDashboard Help Bot"></LocaleText>-->
+<!--					</h5>-->
+<!--					<div class="form-check form-switch ms-auto mb-0">-->
+<!--						<input class="form-check-input"-->
+<!--						       v-model="store.HelpAgent.Enable"-->
+<!--						       type="checkbox" role="switch" id="enableHelpAgent">-->
+<!--						<label class="form-check-label fw-bold" for="enableHelpAgent">-->
+<!--							<LocaleText :t="store.HelpAgent.Enable ? 'Enabled':'Disabled'"></LocaleText>-->
+<!--						</label>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--				<small class="text-muted" v-if="!store.HelpAgent.Enable">-->
+<!--					By using this service, you're agreed to send your messages to a Large Language Model (LLM) hosted on DigitalOcean. Your messages will not store on the server in any type of form, you can verify it on <a href="https://github.com/donaldzou/WGDashboard-Bot-Middleware" target="_blank">here</a>. For more information, please contact me through GitHub or email.-->
+<!--				</small>-->
+<!--			</div>-->
 		</div>
-		<AgentContainer key="agentContainer" v-if="store.HelpAgent.Enable"></AgentContainer>
+<!--		<AgentContainer key="agentContainer" v-if="store.HelpAgent.Enable"></AgentContainer>-->
 	</TransitionGroup>
 </div>
 </template>

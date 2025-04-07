@@ -15,8 +15,8 @@ const loading = ref(false);
 const deleteBackup = () => {
 	loading.value = true;
 	fetchPost("/api/deleteWireguardConfigurationBackup", {
-		configurationName: route.params.id,
-		backupFileName: props.b.filename
+		ConfigurationName: route.params.id,
+		BackupFileName: props.b.filename
 	}, (res) => {
 		loading.value = false;
 		if (res.status){
@@ -31,8 +31,8 @@ const deleteBackup = () => {
 const restoreBackup = () => {
 	loading.value = true;
 	fetchPost("/api/restoreWireguardConfigurationBackup", {
-		configurationName: route.params.id,
-		backupFileName: props.b.filename
+		ConfigurationName: route.params.id,
+		BackupFileName: props.b.filename
 	}, (res) => {
 		loading.value = false;
 		restoreConfirmation.value = false;

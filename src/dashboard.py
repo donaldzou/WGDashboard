@@ -2304,14 +2304,14 @@ def API_createWireguardConfigurationBackup():
 @app.post(f'{APP_PREFIX}/api/deleteWireguardConfigurationBackup')
 def API_deleteWireguardConfigurationBackup():
     data = request.get_json()
-    if ("configurationName" not in data.keys() or 
-            "backupFileName" not in data.keys() or
-            len(data['configurationName']) == 0 or 
-            len(data['backupFileName']) == 0):
+    if ("ConfigurationName" not in data.keys() or 
+            "BackupFileName" not in data.keys() or
+            len(data['ConfigurationName']) == 0 or 
+            len(data['BackupFileName']) == 0):
         return ResponseObject(False, 
         "Please provide configurationName and backupFileName in body")
-    configurationName = data['configurationName']
-    backupFileName = data['backupFileName']
+    configurationName = data['ConfigurationName']
+    backupFileName = data['BackupFileName']
     if configurationName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
     
@@ -2329,14 +2329,14 @@ def API_downloadWireguardConfigurationBackup():
 @app.post(f'{APP_PREFIX}/api/restoreWireguardConfigurationBackup')
 def API_restoreWireguardConfigurationBackup():
     data = request.get_json()
-    if ("configurationName" not in data.keys() or
-            "backupFileName" not in data.keys() or
-            len(data['configurationName']) == 0 or
-            len(data['backupFileName']) == 0):
+    if ("ConfigurationName" not in data.keys() or
+            "BackupFileName" not in data.keys() or
+            len(data['ConfigurationName']) == 0 or
+            len(data['BackupFileName']) == 0):
         return ResponseObject(False,
                               "Please provide configurationName and backupFileName in body")
-    configurationName = data['configurationName']
-    backupFileName = data['backupFileName']
+    configurationName = data['ConfigurationName']
+    backupFileName = data['BackupFileName']
     if configurationName not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist")
 
