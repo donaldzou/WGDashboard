@@ -1,5 +1,10 @@
 [
 	{
+		"lang_id": "fa",
+		"lang_name": "Farsi",
+		"lang_name_localized": "فارسی"
+	},
+	{
 		"lang_id": "ar-sa",
 		"lang_name": "Arabic",
 		"lang_name_localized": "العربية"
