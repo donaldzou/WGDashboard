@@ -1,0 +1,312 @@
+{
+	"Welcome to": "خوش آمدید",
+	"Username": "نام کاربری",
+	"Password": "رمز عبور",
+	"OTP from your authenticator": "رمز یک‌بارمصرف از برنامه احراز هویت شما",
+	"Sign In": "ورود",
+	"Signing In\\.\\.\\.": "ورود به سیستم...",
+	"Access Remote Server": "دسترسی به سرور از راه دور",
+	"Server": "سرور",
+	"Click": "کلیک",
+	"Pinging...": "در حال پینگ کردن...",
+	"to add your server": "برای افزودن سرور شما",
+	"Server List": "لیست سرور ها",
+	"Sorry, your username or password is incorrect.": "متأسفیم، نام کاربری یا رمز عبور شما نادرست است.",
+	"Home": "خانه",
+	"Settings": "تنظیمات",
+	"Tools": "ابزار ها",
+	"Sign Out": "خروج",
+	"Checking for update...": "در حال بررسی به‌روزرسانی...",
+	"You're on the latest version": "شما از آخرین نسخه استفاده می‌کنید",
+	"WireGuard Configurations": "پیکربندی‌های وایرگارد",
+	"You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard.": "شما هنوز هیچ پیکربندی وایرگاردی ندارید. لطفاً پوشه پیکربندی را بررسی کنید یا آن را در تنظیمات تغییر دهید. به‌طور پیش‌فرض، پوشه /etc/wireguard است.",
+	"Configuration": "پیکربندی",
+	"Configurations": "تنظیمات",
+	"Peers Default Settings": "تنظیمات پیش فرض Peers",
+	"Dashboard Theme": "تم داشبورد",
+	"Light": "روشن",
+	"Dark": "تاریک",
+	"This will be changed globally, and will be apply to all peer's QR code and configuration file.": "این تغییر به‌صورت سراسری اعمال خواهد شد و برای کد QR و فایل پیکربندی همه Peer`s اعمال می‌شود.",
+	"WireGuard Configurations Settings": "تنظیمات پیکربندی‌های وایرگارد",
+	"Configurations Directory": "پوشه پیکربندی‌ها",
+	"Remember to remove / at the end of your path. e.g /etc/wireguard": "به یاد داشته باشید که / را در انتهای مسیر خود حذف کنید. به عنوان مثال: /etc/wireguard",
+	"WGDashboard Account Settings": "تنظیمات حساب WGDashboard",
+	"رمز عبور فعلی": "",
+	"رمز عبور جدید": "",
+	"تکرار رمز عبور جدید": "",
+	"بروزرسانی رمز عبور": "",
+	"Multi-Factor Authentication \\(MFA\\)": "احراز هویت چند عاملی (MFA)",
+	"Reset": "بازنشانی",
+	"Setup": "نصب",
+	"API Keys": "API Keys",
+	"API Key": "API Key",
+	"Key": "کلید",
+	"Enabled": "فعال شد",
+	"Disabled": "غیرفعال شد",
+	"No WGDashboard API Key": "کلید API WGDashboard وجود ندارد",
+	"Expire At": "انقضا در",
+	"Are you sure to delete this API key\\?": "آیا مطمئن هستید که این کلید API را حذف می کنید؟",
+	"Create API Key": "ایجاد کلید API",
+	"When should this API Key expire\\?": "چه زمانی باید این کلید API منقضی شود؟",
+	"Never Expire": "نامحدود",
+	"Don't think that's a good idea": "پیشنهاد نمی شود",
+	"Creating\\.\\.\\.": "در ساختن...",
+	"Create": "ایجاد",
+	"Status": "وضعیت",
+	"On": "روشن",
+	"Off": "خاموش",
+	"Turning On\\.\\.\\.": "در حال روشن شدن...",
+	"Turning Off\\.\\.\\.": "در حال خاموش شدن ...",
+	"Address": "آدرس",
+	"Listen Port": "پورت گوش‌دادن",
+	"Public Key": "کلید عمومی",
+	"Connected Peers": "Peer`s متصل",
+	"Total Usage": "مصرف کل",
+	"Total Received": "مجموع دریافت شده",
+	"Total Sent": "مجموع ارسال شده",
+	"Peers Data Usage": "داده های مصرفی Peer`s",
+	"Real Time Received Data Usage": "داده های مصرفی دریافت شده در زمان واقعی",
+	"Real Time Sent Data Usage": "داده های مصرفی ارسال شده در زمان واقعی",
+	"Peer": "Peer",
+	"Peers": "Peers",
+	"Peer Settings": "تنظیمات Peer",
+	"Download All": "دانلود همه",
+	"Search Peers\\.\\.\\.": "جستجو Peer",
+	"Display": "نمایش",
+	"Sort By": "مرتب سازی براساس",
+	"Refresh Interval": "فاصله بازخوانی",
+	"Name": "نام",
+	"Allowed IPs": "IP های مجاز",
+	"Restricted": "محدود شده",
+	"(.*) Seconds": "1$  ثانیه",
+	"(.*) Minutes": "$1 دقیقه",
+	"Configuration Settings": "تنظیمات پیکربندی",
+	"Peer Jobs": "جاب peer",
+	"Active Jobs": "جاب های فعال",
+	"All Active Jobs": "همه جاب های فعال",
+	"Logs": "گزارش ها",
+	"Private Key": "کلید خصوصی",
+	"\\(Required for QR Code and Download\\)": "(برای کد QR و دانلود لازم است)",
+	"\\(Required\\)": "(الزامی)",
+	"Endpoint Allowed IPs": "IP های مجاز نقطه پایانی",
+	"DNS": "DNS",
+	"Optional Settings": "تنظیمات اختیاری",
+	"Pre-Shared Key": "کلید از قبل به اشتراک گذاشته شده",
+	"MTU": "MTU",
+	"Persistent Keepalive": " نگه‌داری پایدار اتصال",
+	"Reset Data Usage": "بازنشانی مصرف داده",
+	"Total": "مجموع",
+	"Sent": "ارسال",
+	"Received": "دریافت",
+	"Revert": "برگرداندن تغییرات",
+	"Save Peer": "ذخیره peer",
+	"QR Code": "QR Code",
+	"Schedule Jobs": "برنامه ریزی جاب ها",
+	"Job": "جاب",
+	"Job ID": "شناسه جاب",
+	"Unsaved Job": "جاب ذخیره نشده",
+	"This peer does not have any job yet\\.": "این peer هیچ جاب فعالی ندارد",
+	"if": "اگر",
+	"is": "هست",
+	"then": "سپس",
+	"larger than": "بزرگتر از",
+	"Date": "تاریخ",
+	"Restrict Peer": "محدود کردن peer",
+	"Delete Peer": "حذف peer",
+	"Edit": "ویرایش",
+	"Delete": "حذف",
+	"Deleting...": "درحال حذف ...",
+	"Cancel": "لغو",
+	"Save": "ذخیره",
+	"No active job at the moment\\.": " در حال حاضر هیچ جابی فعال نیست .",
+	"Jobs Logs": "گزارش جاب ها",
+	"Updated at": "بروزرسانی شده در",
+	"Refresh": "تازه کردن",
+	"Filter": "فیلتر",
+	"Success": "موفق",
+	"Failed": "ناموفق",
+	"Log ID": "شناسه گزارش",
+	"Message": "پیام",
+	"Share Peer": "به اشتراک گذاشتن peer",
+	"Currently the peer is not sharing": "این peer را نمی توان به اشتراک گذاشت",
+	"Sharing\\.\\.\\.": "اشتراک گذاری...",
+	"Start Sharing": "شروع اشتراک گذاری",
+	"Stop Sharing\\.\\.\\.": "توقف اشتراک گذاری...",
+	"Stop Sharing": "توقف اشتراک گذاری",
+	"Access Restricted": "دسترسی محدود شده",
+	"Restrict Access": "محدود کردن دسترسی",
+	"Restricting\\.\\.\\.": "محدود کردن...",
+	"Allow Access": "اجازه دسترسی",
+	"Allowing Access\\.\\.\\.": "اجازه دسترسی...",
+	"Download \\& QR Code is not available due to no private key set for this peer": "دانلود و کد QR در دسترس نیست چون کلید خصوصی برای این  peer تنظیم نشده است.",
+	"Add Peers": "اضافه کردن peers",
+	"Bulk Add": "افزودن انبوه",
+	"By adding peers by bulk, each peer's name will be auto generated, and Allowed IP will be assign to the next available IP\\.": "با افزودن گروهی Peers، نام هر peer به‌صورت خودکار تولید می‌شود و IP مجاز (Allowed IP) به اولین IP آزاد بعدی اختصاص داده خواهد شد.",
+	"How many peers you want to add\\?": "چند peer می خواهید اضافه کنید؟",
+	"You can add up to (.*) peers": "شما می‌توانید تا حداکثر $1 Peer اضافه کنید.",
+	"Use your own Private and Public Key": "از کلید خصوصی و عمومی خود استفاده کنید",
+	"Enter IP Address/CIDR": "نشانی IP یا محدوده CIDR را وارد کنید.",
+	"IP Address/CIDR": "IP Address/CIDR",
+	"or": "یا",
+	"Pick Available IP": "انتخاب IP موجود",
+	"No available IP containing": "هیچ IP قابل استفاده‌ای شامل این مقدار یافت نشد.",
+	"Add": "اضافه کردن",
+	"Adding\\.\\.\\.": "درحال اضافه کردن...",
+	"Failed to check available update": "عدم موفقیت در بررسی آپدیت‌های در دسترس.",
+	"Nice to meet you!": "!از آشنایی با شما خوشوقتم 😊",
+	"Please fill in the following fields to finish setup": "لطفاً فیلدهای زیر را برای تکمیل تنظیمات پر کنید.",
+	"Create an account": "ایجاد حساب کاربری",
+	"Enter an username you like": "یک نام کاربری دلخواه وارد کنید",
+	"Enter a password": "رمز عبور وارد کنید",
+	"\\(At least 8 characters and make sure is strong enough!\\)": "(حداقل ۸ کاراکتر و مطمئن شوید که رمز عبور به‌اندازه کافی قوی باشد!)",
+	"Confirm password": "تأیید رمز عبور",
+	"Next": "بعدی",
+	"Saving\\.\\.\\.": "درحال ذخیره کردن...",
+	"1\\. Please scan the following QR Code to generate TOTP with your choice of authenticator": "۱. لطفاً کد QR زیر را اسکن کنید تا کد یک‌بار مصرف زمان‌دار (TOTP) را با برنامه احراز هویت دلخواه خود تولید کنید.",
+	"Or you can click the link below:": "یا می‌توانید روی لینک زیر کلیک کنید:",
+	"2\\. Enter the TOTP generated by your authenticator to verify": "۲. کد یک‌بار مصرف زمان‌دار (TOTP) تولیدشده توسط برنامه احراز هویت خود را وارد کنید تا تأیید انجام شود.",
+	"TOTP verified!": "کد TOTP با موفقیت تأیید شد!",
+	"I don't need MFA": "من به احراز هویت چندمرحله‌ای (MFA) نیاز ندارم.",
+	"Complete": "تکمیل شد",
+	"(v[0-9.]{1,}) is now available for update!": "نسخه$1 اکنون برای به‌روزرسانی در دسترس است!",
+	"Current Version:": "ورژن فعلی :",
+	"Oh no\\.\\.\\. This link is either expired or invalid\\.": "اوه نه... این لینک یا منقضی شده یا نامعتبر است.",
+	"Scan QR Code with the WireGuard App to add peer": "کد QR را با اپلیکیشن WireGuard اسکن کنید تا Peer اضافه شود.",
+	"or click the button below to download the ": "یا روی دکمه زیر کلیک کنید تا فایل را دانلود کنید",
+	" file": " فایل",
+	"FROM ": "از ",
+	"(.*) is on": "$1 فعال است",
+	"(.*) is off": "$1 غیرفعال است",
+	"Allowed IPs is invalid": "مقدار Allowed IPs نامعتبر است",
+	"Peer created successfully": "peer با موفقیت ساخته شد",
+	"Please fill in all required box": "لطفاً تمام فیلدهای الزامی را پر کنید.",
+	"Please specify amount of peers you want to add": "لطفاً تعداد  Peers که می‌خواهید اضافه کنید را مشخص کنید.",
+	"No more available IP can assign": "IP آزادی برای اختصاص دادن باقی نمانده است.",
+	"The maximum number of peers can add is (.*)": "حداکثر تعداد peer که می‌توان اضافه کرد عبارت است از: $1",
+	"Generating key pairs by bulk failed": "تولید گروهی کلیدهای جفتی (Key Pairs) با شکست مواجه شد.",
+	"Failed to add peers in bulk": "افزودن گروهی Peers با شکست مواجه شد.",
+	"This peer already exist": "این  Peer از قبل وجود دارد.",
+	"This IP is not available: (.*)": " IP $1 در دسترس نیست:",
+	"Configuration does not exist": "پیکربندی  وجود ندارد.",
+	"Peer does not exist": "peer وجود ندارد",
+	"Please provide a valid configuration name": "لطفاً یک نام پیکربندی معتبر وارد کنید.",
+	"Peer saved": "peer ذخیره شد",
+	"Allowed IPs already taken by another peer": "این IPها قبلاً به peer دیگری اختصاص داده شده‌اند.",
+	"Endpoint Allowed IPs format is incorrect": "فرمت IPهای مجاز در Endpoint نادرست است.",
+	"DNS format is incorrect": "فرمت DNS نادرست است.",
+	"MTU format is not correct": "فرمت MTU نادرست است.",
+	"Persistent Keepalive format is not correct": "فرمت Persistent Keepalive نادرست است.",
+	"Private key does not match with the public key": "کلید خصوصی با کلید عمومی مطابقت ندارد.",
+	"Update peer failed when updating Pre-Shared Key": "به‌روزرسانی کلید مشترک (Pre-Shared Key) برای peer با شکست مواجه شد.",
+	"Update peer failed when updating Allowed IPs": "به‌روزرسانی IPهای مجاز برای peer با شکست مواجه شد.",
+	"Update peer failed when saving the configuration": "ذخیره پیکربندی پس از به‌روزرسانی peer با شکست مواجه شد.",
+	"Peer data usage reset successfully": "میزان مصرف داده peer با موفقیت بازنشانی شد.",
+	"Peer download started": "دانلود peer آغاز شد.",
+	"Please specify one or more peers": "لطفاً یک یا چند peer را مشخص کنید.",
+	"Share link failed to create. Reason: (.*)": "ایجاد لینک اشتراک‌گذاری با شکست مواجه شد. دلیل: $1",
+	"Link expire date updated": "تاریخ انقضای لینک با موفقیت به‌روزرسانی شد.",
+	"Link expire date failed to update. Reason: (.*)": "به‌روزرسانی تاریخ انقضای لینک با شکست مواجه شد. دلیل: $1",
+	"Peer job saved": "جاب peer با موفقیت ذخیره شد.",
+	"Please specify job": "لطفاً یک جاب مشخص کنید.",
+    "Please specify peer and configuration": "لطفاً peer و پیکربندی را مشخص کنید.",
+    "Peer job deleted": "جاب peer حذف شد.",
+    "API Keys function is successfully enabled": "قابلیت کلیدهای API با موفقیت فعال شد.",
+    "API Keys function is successfully disabled": "قابلیت کلیدهای API با موفقیت غیرفعال شد.",
+    "API Keys function is failed to enable": "فعال‌سازی قابلیت کلیدهای API با شکست مواجه شد.",
+    "API Keys function is failed to disable": "غیرفعال‌سازی قابلیت کلیدهای API با شکست مواجه شد.",
+    "WGDashboard API Keys function is disabled": "قابلیت کلیدهای API در WGDashboard غیرفعال است.",
+    "WireGuard configuration path saved": "مسیر پیکربندی WireGuard ذخیره شد.",
+    "API Key deleted": "کلید API حذف شد.",
+    "API Key created": "کلید API ایجاد شد.",
+    "Sign in session ended, please sign in again": "نشست ورود به پایان رسیده است، لطفاً دوباره وارد شوید.",
+    "Please specify an IP Address (v4/v6)": "لطفاً یک آدرس IP نسخه ۴ یا ۶ مشخص کنید.",
+    "Please provide ipAddress and count": "لطفاً آدرس IP و تعداد را وارد کنید.",
+    "Please provide ipAddress": "لطفاً آدرس IP را وارد کنید.",
+    "Dashboard Language": "زبان داشبورد",
+    "Dashboard language update failed": "به‌روزرسانی زبان داشبورد با شکست مواجه شد.",
+    "Peer Remote Endpoint": "نقطه پایانی راه دور peer",
+    "New Configuration": "پیکربندی جدید",
+    "Configuration Name": "نام پیکربندی",
+    "Configuration name is invalid. Possible reasons:": "نام پیکربندی نامعتبر است. دلایل احتمالی:",
+    "Configuration name already exist.": "این نام پیکربندی از قبل وجود دارد.",
+    "Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen.": "نام پیکربندی فقط می‌تواند حداکثر شامل ۱۵ حرف کوچک/بزرگ، عدد، زیرخط، مساوی، علامت مثبت، نقطه و خط تیره باشد.",
+    "Invalid Port": "پورت نامعتبر است.",
+    "Save Configuration": "ذخیره پیکربندی",
+    "IP Address/CIDR is invalid": "آدرس IP یا CIDR نامعتبر است.",
+    "IP Address": "آدرس IP",
+    "Enter IP Address / Hostname": "آدرس IP یا نام میزبان را وارد کنید",
+    "IP Address / Hostname": "آدرس IP / نام میزبان",
+    "Dashboard IP Address & Listen Port": "آدرس IP و پورت شنود داشبورد",
+    "Count": "تعداد",
+    "Geolocation": "موقعیت جغرافیایی",
+    "Is Alive": "در دسترس است",
+    "Average / Min / Max Round Trip Time": "میانگین / کمترین / بیشترین زمان رفت‌وبرگشت",
+    "Sent / Received / Lost Package": "بسته‌های ارسال‌شده / دریافت‌شده / گم‌شده",
+    "Manual restart of WGDashboard is needed to apply changes on IP Address and Listen Port": "برای اعمال تغییرات آدرس IP و پورت شنود، باید WGDashboard را دستی راه‌اندازی مجدد کنید.",
+    "Restore Configuration": "بازیابی پیکربندی",
+    "Step (.*)": "مرحله $1",
+    "Select a backup you want to restore": "یک نسخه پشتیبان برای بازیابی انتخاب کنید.",
+    "Click to change a backup": "برای تغییر نسخه پشتیبان کلیک کنید.",
+    "Selected Backup": "نسخه پشتیبان انتخاب‌ شده",
+    "You don't have any configuration to restore": "هیچ پیکربندی برای بازیابی وجود ندارد.",
+    "Help": "راهنما",
+    "Backup": "پشتیبان‌گیری",
+    "([0-9].*) Backups?": "$1 نسخه پشتیبان",
+    "Yes": "بله",
+    "No": "خیر",
+    "Backup not selected": "نسخه پشتیبان انتخاب نشده است.",
+    "Confirm & edit restore information": "تأیید و ویرایش اطلاعات بازیابی",
+    "(.*) Available IP Address": "$1 آدرس IP در دسترس",
+    "Database File": "فایل پایگاه داده",
+    "Contain": "شامل",
+    "Restricted Peers?": "peerهای محدودشده؟",
+    "Restore": "بازیابی",
+    "Restoring": "در حال بازیابی",
+    "WGDashboard Settings": "تنظیمات WGDashboard",
+    "Peers Settings": "تنظیمات peerها",
+    "WireGuard Configuration Settings": "تنظیمات پیکربندی WireGuard",
+    "Appearance": "ظاهر",
+    "Theme": "قالب",
+    "Language": "زبان",
+    "Account Settings": "تنظیمات حساب کاربری",
+    "Peer Default Settings": "تنظیمات پیش‌فرض peer",
+    "Toggle When Start Up": "فعال‌سازی هنگام راه‌اندازی",
+    "Other Settings": "تنظیمات دیگر",
+    "Select Peers": "انتخاب peerها",
+    "Backup & Restore": "پشتیبان‌گیری و بازیابی",
+    "Delete Configuration": "حذف پیکربندی",
+    "Create Backup": "ایجاد نسخه پشتیبان",
+    "No backup yet, click the button above to create backup.": "هنوز نسخه پشتیبانی وجود ندارد، برای ایجاد نسخه پشتیبان روی دکمه بالا کلیک کنید.",
+    "Are you sure to delete this backup?": "آیا از حذف این نسخه پشتیبان مطمئن هستید؟",
+    "Are you sure to restore this backup?": "آیا از بازیابی این نسخه پشتیبان مطمئن هستید؟",
+    "Backup Date": "تاریخ پشتیبان‌گیری",
+    "File": "فایل",
+    "Are you sure to delete this configuration?": "آیا از حذف این پیکربندی مطمئن هستید؟",
+    "Once you deleted this configuration:": "پس از حذف این پیکربندی:",
+    "All connected peers will get disconnected": "تمام peerهای متصل قطع خواهند شد.",
+    "Both configuration file (.conf) and database table related to this configuration will get deleted": "هم فایل پیکربندی (.conf) و هم جدول پایگاه داده مرتبط با این پیکربندی حذف خواهند شد.",
+    "Checking backups...": "در حال بررسی نسخه‌های پشتیبان...",
+    "This configuration have ([0-9].*) backups": "این پیکربندی $1 نسخه پشتیبان دارد.",
+    "This configuration have no backup": "این پیکربندی هیچ نسخه پشتیبانی ندارد.",
+    "If you're sure, please type in the configuration name below and click Delete": "اگر مطمئن هستید، نام پیکربندی را در کادر زیر وارد کرده و روی حذف کلیک کنید.",
+    "Select All": "انتخاب همه",
+    "Clear Selection": "پاک کردن انتخاب",
+    "([0-9].*) Peers?": "$1 peer",
+    "Downloading": "در حال دانلود",
+    "Download Finished": "دانلود به پایان رسید",
+    "Done": "انجام شد",
+    "Are you sure to delete": "آیا از حذف مطمئن هستید؟",
+    "Are you sure to delete this peer?": "آیا از حذف این peer مطمئن هستید؟",
+    "Configuration deleted": "پیکربندی حذف شد.",
+    "Configuration saved": "پیکربندی ذخیره شد.",
+    "WGDashboard language update failed": "به‌روزرسانی زبان WGDashboard با شکست مواجه شد.",
+    "Configuration restored": "پیکربندی بازیابی شد.",
+    "Allowed IP already taken by another peer": "IP مجاز قبلاً توسط peerی دیگری استفاده شده است.",
+    "Failed to allow access of peer (.*)": "اجازه دسترسی به peer ($1) با شکست مواجه شد.",
+    "Failed to save configuration through WireGuard": "ذخیره پیکربندی از طریق WireGuard با شکست مواجه شد.",
+    "Allow access successfully": "دسترسی با موفقیت فعال شد.",
+    "Deleted ([0-9]{1,}) peer(s)": "$1 peer حذف شد.",
+    "Deleted ([0-9]{1,}) peer(s) successfully. Failed to delete ([0-9]{1,}) peer(s)": "$1 peer با موفقیت حذف شد. حذف $2 peer با شکست مواجه شد.",
+    "Restricted ([0-9]{1,}) peer(s)": "$1 peer محدود شد.",
+    "Restricted ([0-9]{1,}) peer(s) successfully. Failed to restrict ([0-9]{1,}) peer(s)": "$1 peer با موفقیت محدود شد. محدودسازی $2 peer با شکست مواجه شد."
+}
