@@ -5,14 +5,24 @@
         "lang_name_localized": "العربية"
     },
     {
+        "lang_id": "zh-cn",
+        "lang_name": "Chinese (Simplified)",
+        "lang_name_localized": "中文（简体）"
+    },
+    {
+        "lang_id": "zh-hk",
+        "lang_name": "Chinese (Traditional)",
+        "lang_name_localized": "中文（繁體）"
+    },
+    {
         "lang_id": "cs",
         "lang_name": "Czech",
         "lang_name_localized": "Česky"
     },
     {
-        "lang_id": "de-de",
-        "lang_name": "German",
-        "lang_name_localized": "Deutsch"
+        "lang_id": "nl-nl",
+        "lang_name": "Dutch",
+        "lang_name_localized": "Nederlands"
     },
     {
         "lang_id": "en",
@@ -20,14 +30,14 @@
         "lang_name_localized": "English"
     },
     {
-        "lang_id": "es-es",
-        "lang_name": "Spanish",
-        "lang_name_localized": "Español"
-    },
-    {
         "lang_id": "fr-ca",
         "lang_name": "French (Quebec)",
         "lang_name_localized": "Français (Québec)"
+    },
+    {
+        "lang_id": "de-de",
+        "lang_name": "German",
+        "lang_name_localized": "Deutsch"
     },
     {
         "lang_id": "it-it",
@@ -45,11 +55,6 @@
         "lang_name_localized": "한국어"
     },
     {
-        "lang_id": "nl-nl",
-        "lang_name": "Dutch",
-        "lang_name_localized": "Nederlands"
-    },
-    {
         "lang_id": "pl",
         "lang_name": "Polish",
         "lang_name_localized": "Polski"
@@ -58,6 +63,11 @@
         "lang_id": "ru",
         "lang_name": "Russian",
         "lang_name_localized": "Русский"
+    },
+    {
+        "lang_id": "es-es",
+        "lang_name": "Spanish",
+        "lang_name_localized": "Español"
     },
     {
         "lang_id": "sv-se",
@@ -78,15 +88,5 @@
         "lang_id": "uk",
         "lang_name": "Ukrainian",
         "lang_name_localized": "Українська"
-    },
-    {
-        "lang_id": "zh-cn",
-        "lang_name": "Chinese (Simplified)",
-        "lang_name_localized": "中文（简体）"
-    },
-    {
-        "lang_id": "zh-hk",
-        "lang_name": "Chinese (Traditional)",
-        "lang_name_localized": "中文（繁體）"
     }
 ]
