@@ -30,6 +30,11 @@
         "lang_name_localized": "English"
     },
     {
+        "lang_id": "fa",
+        "lang_name": "Farsi",
+        "lang_name_localized": "فارسی"
+    },
+    {
         "lang_id": "fr-ca",
         "lang_name": "French (Quebec)",
         "lang_name_localized": "Français (Québec)"
