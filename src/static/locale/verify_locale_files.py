@@ -36,7 +36,7 @@ if __name__ == "__main__":
     missing_translation = [
         key for key in language_template
         if key not in lang_file or not lang_file[key].strip()
-        ]
+    ]
     
     deprecated_translation = [
         key for key in lang_file
