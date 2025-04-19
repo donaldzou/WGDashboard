@@ -127,7 +127,7 @@ export default {
 							                          title="Configuration File"
 							                          @click="this.$emit('configurationFile')"></PeerSettingsDropdownTool>
 							<PeerSettingsDropdownTool icon="bi-share" 
-							                          title="Share"
+							                          title="Share Peer"
 							                          @click="this.$emit('share')"></PeerSettingsDropdownTool>
 						</div>
 					</li>

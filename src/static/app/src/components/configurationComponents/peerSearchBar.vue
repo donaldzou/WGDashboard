@@ -49,16 +49,18 @@ onMounted(() => {
 								</h6>
 								<input
 									ref="searchBar"
-									class="form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "
+									class="flex-grow-1 form-control rounded-3 bg-secondary-subtle border-1 border-secondary-subtle "
 									:placeholder="searchBarPlaceholder"
 									id="searchPeers"
 									@keyup="debounce()"
 									v-model="searchString">
 								<button
 									@click="emits('close')"
+									style="white-space: nowrap"
 									class="btn bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3 d-flex align-items-center">
-									<i class="bi bi-x-circle-fill me-2"></i>
-									<LocaleText t="Done"></LocaleText>
+									<span>
+										<i class="bi bi-x-circle-fill me-2"></i><LocaleText t="Done"></LocaleText>
+									</span>
 								</button>
 							</div>
 						</div>

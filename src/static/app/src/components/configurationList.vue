@@ -142,7 +142,7 @@ export default {
 							   :class="{'bg-primary-subtle text-primary-emphasis': this.currentDisplay === x.name}"
 							   class="px-2 py-1 rounded-3">
 								<small>
-									<i class="bi me-2" :class="'bi-' + x.key"></i> {{x.name}}
+									<i class="bi me-2" :class="'bi-' + x.key"></i> <LocaleText :t="x.name"></LocaleText>
 								</small>
 							</a>
 

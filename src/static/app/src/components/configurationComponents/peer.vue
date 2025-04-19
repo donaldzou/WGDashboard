@@ -5,8 +5,10 @@ import "animate.css"
 import PeerSettingsDropdown from "@/components/configurationComponents/peerSettingsDropdown.vue";
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {GetLocale} from "../../utilities/locale.js";
 export default {
 	name: "peer",
+	methods: {GetLocale},
 	components: {LocaleText, PeerSettingsDropdown},
 	props: {
 		Peer: Object
@@ -76,7 +78,7 @@ export default {
 		</div>
 		<div class="card-body pt-1" style="font-size: 0.9rem">
 			<h6>
-				{{Peer.name ? Peer.name : 'Untitled Peer'}}
+				{{Peer.name ? Peer.name : GetLocale('Untitled Peer')}}
 			</h6>
 			<div class="d-flex"
 			     :class="[dashboardStore.Configuration.Server.dashboard_peer_list_display === 'grid' ? 'gap-1 flex-column' : 'flex-row gap-3']">

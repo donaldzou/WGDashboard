@@ -70,7 +70,18 @@ const copy = async () => {
 						<button type="button" class="btn-close ms-auto" 
 						        @click="emit('close')"></button>
 					</div>
-					<div class="card-body p-4">
+					<div class="card-body p-4 d-flex flex-column gap-3">
+						<div style="height: 300px" class="d-flex">
+							<textarea
+								style="height: 300px"
+								class="form-control w-100 rounded-3 animate__fadeIn animate__faster animate__animated"
+								id="peerConfigurationFile"
+								:class="{'d-none': loading}"
+								:value="configurationFile"></textarea>
+							<div class="spinner-border m-auto" role="status" v-if="loading">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
 						<div class="d-flex">
 							<button
 								@click="copy()"
@@ -85,18 +96,6 @@ const copy = async () => {
 									</span>
 								</Transition>
 							</button>
-						</div>
-						
-						<div style="height: 300px" class="d-flex">
-							<textarea
-								style="height: 300px"
-								class="form-control w-100 rounded-3 mt-2 animate__fadeIn animate__faster animate__animated"
-								id="peerConfigurationFile"
-								:class="{'d-none': loading}"
-								:value="configurationFile"></textarea>
-							<div class="spinner-border m-auto" role="status" v-if="loading">
-								<span class="visually-hidden">Loading...</span>
-							</div>
 						</div>
 					</div>
 				</div>

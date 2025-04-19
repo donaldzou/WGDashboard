@@ -1,5 +1,6 @@
 <script setup>
 import {ref} from "vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 const props = defineProps({
 	icon: String,
@@ -22,7 +23,7 @@ const show = ref(false)
 				v-if="show"
 				class="position-absolute d-block p-1 px-2 bg-body text-body rounded-3 border shadow">
 			<small>
-				{{title}}
+				<LocaleText :t="title"></LocaleText>
 			</small>
 		</span>
 		</Transition>

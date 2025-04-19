@@ -105,7 +105,7 @@ const deleteConfigurationModal = ref(false)
 								<button 
 									@click="updateConfigurationName = true"
 									class="btn btn-sm bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 ms-auto">
-									Update Name
+									<LocaleText t="Update Name"></LocaleText>
 								</button>
 							</div>
 							<UpdateConfigurationName
@@ -210,7 +210,9 @@ const deleteConfigurationModal = ref(false)
 									</button>
 								</div>
 								<hr>
-								<h5 class="mb-3">Danger Zone</h5>
+								<h5 class="mb-3">
+									<LocaleText t="Danger Zone"></LocaleText>
+								</h5>
 								<div class="d-flex gap-2 flex-column">
 									<button
 										@click="backupRestoreModal = true"

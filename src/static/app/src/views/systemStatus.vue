@@ -326,7 +326,9 @@ const networkSpeedHistoricalChartData = computed(() => {
 							<div class="progress-bar bg-info" :style="{width: `${data?.Memory.VirtualMemory.percent}%` }"></div>
 						</div>
 						<div class="d-flex align-items-center">
-							<h6 class="mb-0">Swap Memory</h6>
+							<h6 class="mb-0">
+								<LocaleText t="Swap Memory"></LocaleText>
+							</h6>
 							<h6 class="mb-0 ms-auto">{{data?.Memory.SwapMemory.percent}}%</h6>
 						</div>
 						<div class="progress" role="progressbar" style="height: 10px">
@@ -451,7 +453,7 @@ const networkSpeedHistoricalChartData = computed(() => {
 							</h6>
 							<h6 class="mb-0 ms-auto d-flex gap-2">
 								<span class="text-success">
-									{{ Math.round((disk.used / 1024000000 + Number.EPSILON) * 100) / 100}} / {{ Math.round((disk.total / 1024000000 + Number.EPSILON) * 100) / 100}} GB Used
+									<LocaleText :t="Math.round((disk.used / 1024000000 + Number.EPSILON) * 100) / 100 + ' / ' + Math.round((disk.total / 1024000000 + Number.EPSILON) * 100) / 100 + ' GB Used'"></LocaleText>
 								</span>
 							</h6>
 						</div>

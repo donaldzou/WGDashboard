@@ -73,7 +73,7 @@ const rename = async () => {
 			<LocaleText t="Configuration name is invalid. Possible reasons:"></LocaleText>
 			<ul class="mb-0">
 				<li>
-					<LocaleText t="Configuration name already exist."></LocaleText>
+					<LocaleText t="Configuration name already exist"></LocaleText>
 				</li>
 				<li>
 					<LocaleText t="Configuration name can only contain 15 lower/uppercase alphabet, numbers, underscore, equal sign, plus sign, period and hyphen."></LocaleText>

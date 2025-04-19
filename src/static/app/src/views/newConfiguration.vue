@@ -325,7 +325,7 @@ export default {
 				<div class="card rounded-3 shadow">
 					<div class="card-header d-flex align-items-center">
 						<LocaleText t="IP Address/CIDR"></LocaleText>
-						<span class="badge rounded-pill text-bg-success ms-auto">{{ numberOfAvailableIPs }} Available IPs</span>
+						<span class="badge rounded-pill text-bg-success ms-auto"><LocaleText :t="numberOfAvailableIPs + ' Available IP Address'"></LocaleText></span>
 					</div>
 					<div class="card-body">
 						<input type="text" class="form-control" 

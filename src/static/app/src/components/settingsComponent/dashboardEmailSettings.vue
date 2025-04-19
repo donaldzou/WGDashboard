@@ -159,10 +159,8 @@ const sendTestEmail = async () => {
 					</small>
 				</label>
 				<form
-					
 					@submit="(e) => {e.preventDefault(); sendTestEmail()}"
 					class="input-group">
-
 					<input type="email" class="form-control rounded-start-3"
 					       id="test_email"
 					       placeholder="john@example.com"
@@ -174,7 +172,6 @@ const sendTestEmail = async () => {
 					        id="button-addon2">
 						<i class="bi bi-send me-2" v-if="!testing"></i>
 						<span class="spinner-border spinner-border-sm me-2" v-else>
-						<span class="visually-hidden">Loading...</span>
 					</span>
 						<LocaleText :t="!testing ? 'Send':'Sending...'"></LocaleText>
 					</button>

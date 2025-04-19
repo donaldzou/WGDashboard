@@ -56,10 +56,6 @@ const saveRaw = async () => {
 						<button type="button" class="btn-close ms-auto" @click="emits('close')"></button>
 					</div>
 					<div class="card-body px-4 d-flex flex-column gap-3">
-						<div class="alert alert-warning rounded-3 mb-0">
-							<i class="bi-exclamation-triangle-fill me-2"></i>
-							<LocaleText t="Please be careful when editing the raw file"></LocaleText>
-						</div>
 						<div class="alert alert-danger rounded-3 mb-0" v-if="error">
 							<div class="mb-2">
 								<strong>

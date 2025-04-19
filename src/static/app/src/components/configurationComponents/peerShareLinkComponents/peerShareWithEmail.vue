@@ -37,9 +37,7 @@ const sendEmail = async () => {
 	})
 }
 
-const placeholderTranslate = (key) => {
-	return GetLocale(key)
-}
+
 const emits = defineEmits(['fullscreen'])
 watch(livePreview, () => {
 	emits('fullscreen', livePreview.value)
@@ -62,7 +60,7 @@ watch(livePreview, () => {
 					       style="padding-left: calc( 0.75rem + 24px )"
 					       v-model="email.Receiver"
 					       :disabled="sending"
-					       :placeholder="placeholderTranslate('Send to who?')"
+					       :placeholder="GetLocale('Who are you sending to?')"
 					       required
 					       id="email_receiver" aria-describedby="emailHelp">
 				</div>
@@ -70,7 +68,7 @@ watch(livePreview, () => {
 					<i class="bi bi-hash" style="position: absolute; top: 0.4rem; left: 0.75rem;"></i>
 					<input type="text" class="form-control rounded-0 border-top-0 border-bottom-0"
 					       style="padding-left: calc( 0.75rem + 24px )"
-					       :placeholder="placeholderTranslate('Subject')"
+					       :placeholder="GetLocale('What\'s the subject?')"
 					       :disabled="sending"
 					       v-model="email.Subject"
 					       id="email_subject" aria-describedby="emailHelp">
@@ -80,7 +78,7 @@ watch(livePreview, () => {
 						<textarea class="form-control rounded-top-0 rounded-bottom-0 font-monospace border-bottom-0"
 						          v-model="email.Body"
 						          :disabled="sending"
-						          :placeholder="placeholderTranslate('Body')"
+						          :placeholder="GetLocale('What\'s the body?')"
 						          style="height: 400px; max-height: 400px;"></textarea>
 					</div>
 					<div class="col-6" v-if="livePreview">
