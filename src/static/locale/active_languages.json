@@ -1,10 +1,5 @@
 [
     {
-        "lang_id": "ar-sa",
-        "lang_name": "Arabic",
-        "lang_name_localized": "العربية"
-    },
-    {
         "lang_id": "zh-cn",
         "lang_name": "Chinese (Simplified)",
         "lang_name_localized": "中文（简体）"
@@ -23,6 +18,11 @@
         "lang_id": "nl-nl",
         "lang_name": "Dutch",
         "lang_name_localized": "Nederlands"
+    },
+    {
+        "lang_id": "ar-sa",
+        "lang_name": "Arabic",
+        "lang_name_localized": "العربية"
     },
     {
         "lang_id": "en",

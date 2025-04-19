@@ -2995,7 +2995,7 @@ class Locale:
         self.localePath = './static/locale/'
         self.activeLanguages = {}
         with open(os.path.join(f"{self.localePath}active_languages.json"), "r") as f:
-            self.activeLanguages = json.loads(''.join(f.readlines()))
+            self.activeLanguages = sorted(json.loads(''.join(f.readlines())), key=lambda x : x['lang_name'])
         
     def getLanguage(self) -> dict | None:
         currentLanguage = DashboardConfig.GetConfig("Server", "dashboard_language")[1]
