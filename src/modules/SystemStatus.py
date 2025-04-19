@@ -101,15 +101,16 @@ class NetworkInterfaces:
         self.getData()
         return self.interfaces
 
+class Process:
+    def __init__(self, name, command, pid, percent):
+        self.name = name
+        self.command = command
+        self.pid = pid
+        self.percent = percent
+    def toJson(self):
+        return self.__dict__
+
 class Processes:
-    class Process:
-        def __init__(self, name, command, pid, percent):
-            self.name = name
-            self.command = command
-            self.pid = pid
-            self.percent = percent
-        def toJson(self):
-            return self.__dict__
     def __init__(self):
         self.CPU_Top_10_Processes: list[Processes.Process] = []
         self.Memory_Top_10_Processes: list[Processes.Process] = []

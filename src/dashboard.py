@@ -164,7 +164,7 @@ class PeerJobs:
         except Exception as e:
             return False, str(e)
         
-    def updateJobConfigurationName(self, ConfigurationName: str, NewConfigurationName: str) -> tuple[bool, str]:
+    def updateJobConfigurationName(self, ConfigurationName: str, NewConfigurationName: str) -> tuple[bool, str] | tuple[bool, None]:
         try:
             with self.jobdb:
                 jobdbCursor = self.jobdb.cursor()
@@ -173,6 +173,7 @@ class PeerJobs:
                     ''', (NewConfigurationName, ConfigurationName, ))
                 self.jobdb.commit()
             self.__getJobs()
+            return True, None
         except Exception as e:
             return False, str(e)
         
