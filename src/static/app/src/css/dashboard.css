@@ -76,7 +76,7 @@
 
 @property --brandColor2 {
     syntax: '<color>';
-    initial-value: #ff4a00;
+    initial-value: #F94647;
     inherits: false;
 }
 
@@ -113,8 +113,8 @@
 }
 
 .btn-brand:hover, .dashboardLogo:hover{
-    --brandColor1: rgba(0, 157, 255, 1);
-    --brandColor2: rgba(255, 135, 91, 1);
+    --brandColor1: #2dadff;
+    --brandColor2: #ff6c6d;
     --distance2: 30%;
 }
 
@@ -1203,13 +1203,13 @@ pre.index-alert {
 }
 
 .login-container-fluid{
-    background: linear-gradient(var(--bgdegree), #009fff1a var(--distance2), #ff4b001a 100%);
-    animation: login 8s ease-in-out forwards;
+    background: linear-gradient(var(--bgdegree), #0035551a var(--distance2), #400b0b1a 100%);
+    animation: login 15s ease-in-out infinite;
 }
 
 .login-container-fluid[data-bs-theme="dark"]{
-    background: linear-gradient(var(--bgdegree), #003555 var(--distance2), #521800 100%);
-    animation: login 8s ease-in-out forwards;
+    background: linear-gradient(var(--bgdegree), #003555 var(--distance2), #400b0b 100%);
+    animation: login 15s ease-in-out infinite;
 }
 
 @keyframes login {
