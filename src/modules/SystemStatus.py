@@ -112,21 +112,21 @@ class Process:
 
 class Processes:
     def __init__(self):
-        self.CPU_Top_10_Processes: list[Processes.Process] = []
-        self.Memory_Top_10_Processes: list[Processes.Process] = []
+        self.CPU_Top_10_Processes: list[Process] = []
+        self.Memory_Top_10_Processes: list[Process] = []
     def getData(self):
         while True:
             try:
                 processes = list(psutil.process_iter())
                 self.CPU_Top_10_Processes = sorted(
-                    list(map(lambda x : Processes.Process(x.name(), " ".join(x.cmdline()), x.pid, x.cpu_percent()), processes)),
+                    list(map(lambda x : Process(x.name(), " ".join(x.cmdline()), x.pid, x.cpu_percent()), processes)),
                     key=lambda x : x.percent, reverse=True)[:20]
                 self.Memory_Top_10_Processes = sorted(
-                    list(map(lambda x : Processes.Process(x.name(), " ".join(x.cmdline()), x.pid, x.memory_percent()), processes)),
+                    list(map(lambda x : Process(x.name(), " ".join(x.cmdline()), x.pid, x.memory_percent()), processes)),
                     key=lambda x : x.percent, reverse=True)[:20]
                 break
             except Exception as e:
-                continue
+                break
     def toJson(self):
         self.getData()
         return {
