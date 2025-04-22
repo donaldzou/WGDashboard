@@ -1,4 +1,4 @@
-FROM golang:1.23 AS compiler
+FROM golang:1.24 AS compiler
 WORKDIR /go
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
