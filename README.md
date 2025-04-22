@@ -51,7 +51,8 @@
   <a href="https://app.element.io/#/room/#wgd:matrix.org">Matrix.org Chatroom</a>
 </p>
 
-![](https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Posters/Banner.png)
+
+<hr>
 
 # [Official Documentation](https://donaldzou.dev/WGDashboard-Documentations)
 
