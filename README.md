@@ -8,7 +8,7 @@
 <hr>
 
 <p align="center">
-  <img alt="WGDashboard" src="./src/static/app/public/img/logo.png" width="128">
+  <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="128">
 </p>
 <h1 align="center">WGDashboard</h1>
 <p align="center">
@@ -54,8 +54,7 @@
 
 <hr>
 
-> [!NOTE]
-> To better manage documentation for this project. I've moved it to its own [repo](https://github.com/donaldzou/WGDashboard-Documentation). I will keep updating over there and leave this README only with important information.
+# [Official Documentation](https://donaldzou.dev/WGDashboard-Documentations)
 
 - [💡 Features](https://donaldzou.github.io/WGDashboard-Documentation/features.html)
 - [📝 Requirements](https://donaldzou.github.io/WGDashboard-Documentation/requirements.html)
@@ -66,13 +65,13 @@
 
 # Screenshots
 
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/sign-in.png" alt=""/>
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/cross-server.png" alt=""/>
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/index.png" alt=""/>
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/new-configuration.png" alt="" />
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/settings.png" alt="" />
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/light-dark.png" alt="" />
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/configuration.png" alt=""/>
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/add-peers.png" alt="" />
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/ping.png" alt=""/>
-<img src="https://donaldzou.github.io/WGDashboard-Documentation/images/traceroute.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/sign-in.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/cross-server.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/index.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/new-configuration.png" alt="" />
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/settings.png" alt="" />
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/light-dark.png" alt="" />
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/configuration.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/add-peers.png" alt="" />
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/ping.png" alt=""/>
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/traceroute.png" alt=""/>
