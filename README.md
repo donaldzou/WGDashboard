@@ -4,8 +4,8 @@
 > [!NOTE]
 > **Help Wanted 🎉**: Localizing WGDashboard to other languages! If you're willing to help, please visit https://github.com/donaldzou/WGDashboard/issues/397. Many thanks!
 
+![](https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Posters/Banner.png)
 
-<hr>
 
 <p align="center">
   <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="128">
@@ -51,8 +51,7 @@
   <a href="https://app.element.io/#/room/#wgd:matrix.org">Matrix.org Chatroom</a>
 </p>
 
-
-<hr>
+![](https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Posters/Banner.png)
 
 # [Official Documentation](https://donaldzou.dev/WGDashboard-Documentations)
 
