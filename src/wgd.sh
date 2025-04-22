@@ -27,13 +27,16 @@ else
   cb_config_dir=/var/lib/letsencrypt
 fi
 
-dashes='------------------------------------------------------------'
+dashes='---------------------------------------------------------------------------------'
 equals='============================================================'
 helpMsg="[WGDashboard] Please check ./log/install.txt for more details. For further assistance, please open a ticket on https://github.com/donaldzou/WGDashboard/issues/new/choose, I'm more than happy to help :)"
+print_header(){
+	printf "=================================================================================\n"
+	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
+	printf "=================================================================================\n"
+}
+
 help () {
-  printf "=================================================================================\n"
-  printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
-  printf "=================================================================================\n"
   printf "| Usage: ./wgd.sh <option>                                                      |\n"
   printf "|                                                                               |\n"
   printf "| Available options:                                                            |\n"
@@ -298,7 +301,7 @@ _determinePypiMirror(){
 		rtthost[$index]=$rtt
 		index=$((index+1))
 	done
-
+	printf "              ---------------------------------------------------------\n"
 	for i in "${!rtthost[@]}"; do
 		[[ -z ${rtthost[i]} ]] && continue  # Skip unset or empty values
 		if [[ -z $min_val || ${rtthost[i]} -lt $min_val ]]; then
@@ -308,13 +311,13 @@ _determinePypiMirror(){
 	done
 	min_idx=$((min_idx - 1))
 	
-	printf "\n"
-	printf "              Which mirror you would like to use (Hit enter or wait ${msleep} seconds to use default: ${urls[$min_idx]}): "
+	printf "              Which mirror you would like to use (Hit enter to use default)\n"
+	printf "              Default is %s :" "${urls[$min_idx]}"
 	read -t ${msleep} -r choice
 	printf "\n"
 
 	if [[ -z "$choice" ]]; then
-		choice=${min_dix}
+		choice=$((min_idx + 1))
 	fi
 
 	if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#urls[@]} )); then
@@ -413,7 +416,6 @@ certbot_renew_ssl () {
 }
 
 gunicorn_start () {
-  printf "%s\n" "$dashes"
   printf "[WGDashboard] Starting WGDashboard with Gunicorn in the background.\n"
   d=$(date '+%Y%m%d%H%M%S')
   if [[ $USER == root ]]; then
@@ -432,11 +434,21 @@ gunicorn_start () {
   		sleep 2
   done
   printf "[WGDashboard] WGDashboard w/ Gunicorn started successfully\n"
-  printf "%s\n" "$dashes"
 }
 
 gunicorn_stop () {
-	sudo kill $(cat ./gunicorn.pid)
+	checkPIDExist=1
+	while [ $checkPIDExist -eq 1 ]
+	do
+		if test -f "$PID_FILE"; then
+			printf "[WGDashboard] Stopping WGDashboard w/ Gunicorn on PID %s\n" "$(cat ./gunicorn.pid)"
+			sudo kill "$(cat ./gunicorn.pid)"
+		else
+			checkPIDExist=0
+		fi
+		sleep 2
+	done
+	printf "[WGDashboard] WGDashboard is stopped.\n"
 }
 
 start_wgd () {
@@ -494,11 +506,9 @@ EOF
 # ============= Docker Functions =============
 
 start_wgd_debug() {
-	printf "%s\n" "$dashes"
 	_checkWireguard
 	printf "[WGDashboard] Starting WGDashboard in the foreground.\n"
 	sudo "$venv_python" "$app_name"
-	printf "%s\n" "$dashes"
 }
 
 update_wgd() {
@@ -516,7 +526,6 @@ update_wgd() {
 	_installPythonPip	
 	
 	new_ver=$($venv_python -c "import json; import urllib.request; data = urllib.request.urlopen('https://api.github.com/repos/donaldzou/WGDashboard/releases/latest').read(); output = json.loads(data);print(output['tag_name'])")
-	printf "%s\n" "$dashes"
 
 	if [ "$commandConfirmed" = "true" ]; then
 		printf "[WGDashboard] Confirmation granted.\n"
@@ -539,15 +548,14 @@ update_wgd() {
 		chmod +x ./wgd.sh
 		sudo ./wgd.sh install
 		printf "[WGDashboard] Update completed!\n"
-		printf "%s\n" "$dashes"
 		rm wgd.sh.old
 	else
-		printf "%s\n" "$dashes"
 		printf "[WGDashboard] Update Canceled.\n"
-		printf "%s\n" "$dashes"
 	fi
 }
 
+
+print_header
 if [ "$#" -lt 1 ]; then
 	help
 else
@@ -557,45 +565,30 @@ else
 
 	if [ "$1" = "start" ]; then
 		if check_wgd_status; then
-		printf "%s\n" "$dashes"
-		printf "[WGDashboard] WGDashboard is already running.\n"
-		printf "%s\n" "$dashes"
+			printf "[WGDashboard] WGDashboard is already running.\n"
 		else
 			start_wgd
 		fi
 	elif [ "$1" = "stop" ]; then
 		if check_wgd_status; then
-			printf "%s\n" "$dashes"
-			stop_wgd
-			printf "[WGDashboard] WGDashboard is stopped.\n"
-			printf "%s\n" "$dashes"
-			else
-			printf "%s\n" "$dashes"
+			stop_wgd			
+		else
 			printf "[WGDashboard] WGDashboard is not running.\n"
-			printf "%s\n" "$dashes"
 		fi
 	elif [ "$1" = "update" ]; then
 		update_wgd
 	elif [ "$1" = "install" ]; then
-		clear
-		printf "=================================================================================\n"
-	  	printf "+          <WGDashboard> by Donald Zou - https://github.com/donaldzou           +\n"
-	  	printf "=================================================================================\n"
 		install_wgd
-		printf "%s\n" "$dashes"
 	elif [ "$1" = "restart" ]; then
 		if check_wgd_status; then
-		printf "%s\n" "$dashes"
-		stop_wgd
-		printf "| WGDashboard is stopped.                                  |\n"
-		sleep 4
-		start_wgd
+			stop_wgd
+			start_wgd
 		else
-		start_wgd
+			start_wgd
 		fi
 	elif [ "$1" = "debug" ]; then
 		if check_wgd_status; then
-		printf "| WGDashboard is already running.                          |\n"
+			printf "[WGDashboard] WGDashboard is already running.\n"
 		else
 			start_wgd_debug
 		fi
@@ -607,3 +600,4 @@ else
 		help
 	fi
 fi
+printf "%s\n" "$dashes"
