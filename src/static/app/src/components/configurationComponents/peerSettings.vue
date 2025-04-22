@@ -61,7 +61,7 @@ export default {
 	},
 	mounted() {
 		this.$el.querySelectorAll("input").forEach(x => {
-			x.addEventListener("keyup", () => {
+			x.addEventListener("change", () => {
 				this.dataChanged = true;
 			});
 		})
@@ -80,7 +80,7 @@ export default {
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
-					<div class="card-body px-4 pb-4" v-if="this.data">
+					<div class="card-body px-4" v-if="this.data">
 						<div class="d-flex flex-column gap-2 mb-4">
 							<div class="d-flex align-items-center">
 								<small class="text-muted">
@@ -157,7 +157,7 @@ export default {
 								       v-model="this.data.DNS"
 								       id="peer_DNS_textbox">
 							</div>
-							<div class="accordion mt-3" id="peerSettingsAccordion">
+							<div class="accordion my-3" id="peerSettingsAccordion">
 								<div class="accordion-item">
 									<h2 class="accordion-header">
 										<button class="accordion-button rounded-3 collapsed" type="button"
@@ -198,9 +198,49 @@ export default {
 												       v-model="this.data.keepalive"
 												       id="peer_keep_alive">
 											</div>
+											<div v-if="this.data.advanced_security">
+												<label for="peer_advance_security" class="form-label d-block">
+													<small class="text-muted">
+														<LocaleText t="Advanced Security"></LocaleText>
+													</small>
+												</label>
+												<div class="btn-group" role="group">
+													<input type="radio" class="btn-check"
+													       v-model="this.data.advanced_security"
+													       value="on"
+													       name="advanced_security_radio" id="advanced_security_on" autocomplete="off">
+													<label class="btn btn-outline-primary  btn-sm" for="advanced_security_on">
+														<LocaleText t="On"></LocaleText>
+													</label>
+
+													<input type="radio"
+													       v-model="this.data.advanced_security"
+													       value="off"
+													       class="btn-check" name="advanced_security_radio" id="advanced_security_off" autocomplete="off">
+													<label class="btn btn-outline-primary btn-sm" for="advanced_security_off">
+														<LocaleText t="Off"></LocaleText>
+													</label>
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>
+							</div>
+							<div class="d-flex align-items-center gap-2">
+								<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto px-3 py-2"
+								        @click="this.reset()"
+								        :disabled="!this.dataChanged || this.saving">
+									<i class="bi bi-arrow-clockwise me-2"></i>
+									<LocaleText t="Reset"></LocaleText>
+								</button>
+
+								<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
+								        :disabled="!this.dataChanged || this.saving"
+								        @click="this.savePeer()"
+								>
+									<i class="bi bi-save-fill me-2"></i>
+									<LocaleText t="Save"></LocaleText>
+								</button>
 							</div>
 							<hr>
 							<div class="d-flex gap-2 align-items-center">
@@ -227,21 +267,7 @@ export default {
 										<LocaleText t="Sent"></LocaleText>
 									</button>
 								</div>
-								
 							</div>
-						</div>
-						<div class="d-flex align-items-center gap-2">
-							<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto px-3 py-2"
-							        @click="this.reset()"
-							        :disabled="!this.dataChanged || this.saving">
-								 <i class="bi bi-arrow-clockwise"></i>
-							</button>
-
-							<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 px-3 py-2 shadow"
-							        :disabled="!this.dataChanged || this.saving"
-							        @click="this.savePeer()"
-							>
-								<i class="bi bi-save-fill"></i></button>
 						</div>
 					</div>
 				</div>

@@ -12,7 +12,7 @@ export default {
 		return{
 			newKeyData:{
 				ExpiredAt: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss"),
-				neverExpire: false
+				NeverExpire: false
 			},
 			submitting: false
 		}
@@ -77,13 +77,13 @@ export default {
 						format="yyyy-MM-dd HH:mm:ss"
 						preview-format="yyyy-MM-dd HH:mm:ss"
 						:clearable="false"
-						:disabled="this.newKeyData.neverExpire || this.submitting"
+						:disabled="this.newKeyData.NeverExpire || this.submitting"
 						:dark="this.store.Configuration.Server.dashboard_theme === 'dark'"
 					/>
 				</div>
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox"
-					       v-model="this.newKeyData.neverExpire" id="neverExpire" :disabled="this.submitting">
+					       v-model="this.newKeyData.NeverExpire" id="neverExpire" :disabled="this.submitting">
 					<label class="form-check-label" for="neverExpire">
 						<LocaleText t="Never Expire"></LocaleText> (<i class="bi bi-emoji-grimace-fill me-2"></i> 
 						<LocaleText t="Don't think that's a good idea"></LocaleText>)

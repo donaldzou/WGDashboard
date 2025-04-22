@@ -1,18 +1,13 @@
 [
     {
-        "lang_id": "ar-sa",
-        "lang_name": "Arabic",
-        "lang_name_localized": "العربية"
+        "lang_id": "zh-cn",
+        "lang_name": "Chinese (Simplified)",
+        "lang_name_localized": "中文（简体）"
     },
     {
         "lang_id": "be",
         "lang_name": "Belarusian",
         "lang_name_localized": "Беларуская"
-    },
-    {
-        "lang_id": "zh-cn",
-        "lang_name": "Chinese (Simplified)",
-        "lang_name_localized": "中文（简体）"
     },
     {
         "lang_id": "zh-hk",
@@ -28,6 +23,11 @@
         "lang_id": "nl-nl",
         "lang_name": "Dutch",
         "lang_name_localized": "Nederlands"
+    },
+    {
+        "lang_id": "ar-sa",
+        "lang_name": "Arabic",
+        "lang_name_localized": "العربية"
     },
     {
         "lang_id": "en",

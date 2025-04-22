@@ -6,6 +6,10 @@ import {fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import UpdateConfigurationName
 	from "@/components/configurationComponents/editConfigurationComponents/updateConfigurationName.vue";
+import EditRawConfigurationFile
+	from "@/components/configurationComponents/editConfigurationComponents/editRawConfigurationFile.vue";
+import DeleteConfiguration from "@/components/configurationComponents/deleteConfiguration.vue";
+import ConfigurationBackupRestore from "@/components/configurationComponents/configurationBackupRestore.vue";
 const props = defineProps({
 	configurationInfo: Object
 })
@@ -15,13 +19,11 @@ const saving = ref(false)
 const data = reactive(JSON.parse(JSON.stringify(props.configurationInfo)))
 const editPrivateKey = ref(false)
 const dataChanged = ref(false)
-const confirmChanges = ref(false)
 const reqField = reactive({
 	PrivateKey: true,
 	IPAddress: true,
 	ListenPort: true
 })
-const editConfigurationContainer = useTemplateRef("editConfigurationContainer")
 const genKey = () => {
 	if (wgStore.checkWGKeyLength(data.PrivateKey)){
 		reqField.PrivateKey = true;
@@ -34,7 +36,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close"])
+const emit = defineEmits(["changed", "close", "refresh"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
@@ -56,10 +58,34 @@ watch(data, () => {
 }, {
 	deep: true
 })
+
+const editRawConfigurationFileModal = ref(false)
+const backupRestoreModal = ref(false)
+const deleteConfigurationModal = ref(false)
+
 </script>
 
 <template>
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll" ref="editConfigurationContainer">
+		<TransitionGroup name="zoom">
+			<EditRawConfigurationFile
+				name="EditRawConfigurationFile"
+				v-if="editRawConfigurationFileModal"
+				@close="editRawConfigurationFileModal = false">
+			</EditRawConfigurationFile>
+			<DeleteConfiguration
+				key="DeleteConfiguration"
+				@backup="backupRestoreModal = true"
+				@close="deleteConfigurationModal = false"
+				v-if="deleteConfigurationModal">
+			</DeleteConfiguration>
+			<ConfigurationBackupRestore
+				@close="backupRestoreModal = false"
+				@refreshPeersList="emit('refresh')"
+				v-if="backupRestoreModal">
+			</ConfigurationBackupRestore>
+		</TransitionGroup>
+		
 		<div class="container d-flex h-100 w-100">
 			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 700px">
 				<div class="card rounded-3 shadow flex-grow-1">
@@ -79,7 +105,7 @@ watch(data, () => {
 								<button 
 									@click="updateConfigurationName = true"
 									class="btn btn-sm bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 ms-auto">
-									Update Name
+									<LocaleText t="Update Name"></LocaleText>
 								</button>
 							</div>
 							<UpdateConfigurationName
@@ -145,62 +171,70 @@ watch(data, () => {
 									       id="configuration_listen_port">
 
 								</div>
-								<div>
-									<label for="configuration_preup" class="form-label">
+								<div v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreUp"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
 									<input type="text" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreUp"
-									       id="configuration_preup">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
-								<div>
-									<label for="configuration_predown" class="form-label">
+								<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4']" 
+								     v-if="configurationInfo.Protocol === 'awg'">
+									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
-											<LocaleText t="PreDown"></LocaleText>
+											<LocaleText :t="key"></LocaleText>
 										</small>
 									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
+									<input type="number" class="form-control form-control-sm rounded-3"
 									       :disabled="saving"
-									       v-model="data.PreDown"
-									       id="configuration_predown">
-								</div>
-								<div>
-									<label for="configuration_postup" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostUp"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostUp"
-									       id="configuration_postup">
-								</div>
-								<div>
-									<label for="configuration_postdown" class="form-label">
-										<small class="text-muted">
-											<LocaleText t="PostDown"></LocaleText>
-										</small>
-									</label>
-									<input type="text" class="form-control form-control-sm rounded-3"
-									       :disabled="saving"
-									       v-model="data.PostDown"
-									       id="configuration_postdown">
+									       v-model="data[key]"
+									       :id="'configuration_' + key">
 								</div>
 								<div class="d-flex align-items-center gap-2 mt-4">
 									<button class="btn bg-secondary-subtle border-secondary-subtle text-secondary-emphasis rounded-3 shadow ms-auto"
 									        @click="resetForm()"
 									        :disabled="!dataChanged || saving">
-										<i class="bi bi-arrow-clockwise"></i>
+										<i class="bi bi-arrow-clockwise me-2"></i>
+										<LocaleText t="Reset"></LocaleText>
 									</button>
 									<button class="btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 shadow"
 									        :disabled="!dataChanged || saving"
 									        @click="saveForm()"
 									>
-										<i class="bi bi-save-fill"></i></button>
+										<i class="bi bi-save-fill me-2"></i>
+										<LocaleText t="Save"></LocaleText>
+									</button>
 								</div>
+								<hr>
+								<h5 class="mb-3">
+									<LocaleText t="Danger Zone"></LocaleText>
+								</h5>
+								<div class="d-flex gap-2 flex-column">
+									<button
+										@click="backupRestoreModal = true"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 text-start d-flex">
+										<i class="bi bi-copy me-auto"></i>
+										<LocaleText t="Backup & Restore"></LocaleText>
+									</button>
+									<button
+										@click="editRawConfigurationFileModal = true"
+										class="btn bg-warning-subtle border-warning-subtle text-warning-emphasis rounded-3 d-flex">
+										<i class="bi bi-pen me-auto"></i>
+										<LocaleText t="Edit Raw Configuration File"></LocaleText>
+									</button>
+									
+									<button
+										@click="deleteConfigurationModal = true"
+										class="btn bg-danger-subtle border-danger-subtle text-danger-emphasis rounded-3 d-flex mt-4">
+										<i class="bi bi-trash-fill me-auto"></i>
+										<LocaleText t="Delete Configuration"></LocaleText>
+									</button>
+								</div>
+								
 							</template>
 						</div>
 					</div>

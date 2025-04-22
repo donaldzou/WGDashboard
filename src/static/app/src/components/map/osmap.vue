@@ -39,11 +39,9 @@ export default {
 				return [0,0]
 			}
 			return [this.d.geo.lon, this.d.geo.lat]
-
 		}	
 	},
 	async mounted() {
-		
 		const osm = await fetch("https://tile.openstreetmap.org/", 
 			{ signal: AbortSignal.timeout(1500) })
 			.then(res => {
@@ -62,15 +60,11 @@ export default {
 				const coordinates = [];
 				const vectorSource = new SourceVector();
 				if (this.type === 'traceroute'){
-					console.log(this.getLastLonLat())
 					this.d.forEach(data => {
 						if (data.geo && data.geo.lat && data.geo.lon) {
 							const coordinate = fromLonLat([data.geo.lon, data.geo.lat]);
 							coordinates.push(coordinate);
 							const l = this.getLastLonLat();
-
-							console.log(data.geo.lon, data.geo.lat)
-							console.log( data.geo.lon === l[0] && data.geo.lat === l[1])
 							const marker = new Feature({
 								geometry: new Point(coordinate),
 								last: data.geo.lon === l[0] && data.geo.lat === l[1]
@@ -115,17 +109,13 @@ export default {
 				});
 				map.addLayer(vectorLayer);
 				if (this.store.Configuration.Server.dashboard_theme === 'dark'){
-					map.on('postcompose',function(e){
-						document.querySelector('#map').style.filter="grayscale(80%) invert(100%) ";
+					map.on('postcompose',() => {
+						document.querySelector('#map').style.filter="grayscale(80%) invert(100%)";
 					});
 				}
 			}).catch(e => {
 				this.osmAvailable = false
 			})
-		
-		
-		
-		
 	}
 }
 </script>

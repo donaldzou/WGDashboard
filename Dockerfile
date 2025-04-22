@@ -1,5 +1,34 @@
+FROM golang:1.23 AS compiler
+WORKDIR /go
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git make bash build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-tools.git && \
+    git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git
+RUN cd /go/amneziawg-tools/src && make
+
+RUN cd /go/amneziawg-go && \
+    go get -u ./... && \
+    go mod tidy && \
+    make && \
+    chmod +x /go/amneziawg-go/amneziawg-go /go/amneziawg-tools/src/wg /go/amneziawg-tools/src/wg-quick/linux.bash
+RUN echo "DONE AmneziaWG"
+
+### INTERMEDIATE STAGE
+FROM scratch AS bins
+COPY --from=compiler /go/amneziawg-go/amneziawg-go /amneziawg-go
+COPY --from=compiler /go/amneziawg-tools/src/wg /awg
+COPY --from=compiler /go/amneziawg-tools/src/wg-quick/linux.bash /awg-quick
+
+# FINAL STAGE
 FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
+
+COPY --from=bins /amneziawg-go /usr/bin/amneziawg-go
+COPY --from=bins /awg /usr/bin/awg
+COPY --from=bins /awg-quick /usr/bin/awg-quick
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ARG wg_net="10.0.0.1"
@@ -9,7 +38,8 @@ ARG wg_port="51820"
 ENV TZ="Europe/Amsterdam"
 ENV global_dns="1.1.1.1"
 ENV isolate="none"
-ENV public_ip="0.0.0.0"
+ENV public_ip=""
+ENV wgd_port="10086"
 
 # Doing package management operations, such as upgrading
 RUN apk update \
@@ -19,14 +49,15 @@ RUN apk update \
   && apk upgrade
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
-ENV WGDASH=/opt/wireguarddashboard
+ENV WGDASH=/opt/wgdashboard
 
 # Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
 RUN mkdir /data \
   && mkdir /configs \
-  && mkdir -p ${WGDASH}/src
+  && mkdir -p ${WGDASH}/src \
+  && mkdir -p /etc/amnezia/amneziawg
 COPY ./src ${WGDASH}/src
 
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
@@ -54,5 +85,6 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
+WORKDIR $WGDASH
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

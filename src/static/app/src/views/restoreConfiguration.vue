@@ -4,15 +4,32 @@ import {onMounted, reactive, ref, watch} from "vue";
 import {fetchGet} from "@/utilities/fetch.js";
 import BackupGroup from "@/components/restoreConfigurationComponents/backupGroup.vue";
 import ConfirmBackup from "@/components/restoreConfigurationComponents/confirmBackup.vue";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+// import UploadModal from "@/components/restoreConfigurationComponents/uploadModal.vue";
 const backups = ref(undefined)
+const store = DashboardConfigurationStore();
+const uploadModal = ref(false)
+const uploads = {
+	conf: undefined,
+	sql: undefined
+}
+
 onMounted(() => {
 	fetchGet("/api/getAllWireguardConfigurationBackup", {}, (res) => {
 		backups.value = res.data
-	})
+	});
 })
 const confirm = ref(false)
 const selectedConfigurationBackup = ref(undefined)
 const selectedConfiguration = ref("")
+
+const openFileUpload = () => {
+	// uploadModal.value = true;
+	// document.querySelector("#fileUpload").click();
+}
+
+
+
 </script>
 
 <template>
@@ -28,7 +45,17 @@ const selectedConfiguration = ref("")
 				<h2 class="mb-0">
 					<LocaleText t="Restore Configuration"></LocaleText>
 				</h2>
+				
+<!--				<div class="d-flex gap-2 ms-auto">-->
+<!--					<button class="titleBtn py-2 text-decoration-none btn text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle"-->
+<!--					        @click="openFileUpload()"-->
+<!--					        type="button" aria-expanded="false">-->
+<!--						<i class="bi bi-upload me-2"></i>-->
+<!--						<LocaleText t="Upload Backup"></LocaleText>-->
+<!--					</button>-->
+<!--				</div>-->
 			</div>
+			
 			<Transition name="fade" appear>
 				<div v-if="backups">
 					<div class="d-flex mb-5 align-items-center steps" role="button"
@@ -67,6 +94,7 @@ const selectedConfiguration = ref("")
 									@select="(b) => {selectedConfigurationBackup = b; selectedConfiguration = c; confirm = true}"
 									:selectedConfigurationBackup="selectedConfigurationBackup"
 									:open="selectedConfiguration === c"
+									:protocol="[...new Set(backups.NonExistingConfigurations[c].map(x => x.protocol))]"
 									v-for="c in Object.keys(backups.NonExistingConfigurations)"
 									:configuration-name="c" :backups="backups.NonExistingConfigurations[c]"></BackupGroup>
 								<div v-if="Object.keys(backups.NonExistingConfigurations).length === 0">

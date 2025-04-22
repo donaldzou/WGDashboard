@@ -1,8 +1,7 @@
 {
   "dependencies": {
-    "@volar/language-server": "2.4.0-alpha.18",
-    "@vue/language-server": "2.0.28",
-    "ag-charts-vue3": "^10.3.1",
-    "dayjs": "^1.11.12"
+    "marked": "^15.0.7",
+    "openai": "^4.89.0",
+    "pinia-plugin-persistedstate": "^4.2.0"
   }
 }

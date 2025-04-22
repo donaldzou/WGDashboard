@@ -1,15 +1,15 @@
 <script>
-import {wgdashboardStore} from "@/stores/wgdashboardStore.js";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import {GetLocale} from "@/utilities/locale.js";
 import HelpModal from "@/components/navbarComponents/helpModal.vue";
+import AgentModal from "@/components/navbarComponents/agentModal.vue";
 
 export default {
 	name: "navbar",
-	components: {HelpModal, LocaleText},
+	components: {HelpModal, LocaleText, AgentModal},
 	setup(){
 		const wireguardConfigurationsStore = WireguardConfigurationsStore();
 		const dashboardConfigurationStore = DashboardConfigurationStore();
@@ -21,6 +21,7 @@ export default {
 			updateMessage: "Checking for update...",
 			updateUrl: "",
 			openHelpModal: false,
+			openAgentModal: false,
 		}
 	},
 	computed: {
@@ -56,7 +57,7 @@ export default {
 	>
 		<nav id="sidebarMenu" class=" bg-body-tertiary sidebar border h-100 rounded-3 shadow overflow-y-scroll" >
 			<div class="sidebar-sticky ">
-				<div class="text-white text-center m-0 py-3 mb-3 btn-brand">
+				<div class="text-white text-center m-0 py-3 mb-2 btn-brand">
 					<h5 class="mb-0">
 						WGDashboard
 					</h5>
@@ -64,7 +65,7 @@ export default {
 						<i class="bi bi-hdd-rack-fill me-2"></i>{{getActiveCrossServer.host}}
 					</small>
 				</div>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3"
 						            to="/" exact-active-class="active">
@@ -79,18 +80,17 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link rounded-3" role="button" @click="openHelpModal = true">
+						<a class="nav-link rounded-3" role="button" @click="openAgentModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>
 						</a>
 					</li>
 				</ul>
-				<hr class="text-body">
-				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
-					<i class="bi bi-body-text me-2"></i>
+				<hr class="text-body my-2">
+				<h6 class="sidebar-heading px-3 mt-3 mb-1 text-muted text-center">
 					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
 					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
@@ -100,12 +100,16 @@ export default {
 						</RouterLink>
 					</li>
 				</ul>
-				<hr class="text-body">
-				<h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-center">
-					<i class="bi bi-tools me-2"></i>
+				<hr class="text-body my-2">
+				<h6 class="sidebar-heading px-3 mt-3 mb-1 text-muted text-center">
 					<LocaleText t="Tools"></LocaleText>
 				</h6>
-				<ul class="nav flex-column px-2">
+				<ul class="nav flex-column px-2 gap-1">
+					<li class="nav-item">
+						<RouterLink to="/system_status" class="nav-link rounded-3" active-class="active">
+							<LocaleText t="System Status"></LocaleText>
+						</RouterLink>
+					</li>
 					<li class="nav-item">
 						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">
 							<LocaleText t="Ping"></LocaleText>
@@ -116,14 +120,15 @@ export default {
 						</RouterLink>
 					</li>
 				</ul>
-				<hr class="text-body">
+				<hr class="text-body my-2">
 				<ul class="nav flex-column px-2 mb-3">
-					<li class="nav-item"><a class="nav-link text-danger rounded-3" 
+					<li class="nav-item">
+						<a class="nav-link text-danger rounded-3" 
 					                        @click="this.dashboardConfigurationStore.signOut()" 
 					                        role="button" style="font-weight: bold">
-						<i class="bi bi-box-arrow-left me-2"></i>
-						<LocaleText t="Sign Out"></LocaleText>	
-					</a>
+							<i class="bi bi-box-arrow-left me-2"></i>
+							<LocaleText t="Sign Out"></LocaleText>	
+						</a>
 					</li>
 					<li class="nav-item" style="font-size: 0.8rem">
 						<a :href="this.updateUrl" v-if="this.updateAvailable" class="text-decoration-none rounded-3" target="_blank">
@@ -143,19 +148,23 @@ export default {
 		<Transition name="zoom">
 			<HelpModal v-if="this.openHelpModal" @close="openHelpModal = false;"></HelpModal>
 		</Transition>
+		<Transition name="slideIn">
+			<AgentModal v-if="this.openAgentModal" @close="openAgentModal = false"></AgentModal>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 @media screen and (max-width: 768px) {
 	.navbar-container{
-		position: absolute;
+		position: absolute !important;
 		z-index: 1000;
 		animation-duration: 0.4s;
 		animation-fill-mode: both;
 		display: none;
 		animation-timing-function: cubic-bezier(0.82, 0.58, 0.17, 0.9);
 	}
+	
 	.navbar-container.active{
 		animation-direction: normal;
 		display: block !important;
@@ -165,14 +174,14 @@ export default {
 
 .navbar-container{
 	height: 100vh;
-	
+	position: relative;
 }
 
 
 @supports (height: 100dvh) {
 	@media screen and (max-width: 768px){
 		.navbar-container{
-			height: calc(100dvh - 50px);
+			height: calc(100dvh - 58px);
 		}	
 	}
 	
@@ -191,5 +200,17 @@ export default {
 		transform: translateY(0px);
 		filter: blur(0px);
 	}
+}
+
+.slideIn-enter-active,
+.slideIn-leave-active{
+	transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+
+.slideIn-enter-from,
+.slideIn-leave-to {
+	transform: translateY(30px);
+	filter: blur(3px);
+	opacity: 0;
 }
 </style>

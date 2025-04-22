@@ -46,8 +46,8 @@ export default {
 			<h3 class="mb-3 text-body">
 				<LocaleText t="Traceroute"></LocaleText>
 			</h3>
-			<div class="d-flex gap-2 flex-column mb-5">
-				<div>
+			<div class="d-flex gap-2 mb-3 flex-column">
+				<div class="flex-grow-1">
 					<label class="mb-1 text-muted" for="ipAddress">
 						<small>
 							<LocaleText t="Enter IP Address / Hostname"></LocaleText>
@@ -55,12 +55,12 @@ export default {
 					<input
 						:disabled="this.tracing"
 						id="ipAddress"
-						class="form-control"
+						class="form-control rounded-3"
 						v-model="this.ipAddress"
 						@keyup.enter="this.execute()"
 						type="text">
 				</div>
-				<button class="btn btn-primary rounded-3 mt-3 position-relative"
+				<button class="btn btn-primary rounded-3 position-relative flex-grow-1"
 				        :disabled="this.tracing || !this.ipAddress"
 				        @click="this.execute()">
 					<Transition name="slide">
@@ -119,21 +119,32 @@ export default {
 										<small>{{hop.hop}}</small>
 									</td>
 									<td>
-										<small>{{hop.ip}}</small>
+										<small>
+											<samp>{{hop.ip}}</samp>
+										</small>
 									</td>
 									<td>
-										<small>{{hop.avg_rtt}}</small>
+										<small>
+											<samp>{{hop.avg_rtt}}</samp>
+										</small>
 									</td>
 									<td>
-										<small>{{hop.min_rtt}}</small>
+										<small>
+											<samp>{{hop.min_rtt}}</samp>
+										</small>
 									</td>
 									<td>
-										<small>{{hop.max_rtt}}</small>
+										<small>
+											<samp>{{hop.max_rtt}}</samp>
+										</small>
 									</td>
 									<td>
-									<span v-if="hop.geo.city && hop.geo.country">
-										<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
-									</span>
+										<span v-if="hop.geo.city && hop.geo.country">
+											<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
+										</span>
+										<span v-else>
+											-
+										</span>
 									</td>
 								</tr>
 								</tbody>
@@ -179,21 +190,5 @@ table th, table td{
 
 .table > :not(caption) > * > *{
 	background-color: transparent !important;
-}
-
-.ping-move,
-.ping-enter-active,
-.ping-leave-active {
-	transition: all 0.4s cubic-bezier(0.82, 0.58, 0.17, 0.9);
-}
-
-.ping-leave-active{
-	position: absolute;
-	width: 100%;
-}
-.ping-enter-from,
-.ping-leave-to {
-	opacity: 0;
-	filter: blur(3px);
 }
 </style>

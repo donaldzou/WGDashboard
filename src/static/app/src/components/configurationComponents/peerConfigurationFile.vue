@@ -1,16 +1,40 @@
 <script setup>
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import {fetchGet} from "@/utilities/fetch.js";
+import QRCode from "qrcode";
+import {useRoute} from "vue-router";
 const emit = defineEmits(['close'])
 const props = defineProps({
-	configurationFile: String
+	selectedPeer: Object
 })
 const store = DashboardConfigurationStore()
 const copied = ref(false)
+const configurationFile = ref("")
+const loading = ref(true)
+const error = ref({
+	error: false,
+	message: undefined
+})
+
+onMounted(() => {
+	const route = useRoute();
+	fetchGet("/api/downloadPeer/"+route.params.id, {
+		id: props.selectedPeer.id
+	}, (res) => {
+		if (res.status){
+			configurationFile.value = res.data.file
+			loading.value = false;
+		}else{
+			this.dashboardStore.newMessage("Server", res.message, "danger")
+		}
+	})
+})
+
 const copy = async () => {
 	if (navigator.clipboard && navigator.clipboard.writeText){
-		navigator.clipboard.writeText(props.configurationFile).then(() => {
+		navigator.clipboard.writeText(configurationFile.value).then(() => {
 			copied.value = true;
 			setTimeout(() => {
 				copied.value = false;
@@ -46,11 +70,22 @@ const copy = async () => {
 						<button type="button" class="btn-close ms-auto" 
 						        @click="emit('close')"></button>
 					</div>
-					<div class="card-body p-4">
+					<div class="card-body p-4 d-flex flex-column gap-3">
+						<div style="height: 300px" class="d-flex">
+							<textarea
+								style="height: 300px"
+								class="form-control w-100 rounded-3 animate__fadeIn animate__faster animate__animated"
+								id="peerConfigurationFile"
+								:class="{'d-none': loading}"
+								:value="configurationFile"></textarea>
+							<div class="spinner-border m-auto" role="status" v-if="loading">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
 						<div class="d-flex">
 							<button
 								@click="copy()"
-								:disabled="copied"
+								:disabled="copied || loading"
 								class="ms-auto btn bg-primary-subtle border-primary-subtle text-primary-emphasis rounded-3 position-relative">
 								<Transition name="slide-up" mode="out-in">
 									<span v-if="!copied" class="d-block">
@@ -62,12 +97,6 @@ const copy = async () => {
 								</Transition>
 							</button>
 						</div>
-						
-						<textarea 
-							style="height: 300px"
-							class="form-control w-100 rounded-3 mt-2"
-							id="peerConfigurationFile"
-							:value="configurationFile"></textarea>
 					</div>
 				</div>
 			</div>

@@ -16,7 +16,7 @@ const deleteConfiguration = () => {
 	clearInterval(store.Peers.RefreshInterval)
 	deleting.value = true;
 	fetchPost("/api/deleteWireguardConfiguration", {
-		Name: configurationName
+		ConfigurationName: configurationName
 	}, (res) => {
 		if (res.status){
 			router.push('/')
@@ -30,7 +30,6 @@ const deleteConfiguration = () => {
 
 const loading = ref(true)
 const backups = ref([])
-let timeout = undefined;
 const getBackup = () => {
 	loading.value = true;
 	fetchGet("/api/getWireguardConfigurationBackup", {
@@ -40,16 +39,10 @@ const getBackup = () => {
 		loading.value = false;
 	})
 }
-
-
 onMounted(() => {
 	getBackup()
 })
-
-const emits = defineEmits(["backup"])
-
-
-
+const emits = defineEmits(["backup", "close"])
 </script>
 
 <template>
@@ -61,7 +54,7 @@ const emits = defineEmits(["backup"])
 						<h5 class="mb-0">
 							<LocaleText t="Are you sure to delete this configuration?"></LocaleText>
 						</h5>
-						<button type="button" class="btn-close ms-auto" @click="$emit('close')"></button>
+						<button type="button" class="btn-close ms-auto" @click="emits('close')"></button>
 					</div>
 					<div class="card-body px-4 text-muted">
 						<p class="mb-0">

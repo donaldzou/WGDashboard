@@ -5,21 +5,24 @@ import dayjs from "dayjs";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import LocaleText from "@/components/text/localeText.vue";
+import PeerShareWithEmail from "@/components/configurationComponents/peerShareLinkComponents/peerShareWithEmail.vue";
 
 
 export default {
 	name: "peerShareLinkModal",
 	props: {
-		peer: Object
+		selectedPeer: Object
 	},
 	components: {
+		PeerShareWithEmail,
 		LocaleText,
 		VueDatePicker
 	},
 	data(){
 		return {
 			dataCopy: undefined,
-			loading: false
+			loading: false,
+			fullscreen: false
 		}
 	},
 	setup(){
@@ -27,14 +30,14 @@ export default {
 		return {store}
 	},
 	mounted() {
-		this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
+		this.dataCopy = JSON.parse(JSON.stringify(this.selectedPeer.ShareLink)).at(0);
 	},
 	watch: {
-		'peer.ShareLink': {
+		'selectedPeer.ShareLink': {
 			deep: true,
 			handler(newVal, oldVal){
 				if (oldVal.length !== newVal.length){
-					this.dataCopy = JSON.parse(JSON.stringify(this.peer.ShareLink)).at(0);
+					this.dataCopy = JSON.parse(JSON.stringify(this.selectedPeer.ShareLink)).at(0);
 				}
 			}
 		}
@@ -44,12 +47,12 @@ export default {
 		startSharing(){
 			this.loading = true;
 			fetchPost("/api/sharePeer/create", {
-				Configuration: this.peer.configuration.Name,
-				Peer: this.peer.id,
+				Configuration: this.selectedPeer.configuration.Name,
+				Peer: this.selectedPeer.id,
 				ExpireDate: dayjs().add(7, 'd').format("YYYY-MM-DD HH:mm:ss")
 			}, (res) => {
 				if (res.status){
-					this.peer.ShareLink = res.data;
+					this.selectedPeer.ShareLink = res.data;
 					this.dataCopy = res.data.at(0);
 				}else{
 					this.store.newMessage("Server", 
@@ -62,7 +65,7 @@ export default {
 			fetchPost("/api/sharePeer/update", this.dataCopy, (res) => {
 				if (res.status){
 					this.dataCopy = res.data.at(0)
-					this.peer.ShareLink = res.data;
+					this.selectedPeer.ShareLink = res.data;
 					this.store.newMessage("Server", "Link expire date updated", "success")
 				}else{
 					this.store.newMessage("Server",
@@ -105,7 +108,7 @@ export default {
 <template>
 	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
 		<div class="container d-flex h-100 w-100">
-			<div class="m-auto modal-dialog-centered dashboardModal" style="width: 500px">
+			<div class="m-auto modal-dialog-centered dashboardModal" :style="[ this.fullscreen ? 'width: 100%' : 'width: 700px']">
 				<div class="card rounded-3 shadow flex-grow-1">
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4">
 						<h4 class="mb-0">
@@ -113,7 +116,7 @@ export default {
 						</h4>
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
-					<div class="card-body px-4 pb-4" v-if="this.peer.ShareLink">
+					<div class="card-body px-4 pb-4" v-if="this.selectedPeer.ShareLink">
 						<div v-if="!this.dataCopy">
 							<h6 class="mb-3 text-muted">
 								<LocaleText t="Currently the peer is not sharing"></LocaleText>
@@ -163,6 +166,18 @@ export default {
 								<LocaleText t="Stop Sharing..." v-if="this.loading"></LocaleText>
 								<LocaleText t="Stop Sharing" v-else></LocaleText>
 							</button>
+							<hr>
+							<Suspense>
+								<PeerShareWithEmail 
+									@fullscreen="(f) => { this.fullscreen = f; }"
+									:selectedPeer="selectedPeer" :dataCopy="dataCopy"></PeerShareWithEmail>
+								<template #fallback>
+									<h6 class="text-muted">
+										<span class="spinner-border me-2 spinner-border-sm" role="status"></span>
+										<LocaleText t="Checking SMTP Configuration..."></LocaleText>
+									</h6>
+								</template>
+							</Suspense>
 						</div>
 					</div>
 				</div>

@@ -2,10 +2,12 @@
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import LocaleText from "@/components/text/localeText.vue";
+import PeerSettingsDropdownTool
+	from "@/components/configurationComponents/peerSettingsDropdownComponents/peerSettingsDropdownTool.vue";
 
 export default {
 	name: "peerSettingsDropdown",
-	components: {LocaleText},
+	components: {PeerSettingsDropdownTool, LocaleText},
 	setup(){
 		const dashboardStore = DashboardConfigurationStore()
 		return {dashboardStore}
@@ -92,12 +94,12 @@ export default {
 			<template v-if="!this.confirmDelete">
 				<template v-if="this.Peer.status === 'running'">
 					<li style="font-size: 0.8rem; padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
-				<span class="text-body d-flex">
-						<i class="bi bi-box-arrow-in-right"></i>
-						<span class="ms-auto">
-							{{this.Peer.endpoint}}
+						<span class="text-body d-flex">
+								<i class="bi bi-box-arrow-in-right"></i>
+								<span class="ms-auto">
+									{{this.Peer.endpoint}}
+								</span>
 						</span>
-				</span>
 					</li>
 					<li><hr class="dropdown-divider"></li>
 				</template>
@@ -110,21 +112,24 @@ export default {
 					</li>
 				</template>
 				<template v-else>
-					<li class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
-						<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.downloadPeer()">
-							<i class="me-auto bi bi-download"></i>
-						</a>
-						<a class="dropdown-item text-center px-0 rounded-3" role="button"
-						   @click="this.downloadQRCode('qrcode')">
-							<i class="me-auto bi bi-qr-code"></i>
-						</a>
-						<a class="dropdown-item text-center px-0 rounded-3" role="button"
-						   @click="this.downloadQRCode('configurationFile')">
-							<i class="me-auto bi bi-body-text"></i>
-						</a>
-						<a class="dropdown-item text-center px-0 rounded-3" role="button" @click="this.$emit('share')">
-							<i class="me-auto bi bi-share"></i>
-						</a>
+					<li>
+						<div class="text-center text-muted">
+							
+						</div>
+						<div class="d-flex" style="padding-left: var(--bs-dropdown-item-padding-x); padding-right: var(--bs-dropdown-item-padding-x);">
+							<PeerSettingsDropdownTool icon="bi-download" 
+							                          title="Download"
+							                          @click="this.downloadPeer()"></PeerSettingsDropdownTool>
+							<PeerSettingsDropdownTool icon="bi-qr-code" 
+							                          title="QR Code"
+							                          @click="this.$emit('qrcode')"></PeerSettingsDropdownTool>
+							<PeerSettingsDropdownTool icon="bi-body-text" 
+							                          title="Configuration File"
+							                          @click="this.$emit('configurationFile')"></PeerSettingsDropdownTool>
+							<PeerSettingsDropdownTool icon="bi-share" 
+							                          title="Share Peer"
+							                          @click="this.$emit('share')"></PeerSettingsDropdownTool>
+						</div>
 					</li>
 				</template>
 				<li><hr class="dropdown-divider"></li>
