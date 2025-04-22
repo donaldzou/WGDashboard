@@ -8,7 +8,7 @@
 <hr>
 
 <p align="center">
-  <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="128">
+  <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="256">
 </p>
 <h1 align="center">WGDashboard</h1>
 <p align="center">
