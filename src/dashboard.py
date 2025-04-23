@@ -25,7 +25,7 @@ from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 SystemStatus = SystemStatus()
 
-DASHBOARD_VERSION = 'v4.2.0'
+DASHBOARD_VERSION = 'v4.2.1'
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
@@ -1904,13 +1904,6 @@ class DashboardConfig:
             else:
                 return False, "Section does not exist"
         
-        if not init:
-            print(key)
-            print(self.__config[section].keys())
-    
-            print(value)
-            print(self.__config[section][key])
-        
         if ((key not in self.__config[section].keys() and init) or 
                 (key in self.__config[section].keys())):
             if type(value) is bool:
@@ -2187,7 +2180,7 @@ def API_addWireguardConfiguration():
         WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data) if data.get('Protocol') == 'wg' else AmneziaWireguardConfiguration(data=data)
     return ResponseObject()
 
-@app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
+@app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration')
 def API_toggleWireguardConfiguration():
     configurationName = request.args.get('configurationName')
     if configurationName is None or len(
