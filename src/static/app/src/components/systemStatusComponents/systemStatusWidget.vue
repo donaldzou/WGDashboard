@@ -66,7 +66,7 @@ const data = computed(() => {
 				</h6>
 				<h6 class="ms-auto">
 					<span v-if="data">
-						{{ data?.Disks.find(x => x.mountPoint === '/').percent }}%
+						{{ data.Disks.find(x => x.mountPoint === '/') ? data?.Disks.find(x => x.mountPoint === '/').percent : data?.Disks[0].percent }}%
 					</span>
 					<span v-else class="spinner-border spinner-border-sm"></span>
 				</h6>
