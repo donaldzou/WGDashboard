@@ -1903,9 +1903,16 @@ class DashboardConfig:
                 self.__config[section] = {}
             else:
                 return False, "Section does not exist"
-            
+        
+        if not init:
+            print(key)
+            print(self.__config[section].keys())
+    
+            print(value)
+            print(self.__config[section][key])
+        
         if ((key not in self.__config[section].keys() and init) or 
-                (key in self.__config[section].keys() and value != self.__config[section][key] and not init)):
+                (key in self.__config[section].keys())):
             if type(value) is bool:
                 if value:
                     self.__config[section][key] = "true"
