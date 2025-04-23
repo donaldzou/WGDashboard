@@ -2187,7 +2187,7 @@ def API_addWireguardConfiguration():
         WireguardConfigurations[data['ConfigurationName']] = WireguardConfiguration(data=data) if data.get('Protocol') == 'wg' else AmneziaWireguardConfiguration(data=data)
     return ResponseObject()
 
-@app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration/')
+@app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration')
 def API_toggleWireguardConfiguration():
     configurationName = request.args.get('configurationName')
     if configurationName is None or len(

@@ -197,7 +197,7 @@ export default {
 	methods:{
 		toggle(){
 			this.configurationToggling = true;
-			fetchGet("/api/toggleWireguardConfiguration/", {
+			fetchGet("/api/toggleWireguardConfiguration", {
 				configurationName: this.configurationInfo.Name
 			}, (res) => {
 				if (res.status){

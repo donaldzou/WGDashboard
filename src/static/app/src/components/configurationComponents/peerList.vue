@@ -118,7 +118,7 @@ watch(() => {
 // Toggle Configuration Method =====================================
 const toggleConfiguration = async () => {
 	configurationToggling.value = true;
-	await fetchGet("/api/toggleWireguardConfiguration/", {
+	await fetchGet("/api/toggleWireguardConfiguration", {
 		configurationName: configurationInfo.value.Name
 	}, (res) => {
 		if (res.status){
