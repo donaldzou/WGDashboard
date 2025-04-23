@@ -9,7 +9,7 @@ For more details on the source-code specific to this Docker image, refer to the 
 
 I have tried to embed some new features such as `isolate` and interface startup on container-start (through `enable`). I hope you enjoy!
 
-<img src="https://raw.githubusercontent.com/donaldzou/WGDashboard/main/src/static/img/logo.png" alt="WG-Dashboard Logo" title="WG-Dashboard Logo" width="150" height="150" /> 
+<img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" alt="WG-Dashboard Logo" title="WG-Dashboard Logo" width="150" height="150" /> 
 
 ## Getting the container running:
 
