@@ -58,9 +58,10 @@
 
 - [💡 Features](https://donaldzou.github.io/WGDashboard-Documentation/features.html)
 - [📝 Requirements](https://donaldzou.github.io/WGDashboard-Documentation/requirements.html)
-- [🛠 Install﻿](https://donaldzou.github.io/WGDashboard-Documentation/install.html)
-- [🪜 Usage﻿](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
-- [📖 API Documentation﻿](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
+- [🛠 Install](https://donaldzou.github.io/WGDashboard-Documentation/install.html)
+- [🐬 Docker Solutions](https://github.com/donaldzou/WGDashboard/tree/main/docker)
+- [🪜 Usage](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
+- [📖 API Documentation](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
 - [And much more...](https://donaldzou.github.io/WGDashboard-Documentation/)
 
 # Screenshots
