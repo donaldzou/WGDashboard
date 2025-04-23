@@ -1,4 +1,4 @@
-FROM golang:1.23 AS compiler
+FROM golang:1.24 AS compiler
 WORKDIR /go
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -81,7 +81,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
 # Copy the basic entrypoint.sh script.
-COPY entrypoint.sh /entrypoint.sh
+COPY ./docker/entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
