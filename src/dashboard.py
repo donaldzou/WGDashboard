@@ -25,7 +25,7 @@ from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 SystemStatus = SystemStatus()
 
-DASHBOARD_VERSION = 'v4.2.0.1'
+DASHBOARD_VERSION = 'v4.2.1'
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
@@ -1903,13 +1903,6 @@ class DashboardConfig:
                 self.__config[section] = {}
             else:
                 return False, "Section does not exist"
-        
-        if not init:
-            print(key)
-            print(self.__config[section].keys())
-    
-            print(value)
-            print(self.__config[section][key])
         
         if ((key not in self.__config[section].keys() and init) or 
                 (key in self.__config[section].keys())):
