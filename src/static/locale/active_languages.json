@@ -45,6 +45,11 @@
         "lang_name_localized": "Français (Québec)"
     },
     {
+        "lang_id": "fr-fr",
+        "lang_name": "French (France)",
+        "lang_name_localized": "Français (France)"
+    },
+    {
         "lang_id": "de-de",
         "lang_name": "German",
         "lang_name_localized": "Deutsch"
