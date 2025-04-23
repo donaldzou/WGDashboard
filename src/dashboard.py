@@ -25,7 +25,7 @@ from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 SystemStatus = SystemStatus()
 
-DASHBOARD_VERSION = 'v4.2.0'
+DASHBOARD_VERSION = 'v4.2.0.1'
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
