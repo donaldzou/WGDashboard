@@ -5,8 +5,6 @@ services:
     container_name: wgdashboard
     #environment:
       #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
-      #- global_dns=        # <--- Set global DNS address, default: 1.1.1.1.
-      #- isolate=           # <--- Set the interfaces that will disallow peer communication, default: 'none'.
       #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
       #- wgd_port=          # <--- Set the port WGDashboard will use for its web-server.
     ports:
