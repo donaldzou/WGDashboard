@@ -2,12 +2,15 @@ FROM golang:1.24 AS compiler
 WORKDIR /go
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git make bash build-essential \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+      git make bash build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-tools.git && \
-    git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git
-RUN cd /go/amneziawg-tools/src && make
+RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-tools.git \
+    && git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git
+
+RUN cd /go/amneziawg-tools/src \
+    && make
 
 RUN cd /go/amneziawg-go && \
     go get -u ./... && \
@@ -31,21 +34,20 @@ COPY --from=bins /awg /usr/bin/awg
 COPY --from=bins /awg-quick /usr/bin/awg-quick
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
-ARG wg_net="10.0.0.1"
-ARG wg_port="51820"
+ARG wg_net="10.0.0.1" \
+  wg_port="51820"
 
 # Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
-ENV TZ="Europe/Amsterdam"
-ENV global_dns="1.1.1.1"
-ENV isolate="none"
-ENV public_ip=""
-ENV wgd_port="10086"
+ENV TZ="Europe/Amsterdam" \
+  global_dns="9.9.9.9" \
+  wgd_port="10086" \
+  public_ip=""
 
 # Doing package management operations, such as upgrading
 RUN apk update \
   && apk add --no-cache bash git tzdata \
-  iptables ip6tables openrc curl wireguard-tools \
-  sudo py3-psutil py3-bcrypt \
+    iptables ip6tables openrc curl wireguard-tools \
+    sudo py3-psutil py3-bcrypt \
   && apk upgrade
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
