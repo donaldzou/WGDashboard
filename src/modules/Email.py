@@ -33,8 +33,7 @@ class EmailSender:
         return self.DashboardConfig.GetConfig("Email", "send_from")[1]
 
     def ready(self):
-        print(self.Server())
-        return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0
+        return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0 and len(self.SendFrom())
 
     def send(self, receiver, subject, body, includeAttachment = False, attachmentName = ""):
         if self.ready():
@@ -46,7 +45,7 @@ class EmailSender:
                 self.smtp.login(self.Username(), self.Password())
                 message = MIMEMultipart()
                 message['Subject'] = subject
-                message['From'] = formataddr((Header(self.SendFrom()).encode(), self.Username()))
+                message['From'] = self.SendFrom()
                 message["To"] = receiver
                 message.attach(MIMEText(body, "plain"))
 
@@ -62,7 +61,7 @@ class EmailSender:
                     else:
                         self.smtp.close()
                         return False, "Attachment does not exist"
-                self.smtp.sendmail(self.Username(), receiver, message.as_string())
+                self.smtp.sendmail(self.SendFrom(), receiver, message.as_string())
                 self.smtp.close()
                 return True, None
             except Exception as e:
