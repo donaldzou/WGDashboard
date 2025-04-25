@@ -1,13 +1,13 @@
 {
   "name": "app",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "buildcommitpush": "./build.sh",
-    "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && electron-builder --mac --win",
+    "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && /opt/homebrew/bin/npm run \"electron dist\"",
     "preview": "vite preview"
   },
   "dependencies": {
