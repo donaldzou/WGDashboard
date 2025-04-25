@@ -11,8 +11,8 @@ class EmailSender:
     def __init__(self, DashboardConfig):
         self.smtp = None
         self.DashboardConfig = DashboardConfig
-        if not os.path.exists('../attachments'):
-            os.mkdir('../attachments')
+        if not os.path.exists('./attachments'):
+            os.mkdir('./attachments')
         
     def Server(self):
         return self.DashboardConfig.GetConfig("Email", "server")[1]
