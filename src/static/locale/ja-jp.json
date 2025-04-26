@@ -286,7 +286,7 @@
 	"Create Backup": "バックアップを作成",
 	"No backup yet, click the button above to create backup\\.": "バックアップがありません ボタンをクリックしてバックアップを作成",
 	"Are you sure to delete this backup\\?": "バックアップを削除しますか?",
-	"Are you sure to restore this backup?\\": "バックアップから復元しますか?",
+	"Are you sure to restore this backup\\?": "バックアップから復元しますか?",
 	"Backup Date": "バックアップ日時",
 	"File": "ファイル",
 	"Are you sure to delete this configuration\\?": "この構成を本当に削除しますか?",
