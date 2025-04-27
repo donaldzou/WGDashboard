@@ -34,6 +34,7 @@ export default {
 				PreDown: "",
 				PostUp: "",
 				PostDown: "",
+				Table: "",
 				Protocol: "wg",
 				Jc: 5,
 				Jmin: 49,
@@ -339,6 +340,19 @@ export default {
 								IP Address/CIDR is invalid
 							</div>
 							
+						</div>
+					</div>
+				</div>
+				<div class="card rounded-3 shadow">
+					<div class="card-header">
+						<LocaleText t="Table"></LocaleText>
+					</div>
+					<div class="card-body">
+						<input type="text" class="form-control" placeholder="Ex: off" id="Table" 
+						       v-model="this.newConfiguration.Table"
+						       :disabled="this.loading">
+						<div class="invalid-feedback">
+							<div v-if="this.error">{{this.errorMessage}}</div>
 						</div>
 					</div>
 				</div>

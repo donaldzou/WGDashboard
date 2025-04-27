@@ -945,7 +945,8 @@ class WireguardConfiguration:
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
-            "Protocol": self.Protocol
+            "Protocol": self.Protocol,
+            "Table": self.Table,
         }
     
     def backupConfigurationFile(self) -> tuple[bool, dict[str, str]]:
@@ -1047,7 +1048,7 @@ class WireguardConfiguration:
         dataChanged = False
         with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort", "Table"]
             if self.Protocol == 'awg':
                 allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
             start = original.index("[Interface]")

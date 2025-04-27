@@ -171,6 +171,17 @@ const deleteConfigurationModal = ref(false)
 									       id="configuration_listen_port">
 
 								</div>
+								<div>
+									<label for="configuration_table" class="form-label">
+										<small class="text-muted">
+											<LocaleText t="Table"></LocaleText>
+										</small>
+									</label>
+									<input type="text" class="form-control form-control-sm rounded-3"
+									       :disabled="saving"
+									       v-model="data.Table"
+									       id="configuration_table">
+								</div>
 								<div v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
 									<label :for="'configuration_' + key" class="form-label">
 										<small class="text-muted">
