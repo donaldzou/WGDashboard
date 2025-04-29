@@ -12,6 +12,7 @@ services:
       - 51820:51820/udp
     volumes:
       - conf:/etc/wireguard
+      - awgconf:/etc/amnezia
       - data:/data
     cap_add:
       - NET_ADMIN
