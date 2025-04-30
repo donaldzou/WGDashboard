@@ -28,7 +28,7 @@
 	"Dark": "Fosc",
 	"This will be changed globally, and will be apply to all peer's QR code and configuration file.": "Això es canviarà globalment i s'aplicarà a tots els codis QR i fitxers de configuració dels peer.",
 	"WireGuard Configurations Settings": "Paràmetres de Configuració del WireGuard",
-	"Configurations Directory": "",
+	"Configurations Directory": "Carpeta de configuracions",
 	"Remember to remove / at the end of your path. e.g /etc/wireguard": "",
 	"WGDashboard Account Settings": "",
 	"Current Password": "",
