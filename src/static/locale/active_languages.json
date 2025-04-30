@@ -85,6 +85,11 @@
         "lang_name_localized": "Español"
     },
     {
+        "lang_id": "es-ca",
+        "lang_name": "Catalan",
+        "lang_name_localized": "Català"
+    },
+    {
         "lang_id": "sv-se",
         "lang_name": "Swedish",
         "lang_name_localized": "Svenska"
