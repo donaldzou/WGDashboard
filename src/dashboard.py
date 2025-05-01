@@ -1434,7 +1434,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                         f.write(p['preshared_key'])
 
                 subprocess.check_output(
-                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''} advanced-security {p['advanced_security']}",
+                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist:
                     os.remove(uid)
@@ -1713,7 +1713,7 @@ PersistentKeepalive = {str(self.keepalive)}
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'} advanced-security {advanced_security}",
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'}",
                 shell=True, stderr=subprocess.STDOUT)
 
             if pskExist: os.remove(uid)
@@ -2434,7 +2434,7 @@ def API_updatePeerSettings(configName):
                                        allowed_ip, endpoint_allowed_ip, mtu, keepalive)
             
             return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                allowed_ip, endpoint_allowed_ip, mtu, keepalive, data.get('advanced_security', 'off'))
+                allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
             
     return ResponseObject(False, "Peer does not exist")
 
@@ -2604,7 +2604,7 @@ def API_addPeers(configName):
                             "endpoint_allowed_ip": endpoint_allowed_ip,
                             "mtu": mtu,
                             "keepalive": keep_alive,
-                            "advanced_security": data.get("advanced_security", "off")
+                            "advanced_security": "off"
                         })
                         if addedCount == bulkAddAmount:
                             break
@@ -2674,7 +2674,7 @@ def API_addPeers(configName):
                         "DNS": dns_addresses,
                         "mtu": mtu,
                         "keepalive": keep_alive,
-                        "advanced_security": data.get("advanced_security", "off")
+                        "advanced_security": "off"
                     }]
                 )
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
