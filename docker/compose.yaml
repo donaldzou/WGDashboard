@@ -11,7 +11,7 @@ services:
       - 10086:10086/tcp
       - 51820:51820/udp
     volumes:
-      - aconf:/etc/amnezia/amnesiawg
+      - aconf:/etc/amnezia/amneziawg
       - conf:/etc/wireguard
       - data:/data
     cap_add:
