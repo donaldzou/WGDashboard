@@ -343,19 +343,7 @@ export default {
 						</div>
 					</div>
 				</div>
-				<div class="card rounded-3 shadow">
-					<div class="card-header">
-						<LocaleText t="Table"></LocaleText>
-					</div>
-					<div class="card-body">
-						<input type="text" class="form-control" placeholder="Ex: off" id="Table" 
-						       v-model="this.newConfiguration.Table"
-						       :disabled="this.loading">
-						<div class="invalid-feedback">
-							<div v-if="this.error">{{this.errorMessage}}</div>
-						</div>
-					</div>
-				</div>
+				
 				<hr>
 				<div class="accordion" id="newConfigurationOptionalAccordion">
 					<div class="accordion-item">
@@ -367,7 +355,7 @@ export default {
 						<div id="newConfigurationOptionalAccordionCollapse" 
 						     class="accordion-collapse collapse" data-bs-parent="#newConfigurationOptionalAccordion">
 							<div class="accordion-body d-flex flex-column gap-3">
-								<div class="card rounded-3" v-for="key in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+								<div class="card rounded-3" v-for="key in ['Table', 'PreUp', 'PreDown', 'PostUp', 'PostDown']">
 									<div class="card-header">{{ key }}</div>
 									<div class="card-body">
 										<input type="text" 
