@@ -1,59 +1,37 @@
-FROM golang:1.24 AS compiler
-WORKDIR /go
+FROM golang:1.24 AS awg
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      git make bash build-essential \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/amnezia-vpn/amneziawg-go /awg
+WORKDIR /awg
+RUN go mod download && \
+    go mod verify && \
+    go build -ldflags '-linkmode external -extldflags "-fno-PIC -static"' -v -o /usr/bin
 
-RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-tools.git \
-    && git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git
-
-RUN cd /go/amneziawg-tools/src \
-    && make
-
-RUN cd /go/amneziawg-go && \
-    go get -u ./... && \
-    go mod tidy && \
-    make && \
-    chmod +x /go/amneziawg-go/amneziawg-go /go/amneziawg-tools/src/wg /go/amneziawg-tools/src/wg-quick/linux.bash
-RUN echo "DONE AmneziaWG"
-
-### INTERMEDIATE STAGE
-FROM scratch AS bins
-COPY --from=compiler /go/amneziawg-go/amneziawg-go /amneziawg-go
-COPY --from=compiler /go/amneziawg-tools/src/wg /awg
-COPY --from=compiler /go/amneziawg-tools/src/wg-quick/linux.bash /awg-quick
-
-# FINAL STAGE
 FROM alpine:latest
 LABEL maintainer="dselen@nerthus.nl"
 
-COPY --from=bins /amneziawg-go /usr/bin/amneziawg-go
-COPY --from=bins /awg /usr/bin/awg
-COPY --from=bins /awg-quick /usr/bin/awg-quick
+RUN apk update && apk add \
+    iproute2 iptables bash curl wget unzip procps sudo \
+    tzdata wireguard-tools python3 py3-psutil py3-bcrypt openresolv \
+  && cd /usr/bin/ \
+  && wget $(curl -s https://api.github.com/repos/amnezia-vpn/amneziawg-tools/releases/latest | grep 'alpine' | cut -d : -f 2,3 | tr -d '", ' | tail -n 1) \
+  && unzip -j alpine-3.19-amneziawg-tools.zip \
+  && chmod +x /usr/bin/awg /usr/bin/awg-quick \
+  && rm alpine-3.19-amneziawg-tools.zip
+
+COPY --from=awg /usr/bin/amneziawg-go /usr/bin/amneziawg-go
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ARG wg_net="10.0.0.1" \
-  wg_port="51820"
+    wg_port="51820"
 
 # Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
 ENV TZ="Europe/Amsterdam" \
-  global_dns="9.9.9.9" \
-  wgd_port="10086" \
-  public_ip=""
-
-# Doing package management operations, such as upgrading
-RUN apk update \
-  && apk add --no-cache bash git tzdata \
-    iptables ip6tables openrc curl wireguard-tools \
-    sudo py3-psutil py3-bcrypt \
-  && apk upgrade
+    global_dns="9.9.9.9" \
+    wgd_port="10086" \
+    public_ip=""
 
 # Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
 ENV WGDASH=/opt/wgdashboard
-
-# Removing the Linux Image package to preserve space on the image, for this reason also deleting apt lists, to be able to install packages: run apt update.
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
 RUN mkdir /data \

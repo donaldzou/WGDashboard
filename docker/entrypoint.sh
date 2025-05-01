@@ -131,6 +131,10 @@ set_envvars() {
 start_core() {
   printf "\n---------------------- STARTING CORE -----------------------\n"
 
+  mkdir -p /dev/net
+  mknod /dev/net/tun c 10 200
+  chmod 600 /dev/net/tun
+
   echo "Activating Python venv and executing the WireGuard Dashboard service."
   bash ./wgd.sh start
 }
