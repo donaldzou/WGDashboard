@@ -49,6 +49,6 @@ const squareHeight = computed(() => {
 }
 
 .floatingLabel{
-	top: 40px;
+	top: v-bind(squareHeight);
 }
 </style>
