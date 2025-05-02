@@ -310,7 +310,6 @@
 	"Deleted ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) terhapus",
 	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) berhasil terhapus. Gagal untuk menghapus $2 peer(s)",
 	"Restricted ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) terbatas",
-	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to  restrict ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) berhasil terbatas. Gagal untuk membatasi $2 peer(s)",
 	"Display As": "Tampilkan Sebagai",
 	"List": "Daftar",
 	"Grid": "Kisi",
@@ -349,7 +348,7 @@
 	"Memory": "Memori",
 	"Swap Memory": "Memori Swap",
 	"Processes": "Proses",
-	"CPU Usage": "Penggunaan CPu",
+	"CPU Usage": "Penggunaan CPU",
 	"Memory Usage": "Penggunaan Memori",
 	"Swap Memory Usage": "Penggunaan Memori Swap",
 	"Network": "Jaringan",
@@ -357,5 +356,6 @@
 	"Storage": "Penyimpanan",
 	"([0-9]{1,}) Partitions": "$1 Partisi",
 	"(.*) Used": "$1 terpakai",
-	"Untitled Peer": "Peer Tanpa Judul"
+	"Untitled Peer": "Peer Tanpa Judul",
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) berhasil terbatas. Gagal untuk membatasi $2 peer(s)"
 }
