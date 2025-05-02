@@ -470,11 +470,12 @@ class WireguardConfiguration:
             self.Status = self.getStatus()
     
     def __dropDatabase(self):
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        existingTables = [self.Name, f'{self.Name}_restrict_access', f'{self.Name}_transfer', f'{self.Name}_deleted']        
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
         for t in existingTables:
-            sqlUpdate("DROP TABLE '%s'" % t['name'])
+            sqlUpdate("DROP TABLE '%s'" % t)
 
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
     def createDatabase(self, dbName = None):
         if dbName is None:
