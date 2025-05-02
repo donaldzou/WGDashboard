@@ -47,8 +47,10 @@ export default {
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body p-4">
-						<div style="width: 292px; height: 292px;" class="d-flex">
-							<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster" :class="{'d-none': loading}"></canvas>
+						<div  class="d-flex">
+							<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster" 
+							        
+							        :class="{'d-none': loading}"></canvas>
 							<div class="spinner-border m-auto" role="status" v-if="loading">
 								<span class="visually-hidden">Loading...</span>
 							</div>
@@ -61,4 +63,11 @@ export default {
 </template>
 
 <style scoped>
+@media screen and (max-width: 768px) {
+	#qrcode{
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 1/1;
+	}
+}
 </style>

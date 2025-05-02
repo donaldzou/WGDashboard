@@ -25,7 +25,7 @@ from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 SystemStatus = SystemStatus()
 
-DASHBOARD_VERSION = 'v4.2.2'
+DASHBOARD_VERSION = 'v4.2.3'
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
@@ -470,11 +470,12 @@ class WireguardConfiguration:
             self.Status = self.getStatus()
     
     def __dropDatabase(self):
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        existingTables = [self.Name, f'{self.Name}_restrict_access', f'{self.Name}_transfer', f'{self.Name}_deleted']        
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
         for t in existingTables:
-            sqlUpdate("DROP TABLE '%s'" % t['name'])
+            sqlUpdate("DROP TABLE '%s'" % t)
 
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
     def createDatabase(self, dbName = None):
         if dbName is None:
@@ -804,6 +805,9 @@ class WireguardConfiguration:
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
         self.getPeers()
+        
+        if numOfDeletedPeers == 0 and numOfFailedToDeletePeers == 0:
+            return ResponseObject(False, "No peer(s) to delete found", responseCode=404)
 
         if numOfDeletedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
@@ -945,7 +949,8 @@ class WireguardConfiguration:
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
-            "Protocol": self.Protocol
+            "Protocol": self.Protocol,
+            "Table": self.Table,
         }
     
     def backupConfigurationFile(self) -> tuple[bool, dict[str, str]]:
@@ -1047,7 +1052,7 @@ class WireguardConfiguration:
         dataChanged = False
         with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort", "Table"]
             if self.Protocol == 'awg':
                 allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
             start = original.index("[Interface]")
@@ -1434,7 +1439,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                         f.write(p['preshared_key'])
 
                 subprocess.check_output(
-                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''} advanced-security {p['advanced_security']}",
+                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist:
                     os.remove(uid)
@@ -1713,7 +1718,7 @@ PersistentKeepalive = {str(self.keepalive)}
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'} advanced-security {advanced_security}",
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'}",
                 shell=True, stderr=subprocess.STDOUT)
 
             if pskExist: os.remove(uid)
@@ -2434,7 +2439,7 @@ def API_updatePeerSettings(configName):
                                        allowed_ip, endpoint_allowed_ip, mtu, keepalive)
             
             return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                allowed_ip, endpoint_allowed_ip, mtu, keepalive, data.get('advanced_security', 'off'))
+                allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
             
     return ResponseObject(False, "Peer does not exist")
 
@@ -2463,11 +2468,11 @@ def API_deletePeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify one or more peers")
+            return ResponseObject(False, "Please specify one or more peers", status_code=400)
         configuration = WireguardConfigurations.get(configName)
         return configuration.deletePeers(peers)
 
-    return ResponseObject(False, "Configuration does not exist")
+    return ResponseObject(False, "Configuration does not exist", status_code=404)
 
 @app.post(f'{APP_PREFIX}/api/restrictPeers/<configName>')
 def API_restrictPeers(configName: str) -> ResponseObject:
@@ -2604,7 +2609,7 @@ def API_addPeers(configName):
                             "endpoint_allowed_ip": endpoint_allowed_ip,
                             "mtu": mtu,
                             "keepalive": keep_alive,
-                            "advanced_security": data.get("advanced_security", "off")
+                            "advanced_security": "off"
                         })
                         if addedCount == bulkAddAmount:
                             break
@@ -2674,7 +2679,7 @@ def API_addPeers(configName):
                         "DNS": dns_addresses,
                         "mtu": mtu,
                         "keepalive": keep_alive,
-                        "advanced_security": data.get("advanced_security", "off")
+                        "advanced_security": "off"
                     }]
                 )
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
