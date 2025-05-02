@@ -804,6 +804,9 @@ class WireguardConfiguration:
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
         self.getPeers()
+        
+        if numOfDeletedPeers == 0 and numOfFailedToDeletePeers == 0:
+            return ResponseObject(False, "No peer(s) to delete found", responseCode=404)
 
         if numOfDeletedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
@@ -2464,11 +2467,11 @@ def API_deletePeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify one or more peers")
+            return ResponseObject(False, "Please specify one or more peers", status_code=400)
         configuration = WireguardConfigurations.get(configName)
         return configuration.deletePeers(peers)
 
-    return ResponseObject(False, "Configuration does not exist")
+    return ResponseObject(False, "Configuration does not exist", status_code=404)
 
 @app.post(f'{APP_PREFIX}/api/restrictPeers/<configName>')
 def API_restrictPeers(configName: str) -> ResponseObject:
