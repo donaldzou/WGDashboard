@@ -240,9 +240,9 @@
 	"Dashboard IP Address \\& Listen Port": "ダッシュボードIPアドレス & 待ち受けポート",
 	"Count": "回数",
 	"Hop": "ホップ数",
-	"Average RTT (ms)": "平均RTT (ms)",
-	"Min RTT (ms)": "最低RTT (ms)",
-	"Max RTT (ms)": "最高RTT (ms)",
+	"Average RTT \\(ms\\)": "平均RTT (ms)",
+	"Min RTT \\(ms\\)": "最低RTT (ms)",
+	"Max RTT \\(ms\\)": "最高RTT (ms)",
 	"Geolocation": "場所",
 	"Is Alive": "ステータス",
 	"Average / Min / Max Round Trip Time": "平均 / 最小 / 最大 往復時間",
@@ -334,9 +334,9 @@
 	"Edit Raw Configuration File": "構成ファイルを直接編集",
 	"Peer Configuration File": "ピア構成ファイル",
 	"Share with Email": "Eメールで共有",
-	"Who are you sending to?": "送信先",
-	"What's the subject?": "件名",
-	"What's the body?": "本文",
+	"Who are you sending to\\?": "送信先",
+	"What\\'s the subject\\?": "件名",
+	"What\\'s the body\\?": "本文",
 	"Email Account": "Eメールアカウント",
 	"Ready": "利用可能",
 	"Port": "ポート",
@@ -364,5 +364,6 @@
 	"Storage": "ストレージ",
 	"([0-9]{1,}) Partitions": "$1 個のパーティション",
 	"(.*) Used": "$1 使用中",
-	"Untitled Peer": "無名のピア"
+	"Untitled Peer": "無名のピア",
+	"Table": ""
 }

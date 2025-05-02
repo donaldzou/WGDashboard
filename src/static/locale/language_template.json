@@ -241,9 +241,9 @@
 	"Dashboard IP Address \\& Listen Port": "",
 	"Count": "",
 	"Hop": "",
-	"Average RTT (ms)": "",
-	"Min RTT (ms)": "",
-	"Max RTT (ms)": "",
+	"Average RTT \\(ms\\)": "",
+	"Min RTT \\(ms\\)": "",
+	"Max RTT \\(ms\\)": "",
 	"Geolocation": "",
 	"Is Alive": "",
 	"Average / Min / Max Round Trip Time": "",
@@ -335,9 +335,6 @@
 	"Edit Raw Configuration File": "",
 	"Peer Configuration File": "",
 	"Share with Email": "",
-	"Who are you sending to?": "",
-	"What's the subject?": "",
-	"What's the body?": "",
 	"Email Account": "",
 	"Ready": "",
 	"Port": "",
@@ -365,5 +362,8 @@
 	"Storage": "",
 	"([0-9]{1,}) Partitions": "",
 	"(.*) Used": "",
-	"Untitled Peer": ""
+	"Untitled Peer": "",
+	"Who are you sending to\\?": "",
+	"What\\'s the subject\\?": "",
+	"What\\'s the body\\?": ""
 }
