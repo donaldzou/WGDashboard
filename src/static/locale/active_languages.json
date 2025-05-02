@@ -10,14 +10,14 @@
         "lang_name_localized": "Беларуская"
     },
     {
-        "lang_id": "zh-hk",
-        "lang_name": "Chinese (Traditional)",
-        "lang_name_localized": "中文（繁體）"
-    },
-    {
         "lang_id": "ca",
         "lang_name": "Catalan",
         "lang_name_localized": "Català"
+    },
+    {
+        "lang_id": "zh-hk",
+        "lang_name": "Chinese (Traditional)",
+        "lang_name_localized": "中文（繁體）"
     },
     {
         "lang_id": "cs",
