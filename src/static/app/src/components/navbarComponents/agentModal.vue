@@ -75,7 +75,7 @@ const store = DashboardConfigurationStore()
 	width: 450px;
 	box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(8px);
-	background: linear-gradient(var(--degree), #009dff52 var(--distance2), #ff4a0052 100%);
+	background: linear-gradient(var(--degree), #009dff52 var(--distance2), #F9464752 100%);
 }
 
 .agentContainer.enabled{
