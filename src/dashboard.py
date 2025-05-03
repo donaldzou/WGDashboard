@@ -2957,7 +2957,7 @@ def API_isTotpEnabled():
 @app.get(f'{APP_PREFIX}/api/Welcome_GetTotpLink')
 def API_Welcome_GetTotpLink():
     if not DashboardConfig.GetConfig("Account", "totp_verified")[1]:
-        DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32())
+        DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32(), True)
         return ResponseObject(
             data=pyotp.totp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).provisioning_uri(
                 issuer_name="WGDashboard"))
