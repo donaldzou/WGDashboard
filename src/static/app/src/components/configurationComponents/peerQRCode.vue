@@ -24,9 +24,34 @@ export default {
 		}, (res) => {
 			this.loading = false;
 			if (res.status){
-				QRCode.toCanvas(document.querySelector("#qrcode"), res.data.file,  (error) => {
-					if (error) console.error(error)
-				})
+				if (this.selectedPeer.configuration.Protocol === "awg"){
+					let awgQRCodeObject = {
+						containers: [
+							{
+								awg: {
+									isThirdPartyConfig: true,
+									last_config: res.data.file,
+									port: this.selectedPeer.configuration.ListenPort,
+									transport_proto: "udp"
+								},
+								container: "amnezia-awg",
+							}
+						],
+						defaultContainer: "amnezia-awg",
+						description: this.selectedPeer.name,
+						hostName: this.dashboardStore.Configuration.Peers.remote_endpoint
+					}
+					
+					QRCode.toCanvas(document.querySelector("#qrcode"), btoa(JSON.stringify(awgQRCodeObject)),  (error) => {
+						if (error) console.error(error)
+					})
+				}else{
+					QRCode.toCanvas(document.querySelector("#qrcode"), res.data.file,  (error) => {
+						if (error) console.error(error)
+					})
+				}
+				
+				
 			}else{
 				this.dashboardStore.newMessage("Server", res.message, "danger")
 			}
