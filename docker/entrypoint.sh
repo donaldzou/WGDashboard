@@ -11,6 +11,13 @@ stop_service() {
   exit 0
 }
 
+# Function to hash password using bcrypt
+hash_password() {
+  local password="$1"
+  # Generate bcrypt hash using Python
+  python3 -c "import bcrypt; print(bcrypt.hashpw('${password}'.encode(), bcrypt.gensalt(12)).decode())"
+}
+
 echo "------------------------- START ----------------------------"
 echo "Starting the WireGuard Dashboard Docker container."
 
@@ -124,6 +131,81 @@ set_envvars() {
   else
     echo "Changing default WGD port..."
     sed -i "s/^app_port = .*/app_port = ${wgd_port}/" "${config_file}"
+  fi
+  
+  # Check and update account settings if provided
+  if [ -n "${username}" ] && [ -n "${password}" ]; then
+    current_username=$(grep "^username = " "${config_file}" | awk '{print $NF}')
+    if [ "${username}" == "${current_username}" ]; then
+      echo "Username is set correctly, moving on."
+    else
+      echo "Setting username..."
+      if grep -q "^\[Account\]" "${config_file}"; then
+        sed -i "s/^username = .*/username = ${username}/" "${config_file}"
+      else
+        echo -e "\n[Account]" >> "${config_file}"
+        echo "username = ${username}" >> "${config_file}"
+        echo "enable_totp = false" >> "${config_file}"
+        echo "totp_verified = false" >> "${config_file}"
+        echo "totp_key = " >> "${config_file}"
+      fi
+    fi
+    
+    # Always update password when provided
+    echo "Setting password..."
+    hashed_password=$(hash_password "${password}")
+    if grep -q "^password = " "${config_file}"; then
+      sed -i "s|^password = .*|password = ${hashed_password}|" "${config_file}"
+    else
+      # If [Account] section exists but password line doesn't
+      if grep -q "^\[Account\]" "${config_file}"; then
+        sed -i "/\[Account\]/a password = ${hashed_password}" "${config_file}"
+      fi
+    fi
+    
+    # Set welcome_session to false
+    if grep -q "^\[Other\]" "${config_file}"; then
+      current_welcome=$(grep "^welcome_session = " "${config_file}" | awk '{print $NF}')
+      if [ "${current_welcome}" == "false" ]; then
+        echo "Welcome session already disabled, moving on."
+      else
+        echo "Disabling welcome session..."
+        sed -i "s/^welcome_session = .*/welcome_session = false/" "${config_file}"
+      fi
+    else
+      echo -e "\n[Other]" >> "${config_file}"
+      echo "welcome_session = false" >> "${config_file}"
+    fi
+  fi
+  
+  # Check TOTP setting if provided
+  if [ -n "${enable_totp}" ]; then
+    current_totp=$(grep "^enable_totp = " "${config_file}" | awk '{print $NF}')
+    if [ "${enable_totp}" == "${current_totp}" ]; then
+      echo "TOTP setting is correct, moving on."
+    else
+      echo "Setting TOTP configuration..."
+      if grep -q "^enable_totp = " "${config_file}"; then
+        sed -i "s/^enable_totp = .*/enable_totp = ${enable_totp}/" "${config_file}"
+      fi
+    fi
+  fi
+  
+  # Check WireGuard autostart setting
+  if [ -n "${wg_autostart}" ]; then
+    if grep -q "^\[WireGuardConfiguration\]" "${config_file}"; then
+      current_autostart=$(grep "^autostart = " "${config_file}" | awk '{print $NF}')
+      if [ "${wg_autostart}" == "${current_autostart}" ]; then
+        echo "WireGuard autostart is set correctly, moving on."
+      else
+        echo "Updating WireGuard autostart..."
+        sed -i "s/^autostart = .*/autostart = ${wg_autostart}/" "${config_file}"
+      fi
+    else
+      echo "Setting new WireGuard autostart configuration..."
+      echo -e "\n[WireGuardConfiguration]" >> "${config_file}"
+      echo "autostart = ${wg_autostart}" >> "${config_file}"
+    fi
   fi
 }
 
