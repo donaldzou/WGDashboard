@@ -225,72 +225,72 @@ set_envvars() {
     fi
     
     if [ -n "${email_server}" ]; then
-      current_email_server=$(grep "^server = " "${config_file}" | awk '{print $NF}')
+      current_email_server=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^server = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_server}" == "${current_email_server}" ]; then
         echo "Email server is already set correctly, moving on."
       else
         echo "Updating email server..."
-        sed -i "s|^server = .*|server = ${email_server}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^server = .*|server = '"${email_server}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_port}" ]; then
-      current_email_port=$(grep "^port = " "${config_file}" | awk '{print $NF}')
+      current_email_port=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^port = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_port}" == "${current_email_port}" ]; then
         echo "Email port is already set correctly, moving on."
       else
         echo "Updating email port..."
-        sed -i "s|^port = .*|port = ${email_port}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^port = .*|port = '"${email_port}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_encryption}" ]; then
-      current_email_encryption=$(grep "^encryption = " "${config_file}" | awk '{print $NF}')
+      current_email_encryption=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^encryption = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_encryption}" == "${current_email_encryption}" ]; then
         echo "Email encryption is already set correctly, moving on."
       else
         echo "Updating email encryption..."
-        sed -i "s|^encryption = .*|encryption = ${email_encryption}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^encryption = .*|encryption = '"${email_encryption}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_username}" ]; then
-      current_email_username=$(grep "^username = " "${config_file}" | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
+      current_email_username=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^username = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_username}" == "${current_email_username}" ]; then
         echo "Email username is already set correctly, moving on."
       else
         echo "Updating email username..."
-        sed -i "s|^username = .*|username = ${email_username}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^username = .*|username = '"${email_username}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_password}" ]; then
-      current_email_password=$(grep "^email_password = " "${config_file}" | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
+      current_email_password=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^email_password = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_password}" == "${current_email_password}" ]; then
         echo "Email password is already set correctly, moving on."
       else
         echo "Updating email password..."
-        sed -i "s|^email_password = .*|email_password = ${email_password}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^email_password = .*|email_password = '"${email_password}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_from}" ]; then
-      current_email_from=$(grep "^send_from = " "${config_file}" | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
+      current_email_from=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^send_from = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_from}" == "${current_email_from}" ]; then
         echo "Email from address is already set correctly, moving on."
       else
         echo "Updating email from address..."
-        sed -i "s|^send_from = .*|send_from = ${email_from}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^send_from = .*|send_from = '"${email_from}"'|' "${config_file}"
       fi
     fi
     
     if [ -n "${email_template}" ]; then
-      current_email_template=$(grep "^email_template = " "${config_file}" | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
+      current_email_template=$(grep -A7 "^\[Email\]" "${config_file}" | grep "^email_template = " | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
       if [ "${email_template}" == "${current_email_template}" ]; then
         echo "Email template is already set correctly, moving on."
       else
         echo "Updating email template..."
-        sed -i "s|^email_template = .*|email_template = ${email_template}|" "${config_file}"
+        sed -i '/^\[Email\]/,/^\[/ s|^email_template = .*|email_template = '"${email_template}"'|' "${config_file}"
       fi
     fi
   fi
