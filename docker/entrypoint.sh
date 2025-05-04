@@ -101,22 +101,26 @@ set_envvars() {
   
   set_ini Server app_port "${wgd_port}"
   
-  # Account
-  if [[ -n "$username" && -n "$password" ]]; then
-    echo "Configuring user account:"
-    set_ini Account username "${username}"
-    echo "- Setting password for ${username}"
+  # Account settings - process all parameters
+  echo "Configuring user account:"
+  # Basic account variables
+  [[ -n "$username" ]] && set_ini Account username "${username}"
+  
+  if [[ -n "$password" ]]; then
+    echo "- Setting password"
     set_ini Account password "$(hash_password "${password}")"
-    set_ini Account enable_totp "false"
-    set_ini Account totp_verified "false"
-    set_ini Account totp_key ""
-    set_ini Other welcome_session "false"
   fi
   
-  # TOTP
-  if [[ -n "$enable_totp" ]]; then
-    echo "Configuring TOTP settings:"
-    set_ini Account enable_totp "${enable_totp}"
+  # Additional account variables
+  [[ -n "$enable_totp" ]] && set_ini Account enable_totp "${enable_totp}"
+  [[ -n "$totp_verified" ]] && set_ini Account totp_verified "${totp_verified}"
+  [[ -n "$totp_key" ]] && set_ini Account totp_key "${totp_key}"
+  
+  # Welcome session
+  [[ -n "$welcome_session" ]] && set_ini Other welcome_session "${welcome_session}"
+  # If username and password are set but welcome_session isn't, disable it
+  if [[ -n "$username" && -n "$password" && -z "$welcome_session" ]]; then
+    set_ini Other welcome_session "false"
   fi
   
   # Autostart WireGuard
