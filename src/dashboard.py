@@ -1803,7 +1803,10 @@ class DashboardConfig:
                 "welcome_session": "true"
             },
             "Database":{
-                "type": "sqlite"
+                "type": "sqlite",
+                "host": "",
+                "username": "",
+                "password": ""
             },
             "Email":{
                 "server": "",
@@ -1828,6 +1831,13 @@ class DashboardConfig:
         self.DashboardAPIKeys = self.__getAPIKeys()
         self.APIAccessed = False
         self.SetConfig("Server", "version", DASHBOARD_VERSION)
+    
+    def getConnectionString(self, database) -> str or None:
+        if self.GetConfig("Database", "type")[1] == "sqlite":
+            return f'sqlite:///{os.path.join(CONFIGURATION_PATH, "db", f".db")}'
+        elif self.GetConfig("Database", "type")[1] == "postgresql":
+            return f'postgresql+psycopg2://{self.GetConfig("Database", "username")[1]}:{self.GetConfig("Database", "password")[1]}@{self.GetConfig("Database", "host")[1]}/{database}'
+        return None
     
     def __createAPIKeyTable(self):
         existingTable = sqlSelect("SELECT name FROM sqlite_master WHERE type='table' AND name = 'DashboardAPIKeys'").fetchall()
@@ -3185,8 +3195,8 @@ def InitWireguardConfigurationsList(startup: bool = False):
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks()
 AllPeerJobs: PeerJobs = PeerJobs()
-JobLogger: PeerJobLogger = PeerJobLogger(CONFIGURATION_PATH, AllPeerJobs)
-DashboardLogger: DashboardLogger = DashboardLogger(CONFIGURATION_PATH)
+JobLogger: PeerJobLogger = PeerJobLogger(CONFIGURATION_PATH, AllPeerJobs, DashboardConfig)
+DashboardLogger: DashboardLogger = DashboardLogger(CONFIGURATION_PATH, DashboardConfig)
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")

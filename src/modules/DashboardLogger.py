@@ -6,13 +6,13 @@ import sqlalchemy as db
 from datetime import datetime
 
 class DashboardLogger:
-    def __init__(self, CONFIGURATION_PATH):
-        self.engine = db.create_engine(f'sqlite:///{os.path.join(CONFIGURATION_PATH, "db", "wgdashboard_log.db")}')
+    def __init__(self, CONFIGURATION_PATH, DashboardConfig):
+        self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
         self.loggerdb = self.engine.connect()
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
                                              db.Column('LogID', db.VARCHAR, nullable=False, primary_key=True),
-                                             db.Column('LogDate', db.DATETIME,
+                                             db.Column('LogDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP),
                                                        server_default=datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
                                              db.Column('URL', db.VARCHAR),
                                              db.Column('IP', db.VARCHAR),
