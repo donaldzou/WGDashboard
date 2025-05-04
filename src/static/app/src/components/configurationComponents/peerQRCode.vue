@@ -24,6 +24,7 @@ export default {
 		}, (res) => {
 			this.loading = false;
 			if (res.status){
+				let data = ""
 				if (this.selectedPeer.configuration.Protocol === "awg"){
 					let awgQRCodeObject = {
 						containers: [
@@ -41,17 +42,13 @@ export default {
 						description: this.selectedPeer.name,
 						hostName: this.dashboardStore.Configuration.Peers.remote_endpoint
 					}
-					
-					QRCode.toCanvas(document.querySelector("#qrcode"), btoa(JSON.stringify(awgQRCodeObject)),  (error) => {
-						if (error) console.error(error)
-					})
+					data = JSON.stringify(awgQRCodeObject)
 				}else{
-					QRCode.toCanvas(document.querySelector("#qrcode"), res.data.file,  (error) => {
-						if (error) console.error(error)
-					})
+					data = res.data.file
 				}
-				
-				
+				QRCode.toCanvas(document.querySelector("#qrcode"), data,  (error) => {
+					if (error) console.error(error)
+				})
 			}else{
 				this.dashboardStore.newMessage("Server", res.message, "danger")
 			}
