@@ -1801,6 +1801,7 @@ class DashboardConfig:
             "Database":{
                 "type": "sqlite",
                 "host": "",
+                "port": "",
                 "username": "",
                 "password": ""
             },
@@ -1830,7 +1831,7 @@ class DashboardConfig:
     
     def getConnectionString(self, database) -> str or None:
         if self.GetConfig("Database", "type")[1] == "sqlite":
-            return f'sqlite:///{os.path.join(CONFIGURATION_PATH, "db", f".db")}'
+            return f'sqlite:///{os.path.join(CONFIGURATION_PATH, "db", f"{database}.db")}'
         elif self.GetConfig("Database", "type")[1] == "postgresql":
             return f'postgresql+psycopg2://{self.GetConfig("Database", "username")[1]}:{self.GetConfig("Database", "password")[1]}@{self.GetConfig("Database", "host")[1]}/{database}'
         return None

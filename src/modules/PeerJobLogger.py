@@ -5,17 +5,21 @@ import os, uuid
 import sqlalchemy as db
 from .Log import Log
 from datetime import datetime
+from sqlalchemy_utils import database_exists, create_database
 
 class PeerJobLogger:
     def __init__(self, CONFIGURATION_PATH, AllPeerJobs, DashboardConfig):
         self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)            
+        
         self.loggerdb = self.engine.connect()
         self.metadata = db.MetaData()
         self.jobLogTable = db.Table('JobLog', self.metadata,
                                     db.Column('LogID', db.String, nullable=False, primary_key=True),
                                     db.Column('JobID', db.String, nullable=False),
                                     db.Column('LogDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP), 
-                                              server_default=datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                                              server_default=db.func.now()),
                                     db.Column('Status', db.String, nullable=False),
                                     db.Column('Message', db.String)
                                     )

@@ -9,4 +9,5 @@ gunicorn
 requests
 tcconfig
 sqlalchemy
+sqlalchemy_utils
 psycopg2
