@@ -2,17 +2,19 @@ import os.path
 import dashboard, configparser
 from datetime import datetime
 global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger
-app_host, app_port = dashboard.gunicornConfig()
+app_host, app_port, certfile, keyfile = dashboard.gunicornConfig()
 date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
 def post_worker_init(worker):
     dashboard.startThreads()
 
 worker_class = 'gthread'
-workers = 1
-threads = 1
+workers = 4
+threads = 4
 bind = f"{app_host}:{app_port}"
 daemon = True
+certfile = f"{certfile}"
+keyfile = f"{keyfile}"
 pidfile = './gunicorn.pid'
 wsgi_app = "dashboard:app"
 accesslog = f"./log/access_{date}.log"
