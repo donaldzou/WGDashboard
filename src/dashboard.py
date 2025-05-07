@@ -432,21 +432,6 @@ class WireguardConfiguration:
             original = [l.rstrip("\n") for l in f.readlines()]
             try:
                 start = original.index("[Interface]")
-                
-                # Clean
-                for i in range(start, len(original)):
-                    if original[i] == "[Peer]":
-                        break
-                    split = re.split(r'\s*=\s*', original[i], 1)
-                    if len(split) == 2:
-                        key = split[0]
-                        if key in dir(self):
-                            if isinstance(getattr(self, key), bool):
-                                setattr(self, key, False)
-                            else:
-                                setattr(self, key, "")
-                
-                # Set
                 for i in range(start, len(original)):
                     if original[i] == "[Peer]":
                         break
@@ -459,7 +444,10 @@ class WireguardConfiguration:
                                 setattr(self, key, StringToBoolean(value))
                             else:
                                 if len(getattr(self, key)) > 0:
-                                    setattr(self, key, f"{getattr(self, key)}, {value}")
+                                    if key not in ["PostUp", "PostDown", "PreUp", "PreDown"]:
+                                        setattr(self, key, f"{getattr(self, key)}, {value}")
+                                    else:
+                                        setattr(self, key, f"{getattr(self, key)}; {value}")
                                 else:
                                     setattr(self, key, value)  
             except ValueError as e:
@@ -1209,15 +1197,15 @@ AmneziaWG Configuration
 """
 class AmneziaWireguardConfiguration(WireguardConfiguration):
     def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
-        self.Jc = 0
-        self.Jmin = 0
-        self.Jmax = 0
-        self.S1 = 0
-        self.S2 = 0
-        self.H1 = 1
-        self.H2 = 2
-        self.H3 = 3
-        self.H4 = 4
+        self.Jc = "0"
+        self.Jmin = "0"
+        self.Jmax = "0"
+        self.S1 = "0"
+        self.S2 = "0"
+        self.H1 = "1"
+        self.H2 = "2"
+        self.H3 = "3"
+        self.H4 = "4"
         
         super().__init__(name, data, backup, startup, wg=False)
 
