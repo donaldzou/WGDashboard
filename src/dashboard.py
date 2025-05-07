@@ -432,6 +432,20 @@ class WireguardConfiguration:
             original = [l.rstrip("\n") for l in f.readlines()]
             try:
                 start = original.index("[Interface]")
+                # Clean
+                for i in range(start, len(original)):
+                    if original[i] == "[Peer]":
+                        break
+                    split = re.split(r'\s*=\s*', original[i], 1)
+                    if len(split) == 2:
+                        key = split[0]
+                        if key in dir(self):
+                            if isinstance(getattr(self, key), bool):
+                                setattr(self, key, False)
+                            else:
+                                setattr(self, key, "")
+
+                # Set
                 for i in range(start, len(original)):
                     if original[i] == "[Peer]":
                         break
@@ -1197,15 +1211,15 @@ AmneziaWG Configuration
 """
 class AmneziaWireguardConfiguration(WireguardConfiguration):
     def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
-        self.Jc = "0"
-        self.Jmin = "0"
-        self.Jmax = "0"
-        self.S1 = "0"
-        self.S2 = "0"
-        self.H1 = "1"
-        self.H2 = "2"
-        self.H3 = "3"
-        self.H4 = "4"
+        self.Jc = ""
+        self.Jmin = ""
+        self.Jmax = ""
+        self.S1 = ""
+        self.S2 = ""
+        self.H1 = ""
+        self.H2 = ""
+        self.H3 = ""
+        self.H4 = ""
         
         super().__init__(name, data, backup, startup, wg=False)
 
@@ -1230,6 +1244,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
+            "Table": self.Table,
             "Protocol": self.Protocol,
             "Jc": self.Jc,
             "Jmin": self.Jmin,

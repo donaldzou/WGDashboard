@@ -36,7 +36,7 @@ const resetForm = () => {
 	dataChanged.value = false;
 	Object.assign(data, JSON.parse(JSON.stringify(props.configurationInfo)))
 }
-const emit = defineEmits(["changed", "close", "refresh"])
+const emit = defineEmits(["changed", "close", "refresh", "dataChanged"])
 const saveForm = ()  => {
 	saving.value = true
 	fetchPost("/api/updateWireguardConfiguration", data, (res) => {
