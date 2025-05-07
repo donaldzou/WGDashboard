@@ -24,7 +24,29 @@ export default {
 		}, (res) => {
 			this.loading = false;
 			if (res.status){
-				QRCode.toCanvas(document.querySelector("#qrcode"), res.data.file,  (error) => {
+				let data = ""
+				if (this.selectedPeer.configuration.Protocol === "awg"){
+					let awgQRCodeObject = {
+						containers: [
+							{
+								awg: {
+									isThirdPartyConfig: true,
+									last_config: res.data.file,
+									port: this.selectedPeer.configuration.ListenPort,
+									transport_proto: "udp"
+								},
+								container: "amnezia-awg",
+							}
+						],
+						defaultContainer: "amnezia-awg",
+						description: this.selectedPeer.name,
+						hostName: this.dashboardStore.Configuration.Peers.remote_endpoint
+					}
+					data = JSON.stringify(awgQRCodeObject)
+				}else{
+					data = res.data.file
+				}
+				QRCode.toCanvas(document.querySelector("#qrcode"), data,  (error) => {
 					if (error) console.error(error)
 				})
 			}else{
@@ -47,8 +69,10 @@ export default {
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body p-4">
-						<div style="width: 292px; height: 292px;" class="d-flex">
-							<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster" :class="{'d-none': loading}"></canvas>
+						<div  class="d-flex">
+							<canvas id="qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster" 
+							        
+							        :class="{'d-none': loading}"></canvas>
 							<div class="spinner-border m-auto" role="status" v-if="loading">
 								<span class="visually-hidden">Loading...</span>
 							</div>
@@ -61,4 +85,11 @@ export default {
 </template>
 
 <style scoped>
+@media screen and (max-width: 768px) {
+	#qrcode{
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 1/1;
+	}
+}
 </style>

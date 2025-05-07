@@ -102,11 +102,12 @@ watch(() => {
 					<div class="card-body px-4 pb-4">
 						<div class="d-flex flex-column gap-2">
 							<BulkAdd :saving="saving" :data="peerData" :availableIp="availableIp"></BulkAdd>
-							<hr class="mb-0 mt-2">
-							<NameInput :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></NameInput>
-							<PrivatePublicKeyInput :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></PrivatePublicKeyInput>
-							<AllowedIPsInput :availableIp="availableIp" :saving="saving" :data="peerData" v-if="!peerData.bulkAdd"></AllowedIPsInput>
-							
+							<template v-if="!peerData.bulkAdd">
+								<hr class="mb-0 mt-2">
+								<NameInput :saving="saving" :data="peerData"></NameInput>
+								<PrivatePublicKeyInput :saving="saving" :data="peerData"></PrivatePublicKeyInput>
+								<AllowedIPsInput :availableIp="availableIp" :saving="saving" :data="peerData"></AllowedIPsInput>
+							</template>
 						</div>
 						<hr>
 						<div class="accordion mb-3" id="peerAddModalAccordion">
@@ -155,36 +156,6 @@ watch(() => {
 							
 							
 						</div>
-						
-						<div v-if="getProtocol === 'awg'">
-							<h5>
-								<LocaleText t="AmneziaWG Peer Setting"></LocaleText>
-							</h5>
-							<div >
-								<label class="form-label d-block"><small class="text-muted">
-									<LocaleText t="Advanced Security"></LocaleText>
-								</small></label>
-
-								<div class="btn-group" role="group">
-									<input type="radio" class="btn-check"
-									       v-model="peerData.advanced_security"
-									       value="on"
-									       name="advanced_security_radio" id="advanced_security_on" autocomplete="off">
-									<label class="btn btn-outline-primary  btn-sm" for="advanced_security_on">
-										<LocaleText t="On"></LocaleText>
-									</label>
-
-									<input type="radio"
-									       v-model="peerData.advanced_security"
-									       value="off"
-									       class="btn-check" name="advanced_security_radio" id="advanced_security_off" autocomplete="off">
-									<label class="btn btn-outline-primary btn-sm" for="advanced_security_off">
-										<LocaleText t="Off"></LocaleText>
-									</label>
-								</div>
-							</div>
-						</div>
-						
 						<div class="d-flex mt-2">
 							<button class="ms-auto btn btn-dark btn-brand rounded-3 px-3 py-2 shadow"
 							        :disabled="!allRequireFieldsFilled || saving"

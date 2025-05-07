@@ -278,7 +278,6 @@
 	"Create Backup": "建立備份",
 	"No backup yet, click the button above to create backup\\.": "還沒有任何備份，點擊上方按鈕建立",
 	"Are you sure to delete this backup\\?": "您確定要刪除此備份嗎？",
-	"Are you sure to restore this backup?\\": "您確定要恢復此備份嗎？",
 	"Backup Date": "備份日期",
 	"File": "檔案",
 	"Are you sure to delete this configuration\\?": "您確定要刪除此配置嗎？",
@@ -357,5 +356,14 @@
 	"Storage": "儲存",
 	"([0-9]{1,}) Partitions": "$1 個分割區",
 	"(.*) Used": "已使用 $1",
-	"Untitled Peer": "未命名端點"
+	"Untitled Peer": "未命名端點",
+	"Table": "路由表",
+	"Hop": "跳數",
+	"Average RTT \\(ms\\)": "平均來回時間（毫秒）",
+	"Min RTT \\(ms\\)": "最低來回時間（毫秒）",
+	"Max RTT \\(ms\\)": "最高來回時間（毫秒）",
+	"You can visit our: ": "您可以訪問我們的：",
+	"Official Documentation": "官方文檔",
+	"Discord Server": "Discord 伺服器",
+	"Are you sure to restore this backup\\?": "您確定要恢復到此備份嗎？"
 }
