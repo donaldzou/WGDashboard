@@ -24,6 +24,7 @@ from modules.PeerJobLogger import PeerJobLogger
 from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 from modules.PeerShareLinks import PeerShareLinks
+from modules.DashboardAPIKey import DashboardAPIKey
 SystemStatus = SystemStatus()
 
 from sqlalchemy_utils import database_exists, create_database
@@ -233,7 +234,6 @@ class PeerJobs:
             return x > y
         if operator == "lst":
             return x < y
-        
 
 """
 WireGuard Configuration
@@ -1679,17 +1679,6 @@ PersistentKeepalive = {str(self.keepalive)}
         except subprocess.CalledProcessError as exc:
             return ResponseObject(False, exc.output.decode("UTF-8").strip())
     
-"""
-Dashboard API Key
-"""
-class DashboardAPIKey:
-    def __init__(self, Key: str, CreatedAt: str, ExpiredAt: str):
-        self.Key = Key
-        self.CreatedAt = CreatedAt
-        self.ExpiredAt = ExpiredAt
-    
-    def toJson(self):
-        return self.__dict__
 
 """
 Dashboard Configuration
