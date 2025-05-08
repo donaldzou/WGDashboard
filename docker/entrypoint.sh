@@ -58,6 +58,7 @@ ensure_installation() {
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
   
+  echo "Removing clear command from wgd.sh for better Docker logging."
   sed -i '/clear/d' ./wgd.sh
   
   # Create required directories and links
