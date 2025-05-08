@@ -11,7 +11,6 @@ class DashboardLogger:
         self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
         if not database_exists(self.engine.url):
             create_database(self.engine.url)
-        self.loggerdb = self.engine.connect()
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
                                              db.Column('LogID', db.VARCHAR, nullable=False, primary_key=True),
