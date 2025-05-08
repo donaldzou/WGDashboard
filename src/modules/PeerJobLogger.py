@@ -9,11 +9,7 @@ from sqlalchemy_utils import database_exists, create_database
 
 class PeerJobLogger:
     def __init__(self, CONFIGURATION_PATH, AllPeerJobs, DashboardConfig):
-        self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
-        if not database_exists(self.engine.url):
-            create_database(self.engine.url)            
-        
-        self.loggerdb = self.engine.connect()
+        self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))                
         self.metadata = db.MetaData()
         self.jobLogTable = db.Table('JobLog', self.metadata,
                                     db.Column('LogID', db.String, nullable=False, primary_key=True),
@@ -52,10 +48,11 @@ class PeerJobLogger:
             stmt = self.jobLogTable.select().where(self.jobLogTable.columns.JobID.in_(
                 allJobsID
             ))
-            table = self.loggerdb.execute(stmt).fetchall()            
-            for l in table:
-                logs.append(
-                    Log(l.LogID, l.JobID, l.LogDate.strftime("%Y-%m-%d %H:%M:%S"), l.Status, l.Message))
+            with self.engine.connect() as conn:
+                table = conn.execute(stmt).fetchall()
+                for l in table:
+                    logs.append(
+                        Log(l.LogID, l.JobID, l.LogDate.strftime("%Y-%m-%d %H:%M:%S"), l.Status, l.Message))
         except Exception as e:
             print(e)
             return logs
