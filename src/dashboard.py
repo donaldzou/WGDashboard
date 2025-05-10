@@ -180,6 +180,7 @@ class PeerJobs:
     
     def runJob(self):
         needToDelete = []
+        self.__getJobs()
         for job in self.Jobs:
             c = WireguardConfigurations.get(job.Configuration)
             if c is not None:
