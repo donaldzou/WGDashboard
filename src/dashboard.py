@@ -251,6 +251,7 @@ class PeerJobs:
     
     def runJob(self):
         needToDelete = []
+        self.__getJobs()
         for job in self.Jobs:
             c = WireguardConfigurations.get(job.Configuration)
             if c is not None:
@@ -787,7 +788,7 @@ class WireguardConfiguration:
             return ResponseObject(True, f"Restricted {numOfRestrictedPeers} peer(s)")
         return ResponseObject(False,
                               f"Restricted {numOfRestrictedPeers} peer(s) successfully. Failed to restrict {numOfFailedToRestrictPeers} peer(s)")
-        pass
+        
 
     def deletePeers(self, listOfPublicKeys):
         numOfDeletedPeers = 0
