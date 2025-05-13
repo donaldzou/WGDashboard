@@ -1,14 +1,12 @@
 """
 Peer Job Logger
 """
-import os, uuid
+import uuid
 import sqlalchemy as db
 from .Log import Log
-from datetime import datetime
-from sqlalchemy_utils import database_exists, create_database
 
 class PeerJobLogger:
-    def __init__(self, CONFIGURATION_PATH, AllPeerJobs, DashboardConfig):
+    def __init__(self, AllPeerJobs, DashboardConfig):
         self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))                
         self.metadata = db.MetaData()
         self.jobLogTable = db.Table('JobLog', self.metadata,
@@ -40,7 +38,7 @@ class PeerJobLogger:
             return False
         return True
 
-    def getLogs(self, all: bool = False, configName = None) -> list[Log]:
+    def getLogs(self, configName = None) -> list[Log]:
         logs: list[Log] = []
         try:
             allJobs = self.AllPeerJobs.getAllJobs(configName)
