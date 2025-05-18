@@ -1,16 +1,13 @@
 """
 Dashboard Logger Class
 """
-import os, uuid
+import uuid
 import sqlalchemy as db
-from datetime import datetime
-from sqlalchemy_utils import database_exists, create_database
+
 
 class DashboardLogger:
     def __init__(self, DashboardConfig):
         self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
-        if not database_exists(self.engine.url):
-            create_database(self.engine.url)
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
                                              db.Column('LogID', db.VARCHAR, nullable=False, primary_key=True),
