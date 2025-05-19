@@ -42,7 +42,7 @@ export default {
 						description: this.selectedPeer.name,
 						hostName: this.dashboardStore.Configuration.Peers.remote_endpoint
 					}
-					data = JSON.stringify(awgQRCodeObject)
+					data = btoa(JSON.stringify(awgQRCodeObject))
 				}else{
 					data = res.data.file
 				}
