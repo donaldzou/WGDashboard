@@ -59,47 +59,6 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
     response.content_type = "application/json"
     return response       
 
-
-
-
-            
-
-    
-
-    
-
-
-"""
-Database Connection Functions
-"""
-
-sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'), check_same_thread=False)
-sqldb.row_factory = sqlite3.Row
-
-def sqlSelect(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
-    result = []
-    try:
-        cursor = sqldb.cursor()
-        result = cursor.execute(statement, paramters)
-    except Exception as error:
-        print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
-    return result
-
-def sqlUpdate(statement: str, paramters: tuple = ()) -> sqlite3.Cursor:
-    sqldb = sqlite3.connect(os.path.join(CONFIGURATION_PATH, 'db', 'wgdashboard.db'))
-    sqldb.row_factory = sqlite3.Row
-    cursor = sqldb.cursor()
-    with sqldb:
-        cursor = sqldb.cursor()
-        try:
-            statement = statement.rstrip(';')
-            s = f'BEGIN TRANSACTION;{statement};END TRANSACTION;'
-            cursor.execute(statement, paramters)
-            # sqldb.commit()
-        except Exception as error:
-            print("[WGDashboard] SQLite Error:" + str(error) + " | Statement: " + statement)
-    sqldb.close()
-
 DashboardConfig = DashboardConfig()
 EmailSender = EmailSender(DashboardConfig)
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
