@@ -106,9 +106,15 @@ export default {
 										<PeersDefaultSettingsInput
 											targetData="peer_keep_alive" title="Persistent Keepalive"></PeersDefaultSettingsInput>
 										<PeersDefaultSettingsInput
+											v-model="dashboardConfigurationStore.Configuration.Peers.remote_endpoint"
 											targetData="remote_endpoint" title="Peer Remote Endpoint"
-											:warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."
-										></PeersDefaultSettingsInput>
+											:warning="true" warningText="This will be changed globally, and will be apply to all peer's QR code and configuration file."/>
+										<PeersDefaultSettingsInput
+  											v-model="dashboardConfigurationStore.Configuration.Peers.remote_endpoint_port"
+  											targetData="remote_endpoint_port"
+  											title="Peer Remote Endpoint Port"
+ 											:warning="true"
+  											warningText="Default port for new peers (usually 51820)."/>
 									</div>
 								</div>
 							</div>
