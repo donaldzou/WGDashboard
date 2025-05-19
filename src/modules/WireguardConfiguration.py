@@ -70,7 +70,7 @@ class WireguardConfiguration:
                     os.path.join(
                         self.__getProtocolPath(),
                         'WGDashboard_Backup',
-                        data["Backup"].replace(".conf", ".sql")))
+                        data["Backup"].replace(".conf", ".sql")), True)
             else:
                 self.createDatabase()
 
@@ -213,7 +213,7 @@ class WireguardConfiguration:
                         )
                     )
         except Exception as e:
-            print("[WGDashboard] Error: Drop table failed")
+            print("[WGDashboard] Error: Drop table failed - " + str(e))
             return False
         return True
 
@@ -314,8 +314,9 @@ class WireguardConfiguration:
                     insert_stmt = i.insert().values(dict(row))
                     yield str(insert_stmt.compile(compile_kwargs={"literal_binds": True}))
 
-    def __importDatabase(self, sqlFilePath) -> bool:
-        self.__dropDatabase()
+    def __importDatabase(self, sqlFilePath, restore = False) -> bool:
+        if not restore:
+            self.__dropDatabase()
         self.createDatabase()
         if not os.path.exists(sqlFilePath):
             return False
