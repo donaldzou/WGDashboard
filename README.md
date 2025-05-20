@@ -42,29 +42,29 @@
   Join our Discord Server for quick help, or you wanna chat about this project!
 </p>
 <p align="center">
-  <a align="center" href="https://discord.gg/72TwzjeuWm"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
+  <a align="center" href="https://discord.gg/72TwzjeuWm" target="_blank"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
 </p>
 <p align="center">
   Alternatively, you can also reach out at our Matrix.org Chatroom :)
 </p>
 <p align="center">
-  <a href="https://app.element.io/#/room/#wgd:matrix.org">Matrix.org Chatroom</a>
+  <a href="https://app.element.io/#/room/#wgd:matrix.org" target="_blank">Matrix.org Chatroom</a>
 </p>
 <h3 align="center">Want to support this project?</h4>
 <p align="center">
   You can support via <br>
 </p>
 <p align="center">
-  <a align="center" href="https://github.com/sponsors/donaldzou"><img src="https://img.shields.io/badge/GitHub%20Sponsor-2e9a40?style=for-the-badge&logo=github"></a>
-  <a align="center" href="https://buymeacoffee.com/donaldzou"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=000000"></a>
-  <a align="center" href="https://patreon.com/c/DonaldDonnyZou/membership"><img src="https://img.shields.io/badge/Patreon-000000?style=for-the-badge&logo=patreon&logoColor=ffffff"></a>
+  <a align="center" href="https://github.com/sponsors/donaldzou" target="_blank"><img src="https://img.shields.io/badge/GitHub%20Sponsor-2e9a40?style=for-the-badge&logo=github"></a>
+  <a align="center" href="https://buymeacoffee.com/donaldzou" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=000000"></a>
+  <a align="center" href="https://patreon.com/c/DonaldDonnyZou/membership" target="_blank"><img src="https://img.shields.io/badge/Patreon-000000?style=for-the-badge&logo=patreon&logoColor=ffffff"></a>
 </p>
 
 <p align="center">
   <b>or, visit our merch store and support us by purchasing a merch</b>
 </p>
 <p align="center">
-  <a align="center" href="https://merch.wgdashboard.dev"><img src="https://img.shields.io/badge/Merch%20from%20WGDashboard-926183?style=for-the-badge"></a>
+  <a align="center" href="https://merch.wgdashboard.dev" target="_blank"><img src="https://img.shields.io/badge/Merch%20from%20WGDashboard-926183?style=for-the-badge"></a>
 </p>
 
 <hr>
