@@ -12,12 +12,9 @@
 </p>
 <h1 align="center">WGDashboard</h1>
 <p align="center">
-    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
-    <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
-    <img src="https://forthebadge.com/images/badges/license-mit.svg">
-</p>
-<p align="center">
-    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
+    <img src="https://img.shields.io/badge/Made_With-Python-blue?style=for-the-badge&logo=python&logoColor=ffffff">
+    <img src="https://img.shields.io/badge/Made_With-Vue.js-42b883?style=for-the-badge&logo=vuedotjs&logoColor=ffffff">
+    <img src="https://img.shields.io/badge/License-Apache_License_2.0-D22128?style=for-the-badge&logo=apache&logoColor=ffffff">
 </p>
 
 <p align="center">
