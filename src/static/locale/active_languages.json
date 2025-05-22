@@ -65,6 +65,11 @@
         "lang_name_localized": "Deutsch"
     },
     {
+        "lang_id": "hu-hu",
+        "lang_name": "Hungarian",
+        "lang_name_localized": "Magyar"
+    },
+    {
         "lang_id": "it-it",
         "lang_name": "Italian",
         "lang_name_localized": "Italiano"
