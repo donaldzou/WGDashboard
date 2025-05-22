@@ -83,7 +83,7 @@ _installPython(){
 	{ printf "\n\n [Installing Python] [%s] \n\n""$(date)"; } >> ./log/install.txt 
 	printf "[WGDashboard] %s Installing Python\n" "$install"
 	case "$OS" in
-		ubuntu|debian)
+		ubuntu|debian|raspbian)
 			{ sudo apt update ; sudo apt-get install -y python3 net-tools; printf "\n\n"; } >> ./log/install.txt 
 		;;
 		centos|fedora|redhat|rhel|almalinux|rocky)
@@ -116,7 +116,7 @@ _installPythonVenv(){
 	printf "[WGDashboard] %s Installing Python Virtual Environment\n" "$install"
 	if [ "$pythonExecutable" = "python3" ]; then
 		case "$OS" in
-			ubuntu|debian)
+			ubuntu|debian|raspbian)
 				{ sudo apt update ; sudo apt-get install -y python3-venv; printf "\n\n"; } &>> ./log/install.txt
 			;;
 			centos|fedora|redhat|rhel|almalinux|rocky)
@@ -140,7 +140,7 @@ _installPythonVenv(){
 		esac
 	else
 		case "$OS" in
-			ubuntu|debian)
+			ubuntu|debian|raspbian)
 				{ sudo apt-get update; sudo apt-get install ${pythonExecutable}-venv;  } &>> ./log/install.txt
 			;;
 		esac
@@ -162,7 +162,7 @@ _installPythonPip(){
 	then
 		printf "[WGDashboard] %s Installing Python Package Manager (PIP)\n" "$install"
 		case "$OS" in
-			ubuntu|debian)
+			ubuntu|debian|raspbian)
 				if [ "$pythonExecutable" = "python3" ]; then
 					{ sudo apt update ; sudo apt-get install -y python3-pip; printf "\n\n"; } &>> ./log/install.txt
 				else
@@ -205,7 +205,7 @@ _checkWireguard(){
     then
     	printf "[WGDashboard] %s Installing WireGuard\n" "$install"
         case "$OS" in
-            ubuntu|debian)
+            ubuntu|debian|raspbian)
                 { 
                     sudo apt update && sudo apt-get install -y wireguard; 
                     printf "\n[WGDashboard] WireGuard installed on %s.\n\n" "$OS"; 
