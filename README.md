@@ -10,7 +10,9 @@
 <p align="center">
   <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="128">
 </p>
-<h1 align="center">WGDashboard</h1>
+<h1 align="center">
+  <a href="https://wgdashboard.dev">WGDashboard</a>
+</h1>
 <p align="center">
     <img src="https://img.shields.io/badge/Made_With-Python-blue?style=for-the-badge&logo=python&logoColor=ffffff">
     <img src="https://img.shields.io/badge/Made_With-Vue.js-42b883?style=for-the-badge&logo=vuedotjs&logoColor=ffffff">
@@ -65,27 +67,13 @@
 </p>
 
 <hr>
+<h4 align="center">
+  for more information, visit our
+</h4>
+<h1 align="center">
+  <a href="https://wgdashboard.dev">Official Website</a>
+</h1>
 
-# [Demo](https://wgd-demo.donaldzou.dev)
-If you would like to try out WGDashboard, feel free to access the link above. You won't be able to actually connect it with WireGuard since I blocked all Post/Pre script.
-
-Username: `admin`
-
-Password: `admin`
-
-> **Please don't abuse server 🥺, and do not put any personal information on it.** If you can't access it, [please let me know here](https://github.com/donaldzou/WGDashboard/issues/695).
-
-<hr>
-
-# [Official Documentation](https://donaldzou.dev/WGDashboard-Documentations)
-
-- [💡 Features](https://donaldzou.github.io/WGDashboard-Documentation/features.html)
-- [📝 Requirements](https://donaldzou.github.io/WGDashboard-Documentation/requirements.html)
-- [🛠 Install](https://donaldzou.github.io/WGDashboard-Documentation/install.html)
-- [🐬 Docker Solutions](https://github.com/donaldzou/WGDashboard/tree/main/docker)
-- [🪜 Usage](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
-- [📖 API Documentation](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
-- [And much more...](https://donaldzou.github.io/WGDashboard-Documentation/)
 
 # Screenshots
 
