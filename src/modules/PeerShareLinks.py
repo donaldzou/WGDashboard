@@ -13,9 +13,9 @@ class PeerShareLinks:
         self.metadata = db.MetaData()
         self.peerShareLinksTable = db.Table(
             'PeerShareLinks', self.metadata,
-            db.Column('ShareID', db.String, nullable=False, primary_key=True),
-            db.Column('Configuration', db.String, nullable=False),
-            db.Column('Peer', db.String, nullable=False),
+            db.Column('ShareID', db.String(255), nullable=False, primary_key=True),
+            db.Column('Configuration', db.String(255), nullable=False),
+            db.Column('Peer', db.String(255), nullable=False),
             db.Column('ExpireDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP)),
             db.Column('SharedDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP),
                       server_default=db.func.now()),

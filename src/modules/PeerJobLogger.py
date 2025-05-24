@@ -10,12 +10,12 @@ class PeerJobLogger:
         self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))                
         self.metadata = db.MetaData()
         self.jobLogTable = db.Table('JobLog', self.metadata,
-                                    db.Column('LogID', db.String, nullable=False, primary_key=True),
-                                    db.Column('JobID', db.String, nullable=False),
+                                    db.Column('LogID', db.String(255), nullable=False, primary_key=True),
+                                    db.Column('JobID', db.String(255), nullable=False),
                                     db.Column('LogDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP), 
                                               server_default=db.func.now()),
-                                    db.Column('Status', db.String, nullable=False),
-                                    db.Column('Message', db.String)
+                                    db.Column('Status', db.String(255), nullable=False),
+                                    db.Column('Message', db.Text)
                                     )
         self.logs: list[Log] = []
         self.metadata.create_all(self.engine)

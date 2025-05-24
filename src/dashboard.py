@@ -1189,14 +1189,14 @@ def peerInformationBackgroundThread():
         with app.app_context():
             for c in WireguardConfigurations.values():
                 if c.getStatus():
-                    try:
-                        c.getPeersTransfer()
-                        c.getPeersLatestHandshake()
-                        c.getPeersEndpoint()
-                        c.getPeersList()
-                        c.getRestrictedPeersList()
-                    except Exception as e:
-                        print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
+                    # try:
+                    c.getPeersTransfer()
+                    c.getPeersLatestHandshake()
+                    c.getPeersEndpoint()
+                    c.getPeersList()
+                    c.getRestrictedPeersList()
+                    # except Exception as e:
+                    #     print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
         time.sleep(10)
 
 def peerJobScheduleBackgroundThread():
