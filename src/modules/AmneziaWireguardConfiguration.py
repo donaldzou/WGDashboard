@@ -1,9 +1,7 @@
 """
 AmneziaWG Configuration
 """
-import re
-
-import sqlalchemy
+import random, sqlalchemy, os, subprocess, re, uuid
 
 from .PeerJobs import PeerJobs
 from .AmneziaWGPeer import AmneziaWGPeer
@@ -69,55 +67,55 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
 
         self.peersTable = sqlalchemy.Table(
             dbName, self.metadata,
-            sqlalchemy.Column('id', sqlalchemy.String, nullable=False, primary_key=True),
-            sqlalchemy.Column('private_key', sqlalchemy.String),
-            sqlalchemy.Column('DNS', sqlalchemy.String),
-            sqlalchemy.Column('advanced_security', sqlalchemy.String),
-            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.String),
-            sqlalchemy.Column('name', sqlalchemy.String),
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False, primary_key=True),
+            sqlalchemy.Column('private_key', sqlalchemy.String(255)),
+            sqlalchemy.Column('DNS', sqlalchemy.Text),
+            sqlalchemy.Column('advanced_security', sqlalchemy.String(255)),
+            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.Text),
+            sqlalchemy.Column('name', sqlalchemy.Text),
             sqlalchemy.Column('total_receive', sqlalchemy.Float),
             sqlalchemy.Column('total_sent', sqlalchemy.Float),
             sqlalchemy.Column('total_data', sqlalchemy.Float),
-            sqlalchemy.Column('endpoint', sqlalchemy.String),
-            sqlalchemy.Column('status', sqlalchemy.String),
-            sqlalchemy.Column('latest_handshake', sqlalchemy.String),
-            sqlalchemy.Column('allowed_ip', sqlalchemy.String),
+            sqlalchemy.Column('endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('status', sqlalchemy.String(255)),
+            sqlalchemy.Column('latest_handshake', sqlalchemy.String(255)),
+            sqlalchemy.Column('allowed_ip', sqlalchemy.String(255)),
             sqlalchemy.Column('cumu_receive', sqlalchemy.Float),
             sqlalchemy.Column('cumu_sent', sqlalchemy.Float),
             sqlalchemy.Column('cumu_data', sqlalchemy.Float),
             sqlalchemy.Column('mtu', sqlalchemy.Integer),
             sqlalchemy.Column('keepalive', sqlalchemy.Integer),
-            sqlalchemy.Column('remote_endpoint', sqlalchemy.String),
-            sqlalchemy.Column('preshared_key', sqlalchemy.String),
+            sqlalchemy.Column('remote_endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('preshared_key', sqlalchemy.String(255)),
             extend_existing=True
         )
         self.peersRestrictedTable = sqlalchemy.Table(
             f'{dbName}_restrict_access', self.metadata,
-            sqlalchemy.Column('id', sqlalchemy.String, nullable=False, primary_key=True),
-            sqlalchemy.Column('private_key', sqlalchemy.String),
-            sqlalchemy.Column('DNS', sqlalchemy.String),
-            sqlalchemy.Column('advanced_security', sqlalchemy.String),
-            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.String),
-            sqlalchemy.Column('name', sqlalchemy.String),
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False, primary_key=True),
+            sqlalchemy.Column('private_key', sqlalchemy.String(255)),
+            sqlalchemy.Column('DNS', sqlalchemy.Text),
+            sqlalchemy.Column('advanced_security', sqlalchemy.String(255)),
+            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.Text),
+            sqlalchemy.Column('name', sqlalchemy.Text),
             sqlalchemy.Column('total_receive', sqlalchemy.Float),
             sqlalchemy.Column('total_sent', sqlalchemy.Float),
             sqlalchemy.Column('total_data', sqlalchemy.Float),
-            sqlalchemy.Column('endpoint', sqlalchemy.String),
-            sqlalchemy.Column('status', sqlalchemy.String),
-            sqlalchemy.Column('latest_handshake', sqlalchemy.String),
-            sqlalchemy.Column('allowed_ip', sqlalchemy.String),
+            sqlalchemy.Column('endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('status', sqlalchemy.String(255)),
+            sqlalchemy.Column('latest_handshake', sqlalchemy.String(255)),
+            sqlalchemy.Column('allowed_ip', sqlalchemy.String(255)),
             sqlalchemy.Column('cumu_receive', sqlalchemy.Float),
             sqlalchemy.Column('cumu_sent', sqlalchemy.Float),
             sqlalchemy.Column('cumu_data', sqlalchemy.Float),
             sqlalchemy.Column('mtu', sqlalchemy.Integer),
             sqlalchemy.Column('keepalive', sqlalchemy.Integer),
-            sqlalchemy.Column('remote_endpoint', sqlalchemy.String),
-            sqlalchemy.Column('preshared_key', sqlalchemy.String),
+            sqlalchemy.Column('remote_endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('preshared_key', sqlalchemy.String(255)),
             extend_existing=True
         )
         self.peersTransferTable = sqlalchemy.Table(
             f'{dbName}_transfer', self.metadata,
-            sqlalchemy.Column('id', sqlalchemy.String, nullable=False),
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False),
             sqlalchemy.Column('total_receive', sqlalchemy.Float),
             sqlalchemy.Column('total_sent', sqlalchemy.Float),
             sqlalchemy.Column('total_data', sqlalchemy.Float),
@@ -130,26 +128,26 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         )
         self.peersDeletedTable = sqlalchemy.Table(
             f'{dbName}_deleted', self.metadata,
-            sqlalchemy.Column('id', sqlalchemy.String, nullable=False, primary_key=True),
-            sqlalchemy.Column('private_key', sqlalchemy.String),
-            sqlalchemy.Column('advanced_security', sqlalchemy.String),
-            sqlalchemy.Column('DNS', sqlalchemy.String),
-            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.String),
-            sqlalchemy.Column('name', sqlalchemy.String),
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False),
+            sqlalchemy.Column('private_key', sqlalchemy.String(255)),
+            sqlalchemy.Column('DNS', sqlalchemy.Text),
+            sqlalchemy.Column('advanced_security', sqlalchemy.String(255)),
+            sqlalchemy.Column('endpoint_allowed_ip', sqlalchemy.Text),
+            sqlalchemy.Column('name', sqlalchemy.Text),
             sqlalchemy.Column('total_receive', sqlalchemy.Float),
             sqlalchemy.Column('total_sent', sqlalchemy.Float),
             sqlalchemy.Column('total_data', sqlalchemy.Float),
-            sqlalchemy.Column('endpoint', sqlalchemy.String),
-            sqlalchemy.Column('status', sqlalchemy.String),
-            sqlalchemy.Column('latest_handshake', sqlalchemy.String),
-            sqlalchemy.Column('allowed_ip', sqlalchemy.String),
+            sqlalchemy.Column('endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('status', sqlalchemy.String(255)),
+            sqlalchemy.Column('latest_handshake', sqlalchemy.String(255)),
+            sqlalchemy.Column('allowed_ip', sqlalchemy.String(255)),
             sqlalchemy.Column('cumu_receive', sqlalchemy.Float),
             sqlalchemy.Column('cumu_sent', sqlalchemy.Float),
             sqlalchemy.Column('cumu_data', sqlalchemy.Float),
             sqlalchemy.Column('mtu', sqlalchemy.Integer),
             sqlalchemy.Column('keepalive', sqlalchemy.Integer),
-            sqlalchemy.Column('remote_endpoint', sqlalchemy.String),
-            sqlalchemy.Column('preshared_key', sqlalchemy.String),
+            sqlalchemy.Column('remote_endpoint', sqlalchemy.String(255)),
+            sqlalchemy.Column('preshared_key', sqlalchemy.String(255)),
             extend_existing=True
         )
 

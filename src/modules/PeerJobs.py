@@ -12,15 +12,15 @@ class PeerJobs:
         self.engine = db.create_engine(DashboardConfig.getConnectionString('wgdashboard_job'))
         self.metadata = db.MetaData()
         self.peerJobTable = db.Table('PeerJobs', self.metadata,
-                                     db.Column('JobID', db.String, nullable=False, primary_key=True),
-                                     db.Column('Configuration', db.String, nullable=False),
-                                     db.Column('Peer', db.String, nullable=False),
-                                     db.Column('Field', db.String, nullable=False),
-                                     db.Column('Operator', db.String, nullable=False),
-                                     db.Column('Value', db.String, nullable=False),
+                                     db.Column('JobID', db.String(255), nullable=False, primary_key=True),
+                                     db.Column('Configuration', db.String(255), nullable=False),
+                                     db.Column('Peer', db.String(255), nullable=False),
+                                     db.Column('Field', db.String(255), nullable=False),
+                                     db.Column('Operator', db.String(255), nullable=False),
+                                     db.Column('Value', db.String(255), nullable=False),
                                      db.Column('CreationDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP), nullable=False),
                                      db.Column('ExpireDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP)),
-                                     db.Column('Action', db.String, nullable=False),
+                                     db.Column('Action', db.String(255), nullable=False),
                                      )
         self.metadata.create_all(self.engine)
         self.__getJobs()

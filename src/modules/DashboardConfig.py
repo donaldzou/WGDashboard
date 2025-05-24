@@ -97,19 +97,21 @@ class DashboardConfig:
         if not os.path.isdir(sqlitePath):
             os.mkdir(sqlitePath)
         
-        cn = None
-        if self.GetConfig("Database", "type")[1] == "sqlite":
-            cn = f'sqlite:///{os.path.join(sqlitePath, f"{database}.db")}'
-        elif self.GetConfig("Database", "type")[1] == "postgresql":
+        # cn = None
+        
+        if self.GetConfig("Database", "type")[1] == "postgresql":
             cn = f'postgresql+psycopg2://{self.GetConfig("Database", "username")[1]}:{self.GetConfig("Database", "password")[1]}@{self.GetConfig("Database", "host")[1]}/{database}'
-
+        elif self.GetConfig("Database", "type")[1] == "mysql":
+            cn = f'mysql+mysqldb://{self.GetConfig("Database", "username")[1]}:{self.GetConfig("Database", "password")[1]}@{self.GetConfig("Database", "host")[1]}/{database}'
+        else:
+            cn = f'sqlite:///{os.path.join(sqlitePath, f"{database}.db")}'
         if not database_exists(cn):
             create_database(cn)
         return cn
 
     def __createAPIKeyTable(self):
         self.apiKeyTable = db.Table('DashboardAPIKeys', self.dbMetadata,
-                                    db.Column("Key", db.String, nullable=False, primary_key=True),
+                                    db.Column("Key", db.String(255), nullable=False, primary_key=True),
                                     db.Column("CreatedAt",
                                               (db.DATETIME if self.GetConfig('Database', 'type')[1] == 'sqlite' else db.TIMESTAMP),
                                               server_default=db.func.now()
