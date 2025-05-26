@@ -1184,6 +1184,7 @@ def index():
 def peerInformationBackgroundThread():
     global WireguardConfigurations
     print(f"[WGDashboard] Background Thread #1 Started", flush=True)
+    print(f"[WGDashboard] Background Thread #1 PID:" + str(threading.get_native_id()), flush=True)
     time.sleep(10)
     while True:
         with app.app_context():
@@ -1202,6 +1203,7 @@ def peerInformationBackgroundThread():
 def peerJobScheduleBackgroundThread():
     with app.app_context():
         print(f"[WGDashboard] Background Thread #2 Started", flush=True)
+        print(f"[WGDashboard] Background Thread #2 PID:" + str(threading.get_native_id()), flush=True)
         time.sleep(10)
         while True:
             AllPeerJobs.runJob()
