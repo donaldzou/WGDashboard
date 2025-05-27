@@ -150,6 +150,7 @@ def API_AuthenticateLogin():
     
     if DashboardConfig.APIAccessed:
         authToken = hashlib.sha256(f"{request.headers.get('wg-dashboard-apikey')}{datetime.now()}".encode()).hexdigest()
+        session['role'] = 'admin'
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
         resp.set_cookie("authToken", authToken)
@@ -167,6 +168,7 @@ def API_AuthenticateLogin():
             and ((totpEnabled and totpValid) or not totpEnabled)
     ):
         authToken = hashlib.sha256(f"{data['username']}{datetime.now()}".encode()).hexdigest()
+        session['role'] = 'admin'
         session['username'] = authToken
         resp = ResponseObject(True, DashboardConfig.GetConfig("Other", "welcome_session")[1])
         resp.set_cookie("authToken", authToken)
@@ -1190,14 +1192,11 @@ def peerInformationBackgroundThread():
         with app.app_context():
             for c in WireguardConfigurations.values():
                 if c.getStatus():
-                    # try:
                     c.getPeersTransfer()
                     c.getPeersLatestHandshake()
                     c.getPeersEndpoint()
                     c.getPeersList()
                     c.getRestrictedPeersList()
-                    # except Exception as e:
-                    #     print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
         time.sleep(10)
 
 def peerJobScheduleBackgroundThread():
