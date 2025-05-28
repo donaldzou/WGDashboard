@@ -56,7 +56,7 @@
 </p>
 
 <p align="center">
-  <b>or, visit our merch store and support us by purchasing a merch for only $USD 15.00 (Including shipping worldwide & duties)</b>
+  <b>or, visit our merch store and support us by purchasing a merch for only $USD 17.00 (Including shipping worldwide & duties)</b>
 </p>
 <p align="center">
   <a align="center" href="https://merch.wgdashboard.dev" target="_blank"><img src="https://img.shields.io/badge/Merch%20from%20WGDashboard-926183?style=for-the-badge"></a>
