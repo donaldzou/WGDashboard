@@ -28,11 +28,13 @@ from modules.DashboardConfig import DashboardConfig
 from modules.WireguardConfiguration import WireguardConfiguration
 from modules.AmneziaWireguardConfiguration import AmneziaWireguardConfiguration
 
+from client import client
 
 SystemStatus = SystemStatus()
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
+app.register_blueprint(client)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
@@ -109,7 +111,8 @@ def auth_req():
             whiteList = [
                 '/static/', 'validateAuthentication', 'authenticate', 'getDashboardConfiguration',
                 'getDashboardTheme', 'getDashboardVersion', 'sharePeer/get', 'isTotpEnabled', 'locale',
-                '/fileDownload'
+                '/fileDownload',
+                '/client'
             ]
             
             if ("username" not in session 
