@@ -1,0 +1,55 @@
+@import "bootstrap/dist/css/bootstrap.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    src: url(./fonts/Plus_Jakarta_Sans/PlusJakartaSans-VariableFont_wght.ttf) format('ttf');
+}
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: italic;
+    font-weight: 200 800;
+    src: url(./fonts/Plus_Jakarta_Sans/PlusJakartaSans-Italic-VariableFont_wght.ttf) format('ttf');
+}
+
+*{
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+@property --brandColor1 {
+    syntax: '<color>';
+    initial-value: #009dff;
+    inherits: false;
+}
+
+@property --brandColor2 {
+    syntax: '<color>';
+    initial-value: #F94647;
+    inherits: false;
+}
+
+@property --distance1{
+    syntax: '<percentage>';
+    initial-value: 0%;
+    inherits: false;
+}
+
+@property --degree{
+    syntax: '<angle>';
+    initial-value: 234deg;
+    inherits: false;
+}
+
+.btn-brand{
+    /*background: rgb(23,139,255);*/
+    background: linear-gradient(var(--degree), var(--brandColor1) var(--distance1), var(--brandColor2) 100%);
+    border: 0 !important;
+    transition: --brandColor1 0.3s, --brandColor2 0.3s !important;
+}
+
+.btn-brand:hover{
+    --brandColor1: rgb(0, 142, 216);
+    --brandColor2: rgba(249, 70, 71)
+}
