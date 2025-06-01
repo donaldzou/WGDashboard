@@ -1,6 +1,7 @@
 """
 Peer Jobs
 """
+from .ConnectionString import ConnectionString
 from .PeerJob import PeerJob
 from .PeerJobLogger import PeerJobLogger
 import sqlalchemy as db
@@ -9,7 +10,7 @@ from datetime import datetime
 class PeerJobs:
     def __init__(self, DashboardConfig, WireguardConfigurations):
         self.Jobs: list[PeerJob] = []
-        self.engine = db.create_engine(DashboardConfig.getConnectionString('wgdashboard_job'))
+        self.engine = db.create_engine(ConnectionString('wgdashboard_job'))
         self.metadata = db.MetaData()
         self.peerJobTable = db.Table('PeerJobs', self.metadata,
                                      db.Column('JobID', db.String(255), nullable=False, primary_key=True),

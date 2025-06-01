@@ -4,10 +4,12 @@ Dashboard Logger Class
 import uuid
 import sqlalchemy as db
 
+from .ConnectionString import ConnectionString
+
 
 class DashboardLogger:
     def __init__(self, DashboardConfig):
-        self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))
+        self.engine = db.create_engine(ConnectionString("wgdashboard_log"))
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
                                              db.Column('LogID', db.String(255), nullable=False, primary_key=True),

@@ -3,11 +3,13 @@ Peer Job Logger
 """
 import uuid
 import sqlalchemy as db
+
+from .ConnectionString import ConnectionString
 from .Log import Log
 
 class PeerJobLogger:
     def __init__(self, AllPeerJobs, DashboardConfig):
-        self.engine = db.create_engine(DashboardConfig.getConnectionString("wgdashboard_log"))                
+        self.engine = db.create_engine(ConnectionString("wgdashboard_log"))                
         self.metadata = db.MetaData()
         self.jobLogTable = db.Table('JobLog', self.metadata,
                                     db.Column('LogID', db.String(255), nullable=False, primary_key=True),

@@ -6,6 +6,7 @@ from zipfile import ZipFile
 from datetime import datetime, timedelta
 from itertools import islice
 
+from .ConnectionString import ConnectionString
 from .DashboardConfig import DashboardConfig
 from .Peer import Peer
 from .PeerJobs import PeerJobs
@@ -56,7 +57,7 @@ class WireguardConfiguration:
         self.DashboardConfig = DashboardConfig
         self.AllPeerShareLinks = AllPeerShareLinks
         self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
-        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(self.DashboardConfig.getConnectionString("wgdashboard"))
+        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(ConnectionString("wgdashboard"))
         self.metadata: sqlalchemy.MetaData = sqlalchemy.MetaData()
         self.dbType = self.DashboardConfig.GetConfig("Database", "type")[1]
         
