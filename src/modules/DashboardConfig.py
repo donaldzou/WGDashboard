@@ -6,6 +6,8 @@ from sqlalchemy_utils import database_exists, create_database
 import sqlalchemy as db
 from datetime import datetime
 from typing import Any
+
+from .ConnectionString import ConnectionString
 from .Utilities import (
     GetRemoteEndpoint, ValidateDNSAddress
 )
@@ -84,7 +86,7 @@ class DashboardConfig:
                 if not exist:
                     self.SetConfig(section, key, value, True)
 
-        self.engine = db.create_engine(self.getConnectionString('wgdashboard'))
+        self.engine = db.create_engine(ConnectionString('wgdashboard'))
         self.dbMetadata = db.MetaData()
         self.__createAPIKeyTable()
         self.DashboardAPIKeys = self.__getAPIKeys()

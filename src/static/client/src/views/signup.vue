@@ -22,7 +22,7 @@ const formData = reactive({
 					       autocomplete="email"
 					       autofocus
 					       class="form-control rounded-3" id="email" placeholder="email">
-					<label for="floatingInput" class="d-flex">
+					<label for="email" class="d-flex">
 						<i class="bi bi-person-circle me-2"></i>
 						Email
 					</label>
@@ -32,10 +32,10 @@ const formData = reactive({
 					       required
 					       v-model="formData.password"
 					       name="password"
-					       autocomplete="password"
+					       autocomplete="new-password"
 					       autofocus
 					       class="form-control rounded-3" id="password" placeholder="password">
-					<label for="floatingInput" class="d-flex">
+					<label for="password" class="d-flex">
 						<i class="bi bi-key me-2"></i>
 						Password
 					</label>
@@ -45,10 +45,10 @@ const formData = reactive({
 					       required
 					       v-model="formData.password"
 					       name="confirm_password"
-					       autocomplete="confirm_password"
+					       autocomplete="new-password"
 					       autofocus
 					       class="form-control rounded-3" id="confirm_password" placeholder="confirm_password">
-					<label for="floatingInput" class="d-flex">
+					<label for="confirm_password" class="d-flex">
 						<i class="bi bi-key me-2"></i>
 						Confirm Password
 					</label>
