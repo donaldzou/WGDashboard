@@ -53,3 +53,7 @@
     --brandColor1: rgb(0, 142, 216);
     --brandColor2: rgba(249, 70, 71)
 }
+
+::-webkit-scrollbar {
+    display: none;
+}
