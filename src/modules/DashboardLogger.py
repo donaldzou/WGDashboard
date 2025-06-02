@@ -12,6 +12,7 @@ class DashboardLogger:
         self.engine = db.create_engine(ConnectionString("wgdashboard_log"))
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
+                                             
                                              db.Column('LogID', db.String(255), nullable=False, primary_key=True),
                                              db.Column('LogDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP),
                                                        server_default=db.func.now()),
@@ -19,7 +20,7 @@ class DashboardLogger:
                                              db.Column('IP', db.String(255)),
                                              
                                              db.Column('Status', db.String(255), nullable=False),
-                                             db.Column('Message', db.Text)
+                                             db.Column('Message', db.Text), extend_existing=True,
                                              )
         self.metadata.create_all(self.engine)
         self.log(Message="WGDashboard started")

@@ -12,9 +12,9 @@ def ConnectionString(database) -> str or None:
     if not os.path.isdir(sqlitePath):
         os.mkdir(sqlitePath)
     if parser.get("Database", "type") == "postgresql":
-        cn = f'postgresql+psycopg2://{parser.get("Database", "username")}:{parser.get("Database", "password")[1]}@{parser.get("Database", "host")[1]}/{database}'
-    elif parser.get("Database", "type")[1] == "mysql":
-        cn = f'mysql+mysqldb://{parser.get("Database", "username")[1]}:{parser.get("Database", "password")[1]}@{parser.get("Database", "host")[1]}/{database}'
+        cn = f'postgresql+psycopg2://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
+    elif parser.get("Database", "type") == "mysql":
+        cn = f'mysql+mysqldb://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
     else:
         cn = f'sqlite:///{os.path.join(sqlitePath, f"{database}.db")}'
     if not database_exists(cn):

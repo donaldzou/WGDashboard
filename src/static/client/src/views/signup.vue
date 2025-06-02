@@ -2,9 +2,9 @@
 import {reactive} from "vue";
 
 const formData = reactive({
-	email: "",
-	password: "",
-	confirmPassword: ""
+	Email: "",
+	Password: "",
+	ConfirmPassword: ""
 })
 </script>
 
