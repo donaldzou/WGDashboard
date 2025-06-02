@@ -70,9 +70,34 @@ class DashboardClients:
                 checkPwd = bcrypt.checkpw(Password.encode("utf-8"), existingClient.get("Password").encode("utf-8"))
                 if checkPwd:
                     return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
+        return False, "Email or Password is incorrect"
+    
+    def SignIn_GetTotp(self, Token: str, UserProvidedTotp: str = None) -> tuple[bool, str] or tuple[bool, None, str]:
+        status, data = self.DashboardClientsTOTP.GetTotp(Token)
+        if not status:
+            return False, "TOTP Token is invalid"    
+        if UserProvidedTotp is None:
+            if data.get('TotpKeyVerified') is None:
+                return True, pyotp.totp.TOTP(data.get('TotpKey')).provisioning_uri(name=data.get('Email'),
+                                                                                   issuer_name="WGDashboard Client")
+        else:
+            totpMatched = pyotp.TOTP(data.get('TotpKey')).verify(UserProvidedTotp)
+            if not totpMatched:
+                return False, "TOTP is does not match"
+        if data.get('TotpKeyVerified') is None:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.dashboardClientsTable.update().values({
+                        'TotpKeyVerified': 1
+                    }).where(
+                        self.dashboardClientsTable.c.ClientID == data.get('ClientID')
+                    )
+                )
+        return True, None
+    
                   
                 
-        return False, "Email or Password is incorrect"
+        
     
     def SignUp(self, Email, Password, ConfirmPassword) -> tuple[bool, str] or tuple[bool, None]:
         try:

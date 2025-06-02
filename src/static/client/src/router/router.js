@@ -2,7 +2,9 @@ import {createWebHashHistory, createRouter} from "vue-router";
 import Index from "@/views/index.vue";
 import SignIn from "@/views/signin.vue";
 import SignUp from "@/views/signup.vue";
-import Totp from "@/views/totp.vue";
+import axios from "axios";
+import {requestURl} from "@/utilities/request.js";
+import {clientStore} from "@/stores/clientStore.js";
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -10,6 +12,9 @@ const router = createRouter({
 		{
 			path: '/',
 			component: Index,
+			meta: {
+				auth: true
+			},
 			name: "Home"
 		},
 		{
@@ -21,13 +26,22 @@ const router = createRouter({
 			path: '/signup',
 			component: SignUp,
 			name: "Sign Up"
-		},
-		{
-			path: '/totp',
-			component: Totp,
-			name: "Verify TOTP"
 		}
 	]
+})
+
+router.beforeEach(async (to, from, next) => {
+	if (to.meta.auth){
+		await axios.get(requestURl('/client/api/validateAuthentication')).then(res => {
+			next()
+		}).catch(() => {
+			const store = clientStore()
+			store.newNotification("Sign in session ended, please sign in again", "warning")
+			next('/signin')
+		})
+	}else{
+		next()
+	}
 })
 
 router.afterEach((to, from, next) => {

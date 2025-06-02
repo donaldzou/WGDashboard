@@ -19,6 +19,8 @@ class DashboardClientsTOTP:
                 )
         )
         self.metadata.create_all(self.engine)
+        self.metadata.reflect(self.engine)
+        self.dashboardClientsTable = self.metadata.tables['DashboardClients']
         
     def GenerateToken(self, ClientID) -> str:
         token = hashlib.sha512(f"{ClientID}_{datetime.datetime.now()}_{uuid.uuid4()}".encode()).hexdigest()
@@ -30,8 +32,6 @@ class DashboardClientsTOTP:
                    db.and_(self.dashboardClientsTOTPTable.c.ClientID == ClientID,  self.dashboardClientsTOTPTable.c.ExpireTime > datetime.datetime.now())
                 )
             )
-            
-            
             conn.execute(
                 self.dashboardClientsTOTPTable.insert().values({
                     "Token": token,
@@ -41,4 +41,29 @@ class DashboardClientsTOTP:
             )
         
         return token
+    
+    def GetTotp(self, token: str) -> tuple[bool, dict] or tuple[bool, None]:
+        with self.engine.connect() as conn:
+            totp = conn.execute(
+                db.select(
+                    self.dashboardClientsTable.c.ClientID,
+                    self.dashboardClientsTable.c.Email,
+                    self.dashboardClientsTable.c.TotpKey,
+                    self.dashboardClientsTable.c.TotpKeyVerified,
+                ).select_from(
+                    self.dashboardClientsTOTPTable
+                ).where(
+                    db.and_(
+                        self.dashboardClientsTOTPTable.c.Token == token,
+                        self.dashboardClientsTOTPTable.c.ExpireTime > datetime.datetime.now()
+                    )
+                ).join(
+                    self.dashboardClientsTable,
+                    self.dashboardClientsTOTPTable.c.ClientID == self.dashboardClientsTable.c.ClientID
+                )            
+            ).mappings().fetchone()
+            if totp:
+                return True, dict(totp)
+        return False, None
+
         
