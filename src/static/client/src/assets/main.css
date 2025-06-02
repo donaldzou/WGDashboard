@@ -57,3 +57,19 @@
 ::-webkit-scrollbar {
     display: none;
 }
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+    transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 1);
+}
+.slide-right-enter-from,
+.slide-right-leave-to{
+    opacity: 0;
+}
+
+.slide-right-enter-from{
+    transform: translateX(-20px);
+}
+.slide-right-leave-to{
+    transform: translateX(20px);
+}

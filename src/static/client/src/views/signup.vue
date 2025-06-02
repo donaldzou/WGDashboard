@@ -1,77 +1,146 @@
 <script setup>
-import {reactive} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
+import axios from "axios";
+import {clientStore} from "@/stores/clientStore.js";
+import {requestURl} from "@/utilities/request.js";
+import {useRouter} from "vue-router";
+const store = clientStore()
 
 const formData = reactive({
 	Email: "",
 	Password: "",
 	ConfirmPassword: ""
 })
+const loading = ref(false)
+const router = useRouter()
+
+const signUp = async (e) => {
+	e.preventDefault()
+	if (!formFilled){
+		store.newNotification("Please fill in all fields", "warning")
+		return;
+	}
+	if (validatePassword){
+		loading.value = true
+		await axios.post(requestURl('/client/api/signup'), formData).then((res) => {
+			let data = res.data
+			if (!data.status){
+				store.newNotification(data.message, "danger")
+				loading.value = false
+			}else{
+				store.newNotification("Sign up successfully!", "success")
+				router.push({
+					path: '/signin',
+					query: {
+						Email: formData.Email
+					}
+				})
+			}
+		})
+	}
+
+}
+
+const validatePassword = computed(() => {
+	if (formData.Password && formData.ConfirmPassword){
+		return formData.Password === formData.ConfirmPassword;
+	}
+	return false
+})
+
+const formFilled = computed(() => {
+	return Object.values(formData).find(x => !x) === undefined
+})
+
+onMounted(() => {
+	document.querySelectorAll("input[type=password]").forEach(e => e.addEventListener('blur', () => {
+		if (formData.Password && formData.ConfirmPassword){
+			document.querySelectorAll("input[type=password]").forEach(x => {
+				if (!validatePassword.value){
+					x.classList.add("is-invalid")
+				}else {
+					x.classList.remove("is-invalid")
+				}
+			})
+		}
+	}))
+})
 </script>
 
 <template>
-	<div class="d-flex vh-100 vw-100 p-4 overflow-y-scroll">
-		<div class="m-auto" style="width: 600px">
-			<h1>Sign Up</h1>
-			<p>to use WGDashboard Client</p>
-			<div class="mt-4 d-flex flex-column gap-3">
-				<div class="form-floating">
-					<input type="text"
-					       required
-					       v-model="formData.email"
-					       name="email"
-					       autocomplete="email"
-					       autofocus
-					       class="form-control rounded-3" id="email" placeholder="email">
-					<label for="email" class="d-flex">
-						<i class="bi bi-person-circle me-2"></i>
-						Email
-					</label>
-				</div>
-				<div class="form-floating">
-					<input type="password"
-					       required
-					       v-model="formData.password"
-					       name="password"
-					       autocomplete="new-password"
-					       autofocus
-					       class="form-control rounded-3" id="password" placeholder="password">
-					<label for="password" class="d-flex">
-						<i class="bi bi-key me-2"></i>
-						Password
-					</label>
-				</div>
-				<div class="form-floating">
-					<input type="password"
-					       required
-					       v-model="formData.password"
-					       name="confirm_password"
-					       autocomplete="new-password"
-					       autofocus
-					       class="form-control rounded-3" id="confirm_password" placeholder="confirm_password">
-					<label for="confirm_password" class="d-flex">
-						<i class="bi bi-key me-2"></i>
-						Confirm Password
-					</label>
-				</div>
-				
-				
-				<div class="d-flex">
-					<button class="ms-auto btn btn-primary rounded-3 btn-brand px-3 py-2">
-						Continue
-						<i class="ms-2 bi bi-arrow-right"></i>
-					</button>
+	<div>
+		<h1>Sign Up</h1>
+		<p>to use WGDashboard Client</p>
+		<form class="mt-4 d-flex flex-column gap-3" @submit="e => signUp(e)">
+			<div class="form-floating">
+				<input type="text"
+				       :disabled="loading"
+				       required
+				       v-model="formData.Email"
+				       name="email"
+				       autocomplete="email"
+				       autofocus
+				       class="form-control rounded-3" id="email" placeholder="email">
+				<label for="email" class="d-flex">
+					<i class="bi bi-person-circle me-2"></i>
+					Email
+				</label>
+			</div>
+			<div class="form-floating">
+				<input type="password"
+				       required
+				       :disabled="loading"
+				       v-model="formData.Password"
+				       name="password"
+				       autocomplete="new-password"
+				       autofocus
+				       class="form-control rounded-3" id="password" placeholder="password">
+				<label for="password" class="d-flex">
+					<i class="bi bi-key me-2"></i>
+					Password
+				</label>
+			</div>
+			<div class="form-floating">
+				<input type="password"
+				       required
+				       :disabled="loading"
+				       v-model="formData.ConfirmPassword"
+				       name="confirm_password"
+				       autocomplete="new-password"
+				       autofocus
+				       class="form-control rounded-3" id="confirm_password" placeholder="confirm_password">
+				<label for="confirm_password" class="d-flex">
+					<i class="bi bi-key me-2"></i>
+					Confirm Password
+				</label>
+				<div id="validationServer03Feedback" class="invalid-feedback">
+					Passwords does not match
 				</div>
 			</div>
-			<div>
-				<hr class="my-4">
-				<div class="d-flex align-items-center">
+
+
+			<button
+				:disabled="!formFilled || !validatePassword || loading"
+				class=" btn btn-primary rounded-3 btn-brand px-3 py-2">
+				<Transition name="slide-right" mode="out-in">
+						<span v-if="!loading" class="d-block">
+							Continue <i class="ms-2 bi bi-arrow-right"></i>
+						</span>
+					<span v-else class="d-block">
+							<i class="spinner-border spinner-border-sm"></i>
+						</span>
+				</Transition>
+			</button>
+		</form>
+		<div>
+			<hr class="my-4">
+			<div class="d-flex align-items-center">
 					<span class="text-muted">
 						Already have an account?
 					</span>
-					<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold">
-						Sign In
-					</RouterLink>
-				</div>
+				<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold">
+					Sign In
+				</RouterLink>
 			</div>
 		</div>
 	</div>

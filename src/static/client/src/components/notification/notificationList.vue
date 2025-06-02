@@ -6,10 +6,6 @@ const store = clientStore()
 const notifications = computed(() => {
 	return store.notifications.filter(x => x.show).slice().reverse()
 })
-
-onMounted(() => {
-	store.newNotification("Hi!!lskadjlkasjdlkasjkldjaslkdjklasjdlkjaslkdjlkasjdlkjsalkdjlkasjdlk", "warning")
-})
 </script>
 
 <template>

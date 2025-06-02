@@ -8,13 +8,14 @@ from .ConnectionString import ConnectionString
 
 
 class DashboardLogger:
-    def __init__(self, DashboardConfig):
+    def __init__(self):
         self.engine = db.create_engine(ConnectionString("wgdashboard_log"))
         self.metadata = db.MetaData()
         self.dashboardLoggerTable = db.Table('DashboardLog', self.metadata,
                                              
                                              db.Column('LogID', db.String(255), nullable=False, primary_key=True),
-                                             db.Column('LogDate', (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP),
+                                             db.Column('LogDate',
+                                                       (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP),
                                                        server_default=db.func.now()),
                                              db.Column('URL', db.String(255)),
                                              db.Column('IP', db.String(255)),

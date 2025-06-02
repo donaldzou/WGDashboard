@@ -1264,7 +1264,7 @@ WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
-DashboardLogger: DashboardLogger = DashboardLogger(DashboardConfig)
+DashboardLogger: DashboardLogger = DashboardLogger()
 
 InitWireguardConfigurationsList(startup=True)
 

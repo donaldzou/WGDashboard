@@ -36,19 +36,23 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         if request.method.lower() == 'options':
             return ResponseObject(True)
         
-        
-    
-    @client.get(prefix)
-    def ClientIndex():
-        print(wireguardConfigurations.keys())
-        return render_template('client.html')
     
     @client.post(f'{prefix}/api/signup')
     def ClientAPI_SignUp():
         data = request.json
         status, msg = DashboardClients.SignUp(**data)
-        
-    
         return ResponseObject(status, msg)
+    
+    @client.post(f'{prefix}/api/signin')
+    def ClientAPI_SignIn():
+        data = request.json
+        status, msg = DashboardClients.SignIn(**data)
+        return ResponseObject(status, msg)
+
+    @client.get(prefix)
+    @login_required
+    def ClientIndex():
+        print(wireguardConfigurations.keys())
+        return render_template('client.html')
     
     return client

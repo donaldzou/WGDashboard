@@ -16,7 +16,7 @@ const show = () => {
 	props.notificationData.show = true;
 	timeout = setTimeout(() => {
 		dismiss()
-	}, 50000)
+	}, 5000)
 }
 const clearTime = () => clearTimeout(timeout)
 const dismiss = () => props.notificationData.show = false;
@@ -57,7 +57,7 @@ onMounted(() => {
 <style scoped>
 .notification{
 	width: 100%;
-	word-break: break-all;
+	word-break: break-word;
 }
 
 @media screen and (min-width: 576px) {

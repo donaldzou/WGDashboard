@@ -25,8 +25,7 @@ export default defineConfig({
 	},
 	server:{
 		proxy: {
-			'/api': proxy,
-			'/fileDownload':proxy
+			'/client': proxy,
 		},
 		host: '0.0.0.0'
 	},

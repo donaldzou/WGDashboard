@@ -1,14 +1,23 @@
+import hashlib
+import uuid
+
+import bcrypt
+import pyotp
 import sqlalchemy as db
-from sqlalchemy.orm import DeclarativeBase, Mapped
-from sqlalchemy.testing.schema import mapped_column
 
 from .ConnectionString import ConnectionString
+from .DashboardClientsTOTP import DashboardClientsTOTP
+from .Utilities import ValidatePasswordStrength
+from .DashboardLogger import DashboardLogger
+
 
 
 class DashboardClients:
     def __init__(self):
+        self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
+        self.DashboardClientsTOTP = DashboardClientsTOTP()
         
         self.dashboardClientsTable = db.Table(
             'DashboardClients', self.metadata,
@@ -36,8 +45,6 @@ class DashboardClients:
         self.metadata.create_all(self.engine)
         self.Clients = []
         self.__getClients()
-        print('hi')
-        print(self.Clients)
         
     def __getClients(self):
         with self.engine.connect() as conn:
@@ -49,10 +56,63 @@ class DashboardClients:
                 ).where(
                     self.dashboardClientsTable.c.DeletedDate is None)
                 ).mappings().fetchall()
+
+    def SignIn(self, Email, Password) -> tuple[bool, str]:
+        if not all([Email, Password]):
+            return False, "Please fill in all fields"
+        with self.engine.connect() as conn:
+            existingClient = conn.execute(
+                self.dashboardClientsTable.select().where(
+                    self.dashboardClientsTable.c.Email == Email
+                )
+            ).mappings().fetchone()
+            if existingClient:
+                checkPwd = bcrypt.checkpw(Password.encode("utf-8"), existingClient.get("Password").encode("utf-8"))
+                if checkPwd:
+                    return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
+                  
+                
+        return False, "Email or Password is incorrect"
+    
+    def SignUp(self, Email, Password, ConfirmPassword) -> tuple[bool, str] or tuple[bool, None]:
+        try:
+            if not all([Email, Password, ConfirmPassword]):
+                return False, "Please fill in all fields"
+            if Password != ConfirmPassword:
+                return False, "Passwords does not match"
+    
+            with self.engine.connect() as conn:
+                existingClient = conn.execute(
+                    self.dashboardClientsTable.select().where(
+                        self.dashboardClientsTable.c.Email == Email
+                    )
+                ).mappings().fetchone()
+                if existingClient:
+                    return False, "Email already signed up"
+    
+            pwStrength, msg = ValidatePasswordStrength(Password)
+            if not pwStrength:
+                return pwStrength, msg
+    
+            with self.engine.begin() as conn:
+                newClientUUID = str(uuid.uuid4())
+                totpKey = pyotp.random_base32()
+                encodePassword = Password.encode('utf-8')
+                conn.execute(
+                    self.dashboardClientsTable.insert().values({
+                        "ClientID": newClientUUID,
+                        "Email": Email,
+                        "Password": bcrypt.hashpw(encodePassword, bcrypt.gensalt()).decode("utf-8"),
+                        "TotpKey": totpKey
+                    })
+                )
+                conn.execute(
+                    self.dashboardClientsInfoTable.insert().values({
+                        "ClientID": newClientUUID
+                    })
+                )
+        except Exception as e:
+            self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
+            return False, "Signed up failed."
             
-    
-    
-    def SignUp(self, Email, Password, ConfirmPassword) -> tuple[bool, str]:
-        pass
-    
-        
+        return True, None       
