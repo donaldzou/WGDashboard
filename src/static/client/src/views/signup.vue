@@ -22,7 +22,7 @@ const signUp = async (e) => {
 	}
 	if (validatePassword){
 		loading.value = true
-		await axios.post(requestURl('/client/api/signup'), formData).then((res) => {
+		await axios.post(requestURl('/api/signup'), formData).then((res) => {
 			let data = res.data
 			if (!data.status){
 				store.newNotification(data.message, "danger")

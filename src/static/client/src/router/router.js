@@ -32,7 +32,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
 	if (to.meta.auth){
-		await axios.get(requestURl('/client/api/validateAuthentication')).then(res => {
+		await axios.get(requestURl('/api/validateAuthentication')).then(res => {
 			next()
 		}).catch(() => {
 			const store = clientStore()
