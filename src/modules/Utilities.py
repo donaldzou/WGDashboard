@@ -74,3 +74,22 @@ def GenerateWireguardPrivateKey() -> tuple[bool, str] | tuple[bool, None]:
         return True, publicKey.decode().strip('\n')
     except subprocess.CalledProcessError:
         return False, None
+    
+def ValidatePasswordStrength(password: str) -> tuple[bool, str] | tuple[bool, None]:
+    # Rules:
+    #     - Must be over 8 characters & numbers
+    #     - Must contain at least 1 Uppercase & Lowercase letters
+    #     - Must contain at least 1 Numbers (0-9)
+    #     - Must contain at least 1 special characters from $&+,:;=?@#|'<>.-^*()%!~_-
+    if len(password) < 8:
+        return False, "Password must be 8 characters or more"
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least 1 lowercase character"
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least 1 uppercase character"
+    if not re.search(r'\d', password):
+        return False, "Password must contain at least 1 number"
+    if not re.search(r'[$&+,:;=?@#|\'<>.\-^*()%!~_-]', password):
+        return False, "Password must contain at least 1 special character from $&+,:;=?@#|'<>.-^*()%!~_-"
+    
+    return True, None
