@@ -14,6 +14,7 @@
     "bootstrap-icons": "^1.13.1",
     "dayjs": "^1.11.13",
     "pinia": "^3.0.2",
+    "qrcode": "^1.5.4",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
