@@ -1,7 +1,8 @@
 import {createWebHashHistory, createRouter} from "vue-router";
 import Index from "@/views/index.vue";
-import Signin from "@/views/signin.vue";
-import Signup from "@/views/signup.vue";
+import SignIn from "@/views/signin.vue";
+import SignUp from "@/views/signup.vue";
+import Totp from "@/views/totp.vue";
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -13,13 +14,18 @@ const router = createRouter({
 		},
 		{
 			path: '/signin',
-			component: Signin,
+			component: SignIn,
 			name: "Sign In"
 		},
 		{
 			path: '/signup',
-			component: Signup,
+			component: SignUp,
 			name: "Sign Up"
+		},
+		{
+			path: '/totp',
+			component: Totp,
+			name: "Verify TOTP"
 		}
 	]
 })
