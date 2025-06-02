@@ -28,13 +28,12 @@ from modules.DashboardConfig import DashboardConfig
 from modules.WireguardConfiguration import WireguardConfiguration
 from modules.AmneziaWireguardConfiguration import AmneziaWireguardConfiguration
 
-from client import client
+from client import createClientBlueprint
 
 SystemStatus = SystemStatus()
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
-app.register_blueprint(client)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
@@ -115,7 +114,7 @@ def auth_req():
                 '/client'
             ]
             
-            if ("username" not in session 
+            if (("username" not in session or session.get("role") != "admin") 
                     and (f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}/" != request.path 
                     and f"{(APP_PREFIX if len(APP_PREFIX) > 0 else '')}" != request.path)
                     and len(list(filter(lambda x : x not in request.path, whiteList))) == len(whiteList)
@@ -1268,6 +1267,8 @@ AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger(DashboardConfig)
 
 InitWireguardConfigurationsList(startup=True)
+
+app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig))
 
 def startThreads():
     bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)
