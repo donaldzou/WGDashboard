@@ -79,7 +79,6 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     
     @client.get(prefix)
     def ClientIndex():
-        print(wireguardConfigurations.keys())
         return render_template('client.html')
     
     @client.get(f'{prefix}/api/validateAuthentication')

@@ -25,7 +25,7 @@ const formFilled = computed(() => {
 const store = clientStore()
 const router = useRouter()
 
-await axios.get(requestURl('/client/api/signin/totp'), {
+await axios.get(requestURl('/api/signin/totp'), {
 	params: {
 		Token: props.totpToken
 	}
@@ -53,7 +53,7 @@ const verify = async (e) => {
 	e.preventDefault()
 	if (formFilled){
 		loading.value = true
-		await axios.post(requestURl('/client/api/signin/totp'), {
+		await axios.post(requestURl('/api/signin/totp'), {
 			Token: props.totpToken,
 			UserProvidedTOTP: formData.TOTP
 		}).then(res => {

@@ -20,7 +20,7 @@ const signIn = async (e) => {
 		return;
 	}
 	loading.value = true;
-	await axios.post(requestURl("/client/api/signin"), formData).then(res => {
+	await axios.post(requestURl("/api/signin"), formData).then(res => {
 		let data = res.data;
 		if (!data.status){
 			store.newNotification(data.message, "danger")
