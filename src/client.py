@@ -52,6 +52,13 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             session['role'] = 'client'
             session['totpVerified'] = False
         return ResponseObject(status, msg)
+
+    @client.get(f'{prefix}/api/signout')
+    def ClientAPI_SignOut():
+        session.pop('username')
+        session.pop('role')
+        session.pop('totpVerified')
+        return ResponseObject(True)
     
     @client.get(f'{prefix}/api/signin/totp')
     def ClientAPI_SignIn_TOTP():

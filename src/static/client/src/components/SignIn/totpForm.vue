@@ -14,7 +14,7 @@ const formData = reactive({
 	TOTP: ""
 })
 
-const loading = ref(false)
+const loading = ref(true)
 const replace = () => {
 	formData.TOTP = formData.TOTP.replace(/\D/i, "")
 }
@@ -25,20 +25,23 @@ const formFilled = computed(() => {
 const store = clientStore()
 const router = useRouter()
 
-await axios.get(requestURl('/api/signin/totp'), {
-	params: {
-		Token: props.totpToken
-	}
-}).then(res => {
-	let data = res.data
-	if (data.status){
-		if (data.message){
-			totpKey.value = data.message
+onMounted(() => {
+	axios.get(requestURl('/api/signin/totp'), {
+		params: {
+			Token: props.totpToken
 		}
-	}else{
-		store.newNotification(data.message, "danger")
-		router.push('/signin')
-	}
+	}).then(res => {
+		let data = res.data
+		loading.value = false
+		if (data.status){
+			if (data.message){
+				totpKey.value = data.message
+			}
+		}else{
+			store.newNotification(data.message, "danger")
+			router.push('/signin')
+		}
+	})
 })
 
 const emits = defineEmits(['clearToken'])
@@ -117,14 +120,13 @@ const verify = async (e) => {
 		<button
 			:disabled="!formFilled || loading"
 			class="btn btn-primary rounded-3 btn-brand px-3 py-2">
-			<Transition name="slide-right" mode="out-in">
-				<span v-if="!loading" class="d-block">
-					Continue <i class="ms-2 bi bi-arrow-right"></i>
-				</span>
-				<span v-else class="d-block">
-					<i class="spinner-border spinner-border-sm"></i>
-				</span>
-			</Transition>
+			<span v-if="!loading" class="d-block">
+				Continue <i class="ms-2 bi bi-arrow-right"></i>
+			</span>
+			<span v-else class="d-block">
+				Loading...
+				<i class="ms-2 spinner-border spinner-border-sm"></i>
+			</span>
 		</button>
 	</div>
 

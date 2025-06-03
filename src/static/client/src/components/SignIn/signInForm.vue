@@ -82,15 +82,12 @@ if (route.query.Email){
 			<button
 				:disabled="!formFilled || loading"
 				class="btn btn-primary rounded-3 btn-brand px-3 py-2">
-				<Transition name="slide-right" mode="out-in">
-					<span v-if="!loading" class="d-block">
-						Continue <i class="ms-2 bi bi-arrow-right"></i>
-					</span>
-					<span v-else class="d-block">
-						Loading...
-						<i class="spinner-border spinner-border-sm"></i>
-					</span>
-				</Transition>
+				<span v-if="!loading" class="d-block">
+					Continue <i class="ms-2 bi bi-arrow-right"></i>
+				</span>
+				<span v-else class="d-block">
+					Loading...<i class="ms-2 spinner-border spinner-border-sm"></i>
+				</span>
 			</button>
 		</form>
 		<div>

@@ -8,7 +8,7 @@ const checkTotp = ref("")
 </script>
 
 <template>
-	<div>
+	<div class="p-3 p-sm-5">
 		<Transition name="app" mode="out-in">
 			<SignInForm
 				@totpToken="token => { checkTotp = token }"
