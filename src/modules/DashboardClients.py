@@ -17,7 +17,7 @@ class DashboardClients:
         self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
-        self.DashboardClientsTOTP = DashboardClientsTOTP()
+        
         
         self.dashboardClientsTable = db.Table(
             'DashboardClients', self.metadata,
@@ -45,6 +45,7 @@ class DashboardClients:
         self.metadata.create_all(self.engine)
         self.Clients = []
         self.__getClients()
+        self.DashboardClientsTOTP = DashboardClientsTOTP()
         
     def __getClients(self):
         with self.engine.connect() as conn:
