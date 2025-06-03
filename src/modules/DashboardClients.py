@@ -57,6 +57,7 @@ class DashboardClients:
                 ).where(
                     self.dashboardClientsTable.c.DeletedDate is None)
                 ).mappings().fetchall()
+        
 
     def SignIn(self, Email, Password) -> tuple[bool, str]:
         if not all([Email, Password]):
@@ -85,6 +86,8 @@ class DashboardClients:
             totpMatched = pyotp.TOTP(data.get('TotpKey')).verify(UserProvidedTotp)
             if not totpMatched:
                 return False, "TOTP is does not match"
+            else:
+                self.DashboardClientsTOTP.RevokeToken(Token)
         if data.get('TotpKeyVerified') is None:
             with self.engine.begin() as conn:
                 conn.execute(
@@ -94,12 +97,9 @@ class DashboardClients:
                         self.dashboardClientsTable.c.ClientID == data.get('ClientID')
                     )
                 )
+              
         return True, None
-    
-                  
-                
         
-    
     def SignUp(self, Email, Password, ConfirmPassword) -> tuple[bool, str] or tuple[bool, None]:
         try:
             if not all([Email, Password, ConfirmPassword]):
@@ -141,4 +141,7 @@ class DashboardClients:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
             return False, "Signed up failed."
             
-        return True, None       
+        return True, None
+    
+    def UpdatePassword(self, CurrentPassword, NewPassword, ConfirmNewPassword):
+        pass

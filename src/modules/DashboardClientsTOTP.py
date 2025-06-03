@@ -39,8 +39,21 @@ class DashboardClientsTOTP:
                     "ExpireTime": datetime.datetime.now() + datetime.timedelta(minutes=10)
                 })
             )
-        
         return token
+    
+    def RevokeToken(self, Token) -> bool:
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.dashboardClientsTOTPTable.update().values({
+                        "ExpireTime": datetime.datetime.now()
+                    }).where(
+                        self.dashboardClientsTOTPTable.c.Token == Token
+                    )
+                )
+        except Exception as e:
+            return False
+        return True
     
     def GetTotp(self, token: str) -> tuple[bool, dict] or tuple[bool, None]:
         with self.engine.connect() as conn:
