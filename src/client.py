@@ -81,7 +81,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             if session.get('username') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
             session['totpVerified'] = True
-        
+            # return ResponseObject(True, data=)
         return ResponseObject(status, msg)
     
     @client.get(prefix)
