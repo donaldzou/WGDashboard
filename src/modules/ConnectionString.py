@@ -1,10 +1,6 @@
 import configparser
 import os
-
 from sqlalchemy_utils import database_exists, create_database
-
-from DashboardConfig import DashboardConfig
-
 def ConnectionString(database) -> str or None:    
     parser = configparser.ConfigParser(strict=False)
     parser.read_file(open('wg-dashboard.ini', "r+"))
