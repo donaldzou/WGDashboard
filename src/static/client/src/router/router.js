@@ -26,22 +26,38 @@ const router = createRouter({
 			path: '/signup',
 			component: SignUp,
 			name: "Sign Up"
+		},
+		{
+			path: '/signout',
+			name: "Sign Out"
 		}
 	]
 })
-
 router.beforeEach(async (to, from, next) => {
-	if (to.meta.auth){
-		await axios.get(requestURl('/api/validateAuthentication')).then(res => {
-			next()
-		}).catch(() => {
-			const store = clientStore()
-			store.newNotification("Sign in session ended, please sign in again", "warning")
+	const store = clientStore()
+
+	if (to.path === '/signout'){
+		await axios.get(requestURl('/api/signout')).then(() => {
 			next('/signin')
-		})
+		}).catch(() => {
+			next('/signin')
+		});
+		store.newNotification("Sign in session ended, please sign in again", "warning")
 	}else{
-		next()
+		if (to.meta.auth){
+			await axios.get(requestURl('/api/validateAuthentication')).then(res => {
+				next()
+			}).catch(() => {
+
+				store.newNotification("Sign in session ended, please sign in again", "warning")
+				next('/signin')
+			})
+		}else{
+			next()
+		}
 	}
+
+
 })
 
 router.afterEach((to, from, next) => {

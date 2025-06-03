@@ -68,7 +68,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<div>
+	<div class="p-3 p-sm-5">
 		<h1>Sign Up</h1>
 		<p>to use WGDashboard Client</p>
 		<form class="mt-4 d-flex flex-column gap-3" @submit="e => signUp(e)">
@@ -122,15 +122,13 @@ onMounted(() => {
 			<button
 				:disabled="!formFilled || !validatePassword || loading"
 				class=" btn btn-primary rounded-3 btn-brand px-3 py-2">
-				<Transition name="slide-right" mode="out-in">
-					<span v-if="!loading" class="d-block">
+				<span v-if="!loading" class="d-block">
 						Continue <i class="ms-2 bi bi-arrow-right"></i>
 					</span>
-					<span v-else class="d-block">
+				<span v-else class="d-block">
 						Loading...
 						<i class="spinner-border spinner-border-sm"></i>
 					</span>
-				</Transition>
 			</button>
 		</form>
 		<div>

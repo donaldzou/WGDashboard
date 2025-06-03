@@ -76,11 +76,19 @@
 
 .app-enter-active,
 .app-leave-active {
+
     transition: all 0.3s cubic-bezier(0.82, 0.58, 0.17, 1);
 }
 .app-enter-from,
 .app-leave-to{
     opacity: 0;
     filter: blur(5px);
+}
+
+.app-enter-from{
+    transform: scale(1.03);
+}
+
+.app-leave-to{
     transform: scale(0.97);
 }
