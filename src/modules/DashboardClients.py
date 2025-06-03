@@ -39,7 +39,7 @@ class DashboardClients:
             db.Column('ClientID', db.String(255), nullable=False, primary_key=True),
             db.Column('Firstname', db.String(500)),
             db.Column('Lastname', db.String(500)),
-            extend_existing=True,
+            extend_existing=True,   
         )
 
         self.metadata.create_all(self.engine)
