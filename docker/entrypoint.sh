@@ -2,7 +2,7 @@
 
 config_file="/data/wg-dashboard.ini"
 
-trap 'bash ./wgd.sh stop; exit 0' SIGTERM
+trap 'stop_service' SIGTERM
 
 # Hash password with bcrypt
 hash_password() {
@@ -50,36 +50,80 @@ set_ini() {
   fi
 }
 
+stop_service() {
+  echo "[WGDashboard] Stopping WGDashboard..."
+  /bin/bash ./wgd.sh stop
+  exit 0
+}
+
 echo "------------------------- START ----------------------------"
 echo "Starting the WireGuard Dashboard Docker container."
 
 ensure_installation() {
   echo "Quick-installing..."
+  
+  # Make the wgd.sh script executable.
   chmod +x "${WGDASH}"/src/wgd.sh
   cd "${WGDASH}"/src || exit
   
+  # Github issue: https://github.com/donaldzou/WGDashboard/issues/723
+  echo "Checking for stale pids..."
+  if [[ -f ${WGDASH}/src/gunicorn.pid ]]; then
+    echo "Found stale pid, removing..."
+    rm ${WGDASH}/src/gunicorn.pid
+  fi
+  
+  # Removing clear shell command from the wgd.sh script to enhance docker logging.
   echo "Removing clear command from wgd.sh for better Docker logging."
   sed -i '/clear/d' ./wgd.sh
   
   # Create required directories and links
-  [ ! -d "/data/db" ] && mkdir -p /data/db
-  [ ! -d "${WGDASH}/src/db" ] && ln -s /data/db "${WGDASH}/src/db"
-  [ ! -f "${config_file}" ] && touch "${config_file}"
-  [ ! -f "${WGDASH}/src/wg-dashboard.ini" ] && ln -s "${config_file}" "${WGDASH}/src/wg-dashboard.ini"
+  if [ ! -d "/data/db" ]; then
+    echo "Creating database dir"
+    mkdir -p /data/db
+  fi
+  
+  if [ ! -d "${WGDASH}/src/db" ]; then
+    ln -s /data/db "${WGDASH}/src/db"
+  fi
+  
+  if [ ! -f "${config_file}" ]; then
+    echo "Creating wg-dashboard.ini file"
+    touch "${config_file}"
+  fi
+  
+  if [ ! -f "${WGDASH}/src/wg-dashboard.ini" ]; then
+    ln -s "${config_file}" "${WGDASH}/src/wg-dashboard.ini"
+  fi
 
-  # Python venv
+  # Create the Python virtual environment.
   python3 -m venv "${WGDASH}"/src/venv
   . "${WGDASH}/src/venv/bin/activate"
   
-  # Copy libraries
-  mv /usr/lib/python3.12/site-packages/{psutil,bcrypt}* "${WGDASH}"/src/venv/lib/python3.12/site-packages/
+  # Due to this pip dependency being available as a system package we can just move it to the venv.
+  echo "Moving PIP dependency from ephemerality to runtime environment: psutil"
+  mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
   
-  ./wgd.sh install
+  echo "Moving PIP dependency from ephemerality to runtime environment: bcrypt"
+  mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
+  
+  # Use the bash interpreter to install WGDashboard according to the wgd.sh script.
+  /bin/bash ./wgd.sh install
+  
+  echo "Looks like the installation succeeded. Moving on."
   
   # Setup WireGuard if needed
   if [ ! -f "/etc/wireguard/wg0.conf" ]; then
     cp -a "/configs/wg0.conf.template" "/etc/wireguard/wg0.conf"
-    sed -i "s|^PrivateKey *=.*$|PrivateKey = $(wg genkey)|g" /etc/wireguard/wg0.conf
+    
+    echo "Setting a secure private key."
+    local privateKey
+    privateKey=$(wg genkey)
+    sed -i "s|^PrivateKey *=.*$|PrivateKey = ${privateKey}|g" /etc/wireguard/wg0.conf
+    
+    echo "Done setting template."
+  else
+    echo "Existing wg0 configuration file found, using that."
   fi
 }
 
@@ -98,8 +142,8 @@ set_envvars() {
     public_ip=$(curl -s ifconfig.me)
     echo "Automatically detected public IP: ${public_ip}" 
   fi
-  set_ini Peers remote_endpoint "${public_ip}"
   
+  set_ini Peers remote_endpoint "${public_ip}"
   set_ini Server app_port "${wgd_port}"
   
   # Account settings - process all parameters
@@ -153,13 +197,33 @@ set_envvars() {
 # Start service and monitor logs
 start_and_monitor() {
   printf "\n---------------------- STARTING CORE -----------------------\n"
+  
+  # Due to some instances complaining about this, making sure its there every time.
+  mkdir -p /dev/net
+  mknod /dev/net/tun c 10 200
+  chmod 600 /dev/net/tun
+
+  # Actually starting WGDashboard
+  echo "Activating Python venv and executing the WireGuard Dashboard service."
   bash ./wgd.sh start
   
+  # Wait a second before continuing, to give the python program some time to get ready.
   sleep 1
+  echo -e "\nEnsuring container continuation."
+  
   # Find and monitor log file
-  find "${WGDASH}/src/log" -name "error_*.log" -type f -print0 | 
-    xargs -0 ls -t 2>/dev/null | head -n1 | xargs tail -f 2>/dev/null ||
-    echo "No log files found. Something went wrong!"
+  local logdir="${WGDASH}/src/log"
+  latestErrLog=$(find "$logdir" -name "error_*.log" -type f -print | sort -r | head -n 1)
+  
+  # Only tail the logs if they are found
+  if [ -n "$latestErrLog" ]; then
+    tail -f "$latestErrLog" &
+    # Wait for the tail process to end.
+    wait $!
+  else
+    echo "No log files found to tail. Something went wrong, exiting..."
+    exit 1
+  fi
 }
 
 # Main execution flow

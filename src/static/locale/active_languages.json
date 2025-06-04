@@ -15,6 +15,11 @@
         "lang_name_localized": "Беларуская"
     },
     {
+        "lang_id": "ca",
+        "lang_name": "Catalan",
+        "lang_name_localized": "Català"
+    },
+    {
         "lang_id": "zh-hk",
         "lang_name": "Chinese (Traditional)",
         "lang_name_localized": "中文（繁體）"
@@ -58,6 +63,11 @@
         "lang_id": "de-de",
         "lang_name": "German",
         "lang_name_localized": "Deutsch"
+    },
+    {
+        "lang_id": "hu-hu",
+        "lang_name": "Hungarian",
+        "lang_name_localized": "Magyar"
     },
     {
         "lang_id": "it-it",

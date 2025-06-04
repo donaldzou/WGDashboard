@@ -23,6 +23,7 @@ const squareHeight = computed(() => {
 			<div
 				v-if="show"
 				style="white-space: nowrap;"
+				:style="{'top': squareHeight}"
 				class="floatingLabel z-3 border position-absolute d-block p-1 px-2 
 				bg-body text-body rounded-3 border shadow d-flex"
 				:class="[align ? 'end-0':'start-0']"
@@ -42,9 +43,5 @@ const squareHeight = computed(() => {
 .square{
 	height: v-bind(squareHeight);
 	transition: background-color 0.5s cubic-bezier(0.42, 0, 0.22, 1.0);
-}
-
-.floatingLabel{
-	top: v-bind(squareHeight);
 }
 </style>

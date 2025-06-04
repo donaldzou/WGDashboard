@@ -25,7 +25,7 @@ from modules.PeerJob import PeerJob
 from modules.SystemStatus import SystemStatus
 SystemStatus = SystemStatus()
 
-DASHBOARD_VERSION = 'v4.2.2'
+DASHBOARD_VERSION = 'v4.2.3'
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
@@ -180,6 +180,7 @@ class PeerJobs:
     
     def runJob(self):
         needToDelete = []
+        self.__getJobs()
         for job in self.Jobs:
             c = WireguardConfigurations.get(job.Configuration)
             if c is not None:
@@ -432,7 +433,6 @@ class WireguardConfiguration:
             original = [l.rstrip("\n") for l in f.readlines()]
             try:
                 start = original.index("[Interface]")
-                
                 # Clean
                 for i in range(start, len(original)):
                     if original[i] == "[Peer]":
@@ -445,7 +445,7 @@ class WireguardConfiguration:
                                 setattr(self, key, False)
                             else:
                                 setattr(self, key, "")
-                
+
                 # Set
                 for i in range(start, len(original)):
                     if original[i] == "[Peer]":
@@ -459,7 +459,10 @@ class WireguardConfiguration:
                                 setattr(self, key, StringToBoolean(value))
                             else:
                                 if len(getattr(self, key)) > 0:
-                                    setattr(self, key, f"{getattr(self, key)}, {value}")
+                                    if key not in ["PostUp", "PostDown", "PreUp", "PreDown"]:
+                                        setattr(self, key, f"{getattr(self, key)}, {value}")
+                                    else:
+                                        setattr(self, key, f"{getattr(self, key)}; {value}")
                                 else:
                                     setattr(self, key, value)  
             except ValueError as e:
@@ -470,11 +473,12 @@ class WireguardConfiguration:
             self.Status = self.getStatus()
     
     def __dropDatabase(self):
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        existingTables = [self.Name, f'{self.Name}_restrict_access', f'{self.Name}_transfer', f'{self.Name}_deleted']        
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
         for t in existingTables:
-            sqlUpdate("DROP TABLE '%s'" % t['name'])
+            sqlUpdate("DROP TABLE '%s'" % t)
 
-        existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
+        # existingTables = sqlSelect(f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '{self.Name}%'").fetchall()
 
     def createDatabase(self, dbName = None):
         if dbName is None:
@@ -804,6 +808,9 @@ class WireguardConfiguration:
             return ResponseObject(False, "Failed to save configuration through WireGuard")
 
         self.getPeers()
+        
+        if numOfDeletedPeers == 0 and numOfFailedToDeletePeers == 0:
+            return ResponseObject(False, "No peer(s) to delete found", responseCode=404)
 
         if numOfDeletedPeers == len(listOfPublicKeys):
             return ResponseObject(True, f"Deleted {numOfDeletedPeers} peer(s)")
@@ -945,7 +952,8 @@ class WireguardConfiguration:
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
-            "Protocol": self.Protocol
+            "Protocol": self.Protocol,
+            "Table": self.Table,
         }
     
     def backupConfigurationFile(self) -> tuple[bool, dict[str, str]]:
@@ -1047,7 +1055,7 @@ class WireguardConfiguration:
         dataChanged = False
         with open(self.configPath, 'r') as f:
             original = [l.rstrip("\n") for l in f.readlines()]
-            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort"]
+            allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort", "Table"]
             if self.Protocol == 'awg':
                 allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
             start = original.index("[Interface]")
@@ -1204,15 +1212,15 @@ AmneziaWG Configuration
 """
 class AmneziaWireguardConfiguration(WireguardConfiguration):
     def __init__(self, name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
-        self.Jc = 0
-        self.Jmin = 0
-        self.Jmax = 0
-        self.S1 = 0
-        self.S2 = 0
-        self.H1 = 1
-        self.H2 = 2
-        self.H3 = 3
-        self.H4 = 4
+        self.Jc = ""
+        self.Jmin = ""
+        self.Jmax = ""
+        self.S1 = ""
+        self.S2 = ""
+        self.H1 = ""
+        self.H2 = ""
+        self.H3 = ""
+        self.H4 = ""
         
         super().__init__(name, data, backup, startup, wg=False)
 
@@ -1237,6 +1245,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             },
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
+            "Table": self.Table,
             "Protocol": self.Protocol,
             "Jc": self.Jc,
             "Jmin": self.Jmin,
@@ -1434,7 +1443,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                         f.write(p['preshared_key'])
 
                 subprocess.check_output(
-                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''} advanced-security {p['advanced_security']}",
+                    f"{self.Protocol} set {self.Name} peer {p['id']} allowed-ips {p['allowed_ip'].replace(' ', '')}{f' preshared-key {uid}' if presharedKeyExist else ''}",
                                         shell=True, stderr=subprocess.STDOUT)
                 if presharedKeyExist:
                     os.remove(uid)
@@ -1713,7 +1722,7 @@ PersistentKeepalive = {str(self.keepalive)}
                     f.write(preshared_key)
             newAllowedIPs = allowed_ip.replace(" ", "")
             updateAllowedIp = subprocess.check_output(
-                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'} advanced-security {advanced_security}",
+                f"{self.configuration.Protocol} set {self.configuration.Name} peer {self.id} allowed-ips {newAllowedIPs} {f'preshared-key {uid}' if pskExist else 'preshared-key /dev/null'}",
                 shell=True, stderr=subprocess.STDOUT)
 
             if pskExist: os.remove(uid)
@@ -2434,7 +2443,7 @@ def API_updatePeerSettings(configName):
                                        allowed_ip, endpoint_allowed_ip, mtu, keepalive)
             
             return peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                allowed_ip, endpoint_allowed_ip, mtu, keepalive, data.get('advanced_security', 'off'))
+                allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
             
     return ResponseObject(False, "Peer does not exist")
 
@@ -2463,11 +2472,11 @@ def API_deletePeers(configName: str) -> ResponseObject:
     peers = data['peers']
     if configName in WireguardConfigurations.keys():
         if len(peers) == 0:
-            return ResponseObject(False, "Please specify one or more peers")
+            return ResponseObject(False, "Please specify one or more peers", status_code=400)
         configuration = WireguardConfigurations.get(configName)
         return configuration.deletePeers(peers)
 
-    return ResponseObject(False, "Configuration does not exist")
+    return ResponseObject(False, "Configuration does not exist", status_code=404)
 
 @app.post(f'{APP_PREFIX}/api/restrictPeers/<configName>')
 def API_restrictPeers(configName: str) -> ResponseObject:
@@ -2604,7 +2613,7 @@ def API_addPeers(configName):
                             "endpoint_allowed_ip": endpoint_allowed_ip,
                             "mtu": mtu,
                             "keepalive": keep_alive,
-                            "advanced_security": data.get("advanced_security", "off")
+                            "advanced_security": "off"
                         })
                         if addedCount == bulkAddAmount:
                             break
@@ -2674,7 +2683,7 @@ def API_addPeers(configName):
                         "DNS": dns_addresses,
                         "mtu": mtu,
                         "keepalive": keep_alive,
-                        "advanced_security": data.get("advanced_security", "off")
+                        "advanced_security": "off"
                     }]
                 )
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
@@ -2952,7 +2961,7 @@ def API_isTotpEnabled():
 @app.get(f'{APP_PREFIX}/api/Welcome_GetTotpLink')
 def API_Welcome_GetTotpLink():
     if not DashboardConfig.GetConfig("Account", "totp_verified")[1]:
-        DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32())
+        DashboardConfig.SetConfig("Account", "totp_key", pyotp.random_base32(), True)
         return ResponseObject(
             data=pyotp.totp.TOTP(DashboardConfig.GetConfig("Account", "totp_key")[1]).provisioning_uri(
                 issuer_name="WGDashboard"))
@@ -3106,16 +3115,19 @@ def peerInformationBackgroundThread():
     time.sleep(10)
     while True:
         with app.app_context():
-            for c in WireguardConfigurations.values():
-                if c.getStatus():
-                    try:
-                        c.getPeersTransfer()
-                        c.getPeersLatestHandshake()
-                        c.getPeersEndpoint()
-                        c.getPeersList()
-                        c.getRestrictedPeersList()
-                    except Exception as e:
-                        print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
+            try:
+                curKeys = list(WireguardConfigurations.keys())
+                for name in curKeys:
+                    if name in WireguardConfigurations.keys() and WireguardConfigurations.get(name) is not None:
+                        c = WireguardConfigurations.get(name)
+                        if c.getStatus():
+                            c.getPeersTransfer()
+                            c.getPeersLatestHandshake()
+                            c.getPeersEndpoint()
+                            c.getPeersList()
+                            c.getRestrictedPeersList()
+            except Exception as e:
+                print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
         time.sleep(10)
 
 def peerJobScheduleBackgroundThread():

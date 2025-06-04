@@ -10,14 +10,13 @@
 <p align="center">
   <img alt="WGDashboard" src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Logos/Logo-2-Rounded-512x512.png" width="128">
 </p>
-<h1 align="center">WGDashboard</h1>
+<h1 align="center">
+  <a href="https://wgdashboard.dev">WGDashboard</a>
+</h1>
 <p align="center">
-    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
-    <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
-    <img src="https://forthebadge.com/images/badges/license-mit.svg">
-</p>
-<p align="center">
-    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
+    <img src="https://img.shields.io/badge/Made_With-Python-blue?style=for-the-badge&logo=python&logoColor=ffffff">
+    <img src="https://img.shields.io/badge/Made_With-Vue.js-42b883?style=for-the-badge&logo=vuedotjs&logoColor=ffffff">
+    <img src="https://img.shields.io/badge/License-Apache_License_2.0-D22128?style=for-the-badge&logo=apache&logoColor=ffffff">
 </p>
 
 <p align="center">
@@ -37,43 +36,40 @@
 
 <p align="center"><b><i>This project is not affiliate to the official WireGuard Project</i></b></p>
 
+<h3 align="center">Looking for help or want to chat about this project?</h4>
+<p align="center">
+  You can reach out at
+</p>
+<p align="center">
+  <a align="center" href="https://discord.gg/72TwzjeuWm" target="_blank"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
+  <a align="center" href="https://www.reddit.com/r/WGDashboard/" target="_blank"><img src="https://img.shields.io/badge/Reddit-r%2FWGDashboard-FF4500?style=for-the-badge&logo=reddit"></a>
+  <a align="center" href="https://app.element.io/#/room/#wgd:matrix.org" target="_blank"><img src="https://img.shields.io/badge/Matrix_Chatroom-%23WGD-000000?style=for-the-badge&logo=matrix"></a>
+</p>
+<h3 align="center">Want to support this project?</h4>
+<p align="center">
+  You can support via <br>
+</p>
+<p align="center">
+  <a align="center" href="https://github.com/sponsors/donaldzou" target="_blank"><img src="https://img.shields.io/badge/GitHub%20Sponsor-2e9a40?style=for-the-badge&logo=github"></a>
+  <a align="center" href="https://buymeacoffee.com/donaldzou" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=000000"></a>
+  <a align="center" href="https://patreon.com/c/DonaldDonnyZou/membership" target="_blank"><img src="https://img.shields.io/badge/Patreon-000000?style=for-the-badge&logo=patreon&logoColor=ffffff"></a>
+</p>
 
 <p align="center">
-  Join our Discord Server for quick help, or you wanna chat about this project!
+  <b>or, visit our merch store and support us by purchasing a merch for only $USD 17.00 (Including shipping worldwide & duties)</b>
 </p>
 <p align="center">
-  <a align="center" href="https://discord.gg/72TwzjeuWm"><img src="https://img.shields.io/discord/1276818723637956628?labelColor=ffffff&style=for-the-badge&logo=discord&label=Discord"></a>
+  <a align="center" href="https://merch.wgdashboard.dev" target="_blank"><img src="https://img.shields.io/badge/Merch%20from%20WGDashboard-926183?style=for-the-badge"></a>
 </p>
-<p align="center">
-  Alternatively, you can also reach out at our Matrix.org Chatroom :)
-</p>
-<p align="center">
-  <a href="https://app.element.io/#/room/#wgd:matrix.org">Matrix.org Chatroom</a>
-</p>
-
 
 <hr>
+<h4 align="center">
+  for more information, visit our
+</h4>
+<h1 align="center">
+  <a href="https://wgdashboard.dev">Official Website</a>
+</h1>
 
-# [Demo](https://wgd-demo.donaldzou.dev)
-If you would like to try out WGDashboard, feel free to access the link above. You won't be able to actually connect it with WireGuard since I blocked all Post/Pre script.
-
-Username: `admin`
-
-Password: `admin`
-
-> **Please don't abuse server 🥺, and do not put any personal information on it.** If you can't access it, [please let me know here](https://github.com/donaldzou/WGDashboard/issues/695).
-
-<hr>
-
-# [Official Documentation](https://donaldzou.dev/WGDashboard-Documentations)
-
-- [💡 Features](https://donaldzou.github.io/WGDashboard-Documentation/features.html)
-- [📝 Requirements](https://donaldzou.github.io/WGDashboard-Documentation/requirements.html)
-- [🛠 Install](https://donaldzou.github.io/WGDashboard-Documentation/install.html)
-- [🐬 Docker Solutions](https://github.com/donaldzou/WGDashboard/tree/main/docker)
-- [🪜 Usage](https://donaldzou.github.io/WGDashboard-Documentation/usage.html)
-- [📖 API Documentation](https://donaldzou.github.io/WGDashboard-Documentation/api-documentation.html)
-- [And much more...](https://donaldzou.github.io/WGDashboard-Documentation/)
 
 # Screenshots
 
