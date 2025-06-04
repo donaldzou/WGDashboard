@@ -36,7 +36,7 @@ jobs:
         with:
           registry: ${{ env.GHCR_PREFIX }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
