@@ -7,9 +7,7 @@ on:
       - 'main'
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - 'main'
+  
 
 env:
   DOCKERHUB_PREFIX: docker.io
