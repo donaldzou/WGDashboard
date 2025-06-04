@@ -53,6 +53,11 @@ jobs:
           images: |
             ${{ env.DOCKER_HUB_PREFIX }}/${{ env.DOCKER_IMAGE }}
             ${{ env.GHCR_PREFIX }}/${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern=latest,enable={{is_tag}}
+            type=raw,value=nightly,enable={{is_default_branch}}
+            type=ref,pattern={{ref_name}},enable={{is_default_branch}}
 
       - name: Build and export (multi-arch)
         uses: docker/build-push-action@v6
@@ -72,7 +77,7 @@ jobs:
           uses: docker/scout-action@v1
           with:
             command: cves
-            image: ${{ needs.docker_build.outputs.image-tags }}
+            image: ${{ env.GHCR_PREFIX }}/${{ env.DOCKER_IMAGE }}:nightly
             only-severities: critical,high
             only-fixed: true
             write-comment: true
@@ -83,8 +88,8 @@ jobs:
           uses: docker/scout-action@v1
           with:
             command: compare
-            image: ${{ env.DOCKER_HUB_PREFIX }}/${{ env.DOCKER_IMAGE }}:nightly
-            to: ${{ env.DOCKER_HUB_PREFIX }}/${{ env.DOCKER_IMAGE }}:latest
+            image: ${{ env.GHCR_PREFIX }}/${{ env.DOCKER_IMAGE }}:nightly
+            to: ${{ env.GHCR_PREFIX }}/${{ env.DOCKER_IMAGE }}:latest
             only-severities: critical,high
             ignore-unchanged: true
             github-token: ${{ secrets.GITHUB_TOKEN }}
