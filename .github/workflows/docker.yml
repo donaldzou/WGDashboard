@@ -14,7 +14,7 @@ on:
 env:
   DOCKERHUB_PREFIX: docker.io
   GITHUB_CONTAINER_PREFIX: ghcr.io
-  DOCKER_IMAGE: dselen/wgdashboard
+  DOCKER_IMAGE: donaldzou/wgdashboard
 
 jobs:
   docker_build:
@@ -80,7 +80,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
 
   docker_scan:
-    if: ${{ github.event_name != 'pull_request' }} 
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: docker_build
     steps:
