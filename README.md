@@ -4,6 +4,8 @@
 > [!NOTE]
 > **Help Wanted 🎉**: Localizing WGDashboard to other languages! If you're willing to help, please visit https://github.com/donaldzou/WGDashboard/issues/397. Many thanks!
 
+
+
 ![](https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Posters/Banner.png)
 
 
