@@ -56,8 +56,8 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern=latest,enable={{is_tag}}
-            type=raw,value=nightly,enable={{is_default_branch}}
-            type=ref,event=branch,pattern={{branch}},enable={{github.event_name == 'push' && is_default_branch}}
+            type=raw,value=main,enable={{ github.event_name == 'push' && is_default_branch }}
+            type=raw,value=nightly,enable={{ github.event_name == 'push' && is_default_branch }}
 
       - name: Build and export (multi-arch)
         uses: docker/build-push-action@v6
