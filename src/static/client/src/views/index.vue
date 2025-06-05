@@ -1,5 +1,15 @@
 <script setup>
+import {onMounted} from "vue";
+import {axiosGet} from "@/utilities/request.js";
 
+onMounted(async () => {
+	const data = await axiosGet("/api/configurations")
+	if (data){
+		console.log(data)
+	}else{
+
+	}
+})
 </script>
 
 <template>
