@@ -6,8 +6,10 @@ on:
     branches:
       - 'main'
     tags:
-      - 'v*'
-  
+      - '*'
+  release:
+    types: [ published ]
+  pull_request:
 
 env:
   DOCKERHUB_PREFIX: docker.io
@@ -60,10 +62,9 @@ jobs:
             ${{ env.DOCKERHUB_PREFIX }}/${{ env.DOCKER_IMAGE }}
             ${{ env.GITHUB_CONTAINER_PREFIX }}/${{ env.DOCKER_IMAGE }}
           tags: |
-            type=ref,event=branch,format={{ref_name}}
+            type=ref,event=branch
+            type=ref,event=tag
             type=raw,value=${{ env.SHORT_SHA }}
-            type=semver,pattern={{ version }}
-            type=semver,pattern=latest
 
       - name: Print a message
         run: echo "${{ steps.meta.outputs.tags }}"
@@ -79,6 +80,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
 
   docker_scan:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: docker_build
     steps:
