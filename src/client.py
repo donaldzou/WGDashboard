@@ -55,9 +55,9 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
 
     @client.get(f'{prefix}/api/signout')
     def ClientAPI_SignOut():
-        session.pop('username')
-        session.pop('role')
-        session.pop('totpVerified')
+        session['username'] = None
+        session['role'] = None
+        session['totpVerified'] = None
         return ResponseObject(True)
     
     @client.get(f'{prefix}/api/signin/totp')
@@ -81,7 +81,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             if session.get('username') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
             session['totpVerified'] = True
-            # return ResponseObject(True, data=)
+            return ResponseObject(True)
         return ResponseObject(status, msg)
     
     @client.get(prefix)

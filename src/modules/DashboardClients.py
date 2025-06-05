@@ -6,6 +6,7 @@ import pyotp
 import sqlalchemy as db
 
 from .ConnectionString import ConnectionString
+from .DashboardClientsPeerAssignment import DashboardClientsPeerAssignment
 from .DashboardClientsTOTP import DashboardClientsTOTP
 from .Utilities import ValidatePasswordStrength
 from .DashboardLogger import DashboardLogger
@@ -17,7 +18,6 @@ class DashboardClients:
         self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
-        
         
         self.dashboardClientsTable = db.Table(
             'DashboardClients', self.metadata,
@@ -46,6 +46,7 @@ class DashboardClients:
         self.Clients = []
         self.__getClients()
         self.DashboardClientsTOTP = DashboardClientsTOTP()
+        self.DashboardClientsPeerAssignment = DashboardClientsPeerAssignment()
         
     def __getClients(self):
         with self.engine.connect() as conn:
@@ -76,6 +77,7 @@ class DashboardClients:
     
     def SignIn_GetTotp(self, Token: str, UserProvidedTotp: str = None) -> tuple[bool, str] or tuple[bool, None, str]:
         status, data = self.DashboardClientsTOTP.GetTotp(Token)
+        
         if not status:
             return False, "TOTP Token is invalid"    
         if UserProvidedTotp is None:
@@ -83,7 +85,7 @@ class DashboardClients:
                 return True, pyotp.totp.TOTP(data.get('TotpKey')).provisioning_uri(name=data.get('Email'),
                                                                                    issuer_name="WGDashboard Client")
         else:
-            totpMatched = pyotp.TOTP(data.get('TotpKey')).verify(UserProvidedTotp)
+            totpMatched = pyotp.totp.TOTP(data.get('TotpKey')).verify(UserProvidedTotp)
             if not totpMatched:
                 return False, "TOTP is does not match"
             else:
