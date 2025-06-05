@@ -11,10 +11,11 @@ from .DashboardClientsTOTP import DashboardClientsTOTP
 from .Utilities import ValidatePasswordStrength
 from .DashboardLogger import DashboardLogger
 
+from flask import session
 
 
 class DashboardClients:
-    def __init__(self):
+    def __init__(self, wireguardConfigurations):
         self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
@@ -46,7 +47,7 @@ class DashboardClients:
         self.Clients = []
         self.__getClients()
         self.DashboardClientsTOTP = DashboardClientsTOTP()
-        self.DashboardClientsPeerAssignment = DashboardClientsPeerAssignment()
+        self.DashboardClientsPeerAssignment = DashboardClientsPeerAssignment(wireguardConfigurations)
         
     def __getClients(self):
         with self.engine.connect() as conn:
@@ -72,6 +73,7 @@ class DashboardClients:
             if existingClient:
                 checkPwd = bcrypt.checkpw(Password.encode("utf-8"), existingClient.get("Password").encode("utf-8"))
                 if checkPwd:
+                    session['ClientID'] = existingClient.get("ClientID")
                     return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
         return False, "Email or Password is incorrect"
     
@@ -144,6 +146,9 @@ class DashboardClients:
             return False, "Signed up failed."
             
         return True, None
+    
+    def GetClientAssignedPeers(self, ClientID):
+        return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
     
     def UpdatePassword(self, CurrentPassword, NewPassword, ConfirmNewPassword):
         pass

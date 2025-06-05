@@ -26,7 +26,7 @@ def login_required(f):
 
 def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig):
     from modules.DashboardClients import DashboardClients
-    DashboardClients = DashboardClients()
+    DashboardClients = DashboardClients(wireguardConfigurations)
     client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
     
@@ -96,6 +96,6 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.get(f'{prefix}/api/configurations')
     @login_required
     def ClientAPI_Configurations():
-        return ResponseObject(True, "Ping Pong!")
+        return ResponseObject(True, data=DashboardClients.GetClientAssignedPeers(session['ClientID']))
     
     return client
