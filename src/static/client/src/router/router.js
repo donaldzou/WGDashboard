@@ -3,7 +3,7 @@ import Index from "@/views/index.vue";
 import SignIn from "@/views/signin.vue";
 import SignUp from "@/views/signup.vue";
 import axios from "axios";
-import {requestURl} from "@/utilities/request.js";
+import {axiosGet, requestURl} from "@/utilities/request.js";
 import {clientStore} from "@/stores/clientStore.js";
 
 const router = createRouter({
@@ -37,6 +37,8 @@ router.beforeEach(async (to, from, next) => {
 	const store = clientStore()
 
 	if (to.path === '/signout'){
+
+
 		await axios.get(requestURl('/api/signout')).then(() => {
 			next('/signin')
 		}).catch(() => {
@@ -45,13 +47,13 @@ router.beforeEach(async (to, from, next) => {
 		store.newNotification("Sign in session ended, please sign in again", "warning")
 	}else{
 		if (to.meta.auth){
-			await axios.get(requestURl('/api/validateAuthentication')).then(res => {
+			const status = await axiosGet('/api/validateAuthentication')
+			if (status){
 				next()
-			}).catch(() => {
-
+			}else{
 				store.newNotification("Sign in session ended, please sign in again", "warning")
 				next('/signin')
-			})
+			}
 		}else{
 			next()
 		}

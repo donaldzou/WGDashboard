@@ -1,10 +1,10 @@
 <script setup async>
 import {computed, onMounted, reactive, ref} from "vue";
 import axios from "axios";
-import {requestURl} from "@/utilities/request.js";
+import {axiosPost, requestURl} from "@/utilities/request.js";
 import {useRouter} from "vue-router";
 import {clientStore} from "@/stores/clientStore.js";
-import QRCode from "qrcode";
+import Qrcode from "@/components/SignIn/qrcode.vue";
 
 const props = defineProps([
 	'totpToken'
@@ -47,30 +47,28 @@ onMounted(() => {
 const emits = defineEmits(['clearToken'])
 
 onMounted(() => {
-	if (totpKey.value){
-		QRCode.toCanvas(document.getElementById('qrcode'), totpKey.value, function (error) {})
-	}
+
 })
 
 const verify = async (e) => {
 	e.preventDefault()
 	if (formFilled){
 		loading.value = true
-		await axios.post(requestURl('/api/signin/totp'), {
+		const data = await axiosPost('/api/signin/totp', {
 			Token: props.totpToken,
 			UserProvidedTOTP: formData.TOTP
-		}).then(res => {
-			loading.value = false
-			let data = res.data
+		})
+		loading.value = false
+		if (data){
 			if (data.status){
 				router.push('/')
 			}else{
 				store.newNotification(data.message, "danger")
 			}
-		}).catch(() => {
+		}else{
 			store.newNotification("Sign in status is invalid", "danger")
 			emits('clearToken')
-		})
+		}
 	}
 }
 </script>
@@ -88,7 +86,7 @@ const verify = async (e) => {
 			<div class="card-body d-flex gap-3 flex-column">
 				<h2 class="mb-0">Initial Setup</h2>
 				<p class="mb-0">Please scan the following QR Code to generate TOTP with your choice of authenticator</p>
-				<canvas id="qrcode" class="rounded-3 shadow "></canvas>
+				<Qrcode :content="totpKey"></Qrcode>
 				<p class="mb-0">Or you can click the link below:</p>
 				<div class="card rounded-3 ">
 					<div class="card-body">

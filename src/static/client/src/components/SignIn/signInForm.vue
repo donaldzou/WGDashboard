@@ -2,7 +2,7 @@
 import {computed, reactive, ref} from "vue";
 import {clientStore} from "@/stores/clientStore.js";
 import axios from "axios";
-import {requestURl} from "@/utilities/request.js";
+import {axiosPost, requestURl} from "@/utilities/request.js";
 import {useRoute, useRouter} from "vue-router";
 const loading = ref(false)
 const formData = reactive({
@@ -20,15 +20,14 @@ const signIn = async (e) => {
 		return;
 	}
 	loading.value = true;
-	await axios.post(requestURl("/api/signin"), formData).then(res => {
-		let data = res.data;
-		if (!data.status){
-			store.newNotification(data.message, "danger")
-			loading.value = false;
-		}else{
-			emits("totpToken", data.message)
-		}
-	})
+
+	const data = await axiosPost("/api/signin", formData)
+	if (!data.status){
+		store.newNotification(data.message, "danger")
+		loading.value = false;
+	}else{
+		emits("totpToken", data.message)
+	}
 }
 
 const formFilled = computed(() => {
