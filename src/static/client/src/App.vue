@@ -1,6 +1,6 @@
 <script setup>
 import './assets/main.css'
-import NotificationList from "@/components/notification/notificationList.vue";
+import NotificationList from "@/components/Notification/notificationList.vue";
 </script>
 
 <template>

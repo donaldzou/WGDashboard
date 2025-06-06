@@ -1,14 +1,26 @@
-<script setup>
-import {onMounted} from "vue";
+<script setup async>
+import {computed, onMounted, ref} from "vue";
 import {axiosGet} from "@/utilities/request.js";
+import {clientStore} from "@/stores/clientStore.js";
+import Configuration from "@/components/Configuration/configuration.vue";
+const store = clientStore()
+const loading = ref(true)
+
+const loadConfigurations = async () => {
+
+	await store.getConfigurations()
+
+}
+
+const configurations = computed(() => {
+	return store.configurations
+});
 
 onMounted(async () => {
-	const data = await axiosGet("/api/configurations")
-	if (data){
-		console.log(data)
-	}else{
+	// loading.value = true;
+	await loadConfigurations();
+	loading.value = false;
 
-	}
 })
 </script>
 
@@ -33,13 +45,23 @@ onMounted(async () => {
 			</RouterLink>
 		</li>
 	</ul>
-	<div class="d-flex flex-column gap-3">
-		<div class="px-3 border-bottom py-4">
-			<h6>Hi donaldzou@live.hk!</h6>
-			<h5 class="mb-0">You have <strong>3</strong> configurations available</h5>
+	<Transition name="app" mode="out-in">
+		<div class="d-flex flex-column gap-3" v-if="!loading">
+			<div class="px-3 border-bottom py-4">
+				<h6>Hi donaldzou@live.hk!</h6>
+				<h5 class="mb-0">You have <strong>
+					{{ configurations.length }}
+				</strong> configuration{{ configurations.length > 1 ? 's':''}} available</h5>
+			</div>
+			<div class="px-3">
+				<Configuration v-for="config in configurations" :config="config"></Configuration>
+			</div>
+			<div></div>
 		</div>
-		<div></div>
-	</div>
+		<div v-else class="d-flex py-4">
+			<div class="spinner-border m-auto"></div>
+		</div>
+	</Transition>
 </div>
 </template>
 

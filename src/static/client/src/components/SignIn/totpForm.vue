@@ -1,5 +1,5 @@
 <script setup async>
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import axios from "axios";
 import {axiosPost, requestURl} from "@/utilities/request.js";
 import {useRouter} from "vue-router";
@@ -45,13 +45,8 @@ onMounted(() => {
 })
 
 const emits = defineEmits(['clearToken'])
-
-onMounted(() => {
-
-})
-
 const verify = async (e) => {
-	e.preventDefault()
+	if (e) e.preventDefault()
 	if (formFilled){
 		loading.value = true
 		const data = await axiosPost('/api/signin/totp', {
@@ -61,6 +56,7 @@ const verify = async (e) => {
 		loading.value = false
 		if (data){
 			if (data.status){
+				store.clientProfile = data.data
 				router.push('/')
 			}else{
 				store.newNotification(data.message, "danger")
@@ -71,6 +67,10 @@ const verify = async (e) => {
 		}
 	}
 }
+
+watch(formFilled, () => {
+	verify()
+})
 </script>
 
 <template>

@@ -81,7 +81,10 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             if session.get('username') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
             session['totpVerified'] = True
-            return ResponseObject(True)
+            return ResponseObject(True, data={
+                "Email": session.get('username'),
+                "Profile": DashboardClients.GetClientProfile(session.get("ClientID"))
+            })
         return ResponseObject(status, msg)
     
     @client.get(prefix)
