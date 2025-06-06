@@ -59,7 +59,14 @@ class DashboardClients:
                 ).where(
                     self.dashboardClientsTable.c.DeletedDate is None)
                 ).mappings().fetchall()
-        
+    
+    def GetClientProfile(self, ClientID):
+        with self.engine.connect() as conn:
+            return dict(conn.execute(
+                self.dashboardClientsInfoTable.select().where(
+                    self.dashboardClientsInfoTable.c.ClientID == ClientID
+                )
+            ).mappings().fetchone())
 
     def SignIn(self, Email, Password) -> tuple[bool, str]:
         if not all([Email, Password]):

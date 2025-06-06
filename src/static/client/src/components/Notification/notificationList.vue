@@ -1,6 +1,6 @@
 <script setup>
 import {clientStore} from "@/stores/clientStore.js";
-import Notification from "@/components/notification/notification.vue";
+import Notification from "@/components/Notification/notification.vue";
 import {computed, onMounted} from "vue";
 const store = clientStore()
 const notifications = computed(() => {

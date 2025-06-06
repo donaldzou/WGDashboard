@@ -74,10 +74,8 @@ class DashboardClientsPeerAssignment:
     
     def GetAssignedPeers(self, ClientID):
         peers = []
-        assigned = list(
-            filter(lambda e:
-                   e['ClientID'] == ClientID, self.assignments)
-        )
+        assigned = filter(lambda e:
+                          e['ClientID'] == ClientID, self.assignments)
         
         for a in assigned:
             peer = filter(lambda e : e.id == a['PeerID'], 
@@ -97,6 +95,4 @@ class DashboardClientsPeerAssignment:
                     'configuration_name': a['ConfigurationName'],
                     'peer_configuration_data': p.downloadPeer()
                 })
-        
-        print(peers)
         return peers
