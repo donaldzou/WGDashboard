@@ -2570,9 +2570,9 @@ def API_addPeers(configName):
             allowed_ips_validation: bool = data.get('allowed_ips_validation', True)
             
             endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', "")
-            dns_addresses: str = data.get('DNS', "")
-            mtu: int = data.get('mtu', 0)
-            keep_alive: int = data.get('keepalive', 0)
+            dns_addresses: str = data.get('DNS', "") or ""
+            mtu: int = data.get('mtu', 0) or 0
+            keep_alive: int = data.get('keepalive', 0) or 0
             preshared_key: str = data.get('preshared_key', "")            
 
             if mtu < 0 or mtu > 1460:
