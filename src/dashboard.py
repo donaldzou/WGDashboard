@@ -2569,16 +2569,17 @@ def API_addPeers(configName):
             allowed_ips: list[str] = data.get('allowed_ips', [])
             allowed_ips_validation: bool = data.get('allowed_ips_validation', True)
             
-            endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1])
-            dns_addresses: str = data.get('DNS', DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1])
-            mtu: int = data.get('mtu', int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1]))
-            keep_alive: int = data.get('keepalive', int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]))
+            endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', "")
+            dns_addresses: str = data.get('DNS', "")
+            mtu: int = data.get('mtu', 0)
+            keep_alive: int = data.get('keepalive', 0)
             preshared_key: str = data.get('preshared_key', "")            
-    
-            if type(mtu) is not int or mtu < 0 or mtu > 1460:
-                mtu = int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1])
-            if type(keep_alive) is not int or keep_alive < 0:
-                keep_alive = int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1])
+
+            if mtu < 0 or mtu > 1460:
+                return ResponseObject(False, "MTU must be between 0 and 1460")
+            if keep_alive < 0 or keep_alive > 65535:
+                return ResponseObject(False, "Persistent Keepalive must be between 0 and 65535")
+                
             config = WireguardConfigurations.get(configName)
             if not config.getStatus():
                 config.toggleConfiguration()
