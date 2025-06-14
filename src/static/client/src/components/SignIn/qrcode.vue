@@ -15,7 +15,7 @@ onMounted(() => {
 
 <template>
 <div>
-	<canvas :id="'qrcode_' + id" class="rounded-3 shadow"></canvas>
+	<canvas :id="'qrcode_' + id" class="rounded-3"></canvas>
 </div>
 </template>
 

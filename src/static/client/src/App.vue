@@ -5,8 +5,9 @@ import NotificationList from "@/components/Notification/notificationList.vue";
 
 <template>
 	<div data-bs-theme="dark" class="text-body bg-body w-100 h-100">
-		<div class="d-flex vh-100 vw-100 p-4 overflow-y-scroll">
-			<div class="mx-auto my-sm-auto bg-body-tertiary rounded-4 shadow-lg border position-relative"
+		<div class="d-flex vh-100 vw-100 p-sm-4 overflow-y-scroll">
+			<div class="mx-auto my-sm-auto bg-body-tertiary rounded-4 shadow-sm  position-relative"
+			     id="listContainer"
 			     style="width: 700px">
 				<Suspense>
 					<RouterView v-slot="{ Component }">
@@ -22,5 +23,10 @@ import NotificationList from "@/components/Notification/notificationList.vue";
 </template>
 
 <style scoped>
+@media screen and (max-width: 576px) {
+	#listContainer{
+		border-radius: 0 !important;
+	}
+}
 
 </style>
