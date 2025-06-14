@@ -56,7 +56,7 @@ const verify = async (e) => {
 		loading.value = false
 		if (data){
 			if (data.status){
-				store.clientProfile = data.data
+				console.log(data.data)
 				router.push('/')
 			}else{
 				store.newNotification(data.message, "danger")
@@ -76,7 +76,7 @@ watch(formFilled, () => {
 <template>
 <form class="d-flex flex-column gap-3" @submit="e => verify(e)">
 	<div>
-		<a role="button" @click="emits('clearToken')">
+		<a role="button" @click="emits('clearToken')" class="btn btn-body btn-sm rounded-3">
 			<i class="me-2 bi bi-chevron-left"></i> Back
 		</a>
 	</div>
@@ -117,7 +117,7 @@ watch(formFilled, () => {
 
 		<button
 			:disabled="!formFilled || loading"
-			class="btn btn-primary rounded-3 btn-brand px-3 py-2">
+			class="btn btn-body rounded-3 px-3 py-2 fw-bold">
 			<span v-if="!loading" class="d-block">
 				Continue <i class="ms-2 bi bi-arrow-right"></i>
 			</span>

@@ -63,6 +63,7 @@ class DashboardClientsPeerAssignment:
                         conn.execute(
                             self.dashboardClientsPeerAssignmentTable.insert().values(data)
                         )
+                    self.__getAssignments()
                     return True, data
         return False, None
     
@@ -73,6 +74,8 @@ class DashboardClientsPeerAssignment:
         pass
     
     def GetAssignedPeers(self, ClientID):
+        self.__getAssignments()
+        
         peers = []
         assigned = filter(lambda e:
                           e['ClientID'] == ClientID, self.assignments)

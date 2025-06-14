@@ -10,73 +10,65 @@ const showQRCode = ref(false)
 </script>
 
 <template>
-	<div class="card shadow rounded-3">
-		<div class="card-header d-flex align-items-center">
-			<div>
-				<small v-if="props.config.status === 'stopped'">
-					<i class="bi bi-lightbulb text-secondary me-2"></i>
-				</small>
-				<small v-else>
-					<i class="bi bi-lightbulb-fill text-success me-2"></i>
-				</small>
-				<small style="word-break: break-all">
-					{{ props.config.name }}
-				</small>
-			</div>
-			<div class="ms-auto d-flex gap-2 button-group">
-				<a role="button" class="px-2 py-1 text-white rounded-3" aria-label="Download Configuration">
-					<i class="bi bi-download"></i>
-				</a>
-				<a role="button"
-				   @click="showQRCode = true"
-				   class="px-2 py-1 text-white rounded-3" aria-label="Display QR Code">
-					<i class="bi bi-qr-code"></i>
-				</a>
-				<Transition name="app">
-					<ConfigurationQRCode
-						v-if="showQRCode"
-						@back="showQRCode = false"
-						:qrcode-data="config.peer_configuration_data.file"></ConfigurationQRCode>
-				</Transition>
-			</div>
-		</div>
-		<div class="card-body">
-			<div>
-				<small class="d-block text-muted" style="font-size: 0.8rem">Public Key</small>
-				<small>
-					<samp style="word-break: break-word">{{ props.config.id }}</samp>
-				</small>
-			</div>
-			<hr>
-			<div>
-				<h6 class="text-center">Data Usage</h6>
-				<div class="row text-center">
-					<div class="col-4">
-						<small class="d-block text-muted">
-							Total
-						</small>
-						<small>3.20 GB / 4GB</small>
-					</div>
-					<div class="col-4">
-						<small class="d-block text-muted">
-							Received
-						</small>
-						<small>3.20 GB</small>
-					</div>
-					<div class="col-4">
-						<small class="d-block text-muted">
-							Sent
-						</small>
-						<small>3.20 GB</small>
-					</div>
+	<div class="card rounded-3 border-0">
+		<div class="card-body p-3">
+			<div class="row g-2">
+				<div class="d-flex gap-2 col-12">
+					<small class="text-muted">
+						<i class="bi bi-tag me-1"></i> Name
+					</small>
+					<small class="fw-bold flex-grow-1 text-end">
+						{{ props.config.name }}
+					</small>
+				</div>
+				<div class="d-flex gap-2 col-12">
+					<small class="text-muted">
+						<i class="bi bi-bar-chart-fill me-1"></i> Data Usage
+					</small>
+					<small class="fw-bold flex-grow-1 text-end">
+						3.42 / 4.00 GB
+					</small>
+				</div>
+				<div class="d-flex gap-2 col-12">
+					<small class="text-muted">
+						<i class="bi bi-calendar me-1"></i> Valid Until
+					</small>
+					<small class="fw-bold flex-grow-1 text-end">
+						2025-08-31 00:00:00
+					</small>
 				</div>
 			</div>
+			<div class="mt-3 d-flex">
+				<button class="btn btn-body rounded-3 flex-grow-1 fw-bold" @click="showQRCode = true">
+					<i class="bi bi-link-45deg me-2"></i><small>Connect</small>
+				</button>
+			</div>
 		</div>
+		<Transition name="app">
+			<ConfigurationQRCode
+				v-if="showQRCode"
+				@back="showQRCode = false"
+				:qrcode-data="config.peer_configuration_data.file"></ConfigurationQRCode>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 .button-group a:hover{
 	background-color: #ffffff20;
+}
+
+.dot{
+	width: 10px;
+	height: 10px;
+	border-radius: 50px;
+	display: inline-block;
+	margin-left: auto !important;
+	background-color: #6c757d;
+}
+
+.dot.active {
+	background-color: #28a745 !important;
+	box-shadow: 0 0 0 .2rem #28a74545;
 }
 </style>

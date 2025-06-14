@@ -92,3 +92,31 @@
 .app-leave-to{
     transform: scale(0.97);
 }
+
+.btn-body{
+    border-color: #000000 !important;
+    color: #ffffff !important;
+    background-color: #000000;
+}
+
+.btn-body:hover{
+    border-color: #373737 !important;
+    color: #ffffff !important;
+    background-color: #373737 !important;
+}
+
+[data-bs-theme=dark] .btn-body{
+    border-color: #ffffff !important;
+    color: #000000 !important;
+    background-color: #ffffff;
+}
+
+[data-bs-theme=dark] .btn-body:hover{
+    border-color: #e8e8e8 !important;
+    color: #000000 !important;
+    background-color: #e8e8e8 !important;
+}
+
+.form-control{
+    border-width: 0;
+}

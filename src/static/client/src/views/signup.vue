@@ -137,7 +137,7 @@ onMounted(() => {
 					<span class="text-muted">
 						Already have an account?
 					</span>
-				<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold">
+				<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-body rounded-3">
 					Sign In
 				</RouterLink>
 			</div>

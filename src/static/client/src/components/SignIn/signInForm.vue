@@ -54,7 +54,7 @@ if (route.query.Email){
 				       name="email"
 				       autocomplete="email"
 				       autofocus
-				       class="form-control rounded-3" id="email" placeholder="email">
+				       class="form-control rounded-3 border-0" id="email" placeholder="email">
 				<label for="email" class="d-flex">
 					<i class="bi bi-person-circle me-2"></i>
 					Email
@@ -67,20 +67,20 @@ if (route.query.Email){
 				       v-model="formData.Password"
 				       name="password"
 				       autocomplete="current-password"
-				       class="form-control rounded-3" id="password" placeholder="Password">
+				       class="form-control rounded-3  border-0" id="password" placeholder="Password">
 				<label for="password" class="d-flex">
 					<i class="bi bi-key me-2"></i>
 					Password
 				</label>
 			</div>
-			<div>
-				<a href="#" class="text-body text-decoration-none ms-0">
+			<div class="d-flex">
+				<a href="#" class="text-body text-decoration-none ms-auto btn btn-sm rounded-3">
 					Forgot Password?
 				</a>
 			</div>
 			<button
 				:disabled="!formFilled || loading"
-				class="btn btn-primary rounded-3 btn-brand px-3 py-2">
+				class="btn btn-primary rounded-3 btn-body px-3 py-2 fw-bold">
 				<span v-if="!loading" class="d-block">
 					Continue <i class="ms-2 bi bi-arrow-right"></i>
 				</span>
@@ -95,7 +95,8 @@ if (route.query.Email){
 					<span class="text-muted">
 						Don't have an account yet?
 					</span>
-				<RouterLink  to="/signup" class="text-body text-decoration-none ms-auto fw-bold">
+				<RouterLink  to="/signup"
+				             class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-body rounded-3">
 					Sign Up
 				</RouterLink>
 			</div>
