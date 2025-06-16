@@ -22,10 +22,6 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - name: Generate a shorter Git commit sha.
-        id: gen_short_sha
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -64,10 +60,6 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=raw,value=${{ env.SHORT_SHA }}
-
-      - name: Print a message
-        run: echo "${{ steps.meta.outputs.tags }}"
 
       - name: Build and export (multi-arch)
         uses: docker/build-push-action@v6
