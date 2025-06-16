@@ -2051,7 +2051,7 @@ def auth_req():
         else:
             DashboardConfig.APIAccessed = False
             whiteList = [
-                '/static/', 'validateAuthentication', 'authenticate', 'getDashboardConfiguration',
+                '/static/', 'validateAuthentication', 'authenticate',
                 'getDashboardTheme', 'getDashboardVersion', 'sharePeer/get', 'isTotpEnabled', 'locale',
                 '/fileDownload'
             ]
