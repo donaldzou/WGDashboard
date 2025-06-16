@@ -9,7 +9,6 @@ on:
       - '*'
   release:
     types: [ published ]
-  pull_request:
 
 env:
   DOCKERHUB_PREFIX: docker.io
