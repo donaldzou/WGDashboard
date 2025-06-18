@@ -13,6 +13,11 @@ def ConnectionString(database) -> str or None:
         cn = f'mysql+mysqldb://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
     else:
         cn = f'sqlite:///{os.path.join(sqlitePath, f"{database}.db")}'
-    if not database_exists(cn):
-        create_database(cn)
+    try:
+        if not database_exists(cn):
+            create_database(cn)
+    except Exception as e:
+        print("[WGDashboard] Database error: " + str(e))
+        exit(1)
+        
     return cn

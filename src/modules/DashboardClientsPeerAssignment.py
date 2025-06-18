@@ -85,6 +85,7 @@ class DashboardClientsPeerAssignment:
                           self.wireguardConfigurations[a['ConfigurationName']].Peers)
             for p in peer:
                 peers.append({
+                    'protocol': self.wireguardConfigurations[a['ConfigurationName']].Protocol,
                     'id': p.id,
                     'private_key': p.private_key,
                     'name': p.name,

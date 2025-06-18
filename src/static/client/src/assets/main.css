@@ -93,6 +93,18 @@
     transform: scale(0.97);
 }
 
+.btn-outline-body{
+    color: #000000;
+    border-color: #000000 !important;
+    background-color: transparent;
+}
+
+[data-bs-theme=dark] .btn-outline-body{
+    color: #ffffff;
+    border-color: #ffffff !important;
+    background-color: transparent;
+}
+
 .btn-body{
     border-color: #000000 !important;
     color: #ffffff !important;
@@ -119,4 +131,14 @@
 
 .form-control{
     border-width: 0;
+}
+
+.amneziawgBg{
+    background: rgb(145,199,193);
+    background: linear-gradient(90deg, rgba(145,199,193,1) 0%, rgba(107,95,161,1) 50%, rgba(227,142,65,1) 100%);
+}
+
+.wireguardBg{
+    background: rgb(125,32,32);
+    background: linear-gradient(90deg, rgba(125,32,32,1) 0%, rgba(255,56,56,1) 100%);
 }
