@@ -29,10 +29,10 @@ onMounted(async () => {
 			<strong>WGDashboard Client</strong>
 		</a>
 		<div class="ms-auto px-3 d-flex gap-2 nav-links">
-			<a class=" text-body btn btn-outline-body rounded-3 ms-auto btn-sm" aria-current="page" href="#">
+			<RouterLink to="/settings" class=" text-body btn btn-outline-body rounded-3 ms-auto btn-sm" aria-current="page" href="#">
 				<i class="bi bi-gear-fill me-sm-2"></i>
 				<span>Settings</span>
-			</a>
+			</RouterLink>
 			<RouterLink to="/signout" class="btn btn-outline-danger rounded-3  btn-sm" aria-current="page">
 				<i class="bi bi-box-arrow-left me-sm-2"></i>
 				<span>Sign Out</span>

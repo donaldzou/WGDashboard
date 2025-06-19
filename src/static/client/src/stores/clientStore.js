@@ -4,35 +4,40 @@ import {v4} from "uuid"
 import dayjs from "dayjs";
 import {axiosGet} from "@/utilities/request.js";
 
-
-export const clientStore = defineStore('clientStore', () => {
-	const notifications = ref([])
-	const configurations = ref([])
-	const clientProfile = reactive({
-		Email: "",
-		Profile: {}
-	})
-
-
-	function newNotification(content, status) {
-		notifications.value.push({
-			id: v4().toString(),
-			status: status,
-			content: content,
-			time: dayjs(),
-			show: true
-		})
-	}
-
-	async function getConfigurations(){
-		const data = await axiosGet("/api/configurations")
-		if (data){
-			configurations.value = data.data
-		}else{
-			newNotification("Failed to fetch configurations", "danger")
+export const clientStore = defineStore('clientStore',  {
+	state: () => ({
+		notifications: [],
+		configurations: [],
+		clientProfile: {
+			Email: "",
+			Profile: {}
 		}
-	}
-	return {
-		notifications, newNotification, getConfigurations, configurations, clientProfile
+	}),
+	actions: {
+		newNotification(content, status){
+			this.notifications.push({
+				id: v4().toString(),
+				status: status,
+				content: content,
+				time: dayjs(),
+				show: true
+			})
+		},
+		async getClientProfile(){
+			const data = await axiosGet('/api/settings/getClientProfile')
+			if (data){
+				this.clientProfile.Profile = data.data
+			}else{
+				this.newNotification("Failed to fetch client profile", "danger")
+			}
+		},
+		async getConfigurations(){
+			const data = await axiosGet("/api/configurations")
+			if (data){
+				this.configurations = data.data
+			}else{
+				this.newNotification("Failed to fetch configurations", "danger")
+			}
+		}
 	}
 })

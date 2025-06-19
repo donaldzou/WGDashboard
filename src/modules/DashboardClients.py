@@ -63,7 +63,9 @@ class DashboardClients:
     def GetClientProfile(self, ClientID):
         with self.engine.connect() as conn:
             return dict(conn.execute(
-                self.dashboardClientsInfoTable.select().where(
+                db.select(
+                    *[c for c in self.dashboardClientsInfoTable.c if c.name != 'ClientID']
+                ).where(
                     self.dashboardClientsInfoTable.c.ClientID == ClientID
                 )
             ).mappings().fetchone())

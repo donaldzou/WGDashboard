@@ -56,7 +56,7 @@ const verify = async (e) => {
 		loading.value = false
 		if (data){
 			if (data.status){
-				console.log(data.data)
+				store.clientProfile = data.data;
 				router.push('/')
 			}else{
 				store.newNotification(data.message, "danger")
