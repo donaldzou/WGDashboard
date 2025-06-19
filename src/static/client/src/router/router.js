@@ -5,6 +5,7 @@ import SignUp from "@/views/signup.vue";
 import axios from "axios";
 import {axiosGet, requestURl} from "@/utilities/request.js";
 import {clientStore} from "@/stores/clientStore.js";
+import Settings from "@/views/settings.vue";
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -16,6 +17,14 @@ const router = createRouter({
 				auth: true
 			},
 			name: "Home"
+		},
+		{
+			path: '/settings',
+			component: Settings,
+			meta: {
+				auth: true
+			},
+			name: "Settings"
 		},
 		{
 			path: '/signin',
@@ -35,10 +44,7 @@ const router = createRouter({
 })
 router.beforeEach(async (to, from, next) => {
 	const store = clientStore()
-
 	if (to.path === '/signout'){
-
-
 		await axios.get(requestURl('/api/signout')).then(() => {
 			next('/signin')
 		}).catch(() => {
@@ -58,8 +64,6 @@ router.beforeEach(async (to, from, next) => {
 			next()
 		}
 	}
-
-
 })
 
 router.afterEach((to, from, next) => {

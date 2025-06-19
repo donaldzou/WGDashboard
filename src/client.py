@@ -101,4 +101,9 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     def ClientAPI_Configurations():
         return ResponseObject(True, data=DashboardClients.GetClientAssignedPeers(session['ClientID']))
     
+    @client.get(f'{prefix}/api/settings/getClientProfile')
+    @login_required
+    def ClientAPI_Settings_GetClientProfile():
+        return ResponseObject(data=DashboardClients.GetClientProfile(session['ClientID']))
+    
     return client
