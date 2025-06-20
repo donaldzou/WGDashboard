@@ -106,4 +106,12 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     def ClientAPI_Settings_GetClientProfile():
         return ResponseObject(data=DashboardClients.GetClientProfile(session['ClientID']))
     
+    @client.post(f'{prefix}/api/settings/updatePassword')
+    @login_required
+    def ClientAPI_Settings_UpdatePassword():
+        data = request.json
+        status, message = DashboardClients.UpdateClientPassword(session['Email'], **data)
+    
+        return ResponseObject(status, message)
+    
     return client

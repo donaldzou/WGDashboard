@@ -10,7 +10,6 @@ from .DashboardClientsPeerAssignment import DashboardClientsPeerAssignment
 from .DashboardClientsTOTP import DashboardClientsTOTP
 from .Utilities import ValidatePasswordStrength
 from .DashboardLogger import DashboardLogger
-
 from flask import session
 
 
@@ -69,21 +68,34 @@ class DashboardClients:
                     self.dashboardClientsInfoTable.c.ClientID == ClientID
                 )
             ).mappings().fetchone())
-
-    def SignIn(self, Email, Password) -> tuple[bool, str]:
+    
+    def SignIn_ValidatePassword(self, Email, Password) -> bool:
         if not all([Email, Password]):
-            return False, "Please fill in all fields"
+            return False
+        existingClient = self.SignIn_UserExistence(Email)
+        if existingClient:
+            return bcrypt.checkpw(Password.encode("utf-8"), existingClient.get("Password").encode("utf-8"))            
+        return False
+        
+    def SignIn_UserExistence(self, Email):
         with self.engine.connect() as conn:
             existingClient = conn.execute(
                 self.dashboardClientsTable.select().where(
                     self.dashboardClientsTable.c.Email == Email
                 )
             ).mappings().fetchone()
-            if existingClient:
-                checkPwd = bcrypt.checkpw(Password.encode("utf-8"), existingClient.get("Password").encode("utf-8"))
-                if checkPwd:
-                    session['ClientID'] = existingClient.get("ClientID")
-                    return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
+            return existingClient
+        
+    def SignIn(self, Email, Password) -> tuple[bool, str]:
+        if not all([Email, Password]):
+            return False, "Please fill in all fields"
+        existingClient = self.SignIn_UserExistence(Email)
+        if existingClient:
+            checkPwd = self.SignIn_ValidatePassword(Email, Password)
+            if checkPwd:
+                session['Email'] = Email
+                session['ClientID'] = existingClient.get("ClientID")
+            return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
         return False, "Email or Password is incorrect"
     
     def SignIn_GetTotp(self, Token: str, UserProvidedTotp: str = None) -> tuple[bool, str] or tuple[bool, None, str]:
@@ -119,15 +131,10 @@ class DashboardClients:
                 return False, "Please fill in all fields"
             if Password != ConfirmPassword:
                 return False, "Passwords does not match"
-    
-            with self.engine.connect() as conn:
-                existingClient = conn.execute(
-                    self.dashboardClientsTable.select().where(
-                        self.dashboardClientsTable.c.Email == Email
-                    )
-                ).mappings().fetchone()
-                if existingClient:
-                    return False, "Email already signed up"
+
+            existingClient = self.SignIn_UserExistence(Email)
+            if existingClient:
+                return False, "Email already signed up"
     
             pwStrength, msg = ValidatePasswordStrength(Password)
             if not pwStrength:
@@ -150,6 +157,7 @@ class DashboardClients:
                         "ClientID": newClientUUID
                     })
                 )
+                self.logger.log(Message=f"User {Email} signed up")
         except Exception as e:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
             return False, "Signed up failed."
@@ -159,5 +167,30 @@ class DashboardClients:
     def GetClientAssignedPeers(self, ClientID):
         return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
     
-    def UpdatePassword(self, CurrentPassword, NewPassword, ConfirmNewPassword):
-        pass
+    def UpdateClientPassword(self, Email, CurrentPassword, NewPassword, ConfirmNewPassword):
+        if not all([CurrentPassword, NewPassword, ConfirmNewPassword]):
+            return False, "Please fill in all fields"
+        
+        if not self.SignIn_ValidatePassword(Email, CurrentPassword):
+            return False, "Current password does not match"
+        
+        if NewPassword != ConfirmNewPassword:
+            return False, "New passwords does not match"
+
+        pwStrength, msg = ValidatePasswordStrength(NewPassword)
+        if not pwStrength:
+            return pwStrength, msg
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.dashboardClientsTable.update().values({
+                        "Password": bcrypt.hashpw(NewPassword.encode('utf-8'), bcrypt.gensalt()).decode("utf-8"),
+                    }).where(
+                        self.dashboardClientsTable.c.Email == Email
+                    )
+                )
+                self.logger.log(Message=f"User {Email} updated password")
+        except Exception as e:
+            self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
+            return False, "Signed up failed."
+        return True, None

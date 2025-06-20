@@ -6,18 +6,12 @@ import Configuration from "@/components/Configuration/configuration.vue";
 const store = clientStore()
 const loading = ref(true)
 
-const loadConfigurations = async () => {
-
-	await store.getConfigurations()
-
-}
-
 const configurations = computed(() => {
 	return store.configurations
 });
 
 onMounted(async () => {
-	await loadConfigurations();
+	await store.getConfigurations()
 	loading.value = false;
 })
 </script>
