@@ -23,7 +23,6 @@ const pinia = createPinia();
 pinia.use(({ store }) => {
 	store.$router = markRaw(router)
 })
-pinia.use(piniaPluginPersistedstate)
 
 app.use(pinia)
 const store = DashboardConfigurationStore()
