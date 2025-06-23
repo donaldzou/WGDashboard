@@ -55,7 +55,7 @@ class DashboardClientsPeerAssignment:
                 if len(peer) == 1:
                     with self.engine.begin() as conn:
                         data = {
-                            "AssignmentID": uuid.uuid4(),
+                            "AssignmentID": str(uuid.uuid4()),
                             "ClientID": ClientID,
                             "ConfigurationName": ConfigurationName,
                             "PeerID": PeerID
