@@ -1,6 +1,0 @@
-- name: Close Stale Issues
-  uses: actions/stale@v9.1.0
-  permission:
-    actions: write
-    contents: write # only for delete-branch option
-    issues: write
