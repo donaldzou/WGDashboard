@@ -1,5 +1,10 @@
 [
     {
+        "lang_id": "id",
+        "lang_name": "Bahasa Indonesia",
+        "lang_name_localized": "Bahasa Indonesia"
+    },
+    {
         "lang_id": "zh-cn",
         "lang_name": "Chinese (Simplified)",
         "lang_name_localized": "中文（简体）"
@@ -58,6 +63,11 @@
         "lang_id": "de-de",
         "lang_name": "German",
         "lang_name_localized": "Deutsch"
+    },
+    {
+        "lang_id": "hu-hu",
+        "lang_name": "Hungarian",
+        "lang_name_localized": "Magyar"
     },
     {
         "lang_id": "it-it",
