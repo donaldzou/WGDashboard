@@ -22,4 +22,4 @@ jobs:
         stale-issue-message: 'This issue has not been update for 20 days'
         stale-pr-message: 'Stale pull request message'
         stale-issue-label: 'stale'
-        days-before-stale: 30
+        days-before-stale: 20
