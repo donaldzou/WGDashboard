@@ -22,10 +22,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard"></a>
-  <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg" alt="wakatime"></a>
-  <a href="https://hitscounter.dev"><img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&label=Visitor&icon=github&color=%230a58ca"></a>
-  <img src="https://img.shields.io/docker/pulls/donaldzou/wgdashboard?logo=docker&label=Docker%20Image%20Pulls&labelColor=ffffff">
+  <a href="https://github.com/donaldzou/wireguard-dashboard/releases/latest"><img src="https://img.shields.io/github/v/release/donaldzou/wireguard-dashboard?style=for-the-badge"></a>
+  <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg?style=for-the-badge" alt="wakatime"></a>
+  <a href="https://hitscounter.dev"><img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&label=Visitor&icon=github&color=%230a58ca&style=for-the-badge"></a>
+  <img src="https://img.shields.io/docker/pulls/donaldzou/wgdashboard?logo=docker&label=Docker%20Image%20Pulls&labelColor=ffffff&style=for-the-badge">
 </p>
 <p align="center"><b>This project is supported by</b></p>
 <p align="center">
