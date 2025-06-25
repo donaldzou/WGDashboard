@@ -333,15 +333,15 @@ install_wgd(){
     # --- КОСТЫЛЬ! ---
     # DevOps note: Forced patch because original dev ignores offline users.
     # This replaces GetRemoteEndpoint() in src/Utilities.py so setup doesn't crash without internet.
-    if [ -f patch_utilities.py ]; then
-        echo ">> Patching src/Utilities.py to force GetRemoteEndpoint stub (offline support)..."
-        python3 patch_utilities.py || {
-            echo "!!! [FATAL] Failed to patch Utilities.py, manual patch needed!"
-            exit 1
-        }
-    else
-        echo "!!! [WARNING] patch_utilities.py not found, skipping forced patch."
-    fi
+#    if [ -f patch_utilities.py ]; then
+#        echo ">> Patching src/Utilities.py to force GetRemoteEndpoint stub (offline support)..."
+#        python3 patch_utilities.py || {
+#            echo "!!! [FATAL] Failed to patch Utilities.py, manual patch needed!"
+#            exit 1
+#        }
+#    else
+#        echo "!!! [WARNING] patch_utilities.py not found, skipping forced patch."
+#    fi
 
     printf "[WGDashboard] Starting to install WGDashboard\n"
     _determineOS
