@@ -1585,13 +1585,23 @@ MTU = {str(self.mtu)}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
-        
+   
+      # pull the port out into a Python var (fall back to ListenPort)
+        _, cfg_port = DashboardConfig.GetConfig("Peers", "remote_endpoint_port")
+        endpoint_port = cfg_port or self.configuration.ListenPort
+
+        # pull the endpoint host/address
+        _, remote_ep = DashboardConfig.GetConfig("Peers", "remote_endpoint")
+
+        # now append the correct [Peer] block
+
         peerConfiguration += f'''
 [Peer]
 PublicKey = {self.configuration.PublicKey}
 AllowedIPs = {self.endpoint_allowed_ip}
-Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
-PersistentKeepalive = {str(self.keepalive)}
+endpoint_port = {endpoint_port}
+Endpoint = {remote_ep}:{endpoint_port}
+PersistentKeepalive = {self.keepalive}
 '''
         if len(self.preshared_key) > 0:
             peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
@@ -1670,12 +1680,18 @@ H4 = {self.configuration.H4}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
+ # fetch the port (or fall back to ListenPort)
+        _, cfg_port = DashboardConfig.GetConfig("Peers", "remote_endpoint_port")
+        endpoint_port = cfg_port or self.configuration.ListenPort
+        # fetch the host/IP for the endpoint
+        _, remote_ep = DashboardConfig.GetConfig("Peers", "remote_endpoint")     
         peerConfiguration += f'''
 [Peer]
 PublicKey = {self.configuration.PublicKey}
 AllowedIPs = {self.endpoint_allowed_ip}
-Endpoint = {DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
-PersistentKeepalive = {str(self.keepalive)}
+endpoint_port = {endpoint_port}
+Endpoint = {remote_ep}:{endpoint_port}
+PersistentKeepalive = {self.keepalive}
 '''
         if len(self.preshared_key) > 0:
             peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
@@ -1797,7 +1813,8 @@ class DashboardConfig:
                 "peer_display_mode": "grid",
                 "remote_endpoint": GetRemoteEndpoint(),
                 "peer_MTU": "1420",
-                "peer_keep_alive": "21"
+                "peer_keep_alive": "21",
+                "remote_endpoint_port": "51820",
             },
             "Other": {
                 "welcome_session": "true"
@@ -2372,7 +2389,17 @@ def API_restoreWireguardConfigurationBackup():
     
 @app.get(f'{APP_PREFIX}/api/getDashboardConfiguration')
 def API_getDashboardConfiguration():
-    return ResponseObject(data=DashboardConfig.toJson())
+    # 1. Pull in the full config as a dict
+    cfg = DashboardConfig.toJson()
+
+    # 2. Load the port (or default) from the INI
+    _, port = DashboardConfig.GetConfig("Peers", "remote_endpoint_port")
+
+    # 3. Stick it into the JSON we’ll return
+    cfg["Peers"]["remote_endpoint_port"] = port
+
+    # 4. Return the augmented config
+    return ResponseObject(data=cfg)
 
 @app.post(f'{APP_PREFIX}/api/updateDashboardConfigurationItem')
 def API_updateDashboardConfigurationItem():

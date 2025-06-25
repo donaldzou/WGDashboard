@@ -6,7 +6,16 @@ import {GetLocale} from "@/utilities/locale.js";
 export const DashboardConfigurationStore = defineStore('DashboardConfigurationStore', {
 	state: () => ({
 		Redirect: undefined,
-		Configuration: undefined,
+   		Configuration: {
+      		Peers: {
+        		remote_endpoint: "",          // will hold your API’s remote_endpoint
+        		peer_global_dns: "",          // existing DNS default
+        		peer_endpoint_allowed_ip: "", // existing allowed-ip default
+        		peer_mtu: 1420,               // existing MTU default
+        		peer_keep_alive: 25,          // existing keepalive default
+        		remote_endpoint_port: 51820   // ← your new default port
+      }
+    },
 		Messages: [],
 		Peers: {
 			Selecting: false,
