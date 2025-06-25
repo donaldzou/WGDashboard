@@ -38,19 +38,27 @@ const router = createRouter({
 						title: "WireGuard Configurations"
 					}
 				},
-				{
-					name: "Settings",
-					path: '/settings',
-					component: () => import('@/views/settings.vue'),
-					meta: {
-						title: "Settings"
-					}
-				},
-				{
-					path: '/ping',
-					name: "Ping",
-					component: () => import('@/views/ping.vue'),
-				},
+                                {
+                                        name: "Settings",
+                                        path: '/settings',
+                                        component: () => import('@/views/settings.vue'),
+                                        meta: {
+                                                title: "Settings"
+                                        }
+                                },
+                                {
+                                        name: "VPN Domains",
+                                        path: '/vpn-domains',
+                                        component: () => import('@/views/vpnDomains.vue'),
+                                        meta: {
+                                                title: "VPN Domains"
+                                        }
+                                },
+                                {
+                                        path: '/ping',
+                                        name: "Ping",
+                                        component: () => import('@/views/ping.vue'),
+                                },
 				{
 					path: '/traceroute',
 					name: "Traceroute",
