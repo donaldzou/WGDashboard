@@ -138,6 +138,7 @@ class PeerJobs:
 
 
     def runJob(self):
+        print("[WGDashboard] Running scheduled jobs")
         needToDelete = []
         self.__getJobs()
         for job in self.Jobs:
@@ -156,24 +157,28 @@ class PeerJobs:
                     if runAction:
                         s = False
                         if job.Action == "restrict":
-                            s = c.restrictPeers([fp.id]).get_json()
+                            s, msg = c.restrictPeers([fp.id])
                         elif job.Action == "delete":
-                            s = c.deletePeers([fp.id]).get_json()
+                            s, msg = c.deletePeers([fp.id])
 
-                        if s['status'] is True:
-                            self.JobLogger.log(job.JobID, s["status"],
+                        if s is True:
+                            self.JobLogger.log(job.JobID, s,
                                           f"Peer {fp.id} from {c.Name} is successfully {job.Action}ed."
                                           )
+                            print(f"[WGDashboard] Peer {fp.id} from {c.Name} is successfully {job.Action}ed.")
                             needToDelete.append(job)
                         else:
-                            self.JobLogger.log(job.JobID, s["status"],
+                            print(f"[WGDashboard] Peer {fp.id} from {c.Name} is failed {job.Action}ed.")
+                            self.JobLogger.log(job.JobID, s,
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                                           )
                 else:
+                    print(f"[WGDashboard] Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
                     self.JobLogger.log(job.JobID, False,
                                   f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed."
                                   )
             else:
+                print(f"[WGDashboard] Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
                 self.JobLogger.log(job.JobID, False,
                               f"Somehow can't find this peer {job.Peer} from {job.Configuration} failed {job.Action}ed."
                               )

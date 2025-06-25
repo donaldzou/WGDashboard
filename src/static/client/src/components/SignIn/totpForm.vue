@@ -76,7 +76,7 @@ watch(formFilled, () => {
 <template>
 <form class="d-flex flex-column gap-3" @submit="e => verify(e)">
 	<div>
-		<a role="button" @click="emits('clearToken')" class="btn btn-body btn-sm rounded-3">
+		<a role="button" @click="emits('clearToken')" class="btn btn-outline-body btn-sm rounded-3">
 			<i class="me-2 bi bi-chevron-left"></i> Back
 		</a>
 	</div>

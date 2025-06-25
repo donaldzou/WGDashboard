@@ -95,7 +95,7 @@ class DashboardClients:
             if checkPwd:
                 session['Email'] = Email
                 session['ClientID'] = existingClient.get("ClientID")
-            return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
+                return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
         return False, "Email or Password is incorrect"
     
     def SignIn_GetTotp(self, Token: str, UserProvidedTotp: str = None) -> tuple[bool, str] or tuple[bool, None, str]:
