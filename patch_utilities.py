@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Автоматически заменяет функцию GetRemoteEndpoint в src/Utilities.py на заглушку.
+Заменяет функцию GetRemoteEndpoint на заглушку в src/Utilities.py,
+работает с любым содержимым функции.
 """
 
 import os
@@ -8,7 +9,10 @@ import re
 
 UTILS_PATH = os.path.join('src', 'Utilities.py')
 
-STUB = '''def GetRemoteEndpoint():
+STUB = '''def GetRemoteEndpoint() -> str:
+    """
+    STUB: Always returns 127.0.0.1 (localhost).
+    """
     return "127.0.0.1"
 '''
 
@@ -19,12 +23,13 @@ def patch_utilities():
     with open(UTILS_PATH, 'r') as f:
         content = f.read()
 
-    # Заменяем функцию на заглушку
+    # Используем регулярку, которая цепляет любую сигнатуру и тело функции
+    pattern = r'def\s+GetRemoteEndpoint\s*\([^\)]*\)\s*(->\s*[^\:]+)?\:\s*([\s\S]+?)(?=^def |\Z)'
     new_content, n = re.subn(
-        r'def GetRemoteEndpoint\s*\([^)]*\):.*?(?=^def |\Z)',
+        pattern,
         STUB,
         content,
-        flags=re.DOTALL | re.MULTILINE,
+        flags=re.MULTILINE
     )
 
     if n == 0:
