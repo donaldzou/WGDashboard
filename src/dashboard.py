@@ -31,6 +31,12 @@ CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
 DB_PATH = os.path.join(CONFIGURATION_PATH, 'db')
 if not os.path.isdir(DB_PATH):
     os.mkdir(DB_PATH)
+DASHBOARD_DB_DIR = os.path.dirname(os.path.abspath(__file__))
+DOMAIN_LIST_PATH = os.path.join(DASHBOARD_DB_DIR, 'db', 'list_domains.txt')
+os.makedirs(os.path.dirname(DOMAIN_LIST_PATH), exist_ok=True)
+if not os.path.exists(DOMAIN_LIST_PATH):
+    open(DOMAIN_LIST_PATH, 'a').close()
+    os.chmod(DOMAIN_LIST_PATH, 0o644)
 DASHBOARD_CONF = os.path.join(CONFIGURATION_PATH, 'wg-dashboard.ini')
 UPDATE = None
 app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
@@ -58,7 +64,36 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
     })
     response.status_code = status_code
     response.content_type = "application/json"
-    return response       
+    return response
+
+def loadDomains() -> list:
+    domains = []
+    if os.path.exists(DOMAIN_LIST_PATH):
+        with open(DOMAIN_LIST_PATH, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                if '.' in line:
+                    _, dom = line.split('.', 1)
+                else:
+                    dom = line
+                domains.append(dom)
+    return domains
+
+def saveDomains(domains: list[str]):
+    with open(DOMAIN_LIST_PATH, 'w') as f:
+        for i, dom in enumerate(domains, start=1):
+            f.write(f"{i}.{dom}\n")
+    os.chmod(DOMAIN_LIST_PATH, 0o644)
+
+def sanitizeDomain(domain: str) -> str:
+    domain = domain.strip()
+    domain = re.sub(r'^https?://', '', domain)
+    domain = domain.split('/')[0]
+    if domain.startswith('www.'):
+        domain = domain[4:]
+    return domain.lower()
 
 """
 Peer Jobs
@@ -3131,6 +3166,25 @@ def API_Email_PreviewBody():
         return ResponseObject(data=body)
     except Exception as e:
         return ResponseObject(False, message=str(e))
+
+@app.get(f'{APP_PREFIX}/api/getDomains')
+def API_GetDomains():
+    return ResponseObject(data=loadDomains())
+
+@app.post(f'{APP_PREFIX}/api/addDomain')
+def API_AddDomain():
+    data = request.get_json()
+    dom = sanitizeDomain(data.get('domain', ''))
+    if len(dom) == 0:
+        return ResponseObject(False, 'Domain cannot be empty')
+    if not RegexMatch(r"^(?:[a-zA-Z0-9-]{1,63}\.)+[A-Za-z]{2,}$", dom):
+        return ResponseObject(False, 'Invalid domain')
+    domains = loadDomains()
+    if dom in [d.lower() for d in domains]:
+        return ResponseObject(False, 'Domain already exists')
+    domains.append(dom)
+    saveDomains(domains)
+    return ResponseObject(True, data=domains)
 
 @app.get(f'{APP_PREFIX}/api/systemStatus')
 def API_SystemStatus():
