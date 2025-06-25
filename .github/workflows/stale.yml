@@ -22,5 +22,5 @@ jobs:
         stale-issue-message: 'This issue has not been updated for 20 days'
         stale-pr-message: 'This pull request has not been updated for 20 days'
         stale-issue-label: 'stale'
-        exempt-issue-labels: 'enhancement'
+        exempt-issue-labels: 'enhancement,ongoing'
         days-before-stale: 20
