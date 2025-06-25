@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Заменяет функцию GetRemoteEndpoint на заглушку в src/Utilities.py,
-работает с любым содержимым функции.
+patch_utilities.py — автозамена GetRemoteEndpoint на заглушку.
+Запускать из WGDashboard/src (где этот файл и лежит).
 """
 
 import os
 import re
 
-UTILS_PATH = os.path.join('src', 'Utilities.py')
+UTILS_PATH = os.path.join(os.path.dirname(__file__), 'Utilities.py')
 
 STUB = '''def GetRemoteEndpoint() -> str:
     """
@@ -23,7 +23,6 @@ def patch_utilities():
     with open(UTILS_PATH, 'r') as f:
         content = f.read()
 
-    # Используем регулярку, которая цепляет любую сигнатуру и тело функции
     pattern = r'def\s+GetRemoteEndpoint\s*\([^\)]*\)\s*(->\s*[^\:]+)?\:\s*([\s\S]+?)(?=^def |\Z)'
     new_content, n = re.subn(
         pattern,
@@ -42,4 +41,3 @@ def patch_utilities():
 
 if __name__ == "__main__":
     patch_utilities()
-    
