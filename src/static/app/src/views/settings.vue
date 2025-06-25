@@ -18,6 +18,7 @@ import DashboardSettingsWireguardConfigurationAutostart
 	from "@/components/settingsComponent/dashboardSettingsWireguardConfigurationAutostart.vue";
 import DashboardEmailSettings from "@/components/settingsComponent/dashboardEmailSettings.vue";
 import DomainList from "@/components/settingsComponent/domainList.vue";
+import VpnDomains from "@/views/vpnDomains.vue";
 
 export default {
 	name: "settings",
@@ -25,6 +26,7 @@ export default {
 	components: {
                 DashboardEmailSettings,
                 DomainList,
+                VpnDomains,
                 DashboardSettingsWireguardConfigurationAutostart,
 		DashboardIPPortInput,
 		DashboardLanguage,
@@ -119,10 +121,8 @@ export default {
 								</div>
 							</div>
                                                </div>
-                                               <div class="d-flex justify-content-center" v-else-if="activeTab === 'VPNDomains'">
-                                                       <RouterLink to="/vpn-domains" class="btn btn-primary rounded-3">
-                                                               <LocaleText t="VPN Domains"></LocaleText>
-                                                       </RouterLink>
+                                               <div class="d-flex flex-column gap-3" v-else-if="activeTab === 'VPNDomains'">
+                                                       <VpnDomains></VpnDomains>
                                                </div>
                                                <div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'WGDashboard'">
 							<div class="card rounded-3">
