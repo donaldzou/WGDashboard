@@ -19,8 +19,8 @@ jobs:
     - uses: actions/stale@v9
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'This issue has not been update for 20 days'
-        stale-pr-message: 'Stale pull request message'
+        stale-issue-message: 'This issue has not been updated for 20 days'
+        stale-pr-message: 'This pull request has not been updated for 20 days'
         stale-issue-label: 'stale'
         exempt-issue-labels: 'enhancement'
         days-before-stale: 20
