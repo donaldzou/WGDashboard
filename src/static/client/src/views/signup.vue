@@ -69,8 +69,10 @@ onMounted(() => {
 
 <template>
 	<div class="p-3 p-sm-5">
-		<h1>Sign Up</h1>
-		<p>to use WGDashboard Client</p>
+		<div class="text-center">
+			<h1 class="display-4">Hi, nice to meet you</h1>
+			<p class="text-muted">Sign up to use <strong>WGDashboard Client</strong></p>
+		</div>
 		<form class="mt-4 d-flex flex-column gap-3" @submit="e => signUp(e)">
 			<div class="form-floating">
 				<input type="text"
@@ -86,42 +88,48 @@ onMounted(() => {
 					Email
 				</label>
 			</div>
-			<div class="form-floating">
-				<input type="password"
-				       required
-				       :disabled="loading"
-				       v-model="formData.Password"
-				       name="password"
-				       autocomplete="new-password"
-				       autofocus
-				       class="form-control rounded-3" id="password" placeholder="password">
-				<label for="password" class="d-flex">
-					<i class="bi bi-key me-2"></i>
-					Password
-				</label>
-			</div>
-			<div class="form-floating">
-				<input type="password"
-				       required
-				       :disabled="loading"
-				       v-model="formData.ConfirmPassword"
-				       name="confirm_password"
-				       autocomplete="new-password"
-				       autofocus
-				       class="form-control rounded-3" id="confirm_password" placeholder="confirm_password">
-				<label for="confirm_password" class="d-flex">
-					<i class="bi bi-key me-2"></i>
-					Confirm Password
-				</label>
-				<div id="validationServer03Feedback" class="invalid-feedback">
-					Passwords does not match
+			<div class="row gx-3">
+				<div class="col-6">
+					<div class="form-floating">
+						<input type="password"
+						       required
+						       :disabled="loading"
+						       v-model="formData.Password"
+						       name="password"
+						       autocomplete="new-password"
+						       autofocus
+						       class="form-control rounded-3" id="password" placeholder="password">
+						<label for="password" class="d-flex">
+							<i class="bi bi-key me-2"></i>
+							Password
+						</label>
+					</div>
+				</div>
+				<div class="col-6">
+					<div class="form-floating">
+						<input type="password"
+						       required
+						       :disabled="loading"
+						       v-model="formData.ConfirmPassword"
+						       name="confirm_password"
+						       autocomplete="new-password"
+						       autofocus
+						       class="form-control rounded-3" id="confirm_password" placeholder="confirm_password">
+						<label for="confirm_password" class="d-flex">
+							<i class="bi bi-key me-2"></i>
+							Confirm Password
+						</label>
+						<div id="validationServer03Feedback" class="invalid-feedback">
+							Passwords does not match
+						</div>
+					</div>
 				</div>
 			</div>
 
 
 			<button
 				:disabled="!formFilled || !validatePassword || loading"
-				class=" btn btn-primary rounded-3 btn-brand px-3 py-2">
+				class=" btn btn-primary rounded-3 btn-body px-3 py-2 fw-bold">
 				<span v-if="!loading" class="d-block">
 						Continue <i class="ms-2 bi bi-arrow-right"></i>
 					</span>
@@ -137,7 +145,7 @@ onMounted(() => {
 					<span class="text-muted">
 						Already have an account?
 					</span>
-				<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-body rounded-3">
+				<RouterLink  to="/signin" class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-outline-body rounded-3">
 					Sign In
 				</RouterLink>
 			</div>

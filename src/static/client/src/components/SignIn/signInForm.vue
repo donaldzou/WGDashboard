@@ -43,8 +43,10 @@ if (route.query.Email){
 
 <template>
 	<div>
-		<h1>Sign In</h1>
-		<p>to your WGDashboard Client account</p>
+		<div class="text-center">
+			<h1 class="display-4">Welcome back</h1>
+			<p class="text-muted">Sign in to access your <strong>WGDashboard Client</strong> account</p>
+		</div>
 		<form class="mt-4 d-flex flex-column gap-3" @submit="e => signIn(e)">
 			<div class="form-floating">
 				<input type="text"
@@ -82,7 +84,7 @@ if (route.query.Email){
 				:disabled="!formFilled || loading"
 				class="btn btn-primary rounded-3 btn-body px-3 py-2 fw-bold">
 				<span v-if="!loading" class="d-block">
-					Continue <i class="ms-2 bi bi-arrow-right"></i>
+					Sign In
 				</span>
 				<span v-else class="d-block">
 					Loading...<i class="ms-2 spinner-border spinner-border-sm"></i>
@@ -96,7 +98,7 @@ if (route.query.Email){
 						Don't have an account yet?
 					</span>
 				<RouterLink  to="/signup"
-				             class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-body rounded-3">
+				             class="text-body text-decoration-none ms-auto fw-bold btn btn-sm btn-outline-body rounded-3">
 					Sign Up
 				</RouterLink>
 			</div>
