@@ -1,4 +1,3 @@
-# patch_getremoteendpoint.py
 # Simple stub for GetRemoteEndpoint
 
 def GetRemoteEndpoint():
