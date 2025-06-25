@@ -19,8 +19,14 @@ const getUrl = (url) => {
 	if (apiKey){
 		return `${apiKey.host}${url}`
 	}
-	return import.meta.env.MODE === 'development' ? url 
-		: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`
+        if (import.meta.env.MODE === 'development') {
+                return url
+        }
+        // For production builds we construct the URL relative to the current
+        // origin. Using `location.pathname` here caused the generated URL to
+        // include the current page (e.g. `index.html`), leading to requests
+        // like `/index.html/api/...` which the backend does not recognise.
+        return `${window.location.origin}${url}`
 }
 
 export const fetchGet = async (url, params=undefined, callback=undefined) => {
