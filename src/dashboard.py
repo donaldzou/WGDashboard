@@ -1970,6 +1970,11 @@ class DashboardConfig:
         try:
             with open(DASHBOARD_CONF, "w+", encoding='utf-8') as configFile:
                 self.__config.write(configFile)
+            try:
+                from modules.DomainUpdater import update_domains
+                update_domains(DB_PATH)
+            except Exception as e:
+                print(f"[WGDashboard] Domain update failed: {e}")
             return True
         except Exception as e:
             return False
