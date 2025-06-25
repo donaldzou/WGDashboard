@@ -17,13 +17,15 @@ import DashboardIPPortInput from "@/components/settingsComponent/dashboardIPPort
 import DashboardSettingsWireguardConfigurationAutostart
 	from "@/components/settingsComponent/dashboardSettingsWireguardConfigurationAutostart.vue";
 import DashboardEmailSettings from "@/components/settingsComponent/dashboardEmailSettings.vue";
+import DomainList from "@/components/settingsComponent/domainList.vue";
 
 export default {
 	name: "settings",
 	methods: {ipV46RegexCheck},
 	components: {
-		DashboardEmailSettings,
-		DashboardSettingsWireguardConfigurationAutostart,
+                DashboardEmailSettings,
+                DomainList,
+                DashboardSettingsWireguardConfigurationAutostart,
 		DashboardIPPortInput,
 		DashboardLanguage,
 		LocaleText,
@@ -171,10 +173,11 @@ export default {
 									<AccountSettingsMFA v-if="!this.dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
 								</div>
 							</div>
-							<DashboardAPIKeys></DashboardAPIKeys>
-							<DashboardEmailSettings></DashboardEmailSettings>
-						</div>
-					</Transition>
+                                                        <DashboardAPIKeys></DashboardAPIKeys>
+                                                        <DashboardEmailSettings></DashboardEmailSettings>
+                                                        <DomainList></DomainList>
+                                                </div>
+                                        </Transition>
 					
 				</div>
 			</div>
