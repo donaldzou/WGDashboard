@@ -114,11 +114,16 @@ export default {
 						<RouterLink to="/ping" class="nav-link rounded-3" active-class="active">
 							<LocaleText t="Ping"></LocaleText>
 						</RouterLink></li>
-					<li class="nav-item">
-						<RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">
-							<LocaleText t="Traceroute"></LocaleText>
-						</RouterLink>
-					</li>
+                                        <li class="nav-item">
+                                                <RouterLink to="/traceroute" class="nav-link rounded-3" active-class="active">
+                                                        <LocaleText t="Traceroute"></LocaleText>
+                                                </RouterLink>
+                                        </li>
+                                        <li class="nav-item">
+                                                <RouterLink to="/vpn-domains" class="nav-link rounded-3" active-class="active">
+                                                        <LocaleText t="VPN Domains"></LocaleText>
+                                                </RouterLink>
+                                        </li>
 				</ul>
 				<hr class="text-body my-2">
 				<ul class="nav flex-column px-2 mb-3">
