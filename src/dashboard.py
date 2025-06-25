@@ -2931,6 +2931,41 @@ def API_traceroute_execute():
     else:
         return ResponseObject(False, "Please provide ipAddress")
 
+@app.get(f'{APP_PREFIX}/api/vpnDomains')
+def API_vpn_domains_list():
+    filePath = os.path.join(DB_PATH, 'list.txt')
+    domains = []
+    if os.path.exists(filePath):
+        with open(filePath, 'r') as f:
+            for line in f.readlines():
+                line = line.strip()
+                if len(line) == 0:
+                    continue
+                parts = line.split()
+                if len(parts) >= 2:
+                    domains.append({"domain": parts[0], "ip": parts[1]})
+                elif len(parts) == 1:
+                    domains.append({"domain": parts[0], "ip": ""})
+    return ResponseObject(data=domains)
+
+
+@app.post(f'{APP_PREFIX}/api/vpnDomains')
+def API_vpn_domains_save():
+    data = request.get_json()
+    domains = data.get('domains', [])
+    filePath = os.path.join(DB_PATH, 'list.txt')
+    lines = []
+    for d in domains:
+        domain = str(d.get('domain', '')).strip()
+        ip = str(d.get('ip', '')).strip()
+        if len(domain) == 0:
+            continue
+        lines.append(f"{domain} {ip}".strip())
+    os.makedirs(os.path.dirname(filePath), exist_ok=True)
+    with open(filePath, 'w') as f:
+        f.write("\n".join(lines))
+    return ResponseObject(True, data=domains)
+
 @app.get(f'{APP_PREFIX}/api/getDashboardUpdate')
 def API_getDashboardUpdate():
     import urllib.request as req

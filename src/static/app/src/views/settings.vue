@@ -45,14 +45,18 @@ export default {
 					id: "WGDashboard",
 					title: "WGDashboard Settings"
 				},
-				{
-					id: "Peers",
-					title: "Peers Settings"
-				},
-				{
-					id: "WireGuardConfiguration",
-					title: "WireGuard Configuration Settings"
-				}
+                               {
+                                       id: "Peers",
+                                       title: "Peers Settings"
+                               },
+                               {
+                                        id: "VPNDomains",
+                                        title: "VPN Domains"
+                               },
+                               {
+                                       id: "WireGuardConfiguration",
+                                       title: "WireGuard Configuration Settings"
+                               }
 			]
 		}
 	}
@@ -88,8 +92,8 @@ export default {
 							</DashboardSettingsInputWireguardConfigurationPath>
 							<DashboardSettingsWireguardConfigurationAutostart></DashboardSettingsWireguardConfigurationAutostart>
 						</div>
-						<div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'Peers'">
-							<div class="card rounded-3">
+                                               <div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'Peers'">
+                                                       <div class="card rounded-3">
 								<div class="card-header">
 									<h6 class="my-2">
 										<LocaleText t="Peer Default Settings"></LocaleText>
@@ -112,8 +116,13 @@ export default {
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'WGDashboard'">
+                                               </div>
+                                               <div class="d-flex justify-content-center" v-else-if="activeTab === 'VPNDomains'">
+                                                       <RouterLink to="/vpn-domains" class="btn btn-primary rounded-3">
+                                                               <LocaleText t="VPN Domains"></LocaleText>
+                                                       </RouterLink>
+                                               </div>
+                                               <div class="d-flex gap-3 flex-column" v-else-if="activeTab === 'WGDashboard'">
 							<div class="card rounded-3">
 								<div class="card-header">
 									<h6 class="my-2">
