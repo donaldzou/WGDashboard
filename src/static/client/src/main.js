@@ -11,8 +11,7 @@ import {clientStore} from "@/stores/clientStore.js";
 const app = createApp(App)
 
 app.use(createPinia())
-const store = clientStore()
-await fetch("/client/api/serverInformation").then(res => res.json()).then(res => store.serverInformation = res.data)
+
 
 
 app.use(router)
