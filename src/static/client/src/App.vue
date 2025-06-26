@@ -1,6 +1,10 @@
-<script setup>
+<script setup async>
 import './assets/main.css'
 import NotificationList from "@/components/Notification/notificationList.vue";
+import {clientStore} from "@/stores/clientStore.js";
+
+const store = clientStore()
+fetch("/client/api/serverInformation").then(res => res.json()).then(res => store.serverInformation = res.data)
 </script>
 
 <template>
