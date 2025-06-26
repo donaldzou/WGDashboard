@@ -1,3 +1,5 @@
+from tzlocal import get_localzone
+
 from functools import wraps
 
 from flask import Blueprint, render_template, abort, request, Flask, current_app, session
@@ -90,6 +92,12 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.get(prefix)
     def ClientIndex():
         return render_template('client.html')
+    
+    @client.get(f'{prefix}/api/serverInformation')
+    def ClientAPI_ServerInformation():
+        return ResponseObject(data={
+            "ServerTimezone": str(get_localzone())
+        })
     
     @client.get(f'{prefix}/api/validateAuthentication')
     @login_required

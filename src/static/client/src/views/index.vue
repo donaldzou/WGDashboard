@@ -13,6 +13,10 @@ const configurations = computed(() => {
 onMounted(async () => {
 	await store.getConfigurations()
 	loading.value = false;
+
+	setInterval(async () => {
+		await store.getConfigurations()
+	}, 5000)
 })
 </script>
 
