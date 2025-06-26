@@ -6,6 +6,7 @@ import PeerSettingsDropdown from "@/components/configurationComponents/peerSetti
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {GetLocale} from "../../utilities/locale.js";
+
 export default {
 	name: "peer",
 	methods: {GetLocale},

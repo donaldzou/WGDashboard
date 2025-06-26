@@ -3,7 +3,6 @@ import uuid
 from .ConnectionString import ConnectionString
 from .DashboardLogger import DashboardLogger
 import sqlalchemy as db
-
 from .WireguardConfiguration import WireguardConfiguration
 
 

@@ -12,3 +12,4 @@ sqlalchemy
 sqlalchemy_utils
 psycopg2
 mysqlclient
+tzlocal
