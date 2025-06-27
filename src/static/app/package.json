@@ -1,42 +1,59 @@
 {
-  "name": "app",
+  "name": "wgdashboard",
   "version": "4.2.3",
+  "description": "Simple dashboard for WireGuard VPN written in Python & Vue.js",
   "private": true,
   "type": "module",
+  "keywords": [
+    "wireguard",
+    "dashboard"
+  ],
+  "homepage": "https://github.com/donaldzou/WGDashboard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/donaldzou/WGDashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/donaldzou/WGDashboard/issues"
+  },
+  "author": "Donald Zou",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "buildcommitpush": "./build.sh",
-    "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && /opt/homebrew/bin/npm run \"electron dist\"",
-    "preview": "vite preview"
+    "build:commit:push": "./build.sh",
+    "build:electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && npm run electron:dist",
+    "preview": "vite preview --host"
   },
   "dependencies": {
-    "@vue/language-server": "^2.1.10",
-    "@vuepic/vue-datepicker": "^9.0.1",
-    "@vueuse/core": "^10.9.0",
-    "@vueuse/shared": "^10.9.0",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.3.0",
+    "@vueuse/core": "^13.4.0",
+    "@vuepic/vue-datepicker": "^11.0.2",
+    "vue-chartjs": "^5.3.2",
+    "chart.js": "^4.5.0",
+    "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1",
     "animate.css": "^4.1.1",
-    "bootstrap": "^5.3.2",
-    "bootstrap-icons": "^1.11.3",
-    "cidr-tools": "^7.0.4",
-    "dayjs": "^1.11.12",
-    "electron-builder": "^24.13.3",
-    "fuse.js": "^7.0.0",
-    "i": "^0.3.7",
-    "is-cidr": "^5.0.3",
-    "npm": "^10.5.0",
-    "ol": "^10.2.1",
-    "pinia": "^2.1.7",
-    "qrcode": "^1.5.3",
-    "qrcodejs": "^1.0.0",
-    "simple-code-editor": "^2.0.9",
-    "uuid": "^9.0.1",
-    "vue": "^3.4.29",
-    "vue-chartjs": "^5.3.0",
-    "vue-router": "^4.2.5"
+    "dayjs": "^1.11.13",
+    "fuse.js": "^7.1.0",
+    "marked": "^16.0.0",
+    "ol": "^10.6.1",
+    "qrcode": "^1.5.4",
+    "uuid": "^11.1.0",
+    "cidr-tools": "^11.0.3",
+    "is-cidr": "^5.1.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
-    "vite": "^5.0.10"
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/language-server": "^2.2.10",
+    "vite": "^7.0.0",
+    "electron-builder": "^26.0.12"
   }
 }
