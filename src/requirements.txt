@@ -13,3 +13,4 @@ sqlalchemy_utils
 psycopg2
 mysqlclient
 tzlocal
+python-jose
