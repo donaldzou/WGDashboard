@@ -1,8 +1,10 @@
 from tzlocal import get_localzone
+from authlib.integrations.flask_client import OAuth
+import authlib
 
 from functools import wraps
 
-from flask import Blueprint, render_template, abort, request, Flask, current_app, session
+from flask import Blueprint, render_template, abort, request, Flask, current_app, session, redirect, url_for
 import os
 
 from modules.WireguardConfiguration import WireguardConfiguration
@@ -28,6 +30,10 @@ def login_required(f):
 
 def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig):
     from modules.DashboardClients import DashboardClients
+    from modules.DashboardOIDC import DashboardOIDC
+    
+    
+    OIDC = DashboardOIDC()
     DashboardClients = DashboardClients(wireguardConfigurations)
     client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
@@ -37,13 +43,19 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     def clientBeforeRequest():
         if request.method.lower() == 'options':
             return ResponseObject(True)
-        
     
     @client.post(f'{prefix}/api/signup')
     def ClientAPI_SignUp():
         data = request.json
         status, msg = DashboardClients.SignUp(**data)
         return ResponseObject(status, msg)
+    
+    @client.post(f'{prefix}/api/signin/oidc/')
+    def ClientAPI_SignIn_OIDC_Google():
+        data = request.json
+        print(OIDC.VerifyToken(**data))
+    
+        return ResponseObject()
     
     @client.post(f'{prefix}/api/signin')
     def ClientAPI_SignIn():

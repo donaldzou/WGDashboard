@@ -39,6 +39,16 @@ const route = useRoute()
 if (route.query.Email){
 	formData.Email = route.query.Email
 }
+
+const params = new URLSearchParams({
+	client_id: "ijDjDnBCDuA75srtsq7ksxwpZkLjxiRZVdmkWnRC",
+	redirect_uri: window.location.protocol + '//' + window.location.host + window.location.pathname,
+	response_type: 'code',
+	state: 'Authentik',
+	scope: 'openid email profile'
+}).toString()
+console.log(params)
+
 </script>
 
 <template>
@@ -46,6 +56,19 @@ if (route.query.Email){
 		<div class="text-center">
 			<h1 class="display-4">Welcome back</h1>
 			<p class="text-muted">Sign in to access your <strong>WGDashboard Client</strong> account</p>
+		</div>
+		<div class="d-flex gap-2">
+			<a class="btn btn-sm btn-outline-body rounded-3"
+			   :href="'http://178.128.231.4:9000/application/o/authorize/?' + params"
+			   style="flex: 1 1 0px;" >
+				Google
+			</a>
+			<button class="btn btn-sm btn-outline-body rounded-3" style="flex: 1 1 0px;">
+				GitHub
+			</button>
+			<button class="btn btn-sm btn-outline-body rounded-3" style="flex: 1 1 0px;">
+				Facebook
+			</button>
 		</div>
 		<form class="mt-4 d-flex flex-column gap-3" @submit="e => signIn(e)">
 			<div class="form-floating">
