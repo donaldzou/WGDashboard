@@ -29,7 +29,6 @@ if (state && code){
 	}).then(data => {
 		window.location.search = ''
 		initApp()
-
 		if (!data.status){
 			const store = clientStore()
 			store.newNotification(data.message, 'danger')
