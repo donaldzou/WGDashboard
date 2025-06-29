@@ -4,11 +4,41 @@
 		<meta charset="UTF-8">
 		<link rel="icon" href="/static/client/dist/img/Logo-2-128x128.png">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Vite App</title>
-		<script type="module" crossorigin src="/static/client/dist/assets/index-VLGPfnEQ.js"></script>
-		<link rel="stylesheet" crossorigin href="/static/client/dist/assets/index-BmGX7v2g.css">
+		<title>WGDashboard Client</title>
+        <style>
+            *{
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            }
+            #preloader{
+                width: 100vw; height: 100vh; display: flex
+            }
+            #preloader_placeholder{
+                width: 50px; height: 50px; background-color: #000; margin: auto;
+                animation: 3s ease-in-out fadeInPreloader infinite;
+            }
+            @keyframes fadeInPreloader {
+                0%{
+                    opacity: 0;
+                }
+                50%{
+                    opacity: 1;
+                }
+                100%{
+                    opacity: 0;
+                }
+            }
+        </style>
+		<script type="module" crossorigin src="/static/client/dist/assets/index-DFmEbKGG.js"></script>
+		<link rel="stylesheet" crossorigin href="/static/client/dist/assets/index-1THt9Piw.css">
 	</head>
 	<body>
-		<div id="app"></div>
+		<div id="app">
+            <div id="preloader">
+                <div id="preloader_placeholder">
+                    <img style="width: 100%" src="/static/client/dist/img/Logo-2-128x128.png" alt="WGDashboard Client" />
+                </div>
+
+            </div>
+        </div>
 	</body>
 </html>

@@ -14,17 +14,32 @@ const params = new URLSearchParams(window.location.search)
 const state = params.get('state')
 const code = params.get('code')
 
+const initApp = () => {
+	const app = createApp(App)
+	app.use(createPinia())
+	app.use(router)
+	app.mount("#app")
+}
+
 if (state && code){
-	axiosPost("/api/signin/oidc/", {
+	axiosPost("/api/signin/oidc", {
 		provider: state,
 		code: code,
 		redirect_uri: window.location.protocol + '//' + window.location.host + window.location.pathname
 	}).then(data => {
-		console.log(data)
+		window.location.search = ''
+		initApp()
+
+		if (!data.status){
+			const store = clientStore()
+			store.newNotification(data.message, 'danger')
+		}
 	})
+}else{
+	initApp()
 }
 
-const app = createApp(App)
-app.use(createPinia())
-app.use(router)
-app.mount("#app")
+
+
+
+

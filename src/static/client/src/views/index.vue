@@ -3,20 +3,26 @@ import {computed, onMounted, ref} from "vue";
 import {axiosGet} from "@/utilities/request.js";
 import {clientStore} from "@/stores/clientStore.js";
 import Configuration from "@/components/Configuration/configuration.vue";
+import {onBeforeRouteLeave} from "vue-router";
 const store = clientStore()
 const loading = ref(true)
 
 const configurations = computed(() => {
 	return store.configurations
 });
+const refreshInterval = ref(undefined)
 
 onMounted(async () => {
 	await store.getConfigurations()
 	loading.value = false;
 
-	setInterval(async () => {
+	refreshInterval.value = setInterval(async () => {
 		await store.getConfigurations()
 	}, 5000)
+})
+
+onBeforeRouteLeave(() => {
+	clearInterval(refreshInterval.value)
 })
 </script>
 

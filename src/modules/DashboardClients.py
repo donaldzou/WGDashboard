@@ -8,6 +8,7 @@ import sqlalchemy as db
 from .ConnectionString import ConnectionString
 from .DashboardClientsPeerAssignment import DashboardClientsPeerAssignment
 from .DashboardClientsTOTP import DashboardClientsTOTP
+from .DashboardOIDC import DashboardOIDC
 from .Utilities import ValidatePasswordStrength
 from .DashboardLogger import DashboardLogger
 from flask import session
@@ -18,6 +19,7 @@ class DashboardClients:
         self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
+        self.OIDC = DashboardOIDC()
         
         self.dashboardClientsTable = db.Table(
             'DashboardClients', self.metadata,
@@ -31,6 +33,18 @@ class DashboardClients:
                       server_default=db.func.now()),
             db.Column('DeletedDate', 
                       (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP)),
+            extend_existing=True,
+        )
+        
+        self.dashboardOIDCClientsTable = db.Table(
+            'DashboardOIDCClients', self.metadata,
+            db.Column('ClientID', db.String(255), nullable=False, primary_key=True),
+            db.Column('Email', db.String(255), nullable=False, index=True),
+            db.Column('ProviderIssuer', db.String(500), nullable=False, index=True),
+            db.Column('ProviderSubject', db.String(500), nullable=False, index=True),
+            db.Column('CreatedDate',
+                      (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP),
+                      server_default=db.func.now()),
             extend_existing=True,
         )
 
@@ -85,7 +99,53 @@ class DashboardClients:
                 )
             ).mappings().fetchone()
             return existingClient
+    
+    def SignIn_OIDC_UserExistence(self, data: dict[str, str]):
+        with self.engine.connect() as conn:
+            existingClient = conn.execute(
+                self.dashboardOIDCClientsTable.select().where(
+                    db.and_(
+                        self.dashboardOIDCClientsTable.c.ProviderIssuer == data.get('iss'),
+                        self.dashboardOIDCClientsTable.c.ProviderSubject == data.get('sub'),
+                    )
+                )
+            ).mappings().fetchone()
+            return existingClient
         
+    def SignUp_OIDC(self, data: dict[str, str]) -> tuple[bool, str] | tuple[bool, None]:
+        if not self.SignIn_OIDC_UserExistence(data):
+            with self.engine.begin() as conn:
+                newClientUUID = str(uuid.uuid4())
+                conn.execute(
+                    self.dashboardOIDCClientsTable.insert().values({
+                        "ClientID": newClientUUID,
+                        "Email": data.get('email', ''),
+                        "ProviderIssuer": data.get('iss', ''),
+                        "ProviderSubject": data.get('sub', '')
+                    })
+                )
+                conn.execute(
+                    self.dashboardClientsInfoTable.insert().values({
+                        "ClientID": newClientUUID
+                    })
+                )
+                self.logger.log(Message=f"User {data.get('email', '')} from {data.get('iss', '')} signed up")
+            return True, newClientUUID
+        return False, "User already signed up"
+    
+    def SignIn_OIDC(self, **kwargs):
+        status, data = self.OIDC.VerifyToken(**kwargs)
+        if not status:
+            return False, "Sign in failed"
+        existingClient = self.SignIn_OIDC_UserExistence(data)
+        if not existingClient:
+            status, newClientUUID = self.SignUp_OIDC(data)
+            session['ClientID'] = newClientUUID
+        else:
+            session['ClientID'] = existingClient.get("ClientID")
+        
+        return True, data
+          
     def SignIn(self, Email, Password) -> tuple[bool, str]:
         if not all([Email, Password]):
             return False, "Please fill in all fields"
@@ -149,7 +209,9 @@ class DashboardClients:
                         "ClientID": newClientUUID,
                         "Email": Email,
                         "Password": bcrypt.hashpw(encodePassword, bcrypt.gensalt()).decode("utf-8"),
-                        "TotpKey": totpKey
+                        "TotpKey": totpKey,
+                        "AuthType": "local",
+                        "AuthSrc": "local"
                     })
                 )
                 conn.execute(
