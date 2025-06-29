@@ -71,6 +71,7 @@ class DashboardOIDC:
         jwks_uri = oidc_config.get("jwks_uri")
         issuer = oidc_config.get("issuer")
         jwks = requests.get(jwks_uri, verify=certifi.where()).json()
+        print(jwks)
         headers = jwt.get_unverified_header(id_token)
         kid = headers["kid"]
         
