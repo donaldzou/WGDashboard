@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from jose import jwt
+import certifi
 
 
 class DashboardOIDC:
@@ -43,7 +44,11 @@ class DashboardOIDC:
             return False, "Provider does not exist"
         
         provider = self.providers.get(provider)
-        oidc_config = requests.get(f"{provider.get('issuer').strip('/')}/.well-known/openid-configuration").json()
+        oidc_config = requests.get(
+            f"{provider.get('issuer').strip('/')}/.well-known/openid-configuration",
+            verify=certifi.where()
+
+        ).json()
 
         data = {
             "grant_type": "authorization_code",
@@ -65,7 +70,7 @@ class DashboardOIDC:
         id_token = tokens.get('id_token')
         jwks_uri = oidc_config.get("jwks_uri")
         issuer = oidc_config.get("issuer")
-        jwks = requests.get(jwks_uri).json()
+        jwks = requests.get(jwks_uri, verify=certifi.where()).json()
         headers = jwt.get_unverified_header(id_token)
         kid = headers["kid"]
         
