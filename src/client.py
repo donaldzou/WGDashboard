@@ -1,6 +1,4 @@
 from tzlocal import get_localzone
-from authlib.integrations.flask_client import OAuth
-import authlib
 
 from functools import wraps
 
