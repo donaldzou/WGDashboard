@@ -52,7 +52,7 @@ onMounted(() => {
 								</div>
 							</div>
 						</a>
-						<a class="card text-decoration-none" href="https://donaldzou.github.io/WGDashboard-Documentation/" target="_blank">
+						<a class="card text-decoration-none" href="https://docs.wgdashboard.dev/" target="_blank">
 							<div class="card-body d-flex gap-4 align-items-center">
 								<h1 class="mb-0">
 									<i class="bi bi-hash"></i>

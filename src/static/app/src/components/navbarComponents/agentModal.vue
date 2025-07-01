@@ -29,7 +29,7 @@ const store = DashboardConfigurationStore()
 					<LocaleText t="You can visit our: "></LocaleText>
 				</p>
 				<div class="list-group">
-					<a href="https://donaldzou.github.io/WGDashboard-Documentation/"
+					<a href="https://docs.wgdashboard.dev/"
 					   target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
 						<i class="bi bi-book-fill"></i>
 						<LocaleText class="ms-auto" t="Official Documentation"></LocaleText>
