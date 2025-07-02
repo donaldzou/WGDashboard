@@ -50,3 +50,4 @@ coverage
 *.tsbuildinfo
 .vite/*
 
+proxy.js
