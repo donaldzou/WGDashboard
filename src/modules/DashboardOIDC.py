@@ -30,6 +30,7 @@ class DashboardOIDC:
         for k in self.providers.keys():
             if all([self.providers[k]['client_id'], self.providers[k]['client_secret'], self.providers[k]['issuer']]):
                 try:
+                    print("Requesting " + f"{self.providers[k]['issuer'].strip('/')}/.well-known/openid-configuration")
                     oidc_config = requests.get(
                         f"{self.providers[k]['issuer'].strip('/')}/.well-known/openid-configuration",
                         verify=certifi.where()
