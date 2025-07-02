@@ -27,3 +27,5 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+proxy.js
