@@ -5,7 +5,6 @@ from jose import jwt
 import certifi
 from flask import current_app
 
-
 class DashboardOIDC:
     ConfigurationPath = os.getenv('CONFIGURATION_PATH', '.')
     ConfigurationFilePath = os.path.join(ConfigurationPath, 'wg-dashboard-oidc-providers.json')
