@@ -1284,7 +1284,8 @@ DashboardLogger: DashboardLogger = DashboardLogger()
 
 InitWireguardConfigurationsList(startup=True)
 
-app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig))
+with app.app_context():
+    app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig))
 
 def startThreads():
     bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)
