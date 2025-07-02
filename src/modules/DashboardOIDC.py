@@ -97,8 +97,7 @@ class DashboardOIDC:
     
             return True, payload
         except Exception as e:
-            with current_app.app_context():
-                current_app.logger.error('Read OIDC file failed. Reason: ' + str(e), provider, code, redirect_uri)
+            current_app.logger.error('Read OIDC file failed. Reason: ' + str(e), provider, code, redirect_uri)
             return False, str(e)
         
     
@@ -109,6 +108,5 @@ class DashboardOIDC:
                 open(DashboardOIDC.ConfigurationFilePath, 'r').read()
             )
         except Exception as e:
-            with current_app.app_context():
-                current_app.logger.error('Read OIDC file failed. Reason: ' + str(e))
+            current_app.logger.error('Read OIDC file failed. Reason: ' + str(e))
             return False
