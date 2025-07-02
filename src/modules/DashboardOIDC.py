@@ -9,7 +9,7 @@ class DashboardOIDC:
     ConfigurationPath = os.getenv('CONFIGURATION_PATH', '.')
     ConfigurationFilePath = os.path.join(ConfigurationPath, 'wg-dashboard-oidc-providers.json')
     def __init__(self):
-        self.providers: dict[str, dict] = None
+        self.providers: dict[str, dict] = {}
         self.__default = {
             'Provider': {
                 'client_id': '',
@@ -107,6 +107,7 @@ class DashboardOIDC:
             self.providers = decoder.decode(
                 open(DashboardOIDC.ConfigurationFilePath, 'r').read()
             )
+            print(self.providers)
         except Exception as e:
             current_app.logger.error('Read OIDC file failed. Reason: ' + str(e))
             return False
