@@ -28,11 +28,11 @@ def login_required(f):
 
 def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig):
     from modules.DashboardClients import DashboardClients
-    from modules.DashboardOIDC import DashboardOIDC
     
     
     
-    DashboardClients = DashboardClients(wireguardConfigurations)
+    with current_app.app_context():
+        DashboardClients = DashboardClients(wireguardConfigurations)
     client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
     
