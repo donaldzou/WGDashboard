@@ -1,3 +1,4 @@
+import logging
 import random, shutil, sqlite3, configparser, hashlib, ipaddress, json, os, secrets, subprocess
 import time, re, uuid, bcrypt, psutil, pyotp, threading
 import traceback
@@ -29,6 +30,18 @@ from modules.WireguardConfiguration import WireguardConfiguration
 from modules.AmneziaWireguardConfiguration import AmneziaWireguardConfiguration
 
 from client import createClientBlueprint
+
+from logging.config import dictConfig
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] [%(levelname)s] in [%(module)s] %(message)s',
+    }},
+    'root': {
+        'level': 'INFO'
+    }
+})
 
 SystemStatus = SystemStatus()
 
@@ -634,8 +647,9 @@ def API_allowAccessPeers(configName: str) -> ResponseObject:
 @app.post(f'{APP_PREFIX}/api/addPeers/<configName>')
 def API_addPeers(configName):
     if configName in WireguardConfigurations.keys():
+        data: dict = request.get_json()
         try:
-            data: dict = request.get_json()
+            
 
             bulkAdd: bool = data.get("bulkAdd", False)
             bulkAddAmount: int = data.get('bulkAddAmount', 0)
@@ -764,7 +778,7 @@ def API_addPeers(configName):
                 )
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
         except Exception as e:
-            print(e, str(e.__traceback__))
+            app.logger.error("Add peers failed", data, exc_info=e)
             return ResponseObject(False, "Add peers failed. Please see data for specific issue")
 
     return ResponseObject(False, "Configuration does not exist")
@@ -913,7 +927,7 @@ def API_ping_getAllPeersIpAddress():
                 try:
                     ip = ipaddress.ip_network(x, strict=False)
                 except ValueError as e:
-                    print(f"{p.id} - {c.Name}")
+                    app.logger.error(f"Failed to parse IP address of {p.id} - {c.Name}")
                 if len(list(ip.hosts())) == 1:
                     parsed.append(str(ip.hosts()[0]))
             endpoint = p.endpoint.replace(" ", "").replace("(none)", "")
@@ -1183,12 +1197,14 @@ def API_ProtocolsEnabled():
 
 @app.get(f'{APP_PREFIX}/')
 def index():
+    app.logger.info('hi')
     return render_template('index.html')
 
 def peerInformationBackgroundThread():
     global WireguardConfigurations
-    print(f"[WGDashboard] Background Thread #1 Started", flush=True)
-    print(f"[WGDashboard] Background Thread #1 PID:" + str(threading.get_native_id()), flush=True)
+    app.logger.info("Background Thread #1 Started")
+    app.logger.info("Background Thread #1 PID:" + str(threading.get_native_id()))
+
     time.sleep(10)
     while True:
         with app.app_context():
@@ -1203,8 +1219,8 @@ def peerInformationBackgroundThread():
 
 def peerJobScheduleBackgroundThread():
     with app.app_context():
-        print(f"[WGDashboard] Background Thread #2 Started", flush=True)
-        print(f"[WGDashboard] Background Thread #2 PID:" + str(threading.get_native_id()), flush=True)
+        app.logger.info(f"Background Thread #2 Started")
+        app.logger.info(f"Background Thread #2 PID:" + str(threading.get_native_id()))
         time.sleep(10)
         while True:
             AllPeerJobs.runJob()
@@ -1278,4 +1294,6 @@ def startThreads():
 
 if __name__ == "__main__":
     startThreads()
+    # logging.getLogger().addHandler(logging.StreamHandler())
+    app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

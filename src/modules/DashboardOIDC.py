@@ -74,6 +74,7 @@ class DashboardOIDC:
             except Exception as e:
                 return False, str(e)
             
+            access_token = tokens.get('access_token')
             id_token = tokens.get('id_token')
             jwks_uri = oidc_config.get("jwks_uri")
             issuer = oidc_config.get("issuer")
@@ -83,13 +84,16 @@ class DashboardOIDC:
             kid = headers["kid"]
     
             key = next(k for k in jwks["keys"] if k["kid"] == kid)
-    
+            
+            print(key)
+            
             payload = jwt.decode(
                 id_token,
                 key,
                 algorithms=[key["alg"]],
                 audience=provider.get('client_id'),
-                issuer=issuer
+                issuer=issuer,
+                access_token=access_token
             )
     
             return True, payload
