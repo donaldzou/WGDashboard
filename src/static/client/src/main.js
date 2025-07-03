@@ -21,13 +21,22 @@ const initApp = () => {
 	app.mount("#app")
 }
 
+function removeSearchString() {
+	let url = new URL(window.location.href);
+	url.search = ''; // Remove all query parameters
+	history.replaceState({}, document.title, url.toString());
+}
+
 if (state && code){
 	axiosPost("/api/signin/oidc", {
 		provider: state,
 		code: code,
 		redirect_uri: window.location.protocol + '//' + window.location.host + window.location.pathname
 	}).then(data => {
-		window.location.search = ''
+		let url = new URL(window.location.href);
+		url.search = '';
+		history.replaceState({}, document.title, url.toString());
+
 		initApp()
 		if (!data.status){
 			const store = clientStore()

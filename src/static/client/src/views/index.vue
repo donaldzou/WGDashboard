@@ -1,9 +1,10 @@
 <script setup async>
 import {computed, onMounted, ref} from "vue";
-import {axiosGet} from "@/utilities/request.js";
+import {axiosGet, requestURl} from "@/utilities/request.js";
 import {clientStore} from "@/stores/clientStore.js";
 import Configuration from "@/components/Configuration/configuration.vue";
-import {onBeforeRouteLeave} from "vue-router";
+import {onBeforeRouteLeave, useRouter} from "vue-router";
+import axios from "axios";
 const store = clientStore()
 const loading = ref(true)
 
@@ -23,7 +24,20 @@ onMounted(async () => {
 
 onBeforeRouteLeave(() => {
 	clearInterval(refreshInterval.value)
-})
+});
+const router = useRouter()
+const signingOut = ref(false)
+const signOut = async () => {
+	clearInterval(refreshInterval.value)
+	signingOut.value = true;
+	await axios.get(requestURl('/api/signout')).then(() => {
+		router.push('/signin')
+	}).catch(() => {
+		router.push('/signin')
+	});
+	store.newNotification("Sign out successful", "success")
+}
+
 </script>
 
 <template>
@@ -37,10 +51,14 @@ onBeforeRouteLeave(() => {
 				<i class="bi bi-gear-fill me-sm-2"></i>
 				<span>Settings</span>
 			</RouterLink>
-			<RouterLink to="/signout" class="btn btn-outline-danger rounded-3  btn-sm" aria-current="page">
+			<a role="button" @click="signOut()" class="btn btn-outline-danger rounded-3 btn-sm"
+			   :class="{disabled: signingOut}"
+			   aria-current="page">
 				<i class="bi bi-box-arrow-left me-sm-2"></i>
-				<span>Sign Out</span>
-			</RouterLink>
+				<span>
+					{{ signingOut ? 'Signing out...':'Sign Out'}}
+				</span>
+			</a>
 		</div>
 	</div>
 
