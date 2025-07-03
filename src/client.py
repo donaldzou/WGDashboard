@@ -21,7 +21,7 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
 def login_required(f):
     @wraps(f)
     def func(*args, **kwargs):
-        if session.get("Email") is None or session.get("totpVerified") is None or not session.get("totpVerified") or session.get("role") != "client":
+        if session.get("Email") is None or session.get("TotpVerified") is None or not session.get("TotpVerified") or session.get("Role") != "client":
             return ResponseObject(False, "Unauthorized access.", data=None, status_code=401)
         return f(*args, **kwargs)
     return func
@@ -60,8 +60,8 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             return ResponseObject(status, oidcData)
 
         session['Email'] = oidcData.get('email')
-        session['role'] = 'client'
-        session['totpVerified'] = True
+        session['Role'] = 'client'
+        session['TotpVerified'] = True
         
         return ResponseObject()
     
@@ -71,15 +71,15 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         status, msg = DashboardClients.SignIn(**data)
         if status:
             session['Email'] = data.get('Email')
-            session['role'] = 'client'
-            session['totpVerified'] = False
+            session['Role'] = 'client'
+            session['TotpVerified'] = False
         return ResponseObject(status, msg)
 
     @client.get(f'{prefix}/api/signout')
     def ClientAPI_SignOut():
-        session['Email'] = None
-        session['role'] = None
-        session['totpVerified'] = None
+        if session.get("SignInMethod") == "OIDC":
+            DashboardClients.SignOut_OIDC()
+        session.clear()
         return ResponseObject(True)
     
     @client.get(f'{prefix}/api/signin/totp')
@@ -102,7 +102,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         if status:
             if session.get('Email') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
-            session['totpVerified'] = True
+            session['TotpVerified'] = True
             return ResponseObject(True, data={
                 "Email": session.get('Email'),
                 "Profile": DashboardClients.GetClientProfile(session.get("ClientID"))

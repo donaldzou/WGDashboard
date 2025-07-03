@@ -4,6 +4,7 @@ import uuid
 import bcrypt
 import pyotp
 import sqlalchemy as db
+import requests
 
 from .ConnectionString import ConnectionString
 from .DashboardClientsPeerAssignment import DashboardClientsPeerAssignment
@@ -133,19 +134,34 @@ class DashboardClients:
             return True, newClientUUID
         return False, "User already signed up"
     
+    def SignOut_OIDC(self):
+        sessionPayload = session.get('OIDCPayload')
+        status, oidc_config = self.OIDC.GetProviderConfiguration(session.get('SignInPayload').get("Provider"))        
+        signOut = requests.get(
+            oidc_config.get("end_session_endpoint"), 
+            params={
+                'id_token_hint': session.get('SignInPayload').get("Payload").get('sid')
+            }
+        )
+        return True
+        
     def SignIn_OIDC(self, **kwargs):
         status, data = self.OIDC.VerifyToken(**kwargs)
         if not status:
-            return False, "Sign in failed"
+            return False, "Sign in failed. Reason: " + data
         existingClient = self.SignIn_OIDC_UserExistence(data)
         if not existingClient:
             status, newClientUUID = self.SignUp_OIDC(data)
             session['ClientID'] = newClientUUID
         else:
             session['ClientID'] = existingClient.get("ClientID")
-        
+        session['SignInMethod'] = 'OIDC'
+        session['SignInPayload'] = {
+            "Provider": kwargs.get('provider'),
+            "Payload": data
+        }
         return True, data
-          
+        
     def SignIn(self, Email, Password) -> tuple[bool, str]:
         if not all([Email, Password]):
             return False, "Please fill in all fields"
@@ -153,6 +169,7 @@ class DashboardClients:
         if existingClient:
             checkPwd = self.SignIn_ValidatePassword(Email, Password)
             if checkPwd:
+                session['SignInMethod'] = 'local'
                 session['Email'] = Email
                 session['ClientID'] = existingClient.get("ClientID")
                 return True, self.DashboardClientsTOTP.GenerateToken(existingClient.get("ClientID"))
