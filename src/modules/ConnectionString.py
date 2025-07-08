@@ -8,7 +8,7 @@ def ConnectionString(database) -> str or None:
     if not os.path.isdir(sqlitePath):
         os.mkdir(sqlitePath)
     if parser.get("Database", "type") == "postgresql":
-        cn = f'postgresql+psycopg2://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
+        cn = f'postgresql+psycopg://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
     elif parser.get("Database", "type") == "mysql":
         cn = f'mysql+mysqldb://{parser.get("Database", "username")}:{parser.get("Database", "password")}@{parser.get("Database", "host")}/{database}'
     else:
