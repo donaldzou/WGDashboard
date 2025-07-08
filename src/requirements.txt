@@ -10,7 +10,7 @@ requests
 tcconfig
 sqlalchemy
 sqlalchemy_utils
-psycopg2
+psycopg
 mysqlclient
 tzlocal
 python-jose
