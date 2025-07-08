@@ -12,7 +12,7 @@ const configurations = computed(() => {
 	return store.configurations
 });
 const refreshInterval = ref(undefined)
-
+await store.getClientProfile();
 onMounted(async () => {
 	await store.getConfigurations()
 	loading.value = false;
@@ -37,14 +37,15 @@ const signOut = async () => {
 	});
 	store.newNotification("Sign out successful", "success")
 }
-
 </script>
 
 <template>
 <div class="p-sm-3">
 	<div class="w-100 d-flex align-items-center">
 		<a class="nav-link text-body border-start-0" aria-current="page" href="#">
-			<strong>WGDashboard Client</strong>
+			<strong>
+				Hi, {{ store.clientProfile.Profile.Name ? store.clientProfile.Profile.Name : store.clientProfile.Email}}
+			</strong>
 		</a>
 		<div class="ms-auto px-3 d-flex gap-2 nav-links">
 			<RouterLink to="/settings" class=" text-body btn btn-outline-body rounded-3 ms-auto btn-sm" aria-current="page" href="#">
@@ -64,15 +65,11 @@ const signOut = async () => {
 
 	<Transition name="app" mode="out-in">
 		<div class="d-flex flex-column gap-3" v-if="!loading">
-			<div class="p-3 d-flex flex-column gap-3">
+			<div class="p-3 d-flex flex-column gap-3" v-if="configurations.length > 0">
 				<Configuration v-for="config in configurations" :config="config"></Configuration>
-<!--				<h6 class="mb-0 text-center text-muted">-->
-<!--					<small>-->
-<!--						<strong>-->
-<!--							{{ configurations.length }}-->
-<!--						</strong> configuration{{ configurations.length > 1 ? 's':''}}-->
-<!--					</small>-->
-<!--				</h6>-->
+			</div>
+			<div class="text-center text-muted" v-else>
+				<small>No configuration available</small>
 			</div>
 		</div>
 		<div v-else class="d-flex py-4">

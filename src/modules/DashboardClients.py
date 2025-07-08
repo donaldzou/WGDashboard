@@ -52,8 +52,7 @@ class DashboardClients:
         self.dashboardClientsInfoTable = db.Table(
             'DashboardClientsInfo', self.metadata,
             db.Column('ClientID', db.String(255), nullable=False, primary_key=True),
-            db.Column('Firstname', db.String(500)),
-            db.Column('Lastname', db.String(500)),
+            db.Column('Name', db.String(500)),
             extend_existing=True,   
         )
 
@@ -127,7 +126,8 @@ class DashboardClients:
                 )
                 conn.execute(
                     self.dashboardClientsInfoTable.insert().values({
-                        "ClientID": newClientUUID
+                        "ClientID": newClientUUID,
+                        "Name": data.get("name")
                     })
                 )
                 self.logger.log(Message=f"User {data.get('email', '')} from {data.get('iss', '')} signed up")
@@ -150,6 +150,7 @@ class DashboardClients:
         if not status:
             return False, "Sign in failed. Reason: " + data
         existingClient = self.SignIn_OIDC_UserExistence(data)
+        print(data)
         if not existingClient:
             status, newClientUUID = self.SignUp_OIDC(data)
             session['ClientID'] = newClientUUID
