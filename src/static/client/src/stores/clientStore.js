@@ -12,6 +12,7 @@ export const clientStore = defineStore('clientStore',  {
 		configurations: [],
 		clientProfile: {
 			Email: "",
+			SignInMethod: "",
 			Profile: {}
 		}
 	}),
@@ -28,7 +29,7 @@ export const clientStore = defineStore('clientStore',  {
 		async getClientProfile(){
 			const data = await axiosGet('/api/settings/getClientProfile')
 			if (data){
-				this.clientProfile.Profile = data.data
+				this.clientProfile = data.data
 			}else{
 				this.newNotification("Failed to fetch client profile", "danger")
 			}

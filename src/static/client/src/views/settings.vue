@@ -3,7 +3,6 @@ import {clientStore} from "@/stores/clientStore.js";
 import Profile from "@/components/Settings/profile.vue";
 import UpdatePassword from "@/components/Settings/updatePassword.vue";
 const store = clientStore()
-
 await store.getClientProfile();
 </script>
 
@@ -17,7 +16,7 @@ await store.getClientProfile();
 		<strong class="ms-auto">Settings</strong>
 	</div>
 	<Profile></Profile>
-	<UpdatePassword></UpdatePassword>
+	<UpdatePassword v-if="store.clientProfile.SignInMethod === 'local'"></UpdatePassword>
 </div>
 </template>
 

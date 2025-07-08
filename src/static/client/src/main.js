@@ -6,8 +6,6 @@ import router from "@/router/router.js";
 import {createPinia} from "pinia";
 
 import 'bootstrap/dist/js/bootstrap.bundle.js'
-import {clientStore} from "@/stores/clientStore.js";
-import {OIDCAuth} from "@/utilities/oidcAuth.js";
 import {axiosPost} from "@/utilities/request.js";
 
 const params = new URLSearchParams(window.location.search)

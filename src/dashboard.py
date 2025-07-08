@@ -1265,7 +1265,7 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 try:
                     if i in WireguardConfigurations.keys():
                         if WireguardConfigurations[i].configurationFileChanged():
-                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, i)
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i)
                     else:
                         WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i, startup=startup)
                 except WireguardConfiguration.InvalidConfigurationFileException as e:

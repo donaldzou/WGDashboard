@@ -10,7 +10,7 @@ const params = new URLSearchParams({
 	redirect_uri: window.location.protocol + '//' + window.location.host + window.location.pathname,
 	response_type: 'code',
 	state: props.name,
-	scope: 'openid email'
+	scope: 'openid email profile'
 }).toString()
 const authUrl = ref(undefined)
 
@@ -22,8 +22,6 @@ try{
 	console.log(providerConfiguration.value)
 	authUrl.value = new URL(providerConfiguration.value.authorization_endpoint)
 	authUrl.value.search = params
-
-
 } catch (error){
 	console.log("Provider not available", props.provider)
 }
