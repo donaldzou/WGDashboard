@@ -28,7 +28,7 @@ class PeerShareLinks:
         with self.engine.connect() as conn:
             allLinks = conn.execute(
                 self.peerShareLinksTable.select().where(
-                    db.or_(self.peerShareLinksTable.columns.ExpireDate == None, self.peerShareLinksTable.columns.ExpireDate > datetime.now())
+                    db.or_(self.peerShareLinksTable.columns.ExpireDate.is_(None), self.peerShareLinksTable.columns.ExpireDate > datetime.now())
                 )
             ).mappings().fetchall()
             for link in allLinks:

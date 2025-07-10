@@ -115,6 +115,7 @@ export default {
 								@jobs="this.$emit('jobs')"
 								@refresh="this.$emit('refresh')"
 								@share="this.$emit('share')"
+								@assign="this.$emit('assign')"
 								:Peer="Peer"
 								v-if="this.subMenuOpened"
 								ref="target"
