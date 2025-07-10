@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from .ConnectionString import ConnectionString
@@ -5,7 +6,28 @@ from .DashboardLogger import DashboardLogger
 import sqlalchemy as db
 from .WireguardConfiguration import WireguardConfiguration
 
-
+class Assignment:
+    def __init__(self, **kwargs):
+        self.AssignmentID: str = kwargs.get('AssignmentID')
+        self.ClientID: str = kwargs.get('ClientID')
+        self.ConfigurationName: str = kwargs.get('ConfigurationName')
+        self.PeerID: str = kwargs.get('PeerID')
+        self.AssignedDate: datetime.datetime = kwargs.get('AssignedDate')
+        self.UnassignedDate: datetime.datetime = kwargs.get('UnassignedDate')
+        self.Client: dict = {
+            "ClientID": self.ClientID
+        }
+    
+    def toJson(self):
+        return {
+            "AssignmentID": self.AssignmentID,
+            "Client": self.Client,
+            "ConfigurationName": self.ConfigurationName,
+            "PeerID": self.PeerID,
+            "AssignedDate": self.AssignedDate.strftime("%Y-%m-%d %H:%M:%S"),
+            "UnassignedDate": self.UnassignedDate.strftime("%Y-%m-%d %H:%M:%S") if self.UnassignedDate is not None else self.UnassignedDate
+        }
+        
 class DashboardClientsPeerAssignment:
     def __init__(self, wireguardConfigurations: dict[str, WireguardConfiguration]):
         self.logger = DashboardLogger()
@@ -26,26 +48,28 @@ class DashboardClientsPeerAssignment:
             extend_existing=True
         )
         self.metadata.create_all(self.engine)
-        self.assignments = []
+        self.assignments: list[Assignment] = []
         self.__getAssignments()
-    
-        self.AssignClient("0117a895-bd8b-4ba2-9116-6658372417fb", "wg0", "3kv6Bo46u7ULT07B3I1VHw/rYomVnrCD5TFU369jRSc=")
-        self.GetAssignedPeers("0117a895-bd8b-4ba2-9116-6658372417fb")
         
     def __getAssignments(self):
         with self.engine.connect() as conn:
-            self.assignments = conn.execute(
+            assignments = []
+            get = conn.execute(
                 self.dashboardClientsPeerAssignmentTable.select().where(
-                    self.dashboardClientsPeerAssignmentTable.c.UnassignedDate == db.null()
+                    self.dashboardClientsPeerAssignmentTable.c.UnassignedDate.is_(None)
                 )
             ).mappings().fetchall()
+            for a in get:
+                assignments.append(Assignment(**a))
+            self.assignments = assignments
+            
             
     def AssignClient(self, ClientID, ConfigurationName, PeerID):
         existing = list(
             filter(lambda e: 
-                   e['ClientID'] == ClientID and 
-                   e['ConfigurationName'] == ConfigurationName and
-                   e['PeerID'] == PeerID, self.assignments)
+                   e.ClientID == ClientID and 
+                   e.ConfigurationName == ConfigurationName and
+                   e.PeerID == PeerID, self.assignments)
         )
         if len(existing) == 0:
             if ConfigurationName in self.wireguardConfigurations.keys():
@@ -66,25 +90,44 @@ class DashboardClientsPeerAssignment:
                     return True, data
         return False, None
     
-    def UnassignClient(self, AssignmentID):
-        pass
+    def UnassignClients(self, AssignmentID):
+        existing = list(
+            filter(lambda e:
+                   e.AssignmentID == AssignmentID, self.assignments)
+        )
+        if not existing:
+            return False
+        with self.engine.begin() as conn:
+            conn.execute(
+                self.dashboardClientsPeerAssignmentTable.update().values({
+                    "UnassignedDate": datetime.datetime.now()
+                }).where(
+                    self.dashboardClientsPeerAssignmentTable.c.AssignmentID == AssignmentID
+                )
+            )
+            self.__getAssignments()
+            return True
+        
     
-    def GetAssignedClient(self, ConfigurationName, PeerID):
-        pass
+    def GetAssignedClients(self, ConfigurationName, PeerID) -> list[Assignment]:
+        self.__getAssignments()
+        return list(filter(
+            lambda c : c.ConfigurationName == ConfigurationName and 
+                       c.PeerID == PeerID, self.assignments))
     
     def GetAssignedPeers(self, ClientID):
         self.__getAssignments()
         
         peers = []
         assigned = filter(lambda e:
-                          e['ClientID'] == ClientID, self.assignments)
+                          e.ClientID == ClientID, self.assignments)
         
         for a in assigned:
-            peer = filter(lambda e : e.id == a['PeerID'], 
-                          self.wireguardConfigurations[a['ConfigurationName']].Peers)
+            peer = filter(lambda e : e.id == a.PeerID, 
+                          self.wireguardConfigurations[a.ConfigurationName].Peers)
             for p in peer:
                 peers.append({
-                    'protocol': self.wireguardConfigurations[a['ConfigurationName']].Protocol,
+                    'protocol': self.wireguardConfigurations[a.ConfigurationName].Protocol,
                     'id': p.id,
                     'private_key': p.private_key,
                     'name': p.name,
@@ -95,7 +138,7 @@ class DashboardClientsPeerAssignment:
                     'latest_handshake': p.latest_handshake,
                     'allowed_ip': p.allowed_ip,
                     'jobs': p.jobs,
-                    'configuration_name': a['ConfigurationName'],
+                    'configuration_name': a.ConfigurationName,
                     'peer_configuration_data': p.downloadPeer()
                 })
         return peers

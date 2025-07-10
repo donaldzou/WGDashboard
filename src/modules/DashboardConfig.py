@@ -129,7 +129,7 @@ class DashboardConfig:
         try:
             with self.engine.connect() as conn:
                 keys = conn.execute(self.apiKeyTable.select().where(
-                    db.or_(self.apiKeyTable.columns.ExpiredAt == None, self.apiKeyTable.columns.ExpiredAt > datetime.now())
+                    db.or_(self.apiKeyTable.columns.ExpiredAt.is_(None), self.apiKeyTable.columns.ExpiredAt > datetime.now())
                 )).fetchall()
                 fKeys = []
                 for k in keys:

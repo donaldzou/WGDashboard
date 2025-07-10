@@ -46,6 +46,8 @@ class DashboardClients:
             db.Column('CreatedDate',
                       (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP),
                       server_default=db.func.now()),
+            db.Column('DeletedDate',
+                      (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP)),
             extend_existing=True,
         )
 
@@ -57,21 +59,61 @@ class DashboardClients:
         )
 
         self.metadata.create_all(self.engine)
-        self.Clients = []
+        self.Clients = {}
+        self.ClientsRaw = []
         self.__getClients()
         self.DashboardClientsTOTP = DashboardClientsTOTP()
         self.DashboardClientsPeerAssignment = DashboardClientsPeerAssignment(wireguardConfigurations)
         
     def __getClients(self):
         with self.engine.connect() as conn:
-            self.Clients = conn.execute(
+            localClients = db.select(
+                self.dashboardClientsTable.c.ClientID,
+                self.dashboardClientsTable.c.Email,
+                db.literal_column("'Local'").label("ClientGroup")
+            ).where(
+                self.dashboardClientsTable.c.DeletedDate.is_(None)
+            )
+            
+            oidcClients = db.select(
+                self.dashboardOIDCClientsTable.c.ClientID,
+                self.dashboardOIDCClientsTable.c.Email,
+                self.dashboardOIDCClientsTable.c.ProviderIssuer.label("ClientGroup"),
+            ).where(
+                self.dashboardOIDCClientsTable.c.DeletedDate.is_(None)
+            )
+            
+            union = db.union(localClients, oidcClients).alias("U")
+            
+            self.ClientsRaw = conn.execute(
                 db.select(
-                    self.dashboardClientsTable.c.ClientID,
-                    self.dashboardClientsTable.c.Email,
-                    self.dashboardClientsTable.c.CreatedDate
-                ).where(
-                    self.dashboardClientsTable.c.DeletedDate is None)
-                ).mappings().fetchall()
+                    union, 
+                    self.dashboardClientsInfoTable.c.Name
+                ).outerjoin(self.dashboardClientsInfoTable, 
+                            union.c.ClientID == self.dashboardClientsInfoTable.c.ClientID)
+            ).mappings().fetchall()
+            
+            groups = set(map(lambda c: c.get('ClientGroup'), self.ClientsRaw))
+            gr = {}
+            for g in groups:
+                gr[(g if g == 'Local' else self.OIDC.GetProviderNameByIssuer(g))] = [
+                    dict(x) for x in list(
+                        filter(lambda c: c.get('ClientGroup') == g, self.ClientsRaw)
+                    )
+                ]
+            self.Clients = gr
+            
+    def GetAllClients(self):
+        self.__getClients()
+        return self.Clients  
+    
+    def GetClient(self, ClientID) -> dict[str, str] | None:
+        self.__getClients()
+        c = filter(lambda x: x['ClientID'] == ClientID, self.ClientsRaw)
+        client = next((dict(client) for client in c), None)
+        if client is not None:
+            client['ClientGroup'] = self.OIDC.GetProviderNameByIssuer(client['ClientGroup'])
+        return client
     
     def GetClientProfile(self, ClientID):
         with self.engine.connect() as conn:
@@ -227,9 +269,7 @@ class DashboardClients:
                         "ClientID": newClientUUID,
                         "Email": Email,
                         "Password": bcrypt.hashpw(encodePassword, bcrypt.gensalt()).decode("utf-8"),
-                        "TotpKey": totpKey,
-                        "AuthType": "local",
-                        "AuthSrc": "local"
+                        "TotpKey": totpKey
                     })
                 )
                 conn.execute(
@@ -240,13 +280,13 @@ class DashboardClients:
                 self.logger.log(Message=f"User {Email} signed up")
         except Exception as e:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
-            return False, "Signed up failed."
+            return False, "Signe up failed."
             
         return True, None
     
     def GetClientAssignedPeers(self, ClientID):
         return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
-    
+            
     def UpdateClientPassword(self, Email, CurrentPassword, NewPassword, ConfirmNewPassword):
         if not all([CurrentPassword, NewPassword, ConfirmNewPassword]):
             return False, "Please fill in all fields"
@@ -274,3 +314,21 @@ class DashboardClients:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
             return False, "Signed up failed."
         return True, None
+    
+    '''
+    For WGDashboard Admin to Manage Clients
+    '''
+    def GetAssignedPeerClients(self, ConfigurationName, PeerID):
+        c = self.DashboardClientsPeerAssignment.GetAssignedClients(ConfigurationName, PeerID)
+        for a in c:
+            client = self.GetClient(a.ClientID)
+            if client is not None:
+                a.Client = self.GetClient(a.ClientID)
+        return c
+
+    def AssignClient(self, ConfigurationName, PeerID, ClientID) -> tuple[bool, dict[str, str]] | tuple[bool, None]:
+        return self.DashboardClientsPeerAssignment.AssignClient(ClientID, ConfigurationName, PeerID) 
+    
+    def UnassignClient(self, AssignmentID):
+        return self.DashboardClientsPeerAssignment.UnassignClients(AssignmentID)
+        

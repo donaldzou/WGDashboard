@@ -70,6 +70,9 @@ const configurationModals = ref({
 	},
 	editRawConfigurationFile: {
 		modalOpen: false
+	},
+	assignPeer: {
+		modalOpen: false
 	}
 })
 const peerSearchBar = ref(false)
@@ -361,6 +364,7 @@ const searchPeers = computed(() => {
 				      @setting="configurationModals.peerSetting.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @qrcode="configurationModalSelectedPeer = peer; configurationModals.peerQRCode.modalOpen = true;"
 				      @configurationFile="configurationModalSelectedPeer = peer; configurationModals.peerConfigurationFile.modalOpen = true;"
+				      @assign="configurationModalSelectedPeer = peer; configurationModals.assignPeer.modalOpen = true;"
 				></Peer>
 			</div>
 		</TransitionGroup>

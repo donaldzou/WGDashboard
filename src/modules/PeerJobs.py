@@ -32,7 +32,7 @@ class PeerJobs:
         self.Jobs.clear()
         with self.engine.connect() as conn:
             jobs = conn.execute(self.peerJobTable.select().where(
-                self.peerJobTable.columns.ExpireDate == None
+                self.peerJobTable.columns.ExpireDate.is_(None)
             )).mappings().fetchall()
             for job in jobs:
                 self.Jobs.append(PeerJob(

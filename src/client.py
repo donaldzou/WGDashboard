@@ -26,12 +26,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return func
 
-def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig):
-    from modules.DashboardClients import DashboardClients
-
-
-
-    DashboardClients = DashboardClients(wireguardConfigurations)
+from modules.DashboardClients import DashboardClients
+def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig, dashboardClients: DashboardClients):
         
     client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
@@ -45,17 +41,17 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.post(f'{prefix}/api/signup')
     def ClientAPI_SignUp():
         data = request.json
-        status, msg = DashboardClients.SignUp(**data)
+        status, msg = dashboardClients.SignUp(**data)
         return ResponseObject(status, msg)
 
     @client.get(f'{prefix}/api/signin/oidc/providers')
     def ClientAPI_SignIn_OIDC_GetProviders():
-        return ResponseObject(data=DashboardClients.OIDC.GetProviders())
+        return ResponseObject(data=dashboardClients.OIDC.GetProviders())
     
     @client.post(f'{prefix}/api/signin/oidc')
     def ClientAPI_SignIn_OIDC():
         data = request.json
-        status, oidcData = DashboardClients.SignIn_OIDC(**data)
+        status, oidcData = dashboardClients.SignIn_OIDC(**data)
         if not status:
             return ResponseObject(status, oidcData)
 
@@ -68,7 +64,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.post(f'{prefix}/api/signin')
     def ClientAPI_SignIn():
         data = request.json
-        status, msg = DashboardClients.SignIn(**data)
+        status, msg = dashboardClients.SignIn(**data)
         if status:
             session['Email'] = data.get('Email')
             session['Role'] = 'client'
@@ -78,7 +74,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.get(f'{prefix}/api/signout')
     def ClientAPI_SignOut():
         if session.get("SignInMethod") == "OIDC":
-            DashboardClients.SignOut_OIDC()
+            dashboardClients.SignOut_OIDC()
         session.clear()
         return ResponseObject(True)
     
@@ -88,7 +84,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         if not token:
             return ResponseObject(False, "Please provide TOTP token")
         
-        status, msg = DashboardClients.SignIn_GetTotp(token)
+        status, msg = dashboardClients.SignIn_GetTotp(token)
         return ResponseObject(status, msg)
 
     @client.post(f'{prefix}/api/signin/totp')
@@ -98,14 +94,14 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         userProvidedTotp = data.get('UserProvidedTOTP', None)
         if not all([token, userProvidedTotp]):
             return ResponseObject(False, "Please fill in all fields")
-        status, msg = DashboardClients.SignIn_GetTotp(token, userProvidedTotp)
+        status, msg = dashboardClients.SignIn_GetTotp(token, userProvidedTotp)
         if status:
             if session.get('Email') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
             session['TotpVerified'] = True
             return ResponseObject(True, data={
                 "Email": session.get('Email'),
-                "Profile": DashboardClients.GetClientProfile(session.get("ClientID"))
+                "Profile": dashboardClients.GetClientProfile(session.get("ClientID"))
             })
         return ResponseObject(status, msg)
     
@@ -127,7 +123,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.get(f'{prefix}/api/configurations')
     @login_required
     def ClientAPI_Configurations():
-        return ResponseObject(True, data=DashboardClients.GetClientAssignedPeers(session['ClientID']))
+        return ResponseObject(True, data=dashboardClients.GetClientAssignedPeers(session['ClientID']))
     
     @client.get(f'{prefix}/api/settings/getClientProfile')
     @login_required
@@ -135,14 +131,14 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         return ResponseObject(data={
             "Email": session.get("Email"),
             "SignInMethod": session.get("SignInMethod"),
-            "Profile": DashboardClients.GetClientProfile(session.get("ClientID"))
+            "Profile": dashboardClients.GetClientProfile(session.get("ClientID"))
         })
     
     @client.post(f'{prefix}/api/settings/updatePassword')
     @login_required
     def ClientAPI_Settings_UpdatePassword():
         data = request.json
-        status, message = DashboardClients.UpdateClientPassword(session['Email'], **data)
+        status, message = dashboardClients.UpdateClientPassword(session['Email'], **data)
     
         return ResponseObject(status, message)
     

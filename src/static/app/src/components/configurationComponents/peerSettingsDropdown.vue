@@ -147,6 +147,13 @@ export default {
 						<i class="me-auto bi bi-app-indicator"></i> <LocaleText t="Schedule Jobs"></LocaleText>
 					</a>
 				</li>
+				<li>
+					<a class="dropdown-item d-flex" role="button"
+					   @click="this.$emit('assign')"
+					>
+						<i class="me-auto bi bi-diagram-2"></i> <LocaleText t="Assign Peer"></LocaleText>
+					</a>
+				</li>
 				<li><hr class="dropdown-divider"></li>
 				<li>
 					<a class="dropdown-item d-flex text-warning"

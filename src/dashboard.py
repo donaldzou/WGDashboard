@@ -13,6 +13,9 @@ from flask_cors import CORS
 from icmplib import ping, traceroute
 from flask.json.provider import DefaultJSONProvider
 from itertools import islice
+
+from sqlalchemy import RowMapping
+
 from modules.Utilities import (
     RegexMatch, StringToBoolean,
     ValidateIPAddressesWithRange, ValidateDNSAddress,
@@ -32,6 +35,8 @@ from modules.AmneziaWireguardConfiguration import AmneziaWireguardConfiguration
 from client import createClientBlueprint
 
 from logging.config import dictConfig
+
+from modules.DashboardClients import DashboardClients
 
 dictConfig({
     'version': 1,
@@ -57,6 +62,8 @@ class CustomJsonEncoder(DefaultJSONProvider):
     def default(self, o):
         if callable(getattr(o, "toJson", None)):
             return o.toJson()
+        if type(o) is RowMapping:
+            return dict(o)
         return super().default(self)
 app.json = CustomJsonEncoder(app)
 
@@ -1195,6 +1202,52 @@ def API_SystemStatus():
 def API_ProtocolsEnabled():
     return ResponseObject(data=ProtocolsEnabled())
 
+'''
+Client Controller
+'''
+@app.get(f'{APP_PREFIX}/api/clients/allClients')
+def API_Clients_AllClients():
+    return ResponseObject(data=DashboardClients.GetAllClients())
+
+@app.post(f'{APP_PREFIX}/api/clients/assignClient')
+def API_Clients_AssignClient():
+    data = request.get_json()
+    configurationName = data.get('ConfigurationName')
+    id = data.get('Peer')
+    client = data.get('ClientID')
+    if not all([configurationName, id, client]):
+        return ResponseObject(False, "Please provide all required fields")
+    
+    status, data = DashboardClients.AssignClient(configurationName, id, client)
+    if not status:
+        return ResponseObject(status, message="Client already assiged to this peer")
+    
+    return ResponseObject(data=data)
+
+@app.post(f'{APP_PREFIX}/api/clients/unassignClient')
+def API_Clients_UnassignClient():
+    data = request.get_json()
+    assignmentID = data.get('AssignmentID')
+    if not assignmentID:
+        return ResponseObject(False, "Please provide AssignmentID")
+    return ResponseObject(status=DashboardClients.UnassignClient(assignmentID))
+
+@app.get(f'{APP_PREFIX}/api/clients/assignedClients')
+def API_Clients_AssignedClients():
+    data = request.args
+    configurationName = data.get('ConfigurationName')
+    peerID = data.get('Peer')
+    if not all([configurationName, id]):
+        return ResponseObject(False, "Please provide all required fields")
+    return ResponseObject(
+        data=DashboardClients.GetAssignedPeerClients(configurationName, peerID))
+    
+
+
+'''
+Index Page
+'''
+
 @app.get(f'{APP_PREFIX}/')
 def index():
     app.logger.info('hi')
@@ -1282,10 +1335,13 @@ AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
 
+
+
 InitWireguardConfigurationsList(startup=True)
 
 with app.app_context():
-    app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig))
+    DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
+    app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
 
 def startThreads():
     bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)

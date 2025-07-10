@@ -29,6 +29,11 @@ class DashboardOIDC:
     def GetProviders(self):
         return self.providers
     
+    def GetProviderNameByIssuer(self, issuer):
+        for (key, val) in self.providers.items():
+            if val.get('openid_configuration').get('issuer') == issuer:
+                return key
+    
     def VerifyToken(self, provider, code, redirect_uri):
         try:
             if not all([provider, code, redirect_uri]):
