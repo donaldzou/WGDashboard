@@ -196,7 +196,7 @@ const deleteConfigurationModal = ref(false)
 														       v-model="data[key]"
 														       :id="'configuration_' + key">
 													</div>
-													<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4', 'I1', 'I2', 'J1', 'J2', 'J3', 'ITime']"
+													<div v-for="key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4', 'I1', 'I2', 'J1', 'J2', 'J3', 'Itime']"
 													     v-if="configurationInfo.Protocol === 'awg'">
 														<label :for="'configuration_' + key" class="form-label">
 															<small class="text-muted">

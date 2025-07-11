@@ -1063,7 +1063,7 @@ class WireguardConfiguration:
             original = [l.rstrip("\n") for l in f.readlines()]
             allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort", "Table"]
             if self.Protocol == 'awg':
-                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4", "I1", "I2", "J1", "J2", "J3", "ITime"]
+                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4", "I1", "I2", "J1", "J2", "J3", "Itime"]
             start = original.index("[Interface]")
             try:
                 end = original.index("[Peer]")
@@ -1232,7 +1232,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         self.J1 = ""
         self.J2 = ""
         self.J3 = ""
-        self.ITime = ""
+        self.Itime = ""
         
         super().__init__(name, data, backup, startup, wg=False)
 
@@ -1273,7 +1273,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             "J1": self.J1,
             "J2": self.J2,
             "J3": self.J3,
-            "ITime": self.ITime
+            "Itime": self.Itime
         }
 
     def createDatabase(self, dbName = None):
@@ -1690,7 +1690,7 @@ I2 = {self.configuration.I2}
 J1 = {self.configuration.J1}
 J2 = {self.configuration.J2}
 J3 = {self.configuration.J3}
-ITime = {self.configuration.ITime}
+Itime = {self.configuration.Itime}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
