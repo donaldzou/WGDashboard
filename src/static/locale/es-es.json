@@ -305,8 +305,8 @@
 	"Failed to allow access of peer (.*)": "Fallo de habilitar acceso del peer $1",
 	"Failed to save configuration through WireGuard": "Fallo de salvar configuración a través de WireGuard",
 	"Allow access successfully": "Acceso permitido con éxito",
-	"Deleted ([0-9]{1,}) peer\\(s\\)": "Eliminados $1 peer(s)",
-	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "Eliminados $1 peer(s) con éxito. Fallo al eliminar $2 peer(s)",
-	"Restricted ([0-9]{1,}) peer\\(s\\)": "Restringidos $1 peer(s)",
-	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "Restringidos $1 peer(s) con éxito. Fallo al restringir $2 peer(s)"
+	"Deleted ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) eliminado(s)",
+	"Deleted ([0-9]{1,}) peer\\(s\\) successfully. Failed to delete ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) eliminado(s) con éxito. Fallo al eliminar $2 peer(s)",
+	"Restricted ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) restringido(s)",
+	"Restricted ([0-9]{1,}) peer\\(s\\) successfully. Failed to restrict ([0-9]{1,}) peer\\(s\\)": "$1 peer(s) restringido(s) con éxito. Fallo al restringir $2 peer(s)"
 }
