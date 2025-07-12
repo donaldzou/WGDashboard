@@ -12,6 +12,7 @@ LABEL maintainer="dselen@nerthus.nl"
 RUN apk update && apk add \
     iproute2 iptables bash curl wget unzip procps sudo \
     tzdata wireguard-tools python3 py3-psutil py3-bcrypt openresolv \
+    make git build-base linux-headers \
   && cd /usr/bin/ \
   && git clone https://github.com/WGDashboard/amneziawg-tools \
   && cd amneziawg-tools \
