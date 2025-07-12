@@ -1,6 +1,6 @@
 FROM golang:1.24 AS awg
 
-RUN git clone https://github.com/amnezia-vpn/amneziawg-go /awg
+RUN git clone https://github.com/WGDashboard/amneziawg-go /awg
 WORKDIR /awg
 RUN go mod download && \
     go mod verify && \
@@ -13,10 +13,14 @@ RUN apk update && apk add \
     iproute2 iptables bash curl wget unzip procps sudo \
     tzdata wireguard-tools python3 py3-psutil py3-bcrypt openresolv \
   && cd /usr/bin/ \
-  && wget $(curl -s https://api.github.com/repos/amnezia-vpn/amneziawg-tools/releases/latest | grep 'alpine' | cut -d : -f 2,3 | tr -d '", ' | tail -n 1) \
-  && unzip -j alpine-3.19-amneziawg-tools.zip \
+  && git clone https://github.com/WGDashboard/amneziawg-tools \
+  && cd amneziawg-tools \
+  && cd src \
+  && make \
+  && make install \
   && chmod +x /usr/bin/awg /usr/bin/awg-quick \
-  && rm alpine-3.19-amneziawg-tools.zip
+  && cd .. && cd .. \
+  && rm -R amneziawg-tools
 
 COPY --from=awg /usr/bin/amneziawg-go /usr/bin/amneziawg-go
 
