@@ -15,12 +15,11 @@ RUN apk update && apk add \
     make git build-base linux-headers \
   && cd /usr/bin/ \
   && git clone https://github.com/WGDashboard/amneziawg-tools \
-  && cd amneziawg-tools \
-  && cd src \
+  && cd amneziawg-tools/src \
   && make \
   && make install \
   && chmod +x /usr/bin/awg /usr/bin/awg-quick \
-  && cd .. && cd .. \
+  && cd ../.. \
   && rm -R amneziawg-tools
 
 COPY --from=awg /usr/bin/amneziawg-go /usr/bin/amneziawg-go
