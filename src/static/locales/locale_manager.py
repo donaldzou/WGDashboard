@@ -218,7 +218,7 @@ class LocaleManager:
         print("-" * 50)
 
         for lang in self.supported_locales:
-            print(f"{lang.lang_name:<25} | {lang.lang_id}")
+            print(f"{lang.lang_id} | {lang.lang_name}")
 
         print()
 
