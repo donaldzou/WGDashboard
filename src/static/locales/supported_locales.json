@@ -60,6 +60,18 @@
         "lang_name_localized": "Français (France)"
     },
     {
+        "flag": "🇭🇺",
+        "lang_id": "hu-HU",
+        "lang_name": "Hungarian (Hungary)",
+        "lang_name_localized": "Magyar (Magyarország)"
+    },
+    {
+        "flag": "🇮🇩",
+        "lang_id": "id-ID",
+        "lang_name": "Indonesian (Indonesia)",
+        "lang_name_localized": "Bahasa Indonesia (Indonesia)"
+    },
+    {
         "flag": "🇮🇹",
         "lang_id": "it-IT",
         "lang_name": "Italian (Italy)",
@@ -88,6 +100,12 @@
         "lang_id": "pl-PL",
         "lang_name": "Polish (Poland)",
         "lang_name_localized": "Polski (Polska)"
+    },
+    {
+        "flag": "🇵🇹",
+        "lang_id": "pt-BR",
+        "lang_name": "Portuguese (Brazil)",
+        "lang_name_localized": "Português (Brasil)"
     },
     {
         "flag": "🇷🇺",
