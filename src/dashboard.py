@@ -381,6 +381,12 @@ class WireguardConfiguration:
                 self.__parser["Interface"]["H2"] = self.H2 
                 self.__parser["Interface"]["H3"] = self.H3 
                 self.__parser["Interface"]["H4"] = self.H4 
+                self.__parser["Interface"]["I1"] = self.I1 
+                self.__parser["Interface"]["I2"] = self.I2 
+                self.__parser["Interface"]["J1"] = self.J1 
+                self.__parser["Interface"]["J2"] = self.J2 
+                self.__parser["Interface"]["J3"] = self.J3 
+                self.__parser["Interface"]["Itime"] = self.Itime 
                 
             if "Backup" not in data.keys():
                 self.createDatabase()
@@ -1057,7 +1063,7 @@ class WireguardConfiguration:
             original = [l.rstrip("\n") for l in f.readlines()]
             allowEdit = ["Address", "PreUp", "PostUp", "PreDown", "PostDown", "ListenPort", "Table"]
             if self.Protocol == 'awg':
-                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4"]
+                allowEdit += ["Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4", "I1", "I2", "J1", "J2", "J3", "Itime"]
             start = original.index("[Interface]")
             try:
                 end = original.index("[Peer]")
@@ -1221,6 +1227,12 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         self.H2 = ""
         self.H3 = ""
         self.H4 = ""
+        self.I1 = ""
+        self.I2 = ""
+        self.J1 = ""
+        self.J2 = ""
+        self.J3 = ""
+        self.Itime = ""
         
         super().__init__(name, data, backup, startup, wg=False)
 
@@ -1255,7 +1267,13 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             "H1": self.H1,
             "H2": self.H2,
             "H3": self.H3,
-            "H4": self.H4
+            "H4": self.H4,
+            "I1": self.I1,
+            "I2": self.I2,
+            "J1": self.J1,
+            "J2": self.J2,
+            "J3": self.J3,
+            "Itime": self.Itime
         }
 
     def createDatabase(self, dbName = None):
@@ -1667,6 +1685,12 @@ H1 = {self.configuration.H1}
 H2 = {self.configuration.H2}
 H3 = {self.configuration.H3}
 H4 = {self.configuration.H4}
+I1 = {self.configuration.I1}
+I2 = {self.configuration.I2}
+J1 = {self.configuration.J1}
+J2 = {self.configuration.J2}
+J3 = {self.configuration.J3}
+Itime = {self.configuration.Itime}
 '''
         if len(self.DNS) > 0:
             peerConfiguration += f"DNS = {self.DNS}\n"
