@@ -1,10 +1,8 @@
 <script setup async>
 import LocaleText from "@/components/text/localeText.vue";
-import {onMounted, ref} from "vue";
-import {GetLocale} from "@/utilities/locale.js";
-import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 import SearchClients from "@/components/configurationComponents/peerAssignModalComponents/searchClients.vue";
 import AssignedClients from "@/components/configurationComponents/peerAssignModalComponents/assignedClients.vue";
+import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 
 const props = defineProps({
 	selectedPeer: Object
@@ -12,44 +10,17 @@ const props = defineProps({
 const emits = defineEmits([
 	'close'
 ])
-const assignments = ref([])
-const clients = ref([])
-await fetchGet('/api/clients/allClients', {},(res) => {
-	clients.value = res.data;
-	console.log(clients.value)
-})
+const assignmentStore = DashboardClientAssignmentStore()
 
-const getAssignedClients = async () => {
-	await fetchGet('/api/clients/assignedClients', {
-		ConfigurationName: props.selectedPeer.configuration.Name,
-		Peer: props.selectedPeer.id
-	}, (res) => {
-		assignments.value = res.data
-	})
+if (assignmentStore.clients.length > 0){
+	assignmentStore.getClients()
+}else{
+	await assignmentStore.getClients()
 }
 
-await getAssignedClients()
-
+await assignmentStore.getAssignedClients(props.selectedPeer.configuration.Name, props.selectedPeer.id)
 const assignClient = async (clientID) => {
-	await fetchPost('/api/clients/assignClient', {
-		ConfigurationName: props.selectedPeer.configuration.Name,
-		Peer: props.selectedPeer.id,
-		ClientID: clientID
-	}, async (res) => {
-		if (res.status){
-			await getAssignedClients()
-		}
-	})
-}
-
-const unassignClient = async (assignmentID) => {
-	await fetchPost('/api/clients/unassignClient', {
-		AssignmentID: assignmentID
-	}, async (res) => {
-		if (res.status){
-			await getAssignedClients()
-		}
-	})
+	await assignmentStore.assignClient(props.selectedPeer.configuration.Name, props.selectedPeer.id, clientID)
 }
 </script>
 
@@ -65,13 +36,12 @@ const unassignClient = async (assignmentID) => {
 						<button type="button" class="btn-close ms-auto" @click="emits('close')"></button>
 					</div>
 					<div class="card-body px-4 pb-4 d-flex gap-2 flex-column">
-						<AssignedClients 
-							@unassign="args => unassignClient(args)"
-							:assignments="assignments"></AssignedClients>
+						<AssignedClients
+							:configuration-name="props.selectedPeer.configuration.Name"
+							:peer="props.selectedPeer.id"
+						></AssignedClients>
 						<SearchClients
-							:assignments="assignments"
-							@assign="args => assignClient(args)"
-							:clients="clients"></SearchClients>
+							@assign="args => assignClient(args)"></SearchClients>
 					</div>
 				</div>
 			</div>

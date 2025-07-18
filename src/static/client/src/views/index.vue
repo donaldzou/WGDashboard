@@ -72,8 +72,10 @@ const signOut = async () => {
 				<small>No configuration available</small>
 			</div>
 		</div>
-		<div v-else class="d-flex py-4">
-			<div class="spinner-border m-auto"></div>
+		<div v-else class="d-flex p-3">
+			<div class="bg-body rounded-3 d-flex" style="width: 100%; height: 211px;">
+				<div class="spinner-border m-auto"></div>
+			</div>
 		</div>
 	</Transition>
 </div>

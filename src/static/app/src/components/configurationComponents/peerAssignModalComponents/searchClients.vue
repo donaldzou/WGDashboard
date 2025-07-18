@@ -4,22 +4,25 @@ import LocaleText from "@/components/text/localeText.vue";
 import {computed, reactive, ref} from "vue";
 import SearchClientsGroup from "@/components/configurationComponents/peerAssignModalComponents/searchClientsGroup.vue";
 import {fetchPost} from "@/utilities/fetch.js";
+import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 
 const props = defineProps(['clients', 'newAssignClients', 'assignments'])
+
+const assignmentStore = DashboardClientAssignmentStore()
 
 const selectedGroup = ref("")
 const searchString = ref("")
 const getSelectedGroup = computed(() => {
 	if (selectedGroup.value){
 		return {
-			[selectedGroup.value] : props.clients[selectedGroup.value]
+			[selectedGroup.value] : assignmentStore.clients[selectedGroup.value]
 		}
 	}
-	return props.clients
+	return assignmentStore.clients
 })
 const groupCount = reactive({})
-Object.keys(props.clients).forEach(
-	x => groupCount[x] = props.clients[x].length
+Object.keys(assignmentStore.clients).forEach(
+	x => groupCount[x] = assignmentStore.clients[x].length
 )
 
 const emits = defineEmits(['assign'])
@@ -52,7 +55,7 @@ const emits = defineEmits(['assign'])
 						@click="selectedGroup = groupName"
 						:class="{'active': selectedGroup === groupName}"
 						class="btn bg-primary-subtle text-primary-emphasis btn-sm me-2 rounded-3" 
-						v-for="(_, groupName) in clients">
+						v-for="(_, groupName) in assignmentStore.clients">
 						{{ groupName }} 
 							<span class="ms-1 badge" :class="[ groupCount[groupName] > 0 ? 'bg-primary' : 'bg-secondary' ]">
 								{{ groupCount[groupName] }}
@@ -61,12 +64,12 @@ const emits = defineEmits(['assign'])
 				</div>
 			</div>
 			<div class="p-3 border rounded-3 d-flex flex-column gap-2 overflow-y-scroll" style="height: 400px">
-				<SearchClientsGroup 
-					:assignments="assignments"
+				<SearchClientsGroup
 					@assign="(args) => emits('assign', args)"
 					@count="(args) => groupCount[groupName] = args"
 					:searchString="searchString"
-					:group="group" :groupName="groupName" v-for="(group, groupName) in getSelectedGroup"></SearchClientsGroup>
+					:group="group" :groupName="groupName" 
+					v-for="(group, groupName) in getSelectedGroup"></SearchClientsGroup>
 			</div>
 		</div>
 	</div>
