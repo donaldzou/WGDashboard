@@ -81,6 +81,14 @@ const router = createRouter({
 					}
 				},
 				{
+					name: "Clients",
+					path: '/clients',
+					component: () => import("@/views/clients.vue"),
+					meta: {
+						title: "Clients"
+					}
+				},
+				{
 					name: "Configuration",
 					path: '/configuration/:id',
 					component: () => import('@/views/configuration.vue'),
