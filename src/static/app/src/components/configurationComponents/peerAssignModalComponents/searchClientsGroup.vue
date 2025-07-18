@@ -1,14 +1,15 @@
 <script setup>
 import {computed} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
+import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 
-const props = defineProps(['group', 'groupName', 'searchString', 'assignments'])
+const props = defineProps(['group', 'groupName', 'searchString'])
 const emits = defineEmits(['count', 'assign'])
+const assignmentStore = DashboardClientAssignmentStore()
 
 const filterGroup = computed(() => {
 	let g = props.group.filter(x => 
-		!props.assignments.map(a => a.Client.ClientID).includes(x.ClientID))
-	
+		!assignmentStore.assignments.map(a => a.Client.ClientID).includes(x.ClientID))
 	if (props.searchString){
 		let v = g.filter(
 			x => (x.Name && x.Name.includes(props.searchString)) || (x.Email && x.Email.includes(props.searchString))
@@ -27,13 +28,22 @@ const filterGroup = computed(() => {
 			<small>{{groupName}}</small>
 		</h6>
 		<div v-if="filterGroup.length > 0" class="d-flex flex-column gap-2">
-			<div class="bg-body-secondary rounded-3 text-start p-2 d-flex p-1" role="button"
-			     @click="emits('assign', client.ClientID)"
+			<div class="bg-body-secondary rounded-3 text-start p-2 d-flex"
+			     
 			     v-for="client in filterGroup">
-				<small class="mb-0">
-					{{ client.Email }}
-				</small>
-				<small class="text-muted ms-auto">{{ client.Name }}</small>
+				<div class="d-flex flex-column">
+					<small class="mb-0">
+						{{ client.Email }}
+					</small>
+					<small class="text-muted">{{ client.Name ? client.Name : 'No Name' }}</small>
+				</div>
+				<button
+					@click="emits('assign', client.ClientID)"
+					:class="{disabled: assignmentStore.assigning}"
+					class="btn bg-success-subtle text-success-emphasis ms-auto">
+					<span class="spinner-border spinner-border-sm" v-if="assignmentStore.assigning === client.ClientID"></span>
+					<i class="bi bi-plus-circle-fill" v-else></i>
+				</button>
 			</div>
 		</div>
 		<div v-else>

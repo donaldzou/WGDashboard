@@ -1,7 +1,11 @@
 <script setup>
 import LocaleText from "@/components/text/localeText.vue";
-const props = defineProps(['assignments'])
+import {ref} from "vue";
+import Assignment from "@/components/configurationComponents/peerAssignModalComponents/assignment.vue";
+import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 const emits = defineEmits(['unassign'])
+const props = defineProps(['configurationName', 'peer'])
+const assignmentStore = DashboardClientAssignmentStore()
 </script>
 
 <template>
@@ -10,26 +14,11 @@ const emits = defineEmits(['unassign'])
 			<LocaleText t="Assigned Clients"></LocaleText>
 		</h6>
 		<TransitionGroup name="list" tag="div" class="position-relative">
-			<div class="bg-body-secondary rounded-3 text-start p-2 d-flex mb-2 assignment"
-			     :key="a.AssignmentID"
-			     v-for="a in assignments">
-				<div class="d-flex flex-column">
-					<small>
-						{{ a.Client.Email }}
-					</small>
-					<small class="text-muted">
-						{{ a.Client.Name ? a.Client.Name + ' | ' : '' }}{{ a.Client.ClientGroup ? a.Client.ClientGroup : 'Local' }}
-					</small>
-				</div>
-				<button
-					@click="emits('unassign', a.AssignmentID)"
-					aria-label="Delete Assignment"
-					class="btn bg-danger-subtle text-danger-emphasis ms-auto">
-					<i class="bi bi-trash-fill"></i>
-				</button>
-			</div>
+			<Assignment :assignment="a" :key="a.AssignmentID"
+			            @unassign="assignmentStore.unassignClient(configurationName, peer, a.AssignmentID)"
+			            v-for="a in assignmentStore.assignments"></Assignment>
 		</TransitionGroup>
-		<div class="text-center" v-if="assignments.length === 0">
+		<div class="text-center" v-if="assignmentStore.assignments.length === 0">
 			<small class="text-muted">
 				<LocaleText t="No client assigned to this peer yet"></LocaleText>
 			</small>

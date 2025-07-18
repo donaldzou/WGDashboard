@@ -48,12 +48,12 @@ window.dayjs = dayjs
 </script>
 
 <template>
-	<div class="card rounded-3 border shadow">
-		<div class="card-header border-0 align-items-center d-flex p-3 flex-column flex-sm-row gap-2">
+	<div class="card rounded-3 border-0 shadow">
+		<div class="card-header rounded-top-3 border-0 align-items-center d-flex p-3 flex-column flex-sm-row gap-2">
 			<small class="fw-bold">
 				{{ props.config.name }}
 			</small>
-			<span class="badge rounded-3 shadow ms-sm-auto"
+			<span class="badge rounded-3 ms-sm-auto"
 			      :class="[props.config.protocol === 'wg' ? 'wireguardBg' : 'amneziawgBg' ]"
 			      v-if="props.config.protocol === 'wg'">
 							{{ props.config.protocol === 'wg' ? 'WireGuard': 'AmneziaWG' }}
