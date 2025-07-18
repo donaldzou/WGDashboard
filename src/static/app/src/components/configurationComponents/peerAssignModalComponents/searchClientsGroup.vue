@@ -29,7 +29,6 @@ const filterGroup = computed(() => {
 		</h6>
 		<div v-if="filterGroup.length > 0" class="d-flex flex-column gap-2">
 			<div class="bg-body-secondary rounded-3 text-start p-2 d-flex"
-			     
 			     v-for="client in filterGroup">
 				<div class="d-flex flex-column">
 					<small class="mb-0">

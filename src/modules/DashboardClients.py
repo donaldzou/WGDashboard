@@ -105,7 +105,11 @@ class DashboardClients:
             
     def GetAllClients(self):
         self.__getClients()
-        return self.Clients  
+        return self.Clients
+    
+    def GetAllClientsRaw(self):
+        self.__getClients()
+        return self.ClientsRaw
     
     def GetClient(self, ClientID) -> dict[str, str] | None:
         self.__getClients()

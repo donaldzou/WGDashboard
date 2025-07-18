@@ -1209,6 +1209,10 @@ Client Controller
 def API_Clients_AllClients():
     return ResponseObject(data=DashboardClients.GetAllClients())
 
+@app.get(f'{APP_PREFIX}/api/clients/allClientsRaw')
+def API_Clients_AllClientsRaw():
+    return ResponseObject(data=DashboardClients.GetAllClientsRaw())
+
 @app.post(f'{APP_PREFIX}/api/clients/assignClient')
 def API_Clients_AssignClient():
     data = request.get_json()
