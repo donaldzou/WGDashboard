@@ -19,46 +19,28 @@ const getClients = computed(() => {
 </script>
 
 <template>
-	<div class="card rounded-3">
-		<div class="card-header d-flex align-items-center">
-			{{ groupName }}
+	<div class="card rounded-0 border-0">
+		<div class="card-header d-flex align-items-center rounded-0">
+			<h6 class="my-2">{{ groupName }}</h6>
 			<span class="badge text-bg-primary ms-auto">
 				<LocaleText :t="getClients.length + ' Clients'"></LocaleText>
 			</span>
 		</div>
-		<div class="card-body">
-			<small class="text-muted" v-if="getClients.length === 0">
-				<LocaleText :t="'No clients contains ' + searchString"></LocaleText>
-			</small>
-			<div class="row g-2" v-else>
-				<div class="col-sm-4" v-for="clients in getClients">
-					<div class="p-3 bg-body-tertiary border rounded-3 shadow" role="button">
-						<div>
-							<small class="text-muted">
-								<LocaleText t="Client ID"></LocaleText>
-							</small>
-							<p class="mb-0">
-								<samp style="font-size: 0.875rem">{{ clients.ClientID }}</samp>
-							</p>
-						</div>
-						<div>
-							<small class="text-muted">
-								<LocaleText t="Email"></LocaleText>
-							</small>
-							<p class="mb-0">
-								{{ clients.Email }}
-							</p>
-						</div>
-						<div>
-							<small class="text-muted">
-								<LocaleText t="Name"></LocaleText>
-							</small>
-							<p class="mb-0" :class="{'text-muted': !clients.Name}">
-								{{ clients.Name ? clients.Name : 'N/A' }}
-							</p>
-						</div>
-					</div>
-				</div>
+		<div class="card-body p-0">
+			
+			<div class="list-group list-group-flush" >
+				<RouterLink
+					:to="{ name: 'Client Viewer', params: { id: client.ClientID } }"
+					class="list-group-item d-flex flex-column border-bottom list-group-item-action"
+				    v-for="client in getClients" >
+					<small class="text-body">
+						
+						{{ client.Email }}
+					</small>
+					<small class="text-muted">
+						{{ client.Name ? client.Name : 'No Name'}}
+					</small>
+				</RouterLink>
 			</div>
 		</div>
 	</div>
