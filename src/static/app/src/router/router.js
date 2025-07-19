@@ -40,25 +40,25 @@ const router = createRouter({
 				},
 				{
 					name: "Settings",
-					path: '/settings',
+					path: 'settings',
 					component: () => import('@/views/settings.vue'),
 					meta: {
 						title: "Settings"
 					}
 				},
 				{
-					path: '/ping',
+					path: 'ping',
 					name: "Ping",
 					component: () => import('@/views/ping.vue'),
 				},
 				{
-					path: '/traceroute',
+					path: 'traceroute',
 					name: "Traceroute",
 					component: () => import('@/views/traceroute.vue'),
 				},
 				{
 					name: "New Configuration",
-					path: '/new_configuration',
+					path: 'new_configuration',
 					component: () => import('@/views/newConfiguration.vue'),
 					meta: {
 						title: "New Configuration"
@@ -66,7 +66,7 @@ const router = createRouter({
 				},
 				{
 					name: "Restore Configuration",
-					path: '/restore_configuration',
+					path: 'restore_configuration',
 					component: () => import('@/views/restoreConfiguration.vue'),
 					meta: {
 						title: "Restore Configuration"
@@ -74,7 +74,7 @@ const router = createRouter({
 				},
 				{
 					name: "System Status",
-					path: '/system_status',
+					path: 'system_status',
 					component: () => import("@/views/systemStatus.vue"),
 					meta: {
 						title: "System Status"
@@ -82,15 +82,22 @@ const router = createRouter({
 				},
 				{
 					name: "Clients",
-					path: '/clients',
+					path: 'clients',
 					component: () => import("@/views/clients.vue"),
 					meta: {
 						title: "Clients"
-					}
+					},
+					children: [
+						{
+							name: "Client Viewer",
+							path: ':id',
+							component: () => import('@/components/clientComponents/clientViewer.vue')
+						}
+					]
 				},
 				{
 					name: "Configuration",
-					path: '/configuration/:id',
+					path: 'configuration/:id',
 					component: () => import('@/views/configuration.vue'),
 					meta: {
 						title: "Configuration"
