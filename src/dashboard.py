@@ -668,14 +668,25 @@ def API_addPeers(configName):
             
             endpoint_allowed_ip: str = data.get('endpoint_allowed_ip', DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[1])
             dns_addresses: str = data.get('DNS', DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1])
-            mtu: int = data.get('mtu', int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1]))
-            keep_alive: int = data.get('keepalive', int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]))
+            
+            
+            mtu: int = data.get('mtu', None)
+            keep_alive: int = data.get('keepalive', None)
             preshared_key: str = data.get('preshared_key', "")            
     
             if type(mtu) is not int or mtu < 0 or mtu > 1460:
-                mtu = int(DashboardConfig.GetConfig("Peers", "peer_MTU")[1])
+                default: str = DashboardConfig.GetConfig("Peers", "peer_MTU")[1]
+                if default.isnumeric():
+                    mtu = default
+                else:
+                    mtu = 0
             if type(keep_alive) is not int or keep_alive < 0:
-                keep_alive = int(DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1])
+                default = DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]
+                if default.isnumeric():
+                    keep_alive = default
+                else:
+                    keep_alive = 0
+            
             config = WireguardConfigurations.get(configName)
             if not config.getStatus():
                 config.toggleConfiguration()
@@ -1245,6 +1256,20 @@ def API_Clients_AssignedClients():
         return ResponseObject(False, "Please provide all required fields")
     return ResponseObject(
         data=DashboardClients.GetAssignedPeerClients(configurationName, peerID))
+
+@app.get(f'{APP_PREFIX}/api/clients/allConfigurationsPeers')
+def API_Clients_AllConfigurationsPeers():
+    c = {}
+    
+    for (key, val) in WireguardConfigurations.items():
+        c[key] = list(map(lambda x : {
+            "id": x.id,
+            "name": x.name
+        }, val.Peers))
+    
+    return ResponseObject(
+        data=c
+    )
     
 
 
