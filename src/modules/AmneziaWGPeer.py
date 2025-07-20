@@ -30,31 +30,64 @@ class AmneziaWGPeer(Peer):
             if re.match("^[a-zA-Z0-9_=+.-]$", i):
                 finalFilename += i
 
-        peerConfiguration = f'''[Interface]
-PrivateKey = {self.private_key}
-Address = {self.allowed_ip}
-MTU = {str(self.mtu)}
-Jc = {self.configuration.Jc}
-Jmin = {self.configuration.Jmin}
-Jmax = {self.configuration.Jmax}
-S1 = {self.configuration.S1}
-S2 = {self.configuration.S2}
-H1 = {self.configuration.H1}
-H2 = {self.configuration.H2}
-H3 = {self.configuration.H3}
-H4 = {self.configuration.H4}
-'''
-        if len(self.DNS) > 0:
-            peerConfiguration += f"DNS = {self.DNS}\n"
-        peerConfiguration += f'''
-[Peer]
-PublicKey = {self.configuration.PublicKey}
-AllowedIPs = {self.endpoint_allowed_ip}
-Endpoint = {self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
-PersistentKeepalive = {str(self.keepalive)}
-'''
-        if len(self.preshared_key) > 0:
-            peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
+        interfaceSection = {
+            "PrivateKey": self.private_key,
+            "Address": self.allowed_ip,
+            "MTU": self.mtu,
+            "DNS": self.DNS,
+            "Jc": self.configuration.Jc,
+            "Jmin": self.configuration.Jmin,
+            "Jmax": self.configuration.Jmax,
+            "S1": self.configuration.S1,
+            "S2": self.configuration.S2,
+            "H1": self.configuration.H1,
+            "H2": self.configuration.H2,
+            "H3": self.configuration.H3,
+            "H4": self.configuration.H4 
+        }
+        peerSection = {
+            "PublicKey": self.configuration.PublicKey,
+            "AllowedIPs": self.endpoint_allowed_ip,
+            "Endpoint": f'{self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}',
+            "PersistentKeepalive": self.keepalive,
+            "PresharedKey": self.preshared_key
+        }
+        combine = [interfaceSection.items(), peerSection.items()]
+        peerConfiguration = ""
+        for s in range(len(combine)):
+            if s == 0:
+                peerConfiguration += "[Interface]\n"
+            else:
+                peerConfiguration += "\n[Peer]\n"
+            for (key, val) in combine[s]:
+                if val is not None and ((type(val) is str and len(val) > 0) or (type(val) is int and val > 0)):
+                    peerConfiguration += f"{key} = {val}\n"
+
+#         peerConfiguration = f'''[Interface]
+# PrivateKey = {self.private_key}
+# Address = {self.allowed_ip}
+# MTU = {str(self.mtu)}
+# Jc = {self.configuration.Jc}
+# Jmin = {self.configuration.Jmin}
+# Jmax = {self.configuration.Jmax}
+# S1 = {self.configuration.S1}
+# S2 = {self.configuration.S2}
+# H1 = {self.configuration.H1}
+# H2 = {self.configuration.H2}
+# H3 = {self.configuration.H3}
+# H4 = {self.configuration.H4}
+# '''
+#         if len(self.DNS) > 0:
+#             peerConfiguration += f"DNS = {self.DNS}\n"
+#         peerConfiguration += f'''
+# [Peer]
+# PublicKey = {self.configuration.PublicKey}
+# AllowedIPs = {self.endpoint_allowed_ip}
+# Endpoint = {self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
+# PersistentKeepalive = {str(self.keepalive)}
+# '''
+#         if len(self.preshared_key) > 0:
+#             peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
         return {
             "fileName": finalFilename,
             "file": peerConfiguration
@@ -78,6 +111,13 @@ PersistentKeepalive = {str(self.keepalive)}
             return False, f"Endpoint Allowed IPs format is incorrect"
         if len(dns_addresses) > 0 and not ValidateDNSAddress(dns_addresses):
             return False, f"DNS format is incorrect"
+
+        if type(mtu) is str:
+            mtu = 0
+
+        if type(keepalive) is str:
+            keepalive = 0
+        
         if mtu < 0 or mtu > 1460:
             return False, "MTU format is not correct"
         if keepalive < 0:
