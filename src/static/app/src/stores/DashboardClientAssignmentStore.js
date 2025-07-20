@@ -1,9 +1,10 @@
 import {defineStore} from "pinia";
-import {computed, ref} from "vue";
+import {ref} from "vue";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
 
 export const DashboardClientAssignmentStore = 
 	defineStore('DashboardClientAssignmentStore', () => {
+		const allConfigurationsPeers = ref({})
 		const assignments = ref([])
 		const clients = ref({})
 		const clientsRaw = ref([])
@@ -63,6 +64,12 @@ export const DashboardClientAssignmentStore =
 				unassigning.value = false;
 			})
 		}
+
+		const getAllConfigurationsPeers = async () => {
+			await fetchGet("/api/clients/allConfigurationsPeers", {}, (res) => {
+				allConfigurationsPeers.value = res.data
+			})
+		}
 		
 		return {
 			assignments, 
@@ -75,6 +82,8 @@ export const DashboardClientAssignmentStore =
 			getClientById,
 			unassigning,
 			assigning,
-			clientsRaw
+			clientsRaw,
+			allConfigurationsPeers,
+			getAllConfigurationsPeers
 		}
 })

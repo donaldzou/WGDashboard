@@ -1,18 +1,18 @@
-<script setup lang="ts">
+<script setup lang="ts" async>
 import {useRoute} from "vue-router";
+import { fetchGet } from "@/utilities/fetch.js"
+
 
 import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 import {computed} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
+import ClientAssignedPeers from "@/components/clientComponents/clientAssignedPeers.vue";
 const assignmentStore = DashboardClientAssignmentStore()
 const route = useRoute()
 
 const client = computed(() => {
 	return assignmentStore.getClientById(route.params.id)
 })
-
-
-
 </script>
 
 <template>
@@ -34,9 +34,10 @@ const client = computed(() => {
 			</div>
 		</div>
 		<div class="px-4">
-			<h5>
-				<LocaleText t="Assigned Peers"></LocaleText>
+			<h5 class="mb-3">
+				<LocaleText t="Assign Peers"></LocaleText>
 			</h5>
+			<ClientAssignedPeers :client="client"></ClientAssignedPeers>
 		</div>
 	</div>
 	<div v-else class="d-flex w-100 h-100 text-muted">

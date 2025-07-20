@@ -5,9 +5,10 @@ import {ref} from "vue";
 const assignmentStore = DashboardClientAssignmentStore()
 import {GetLocale} from "@/utilities/locale.js";
 import ClientGroup from "@/components/clientComponents/clientGroup.vue";
-import * as sea from "node:sea";
+import { fetchGet } from "@/utilities/fetch.js"
 
 await assignmentStore.getClients();
+assignmentStore.getAllConfigurationsPeers();
 
 const searchString = ref("")
 </script>
