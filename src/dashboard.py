@@ -1260,7 +1260,6 @@ def API_Clients_AssignedClients():
 @app.get(f'{APP_PREFIX}/api/clients/allConfigurationsPeers')
 def API_Clients_AllConfigurationsPeers():
     c = {}
-    
     for (key, val) in WireguardConfigurations.items():
         c[key] = list(map(lambda x : {
             "id": x.id,
@@ -1270,7 +1269,18 @@ def API_Clients_AllConfigurationsPeers():
     return ResponseObject(
         data=c
     )
+
+@app.get(f'{APP_PREFIX}/api/clients/assignedPeers')
+def API_Clients_AssignedPeers():
+    data = request.args
+    clientId = data.get("ClientID")
+    if not clientId:
+        return ResponseObject(False, "Please provide ClientID")
     
+    d = DashboardClients.GetClientAssignedPeers(clientId)
+    if d is None:
+        return ResponseObject(False, "Client does not exist")
+    return ResponseObject(data=d)
 
 
 '''

@@ -329,6 +329,12 @@ class DashboardClients:
             if client is not None:
                 a.Client = self.GetClient(a.ClientID)
         return c
+    
+    def GetClientAssignedPeers(self, ClientID):
+        client = self.GetClient(ClientID)
+        if client is not None:
+            return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
+        return None
 
     def AssignClient(self, ConfigurationName, PeerID, ClientID) -> tuple[bool, dict[str, str]] | tuple[bool, None]:
         return self.DashboardClientsPeerAssignment.AssignClient(ClientID, ConfigurationName, PeerID) 
