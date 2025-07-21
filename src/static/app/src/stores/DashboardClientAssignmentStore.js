@@ -37,7 +37,7 @@ export const DashboardClientAssignmentStore =
 			})
 		}
 
-		const assignClient = async (ConfigurationName, Peer, ClientID) => {
+		const assignClient = async (ConfigurationName, Peer, ClientID, get=true) => {
 			assigning.value = ClientID;
 			await fetchPost('/api/clients/assignClient', {
 				ConfigurationName: ConfigurationName,
@@ -45,7 +45,7 @@ export const DashboardClientAssignmentStore =
 				ClientID: ClientID
 			}, async (res) => {
 				if (res.status){
-					await getAssignedClients(ConfigurationName, Peer)
+					if (get) await getAssignedClients(ConfigurationName, Peer)
 					assigning.value = "";
 				}else{
 					assigning.value = "";
@@ -59,7 +59,7 @@ export const DashboardClientAssignmentStore =
 				AssignmentID: AssignmentID
 			}, async (res) => {
 				if (res.status){
-					await getAssignedClients(ConfigurationName, Peer)
+					if (ConfigurationName && Peer) await getAssignedClients(ConfigurationName, Peer)
 				}
 				unassigning.value = false;
 			})

@@ -330,10 +330,15 @@ class DashboardClients:
                 a.Client = self.GetClient(a.ClientID)
         return c
     
-    def GetClientAssignedPeers(self, ClientID):
+    def GetClientAssignedPeersGrouped(self, ClientID):
         client = self.GetClient(ClientID)
         if client is not None:
-            return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
+            p = self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
+            configs = set(map(lambda x : x['configuration_name'], p))
+            d = {}
+            for i in configs:
+                d[i] = list(filter(lambda x : x['configuration_name'] == i, p)) 
+            return d
         return None
 
     def AssignClient(self, ConfigurationName, PeerID, ClientID) -> tuple[bool, dict[str, str]] | tuple[bool, None]:

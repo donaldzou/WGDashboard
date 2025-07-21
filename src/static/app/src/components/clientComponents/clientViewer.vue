@@ -34,9 +34,7 @@ const client = computed(() => {
 			</div>
 		</div>
 		<div class="px-4">
-			<h5 class="mb-3">
-				<LocaleText t="Assign Peers"></LocaleText>
-			</h5>
+
 			<ClientAssignedPeers :client="client"></ClientAssignedPeers>
 		</div>
 	</div>
