@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
+import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 export const DashboardClientAssignmentStore = 
 	defineStore('DashboardClientAssignmentStore', () => {
@@ -10,6 +11,7 @@ export const DashboardClientAssignmentStore =
 		const clientsRaw = ref([])
 		const unassigning = ref(false)
 		const assigning = ref("")
+		const dashboardConfigurationStore = DashboardConfigurationStore()
 		
 		const getClients = async () => {
 			await fetchGet('/api/clients/allClients', {},(res) => {
@@ -45,11 +47,14 @@ export const DashboardClientAssignmentStore =
 				ClientID: ClientID
 			}, async (res) => {
 				if (res.status){
+					dashboardConfigurationStore.newMessage("Server", "Assign successfully!", "success")
 					if (get) await getAssignedClients(ConfigurationName, Peer)
-					assigning.value = "";
+
 				}else{
-					assigning.value = "";
+					dashboardConfigurationStore.newMessage("Server", "Assign Failed. Reason: " + res.message, "success")
+					console.error("Assign Failed. Reason: " + res.message)
 				}
+				assigning.value = "";
 			})
 		}
 
@@ -59,7 +64,11 @@ export const DashboardClientAssignmentStore =
 				AssignmentID: AssignmentID
 			}, async (res) => {
 				if (res.status){
+					dashboardConfigurationStore.newMessage("Server", "Unassign successfully!", "success")
 					if (ConfigurationName && Peer) await getAssignedClients(ConfigurationName, Peer)
+				}else{
+					dashboardConfigurationStore.newMessage("Server", "Unassign Failed. Reason: " + res.message, "success")
+					console.error("Unassign Failed. Reason: " + res.message)
 				}
 				unassigning.value = false;
 			})
