@@ -18,17 +18,24 @@ const available = computed(() => {
 	}
 	return props.peers
 })
-
 const confirmDelete = ref(false)
 
+const collapse = ref(false)
 </script>
 
 <template>
 	<div class="card rounded-0 border-0">
-		<div class="card-header rounded-top-3 sticky-top z-5 bg-body-secondary border-0 shadow border-bottom btn-brand text-white">
+		<div
+			@click="collapse = !collapse"
+			role="button"
+			class="card-header rounded-0 sticky-top z-5 bg-body-secondary border-0 shadow border-bottom btn-brand text-white d-flex">
 			<samp>{{ configuration }}</samp>
+			<a role="button" class="ms-auto text-white" >
+				<i class="bi bi-chevron-compact-down" v-if="collapse"></i>
+				<i class="bi bi-chevron-compact-up" v-else></i>
+			</a>
 		</div>
-		<div class="card-body p-0">
+		<div class="card-body p-0" v-if="!collapse">
 			<div class="list-group list-group-flush" >
 				<div
 					class="list-group-item d-flex border-bottom list-group-item-action d-flex align-items-center gap-3"
