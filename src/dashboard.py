@@ -1277,7 +1277,7 @@ def API_Clients_AssignedPeers():
     if not clientId:
         return ResponseObject(False, "Please provide ClientID")
     
-    d = DashboardClients.GetClientAssignedPeers(clientId)
+    d = DashboardClients.GetClientAssignedPeersGrouped(clientId)
     if d is None:
         return ResponseObject(False, "Client does not exist")
     return ResponseObject(data=d)

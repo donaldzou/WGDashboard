@@ -1,62 +1,92 @@
 <script setup lang="ts">
-import {onMounted, watch, watchEffect} from "vue";
+import {onMounted, ref, watch, watchEffect} from "vue";
 import { fetchGet } from "@/utilities/fetch.js"
 import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
-
+import AvailablePeersGroup from "@/components/clientComponents/availablePeersGroup.vue";
+import LocaleText from "@/components/text/localeText.vue";
+import configuration from "@/views/configuration.vue";
 const props = defineProps(['client'])
-watchEffect(async () => {
-	const clientId = props.client.ClientID;
+const clientAssignedPeers = ref({})
+const loading = ref(false)
+const assignmentStore = DashboardClientAssignmentStore()
+const manage = ref(false)
+
+const selectedAssign = ref(undefined)
+const selectedUnassign = ref(undefined)
+
+
+
+
+const getAssignedPeers = async () => {
 	await fetchGet('/api/clients/assignedPeers', {
-		ClientID: clientId
+		ClientID: props.client.ClientID
 	}, (res) => {
-		console.log(res)
+		clientAssignedPeers.value = res.data;
+		loading.value = false;
 	})
+}
+
+watchEffect(async () => {
+	loading.value = true
+	await getAssignedPeers()
 })
 
-const assignmentStore = DashboardClientAssignmentStore()
+const assign = async (ConfigurationName, Peer, ClientID) => {
+	await assignmentStore.assignClient(ConfigurationName, Peer, ClientID, false)
+	await getAssignedPeers()
+}
+
+const unassign = async (AssignmentID) => {
+	await assignmentStore.unassignClient(undefined, undefined, AssignmentID)
+	await getAssignedPeers()
+}
 
 </script>
 
 <template>
-<div class="border w-100 d-flex " style="height: 400px">
-	<div style="flex: 1 0 0; overflow: scroll">
-		<div class="card rounded-0 border-0" v-for="(peers, configuration) in assignmentStore.allConfigurationsPeers">
-			<div class="card-header sticky-top z-5 bg-body-secondary border-0 rounded-0 shadow border-bottom btn-brand text-white">
-				<samp>{{ configuration }}</samp>
-			</div>
-			<div class="card-body p-0">
-				<div class="list-group list-group-flush" >
-					<button
-						class="list-group-item d-flex flex-column border-bottom list-group-item-action"
-						v-for="peer in peers" >
-						<small class="text-body">
-							{{ peer.id }}
-						</small>
-						<small class="text-muted">
-							{{ client.name ? client.name : 'Untitled Peer'}}
-						</small>
-					</button>
-				</div>
-
-			</div>
+<div class="d-flex rounded-3 flex-column gap-3">
+	<div style="height: 300px" class="d-flex flex-column">
+		<div class="d-flex align-items-center mb-2">
+			<h6 class="mb-0">
+				<LocaleText t="Assigned Peers"></LocaleText>
+			</h6>
+			<button class="btn btn-sm bg-primary-subtle text-primary-emphasis rounded-3 ms-auto"
+					@click="manage = !manage">
+				<template v-if="!manage">
+					<i class="bi bi-list-check me-2"></i>Manage
+				</template>
+				<template v-else>
+					<i class="bi bi-check me-2"></i>Done
+				</template>
+			</button>
+		</div>
+		<div class="rounded-3 availablePeers border h-100 overflow-scroll flex-grow-1">
+			<AvailablePeersGroup
+				:configuration="configuration"
+				:peers="peers"
+				@unassign="async (id) => await unassign(id)"
+				v-for="(peers, configuration) in clientAssignedPeers">
+			</AvailablePeersGroup>
 		</div>
 	</div>
-	<div class="px-3 border-start border-end d-flex flex-column justify-content-center gap-3">
-		<button class="btn">
-			<i class="bi bi-chevron-left"></i>
-		</button>
-		<button class="btn">
-			<i class="bi bi-chevron-right"></i>
-		</button>
+	<div style="height: 300px" class="d-flex flex-column" v-if="manage">
+		<h6>
+			<LocaleText t="Available Peers"></LocaleText>
+		</h6>
+		<div class="rounded-3 availablePeers border h-100 overflow-scroll flex-grow-1">
+			<AvailablePeersGroup
+				:configuration="configuration"
+				:clientAssignedPeers="clientAssignedPeers"
+				:peers="peers"
+				@assign="async (id) => await assign(configuration, id, props.client.ClientID)"
+				v-for="(peers, configuration) in assignmentStore.allConfigurationsPeers">
+			</AvailablePeersGroup>
+		</div>
 	</div>
-	<div style="flex: 1 0 0">
-		hi
-	</div>
+
 </div>
 </template>
 
 <style scoped>
-div .list-group-item:last-child{
-	border-bottom: none !important;
-}
+
 </style>
