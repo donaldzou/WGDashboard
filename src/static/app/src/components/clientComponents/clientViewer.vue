@@ -4,19 +4,36 @@ import { fetchGet } from "@/utilities/fetch.js"
 
 
 import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
-import {computed} from "vue";
+import {computed, ref, watch} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import ClientAssignedPeers from "@/components/clientComponents/clientAssignedPeers.vue";
+import ClientResetPassword from "@/components/clientComponents/clientResetPassword.vue";
 const assignmentStore = DashboardClientAssignmentStore()
 const route = useRoute()
 
 const client = computed(() => {
 	return assignmentStore.getClientById(route.params.id)
 })
+
+const clientAssignedPeers = ref({})
+const getAssignedPeers = async () => {
+	await fetchGet('/api/clients/assignedPeers', {
+		ClientID: client.value.ClientID
+	}, (res) => {
+		clientAssignedPeers.value = res.data;
+	})
+}
+
+if (client.value){
+	watch(() => client.value.ClientID, async () => {
+		await getAssignedPeers()
+	})
+	await getAssignedPeers()
+}
 </script>
 
 <template>
-	<div class="text-body d-flex flex-column gap-3" v-if="client">
+	<div class="text-body d-flex flex-column" v-if="client">
 		<div class="p-4 border-bottom bg-body-tertiary">
 			<small class="text-muted">
 				<LocaleText t="Email"></LocaleText>
@@ -33,10 +50,11 @@ const client = computed(() => {
 				</small>
 			</div>
 		</div>
-		<div class="px-4">
-
-			<ClientAssignedPeers :client="client"></ClientAssignedPeers>
-		</div>
+		<ClientAssignedPeers
+			@refresh="getAssignedPeers()"
+			:clientAssignedPeers="clientAssignedPeers"
+			:client="client"></ClientAssignedPeers>
+		<ClientResetPassword :client="client" v-if="client.ClientGroup === 'Local'"></ClientResetPassword>
 	</div>
 	<div v-else class="d-flex w-100 h-100 text-muted">
 		<div class="m-auto text-center">

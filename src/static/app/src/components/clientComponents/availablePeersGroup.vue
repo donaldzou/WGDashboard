@@ -3,23 +3,27 @@ import {computed, ref} from "vue";
 import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
 import LocaleText from "@/components/text/localeText.vue";
 
-const props = defineProps(['configuration', 'peers', 'clientAssignedPeers'])
+const props = defineProps(['configuration', 'peers', 'clientAssignedPeers', 'availablePeerSearchString'])
 const emits = defineEmits(['assign', 'unassign'])
 const assignmentStore = DashboardClientAssignmentStore()
 const available = computed(() => {
 	if (props.clientAssignedPeers){
 		if (Object.keys(props.clientAssignedPeers).includes(props.configuration)){
 			return props.peers.filter(
-				x => !props.clientAssignedPeers[props.configuration].map(
-					x => x.id
-				).includes(x.id)
+				x => {
+					return !props.clientAssignedPeers[props.configuration].map(
+						x => x.id
+					).includes(x.id) &&
+						(!props.availablePeerSearchString ||
+							(props.availablePeerSearchString &&
+								(x.id.includes(props.availablePeerSearchString) || x.name.includes(props.availablePeerSearchString))))
+				}
 			)
 		}
 	}
 	return props.peers
 })
 const confirmDelete = ref(false)
-
 const collapse = ref(false)
 </script>
 
@@ -28,8 +32,8 @@ const collapse = ref(false)
 		<div
 			@click="collapse = !collapse"
 			role="button"
-			class="card-header rounded-0 sticky-top z-5 bg-body-secondary border-0 shadow border-bottom btn-brand text-white d-flex">
-			<samp>{{ configuration }}</samp>
+			class="card-header rounded-0 sticky-top z-5 bg-body-secondary border-0 border-bottom text-white d-flex">
+			<small><samp>{{ configuration }}</samp></small>
 			<a role="button" class="ms-auto text-white" >
 				<i class="bi bi-chevron-compact-down" v-if="collapse"></i>
 				<i class="bi bi-chevron-compact-up" v-else></i>
