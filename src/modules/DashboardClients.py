@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import uuid
 
@@ -57,6 +58,18 @@ class DashboardClients:
             db.Column('Name', db.String(500)),
             extend_existing=True,   
         )
+        
+        self.dashboardClientsPasswordResetLinkTable = db.Table(
+            'DashboardClientsPasswordResetLinks', self.metadata,
+            db.Column('ResetToken', db.String(255), nullable=False, primary_key=True),
+            db.Column('ClientID', db.String(255), nullable=False),
+            db.Column('CreatedDate',
+                      (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP),
+                      server_default=db.func.now()),
+            db.Column('ExpiryDate',
+                      (db.DATETIME if 'sqlite:///' in ConnectionString("wgdashboard") else db.TIMESTAMP)),
+            extend_existing=True
+        )
 
         self.metadata.create_all(self.engine)
         self.Clients = {}
@@ -112,7 +125,6 @@ class DashboardClients:
         return self.ClientsRaw
     
     def GetClient(self, ClientID) -> dict[str, str] | None:
-        self.__getClients()
         c = filter(lambda x: x['ClientID'] == ClientID, self.ClientsRaw)
         client = next((dict(client) for client in c), None)
         if client is not None:
@@ -322,6 +334,33 @@ class DashboardClients:
     '''
     For WGDashboard Admin to Manage Clients
     '''
+
+    def GenerateClientPasswordResetLink(self, ClientID) -> bool | str:
+        c = self.GetClient(ClientID)
+        if c is None:
+            return False
+        
+        newToken = str(uuid.uuid4())
+        with self.engine.begin() as conn:
+            conn.execute(
+                self.dashboardClientsPasswordResetLinkTable.update().values({
+                    "ExpiryDate": db.func.now()
+                }).where(
+                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID
+                )
+            )
+            conn.execute(
+                self.dashboardClientsPasswordResetLinkTable.insert().values({
+                    "ResetToken": newToken,
+                    "ClientID": ClientID,
+                    "ExpiryDate": datetime.datetime.now() + datetime.timedelta(minutes=30)
+                })
+            )
+        
+        return newToken
+        
+        
+    
     def GetAssignedPeerClients(self, ConfigurationName, PeerID):
         c = self.DashboardClientsPeerAssignment.GetAssignedClients(ConfigurationName, PeerID)
         for a in c:
