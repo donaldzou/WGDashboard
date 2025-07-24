@@ -1282,6 +1282,17 @@ def API_Clients_AssignedPeers():
         return ResponseObject(False, "Client does not exist")
     return ResponseObject(data=d)
 
+@app.post(f'{APP_PREFIX}/api/clients/generatePasswordResetLink')
+def API_Clients_GeneratePasswordResetLink():
+    data = request.get_json()
+    clientId = data.get("ClientID")
+    if not clientId:
+        return ResponseObject(False, "Please provide ClientID")
+    
+    token = DashboardClients.GenerateClientPasswordResetLink(clientId)
+    if token:
+        return ResponseObject(data=token)
+    return ResponseObject(False, "Failed to generate link")
 
 '''
 Index Page
