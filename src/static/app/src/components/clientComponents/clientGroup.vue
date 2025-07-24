@@ -27,14 +27,12 @@ const getClients = computed(() => {
 			</span>
 		</div>
 		<div class="card-body p-0">
-			
 			<div class="list-group list-group-flush" >
 				<RouterLink
 					:to="{ name: 'Client Viewer', params: { id: client.ClientID } }"
 					class="list-group-item d-flex flex-column border-bottom list-group-item-action"
 				    v-for="client in getClients" >
 					<small class="text-body">
-						
 						{{ client.Email }}
 					</small>
 					<small class="text-muted">
