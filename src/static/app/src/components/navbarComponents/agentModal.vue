@@ -1,6 +1,5 @@
 <script setup>
 import LocaleText from "@/components/text/localeText.vue";
-import AgentContainer from "@/components/navbarComponents/agentContainer.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 const emits = defineEmits(['close'])
