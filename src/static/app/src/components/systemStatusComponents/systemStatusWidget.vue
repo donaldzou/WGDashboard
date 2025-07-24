@@ -72,7 +72,7 @@ const data = computed(() => {
 				</h6>
 			</div>
 			<div class="progress" role="progressbar" style="height: 6px">
-				<div class="progress-bar bg-success" :style="{width: `${data?.Disks.find(x => x.mountPoint === '/').percent}%` }"></div>
+				<div class="progress-bar bg-success" :style="{width: `${data?.Disks.find(x => x.mountPoint === '/') ? data?.Disks.find(x => x.mountPoint === '/').percent : data?.Disks[0].percent}%` }"></div>
 			</div>
 			<div class="d-flex mt-2 gap-1">
 				<StorageMount v-for="(disk, count) in data?.Disks"

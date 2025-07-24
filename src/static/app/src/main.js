@@ -9,7 +9,6 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router/router.js'
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 let Locale;
 await fetch("/api/locale")
 	.then(res => res.json())
@@ -24,7 +23,6 @@ const pinia = createPinia();
 pinia.use(({ store }) => {
 	store.$router = markRaw(router)
 })
-pinia.use(piniaPluginPersistedstate)
 
 app.use(pinia)
 const store = DashboardConfigurationStore()
