@@ -160,7 +160,6 @@ router.beforeEach(async (to, from, next) => {
 				}
 				dashboardConfigurationStore.Redirect = undefined;
 				next()
-				
 			}else{
 				dashboardConfigurationStore.Redirect = to;
 				next("/signin")
