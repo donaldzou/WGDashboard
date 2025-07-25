@@ -1156,8 +1156,8 @@ def API_Email_Ready():
 @app.post(f'{APP_PREFIX}/api/email/send')
 def API_Email_Send():
     data = request.get_json()
-    if "Receiver" not in data.keys():
-        return ResponseObject(False, "Please at least specify receiver")
+    if "Receiver" not in data.keys() or "Subject" not in data.keys():
+        return ResponseObject(False, "Please at least specify receiver and subject")
     body = data.get('Body', '')
     download = None
     if ("ConfigurationName" in data.keys() 

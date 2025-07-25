@@ -33,7 +33,7 @@ if (client.value){
 </script>
 
 <template>
-	<div class="text-body d-flex flex-column" v-if="client">
+	<div class="text-body d-flex flex-column overflow-y-scroll h-100" v-if="client" :key="client.ClientID">
 		<div class="p-4 border-bottom bg-body-tertiary">
 			<small class="text-muted">
 				<LocaleText t="Email"></LocaleText>
@@ -50,11 +50,15 @@ if (client.value){
 				</small>
 			</div>
 		</div>
-		<ClientAssignedPeers
-			@refresh="getAssignedPeers()"
-			:clientAssignedPeers="clientAssignedPeers"
-			:client="client"></ClientAssignedPeers>
-		<ClientResetPassword :client="client" v-if="client.ClientGroup === 'Local'"></ClientResetPassword>
+		<div style="flex: 1 0 0; overflow-y: scroll;">
+			<ClientAssignedPeers
+
+				@refresh="getAssignedPeers()"
+				:clientAssignedPeers="clientAssignedPeers"
+				:client="client"></ClientAssignedPeers>
+			<ClientResetPassword
+				:client="client" v-if="client.ClientGroup === 'Local'"></ClientResetPassword>
+		</div>
 	</div>
 	<div v-else class="d-flex w-100 h-100 text-muted">
 		<div class="m-auto text-center">
