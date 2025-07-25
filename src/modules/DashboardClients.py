@@ -346,7 +346,10 @@ class DashboardClients:
                 self.dashboardClientsPasswordResetLinkTable.update().values({
                     "ExpiryDate": db.func.now()
                 }).where(
-                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID
+                    db.and_(
+                        self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
+                        self.dashboardClientsPasswordResetLinkTable.c.ExpiryDate > db.func.now()
+                    )
                 )
             )
             conn.execute(
