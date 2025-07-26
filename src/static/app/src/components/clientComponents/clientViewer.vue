@@ -34,7 +34,12 @@ if (client.value){
 
 <template>
 	<div class="text-body d-flex flex-column overflow-y-scroll h-100" v-if="client" :key="client.ClientID">
-		<div class="p-4 border-bottom bg-body-tertiary">
+		<div class="p-4 border-bottom bg-body-tertiary z-0">
+			<div class="mb-3 backLink">
+				<RouterLink to="/clients" class="text-body text-decoration-none">
+					<i class="bi bi-arrow-left me-2"></i>
+					Back</RouterLink>
+			</div>
 			<small class="text-muted">
 				<LocaleText t="Email"></LocaleText>
 			</small>
@@ -52,7 +57,6 @@ if (client.value){
 		</div>
 		<div style="flex: 1 0 0; overflow-y: scroll;">
 			<ClientAssignedPeers
-
 				@refresh="getAssignedPeers()"
 				:clientAssignedPeers="clientAssignedPeers"
 				:client="client"></ClientAssignedPeers>
@@ -73,5 +77,9 @@ if (client.value){
 </template>
 
 <style scoped>
-
+@media screen and (min-width: 576px) {
+	.backLink{
+		display: none;
+	}
+}
 </style>
