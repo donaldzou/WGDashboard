@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, onMounted} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
+import {useRoute} from "vue-router";
 
 const props = defineProps(['groupName', 'clients', 'searchString'])
 
@@ -16,6 +17,10 @@ const getClients = computed(() => {
 				(x.Name && x.Name.toLowerCase().includes(s)))
 	)
 })
+const route = useRoute()
+onMounted(() => {
+	document.querySelector(".clientList .active")?.scrollIntoView()
+})
 </script>
 
 <template>
@@ -27,10 +32,13 @@ const getClients = computed(() => {
 			</span>
 		</div>
 		<div class="card-body p-0">
-			<div class="list-group list-group-flush" >
+			<div class="list-group list-group-flush clientList">
 				<RouterLink
+					:key="client.ClientID"
+					:id="'client_' + client.ClientID"
+					active-class="active"
 					:to="{ name: 'Client Viewer', params: { id: client.ClientID } }"
-					class="list-group-item d-flex flex-column border-bottom list-group-item-action"
+					class="list-group-item d-flex flex-column border-bottom list-group-item-action client"
 				    v-for="client in getClients" >
 					<small class="text-body">
 						{{ client.Email }}

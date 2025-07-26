@@ -909,7 +909,7 @@ pre.index-alert {
     }
 
     main{
-        padding-bottom: calc( 3rem + 40px + env(safe-area-inset-bottom, 5px));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     }
 }
 
