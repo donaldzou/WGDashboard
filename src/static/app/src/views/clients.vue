@@ -7,13 +7,14 @@ import {GetLocale} from "@/utilities/locale.js";
 import ClientGroup from "@/components/clientComponents/clientGroup.vue";
 import { fetchGet } from "@/utilities/fetch.js"
 import {useRoute} from "vue-router";
+import ClientSettings from "@/components/clientComponents/clientSettings.vue";
 
 await assignmentStore.getClients();
 assignmentStore.getAllConfigurationsPeers();
 
 const searchString = ref("")
 const route = useRoute()
-
+const settings = ref(false)
 const oidc = computed(() => {
 	return Object.fromEntries(
 		Object.entries(assignmentStore.clients).filter(
@@ -24,8 +25,12 @@ const oidc = computed(() => {
 </script>
 
 <template>
-	<div class="text-body w-100 h-100 pb-2">
+	<div class="text-body w-100 h-100 pb-2 position-relative">
+
 		<div class="w-100 h-100 card rounded-3">
+			<Transition name="zoom">
+				<ClientSettings v-if="settings"></ClientSettings>
+			</Transition>
 			<div class="border-bottom z-0">
 				<div class="d-flex text-body align-items-center sticky-top p-3 bg-body-tertiary rounded-top-3" style="border-top-right-radius: 0 !important;">
 					<label for="searchClient"><i class="bi bi-search me-2"></i></label>
@@ -35,7 +40,7 @@ const oidc = computed(() => {
 						class="form-control rounded-3 form-control-sm"
 						:placeholder="GetLocale('Search Clients...')"
 						type="email" style="width: auto;">
-					<button class="btn btn-body ms-auto bg-body-secondary rounded-3 btn-sm">
+					<button class="btn btn-body ms-auto bg-body-secondary rounded-3 btn-sm" @click="settings = !settings">
 						<i class="bi bi-gear-fill me-2"></i>
 						<LocaleText t="Settings"></LocaleText>
 					</button>

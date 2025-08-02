@@ -23,7 +23,7 @@ class DashboardConfig:
     def __init__(self):
         if not os.path.exists(DashboardConfig.ConfigurationFilePath):
             open(DashboardConfig.ConfigurationFilePath, "x")
-        self.__config = configparser.ConfigParser(strict=False)
+        self.__config = configparser.RawConfigParser(strict=False)
         self.__config.read_file(open(DashboardConfig.ConfigurationFilePath, "r+"))
         self.hiddenAttribute = ["totp_key", "auth_req"]
         self.__default = {
@@ -75,6 +75,10 @@ class DashboardConfig:
                 "email_password": "",
                 "send_from": "",
                 "email_template": ""
+            },
+            "OIDC": {
+                "admin_enable": "false",
+                "client_enable": "false"
             },
             "WireGuardConfiguration": {
                 "autostart": ""
@@ -236,7 +240,7 @@ class DashboardConfig:
             elif type(value) is list:
                 self.__config[section][key] = "||".join(value).strip("||")
             else:
-                self.__config[section][key] = value
+                self.__config[section][key] = fr"{value}"
             return self.SaveConfig(), ""
         else:
             return False, f"{key} does not exist under {section}"

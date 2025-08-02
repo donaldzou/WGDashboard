@@ -8,15 +8,25 @@ from flask import current_app
 class DashboardOIDC:
     ConfigurationPath = os.getenv('CONFIGURATION_PATH', '.')
     ConfigurationFilePath = os.path.join(ConfigurationPath, 'wg-dashboard-oidc-providers.json')
-    def __init__(self):
+    def __init__(self, mode):
+        self.mode = mode
         self.providers: dict[str, dict] = {}
         self.provider_secret: dict[str, str] = {}
         self.__default = {
-            'Provider': {
-                'client_id': '',
-                'client_secret': '',
-                'issuer': '',
+            "Admin": {
+                'Provider': {
+                    'client_id': '',
+                    'client_secret': '',
+                    'issuer': '',
+                },
             },
+            "Client": {
+                'Provider': {
+                    'client_id': '',
+                    'client_secret': '',
+                    'issuer': '',
+                },
+            }
         }
         
         if not os.path.exists(DashboardOIDC.ConfigurationFilePath):
@@ -109,6 +119,7 @@ class DashboardOIDC:
             providers = decoder.decode(
                 open(DashboardOIDC.ConfigurationFilePath, 'r').read()
             )
+            providers = providers[self.mode]
             for k in providers.keys():
                 if all([providers[k]['client_id'], providers[k]['client_secret'], providers[k]['issuer']]):
                     try:

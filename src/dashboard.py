@@ -1127,7 +1127,7 @@ class Locale:
     
     def updateLanguage(self, lang_id):
         if not os.path.exists(os.path.join(f"{self.localePath}{lang_id}.json")):
-            DashboardConfig.SetConfig("Server", "dashboard_language", "en")
+            DashboardConfig.SetConfig("Server", "dashboard_language", "en-US")
         else:
             DashboardConfig.SetConfig("Server", "dashboard_language", lang_id)
         
