@@ -29,7 +29,7 @@ const oidc = computed(() => {
 
 		<div class="w-100 h-100 card rounded-3">
 			<Transition name="zoom">
-				<ClientSettings v-if="settings"></ClientSettings>
+				<ClientSettings v-if="settings" @close="settings = false"></ClientSettings>
 			</Transition>
 			<div class="border-bottom z-0">
 				<div class="d-flex text-body align-items-center sticky-top p-3 bg-body-tertiary rounded-top-3" style="border-top-right-radius: 0 !important;">
