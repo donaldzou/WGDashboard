@@ -91,7 +91,10 @@ const router = createRouter({
 						{
 							name: "Client Viewer",
 							path: ':id',
-							component: () => import('@/components/clientComponents/clientViewer.vue')
+							component: () => import('@/components/clientComponents/clientViewer.vue'),
+							meta: {
+								title: "Clients"
+							},
 						}
 					]
 				},
@@ -155,11 +158,9 @@ router.beforeEach(async (to, from, next) => {
 	const dashboardConfigurationStore = DashboardConfigurationStore();
 
 	if (to.meta.title){
-		if (to.params.id){
-			document.title = to.params.id + " | WGDashboard";
-		}else{
-			document.title = to.meta.title + " | WGDashboard";
-		}
+		document.title = to.meta.title + " | WGDashboard";
+	}else if(to.params.id){
+		document.title = to.params.id + " | WGDashboard";
 	}else{
 		document.title = "WGDashboard"
 	}

@@ -21,7 +21,7 @@ class DashboardClients:
         self.logger = DashboardLogger()
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
-        self.OIDC = DashboardOIDC()
+        self.OIDC = DashboardOIDC("Client")
         
         self.dashboardClientsTable = db.Table(
             'DashboardClients', self.metadata,
