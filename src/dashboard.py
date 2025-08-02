@@ -1214,6 +1214,38 @@ def API_ProtocolsEnabled():
     return ResponseObject(data=ProtocolsEnabled())
 
 '''
+OIDC Controller
+'''
+@app.get(f'{APP_PREFIX}/api/oidc/toggle')
+def API_OIDC_Toggle():
+    data = request.args
+    if not data.get('mode'):
+        return ResponseObject(False, "Please provide mode")
+
+    mode = data.get('mode')
+    if mode == 'Client':
+        DashboardConfig.SetConfig("OIDC", "client_enable", 
+                                  not DashboardConfig.GetConfig("OIDC", "client_enable")[1])
+    elif mode == 'Admin':
+        DashboardConfig.SetConfig("OIDC", "admin_enable",
+                                  not DashboardConfig.GetConfig("OIDC", "admin_enable")[1])
+    else:
+        return ResponseObject(False, "Mode does not exist")
+    return ResponseObject()
+
+@app.get(f'{APP_PREFIX}/api/oidc/status')
+def API_OIDC_Status():
+    data = request.args
+    if not data.get('mode'):
+        return ResponseObject(False, "Please provide mode")
+    mode = data.get('mode')
+    if mode == 'Client':
+        return ResponseObject(data=DashboardConfig.GetConfig("OIDC", "client_enable")[1])
+    elif mode == 'Admin':
+        return ResponseObject(data=DashboardConfig.GetConfig("OIDC", "admin_enable")[1])
+    return ResponseObject(False, "Mode does not exist")
+
+'''
 Client Controller
 '''
 @app.get(f'{APP_PREFIX}/api/clients/allClients')

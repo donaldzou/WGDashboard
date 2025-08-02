@@ -46,10 +46,18 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
 
     @client.get(f'{prefix}/api/signin/oidc/providers')
     def ClientAPI_SignIn_OIDC_GetProviders():
+        _, oidc = dashboardConfig.GetConfig("OIDC", "client_enable")
+        if not oidc:
+            return ResponseObject(status=False, message="OIDC is disabled")
+        
         return ResponseObject(data=dashboardClients.OIDC.GetProviders())
     
     @client.post(f'{prefix}/api/signin/oidc')
     def ClientAPI_SignIn_OIDC():
+        _, oidc = dashboardConfig.GetConfig("OIDC", "client_enable")
+        if not oidc:
+            return ResponseObject(status=False, message="OIDC is disabled")
+        
         data = request.json
         status, oidcData = dashboardClients.SignIn_OIDC(**data)
         if not status:

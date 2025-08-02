@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LocaleText from "@/components/text/localeText.vue";
+import OidcSettings from "@/components/clientComponents/clientSettingComponents/oidcSettings.vue";
 const emits = defineEmits(['close'])
 
 </script>
@@ -15,16 +16,8 @@ const emits = defineEmits(['close'])
 		</div>
 		<div class="card-body px-4">
 			<div class="py-2">
-				<h6>
-					<LocaleText t="OpenID Connect (OIDC)"></LocaleText>
-				</h6>
+				<OidcSettings mode="Client"></OidcSettings>
 				<hr>
-				<div class="form-check form-switch">
-					<label class="form-check-label" for="oidc_switch">
-						<LocaleText t="Enable"></LocaleText>
-					</label>
-					<input class="form-check-input" type="checkbox" role="switch" id="oidc_switch">
-				</div>
 			</div>
 		</div>
 	</div>
