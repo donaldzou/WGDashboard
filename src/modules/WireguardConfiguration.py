@@ -73,9 +73,6 @@ class WireguardConfiguration:
 
             self.__parseConfigurationFile()
             self.__initPeersList()
-
-
-
         else:
             self.Name = data["ConfigurationName"]
             self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
@@ -132,7 +129,7 @@ class WireguardConfiguration:
 
     def __initPeersList(self):
         self.Peers: list[Peer] = []
-        self.getPeersList()
+        self.getPeers()
         self.getRestrictedPeersList()
 
     def getRawConfigurationFile(self):
@@ -350,7 +347,6 @@ class WireguardConfiguration:
         return changed
 
     def getPeers(self):
-        # self.Peers = []
         tmpList = []
         if self.configurationFileChanged():
             with open(self.configPath, 'r') as configFile:
@@ -377,6 +373,8 @@ class WireguardConfiguration:
                             if len(split) == 2:
                                 p[pCounter]["name"] = split[1]
                     with self.engine.begin() as conn:
+                        
+                        
                         for i in p:
                             if "PublicKey" in i.keys():
                                 tempPeer = conn.execute(self.peersTable.select().where(
@@ -475,7 +473,7 @@ class WireguardConfiguration:
                     os.remove(uid)
             subprocess.check_output(
                 f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
-            self.getPeersList()
+            self.getPeers()
             for p in peers:
                 p = self.searchPeer(p['id'])
                 if p[0]:
@@ -758,7 +756,6 @@ class WireguardConfiguration:
         return True, None
 
     def getPeersList(self):
-        self.getPeers()
         return self.Peers
 
     def getRestrictedPeersList(self) -> list:

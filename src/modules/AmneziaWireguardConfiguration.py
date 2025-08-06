@@ -353,7 +353,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                     os.remove(uid)
             subprocess.check_output(
                 f"{self.Protocol}-quick save {self.Name}", shell=True, stderr=subprocess.STDOUT)
-            self.getPeersList()
+            self.getPeers()
             for p in peers:
                 p = self.searchPeer(p['id'])
                 if p[0]:

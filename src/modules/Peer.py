@@ -35,8 +35,8 @@ class Peer:
         self.getShareLink()
 
     def toJson(self):
-        self.getJobs()
-        self.getShareLink()
+        # self.getJobs()
+        # self.getShareLink()
         return self.__dict__
 
     def __repr__(self):
@@ -56,8 +56,10 @@ class Peer:
 
         if allowed_ip in existingAllowedIps:
             return False, "Allowed IP already taken by another peer"
+        
         if not ValidateIPAddressesWithRange(endpoint_allowed_ip):
             return False, f"Endpoint Allowed IPs format is incorrect"
+        
         if len(dns_addresses) > 0 and not ValidateDNSAddress(dns_addresses):
             return False, f"DNS format is incorrect"
         
