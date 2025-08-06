@@ -8,7 +8,7 @@ import uuid
 Peer Share Links
 """
 class PeerShareLinks:
-    def __init__(self, DashboardConfig):
+    def __init__(self, DashboardConfig, WireguardConfigurations):
         self.Links: list[PeerShareLink] = []
         self.engine = db.create_engine(ConnectionString("wgdashboard"))
         self.metadata = db.MetaData()
@@ -23,6 +23,7 @@ class PeerShareLinks:
         )
         self.metadata.create_all(self.engine)
         self.__getSharedLinks()
+        self.wireguardConfigurations = WireguardConfigurations
     def __getSharedLinks(self):
         self.Links.clear()
         with self.engine.connect() as conn:
@@ -68,18 +69,21 @@ class PeerShareLinks:
                     )
                 )
             self.__getSharedLinks()
+            self.wireguardConfigurations.get(Configuration).searchPeer(Peer)[1].getShareLink()
         except Exception as e:
             return False, str(e)
         return True, newShareID
 
     def updateLinkExpireDate(self, ShareID, ExpireDate: datetime = None) -> tuple[bool, str]:
         with self.engine.begin() as conn:
-            conn.execute(
+            updated = conn.execute(
                 self.peerShareLinksTable.update().values(
                     {
                         "ExpireDate": ExpireDate
                     }
-                ).where(db.and_(self.peerShareLinksTable.columns.ShareID == ShareID))
-            )
+                ).returning(self.peerShareLinksTable.c.Configuration, self.peerShareLinksTable.c.Peer)
+                .where(self.peerShareLinksTable.columns.ShareID == ShareID)
+            ).mappings().fetchone()
         self.__getSharedLinks()
+        self.wireguardConfigurations.get(updated.Configuration).searchPeer(updated.Peer)[1].getShareLink()
         return True, ""

@@ -609,7 +609,7 @@ def API_sharePeer_update():
     ShareID: str = data.get("ShareID")
     ExpireDate: str = data.get("ExpireDate")
     
-    if ShareID is None:
+    if not all([ShareID, ExpireDate]):
         return ResponseObject(False, "Please specify ShareID")
     
     if len(AllPeerShareLinks.getLinkByID(ShareID)) == 0:
@@ -1348,7 +1348,7 @@ def peerInformationBackgroundThread():
                     c.getPeersTransfer()
                     c.getPeersLatestHandshake()
                     c.getPeersEndpoint()
-                    c.getPeersList()
+                    c.getPeers()
                     c.getRestrictedPeersList()
         time.sleep(10)
 
@@ -1413,7 +1413,7 @@ _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 
-AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig)
+AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
 
