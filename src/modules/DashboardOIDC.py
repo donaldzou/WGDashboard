@@ -43,6 +43,7 @@ class DashboardOIDC:
         for (key, val) in self.providers.items():
             if val.get('openid_configuration').get('issuer') == issuer:
                 return key
+        return issuer
     
     def VerifyToken(self, provider, code, redirect_uri):
         try:
