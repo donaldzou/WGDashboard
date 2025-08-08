@@ -115,6 +115,25 @@ const sendTestEmail = async () => {
 					</div>
 					<div class="col-12 col-lg-4">
 						<div class="form-group">
+							<label for="required_auth" class="text-muted mb-1">
+								<strong><small>
+									<LocaleText t="Requires Authentication"></LocaleText>
+								</small></strong>
+							</label>
+							<select class="form-select"
+							        v-model="store.Configuration.Email.require_auth"
+							        id="encryption">
+								<option value="NO">
+									No
+								</option>
+								<option value="YES">
+									<LocaleText t="Yes"></LocaleText>
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-12 col-lg-4">
+						<div class="form-group">
 							<label for="username" class="text-muted mb-1">
 								<strong><small>
 									<LocaleText t="Username"></LocaleText>
