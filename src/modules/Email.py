@@ -50,7 +50,10 @@ class EmailSender:
                 self.smtp.ehlo()
                 if self.Encryption() == "STARTTLS":
                     self.smtp.starttls()
-                self.smtp.login(self.Username(), self.Password())
+                if self.RequireAuth():
+                    self.smtp.login(self.Username(), self.Password())
+                else:
+                    self.smtp.ehlo()
                 message = MIMEMultipart()
                 message['Subject'] = subject
                 message['From'] = self.SendFrom()
