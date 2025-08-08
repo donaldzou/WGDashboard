@@ -39,7 +39,7 @@ class EmailSender:
             return False
 
     def ready(self):
-        if self.RequireAuth():
+        if self.RequireAuth() or self.Username():
             return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0 and len(self.SendFrom())
         return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.SendFrom())
 
@@ -50,7 +50,7 @@ class EmailSender:
                 self.smtp.ehlo()
                 if self.Encryption() == "STARTTLS":
                     self.smtp.starttls()
-                if self.RequireAuth():
+                if self.RequireAuth() or self.Username():
                     self.smtp.login(self.Username(), self.Password())
                 else:
                     self.smtp.ehlo()
