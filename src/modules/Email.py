@@ -39,7 +39,9 @@ class EmailSender:
             return False
 
     def ready(self):
-        return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0 and len(self.SendFrom())
+        if self.RequireAuth():
+            return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0 and len(self.SendFrom())
+        return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.SendFrom())
 
     def send(self, receiver, subject, body, includeAttachment = False, attachmentName = ""):
         if self.ready():
