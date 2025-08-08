@@ -31,6 +31,12 @@ class EmailSender:
     
     def SendFrom(self):
         return self.DashboardConfig.GetConfig("Email", "send_from")[1]
+    
+    def RequireAuth(self):
+        try:
+            return self.DashboardConfig.GetConfig("Email", "require_auth")[1]
+        except:
+            return False
 
     def ready(self):
         return len(self.Server()) > 0 and len(self.Port()) > 0 and len(self.Encryption()) > 0 and len(self.Username()) > 0 and len(self.Password()) > 0 and len(self.SendFrom())
