@@ -122,9 +122,9 @@ const sendTestEmail = async () => {
 							</label>
 							<select class="form-select"
 							        v-model="store.Configuration.Email.require_auth"
-							        id="encryption">
+							        id="required_auth">
 								<option value="NO">
-									No
+									<LocaleText t="No"></LocaleText>
 								</option>
 								<option value="YES">
 									<LocaleText t="Yes"></LocaleText>
