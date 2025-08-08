@@ -1812,7 +1812,8 @@ class DashboardConfig:
                 "username": "",
                 "email_password": "",
                 "send_from": "",
-                "email_template": ""
+                "email_template": "",
+                "required_auth": ""
             },
             "WireGuardConfiguration": {
                 "autostart": ""
