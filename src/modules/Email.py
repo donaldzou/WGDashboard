@@ -34,7 +34,7 @@ class EmailSender:
     
     def RequireAuth(self):
         try:
-            return self.DashboardConfig.GetConfig("Email", "require_auth")[1]
+            return True if str(self.DashboardConfig.GetConfig("Email", "require_auth")[1]).upper() == "YES" else False
         except:
             return False
 
