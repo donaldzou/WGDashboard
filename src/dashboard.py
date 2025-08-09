@@ -1221,7 +1221,6 @@ def API_OIDC_Toggle():
     data = request.args
     if not data.get('mode'):
         return ResponseObject(False, "Please provide mode")
-
     mode = data.get('mode')
     if mode == 'Client':
         DashboardConfig.SetConfig("OIDC", "client_enable", 
