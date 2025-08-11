@@ -189,6 +189,7 @@ class DashboardClients:
                     })
                 )
                 self.logger.log(Message=f"User {data.get('email', '')} from {data.get('iss', '')} signed up")
+                self.__getClients()
             return True, newClientUUID
         return False, "User already signed up"
     
@@ -294,6 +295,7 @@ class DashboardClients:
                     })
                 )
                 self.logger.log(Message=f"User {Email} signed up")
+                self.__getClients()
         except Exception as e:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
             return False, "Signe up failed."
@@ -346,7 +348,34 @@ class DashboardClients:
             self.logger.log(Status="false", Message=f"User {ClientID} updated name to {Name} failed")
             return False
         return True
-        
+    
+    def DeleteClient(self, ClientID):
+        try:
+            with self.engine.begin() as conn:
+                client = self.GetClient(ClientID)
+                if client.get("ClientGroup") == "Local":
+                    conn.execute(
+                        self.dashboardClientsTable.delete().where(
+                            self.dashboardClientsTable.c.ClientID == ClientID
+                        )
+                    )
+                else:
+                    conn.execute(
+                        self.dashboardOIDCClientsTable.delete().where(
+                            self.dashboardOIDCClientsTable.c.ClientID == ClientID
+                        )
+                    )
+                conn.execute(
+                    self.dashboardClientsInfoTable.delete().where(
+                        self.dashboardClientsInfoTable.c.ClientID == ClientID
+                    )
+                )
+            self.DashboardClientsPeerAssignment.UnassignPeers(ClientID)
+        except Exception as e:
+            self.logger.log(Status="false", Message=f"Failed to delete {ClientID}")
+            return False
+        return True
+    
     '''
     For WGDashboard Admin to Manage Clients
     '''

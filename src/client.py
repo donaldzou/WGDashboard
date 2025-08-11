@@ -18,20 +18,26 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
     response.content_type = "application/json"
     return response
 
-def login_required(f):
-    @wraps(f)
-    def func(*args, **kwargs):
-        if session.get("Email") is None or session.get("TotpVerified") is None or not session.get("TotpVerified") or session.get("Role") != "client":
-            return ResponseObject(False, "Unauthorized access.", data=None, status_code=401)
-        return f(*args, **kwargs)
-    return func
+
 
 from modules.DashboardClients import DashboardClients
 def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig, dashboardClients: DashboardClients):
         
     client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
-    
+
+    def login_required(f):
+        @wraps(f)
+        def func(*args, **kwargs):
+            if session.get("Email") is None or session.get("TotpVerified") is None or not session.get("TotpVerified") or session.get("Role") != "client":
+                return ResponseObject(False, "Unauthorized access.", data=None, status_code=401)
+        
+            if not dashboardClients.GetClient(session.get("ClientID")):
+                session.clear()
+                return ResponseObject(False, "Unauthorized access.", data=None, status_code=401)
+            
+            return f(*args, **kwargs)
+        return func
     
     @client.before_request
     def clientBeforeRequest():
@@ -107,9 +113,11 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
             if session.get('Email') is None:
                 return ResponseObject(False, "Sign in status is invalid", status_code=401)
             session['TotpVerified'] = True
+            profile = dashboardClients.GetClientProfile(session.get("ClientID"))
+            
             return ResponseObject(True, data={
                 "Email": session.get('Email'),
-                "Profile": dashboardClients.GetClientProfile(session.get("ClientID"))
+                "Profile": profile
             })
         return ResponseObject(status, msg)
     
@@ -145,7 +153,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @client.post(f'{prefix}/api/settings/updatePassword')
     @login_required
     def ClientAPI_Settings_UpdatePassword():
-        data = request.json
+        data = request.get_json()
         status, message = dashboardClients.UpdateClientPassword(session['Email'], **data)
     
         return ResponseObject(status, message)
