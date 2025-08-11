@@ -108,6 +108,20 @@ class DashboardClientsPeerAssignment:
             self.__getAssignments()
             return True
         
+    def UnassignPeers(self, ClientID):
+        with self.engine.begin() as conn:
+            conn.execute(
+                self.dashboardClientsPeerAssignmentTable.update().values({
+                    "UnassignedDate": datetime.datetime.now()
+                }).where(
+                    db.and_(
+                        self.dashboardClientsPeerAssignmentTable.c.ClientID == ClientID,
+                        self.dashboardClientsPeerAssignmentTable.c.UnassignedDate.is_(db.null())
+                    )
+                )
+            )
+            self.__getAssignments()
+            return True
     
     def GetAssignedClients(self, ConfigurationName, PeerID) -> list[Assignment]:
         self.__getAssignments()

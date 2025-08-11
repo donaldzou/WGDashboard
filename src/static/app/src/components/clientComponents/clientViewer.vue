@@ -1,5 +1,5 @@
 <script setup lang="ts" async>
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import { fetchGet, fetchPost } from "@/utilities/fetch.js"
 
 
@@ -10,10 +10,12 @@ import {computed, reactive, ref, watch} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import ClientAssignedPeers from "@/components/clientComponents/clientAssignedPeers.vue";
 import ClientResetPassword from "@/components/clientComponents/clientResetPassword.vue";
+import ClientDelete from "@/components/clientComponents/clientDelete.vue";
 const assignmentStore = DashboardClientAssignmentStore()
 const dashboardConfigurationStore = DashboardConfigurationStore()
 
 const route = useRoute()
+const router = useRouter()
 const client = computed(() => {
 	return assignmentStore.getClientById(route.params.id)
 })
@@ -25,9 +27,10 @@ const getAssignedPeers = async () => {
 		clientAssignedPeers.value = res.data;
 	})
 }
+const emits = defineEmits(['deleteSuccess'])
 
 const clientProfile = reactive({
-	Name: client.value.Name
+	Name: undefined
 })
 
 if (client.value){
@@ -36,7 +39,13 @@ if (client.value){
 		await getAssignedPeers()
 	})
 	await getAssignedPeers()
+	clientProfile.Name = client.value.Name
+}else{
+	router.push('/clients')
+	dashboardConfigurationStore.newMessage("WGDashboard", "Client does not exist", "danger")
 }
+
+
 
 const updatingProfile = ref(false)
 const updateProfile = async () => {
@@ -54,6 +63,10 @@ const updateProfile = async () => {
 		}
 		updatingProfile.value = false
 	})
+}
+const deleteSuccess = () => {
+	router.push('/clients')
+	emits("deleteSuccess")
 }
 
 </script>
@@ -104,6 +117,9 @@ const updateProfile = async () => {
 				:client="client"></ClientAssignedPeers>
 			<ClientResetPassword
 				:client="client" v-if="client.ClientGroup === 'Local'"></ClientResetPassword>
+			<ClientDelete
+				@deleteSuccess="deleteSuccess()"
+				:client="client"></ClientDelete>
 		</div>
 	</div>
 	<div v-else class="d-flex w-100 h-100 text-muted">

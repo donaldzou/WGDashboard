@@ -52,6 +52,7 @@ const oidc = computed(() => {
 					class="col-sm-4 border-end d-flex flex-column clientListContainer">
 					<div class="d-flex flex-column overflow-y-scroll" style="flex: 1 0 0">
 						<ClientGroup :searchString="searchString"
+									 v-if="Object.keys(assignmentStore.clients).includes('Local')"
 									 :clients="assignmentStore.clients.Local" groupName="Local"></ClientGroup>
 						<ClientGroup v-for="(clients, groupName) in oidc"
 						             :searchString="searchString"
@@ -61,7 +62,7 @@ const oidc = computed(() => {
 				<div
 					:class="{'hide': !route.params.id}"
 					class="col-sm-8 clientViewerContainer">
-					<RouterView></RouterView>
+					<RouterView @deleteSuccess="async () => { await assignmentStore.getClients()}"></RouterView>
 				</div>
 			</div>
 		</div>

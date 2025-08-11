@@ -1263,6 +1263,8 @@ def API_Clients_AssignClient():
     client = data.get('ClientID')
     if not all([configurationName, id, client]):
         return ResponseObject(False, "Please provide all required fields")
+    if not DashboardClients.GetClient(client):
+        return ResponseObject(False, "Client does not exist")
     
     status, data = DashboardClients.AssignClient(configurationName, id, client)
     if not status:
@@ -1307,7 +1309,8 @@ def API_Clients_AssignedPeers():
     clientId = data.get("ClientID")
     if not clientId:
         return ResponseObject(False, "Please provide ClientID")
-    
+    if not DashboardClients.GetClient(clientId):
+        return ResponseObject(False, "Client does not exist")
     d = DashboardClients.GetClientAssignedPeersGrouped(clientId)
     if d is None:
         return ResponseObject(False, "Client does not exist")
@@ -1319,6 +1322,8 @@ def API_Clients_GeneratePasswordResetLink():
     clientId = data.get("ClientID")
     if not clientId:
         return ResponseObject(False, "Please provide ClientID")
+    if not DashboardClients.GetClient(clientId):
+        return ResponseObject(False, "Client does not exist")
     
     token = DashboardClients.GenerateClientPasswordResetLink(clientId)
     if token:
@@ -1331,8 +1336,22 @@ def API_Clients_UpdateProfile():
     clientId = data.get("ClientID")
     if not clientId:
         return ResponseObject(False, "Please provide ClientID")
+    if not DashboardClients.GetClient(clientId):
+        return ResponseObject(False, "Client does not exist")
+    
     value = data.get('Name')
     return ResponseObject(status=DashboardClients.UpdateClientProfile(clientId, value))
+
+@app.post(f'{APP_PREFIX}/api/clients/deleteClient')
+def API_Clients_DeleteClient():
+    data = request.get_json()
+    clientId = data.get("ClientID")
+    if not clientId:
+        return ResponseObject(False, "Please provide ClientID")
+    if not DashboardClients.GetClient(clientId):
+        return ResponseObject(False, "Client does not exist")
+    return ResponseObject(status=DashboardClients.DeleteClient(clientId))
+    
 '''
 Index Page
 '''
