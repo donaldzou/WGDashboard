@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watch} from "vue"
+import {ref} from "vue"
 import LocaleText from "@/components/text/localeText.vue";
 import { fetchGet } from "@/utilities/fetch.js"
 import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore"
