@@ -3,6 +3,7 @@
   "version": "4.3",
   "private": true,
   "type": "module",
+  "module": "es2022",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -331,6 +331,22 @@ class DashboardClients:
             return False, "Signed up failed."
         return True, None
     
+    def UpdateClientProfile(self, ClientID, Name):
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.dashboardClientsInfoTable.update().values({
+                        "Name": Name
+                    }).where(
+                        self.dashboardClientsInfoTable.c.ClientID == ClientID
+                    )
+                )
+            self.logger.log(Message=f"User {ClientID} updated name to {Name}")
+        except Exception as e:
+            self.logger.log(Status="false", Message=f"User {ClientID} updated name to {Name} failed")
+            return False
+        return True
+        
     '''
     For WGDashboard Admin to Manage Clients
     '''

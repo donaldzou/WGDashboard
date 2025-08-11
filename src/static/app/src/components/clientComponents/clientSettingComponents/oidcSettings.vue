@@ -1,28 +1,27 @@
 <script setup lang="ts">
 import {ref, watch} from "vue"
 import LocaleText from "@/components/text/localeText.vue";
-const props = defineProps(['mode'])
 import { fetchGet } from "@/utilities/fetch.js"
 import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore"
 
+const props = defineProps(['mode'])
 const dashboardConfigurationStore = DashboardConfigurationStore()
 const oidcStatus = ref(false)
 const oidcStatusLoading = ref(false)
 
 const getStatus = async () => {
 	await fetchGet("/api/oidc/status", {
-		mode: "Client"
+		mode: props.mode
 	}, (res) => {
 		oidcStatus.value = res.data
 		oidcStatusLoading.value = false
 	})
 }
-
 await getStatus()
 const toggle = async () => {
 	oidcStatusLoading.value = true
 	await fetchGet('/api/oidc/toggle', {
-		mode: "Client"
+		mode: props.mode
 	}, (res) => {
 		if (!res.status){
 			oidcStatus.value = !oidcStatus.value
@@ -31,7 +30,6 @@ const toggle = async () => {
 		oidcStatusLoading.value = false
 	})
 }
-
 </script>
 
 <template>
@@ -54,12 +52,9 @@ const toggle = async () => {
 	<div>
 		<div class="alert alert-dark rounded-3 mb-0">
 			<LocaleText t="Due to security reason, in order to edit OIDC configuration, you will need to edit "></LocaleText>
-			<code>wg-dashboard-oidc-providers.json</code> <LocaleText t="directly. If you updated the file, click the update button below to reload the configuration."></LocaleText>
+			<code>wg-dashboard-oidc-providers.json</code> <LocaleText t="directly, then restart WGDashboard to apply the latest settings."></LocaleText>
 		</div>
 	</div>
-	<button class="rounded-3 btn bg-success-subtle text-success-emphasis border-success-subtle">
-		<i class="bi bi-arrow-clockwise me-2"></i><LocaleText t="Refresh"></LocaleText>
-	</button>
 </div>
 </template>
 

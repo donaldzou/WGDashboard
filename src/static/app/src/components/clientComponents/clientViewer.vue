@@ -1,20 +1,22 @@
 <script setup lang="ts" async>
 import {useRoute} from "vue-router";
-import { fetchGet } from "@/utilities/fetch.js"
+import { fetchGet, fetchPost } from "@/utilities/fetch.js"
 
 
 import {DashboardClientAssignmentStore} from "@/stores/DashboardClientAssignmentStore.js";
-import {computed, ref, watch} from "vue";
+import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore.js"
+
+import {computed, reactive, ref, watch} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
 import ClientAssignedPeers from "@/components/clientComponents/clientAssignedPeers.vue";
 import ClientResetPassword from "@/components/clientComponents/clientResetPassword.vue";
 const assignmentStore = DashboardClientAssignmentStore()
-const route = useRoute()
+const dashboardConfigurationStore = DashboardConfigurationStore()
 
+const route = useRoute()
 const client = computed(() => {
 	return assignmentStore.getClientById(route.params.id)
 })
-
 const clientAssignedPeers = ref({})
 const getAssignedPeers = async () => {
 	await fetchGet('/api/clients/assignedPeers', {
@@ -24,12 +26,36 @@ const getAssignedPeers = async () => {
 	})
 }
 
+const clientProfile = reactive({
+	Name: client.value.Name
+})
+
 if (client.value){
 	watch(() => client.value.ClientID, async () => {
+		clientProfile.Name = client.value.Name;
 		await getAssignedPeers()
 	})
 	await getAssignedPeers()
 }
+
+const updatingProfile = ref(false)
+const updateProfile = async () => {
+	updatingProfile.value = true
+	await fetchPost("/api/clients/updateProfileName", {
+		ClientID: client.value.ClientID,
+		Name: clientProfile.Name
+	}, (res) => {
+		if (res.status){
+			client.value.Name = clientProfile.Name;
+			dashboardConfigurationStore.newMessage("Server", "Client name update success", "success")
+		}else{
+			clientProfile.Name = client.value.Name;
+			dashboardConfigurationStore.newMessage("Server", "Client name update failed", "danger")
+		}
+		updatingProfile.value = false
+	})
+}
+
 </script>
 
 <template>
@@ -46,13 +72,29 @@ if (client.value){
 			<h1>
 				{{ client.Email }}
 			</h1>
-			<div class="d-flex align-items-center">
-				<small class="text-muted">
-					<LocaleText t="Client ID"></LocaleText>
-				</small>
-				<small class="ms-auto">
-					<samp>{{ client.ClientID }}</samp>
-				</small>
+			<div class="d-flex flex-column gap-2">
+				<div class="d-flex align-items-center">
+					<small class="text-muted">
+						<LocaleText t="Client ID"></LocaleText>
+					</small>
+					<small class="ms-auto">
+						<samp>{{ client.ClientID }}</samp>
+					</small>
+				</div>
+				<div class="d-flex align-items-center gap-2">
+					<small class="text-muted">
+						<LocaleText t="Client Name"></LocaleText>
+					</small>
+					<input class="form-control form-control-sm rounded-3 ms-auto"
+						   style="width: 300px"
+						   type="text" v-model="clientProfile.Name">
+					<button
+						@click="updateProfile()"
+						aria-label="Save Client Name"
+						class="btn btn-sm rounded-3 bg-success-subtle border-success-subtle text-success-emphasis">
+						<i class="bi bi-save-fill"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 		<div style="flex: 1 0 0; overflow-y: scroll;">

@@ -1325,6 +1325,14 @@ def API_Clients_GeneratePasswordResetLink():
         return ResponseObject(data=token)
     return ResponseObject(False, "Failed to generate link")
 
+@app.post(f'{APP_PREFIX}/api/clients/updateProfileName')
+def API_Clients_UpdateProfile():
+    data = request.get_json()
+    clientId = data.get("ClientID")
+    if not clientId:
+        return ResponseObject(False, "Please provide ClientID")
+    value = data.get('Name')
+    return ResponseObject(status=DashboardClients.UpdateClientProfile(clientId, value))
 '''
 Index Page
 '''
