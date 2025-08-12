@@ -189,6 +189,17 @@ const searchPeers = computed(() => {
 		return 0;
 	}).slice(0, showPeersCount.value)
 })
+
+watch(() => route.query.id, (newValue) => {
+	if (newValue){
+		wireguardConfigurationStore.searchString = newValue
+	}else{
+		wireguardConfigurationStore.searchString = undefined
+	}
+}, {
+	immediate: true
+})
+
 </script>
 
 <template>

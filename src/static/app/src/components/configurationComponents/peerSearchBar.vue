@@ -3,13 +3,14 @@ import {GetLocale} from "@/utilities/locale.js";
 import {computed, onMounted, ref, useTemplateRef} from "vue";
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import LocaleText from "@/components/text/localeText.vue";
+import {useRoute, useRouter} from "vue-router";
 
 const searchBarPlaceholder = computed(() => {
 	return GetLocale("Search Peers...")
 })
 let searchStringTimeout = undefined
-const searchString = ref("")
 const wireguardConfigurationStore = WireguardConfigurationsStore()
+const searchString = ref(wireguardConfigurationStore.searchString)
 
 const debounce = () => {
 	if (!searchStringTimeout){
@@ -27,9 +28,17 @@ const debounce = () => {
 const emits = defineEmits(['close'])
 const input = useTemplateRef('searchBar')
 
+const route = useRoute()
+const router = useRouter()
+if (route.query.peer){
+	searchString.value = route.query.peer
+	router.replace({ query: null })
+}
+
 onMounted(() => {
 	input.value.focus();
 })
+
 
 </script>
 
