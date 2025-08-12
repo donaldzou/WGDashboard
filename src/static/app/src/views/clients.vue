@@ -22,6 +22,10 @@ const oidc = computed(() => {
 		)
 	)
 })
+
+const deleteSuccess = async () => {
+	await assignmentStore.getClients();
+}
 </script>
 
 <template>
@@ -62,7 +66,7 @@ const oidc = computed(() => {
 				<div
 					:class="{'hide': !route.params.id}"
 					class="col-sm-8 clientViewerContainer">
-					<RouterView @deleteSuccess="async () => { await assignmentStore.getClients()}"></RouterView>
+					<RouterView></RouterView>
 				</div>
 			</div>
 		</div>

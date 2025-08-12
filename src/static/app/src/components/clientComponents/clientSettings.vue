@@ -12,7 +12,7 @@ const values = reactive({
 </script>
 
 <template>
-<div class="position-absolute w-100 h-100 top-0 start-0 z-1 rounded-3 d-flex p-2" style="background-color: #00000070;">
+<div class="position-absolute w-100 h-100 top-0 start-0 z-1 rounded-3 d-flex p-2" style="background-color: #00000070; z-index: 9999">
 	<div class="card m-auto rounded-3" style="width: 700px">
 		<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
 			<h4 class="mb-0">
