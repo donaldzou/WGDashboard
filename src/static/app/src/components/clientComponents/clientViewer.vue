@@ -64,9 +64,9 @@ const updateProfile = async () => {
 		updatingProfile.value = false
 	})
 }
-const deleteSuccess = () => {
-	router.push('/clients')
-	emits("deleteSuccess")
+const deleteSuccess = async () => {
+	await router.push('/clients')
+	await assignmentStore.getClients()
 }
 
 </script>
