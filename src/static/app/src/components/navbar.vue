@@ -74,14 +74,14 @@ export default {
 						</RouterLink></li>
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3" to="/settings" 
-						            exact-active-class="active">
+						            active-class="active">
 							<i class="bi bi-gear me-2"></i>
 							<LocaleText t="Settings"></LocaleText>	
 						</RouterLink>
 					</li>
 					<li class="nav-item">
 						<RouterLink class="nav-link rounded-3" to="/clients"
-						            exact-active-class="active">
+						            active-class="active">
 							<i class="bi bi-people me-2"></i>
 							<LocaleText t="Clients"></LocaleText>
 						</RouterLink>
@@ -98,7 +98,7 @@ export default {
 					<LocaleText t="WireGuard Configurations"></LocaleText>
 				</h6>
 				<ul class="nav flex-column px-2 gap-1">
-					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.Configurations">
+					<li class="nav-item" v-for="c in this.wireguardConfigurationsStore.sortConfigurations">
 						<RouterLink :to="'/configuration/'+c.Name + '/peers'" class="nav-link nav-conf-link rounded-3"
 						            active-class="active"
 						            >

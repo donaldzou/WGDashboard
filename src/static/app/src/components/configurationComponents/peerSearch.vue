@@ -15,7 +15,6 @@ export default {
 		return {store, wireguardConfigurationStore}
 	},
 	props: {
-		
 		configuration: Object
 	},
 	data(){
@@ -43,18 +42,6 @@ export default {
 		}
 	},
 	methods: {
-		debounce(){
-			if (!this.searchStringTimeout){
-				this.searchStringTimeout = setTimeout(() => {
-					this.wireguardConfigurationStore.searchString = this.searchString;
-				}, 300)
-			}else{
-				clearTimeout(this.searchStringTimeout)
-				this.searchStringTimeout = setTimeout(() => {
-					this.wireguardConfigurationStore.searchString = this.searchString;
-				}, 300)
-			}
-		},
 		updateSort(sort){
 			fetchPost("/api/updateDashboardConfigurationItem", {
 				section: "Server",

@@ -41,6 +41,7 @@ export default {
 
 <template>
 	<div class="card shadow-sm rounded-3 peerCard"
+		 :id="'peer_'+Peer.id"
 		:class="{'border-warning': Peer.restricted}">
 		<div>
 			<div v-if="!Peer.restricted" class="card-header bg-transparent d-flex align-items-center gap-2 border-0">
