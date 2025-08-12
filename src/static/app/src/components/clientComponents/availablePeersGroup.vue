@@ -21,7 +21,9 @@ const available = computed(() => {
 			)
 		}
 	}
-	return props.peers
+	return props.availablePeerSearchString ? props.peers.filter(
+		x => x.id.includes(props.availablePeerSearchString) || x.name.includes(props.availablePeerSearchString)
+	) : props.peers
 })
 const confirmDelete = ref(false)
 const collapse = ref(false)
@@ -47,7 +49,12 @@ const collapse = ref(false)
 					v-for="peer in available" >
 					<div v-if="!confirmDelete">
 						<small class="text-body">
-							<samp>{{ peer.id }}</samp>
+							<RouterLink
+								class="text-decoration-none"
+								target="_blank"
+								:to="'/configuration/' + configuration +'/peers?id=' + encodeURIComponent(peer.id)">
+								<samp>{{ peer.id }}</samp>
+							</RouterLink>
 						</small><br>
 						<small class="text-muted">
 							{{ peer.name ? peer.name : 'Untitled Peer'}}
