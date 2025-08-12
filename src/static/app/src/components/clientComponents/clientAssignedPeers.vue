@@ -73,6 +73,7 @@ const availablePeerSearchString = ref("")
 						:configuration="configuration"
 						:clientAssignedPeers="clientAssignedPeers"
 						:peers="peers"
+						:key="configuration"
 						@assign="async (id) => await assign(configuration, id, props.client.ClientID)"
 						v-for="(peers, configuration) in assignmentStore.allConfigurationsPeers">
 					</AvailablePeersGroup>
