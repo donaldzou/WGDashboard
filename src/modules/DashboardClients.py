@@ -189,7 +189,7 @@ class DashboardClients:
                     })
                 )
                 self.logger.log(Message=f"User {data.get('email', '')} from {data.get('iss', '')} signed up")
-                self.__getClients()
+            self.__getClients()
             return True, newClientUUID
         return False, "User already signed up"
     
@@ -371,6 +371,7 @@ class DashboardClients:
                     )
                 )
             self.DashboardClientsPeerAssignment.UnassignPeers(ClientID)
+            self.__getClients()
         except Exception as e:
             self.logger.log(Status="false", Message=f"Failed to delete {ClientID}")
             return False
