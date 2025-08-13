@@ -37,6 +37,7 @@ from client import createClientBlueprint
 from logging.config import dictConfig
 
 from modules.DashboardClients import DashboardClients
+from modules.DashboardPlugin import DashboardPlugin
 
 dictConfig({
     'version': 1,
@@ -1442,12 +1443,11 @@ WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
-
+DashboardPlugin: DashboardPlugin = DashboardPlugin(app, WireguardConfigurations)
 
 
 InitWireguardConfigurationsList(startup=True)
 
-import plugins.rrd_data.main as rrd_data
 
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
@@ -1458,12 +1458,10 @@ def startThreads():
     bgThread.start()
     scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread, daemon=True)
     scheduleJobThread.start()
-    
-    t = threading.Thread(target=rrd_data.main, args=(WireguardConfigurations,), daemon=True)
-    t.start()
 
 if __name__ == "__main__":
     startThreads()
+    DashboardPlugin.startThreads()
     #    logging.getLogger().addHandler(logging.StreamHandler())
     app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)
