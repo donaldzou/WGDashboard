@@ -1447,6 +1447,8 @@ DashboardLogger: DashboardLogger = DashboardLogger()
 
 InitWireguardConfigurationsList(startup=True)
 
+import plugins.rrd_data.main as rrd_data
+
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
     app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
@@ -1456,9 +1458,12 @@ def startThreads():
     bgThread.start()
     scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread, daemon=True)
     scheduleJobThread.start()
+    
+    t = threading.Thread(target=rrd_data.main, args=(WireguardConfigurations,), daemon=True)
+    t.start()
 
 if __name__ == "__main__":
     startThreads()
-    # logging.getLogger().addHandler(logging.StreamHandler())
+    #    logging.getLogger().addHandler(logging.StreamHandler())
     app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

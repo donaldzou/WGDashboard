@@ -627,7 +627,7 @@ class WireguardConfiguration:
         latestHandshake = latestHandshake.decode("UTF-8").split()
         count = 0
         now = datetime.now()
-        time_delta = timedelta(minutes=2)
+        time_delta = timedelta(minutes=3)
 
         with self.engine.begin() as conn:
             for _ in range(int(len(latestHandshake) / 2)):
