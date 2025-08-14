@@ -12,6 +12,7 @@ from .Peer import Peer
 from .PeerJobs import PeerJobs
 from .PeerShareLinks import PeerShareLinks
 from .Utilities import StringToBoolean, GenerateWireguardPublicKey, RegexMatch
+from .WireguardConfigurationInfo import WireguardConfigurationInfo
 
 
 class WireguardConfiguration:
@@ -122,6 +123,8 @@ class WireguardConfiguration:
         if self.getAutostartStatus() and not self.getStatus() and startup:
             self.toggleConfiguration()
             print(f"[WGDashboard] Autostart Configuration: {name}")
+            
+        self.configurationInfo: WireguardConfigurationInfo | None = None
 
     def __getProtocolPath(self):
         return self.DashboardConfig.GetConfig("Server", "wg_conf_path")[1] if self.Protocol == "wg" \
@@ -294,6 +297,12 @@ class WireguardConfiguration:
             sqlalchemy.Column('keepalive', sqlalchemy.Integer),
             sqlalchemy.Column('remote_endpoint', sqlalchemy.String(255)),
             sqlalchemy.Column('preshared_key', sqlalchemy.String(255)),
+            extend_existing=True
+        )
+        self.infoTable = sqlalchemy.Table(
+            'ConfigurationsInfo', self.metadata,
+            sqlalchemy.Column('ID', sqlalchemy.String(255), primary_key=True),
+            sqlalchemy.Column('Info', sqlalchemy.Text),
             extend_existing=True
         )
 
@@ -1049,3 +1058,12 @@ class WireguardConfiguration:
                 return { "sent": 0, "recv": 0 }
         else:
             return { "sent": 0, "recv": 0 }
+    
+    def readConfigurationInfo(self):
+        with self.engine.connect() as conn:
+            result = conn.execute(
+                self.infoTable.select().where(
+                    self.infoTable.c.ID == self.Name
+                )
+            ).mappings().fetchone()
+        return result
