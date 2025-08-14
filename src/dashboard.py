@@ -37,7 +37,7 @@ from client import createClientBlueprint
 from logging.config import dictConfig
 
 from modules.DashboardClients import DashboardClients
-from modules.DashboardPlugin import DashboardPlugin
+from modules.DashboardPlugins import DashboardPlugins
 
 dictConfig({
     'version': 1,
@@ -1443,7 +1443,7 @@ WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
-DashboardPlugin: DashboardPlugin = DashboardPlugin(app, WireguardConfigurations)
+DashboardPlugin: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
 
 
 InitWireguardConfigurationsList(startup=True)
