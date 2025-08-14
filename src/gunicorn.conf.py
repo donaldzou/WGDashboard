@@ -7,7 +7,7 @@ date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
 def post_worker_init(worker):
     dashboard.startThreads()
-    dashboard.DashboardPlugin.startThreads()
+    dashboard.DashboardPlugins.startThreads()
 
 worker_class = 'gthread'
 workers = 1

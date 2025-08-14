@@ -6,7 +6,7 @@ from typing import Dict, Callable, List, Optional
 import threading
 
 
-class DashboardPlugin:
+class DashboardPlugins:
     
     def __init__(self, app, WireguardConfigurations, directory: str = 'plugins'):
         self.directory = Path('plugins')
