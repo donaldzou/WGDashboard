@@ -33,8 +33,9 @@ export default {
 			return undefined
 		}
 	},
-	mounted() {
-		fetchGet("/api/getDashboardUpdate", {}, (res) => {
+	async mounted() {
+		await this.wireguardConfigurationsStore.getConfigurations();
+		await fetchGet("/api/getDashboardUpdate", {}, (res) => {
 			if (res.status){
 				if (res.data){
 					this.updateAvailable = true
@@ -46,12 +47,15 @@ export default {
 				console.log(`Failed to get update: ${res.message}`)
 			}
 		})
+		this.wireguardConfigurationsStore.ConfigurationListInterval = setInterval(() => {
+			this.wireguardConfigurationsStore.getConfigurations()
+		}, 10000)
 	}
 }
 </script>
 
 <template>
-	<div class="col-md-3 col-lg-2 d-md-block p-2 navbar-container"
+	<div class="col-md-3 col-lg-2 d-md-block p-2 navbar-container bg-transparent"
 	     :class="{active: this.dashboardConfigurationStore.ShowNavBar}"
 	     :data-bs-theme="dashboardConfigurationStore.Configuration.Server.dashboard_theme"
 	>

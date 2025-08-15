@@ -6,6 +6,7 @@ import {GetLocale} from "@/utilities/locale.js";
 export const WireguardConfigurationsStore = defineStore('WireguardConfigurationsStore', {
 	state: () => ({
 		Configurations: [],
+        ConfigurationLoaded: false,
 		searchString: "",
 		ConfigurationListInterval: undefined,
         SortOptions: {
@@ -92,8 +93,10 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 	actions: {
 		async getConfigurations(){
 			await fetchGet("/api/getWireguardConfigurations", {}, (res) => {
-				if (res.status)  this.Configurations = res.data
-				// this.Configurations = []
+				if (res.status)  {
+                    this.Configurations = res.data
+                }
+                this.ConfigurationLoaded = true
 			});
 		},
 
