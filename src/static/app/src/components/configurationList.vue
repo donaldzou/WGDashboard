@@ -28,27 +28,7 @@ export default {
 			searchKey: ""
 		}
 	},
-	async mounted() {
-		// if (!window.localStorage.getItem('ConfigurationListSort')){
-		// 	window.localStorage.setItem('ConfigurationListSort', JSON.stringify(this.currentSort))
-		// }else{
-		// 	this.currentSort = JSON.parse(window.localStorage.getItem('ConfigurationListSort'))
-		// }
-		//
-		// if (!window.localStorage.getItem('ConfigurationListDisplay')){
-		// 	window.localStorage.setItem('ConfigurationListDisplay', this.currentDisplay)
-		// }else{
-		// 	this.currentDisplay = window.localStorage.getItem('ConfigurationListDisplay')
-		// }
-		
-		
-		await this.wireguardConfigurationsStore.getConfigurations();
-		this.configurationLoaded = true;
-		
-		this.wireguardConfigurationsStore.ConfigurationListInterval = setInterval(() => {
-			this.wireguardConfigurationsStore.getConfigurations()
-		}, 10000)
-	},
+
 	beforeUnmount() {
 		clearInterval(this.wireguardConfigurationsStore.ConfigurationListInterval)
 	},
@@ -102,7 +82,7 @@ export default {
 				
 			</div>
 			<Transition name="fade">
-				<div class="text-body filter mb-3 d-flex gap-2 flex-column flex-md-row" v-if="this.configurationLoaded">
+				<div class="text-body filter mb-3 d-flex gap-2 flex-column flex-md-row" v-if="this.wireguardConfigurationsStore.ConfigurationLoaded">
 					<div class="d-flex align-items-center gap-3 align-items-center mb-3 mb-md-0">
 						<small class="text-muted">
 							<LocaleText t="Sort By"></LocaleText>
@@ -152,14 +132,14 @@ export default {
 				<TransitionGroup name="fade">
 					<p class="text-muted col-12"
 					   key="noConfiguration"
-					   v-if="this.configurationLoaded && this.wireguardConfigurationsStore.Configurations.length === 0">
+					   v-if="this.wireguardConfigurationsStore.ConfigurationLoaded && this.wireguardConfigurationsStore.Configurations.length === 0">
 						<LocaleText t="You don't have any WireGuard configurations yet. Please check the configuration folder or change it in Settings. By default the folder is /etc/wireguard."></LocaleText>
 					</p>
 					<ConfigurationCard
 						:display="this.wireguardConfigurationsStore.CurrentDisplay"
 						v-for="(c, index) in configurations"
 						:delay="index*0.03 + 's'"
-						v-else-if="this.configurationLoaded"
+						v-else-if="this.wireguardConfigurationsStore.ConfigurationLoaded"
 						:key="c.Name" :c="c"></ConfigurationCard>
 				</TransitionGroup>
 			</div>

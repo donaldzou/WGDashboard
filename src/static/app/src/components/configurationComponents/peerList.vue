@@ -215,7 +215,6 @@ watch(() => route.query.id, (newValue) => {
 				<h1 class="mb-0 display-4"><samp>{{configurationInfo.Name}}</samp></h1>
 			</div>
 		</div>
-
 		<div class="ms-sm-auto d-flex gap-2 flex-column">
 			<div class="card rounded-3 bg-transparent ">
 				<div class="card-body py-2 d-flex align-items-center">
@@ -238,7 +237,6 @@ watch(() => route.query.id, (newValue) => {
 						       @change="toggleConfiguration()"
 						       v-model="configurationInfo.Status">
 					</div>
-
 				</div>
 			</div>
 			<div class="d-flex gap-2">
