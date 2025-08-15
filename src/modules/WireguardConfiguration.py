@@ -1106,8 +1106,12 @@ class WireguardConfiguration:
         except Exception as e:
             return False
         
-    def updateConfigurationInfo(self, key: str, value):
+    def updateConfigurationInfo(self, key: str, value) -> tuple[bool, str] | tuple[bool, None]:
         if key == "Description":
             self.configurationInfo.Description = value
+        else: 
+            return False, "Key does not exist"
         
+        self.storeConfigurationInfo()
+        return True, None
         
