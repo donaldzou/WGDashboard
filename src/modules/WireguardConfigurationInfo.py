@@ -9,6 +9,7 @@ class OverridePeerSettingsClass(BaseModel):
     ListenPort: int | str = ''
     
 class PeerGroupsClass(BaseModel):
+    GroupName: str = ''
     Description: str = ''
     BackgroundColor: str = ''
     Peers: list[str] = []
@@ -20,5 +21,5 @@ class WireguardConfigurationInfo(BaseModel):
 
 
 if __name__ == '__main__':
-    d = WireguardConfigurationInfo.model_validate_json("{\"Description\": \"Hi!\"}")
+    d = WireguardConfigurationInfo.model_validate_json("")
     print(d.model_dump())

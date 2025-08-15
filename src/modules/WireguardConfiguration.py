@@ -125,6 +125,13 @@ class WireguardConfiguration:
             print(f"[WGDashboard] Autostart Configuration: {name}")
             
         self.configurationInfo: WireguardConfigurationInfo | None = None
+        configurationInfoJson = self.readConfigurationInfo()
+        if not configurationInfoJson:
+            self.configurationInfo = WireguardConfigurationInfo(**{})
+            self.initConfigurationInfo()
+        else:
+            self.configurationInfo = WireguardConfigurationInfo.model_validate_json(configurationInfoJson)
+        
 
     def __getProtocolPath(self):
         return self.DashboardConfig.GetConfig("Server", "wg_conf_path")[1] if self.Protocol == "wg" \
@@ -794,6 +801,7 @@ class WireguardConfiguration:
             "TotalPeers": len(self.Peers),
             "Protocol": self.Protocol,
             "Table": self.Table,
+            "Info": self.configurationInfo.model_dump()
         }
 
     def backupConfigurationFile(self) -> tuple[bool, dict[str, str]]:
@@ -1059,6 +1067,10 @@ class WireguardConfiguration:
         else:
             return { "sent": 0, "recv": 0 }
     
+    '''
+    Manager WireGuard Configuration Information
+    '''
+    
     def readConfigurationInfo(self):
         with self.engine.connect() as conn:
             result = conn.execute(
@@ -1066,4 +1078,36 @@ class WireguardConfiguration:
                     self.infoTable.c.ID == self.Name
                 )
             ).mappings().fetchone()
-        return result
+        return result.get('Info')
+    
+    def initConfigurationInfo(self):
+        with self.engine.begin() as conn:
+            conn.execute(
+                self.infoTable.insert().values(
+                    {
+                        "ID": self.Name,
+                        "Info": self.configurationInfo.model_dump_json()
+                    }
+                )
+            )
+    
+    def storeConfigurationInfo(self):
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.infoTable.update().values(
+                        {
+                            "Info": self.configurationInfo.model_dump_json()
+                        }
+                    ).where(
+                        self.infoTable.c.ID == self.Name
+                    )
+                )
+        except Exception as e:
+            return False
+        
+    def updateConfigurationInfo(self, key: str, value):
+        if key == "Description":
+            self.configurationInfo.Description = value
+        
+        
