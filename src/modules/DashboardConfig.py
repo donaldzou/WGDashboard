@@ -170,7 +170,7 @@ class DashboardConfig:
 
         self.DashboardAPIKeys = self.__getAPIKeys()
 
-    def __configValidation(self, section : str, key: str, value: Any) -> [bool, str]:
+    def __configValidation(self, section : str, key: str, value: Any) -> tuple[bool, str]:
         if (type(value) is str and len(value) == 0
                 and section not in ['Email', 'WireGuardConfiguration'] and
                 (section == 'Peer' and key == 'peer_global_dns')):

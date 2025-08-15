@@ -1109,6 +1109,13 @@ class WireguardConfiguration:
     def updateConfigurationInfo(self, key: str, value) -> tuple[bool, str] | tuple[bool, None]:
         if key == "Description":
             self.configurationInfo.Description = value
+        elif key == "OverridePeerSettings":
+            for key in value.keys():
+                if key == "DNS" and value.get("DNS"):
+                    pass
+            
+            self.configurationInfo.OverridePeerSettings = (
+                self.configurationInfo.OverridePeerSettings.model_validate(value))
         else: 
             return False, "Key does not exist"
         
