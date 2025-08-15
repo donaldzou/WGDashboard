@@ -11,6 +11,7 @@ import PeerSearch from "@/components/configurationComponents/peerSearch.vue";
 import Peer from "@/components/configurationComponents/peer.vue";
 import PeerListModals from "@/components/configurationComponents/peerListComponents/peerListModals.vue";
 import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
+import ConfigurationDescription from "@/components/configurationComponents/configurationDescription.vue";
 
 
 // Async Components
@@ -200,6 +201,7 @@ watch(() => route.query.id, (newValue) => {
 	immediate: true
 })
 
+
 </script>
 
 <template>
@@ -257,9 +259,7 @@ watch(() => route.query.id, (newValue) => {
 		</div>
 	</div>
 	<hr>
-	<input type="text"
-			  placeholder="Want to make some notes? Type it in here :)"
-			  class="form-control rounded-3 bg-transparent form-control-sm text-muted">
+	<ConfigurationDescription :configuration="configurationInfo"></ConfigurationDescription>
 	<div class="row mt-3 gy-2 gx-2 mb-2">
 		<div class="col-12 col-lg-3">
 			<div class="card rounded-3 bg-transparent  h-100">

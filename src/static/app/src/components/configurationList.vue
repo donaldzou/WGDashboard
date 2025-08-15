@@ -28,10 +28,6 @@ export default {
 			searchKey: ""
 		}
 	},
-
-	beforeUnmount() {
-		clearInterval(this.wireguardConfigurationsStore.ConfigurationListInterval)
-	},
 	computed: {
 		configurations(){
 			return this.wireguardConfigurationsStore.sortConfigurations

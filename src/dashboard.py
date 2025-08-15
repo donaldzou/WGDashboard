@@ -298,6 +298,21 @@ def API_updateWireguardConfiguration():
     
     return ResponseObject(status, message=msg, data=WireguardConfigurations[name])
 
+@app.post(f'{APP_PREFIX}/api/updateWireguardConfigurationInfo')
+def API_updateWireguardConfigurationInfo():
+    data = request.get_json()
+    name = data.get('Name')
+    key = data.get('Key')
+    value = data.get('Value')
+    if not all([data, key, name]):
+        return ResponseObject(status=False, message="Please provide configuration name, key and value")
+    if name not in WireguardConfigurations.keys():
+        return ResponseObject(False, "Configuration does not exist", status_code=404)
+    
+    status, msg = WireguardConfigurations[name].updateConfigurationInfo(key, value)
+    
+    return ResponseObject(status=status, message=msg)
+
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationRawFile')
 def API_GetWireguardConfigurationRawFile():
     configurationName = request.args.get('configurationName')
@@ -1351,8 +1366,7 @@ def API_Clients_DeleteClient():
         return ResponseObject(False, "Please provide ClientID")
     if not DashboardClients.GetClient(clientId):
         return ResponseObject(False, "Client does not exist")
-    return ResponseObject(status=DashboardClients.DeleteClient(clientId))
-    
+    return ResponseObject(status=DashboardClients.DeleteClient(clientId))   
 '''
 Index Page
 '''
