@@ -204,7 +204,7 @@ watch(() => route.query.id, (newValue) => {
 
 <template>
 <div class="container-fluid" >
-	<div class="d-flex align-items-sm-center flex-column flex-sm-row gap-3">
+	<div class="d-flex align-items-sm-start flex-column flex-sm-row gap-3">
 		<div>
 			<div class="text-muted d-flex align-items-center gap-2">
 				<h5 class="mb-0">
@@ -215,6 +215,7 @@ watch(() => route.query.id, (newValue) => {
 				<h1 class="mb-0 display-4"><samp>{{configurationInfo.Name}}</samp></h1>
 			</div>
 		</div>
+
 		<div class="ms-sm-auto d-flex gap-2 flex-column">
 			<div class="card rounded-3 bg-transparent ">
 				<div class="card-body py-2 d-flex align-items-center">
@@ -258,6 +259,9 @@ watch(() => route.query.id, (newValue) => {
 		</div>
 	</div>
 	<hr>
+	<input type="text"
+			  placeholder="Want to make some notes? Type it in here :)"
+			  class="form-control rounded-3 bg-transparent form-control-sm text-muted">
 	<div class="row mt-3 gy-2 gx-2 mb-2">
 		<div class="col-12 col-lg-3">
 			<div class="card rounded-3 bg-transparent  h-100">
