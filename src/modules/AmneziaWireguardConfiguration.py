@@ -150,6 +150,12 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             sqlalchemy.Column('preshared_key', sqlalchemy.String(255)),
             extend_existing=True
         )
+        self.infoTable = sqlalchemy.Table(
+            'ConfigurationsInfo', self.metadata,
+            sqlalchemy.Column('ID', sqlalchemy.String(255), primary_key=True),
+            sqlalchemy.Column('Info', sqlalchemy.Text),
+            extend_existing=True
+        )
 
         self.metadata.create_all(self.engine)
 
