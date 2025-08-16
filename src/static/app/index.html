@@ -10,31 +10,6 @@
 		<link rel="icon" href="/img/Logo-2-512x512.png">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>WGDashboard</title>
-        <script type="javascript">
-            // Runtime base path detection
-            function getBasePath() {
-                const path = window.location.pathname
-                const segments = path.split('/')
-                const staticIndex = segments.indexOf('static')
-
-                if (staticIndex > 0) {
-                    return segments.slice(0, staticIndex + 1).join('/') + '/app/dist/'
-                }
-                return '/static/app/dist/'
-            }
-
-            // Update document base if needed
-            const currentBase = document.querySelector('base')?.href || window.location.origin + '/'
-            const detectedBase = window.location.origin + getBasePath()
-            console.log(detectedBase)
-            if (currentBase !== detectedBase) {
-                const baseTag = document.querySelector('base') || document.createElement('base')
-                baseTag.href = detectedBase
-                if (!document.querySelector('base')) {
-                    document.head.appendChild(baseTag)
-                }
-            }
-        </script>
 	</head>
 	<body>
 		<div id="app"></div>
