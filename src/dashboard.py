@@ -1462,7 +1462,7 @@ DashboardPlugin: DashboardPlugins = DashboardPlugins(app, WireguardConfiguration
 
 InitWireguardConfigurationsList(startup=True)
 
-app.static_url_path = f'{APP_PREFIX}/static'
+# app.static_url_path = f'{APP_PREFIX}/static'
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
     app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
@@ -1474,6 +1474,7 @@ def startThreads():
     scheduleJobThread.start()
 
 if __name__ == "__main__":
+    print(app.static_url_path)
     startThreads()
     DashboardPlugin.startThreads()
     #    logging.getLogger().addHandler(logging.StreamHandler())
