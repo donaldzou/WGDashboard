@@ -6,7 +6,7 @@ export const requestURl = (url) => {
 		: `${window.location.protocol}//${(window.location.host + window.location.pathname + url).replace(/\/\//g, '/')}`
 }
 
-const router = useRouter()
+// const router = useRouter()
 
 export const axiosPost = async (URL, body = {}) => {
 	try{
@@ -14,9 +14,9 @@ export const axiosPost = async (URL, body = {}) => {
 		return res.data
 	} catch (error){
 		console.log(error)
-		if (error.status === 401){
-			await router.push('/signin')
-		}
+		// if (error.status === 401){
+		// 	await router.push('/signin')
+		// }
 
 		return undefined
 	}
@@ -28,9 +28,9 @@ export const axiosGet = async (URL, query = {}) => {
 		return res.data
 	} catch (error){
 		console.log(error)
-		if (error.status === 401){
-			await router.push('/signin')
-		}
+		// if (error.status === 401){
+		// 	await router.push('/signin')
+		// }
 		return undefined
 	}
 }
