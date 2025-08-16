@@ -130,7 +130,7 @@ class WireguardConfiguration:
             self.configurationInfo = WireguardConfigurationInfo(**{})
             self.initConfigurationInfo()
         else:
-            self.configurationInfo = WireguardConfigurationInfo.model_validate_json(configurationInfoJson)
+            self.configurationInfo = WireguardConfigurationInfo.model_validate_json(configurationInfoJson.get("Info"))
         
 
     def __getProtocolPath(self):
@@ -1078,7 +1078,7 @@ class WireguardConfiguration:
                     self.infoTable.c.ID == self.Name
                 )
             ).mappings().fetchone()
-        return result.get('Info')
+        return result
     
     def initConfigurationInfo(self):
         with self.engine.begin() as conn:
