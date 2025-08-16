@@ -309,9 +309,9 @@ def API_updateWireguardConfigurationInfo():
     if name not in WireguardConfigurations.keys():
         return ResponseObject(False, "Configuration does not exist", status_code=404)
     
-    status, msg = WireguardConfigurations[name].updateConfigurationInfo(key, value)
+    status, msg, key = WireguardConfigurations[name].updateConfigurationInfo(key, value)
     
-    return ResponseObject(status=status, message=msg)
+    return ResponseObject(status=status, message=msg, data=key)
 
 @app.get(f'{APP_PREFIX}/api/getWireguardConfigurationRawFile')
 def API_GetWireguardConfigurationRawFile():
