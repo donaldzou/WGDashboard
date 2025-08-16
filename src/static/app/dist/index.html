@@ -31,7 +31,7 @@
             // Update document base if needed
             const currentBase = document.querySelector('base')?.href || window.location.origin + '/'
             const detectedBase = window.location.origin + getBasePath()
-
+            console.log(detectedBase)
             if (currentBase !== detectedBase) {
                 const baseTag = document.querySelector('base') || document.createElement('base')
                 baseTag.href = detectedBase
