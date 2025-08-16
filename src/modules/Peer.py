@@ -137,7 +137,10 @@ class Peer:
             "PrivateKey": self.private_key,
             "Address": self.allowed_ip,
             "MTU": self.mtu,
-            "DNS": self.DNS
+            "DNS": (
+                self.configuration.configurationInfo.OverridePeerSettings.DNS 
+                    if self.configuration.configurationInfo.OverridePeerSettings.DNS else self.DNS
+            )
         }
         peerSection = {
             "PublicKey": self.configuration.PublicKey,
@@ -156,31 +159,6 @@ class Peer:
             for (key, val) in combine[s]:
                 if val is not None and ((type(val) is str and len(val) > 0) or (type(val) is int and val > 0)):
                     peerConfiguration += f"{key} = {val}\n"
-
-        
-        # for (key, val) in interfaceSection.items():
-        #     if val is not None and ((type(val) is str and len(val) > 0) or type(val) is int):
-        #         peerConfiguration += f"{key} = {val}\n"
-        # peerConfiguration = "\n[Peer]\n"
-        
-
-#         peerConfiguration = f'''[Interface]
-# PrivateKey = {self.private_key}
-# Address = {self.allowed_ip}
-# MTU = {str(self.mtu)}
-# '''
-#         if len(self.DNS) > 0:
-#             peerConfiguration += f"DNS = {self.DNS}\n"
-# 
-#         peerConfiguration += f'''
-# [Peer]
-# PublicKey = {self.configuration.PublicKey}
-# AllowedIPs = {self.endpoint_allowed_ip}
-# Endpoint = {self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}
-# PersistentKeepalive = {str(self.keepalive)}
-# '''
-        # if len(self.preshared_key) > 0:
-        #     peerConfiguration += f"PresharedKey = {self.preshared_key}\n"
         return {
             "fileName": finalFilename,
             "file": peerConfiguration
