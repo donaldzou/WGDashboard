@@ -24,7 +24,7 @@ class DashboardPlugins:
         readyPlugins = []
         
         if not self.directory.exists():
-            self.logger.error("Failed to load ./plugins directory")
+            os.mkdir(self.directory)
             return []
         
         for plugin in self.directory.iterdir():
