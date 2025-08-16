@@ -13,6 +13,31 @@
 	</head>
 	<body>
 		<div id="app"></div>
+        <script type="javascript">
+            // Runtime base path detection
+            function getBasePath() {
+                const path = window.location.pathname
+                const segments = path.split('/')
+                const staticIndex = segments.indexOf('static')
+
+                if (staticIndex > 0) {
+                    return segments.slice(0, staticIndex + 1).join('/') + '/app/dist/'
+                }
+                return '/static/app/dist/'
+            }
+
+            // Update document base if needed
+            const currentBase = document.querySelector('base')?.href || window.location.origin + '/'
+            const detectedBase = window.location.origin + getBasePath()
+
+            if (currentBase !== detectedBase) {
+                const baseTag = document.querySelector('base') || document.createElement('base')
+                baseTag.href = detectedBase
+                if (!document.querySelector('base')) {
+                    document.head.appendChild(baseTag)
+                }
+            }
+        </script>
 		<script type="module" src="./src/main.js"></script>
 	</body>
 </html>
