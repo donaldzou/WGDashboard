@@ -52,7 +52,10 @@ dictConfig({
 SystemStatus = SystemStatus()
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
-app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
+app = Flask("WGDashboard", 
+            template_folder=os.path.abspath("./static/app/dist"),
+            static_folder=os.path.abspath("./static/app/dist")
+            )
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
@@ -1464,18 +1467,18 @@ InitWireguardConfigurationsList(startup=True)
 
 
 
-url_map = app.url_map
-app.view_functions["static"] = None
-try:
-    for rule in url_map.iter_rules('static'):
-        url_map._rules.remove(rule)
-except ValueError:
-    pass
-
-app.static_url_path = f'{APP_PREFIX}/static'
-app.add_url_rule(
-    app.static_url_path + '/<path:filename>',
-    endpoint='static', view_func=app.send_static_file)
+# url_map = app.url_map
+# app.view_functions["static"] = None
+# try:
+#     for rule in url_map.iter_rules('static'):
+#         url_map._rules.remove(rule)
+# except ValueError:
+#     pass
+# 
+# app.static_url_path = f'{APP_PREFIX}/static'
+# app.add_url_rule(
+#     app.static_url_path + '/<path:filename>',
+#     endpoint='static', view_func=app.send_static_file)
 
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
