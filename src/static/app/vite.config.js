@@ -32,7 +32,10 @@ export default defineConfig(({mode}) => {
 	}
 
 	return {
-		base: "./",
+		base: "/",
+        define: {
+            __RUNTIME_BASE_DETECTION__: true
+        },
 		plugins: [
 			vue(),
 		],
