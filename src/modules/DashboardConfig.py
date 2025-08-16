@@ -107,8 +107,6 @@ class DashboardConfig:
         if not os.path.isdir(sqlitePath):
             os.mkdir(sqlitePath)
         
-        # cn = None
-        
         if self.GetConfig("Database", "type")[1] == "postgresql":
             cn = f'postgresql+psycopg2://{self.GetConfig("Database", "username")[1]}:{self.GetConfig("Database", "password")[1]}@{self.GetConfig("Database", "host")[1]}/{database}'
         elif self.GetConfig("Database", "type")[1] == "mysql":
@@ -132,7 +130,6 @@ class DashboardConfig:
                                     )
         self.dbMetadata.create_all(self.engine)
     def __getAPIKeys(self) -> list[DashboardAPIKey]:
-        # keys = sqlSelect("SELECT * FROM DashboardAPIKeys WHERE ExpiredAt IS NULL OR ExpiredAt > datetime('now', 'localtime') ORDER BY CreatedAt DESC").fetchall()
         try:
             with self.engine.connect() as conn:
                 keys = conn.execute(self.apiKeyTable.select().where(
@@ -148,7 +145,6 @@ class DashboardConfig:
 
     def createAPIKeys(self, ExpiredAt = None):
         newKey = secrets.token_urlsafe(32)
-        # sqlUpdate('INSERT INTO DashboardAPIKeys (Key, ExpiredAt) VALUES (?, ?)', (newKey, ExpiredAt,))
         with self.engine.begin() as conn:
             conn.execute(
                 self.apiKeyTable.insert().values({
@@ -160,7 +156,6 @@ class DashboardConfig:
         self.DashboardAPIKeys = self.__getAPIKeys()
 
     def deleteAPIKey(self, key):
-        # sqlUpdate("UPDATE DashboardAPIKeys SET ExpiredAt = datetime('now', 'localtime') WHERE Key = ?", (key, ))
         with self.engine.begin() as conn:
             conn.execute(
                 self.apiKeyTable.update().values({
@@ -203,7 +198,7 @@ class DashboardConfig:
     def __checkPassword(self, plainTextPassword: str, hashedPassword: bytes):
         return bcrypt.checkpw(plainTextPassword.encode("utf-8"), hashedPassword)
 
-    def SetConfig(self, section: str, key: str, value: any, init: bool = False) -> [bool, str]:
+    def SetConfig(self, section: str, key: str, value: str | bool | list[str] | dict[str, str], init: bool = False) -> tuple[bool, str] | tuple[bool, None]:
         if key in self.hiddenAttribute and not init:
             return False, None
 
@@ -247,7 +242,6 @@ class DashboardConfig:
             return self.SaveConfig(), ""
         else:
             return False, f"{key} does not exist under {section}"
-        return True, ""
 
     def SaveConfig(self) -> bool:
         try:
@@ -257,7 +251,7 @@ class DashboardConfig:
         except Exception as e:
             return False
 
-    def GetConfig(self, section, key) -> [bool, any]:
+    def GetConfig(self, section, key) ->tuple[bool, bool] | tuple[bool, str]  | tuple[bool, list[str]] |  tuple[bool, None]:
         if section not in self.__config:
             return False, None
 
