@@ -295,7 +295,7 @@ class DashboardClients:
                     })
                 )
                 self.logger.log(Message=f"User {Email} signed up")
-                self.__getClients()
+            self.__getClients()
         except Exception as e:
             self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
             return False, "Signe up failed."

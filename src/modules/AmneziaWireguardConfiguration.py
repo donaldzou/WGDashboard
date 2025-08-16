@@ -41,6 +41,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             "PostUp": self.PostUp,
             "PostDown": self.PostDown,
             "SaveConfig": self.SaveConfig,
+            "Info": self.configurationInfo.model_dump(),
             "DataUsage": {
                 "Total": sum(list(map(lambda x: x.cumu_data + x.total_data, self.Peers))),
                 "Sent": sum(list(map(lambda x: x.cumu_sent + x.total_sent, self.Peers))),
@@ -158,62 +159,6 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         )
 
         self.metadata.create_all(self.engine)
-
-        # existingTables = sqlSelect("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-        # existingTables = [t['name'] for t in existingTables]
-        # if dbName not in existingTables:
-        #     sqlUpdate(
-        #         """
-        #         CREATE TABLE '%s'(
-        #             id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
-        #             endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
-        #             total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
-        #             status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
-        #             cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
-        #             keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
-        #             PRIMARY KEY (id)
-        #         )
-        #         """ % dbName
-        #     )
-        # 
-        # if f'{dbName}_restrict_access' not in existingTables:
-        #     sqlUpdate(
-        #         """
-        #         CREATE TABLE '%s_restrict_access' (
-        #             id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL, 
-        #             endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
-        #             total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
-        #             status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
-        #             cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
-        #             keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
-        #             PRIMARY KEY (id)
-        #         )
-        #         """ % dbName
-        #     )
-        # if f'{dbName}_transfer' not in existingTables:
-        #     sqlUpdate(
-        #         """
-        #         CREATE TABLE '%s_transfer' (
-        #             id VARCHAR NOT NULL, total_receive FLOAT NULL,
-        #             total_sent FLOAT NULL, total_data FLOAT NULL,
-        #             cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, time DATETIME
-        #         )
-        #         """ % dbName
-        #     )
-        # if f'{dbName}_deleted' not in existingTables:
-        #     sqlUpdate(
-        #         """
-        #         CREATE TABLE '%s_deleted' (
-        #             id VARCHAR NOT NULL, private_key VARCHAR NULL, DNS VARCHAR NULL, advanced_security VARCHAR NULL,
-        #             endpoint_allowed_ip VARCHAR NULL, name VARCHAR NULL, total_receive FLOAT NULL, 
-        #             total_sent FLOAT NULL, total_data FLOAT NULL, endpoint VARCHAR NULL, 
-        #             status VARCHAR NULL, latest_handshake VARCHAR NULL, allowed_ip VARCHAR NULL, 
-        #             cumu_receive FLOAT NULL, cumu_sent FLOAT NULL, cumu_data FLOAT NULL, mtu INT NULL, 
-        #             keepalive INT NULL, remote_endpoint VARCHAR NULL, preshared_key VARCHAR NULL,
-        #             PRIMARY KEY (id)
-        #         )
-        #         """ % dbName
-        #     )
 
     def getPeers(self):
         self.Peers.clear()
@@ -336,14 +281,6 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                     conn.execute(
                         self.peersTable.insert().values(newPeer)
                     )
-                    # sqlUpdate(
-                    #     """
-                    #     INSERT INTO '%s'
-                    #         VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
-                    #         :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
-                    #         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
-                    #     """ % self.Name
-                    #     , newPeer)
             for p in peers:
                 presharedKeyExist = len(p['preshared_key']) > 0
                 rd = random.Random()
@@ -371,7 +308,6 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
 
     def getRestrictedPeers(self):
         self.RestrictedPeers = []
-        # restricted = sqlSelect("SELECT * FROM '%s_restrict_access'" % self.Name).fetchall()
         with self.engine.connect() as conn:
             restricted = conn.execute(self.peersRestrictedTable.select()).mappings().fetchall()
             for i in restricted:
