@@ -59,6 +59,15 @@ def ValidateDNSAddress(addresses) -> tuple[bool, str]:
             return False, f"{address} does not appear to be an valid DNS address"
     return True, ""
 
+def ValidateEndpointAllowedIPs(IPs) -> tuple[bool, str] | tuple[bool, None]:
+    ips = IPs.replace(" ", "").split(",")
+    for ip in ips:
+        try:
+            ipaddress.ip_network(ip, strict=False)
+        except ValueError as e:
+            return False, str(e)
+    return True, None
+
 def GenerateWireguardPublicKey(privateKey: str) -> tuple[bool, str] | tuple[bool, None]:
     try:
         publicKey = subprocess.check_output(f"wg pubkey", input=privateKey.encode(), shell=True,
