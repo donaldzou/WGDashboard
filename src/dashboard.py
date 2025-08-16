@@ -1467,18 +1467,18 @@ InitWireguardConfigurationsList(startup=True)
 
 
 
-# url_map = app.url_map
-# app.view_functions["static"] = None
-# try:
-#     for rule in url_map.iter_rules('static'):
-#         url_map._rules.remove(rule)
-# except ValueError:
-#     pass
-# 
-# app.static_url_path = f'{APP_PREFIX}/static'
-# app.add_url_rule(
-#     app.static_url_path + '/<path:filename>',
-#     endpoint='static', view_func=app.send_static_file)
+url_map = app.url_map
+app.view_functions["static"] = None
+try:
+    for rule in url_map.iter_rules('static'):
+        url_map._rules.remove(rule)
+except ValueError:
+    pass
+
+app.static_url_path = f'{APP_PREFIX}'
+app.add_url_rule(
+    app.static_url_path + '/<path:filename>',
+    endpoint='static', view_func=app.send_static_file)
 
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
