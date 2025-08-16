@@ -32,10 +32,7 @@ export default defineConfig(({mode}) => {
 	}
 
 	return {
-		base: "/",
-        define: {
-            __RUNTIME_BASE_DETECTION__: true
-        },
+		base: "/static/app/dist",
 		plugins: [
 			vue(),
 		],

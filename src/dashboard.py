@@ -1462,7 +1462,7 @@ DashboardPlugin: DashboardPlugins = DashboardPlugins(app, WireguardConfiguration
 
 InitWireguardConfigurationsList(startup=True)
 
-
+app.static_url_path = f'{APP_PREFIX}/static'
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
     app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
