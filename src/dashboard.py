@@ -1465,6 +1465,7 @@ InitWireguardConfigurationsList(startup=True)
 
 
 url_map = app.url_map
+app.view_functions["static"] = None
 try:
     for rule in url_map.iter_rules('static'):
         url_map._rules.remove(rule)
