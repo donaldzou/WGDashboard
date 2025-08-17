@@ -1477,7 +1477,7 @@ except ValueError:
 
 app.static_url_path = f'{APP_PREFIX}'
 app.add_url_rule(
-    app.static_url_path + '/<path:filename>',
+    app.static_url_path + '/assets/<path:filename>',
     endpoint='static', view_func=app.send_static_file)
 
 with app.app_context():
