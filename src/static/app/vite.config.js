@@ -32,7 +32,7 @@ export default defineConfig(({mode}) => {
 	}
 
 	return {
-		base: "./",
+		base: "/static/app/dist",
 		plugins: [
 			vue(),
 		],
