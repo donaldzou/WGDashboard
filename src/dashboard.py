@@ -52,10 +52,7 @@ dictConfig({
 SystemStatus = SystemStatus()
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
-app = Flask("WGDashboard", 
-            template_folder=os.path.abspath("./static/app/dist"),
-            static_folder=os.path.abspath("./static/app/dist")
-            )
+app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
@@ -135,7 +132,7 @@ def auth_req():
                 '/static/', 'validateAuthentication', 'authenticate', 'getDashboardConfiguration',
                 'getDashboardTheme', 'getDashboardVersion', 'sharePeer/get', 'isTotpEnabled', 'locale',
                 '/fileDownload',
-                '/client', '/assets/', '/img/', '/json/'
+                '/client'
             ]
             
             if (("username" not in session or session.get("role") != "admin") 
@@ -1466,20 +1463,6 @@ DashboardPlugin: DashboardPlugins = DashboardPlugins(app, WireguardConfiguration
 InitWireguardConfigurationsList(startup=True)
 
 
-
-url_map = app.url_map
-app.view_functions["static"] = None
-try:
-    for rule in url_map.iter_rules('static'):
-        url_map._rules.remove(rule)
-except ValueError:
-    pass
-
-app.static_url_path = f'{APP_PREFIX}'
-app.add_url_rule(
-    app.static_url_path + '/<path:filename>',
-    endpoint='static', view_func=app.send_static_file)
-
 with app.app_context():
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
     app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
@@ -1491,7 +1474,6 @@ def startThreads():
     scheduleJobThread.start()
 
 if __name__ == "__main__":
-    print(app.static_url_path)
     startThreads()
     DashboardPlugin.startThreads()
     #    logging.getLogger().addHandler(logging.StreamHandler())
