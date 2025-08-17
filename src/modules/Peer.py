@@ -2,6 +2,9 @@
 Peer
 """
 import os, subprocess, uuid, random, re
+
+import jinja2
+
 from .PeerJob import PeerJob
 from .PeerShareLink import PeerShareLink
 from .Utilities import GenerateWireguardPublicKey, ValidateIPAddressesWithRange, ValidateDNSAddress
@@ -136,7 +139,10 @@ class Peer:
         interfaceSection = {
             "PrivateKey": self.private_key,
             "Address": self.allowed_ip,
-            "MTU": self.mtu,
+            "MTU": (
+                self.configuration.configurationInfo.OverridePeerSettings.MTU
+                    if self.configuration.configurationInfo.OverridePeerSettings.MTU else self.mtu
+            ),
             "DNS": (
                 self.configuration.configurationInfo.OverridePeerSettings.DNS 
                     if self.configuration.configurationInfo.OverridePeerSettings.DNS else self.DNS
@@ -144,9 +150,16 @@ class Peer:
         }
         peerSection = {
             "PublicKey": self.configuration.PublicKey,
-            "AllowedIPs": self.endpoint_allowed_ip,
-            "Endpoint": f'{self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1]}:{self.configuration.ListenPort}',
-            "PersistentKeepalive": self.keepalive,
+            "AllowedIPs": (
+                self.configuration.configurationInfo.OverridePeerSettings.EndpointAllowedIPs
+                    if self.configuration.configurationInfo.OverridePeerSettings.EndpointAllowedIPs else self.endpoint_allowed_ip
+            ),
+            "Endpoint": f'{(self.configuration.configurationInfo.OverridePeerSettings.PeerRemoteEndpoint if self.configuration.configurationInfo.OverridePeerSettings.PeerRemoteEndpoint else self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1])}:{(self.configuration.configurationInfo.OverridePeerSettings.ListenPort if self.configuration.configurationInfo.OverridePeerSettings.ListenPort else self.configuration.ListenPort)}',
+            "PersistentKeepalive": (
+                self.configuration.configurationInfo.OverridePeerSettings.PersistentKeepalive 
+                if self.configuration.configurationInfo.OverridePeerSettings.PersistentKeepalive
+                else self.keepalive
+            ),
             "PresharedKey": self.preshared_key
         }
         combine = [interfaceSection.items(), peerSection.items()]
@@ -161,7 +174,7 @@ class Peer:
                     peerConfiguration += f"{key} = {val}\n"
         return {
             "fileName": finalFilename,
-            "file": peerConfiguration
+            "file": jinja2.Template(peerConfiguration).render(configuration=self.configuration)
         }
 
     def getJobs(self):
