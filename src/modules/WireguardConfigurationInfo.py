@@ -12,6 +12,7 @@ class PeerGroupsClass(BaseModel):
     GroupName: str = ''
     Description: str = ''
     BackgroundColor: str = ''
+    Icon: str = ''
     Peers: list[str] = []
 
 class WireguardConfigurationInfo(BaseModel):

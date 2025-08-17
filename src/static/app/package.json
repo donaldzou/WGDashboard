@@ -21,6 +21,7 @@
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.3",
     "cidr-tools": "^11.0.3",
+    "css-color-converter": "^2.0.0",
     "dayjs": "^1.11.12",
     "electron-builder": "^26.0.12",
     "fuse.js": "^7.0.0",
