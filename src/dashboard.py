@@ -52,7 +52,7 @@ dictConfig({
 SystemStatus = SystemStatus()
 
 CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
-app = Flask("WGDashboard", template_folder=os.path.abspath("./static/app/dist"))
+app = Flask("WGDashboard", template_folder=os.path.abspath("./static/dist/WGDashboardAdmin"))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
 app.secret_key = secrets.token_urlsafe(32)
 
