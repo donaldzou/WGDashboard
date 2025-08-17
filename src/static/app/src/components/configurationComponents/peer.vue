@@ -6,11 +6,14 @@ import PeerSettingsDropdown from "@/components/configurationComponents/peerSetti
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import {GetLocale} from "@/utilities/locale.js";
+import PeerTagBadge from "@/components/configurationComponents/peerTagBadge.vue";
 
 export default {
 	name: "peer",
 	methods: {GetLocale},
-	components: {LocaleText, PeerSettingsDropdown},
+	components: {
+		PeerTagBadge, LocaleText, PeerSettingsDropdown
+	},
 	props: {
 		Peer: Object
 	},
@@ -100,7 +103,10 @@ export default {
 						<samp>{{Peer.allowed_ip}}</samp>
 					</small>
 				</div>
-				<div class="d-flex align-items-end ms-auto">
+				<div class="d-flex align-items-center gap-1"
+					:class="{'ms-auto': dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list'}"
+				>
+					<PeerTagBadge BackgroundColor="#ff3838" GroupName="IDK" Icon="bi-pencil"></PeerTagBadge>
 					<div class="ms-auto px-2 rounded-3 subMenuBtn"
 					     :class="{active: this.subMenuOpened}"
 					>
