@@ -6,7 +6,7 @@
   "module": "es2022",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --emptyOutDir",
     "buildcommitpush": "./build.sh",
     "build electron": "vite build && vite build --mode electron && cd ../../../../WGDashboard-Desktop && /opt/homebrew/bin/npm run \"electron dist\"",
     "preview": "vite preview"

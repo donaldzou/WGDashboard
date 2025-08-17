@@ -32,7 +32,7 @@ export default defineConfig(({mode}) => {
 	}
 
 	return {
-		base: "/static/app/dist",
+		base: "/static/dist/WGDashboardAdmin",
 		plugins: [
 			vue(),
 		],
@@ -50,7 +50,7 @@ export default defineConfig(({mode}) => {
 		},
 		build: {
 			target: "es2022",
-			outDir: 'dist',
+			outDir: '../dist/WGDashboardAdmin',
 			rollupOptions: {
 				output: {
 					entryFileNames: `assets/[name]-[hash].js`,
