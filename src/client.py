@@ -23,7 +23,10 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
 from modules.DashboardClients import DashboardClients
 def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration], dashboardConfig: DashboardConfig, dashboardClients: DashboardClients):
         
-    client = Blueprint('client', __name__, template_folder=os.path.abspath("./static/client/dist"))
+    client = Blueprint('client', __name__, 
+                       template_folder=os.path.abspath("./static/client/dist"),
+                       static_folder=os.path.abspath("./static/client/dist")
+                       )
     prefix = f'{dashboardConfig.GetConfig("Server", "app_prefix")[1]}/client'
 
     def login_required(f):
