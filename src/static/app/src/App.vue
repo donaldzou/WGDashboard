@@ -4,6 +4,7 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import {computed, watch} from "vue";
 const store = DashboardConfigurationStore();
 import "@/utilities/wireguard.js"
+import {fetchGet} from "@/utilities/fetch.js";
 store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
 	store.IsElectronApp = true;
@@ -15,7 +16,9 @@ watch(store.CrossServerConfiguration, () => {
 	deep: true
 });
 const route = useRoute()
-
+fetchGet("/api/locale", {}, (res) => {
+	store.Locale = res.data
+})
 </script>
 
 <template>

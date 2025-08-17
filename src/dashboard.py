@@ -490,12 +490,12 @@ def API_updateDashboardConfigurationItem():
     valid, msg = DashboardConfig.SetConfig(
         data["section"], data["key"], data['value'])
     if not valid:
-        return ResponseObject(False, msg, status_code=404)
+        return ResponseObject(False, msg)
     if data['section'] == "Server":
         if data['key'] == 'wg_conf_path':
             WireguardConfigurations.clear()
             WireguardConfigurations.clear()
-            InitWireguardConfigurationsList()            
+            InitWireguardConfigurationsList()
     return ResponseObject(True, data=DashboardConfig.GetConfig(data["section"], data["key"])[1])
 
 @app.get(f'{APP_PREFIX}/api/getDashboardAPIKeys')
