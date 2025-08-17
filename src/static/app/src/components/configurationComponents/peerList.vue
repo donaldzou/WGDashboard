@@ -13,14 +13,20 @@ import PeerListModals from "@/components/configurationComponents/peerListCompone
 import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
 import ConfigurationDescription from "@/components/configurationComponents/configurationDescription.vue";
 
+import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vue"
+import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue"
+import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue"
+import EditConfigurationModal from "@/components/configurationComponents/editConfiguration.vue"
+import SelectPeersModal from "@/components/configurationComponents/selectPeers.vue"
+import PeerAddModal from "@/components/configurationComponents/peerAddModal.vue"
 
 // Async Components
-const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
-const PeerJobsAllModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue"))
-const PeerJobsLogsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue"))
-const EditConfigurationModal = defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue"))
-const SelectPeersModal = defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue"))
-const PeerAddModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerAddModal.vue"))
+// const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
+// const PeerJobsAllModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue"))
+// const PeerJobsLogsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsLogsModal.vue"))
+// const EditConfigurationModal = defineAsyncComponent(() => import("@/components/configurationComponents/editConfiguration.vue"))
+// const SelectPeersModal = defineAsyncComponent(() => import("@/components/configurationComponents/selectPeers.vue"))
+// const PeerAddModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerAddModal.vue"))
 
 const dashboardStore = DashboardConfigurationStore()
 const wireguardConfigurationStore = WireguardConfigurationsStore()

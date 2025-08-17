@@ -32,7 +32,7 @@ export default defineConfig(({mode}) => {
 	}
 
 	return {
-		base: "/static/app/dist",
+		base: "./",
 		plugins: [
 			vue(),
 		],
@@ -53,9 +53,9 @@ export default defineConfig(({mode}) => {
 			outDir: 'dist',
 			rollupOptions: {
 				output: {
-					entryFileNames: `assets/[name]-[hash].js`,
-					chunkFileNames: `assets/[name]-[hash].js`,
-					assetFileNames: `assets/[name]-[hash].[ext]`
+					entryFileNames: `static/app/dist/[name]-[hash].js`,
+					chunkFileNames: `static/app/dist/[name]-[hash].js`,
+					assetFileNames: `static/app/dist/[name]-[hash].[ext]`
 				}
 			}
 		}
