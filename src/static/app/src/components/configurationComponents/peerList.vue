@@ -13,13 +13,6 @@ import PeerListModals from "@/components/configurationComponents/peerListCompone
 import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
 import ConfigurationDescription from "@/components/configurationComponents/configurationDescription.vue";
 
-// import PeerSearchBar from "@/components/configurationComponents/peerSearchBar.vue"
-// import PeerJobsAllModal from "@/components/configurationComponents/peerJobsAllModal.vue"
-// import PeerJobsLogsModal from "@/components/configurationComponents/peerJobsLogsModal.vue"
-// import EditConfigurationModal from "@/components/configurationComponents/editConfiguration.vue"
-// import SelectPeersModal from "@/components/configurationComponents/selectPeers.vue"
-// import PeerAddModal from "@/components/configurationComponents/peerAddModal.vue"
-
 // Async Components
 const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
 const PeerJobsAllModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerJobsAllModal.vue"))
@@ -377,6 +370,7 @@ watch(() => route.query.id, (newValue) => {
 			     :key="peer.id"
 			     v-for="peer in searchPeers">
 				<Peer :Peer="peer"
+					  :ConfigurationInfo="configurationInfo"
 				      @share="configurationModals.peerShare.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @refresh="fetchPeerList()"
 				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModalSelectedPeer = peer"

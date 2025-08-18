@@ -1,45 +1,43 @@
 <script setup lang="ts">
-import {computed} from "vue";
-import { fromString } from 'css-color-converter';
-
+import LocaleText from "@/components/text/localeText.vue";
+import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js"
+import {ref} from "vue";
+const store = WireguardConfigurationsStore();
 const props = defineProps(['group'])
+const emits = defineEmits(['delete', 'iconPickerOpen', 'colorPickerOpen'])
 
-const color = computed(() => {
-	if (props.group.BackgroundColor){
-		const cssColor = fromString(props.group.BackgroundColor)
-		if (cssColor) {
-			const rgb = cssColor.toRgbaArray()
-			return +((rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 255000).toFixed(2) > 0.69 ? "#000":"#fff"
-		}
-	}
-	return "#ffffff"
-})
-console.log(color)
+const groupName = ref(props.group.GroupName)
 </script>
 
 <template>
-<div :style="{'background-color': group.BackgroundColor }"
-	 class="badge rounded-3 d-flex align-items-center overflow-scroll">
+<div class="border rounded-3 p-2">
 	<div
-		aria-label="Pick icon button"
-		style="height: 30px;"
-		class="d-flex align-items-center border rounded-2 p-2 btn btn-sm">
-		<i class="bi bi-pencil-fill"  :style="{color: color}"></i>
-	</div>
-	<div contenteditable="true" class="flex-grow-1 text-start d-flex align-items-center rounded-2"
-		 :style="{color: color}"
-		 style="height: 30px">
-		Tag Name
-	</div>
-	<div style="height: 30px;"
-		 aria-label="Pick color button"
-		 class="d-flex align-items-center border-0 rounded-2 p-2 btn btn-sm">
-		<i class="bi bi-palette-fill" :style="{color: color}"></i>
-	</div>
-	<div style="height: 30px;"
-		 aria-label="Pick color button"
-		 class="d-flex align-items-center border-0 rounded-2 p-2 btn btn-sm">
-		<i class="bi bi-trash-fill" :style="{color: color}"></i>
+		class="rounded-3 align-items-center overflow-scroll d-flex gap-2 position-relative">
+		<div
+			@click="emits('iconPickerOpen')"
+			aria-label="Pick icon button"
+			class="d-flex align-items-center p-2 btn btn-sm border rounded-2">
+			<i class="bi" :class="'bi-' + group.Icon" :aria-label="group.Icon" v-if="group.Icon"></i>
+			<span style="white-space: nowrap" v-else>
+					<LocaleText t="No Icon"></LocaleText>
+				</span>
+		</div>
+		<div
+			aria-label="Pick color button"
+			@click="emits('colorPickerOpen')"
+			:style="{'background-color': group.BackgroundColor, 'color': store.colorText(group.BackgroundColor)}"
+			class="d-flex align-items-center  p-2 btn btn-sm border rounded-2">
+			<i class="bi bi-eyedropper"  ></i>
+		</div>
+		<input
+			v-model="groupName"
+			@change="group.GroupName = groupName"
+			class="form-control form-control-sm p-2 rounded-2 w-100">
+		<div
+			aria-label="Pick color button" @click="emits('delete')"
+			class="rounded-2 border p-2 btn btn-sm btn-outline-danger">
+			<i class="bi bi-trash-fill" ></i>
+		</div>
 	</div>
 </div>
 </template>

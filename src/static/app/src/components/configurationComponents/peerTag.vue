@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {reactive, ref, watch} from "vue";
 import LocaleText from "@/components/text/localeText.vue";
+import bootstrapIcons from "bootstrap-icons/font/bootstrap-icons.json"
 
 const predefinedColors = {
 	"blue-100": "#cfe2ff",
@@ -105,17 +106,21 @@ const predefinedColors = {
 	"white": "#fff",
 	"black": "#000",
 }
+
 const props = defineProps(['configuration'])
 const groups = reactive({...props.configuration.Info.PeerGroups})
 import { v4 } from "uuid"
 import PeerTagSetting from "@/components/configurationComponents/peerTagComponents/peerTagSetting.vue";
+import PeerTagIconPicker from "@/components/configurationComponents/peerTagComponents/peerTagIconPicker.vue";
+import PeerTagColorPicker from "@/components/configurationComponents/peerTagComponents/peerTagColorPicker.vue";
+import { fetchPost } from "@/utilities/fetch.js"
 
 const addGroup = () => {
 	groups[v4().toString()] = {
 		GroupName: "",
 		Description: "",
 		BackgroundColor: randomColor(),
-		Icon: "",
+		Icon: randomIcon(),
 		Peers: []
 	}
 }
@@ -125,22 +130,70 @@ const randomColor = () => {
 	const n = Math.floor(Math.random() * keys.length) + 1
 	return predefinedColors[keys[n]]
 }
+
+const randomIcon = () => {
+	const keys = Object.keys(bootstrapIcons)
+	const n = Math.floor(Math.random() * keys.length) + 1
+	return keys[n]
+}
+
+const iconPickerOpen = ref(false)
+const colorPickerOpen = ref(false)
+const selectedKey = ref("")
+const emits = defineEmits(['close', 'update'])
+watch(() => groups, (newVal) => {
+	fetchPost("/api/updateWireguardConfigurationInfo", {
+		Name: props.configuration.Name,
+		Key: "PeerGroups",
+		Value: newVal
+	}, (res) => {
+		if (res.status){
+			emits('update', groups)
+		}
+	})
+}, {
+	deep: true
+})
 </script>
 
 <template>
 <div class="card shadow" id="peerTag">
-	<div class="card-body" >
-		<small v-if="Object.keys(groups).length === 0">
-			<LocaleText t="No tag"></LocaleText>
-		</small>
-		<div class="d-flex flex-column gap-2" v-else>
-			<PeerTagSetting v-for="group in groups" :group="group">
-
-			</PeerTagSetting>
-		</div>
+	<div class="card-body p-2" >
+		<Transition name="zoom" mode="out-in">
+			<div v-if="!iconPickerOpen && !colorPickerOpen">
+				<div v-if="Object.keys(groups).length === 0" class="text-center text-muted">
+					<small><LocaleText t="No tag"></LocaleText></small>
+				</div>
+				<div class="d-flex flex-column gap-2" v-else>
+					<PeerTagSetting v-for="(group, key) in groups"
+									@delete="delete groups[key]"
+									@colorPickerOpen="colorPickerOpen = true; selectedKey = key"
+									@iconPickerOpen="iconPickerOpen = true; selectedKey = key"
+									:key="key"
+									:group="group"></PeerTagSetting>
+				</div>
+			</div>
+			<PeerTagIconPicker
+				v-else-if="iconPickerOpen"
+				@close="iconPickerOpen = false"
+				:group="groups[selectedKey]"></PeerTagIconPicker>
+			<PeerTagColorPicker :colors="predefinedColors"
+								@close="colorPickerOpen = false"
+								:group="groups[selectedKey]"
+								v-else-if="colorPickerOpen"></PeerTagColorPicker>
+		</Transition>
 	</div>
-	<div class="card-footer btn" @click="addGroup()">
-		<small><i class="bi bi-plus-lg me-2"></i><LocaleText t="Tag"></LocaleText></small>
+	<div class="card-footer p-2 d-flex gap-2" >
+		<button
+			@click="emits('close')"
+			class="btn btn-sm bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3">
+			<small><LocaleText t="Close"></LocaleText></small>
+		</button>
+		<button
+			@click="addGroup"
+			class="btn btn-sm bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 ms-auto">
+			<small><i class="bi bi-plus-lg me-2"></i><LocaleText t="Tag"></LocaleText></small>
+		</button>
 	</div>
 </div>
 </template>
