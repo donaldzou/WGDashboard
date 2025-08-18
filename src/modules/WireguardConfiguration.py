@@ -16,7 +16,7 @@ from .PeerJobs import PeerJobs
 from .PeerShareLinks import PeerShareLinks
 from .Utilities import StringToBoolean, GenerateWireguardPublicKey, RegexMatch, ValidateDNSAddress, \
     ValidateEndpointAllowedIPs
-from .WireguardConfigurationInfo import WireguardConfigurationInfo
+from .WireguardConfigurationInfo import WireguardConfigurationInfo, PeerGroupsClass
 
 
 class WireguardConfiguration:
@@ -1110,7 +1110,7 @@ class WireguardConfiguration:
         except Exception as e:
             return False
         
-    def updateConfigurationInfo(self, key: str, value: str | dict[str, str]) -> tuple[bool, Any, str] | tuple[
+    def updateConfigurationInfo(self, key: str, value: str | dict[str, str] | dict[str, dict]) -> tuple[bool, Any, str] | tuple[
         bool, str, None] | tuple[bool, None, None]:
         if key == "Description":
             self.configurationInfo.Description = value
@@ -1124,6 +1124,11 @@ class WireguardConfiguration:
                     return False, str(e), None
             self.configurationInfo.OverridePeerSettings = (
                 self.configurationInfo.OverridePeerSettings.model_validate(value))
+        elif key == "PeerGroups":
+            peerGroups = {}
+            for name, data in value.items():
+                peerGroups[name] = PeerGroupsClass(**data)
+            self.configurationInfo.PeerGroups = peerGroups
         else: 
             return False, "Key does not exist", None
         

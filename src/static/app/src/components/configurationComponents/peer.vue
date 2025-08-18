@@ -15,7 +15,7 @@ export default {
 		PeerTagBadge, LocaleText, PeerSettingsDropdown
 	},
 	props: {
-		Peer: Object
+		Peer: Object, ConfigurationInfo: Object
 	},
 	data(){
 		return {
@@ -106,7 +106,9 @@ export default {
 				<div class="d-flex align-items-center gap-1"
 					:class="{'ms-auto': dashboardStore.Configuration.Server.dashboard_peer_list_display === 'list'}"
 				>
-					<PeerTagBadge BackgroundColor="#ff3838" GroupName="IDK" Icon="bi-pencil"></PeerTagBadge>
+					<PeerTagBadge :BackgroundColor="group.BackgroundColor" :GroupName="group.GroupName" :Icon="'bi-' + group.Icon"
+						v-for="group in Object.values(ConfigurationInfo.Info.PeerGroups).filter(x => x.Peers.includes(Peer.id))"
+					></PeerTagBadge>
 					<div class="ms-auto px-2 rounded-3 subMenuBtn"
 					     :class="{active: this.subMenuOpened}"
 					>
@@ -124,6 +126,7 @@ export default {
 								@share="this.$emit('share')"
 								@assign="this.$emit('assign')"
 								:Peer="Peer"
+								:ConfigurationInfo="ConfigurationInfo"
 								v-if="this.subMenuOpened"
 								ref="target"
 							></PeerSettingsDropdown>
@@ -138,16 +141,7 @@ export default {
 
 <style scoped>
 
-.slide-fade-leave-active, .slide-fade-enter-active{
-	transition: all 0.2s cubic-bezier(0.82, 0.58, 0.17, 1.3);
-}
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-	transform: translateY(20px);
-	opacity: 0;
-	filter: blur(3px);
-}
 
 .subMenuBtn.active{
 	background-color: #ffffff20;

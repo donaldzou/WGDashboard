@@ -4,16 +4,18 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 import LocaleText from "@/components/text/localeText.vue";
 import PeerSettingsDropdownTool
 	from "@/components/configurationComponents/peerSettingsDropdownComponents/peerSettingsDropdownTool.vue";
+import PeerTagSelectDropdown
+	from "@/components/configurationComponents/peerSettingsDropdownComponents/peerTagSelectDropdown.vue";
 
 export default {
 	name: "peerSettingsDropdown",
-	components: {PeerSettingsDropdownTool, LocaleText},
+	components: {PeerTagSelectDropdown, PeerSettingsDropdownTool, LocaleText},
 	setup(){
 		const dashboardStore = DashboardConfigurationStore()
 		return {dashboardStore}
 	},
 	props: {
-		Peer: Object
+		Peer: Object, ConfigurationInfo: Object
 	},
 	data(){
 		return{
@@ -153,6 +155,18 @@ export default {
 					>
 						<i class="me-auto bi bi-diagram-2"></i> <LocaleText t="Assign Peer"></LocaleText>
 					</a>
+				</li>
+				<li class="dropdown dropstart">
+					<a class="dropdown-item d-flex " role="button"
+					   data-bs-auto-close="outside"
+					   data-bs-toggle="dropdown"
+
+					>
+						<i class="me-auto bi bi-diagram-2"></i> <LocaleText t="Tag Peer"></LocaleText>
+					</a>
+					<PeerTagSelectDropdown
+						@update="this.$emit('refresh')"
+						:Peer="Peer" :ConfigurationInfo="ConfigurationInfo"></PeerTagSelectDropdown>
 				</li>
 				<li><hr class="dropdown-divider"></li>
 				<li>

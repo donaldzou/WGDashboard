@@ -39,7 +39,8 @@ export default {
 			searchString: "",
 			searchStringTimeout: undefined,
 			showDisplaySettings: false,
-			showMoreSettings: false
+			showMoreSettings: false,
+			tagManager: false
 		}
 	},
 	methods: {
@@ -159,11 +160,19 @@ export default {
 			</div>
 			<div class="position-relative">
 				<button
+					@click="tagManager = !tagManager"
 					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  position-relative">
+
 					<i class="bi me-2 bi-hash"></i>
 					<LocaleText t="Tags"></LocaleText>
+
 				</button>
-				<PeerTag :configuration="configuration"></PeerTag>
+				<Transition name="slide-fade">
+					<PeerTag
+						@update="args => configuration.Info.PeerGroups = args"
+						@close="this.tagManager = false"
+						:configuration="configuration" v-if="this.tagManager"></PeerTag>
+				</Transition>
 			</div>
 			
 			<button class="btn btn-sm text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle ms-lg-auto"

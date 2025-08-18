@@ -2,6 +2,7 @@ import {defineStore} from "pinia";
 import {fetchGet} from "@/utilities/fetch.js";
 import isCidr from "is-cidr";
 import {GetLocale} from "@/utilities/locale.js";
+import {fromString} from "css-color-converter";
 
 export const WireguardConfigurationsStore = defineStore('WireguardConfigurationsStore', {
 	state: () => ({
@@ -99,7 +100,16 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
                 this.ConfigurationLoaded = true
 			});
 		},
-
+        colorText(color){
+            if (color){
+                const cssColor = fromString(color)
+                if (cssColor) {
+                    const rgb = cssColor.toRgbaArray()
+                    return +((rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 255000).toFixed(2) > 0.5 ? "#000":"#fff"
+                }
+            }
+            return "#ffffff"
+        },
         dotNotation(object, dotNotation){
             let result = dotNotation.split('.').reduce((o, key) => o && o[key], object)
             if (typeof result === "string"){
