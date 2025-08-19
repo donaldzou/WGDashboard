@@ -10,6 +10,10 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
         ConfigurationLoaded: false,
 		searchString: "",
 		ConfigurationListInterval: undefined,
+        Filter: {
+            HiddenTags: [],
+            ShowAllPeersWhenHiddenTags: true
+        },
         SortOptions: {
             Name: GetLocale("Name"),
             Status: GetLocale("Status"),
@@ -131,7 +135,7 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 	},
     persist: {
         pick: [
-            "CurrentSort", "CurrentDisplay"
+            "CurrentSort", "CurrentDisplay", "Filter.ShowAllPeersWhenHiddenTags"
         ]
     }
 });

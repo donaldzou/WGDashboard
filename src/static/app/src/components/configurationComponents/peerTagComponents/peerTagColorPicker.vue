@@ -16,14 +16,6 @@ onMounted(() => {
 
 <template>
 	<div class="w-100 bg-body top-0 border rounded-2">
-		<div class="p-2 d-flex align-items-center gap-2 border-bottom">
-			<label>
-				<i class="bi bi-search"></i>
-			</label>
-			<input v-model="searchString"
-				   placeholder="Search Icon"
-				   class="form-control form-control-sm rounded-2">
-		</div>
 		<div class="p-2 d-grid icon-grid"
 			 style="grid-template-columns: repeat(auto-fit, minmax(30px, 30px)); gap: 3px; max-height: 300px; overflow-y: scroll">
 			<div class="rounded-1 border icon d-flex"

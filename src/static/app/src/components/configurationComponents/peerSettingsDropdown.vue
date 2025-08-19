@@ -162,7 +162,7 @@ export default {
 					   data-bs-toggle="dropdown"
 
 					>
-						<i class="me-auto bi bi-diagram-2"></i> <LocaleText t="Tag Peer"></LocaleText>
+						<i class="me-auto bi bi-tag"></i> <LocaleText t="Tag Peer"></LocaleText>
 					</a>
 					<PeerTagSelectDropdown
 						@update="this.$emit('refresh')"
