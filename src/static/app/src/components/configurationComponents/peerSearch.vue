@@ -16,7 +16,7 @@ export default {
 		return {store, wireguardConfigurationStore}
 	},
 	props: {
-		configuration: Object
+		configuration: Object, displayTags: Array
 	},
 	data(){
 		return {
@@ -163,7 +163,7 @@ export default {
 					@click="tagManager = !tagManager"
 					class="btn btn-sm w-100 text-primary-emphasis bg-primary-subtle rounded-3 border-1 border-primary-subtle  position-relative">
 
-					<i class="bi me-2 bi-hash"></i>
+					<i class="bi me-2 bi-tag"></i>
 					<LocaleText t="Tags"></LocaleText>
 
 				</button>

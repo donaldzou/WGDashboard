@@ -76,7 +76,6 @@ const configurationModals = ref({
 	}
 })
 const peerSearchBar = ref(false)
-
 // Fetch Peer =====================================
 const fetchPeerList = async () => {
 	await fetchGet("/api/getWireguardConfigurationInfo", {
@@ -110,6 +109,7 @@ setFetchPeerListInterval()
 onBeforeUnmount(() => {
 	clearInterval(fetchPeerListInterval.value);
 	fetchPeerListInterval.value = undefined;
+	wireguardConfigurationStore.Filter.HiddenTags = []
 })
 
 watch(() => {
@@ -155,13 +155,28 @@ const configurationSummary = computed(() => {
 
 const showPeersCount = ref(10)
 const showPeersThreshold = 20;
+const hiddenPeers = computed(() => {
+	return wireguardConfigurationStore.Filter.HiddenTags.map(tag => {
+		return configurationInfo.value.Info.PeerGroups[tag].Peers
+	}).flat()
+})
+const taggedPeers = computed(() => {
+	return Object.values(configurationInfo.value.Info.PeerGroups).map(x => x.Peers).flat()
+})
+
 const searchPeers = computed(() => {
 	const result = wireguardConfigurationStore.searchString ?
 		configurationPeers.value.filter(x => {
-			return x.name.includes(wireguardConfigurationStore.searchString) ||
+			return (x.name.includes(wireguardConfigurationStore.searchString) ||
 				x.id.includes(wireguardConfigurationStore.searchString) ||
-				x.allowed_ip.includes(wireguardConfigurationStore.searchString)
-		}) : configurationPeers.value;
+				x.allowed_ip.includes(wireguardConfigurationStore.searchString))
+				&& !hiddenPeers.value.includes(x.id)
+				&& (
+					wireguardConfigurationStore.Filter.ShowAllPeersWhenHiddenTags || (!wireguardConfigurationStore.Filter.ShowAllPeersWhenHiddenTags && taggedPeers.value.includes(x.id))
+				)
+		}) : configurationPeers.value.filter(x => !hiddenPeers.value.includes(x.id) && (
+			wireguardConfigurationStore.Filter.ShowAllPeersWhenHiddenTags || (!wireguardConfigurationStore.Filter.ShowAllPeersWhenHiddenTags && taggedPeers.value.includes(x.id))
+		));
 
 	if (dashboardStore.Configuration.Server.dashboard_sort === "restricted"){
 		return result.sort((a, b) => {
@@ -199,6 +214,7 @@ watch(() => route.query.id, (newValue) => {
 }, {
 	immediate: true
 })
+
 
 
 </script>
@@ -352,10 +368,10 @@ watch(() => route.query.id, (newValue) => {
 		:configurationInfo="configurationInfo"
 	></PeerDataUsageCharts>
 	<hr>
-	<div style="margin-bottom: 80px">
+	<div style="margin-bottom: 10rem">
 		<PeerSearch
 			v-if="configurationPeers.length > 0"
-			@search="peerSearchBar = true"
+			@search="peerSearchBar = !peerSearchBar"
 			@jobsAll="configurationModals.peerScheduleJobsAll.modalOpen = true"
 			@jobLogs="configurationModals.peerScheduleJobsLogs.modalOpen = true"
 			@editConfiguration="configurationModals.editConfiguration.modalOpen = true"
@@ -383,8 +399,11 @@ watch(() => route.query.id, (newValue) => {
 		</TransitionGroup>
 		
 	</div>
-	<Transition name="slideUp">
-		<PeerSearchBar @close="peerSearchBar = false" v-if="peerSearchBar"></PeerSearchBar>
+	<Transition name="slide-fade">
+		<PeerSearchBar
+			v-if="peerSearchBar"
+			:ConfigurationInfo="configurationInfo"
+			@close="peerSearchBar = false"></PeerSearchBar>
 	</Transition>
 	<PeerListModals 
 		:configurationModals="configurationModals"

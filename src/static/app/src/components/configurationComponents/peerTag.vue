@@ -106,7 +106,8 @@ const predefinedColors = {
 	"white": "#fff",
 	"black": "#000",
 }
-
+import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js"
+const store = WireguardConfigurationsStore()
 const props = defineProps(['configuration'])
 const groups = reactive({...props.configuration.Info.PeerGroups})
 import { v4 } from "uuid"
@@ -154,10 +155,22 @@ watch(() => groups, (newVal) => {
 }, {
 	deep: true
 })
+
+const edit = ref(false)
 </script>
 
 <template>
-<div class="card shadow" id="peerTag">
+<div class="card shadow rounded-3" id="peerTag">
+	<div class="card-header">
+		<div class="form-check form-switch">
+			<input class="form-check-input" type="checkbox" role="switch" id="showAllPeers" v-model="store.Filter.ShowAllPeersWhenHiddenTags">
+			<label class="form-check-label" for="showAllPeers">
+				<small>
+					<LocaleText t="Show All Peers"></LocaleText>
+				</small>
+			</label>
+		</div>
+	</div>
 	<div class="card-body p-2" >
 		<Transition name="zoom" mode="out-in">
 			<div v-if="!iconPickerOpen && !colorPickerOpen">
@@ -165,12 +178,16 @@ watch(() => groups, (newVal) => {
 					<small><LocaleText t="No tag"></LocaleText></small>
 				</div>
 				<div class="d-flex flex-column gap-2" v-else>
-					<PeerTagSetting v-for="(group, key) in groups"
-									@delete="delete groups[key]"
-									@colorPickerOpen="colorPickerOpen = true; selectedKey = key"
-									@iconPickerOpen="iconPickerOpen = true; selectedKey = key"
-									:key="key"
-									:group="group"></PeerTagSetting>
+					<TransitionGroup name="slide-fade">
+						<PeerTagSetting v-for="(group, key) in groups"
+										:groupId="key"
+										@delete="delete groups[key]; store.Filter.HiddenTags = store.Filter.HiddenTags.filter(x => x !== key)"
+										@colorPickerOpen="colorPickerOpen = true; selectedKey = key"
+										@iconPickerOpen="iconPickerOpen = true; selectedKey = key"
+										:key="key"
+										:edit="edit"
+										:group="group"></PeerTagSetting>
+					</TransitionGroup>
 				</div>
 			</div>
 			<PeerTagIconPicker
@@ -184,16 +201,31 @@ watch(() => groups, (newVal) => {
 		</Transition>
 	</div>
 	<div class="card-footer p-2 d-flex gap-2" >
-		<button
-			@click="emits('close')"
-			class="btn btn-sm bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3">
-			<small><LocaleText t="Close"></LocaleText></small>
-		</button>
-		<button
-			@click="addGroup"
-			class="btn btn-sm bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 ms-auto">
-			<small><i class="bi bi-plus-lg me-2"></i><LocaleText t="Tag"></LocaleText></small>
-		</button>
+		<template v-if="!edit">
+			<button
+				@click="emits('close')"
+				class="btn btn-sm bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3">
+				<small><LocaleText t="Close"></LocaleText></small>
+			</button>
+			<button
+				@click="edit = true"
+				class="btn btn-sm bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 ms-auto">
+				<small><i class="bi bi-pen me-2"></i><LocaleText t="Edit"></LocaleText></small>
+			</button>
+		</template>
+		<template v-else>
+
+			<button
+				@click="addGroup"
+				class="btn btn-sm bg-primary-subtle text-primary-emphasis border-primary-subtle rounded-3 ">
+				<small><i class="bi bi-plus-lg me-2"></i><LocaleText t="Tag"></LocaleText></small>
+			</button>
+			<button
+				@click="edit = false"
+				class="btn btn-sm bg-secondary-subtle text-secondary-emphasis border-secondary-subtle rounded-3 ms-auto">
+				<small><LocaleText t="Done"></LocaleText></small>
+			</button>
+		</template>
 	</div>
 </div>
 </template>
