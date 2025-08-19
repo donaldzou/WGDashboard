@@ -18,7 +18,7 @@ export default {
 		Peer: Object, ConfigurationInfo: Object, order: Number, searchPeersLength: Number
 	},
 	mounted() {
-		
+
 	},
 	setup(){
 		const target = ref(null);
