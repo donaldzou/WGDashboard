@@ -15,12 +15,10 @@ export default {
 		PeerTagBadge, LocaleText, PeerSettingsDropdown
 	},
 	props: {
-		Peer: Object, ConfigurationInfo: Object
+		Peer: Object, ConfigurationInfo: Object, order: Number, searchPeersLength: Number
 	},
-	data(){
-		return {
+	mounted() {
 		
-		}
 	},
 	setup(){
 		const target = ref(null);
@@ -37,6 +35,9 @@ export default {
 				return this.Peer.latest_handshake.split(",")[0]
 			}
 			return this.Peer.latest_handshake;
+		},
+		getDropup(){
+			return this.searchPeersLength - this.order <= 3
 		}
 	}
 }
@@ -109,7 +110,7 @@ export default {
 					<PeerTagBadge :BackgroundColor="group.BackgroundColor" :GroupName="group.GroupName" :Icon="'bi-' + group.Icon"
 						v-for="group in Object.values(ConfigurationInfo.Info.PeerGroups).filter(x => x.Peers.includes(Peer.id))"
 					></PeerTagBadge>
-					<div class="ms-auto px-2 rounded-3 subMenuBtn"
+					<div class="ms-auto px-2 rounded-3 subMenuBtn position-relative"
 					     :class="{active: this.subMenuOpened}"
 					>
 						<a role="button" class="text-body"
@@ -118,6 +119,7 @@ export default {
 						</a>
 						<Transition name="slide-fade">
 							<PeerSettingsDropdown
+								:dropup="getDropup"
 								@qrcode="this.$emit('qrcode')"
 								@configurationFile="this.$emit('configurationFile')"
 								@setting="this.$emit('setting')"
