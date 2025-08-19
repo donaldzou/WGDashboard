@@ -6,6 +6,7 @@ import PeerSettingsDropdownTool
 	from "@/components/configurationComponents/peerSettingsDropdownComponents/peerSettingsDropdownTool.vue";
 import PeerTagSelectDropdown
 	from "@/components/configurationComponents/peerSettingsDropdownComponents/peerTagSelectDropdown.vue";
+import {onMounted} from "vue";
 
 export default {
 	name: "peerSettingsDropdown",
@@ -15,7 +16,7 @@ export default {
 		return {dashboardStore}
 	},
 	props: {
-		Peer: Object, ConfigurationInfo: Object
+		Peer: Object, ConfigurationInfo: Object, dropup: Boolean
 	},
 	data(){
 		return{
@@ -23,7 +24,11 @@ export default {
 			restrictBtnDisabled: false,
 			allowAccessBtnDisabled: false,
 			confirmDelete: false,
+			height: 0
 		}
+	},
+	mounted() {
+		this.height = document.querySelector("#peerDropdown").clientHeight
 	},
 	methods: {
 		downloadPeer(){
@@ -84,14 +89,16 @@ export default {
 				this.$emit("refresh")
 				this.allowAccessBtnDisabled = false
 			})
-		}
+		},
+
 	}
 }
 </script>
 
 <template>
-	<ul class="dropdown-menu mt-2 shadow-lg d-block rounded-3" style="max-width: 200px">
-		
+	<ul
+		:class="{'dropup': dropup}"
+		class="dropdown-menu mt-2 shadow-lg d-block rounded-3" id="peerDropdown" style="max-width: 200px">
 		<template v-if="!this.Peer.restricted">
 			<template v-if="!this.confirmDelete">
 				<template v-if="this.Peer.status === 'running'">
@@ -217,6 +224,7 @@ export default {
 		<template v-else>
 			<li>
 				<a class="dropdown-item d-flex text-warning"
+
 				   @click="this.allowAccessPeer()"
 				   :class="{disabled: this.allowAccessBtnDisabled}"
 				   role="button">
@@ -231,8 +239,12 @@ export default {
 
 <style scoped>
 .dropdown-menu{
-	right: 1rem;
+	right: 0;
 	min-width: 200px;
+}
+
+.dropdown-menu.dropup{
+	bottom: 100%;
 }
 
 .dropdown-item.disabled, .dropdown-item:disabled{

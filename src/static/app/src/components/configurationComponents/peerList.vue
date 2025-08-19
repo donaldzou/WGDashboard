@@ -205,6 +205,10 @@ const searchPeers = computed(() => {
 	}).slice(0, showPeersCount.value)
 })
 
+const dropup = (index) => {
+	return searchPeers.value.length - (index + 1) <= 3
+}
+
 watch(() => route.query.id, (newValue) => {
 	if (newValue){
 		wireguardConfigurationStore.searchString = newValue
@@ -384,8 +388,10 @@ watch(() => route.query.id, (newValue) => {
 			<div class="col-12"
 			     :class="{'col-lg-6 col-xl-4': dashboardStore.Configuration.Server.dashboard_peer_list_display === 'grid'}"
 			     :key="peer.id"
-			     v-for="peer in searchPeers">
+			     v-for="(peer, order) in searchPeers">
 				<Peer :Peer="peer"
+					  :searchPeersLength="searchPeers.length"
+					  :order="order"
 					  :ConfigurationInfo="configurationInfo"
 				      @share="configurationModals.peerShare.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @refresh="fetchPeerList()"
