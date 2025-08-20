@@ -42,6 +42,32 @@ const router = createRouter({
 					name: "Settings",
 					path: 'settings',
 					component: () => import('@/views/settings.vue'),
+                    children: [
+                        {
+                            name: "WGDashboard Settings",
+                            path: "",
+                            component: () => import("@/components/settingsComponent/wgdashboardSettings.vue"),
+                            meta: {
+                                title: "WGDashboard Settings"
+                            }
+                        },
+                        {
+                            name: "Peers Settings",
+                            path: "peers_settings",
+                            component: () => import("@/components/settingsComponent/peerDefaultSettings.vue"),
+                            meta: {
+                                title: "Peers Default Settings"
+                            }
+                        },
+                        {
+                            name: "WireGuard Configuration Settings",
+                            path: "wireguard_settings",
+                            component: () => import("@/components/settingsComponent/wireguardConfigurationSettings.vue"),
+                            meta: {
+                                title: "WireGuard Configuration Settings"
+                            }
+                        }
+                    ],
 					meta: {
 						title: "Settings"
 					}

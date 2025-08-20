@@ -30,7 +30,6 @@ const deleteSuccess = async () => {
 
 <template>
 	<div class="text-body w-100 h-100 pb-2 position-relative">
-
 		<div class="w-100 h-100 card rounded-3">
 			<Transition name="zoom">
 				<ClientSettings v-if="settings" @close="settings = false"></ClientSettings>
