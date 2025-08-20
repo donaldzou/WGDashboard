@@ -583,7 +583,7 @@ def API_deletePeers(configName: str) -> ResponseObject:
         if len(peers) == 0:
             return ResponseObject(False, "Please specify one or more peers", status_code=400)
         configuration = WireguardConfigurations.get(configName)
-        status, msg = configuration.deletePeers(peers)
+        status, msg = configuration.deletePeers(peers, AllPeerJobs, AllPeerShareLinks)
         return ResponseObject(status, msg)
 
     return ResponseObject(False, "Configuration does not exist", status_code=404)
