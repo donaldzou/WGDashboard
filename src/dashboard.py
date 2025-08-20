@@ -38,6 +38,7 @@ from logging.config import dictConfig
 
 from modules.DashboardClients import DashboardClients
 from modules.DashboardPlugins import DashboardPlugins
+from modules.DashboardWebHooks import DashboardWebHooks
 
 dictConfig({
     'version': 1,
@@ -1458,7 +1459,7 @@ AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardCon
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
 DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
-
+DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
 
 InitWireguardConfigurationsList(startup=True)
 
@@ -1476,6 +1477,5 @@ def startThreads():
 if __name__ == "__main__":
     startThreads()
     DashboardPlugins.startThreads()
-    #    logging.getLogger().addHandler(logging.StreamHandler())
     app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

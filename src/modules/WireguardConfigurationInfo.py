@@ -1,4 +1,4 @@
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel
 
 class OverridePeerSettingsClass(BaseModel):
     DNS: str = ''
