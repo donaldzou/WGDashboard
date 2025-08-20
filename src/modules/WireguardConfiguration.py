@@ -596,7 +596,7 @@ class WireguardConfiguration:
         return False, f"Restricted {numOfRestrictedPeers} peer(s) successfully. Failed to restrict {numOfFailedToRestrictPeers} peer(s)"
 
 
-    def deletePeers(self, listOfPublicKeys) -> tuple[bool, str]:
+    def deletePeers(self, listOfPublicKeys, AllPeerJobs: PeerJobs, AllPeerShareLinks: PeerShareLinks) -> tuple[bool, str]:
         numOfDeletedPeers = 0
         numOfFailedToDeletePeers = 0
         if not self.getStatus():
@@ -604,6 +604,10 @@ class WireguardConfiguration:
         with self.engine.begin() as conn:
             for p in listOfPublicKeys:
                 found, pf = self.searchPeer(p)
+                for job in pf.jobs:
+                    AllPeerJobs.deleteJob(job)
+                for shareLink in pf.ShareLink:
+                    AllPeerShareLinks.updateLinkExpireDate(shareLink.ShareID, datetime.now())
                 if found:
                     try:
                         subprocess.check_output(f"{self.Protocol} set {self.Name} peer {pf.id} remove",
