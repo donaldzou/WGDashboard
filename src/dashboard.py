@@ -1457,7 +1457,7 @@ WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
 AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
-DashboardPlugin: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
+DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
 
 
 InitWireguardConfigurationsList(startup=True)
@@ -1475,7 +1475,7 @@ def startThreads():
 
 if __name__ == "__main__":
     startThreads()
-    DashboardPlugin.startThreads()
+    DashboardPlugins.startThreads()
     #    logging.getLogger().addHandler(logging.StreamHandler())
     app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

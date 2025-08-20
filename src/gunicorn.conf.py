@@ -1,7 +1,7 @@
 import os.path
 import dashboard, configparser
 from datetime import datetime
-global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger
+global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger, Dash
 app_host, app_port = dashboard.gunicornConfig()
 date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
