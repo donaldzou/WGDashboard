@@ -60,6 +60,7 @@ const sendTestEmail = async () => {
 	<div class="card">
 		<div class="card-header">
 			<h6 class="my-2 d-flex">
+				<i class="bi bi-envelope-fill me-2"></i>
 				<LocaleText t="Email Account"></LocaleText>
 				<span class="text-success ms-auto" v-if="emailIsReady">
 					<i class="bi bi-check-circle-fill me-2"></i>

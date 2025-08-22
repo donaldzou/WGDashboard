@@ -66,6 +66,8 @@ class CustomJsonEncoder(DefaultJSONProvider):
             return o.toJson()
         if type(o) is RowMapping:
             return dict(o)
+        if type(o) is datetime:
+            return o.strftime("%Y-%m-%d %H:%M:%S")
         return super().default(self)
 app.json = CustomJsonEncoder(app)
 
@@ -1368,6 +1370,23 @@ def API_Clients_DeleteClient():
     if not DashboardClients.GetClient(clientId):
         return ResponseObject(False, "Client does not exist")
     return ResponseObject(status=DashboardClients.DeleteClient(clientId))   
+
+@app.get(f'{APP_PREFIX}/api/webHooks/getWebHooks')
+def API_WebHooks_GetWebHooks():
+    return ResponseObject(data=DashboardWebHooks.GetWebHooks())
+
+@app.get(f'{APP_PREFIX}/api/webHooks/createWebHook')
+def API_WebHooks_createWebHook():
+    return ResponseObject(data=DashboardWebHooks.CreateWebHook().model_dump(
+        exclude={'CreationDate'}
+    ))
+
+@app.post(f'{APP_PREFIX}/api/webHooks/updateWebHook')
+def API_WebHooks_UpdateWebHook():
+    data = request.get_json()
+    status, msg = DashboardWebHooks.UpdateWebHook(data)
+    return ResponseObject(status, msg)
+    
 '''
 Index Page
 '''

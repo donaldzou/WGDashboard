@@ -21,6 +21,7 @@ const dashboardConfigurationStore = DashboardConfigurationStore()
 		<div class="card rounded-3">
 			<div class="card-header">
 				<h6 class="my-2">
+					<i class="bi bi-magic me-2"></i>
 					<LocaleText t="Appearance"></LocaleText>
 				</h6>
 			</div>
@@ -35,9 +36,10 @@ const dashboardConfigurationStore = DashboardConfigurationStore()
 				</div>
 			</div>
 		</div>
-		<div class="card">
+		<div class="card rounded-3">
 			<div class="card-header">
 				<h6 class="my-2">
+					<i class="bi bi-ethernet me-2"></i>
 					<LocaleText t="Dashboard IP Address & Listen Port"></LocaleText>
 				</h6>
 			</div>
@@ -45,9 +47,10 @@ const dashboardConfigurationStore = DashboardConfigurationStore()
 				<DashboardIPPortInput></DashboardIPPortInput>
 			</div>
 		</div>
-		<div class="card">
+		<div class="card rounded-3">
 			<div class="card-header">
 				<h6 class="my-2">
+					<i class="bi bi-people-fill me-2"></i>
 					<LocaleText t="Account Settings"></LocaleText>
 				</h6>
 			</div>
@@ -63,18 +66,16 @@ const dashboardConfigurationStore = DashboardConfigurationStore()
 						targetData="password">
 					</AccountSettingsInputPassword>
 				</div>
+				<hr>
+				<div>
+					<h6 >
+						<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
+					</h6>
+					<AccountSettingsMFA v-if="!dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
+				</div>
 			</div>
 		</div>
-		<div class="card">
-			<div class="card-header">
-				<h6 class="my-2">
-					<LocaleText t="Multi-Factor Authentication (MFA)"></LocaleText>
-				</h6>
-			</div>
-			<div class="card-body">
-				<AccountSettingsMFA v-if="!dashboardConfigurationStore.getActiveCrossServer()"></AccountSettingsMFA>
-			</div>
-		</div>
+
 		<DashboardAPIKeys></DashboardAPIKeys>
 		<DashboardEmailSettings></DashboardEmailSettings>
 		<DashboardWebHooks></DashboardWebHooks>

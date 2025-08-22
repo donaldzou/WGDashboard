@@ -78,60 +78,65 @@ export default {
 </script>
 
 <template>
-	<form class="d-flex flex-column gap-2">
-		<div class="row g-2">
-			<div class="col-sm">
-				<div class="form-group">
-					<label :for="'currentPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>
-							<LocaleText t="Current Password"></LocaleText>
-						</small></strong>
-					</label>
-					<input type="password" class="form-control"
-					       autocomplete="current-password"
-					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
-					       v-model="this.value.currentPassword"
-					       :id="'currentPassword_' + this.uuid">
-					<div class="invalid-feedback d-block" v-if="showInvalidFeedback">{{this.invalidFeedback}}</div>
-				</div>
-			</div>
-			<div class="col-sm">
-				<div class="form-group">
-					<label :for="'newPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>
-							<LocaleText t="New Password"></LocaleText>
-						</small></strong>
-					</label>
-					<input type="password" class="form-control"
-					       autocomplete="new-password"
-					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
-					       v-model="this.value.newPassword"
-					       :id="'newPassword_' + this.uuid">
-
-				</div>
-			</div>
-			<div class="col-sm">
-				<div class="form-group">
-					<label :for="'repeatNewPassword_' + this.uuid" class="text-muted mb-1">
-						<strong><small>
-							<LocaleText t="Repeat New Password"></LocaleText>
-						</small></strong>
-					</label>
-					<input type="password" class="form-control"
-					       autocomplete="new-password"
-					       :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
-					       v-model="this.value.repeatNewPassword"
-					       :id="'repeatNewPassword_' + this.uuid">
-				</div>
-			</div>
-		</div>
-		<button 
-			:disabled="!this.passwordValid"
-			class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
-			<i class="bi bi-save2-fill me-2"></i>
+	<div>
+		<h6>
 			<LocaleText t="Update Password"></LocaleText>
-		</button>
-	</form>
+		</h6>
+		<form class="d-flex flex-column gap-2">
+			<div class="row g-2">
+				<div class="col-sm">
+					<div class="form-group">
+						<label :for="'currentPassword_' + this.uuid" class="text-muted mb-1">
+							<strong><small>
+								<LocaleText t="Current Password"></LocaleText>
+							</small></strong>
+						</label>
+						<input type="password" class="form-control"
+							   autocomplete="current-password"
+							   :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
+							   v-model="this.value.currentPassword"
+							   :id="'currentPassword_' + this.uuid">
+						<div class="invalid-feedback d-block" v-if="showInvalidFeedback">{{this.invalidFeedback}}</div>
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label :for="'newPassword_' + this.uuid" class="text-muted mb-1">
+							<strong><small>
+								<LocaleText t="New Password"></LocaleText>
+							</small></strong>
+						</label>
+						<input type="password" class="form-control"
+							   autocomplete="new-password"
+							   :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
+							   v-model="this.value.newPassword"
+							   :id="'newPassword_' + this.uuid">
+
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="form-group">
+						<label :for="'repeatNewPassword_' + this.uuid" class="text-muted mb-1">
+							<strong><small>
+								<LocaleText t="Repeat New Password"></LocaleText>
+							</small></strong>
+						</label>
+						<input type="password" class="form-control"
+							   autocomplete="new-password"
+							   :class="{'is-invalid': showInvalidFeedback, 'is-valid': isValid}"
+							   v-model="this.value.repeatNewPassword"
+							   :id="'repeatNewPassword_' + this.uuid">
+					</div>
+				</div>
+			</div>
+			<button
+				:disabled="!this.passwordValid"
+				class="ms-auto btn bg-success-subtle text-success-emphasis border-1 border-success-subtle rounded-3 shadow-sm" @click="this.useValidation()">
+				<i class="bi bi-save2-fill me-2"></i>
+				<LocaleText t="Save"></LocaleText>
+			</button>
+		</form>
+	</div>
 </template>
 
 <style scoped>
