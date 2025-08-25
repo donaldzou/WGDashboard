@@ -175,7 +175,7 @@ class WebHookSession:
         data['time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['webhook_id'] = webHook.WebHookID
         data['webhook_session'] = self.sessionID
-        data['contents'] = 'hi!'
+        data['content'] = 'hi!'
         self.Prepare()
         self.Execute(data)
         
