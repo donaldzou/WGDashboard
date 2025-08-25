@@ -30,7 +30,7 @@ const Actions = ref({
 	'peer_deleted': "Peer Deleted",
 	'peer_updated': "Peer Updated"
 })
-const emits = defineEmits(['refresh'])
+const emits = defineEmits(['refresh', 'delete'])
 
 const alert = ref(false)
 const alertMsg = ref("")
@@ -41,6 +41,19 @@ const submitWebHook = async (e) => {
 	await fetchPost("/api/webHooks/updateWebHook", newWebHook.value, (res) => {
 		if (res.status){
 			emits('refresh')
+		}else{
+			alert.value = true
+			alertMsg.value = res.message
+		}
+		submitting.value = false
+	})
+}
+
+const deleteWebHook = async () => {
+	submitting.value = true;
+	await fetchPost("/api/webHooks/deleteWebHook", newWebHook.value, (res) => {
+		if (res.status){
+			emits('delete')
 		}else{
 			alert.value = true
 			alertMsg.value = res.message
@@ -208,7 +221,7 @@ const submitWebHook = async (e) => {
 				<h6 class="mb-0">
 					<LocaleText t="Danger Zone"></LocaleText></h6>
 				<button
-					@click="confirmDelete = true"
+					@click="deleteWebHook()"
 					type="button"
 					:class="{disabled: submitting}"
 					class="btn bg-danger-subtle text-danger-emphasis border-danger-subtle rounded-3 ms-auto">

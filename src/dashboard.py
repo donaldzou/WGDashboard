@@ -749,6 +749,10 @@ def API_addPeers(configName):
                 if len(keyPairs) == 0 or (bulkAdd and len(keyPairs) != bulkAddAmount):
                     return ResponseObject(False, "Generating key pairs by bulk failed")
                 status, result = config.addPeers(keyPairs)
+                DashboardWebHooks.RunWebHook('peer_created', {
+                    "configuration": config.Name,
+                    "peers": list(map(lambda p : p.id, keyPairs))
+                })
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
     
             else:
@@ -813,6 +817,10 @@ def API_addPeers(configName):
                         "advanced_security": "off"
                     }]
                 )
+                DashboardWebHooks.RunWebHook('peer_created', {
+                    "configuration": config.Name,
+                    "peers": [{"id": public_key}]
+                })
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
         except Exception as e:
             app.logger.error("Add peers failed", data, exc_info=e)
@@ -1386,7 +1394,14 @@ def API_WebHooks_UpdateWebHook():
     data = request.get_json()
     status, msg = DashboardWebHooks.UpdateWebHook(data)
     return ResponseObject(status, msg)
-    
+
+@app.post(f'{APP_PREFIX}/api/webHooks/deleteWebHook')
+def API_WebHooks_DeleteWebHook():
+    data = request.get_json()
+    status, msg = DashboardWebHooks.DeleteWebHook(data)
+    return ResponseObject(status, msg)
+
+
 '''
 Index Page
 '''

@@ -57,18 +57,22 @@ const selectedWebHook = ref(undefined)
 								<p class="mb-0 fw-bold text-body url" >
 									{{ webHook.PayloadURL }}
 								</p>
-								<small>
+								<p class="url mb-0">
 									<LocaleText t="Subscribed Actions"></LocaleText>:
 									{{ webHook.SubscribedActions.join(", ")}}
-								</small>
+								</p>
 							</a>
 							<div class="flex-grow-1 d-flex text-muted" v-else>
 								<LocaleText t="No Webhooks" class="m-auto"></LocaleText>
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-8 overflow-scroll h-100" v-if="selectedWebHook">
-						<AddWebHook :webHook="selectedWebHook" @refresh="getWebHooks()" :key="selectedWebHook.WebHookID"></AddWebHook>
+					<div class="col-sm-8 overflow-scroll h-100" >
+						<AddWebHook
+							:key="selectedWebHook"
+							v-if="selectedWebHook"
+							@delete="getWebHooks(); selectedWebHook = undefined;"
+							:webHook="selectedWebHook" @refresh="getWebHooks()" ></AddWebHook>
 					</div>
 				</div>
 				<suspense v-else>

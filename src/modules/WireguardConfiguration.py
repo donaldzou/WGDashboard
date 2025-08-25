@@ -444,7 +444,6 @@ class WireguardConfiguration:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()
                 for i in existingPeers:
                     tmpList.append(Peer(i, self))
-        self.Peers = []
         self.Peers = tmpList
 
     def addPeers(self, peers: list) -> tuple[bool, dict]:
