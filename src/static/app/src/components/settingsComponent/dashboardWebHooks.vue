@@ -3,6 +3,7 @@ import LocaleText from "@/components/text/localeText.vue";
 import { fetchGet } from "@/utilities/fetch.js"
 import {onMounted, ref} from "vue";
 import AddWebHook from "@/components/settingsComponent/dashboardWebHooksComponents/addWebHook.vue";
+import WebHookSessions from "@/components/settingsComponent/dashboardWebHooksComponents/webHookSessions.vue";
 const webHooks = ref([])
 const webHooksLoaded = ref(false)
 
@@ -19,6 +20,7 @@ const getWebHooks = async () => {
 const addWebHook = ref(false)
 const selectedWebHook = ref(undefined)
 
+const view = ref("edit")
 </script>
 
 <template>
@@ -67,12 +69,43 @@ const selectedWebHook = ref(undefined)
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-8 overflow-scroll h-100" >
+					<div class="col-sm-8 overflow-scroll h-100" v-if="selectedWebHook">
+						<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+							<div class="container-fluid">
+								<div>
+									<ul class="navbar-nav gap-2">
+										<li class="nav-item">
+											<a
+												@click="view = 'edit'"
+												:class="{active: view === 'edit'}"
+												class="nav-link  rounded-3" role="button">Edit</a>
+										</li>
+										<li class="nav-item">
+											<a
+												:class="{active: view === 'sessions'}"
+												@click="view = 'sessions'"
+												class="nav-link rounded-3" role="button">Sessions</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</nav>
 						<AddWebHook
+							v-if="view === 'edit'"
 							:key="selectedWebHook"
-							v-if="selectedWebHook"
 							@delete="getWebHooks(); selectedWebHook = undefined;"
 							:webHook="selectedWebHook" @refresh="getWebHooks()" ></AddWebHook>
+						<Suspense v-else-if="view === 'sessions'">
+							<WebHookSessions
+
+								:key="selectedWebHook"
+								:webHook="selectedWebHook"></WebHookSessions>
+							<template #fallback>
+								<div class="p-3">
+									<LocaleText t="Loading..."></LocaleText>
+								</div>
+							</template>
+						</Suspense>
 					</div>
 				</div>
 				<suspense v-else>

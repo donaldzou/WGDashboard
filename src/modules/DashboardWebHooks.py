@@ -69,6 +69,7 @@ class DashboardWebHooks:
             db.Column('EndDate',
                       (db.DATETIME if DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else db.TIMESTAMP),
             ),
+            db.Column('Data', db.JSON),
             db.Column('Status', db.INTEGER),
             db.Column('Logs', db.JSON)
         )
@@ -91,12 +92,30 @@ class DashboardWebHooks:
         self.__getWebHooks()
         return list(map(lambda x : x.model_dump(), self.WebHooks))
     
+    def GetWebHookSessions(self, webHook: WebHook):
+        with self.engine.connect() as conn:
+            sessions = conn.execute(
+                self.webHookSessionsTable.select().where(
+                    self.webHookSessionsTable.c.WebHookID == webHook.WebHookID
+                ).order_by(
+                    db.desc(self.webHookSessionsTable.c.StartDate)
+                )
+            ).mappings().fetchall()
+        return sessions
+    
     def CreateWebHook(self) -> WebHook:
         return WebHook(WebHookID=str(uuid.uuid4()))
     
     def SearchWebHook(self, webHook: WebHook) -> WebHook | None:
         try:
             first = next(filter(lambda x : x.WebHookID == webHook.WebHookID, self.WebHooks))
+        except StopIteration:
+            return None
+        return first
+    
+    def SearchWebHookByID(self, webHookID: str) -> WebHook | None:
+        try:
+            first = next(filter(lambda x : x.WebHookID == webHookID, self.WebHooks))
         except StopIteration:
             return None
         return first
@@ -154,6 +173,7 @@ class DashboardWebHooks:
             return False
         self.__getWebHooks()
         subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions, self.WebHooks)
+        data['action'] = action
         for i in subscribedWebHooks:
             try:
                 t = threading.Thread(target=WebHookSession, args=(i,data), daemon=True)
@@ -171,11 +191,11 @@ class WebHookSession:
         self.webHook = webHook
         self.sessionID = str(uuid.uuid4())
         self.webHookSessionLogs: WebHookSessionLogs = WebHookSessionLogs()
-        
-        data['time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.time = datetime.now()
+        data['time'] = self.time.strftime("%Y-%m-%d %H:%M:%S")
         data['webhook_id'] = webHook.WebHookID
         data['webhook_session'] = self.sessionID
-        data['content'] = 'hi!'
+        self.data = data
         self.Prepare()
         self.Execute(data)
         
@@ -185,6 +205,8 @@ class WebHookSession:
                 self.webHookSessionsTable.insert().values({
                     "WebHookSessionID": self.sessionID,
                     "WebHookID": self.webHook.WebHookID,
+                    "Data": self.data,
+                    "StartDate": self.time,
                     "Status": -1,
                     "Logs": self.webHookSessionLogs.model_dump()
                 })
@@ -243,10 +265,8 @@ class WebHookSession:
                 break
             except requests.exceptions.RequestException as e:
                 self.UpdateSessionLog(1, f"Attempt #{i + 1}/5. Request errored. Reason: " + str(e))
-            time.sleep(5)
+            time.sleep(10)
         
         if not success:
             self.UpdateSessionLog(1, "Webhook request failed & terminated.")
             self.UpdateStatus(1)
-            
-            

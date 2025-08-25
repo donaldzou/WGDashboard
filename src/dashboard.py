@@ -1401,6 +1401,18 @@ def API_WebHooks_DeleteWebHook():
     status, msg = DashboardWebHooks.DeleteWebHook(data)
     return ResponseObject(status, msg)
 
+@app.get(f'{APP_PREFIX}/api/webHooks/getWebHookSessions')
+def API_WebHooks_GetWebHookSessions():
+    webhookID = request.args.get('WebHookID')
+    if not webhookID:
+        return ResponseObject(False, "Please provide WebHookID")
+    
+    webHook = DashboardWebHooks.SearchWebHookByID(webhookID)
+    if not webHook:
+        return ResponseObject(False, "Webhook does not exist")
+    
+    return ResponseObject(data=DashboardWebHooks.GetWebHookSessions(webHook))
+    
 
 '''
 Index Page
