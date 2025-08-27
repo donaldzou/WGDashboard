@@ -74,23 +74,23 @@ const getData = () => {
 		historicalCpuUsage.value.push(res.data.CPU.cpu_percent)
 		historicalVirtualMemoryUsage.value.push(res.data.Memory.VirtualMemory.percent)
 		historicalSwapMemoryUsage.value.push(res.data.Memory.SwapMemory.percent)
-		
-		historicalNetworkData.value.bytes_recv.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_recv).reduce((x, y) => x + y)
+
+		historicalNetworkSpeed.value.bytes_recv.push(
+			Object.values(res.data.NetworkInterfaces).map(x => x.realtime.recv).reduce((x, y) => x + y)
 		)
-		historicalNetworkData.value.bytes_sent.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_sent).reduce((x, y) => x + y)
+		historicalNetworkSpeed.value.bytes_sent.push(
+			Object.values(res.data.NetworkInterfaces).map(x => x.realtime.sent).reduce((x, y) => x + y)
 		)
 
-		if (historicalNetworkData.value.bytes_recv.length === 1 && historicalNetworkData.value.bytes_sent.length === 1){
-			historicalNetworkSpeed.value.bytes_recv.push(0)
-			historicalNetworkSpeed.value.bytes_sent.push(0)
-		}else{
-			let bytes_recv_diff = historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 1] - historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 2]
-			let bytes_sent_diff = historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 1] - historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 2]
-			historicalNetworkSpeed.value.bytes_recv.push(Math.round((bytes_recv_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
-			historicalNetworkSpeed.value.bytes_sent.push(Math.round((bytes_sent_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
-		}
+		// if (historicalNetworkData.value.bytes_recv.length === 1 && historicalNetworkData.value.bytes_sent.length === 1){
+		// 	historicalNetworkSpeed.value.bytes_recv.push(0)
+		// 	historicalNetworkSpeed.value.bytes_sent.push(0)
+		// }else{
+		// 	let bytes_recv_diff = historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 1] - historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 2]
+		// 	let bytes_sent_diff = historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 1] - historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 2]
+		// 	historicalNetworkSpeed.value.bytes_recv.push(Math.round(((bytes_recv_diff / 1024 / 1024) + Number.EPSILON) * 10000) / 10000)
+		// 	historicalNetworkSpeed.value.bytes_sent.push(Math.round(((bytes_sent_diff / 1024 / 1024) + Number.EPSILON) * 10000) / 10000)
+		// }
 		
 	})
 }

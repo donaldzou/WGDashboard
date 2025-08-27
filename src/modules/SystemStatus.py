@@ -1,3 +1,5 @@
+import time
+import threading
 import psutil
 class SystemStatus:
     def __init__(self):
@@ -8,6 +10,17 @@ class SystemStatus:
         self.NetworkInterfaces = NetworkInterfaces()
         self.Processes = Processes()
     def toJson(self):
+        process = [
+            threading.Thread(target=self.CPU.getCPUPercent), 
+            threading.Thread(target=self.CPU.getPerCPUPercent),
+            threading.Thread(target=self.NetworkInterfaces.getData)
+        ]
+        for p in process:
+            p.start()
+        for p in process:
+            p.join()
+        
+        
         return {
             "CPU": self.CPU,
             "Memory": {
@@ -25,11 +38,25 @@ class CPU:
         self.cpu_percent: float = 0
         self.cpu_percent_per_cpu: list[float] = []
     def getData(self):
+        pass
+        # try:
+        #     self.cpu_percent_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
+        #     
+        # except Exception as e:
+        #     pass
+    def getCPUPercent(self):
         try:
-            self.cpu_percent_per_cpu = psutil.cpu_percent(interval=0.5, percpu=True)
-            self.cpu_percent = psutil.cpu_percent(interval=0.5)
+            self.cpu_percent = psutil.cpu_percent(interval=1)
         except Exception as e:
             pass
+    
+    def getPerCPUPercent(self):
+        try:
+            self.cpu_percent_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
+
+        except Exception as e:
+            pass
+    
     def toJson(self):
         self.getData()
         return self.__dict__
@@ -95,10 +122,16 @@ class NetworkInterfaces:
             network = psutil.net_io_counters(pernic=True, nowrap=True)
             for i in network.keys():
                 self.interfaces[i] = network[i]._asdict()
+            time.sleep(1)
+            network = psutil.net_io_counters(pernic=True, nowrap=True)
+            for i in network.keys():
+                self.interfaces[i]['realtime'] = {
+                    'sent': round((network[i].bytes_sent - self.interfaces[i]['bytes_sent']) / 1024 / 1024, 4),
+                    'recv': round((network[i].bytes_recv - self.interfaces[i]['bytes_recv']) / 1024 / 1024, 4)
+                }
         except Exception as e:
-            pass
+            print(str(e))
     def toJson(self):
-        self.getData()
         return self.interfaces
 
 class Process:
