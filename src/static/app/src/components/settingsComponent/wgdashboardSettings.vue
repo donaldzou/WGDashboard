@@ -78,7 +78,6 @@ const dashboardConfigurationStore = DashboardConfigurationStore()
 
 		<DashboardAPIKeys></DashboardAPIKeys>
 		<DashboardEmailSettings></DashboardEmailSettings>
-		<DashboardWebHooks></DashboardWebHooks>
 	</div>
 </template>
 

@@ -8,9 +8,11 @@ import Process from "@/components/systemStatusComponents/process.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 const dashboardStore = DashboardConfigurationStore()
+const loaded = ref(false)
 const data = computed(() => {
-	return dashboardStore.SystemStatus
+	return loaded.value ? dashboardStore.SystemStatus : undefined
 })
+
 let interval = null;
 import {
 	Chart,
@@ -59,16 +61,10 @@ const historicalChartTimestamp = ref([])
 const historicalCpuUsage = ref([])
 const historicalVirtualMemoryUsage = ref([])
 const historicalSwapMemoryUsage = ref([])
-const historicalNetworkData = ref({
-	bytes_recv: [],
-	bytes_sent: []
-})
-const historicalNetworkSpeed = reactive({
+const historicalNetworkSpeed = reactive({})
 
-})
-
-const getData = () => {
-	fetchGet("/api/systemStatus", {}, (res) => {
+const getData = async () => {
+	await fetchGet("/api/systemStatus", {}, (res) => {
 		historicalChartTimestamp.value.push(dayjs().format("HH:mm:ss A"))
 		dashboardStore.SystemStatus = res.data
 		historicalCpuUsage.value.push(res.data.CPU.cpu_percent)
@@ -85,6 +81,7 @@ const getData = () => {
 			historicalNetworkSpeed[i].bytes_recv.push(res.data.NetworkInterfaces[i].realtime.recv)
 			historicalNetworkSpeed[i].bytes_sent.push(res.data.NetworkInterfaces[i].realtime.sent)
 		}
+		loaded.value = true
 	})
 }
 
@@ -116,43 +113,6 @@ const chartOption = computed(() => {
 				ticks: {
 					callback: (val, index) => {
 						return `${val}%`
-					}
-				},
-				grid: {
-					display: false
-				},
-			}
-		}
-	}
-})
-const networkSpeedChartOption = computed(() => {
-	return {
-		responsive: true,
-		plugins: {
-			legend: {
-				display: true
-			},
-			tooltip: {
-				callbacks: {
-					label: (tooltipItem) => {
-						return `${tooltipItem.formattedValue} MB/s`
-					}
-				}
-			}
-		},
-		scales: {
-			x: {
-				ticks: {
-					display: false,
-				},
-				grid: {
-					display: false
-				},
-			},
-			y:{
-				ticks: {
-					callback: (val, index) => {
-						return `${val} MB/s`
 					}
 				},
 				grid: {
@@ -208,33 +168,6 @@ const memoryHistoricalChartData = computed(() => {
 	}
 })
 
-const networkSpeedHistoricalChartData = computed(() => {
-	return {
-		labels: [...historicalChartTimestamp.value],
-		datasets: [
-			{
-				label: GetLocale('Real Time Received Data Usage'),
-				data: [...historicalNetworkSpeed.value.bytes_recv],
-				fill: 'origin',
-				borderColor: '#0dcaf0',
-				backgroundColor: '#0dcaf090',
-				tension: 0,
-				pointRadius: 2,
-				borderWidth: 1,
-			},
-			{
-				label: GetLocale('Real Time Sent Data Usage'),
-				data: [...historicalNetworkSpeed.value.bytes_sent],
-				fill: 'origin',
-				backgroundColor: '#ffc10790',
-				borderColor: '#ffc107',
-				tension: 0,
-				pointRadius: 2,
-				borderWidth: 1,
-			}
-		]
-	}
-})
 </script>
 
 <template>

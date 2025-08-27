@@ -75,12 +75,19 @@ const networkSpeedChartOption = computed(() => {
 })
 
 const networkSpeedHistoricalChartData = computed(() => {
+	let bytes_recv = []
+	let bytes_sent = []
+	if (props.historicalNetworkSpeed.bytes_recv && props.historicalNetworkSpeed.bytes_sent){
+		bytes_recv = [...props.historicalNetworkSpeed.bytes_recv]
+		bytes_sent = [...props.historicalNetworkSpeed.bytes_sent]
+	}
+
 	return {
 		labels: [...props.historicalChartTimestamp],
 		datasets: [
 			{
 				label: GetLocale('Real Time Received Data Usage'),
-				data: [...props.historicalNetworkSpeed.bytes_recv],
+				data: bytes_recv,
 				fill: 'origin',
 				borderColor: '#0dcaf0',
 				backgroundColor: '#0dcaf090',
@@ -90,7 +97,7 @@ const networkSpeedHistoricalChartData = computed(() => {
 			},
 			{
 				label: GetLocale('Real Time Sent Data Usage'),
-				data: [...props.historicalNetworkSpeed.bytes_sent],
+				data: bytes_sent,
 				fill: 'origin',
 				backgroundColor: '#ffc10790',
 				borderColor: '#ffc107',

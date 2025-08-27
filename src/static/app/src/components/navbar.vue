@@ -91,6 +91,13 @@ export default {
 						</RouterLink>
 					</li>
 					<li class="nav-item">
+						<RouterLink class="nav-link rounded-3" to="/webhooks"
+									active-class="active">
+							<i class="bi bi-postcard me-2"></i>
+							<LocaleText t="Webhooks"></LocaleText>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
 						<a class="nav-link rounded-3" role="button" @click="openAgentModal = true">
 							<i class="bi bi-question-circle me-2"></i>
 							<LocaleText t="Help"></LocaleText>

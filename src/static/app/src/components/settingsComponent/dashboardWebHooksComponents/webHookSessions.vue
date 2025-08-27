@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { fetchGet } from "@/utilities/fetch.js"
 import LocaleText from "@/components/text/localeText.vue";
-import {computed, ref, watch} from "vue";
+import {computed, onBeforeUnmount, ref, watch} from "vue";
+import WebHookSession from "@/components/settingsComponent/dashboardWebHooksComponents/webHookSession.vue";
+import PreviousWebHookSession
+	from "@/components/settingsComponent/dashboardWebHooksComponents/previousWebHookSession.vue";
 const props = defineProps(['webHook'])
 const sessions = ref([])
 
@@ -24,107 +27,37 @@ const latestSession = computed(() => {
 	return sessions.value[0]
 })
 
-watch(() => latestSession.value.Status, () => {
-	if (latestSession.value.Status > -1) clearInterval(refreshInterval.value)
+// watch(() => latestSession.value.Status, () => {
+// 	if (latestSession.value.Status > -1) clearInterval(refreshInterval.value)
+// })
+
+// if (latestSession.value.Status === -1){
+//
+// }
+refreshInterval.value = setInterval(() => {
+	getSessions()
+}, 5000)
+onBeforeUnmount(() => {
+	clearInterval(refreshInterval.value)
 })
-
-
-
-if (latestSession.value.Status === -1){
-	refreshInterval.value = setInterval(() => {
-		getSessions()
-	}, 5000)
-}
 </script>
 
 <template>
-	<div class="p-3" v-if="latestSession">
-		<h6 class="mb-3">
-			<LocaleText t="Latest Session"></LocaleText>
-		</h6>
-		<h3 :class="{'text-success': latestSession.Status === 0, 'text-danger': latestSession.Status === 1}">
-			<span v-if="latestSession.Status === 0">
-				<i class="bi bi-check-circle-fill me-2"></i><LocaleText t="Success"></LocaleText>
-			</span>
-			<span v-else-if="latestSession.Status === 1">
-				<i class="bi bi-x-circle-fill me-2"></i><LocaleText t="Failed"></LocaleText>
-			</span>
-			<span v-else-if="latestSession.Status === -1">
-				<i class="spinner-border me-2"></i><LocaleText t="Requesting..."></LocaleText>
-			</span>
-		</h3>
-		<div class="d-flex gap-4 align-items-center">
-			<div>
-				<small class="text-muted">
-					<LocaleText t="Started At"></LocaleText>
-				</small>
-				<h6>
-					{{ latestSession.StartDate }}
-				</h6>
-			</div>
-			<div v-if="latestSession.EndDate">
-				<i class="bi bi-arrow-right"></i>
-			</div>
-			<div v-if="latestSession.EndDate">
-				<small class="text-muted">
-					<LocaleText t="Ended At"></LocaleText>
-				</small>
-				<h6>
-					{{ latestSession.EndDate }}
-				</h6>
-			</div>
-		</div>
-		<hr>
-		<div>
-			<h6>
-				<LocaleText t="Logs"></LocaleText>
+	<div v-if="latestSession">
+		<div class="p-3">
+			<h6 class="mb-3">
+				<LocaleText t="Latest Session"></LocaleText>
 			</h6>
-			<div class="table-responsive">
-				<table class="table">
-					<thead>
-					<tr>
-						<th scope="col">
-							<LocaleText t="Datetime"></LocaleText>
-						</th>
-						<th scope="col">
-							<LocaleText t="Status"></LocaleText>
-						</th>
-						<th scope="col">
-							<LocaleText t="Message"></LocaleText>
-						</th>
-					</tr>
-					</thead>
-					<tbody>
-					<tr v-for="log in [...latestSession.Logs.Logs].reverse()">
-						<td style="white-space: nowrap">
-							{{ log.LogTime }}
-						</td>
-						<td style="white-space: nowrap" :class="{'text-success': log.Status === 0, 'text-danger': log.Status === 1}">
-							<span v-if="log.Status === 0">
-								<i class="bi bi-check-circle-fill me-2"></i>
-							</span>
-							<span v-else-if="log.Status === 1">
-								<i class="bi bi-x-circle-fill me-2"></i>
-							</span>
-							<span v-else-if="log.Status === -1">
-								<i class="bi bi-circle me-2"></i>
-							</span>
-						</td>
-						<td>
-							{{ log.Message }}
-						</td>
-					</tr>
-					</tbody>
-				</table>
-			</div>
+			<WebHookSession :session="latestSession" :key="latestSession.WebHookSessionID"></WebHookSession>
 		</div>
-
-		<div>
+		<div class="border-top p-3" v-if="sessions.length > 1">
 			<h6>
-				<LocaleText t="Data"></LocaleText>
+				<LocaleText t="Previous Sessions"></LocaleText>
 			</h6>
-			<div class="bg-body-tertiary p-3 rounded-3" style="max-height: 200px; overflow: scroll">
-				<pre><code>{{ JSON.stringify(latestSession.Data, null, 4) }}</code></pre>
+			<div class="d-flex flex-column gap-2">
+				<PreviousWebHookSession :session="session"
+										:key="session.WebHookSessionID"
+										v-for="session in sessions.slice(1)"></PreviousWebHookSession>
 			</div>
 		</div>
 	</div>

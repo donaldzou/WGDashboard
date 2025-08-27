@@ -124,6 +124,14 @@ const router = createRouter({
 						}
 					]
 				},
+                {
+                    name: "Webhooks",
+                    path: "webhooks",
+                    component: () => import("@/components/settingsComponent/dashboardWebHooks.vue"),
+                    meta: {
+                        title: "Webhooks"
+                    }
+                },
 				{
 					name: "Configuration",
 					path: 'configuration/:id',

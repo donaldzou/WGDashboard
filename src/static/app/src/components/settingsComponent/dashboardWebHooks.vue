@@ -4,6 +4,8 @@ import { fetchGet } from "@/utilities/fetch.js"
 import {onMounted, ref} from "vue";
 import AddWebHook from "@/components/settingsComponent/dashboardWebHooksComponents/addWebHook.vue";
 import WebHookSessions from "@/components/settingsComponent/dashboardWebHooksComponents/webHookSessions.vue";
+import ClientGroup from "@/components/clientComponents/clientGroup.vue";
+import ClientSettings from "@/components/clientComponents/clientSettings.vue";
 const webHooks = ref([])
 const webHooksLoaded = ref(false)
 
@@ -24,31 +26,33 @@ const view = ref("edit")
 </script>
 
 <template>
-	<div class="card rounded-3">
-		<div class="card-header d-flex align-items-center">
-			<h6 class="my-2">
-				<i class="bi bi-plug-fill me-2"></i>
-				<LocaleText t="Webhooks"></LocaleText>
-			</h6>
-			<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm ms-auto"
-				@click="addWebHook = true; selectedWebHook = undefined"
-					v-if="!addWebHook"
-			>
-				<i class="bi bi-plus-circle-fill me-2"></i>
-				<LocaleText t="Webhook"></LocaleText>
-			</button>
-			<button class="btn bg-secondary-subtle text-secondary-emphasis border-1 border-secondary-subtle rounded-3 shadow-sm ms-auto"
-					@click="addWebHook = false"
-					v-else
-			>
-				<i class="bi bi-chevron-left me-2"></i>
-				<LocaleText t="Back"></LocaleText>
-			</button>
-		</div>
-		<div class="card-body p-0">
-			<div style="height: 600px" class="overflow-scroll">
-				<div class="row g-0 h-100" v-if="!addWebHook">
-					<div class="col-sm-4 border-end h-100" style="overflow-y: scroll">
+	<div class="text-body w-100 h-100 pb-2 position-relative">
+		<div class="w-100 h-100 card rounded-3">
+			<div class="border-bottom z-0">
+				<div class="d-flex text-body align-items-center sticky-top p-3 bg-body-tertiary rounded-top-3" style="border-top-right-radius: 0 !important;">
+					<h6 class="my-2">
+						<i class="bi bi-plug-fill me-2"></i>
+						<LocaleText t="Webhooks"></LocaleText>
+					</h6>
+					<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm ms-auto"
+							@click="addWebHook = true; selectedWebHook = undefined"
+							v-if="!addWebHook"
+					>
+						<i class="bi bi-plus-circle-fill me-2"></i>
+						<LocaleText t="Webhook"></LocaleText>
+					</button>
+					<button class="btn bg-secondary-subtle text-secondary-emphasis border-1 border-secondary-subtle rounded-3 shadow-sm ms-auto"
+							@click="addWebHook = false"
+							v-else
+					>
+						<i class="bi bi-chevron-left me-2"></i>
+						<LocaleText t="Back"></LocaleText>
+					</button>
+				</div>
+			</div>
+			<div class="row h-100 g-0" v-if="!addWebHook">
+				<div class="col-sm-4 border-end d-flex flex-column clientListContainer">
+					<div class="d-flex flex-column overflow-y-scroll" style="flex: 1 0 0">
 						<div class="list-group d-flex flex-column d-flex h-100">
 							<a role="button"
 							   @click="selectedWebHook = webHook"
@@ -69,7 +73,11 @@ const view = ref("edit")
 							</div>
 						</div>
 					</div>
-					<div class="col-sm-8 overflow-scroll h-100" v-if="selectedWebHook">
+				</div>
+				<div
+					v-if="selectedWebHook"
+					class="col-sm-8 clientViewerContainer  d-flex flex-column " >
+					<div class="overflow-scroll"  style="flex: 1 0 0">
 						<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
 							<div class="container-fluid">
 								<div>
@@ -108,12 +116,11 @@ const view = ref("edit")
 						</Suspense>
 					</div>
 				</div>
-				<suspense v-else>
-					<AddWebHook @refresh="selectedWebHook = undefined; addWebHook = false;  getWebHooks(); "></AddWebHook>
-				</suspense>
 			</div>
+			<suspense v-else>
+				<AddWebHook @refresh="selectedWebHook = undefined; addWebHook = false;  getWebHooks(); "></AddWebHook>
+			</suspense>
 		</div>
-
 	</div>
 </template>
 

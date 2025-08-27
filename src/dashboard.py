@@ -751,7 +751,7 @@ def API_addPeers(configName):
                 status, result = config.addPeers(keyPairs)
                 DashboardWebHooks.RunWebHook('peer_created', {
                     "configuration": config.Name,
-                    "peers": list(map(lambda p : p.id, keyPairs))
+                    "peers": list(map(lambda p : p['id'], keyPairs))
                 })
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
     
