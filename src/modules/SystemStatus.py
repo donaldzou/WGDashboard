@@ -1,3 +1,5 @@
+import shutil
+import subprocess
 import time
 import threading
 import psutil
@@ -29,6 +31,7 @@ class SystemStatus:
             },
             "Disks": self.Disks,
             "NetworkInterfaces": self.NetworkInterfaces,
+            "NetworkInterfacesPriority": self.NetworkInterfaces.getInterfacePriorities(),
             "Processes": self.Processes
         }
         
@@ -117,7 +120,23 @@ class Disk:
 class NetworkInterfaces:
     def __init__(self):
         self.interfaces = {}
+        
+    def getInterfacePriorities(self):
+        if shutil.which("ip"):
+            result = subprocess.check_output(["ip", "route", "show"]).decode()
+            priorities = {}
+            for line in result.splitlines():
+                if "metric" in line and "dev" in line:
+                    parts = line.split()
+                    dev = parts[parts.index("dev")+1]
+                    metric = int(parts[parts.index("metric")+1])
+                    if dev not in priorities:
+                        priorities[dev] = metric
+            return priorities
+        return {}
+
     def getData(self):
+        self.interfaces.clear()
         try:
             network = psutil.net_io_counters(pernic=True, nowrap=True)
             for i in network.keys():
