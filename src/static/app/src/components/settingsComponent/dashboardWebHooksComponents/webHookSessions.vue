@@ -27,13 +27,6 @@ const latestSession = computed(() => {
 	return sessions.value[0]
 })
 
-// watch(() => latestSession.value.Status, () => {
-// 	if (latestSession.value.Status > -1) clearInterval(refreshInterval.value)
-// })
-
-// if (latestSession.value.Status === -1){
-//
-// }
 refreshInterval.value = setInterval(() => {
 	getSessions()
 }, 5000)
@@ -48,7 +41,8 @@ onBeforeUnmount(() => {
 			<h6 class="mb-3">
 				<LocaleText t="Latest Session"></LocaleText>
 			</h6>
-			<WebHookSession :session="latestSession" :key="latestSession.WebHookSessionID"></WebHookSession>
+			<WebHookSession :session="latestSession"
+							:key="latestSession.WebHookID"></WebHookSession>
 		</div>
 		<div class="border-top p-3" v-if="sessions.length > 1">
 			<h6>

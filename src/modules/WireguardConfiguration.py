@@ -11,12 +11,14 @@ from itertools import islice
 
 from .ConnectionString import ConnectionString
 from .DashboardConfig import DashboardConfig
+from .DashboardWebHooks import DashboardWebHooks
 from .Peer import Peer
 from .PeerJobs import PeerJobs
 from .PeerShareLinks import PeerShareLinks
 from .Utilities import StringToBoolean, GenerateWireguardPublicKey, RegexMatch, ValidateDNSAddress, \
     ValidateEndpointAllowedIPs
 from .WireguardConfigurationInfo import WireguardConfigurationInfo, PeerGroupsClass
+from .DashboardWebHooks import DashboardWebHooks
 
 
 class WireguardConfiguration:
@@ -30,6 +32,7 @@ class WireguardConfiguration:
     def __init__(self, DashboardConfig: DashboardConfig, 
                  AllPeerJobs: PeerJobs,
                  AllPeerShareLinks: PeerShareLinks,
+                 DashboardWebHooks: DashboardWebHooks,
                  name: str = None,
                  data: dict = None,
                  backup: dict = None,
@@ -61,6 +64,7 @@ class WireguardConfiguration:
         self.AllPeerJobs = AllPeerJobs
         self.DashboardConfig = DashboardConfig
         self.AllPeerShareLinks = AllPeerShareLinks
+        self.DashboardWebHooks = DashboardWebHooks
         self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
         self.engine: sqlalchemy.engine = sqlalchemy.create_engine(ConnectionString("wgdashboard"))
         self.metadata: sqlalchemy.MetaData = sqlalchemy.MetaData()
@@ -497,6 +501,10 @@ class WireguardConfiguration:
                 p = self.searchPeer(p['id'])
                 if p[0]:
                     result['peers'].append(p[1])
+            self.DashboardWebHooks.RunWebHook("peer_created", {
+                "configuration": self.Name,
+                "peers": list(map(lambda k : k['id'], peers))
+            })
             return True, result
         except Exception as e:
             result['message'] = str(e)
@@ -598,6 +606,7 @@ class WireguardConfiguration:
     def deletePeers(self, listOfPublicKeys, AllPeerJobs: PeerJobs, AllPeerShareLinks: PeerShareLinks) -> tuple[bool, str]:
         numOfDeletedPeers = 0
         numOfFailedToDeletePeers = 0
+        deleted = []
         if not self.getStatus():
             self.toggleConfiguration()
         with self.engine.begin() as conn:
@@ -616,6 +625,7 @@ class WireguardConfiguration:
                                 self.peersTable.columns.id == pf.id
                             )
                         )
+                        deleted.append(pf.id)
                         numOfDeletedPeers += 1
                     except Exception as e:
                         numOfFailedToDeletePeers += 1
@@ -624,12 +634,17 @@ class WireguardConfiguration:
             return False, "Failed to save configuration through WireGuard"
 
         self.getPeers()
-
+        
         if numOfDeletedPeers == 0 and numOfFailedToDeletePeers == 0:
             return False, "No peer(s) to delete found"
-
+        
         if numOfDeletedPeers == len(listOfPublicKeys):
+            self.DashboardWebHooks.RunWebHook("peer_deleted", {
+                "configuration": self.Name,
+                "peers": deleted
+            })
             return True, f"Deleted {numOfDeletedPeers} peer(s)"
+        
         return False, f"Deleted {numOfDeletedPeers} peer(s) successfully. Failed to delete {numOfFailedToDeletePeers} peer(s)"
 
     def __wgSave(self) -> tuple[bool, str] | tuple[bool, None]:

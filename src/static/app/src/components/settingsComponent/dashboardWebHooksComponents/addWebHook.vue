@@ -31,7 +31,8 @@ const Actions = ref({
 	'peer_updated': "Peer Updated"
 })
 const emits = defineEmits(['refresh', 'delete'])
-
+import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore"
+const store = DashboardConfigurationStore()
 const alert = ref(false)
 const alertMsg = ref("")
 const submitting = ref(false)
@@ -41,9 +42,11 @@ const submitWebHook = async (e) => {
 	await fetchPost("/api/webHooks/updateWebHook", newWebHook.value, (res) => {
 		if (res.status){
 			emits('refresh')
+			store.newMessage("Server", "Webhook saved", "success")
 		}else{
 			alert.value = true
 			alertMsg.value = res.message
+			store.newMessage("Server", "Webhook failed to save", "danger")
 		}
 		submitting.value = false
 	})
@@ -54,9 +57,11 @@ const deleteWebHook = async () => {
 	await fetchPost("/api/webHooks/deleteWebHook", newWebHook.value, (res) => {
 		if (res.status){
 			emits('delete')
+			store.newMessage("Server", "Webhook deleted", "success")
 		}else{
 			alert.value = true
 			alertMsg.value = res.message
+			store.newMessage("Server", "Webhook failed to delete", "danger")
 		}
 		submitting.value = false
 	})

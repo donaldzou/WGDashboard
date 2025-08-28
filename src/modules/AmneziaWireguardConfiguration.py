@@ -8,12 +8,14 @@ from .AmneziaWGPeer import AmneziaWGPeer
 from .PeerShareLinks import PeerShareLinks
 from .Utilities import RegexMatch
 from .WireguardConfiguration import WireguardConfiguration
+from .DashboardWebHooks import DashboardWebHooks
 
 
 class AmneziaWireguardConfiguration(WireguardConfiguration):
     def __init__(self, DashboardConfig,
                  AllPeerJobs: PeerJobs,
                  AllPeerShareLinks: PeerShareLinks,
+                 DashboardWebHooks: DashboardWebHooks,
                  name: str = None, data: dict = None, backup: dict = None, startup: bool = False):
         self.Jc = 0
         self.Jmin = 0
@@ -25,7 +27,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
         self.H3 = 3
         self.H4 = 4
 
-        super().__init__(DashboardConfig, AllPeerJobs, AllPeerShareLinks, name, data, backup, startup, wg=False)
+        super().__init__(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, name, data, backup, startup, wg=False)
 
     def toJson(self):
         self.Status = self.getStatus()
@@ -301,6 +303,10 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                 p = self.searchPeer(p['id'])
                 if p[0]:
                     result['peers'].append(p[1])
+            self.DashboardWebHooks.RunWebHook("peer_created", {
+                "configuration": self.Name,
+                "peers": list(map(lambda k : k['id'], peers))
+            })
             return True, result
         except Exception as e:
             result['message'] = str(e)

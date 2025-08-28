@@ -270,11 +270,11 @@ def API_addWireguardConfiguration():
         )
         WireguardConfigurations[data['ConfigurationName']] = (
             WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data=data, name=data['ConfigurationName'])) if protocol == 'wg' else (
-            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data=data, name=data['ConfigurationName']))
+            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data=data, name=data['ConfigurationName']))
     else:
         WireguardConfigurations[data['ConfigurationName']] = (
-            WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data=data)) if data.get('Protocol') == 'wg' else (
-            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data=data))
+            WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data=data)) if data.get('Protocol') == 'wg' else (
+            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, DashboardWebHooks, data=data))
     return ResponseObject()
 
 @app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration')
@@ -371,7 +371,7 @@ def API_renameWireguardConfiguration():
     
     status, message = rc.renameConfiguration(data.get("NewConfigurationName"))
     if status:
-        WireguardConfigurations[data.get("NewConfigurationName")] = (WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data.get("NewConfigurationName")) if rc.Protocol == 'wg' else AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, data.get("NewConfigurationName")))
+        WireguardConfigurations[data.get("NewConfigurationName")] = (WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data.get("NewConfigurationName")) if rc.Protocol == 'wg' else AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data.get("NewConfigurationName")))
     else:
         WireguardConfigurations[data.get("ConfigurationName")] = rc
     return ResponseObject(status, message)
@@ -552,9 +552,13 @@ def API_updatePeerSettings(configName):
             if wireguardConfig.Protocol == 'wg':
                 status, msg = peer.updatePeer(name, private_key, preshared_key, dns_addresses,
                                        allowed_ip, endpoint_allowed_ip, mtu, keepalive)
-                return ResponseObject(status, msg)
-            status, msg = peer.updatePeer(name, private_key, preshared_key, dns_addresses,
-                allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
+            else:
+                status, msg = peer.updatePeer(name, private_key, preshared_key, dns_addresses,
+                    allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
+            DashboardWebHooks.RunWebHook('peer_updated', {
+                "configuration": wireguardConfig.Name,
+                "peers": [id]
+            })
             return ResponseObject(status, msg)
             
     return ResponseObject(False, "Peer does not exist")
@@ -749,10 +753,10 @@ def API_addPeers(configName):
                 if len(keyPairs) == 0 or (bulkAdd and len(keyPairs) != bulkAddAmount):
                     return ResponseObject(False, "Generating key pairs by bulk failed")
                 status, result = config.addPeers(keyPairs)
-                DashboardWebHooks.RunWebHook('peer_created', {
-                    "configuration": config.Name,
-                    "peers": list(map(lambda p : p['id'], keyPairs))
-                })
+                # DashboardWebHooks.RunWebHook('peer_created', {
+                #     "configuration": config.Name,
+                #     "peers": list(map(lambda p : p['id'], keyPairs))
+                # })
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
     
             else:
@@ -817,10 +821,10 @@ def API_addPeers(configName):
                         "advanced_security": "off"
                     }]
                 )
-                DashboardWebHooks.RunWebHook('peer_created', {
-                    "configuration": config.Name,
-                    "peers": [{"id": public_key}]
-                })
+                # DashboardWebHooks.RunWebHook('peer_created', {
+                #     "configuration": config.Name,
+                #     "peers": [{"id": public_key}]
+                # })
                 return ResponseObject(status=status, message=result['message'], data=result['peers'])
         except Exception as e:
             app.logger.error("Add peers failed", data, exc_info=e)
@@ -1473,9 +1477,9 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 try:
                     if i in WireguardConfigurations.keys():
                         if WireguardConfigurations[i].configurationFileChanged():
-                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i)
+                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
                     else:
-                        WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i, startup=startup)
+                        WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
                 except WireguardConfiguration.InvalidConfigurationFileException as e:
                     print(f"{i} have an invalid configuration file.")
 
@@ -1488,9 +1492,9 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 try:
                     if i in WireguardConfigurations.keys():
                         if WireguardConfigurations[i].configurationFileChanged():
-                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i)
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
                     else:
-                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, i, startup=startup)
+                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
                 except WireguardConfiguration.InvalidConfigurationFileException as e:
                     print(f"{i} have an invalid configuration file.")
 

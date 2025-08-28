@@ -1,8 +1,11 @@
 <script setup lang="ts">
 
 import LocaleText from "@/components/text/localeText.vue";
+import {computed} from "vue";
 const props = defineProps(['session'])
-
+const formattedBody = computed(() => {
+	return JSON.stringify(props.session.Data, null, 4)
+})
 </script>
 
 <template>
@@ -94,7 +97,7 @@ const props = defineProps(['session'])
 			<LocaleText t="Data"></LocaleText>
 		</h6>
 		<div class="bg-body-tertiary p-3 rounded-3">
-			<pre class="mb-0"><code>{{ JSON.stringify(session.Data, null, 4) }}</code></pre>
+			<pre class="mb-0"><code>{{ formattedBody }}</code></pre>
 		</div>
 	</div>
 </div>

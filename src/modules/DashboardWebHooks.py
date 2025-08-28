@@ -168,19 +168,23 @@ class DashboardWebHooks:
             return False, str(e)
         return True, None
     
-    def RunWebHook(self, action: str, data: dict[str, str]):
-        if action not in WebHookActions:
-            return False
-        self.__getWebHooks()
-        subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions, self.WebHooks)
-        data['action'] = action
-        for i in subscribedWebHooks:
-            try:
-                t = threading.Thread(target=WebHookSession, args=(i,data), daemon=True)
-                t.start()
-                print("Spinning threads...")
-            except Exception as e:
-                pass
+    def RunWebHook(self, action: str, data):
+        try:
+            if action not in WebHookActions:
+                return False
+            self.__getWebHooks()
+            subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions, self.WebHooks)
+            data['action'] = action
+            for i in subscribedWebHooks:
+                try:
+                    ws = WebHookSession(i, data)
+                    t = threading.Thread(target=ws.Execute, daemon=True)
+                    t.start()
+                    print("Spinning threads...")
+                except Exception as e:
+                    print(e)
+        except Exception as e:
+            print(e)
         return True
 
 class WebHookSession:
@@ -197,7 +201,6 @@ class WebHookSession:
         data['webhook_session'] = self.sessionID
         self.data = data
         self.Prepare()
-        self.Execute(data)
         
     def Prepare(self):
         with self.engine.begin() as conn:
@@ -235,7 +238,7 @@ class WebHookSession:
                 )
             )
     
-    def Execute(self, data: dict[str, str]):
+    def Execute(self):
         success = False
         
         for i in range(5):
@@ -247,15 +250,15 @@ class WebHookSession:
                     headerDictionary[header['key']] = header['value']
                 
             if self.webHook.ContentType == "application/json":
-                reqData = json.dumps(data)
+                reqData = json.dumps(self.data)
             else:
-                for (key, val) in data.items():
-                    if type(data[key]) not in [str, int]:
-                        data[key] = json.dumps(data[key])
-                reqData = urllib.parse.urlencode(data)
+                for (key, val) in self.data.items():
+                    if type(self.data[key]) not in [str, int]:
+                        self.data[key] = json.dumps(self.data[key])
+                reqData = urllib.parse.urlencode(self.data)
             try:
                 req = requests.post(
-                    self.webHook.PayloadURL, headers=headerDictionary, timeout=10, data=reqData
+                    self.webHook.PayloadURL, headers=headerDictionary, timeout=10, data=reqData, verify=self.webHook.VerifySSL
                 )
                 req.raise_for_status()
                 success = True

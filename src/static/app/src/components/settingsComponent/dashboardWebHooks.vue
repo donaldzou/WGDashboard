@@ -4,8 +4,6 @@ import { fetchGet } from "@/utilities/fetch.js"
 import {onMounted, ref} from "vue";
 import AddWebHook from "@/components/settingsComponent/dashboardWebHooksComponents/addWebHook.vue";
 import WebHookSessions from "@/components/settingsComponent/dashboardWebHooksComponents/webHookSessions.vue";
-import ClientGroup from "@/components/clientComponents/clientGroup.vue";
-import ClientSettings from "@/components/clientComponents/clientSettings.vue";
 const webHooks = ref([])
 const webHooksLoaded = ref(false)
 
@@ -34,14 +32,14 @@ const view = ref("edit")
 						<i class="bi bi-plug-fill me-2"></i>
 						<LocaleText t="Webhooks"></LocaleText>
 					</h6>
-					<button class="btn bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm ms-auto"
+					<button class="btn btn-sm bg-primary-subtle text-primary-emphasis border-1 border-primary-subtle rounded-3 shadow-sm ms-auto"
 							@click="addWebHook = true; selectedWebHook = undefined"
 							v-if="!addWebHook"
 					>
 						<i class="bi bi-plus-circle-fill me-2"></i>
 						<LocaleText t="Webhook"></LocaleText>
 					</button>
-					<button class="btn bg-secondary-subtle text-secondary-emphasis border-1 border-secondary-subtle rounded-3 shadow-sm ms-auto"
+					<button class="btn btn-sm bg-secondary-subtle text-secondary-emphasis border-1 border-secondary-subtle rounded-3 shadow-sm ms-auto"
 							@click="addWebHook = false"
 							v-else
 					>
@@ -105,7 +103,6 @@ const view = ref("edit")
 							:webHook="selectedWebHook" @refresh="getWebHooks()" ></AddWebHook>
 						<Suspense v-else-if="view === 'sessions'">
 							<WebHookSessions
-
 								:key="selectedWebHook"
 								:webHook="selectedWebHook"></WebHookSessions>
 							<template #fallback>
