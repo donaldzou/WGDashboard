@@ -41,7 +41,11 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			window.localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 		},
 		addCrossServerConfiguration(){
-			this.CrossServerConfiguration.ServerList[v4().toString()] = {host: "", apiKey: "", active: false}
+			this.CrossServerConfiguration.ServerList[v4().toString()] = {
+                host: "",
+                apiKey: "",
+                active: false
+            }
 		},
 		deleteCrossServerConfiguration(key){
 			delete this.CrossServerConfiguration.ServerList[key];

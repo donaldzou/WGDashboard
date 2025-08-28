@@ -3,13 +3,22 @@ import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.
 
 const getHeaders = () => {
 	let headers = {
-		"content-type": "application/json"
+		"Content-Type": "application/json"
 	}
 	const store = DashboardConfigurationStore();
-	const apiKey = store.getActiveCrossServer();
-	if (apiKey){
-		headers['wg-dashboard-apikey'] = apiKey.apiKey
+	const crossServer = store.getActiveCrossServer();
+	if (crossServer){
+		headers['wg-dashboard-apikey'] = crossServer.apiKey
+        if (crossServer.headers){
+            for (let header of Object.values(crossServer.headers)){
+                if (header.key && header.value && !Object.keys(headers).includes(header.key)){
+                    headers[header.key] = header.value
+                }
+            }
+        }
 	}
+
+
 	return headers
 }
 

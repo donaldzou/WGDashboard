@@ -90,7 +90,7 @@ _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
     "methods": "DELETE, POST, GET, OPTIONS",
-    "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
+    "allow_headers": ["Content-Type", "wg-dashboard-apikey", "name"]
 }})
 
 '''
