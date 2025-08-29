@@ -90,7 +90,7 @@ _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
     "methods": "DELETE, POST, GET, OPTIONS",
-    "allow_headers": ["Content-Type", "wg-dashboard-apikey", "name"]
+    "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
 }})
 
 '''
@@ -883,6 +883,31 @@ def API_getConfigurationInfo():
         "configurationRestrictedPeers": WireguardConfigurations[configurationName].getRestrictedPeersList()
     })
 
+@app.get(f'{APP_PREFIX}/api/getPeerSessions')
+def API_GetPeerSessions():
+    configurationName = request.args.get("configurationName")
+    id = request.args.get('id')
+    try:
+        startDate = request.args.get('startDate', None)
+        endDate = request.args.get('endDate', None)
+        
+        if startDate is None:
+            endDate = None
+        else:
+            startDate = datetime.strptime(startDate, "%Y-%m-%d")
+            if endDate:
+                endDate = datetime.strptime(endDate, "%Y-%m-%d")
+                if startDate > endDate:
+                    return ResponseObject(False, "startDate must be smaller than endDate")
+    except Exception as e:
+        return ResponseObject(False, "Dates are invalid")
+    if not configurationName or not id:
+        return ResponseObject(False, "Please provide configurationName and id")
+    fp, p = WireguardConfigurations.get(configurationName).searchPeer(id)
+    if fp:
+        return ResponseObject(data=p.getSessions(startDate, endDate))
+    return ResponseObject(False, "Peer does not exist")
+
 @app.get(f'{APP_PREFIX}/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])
@@ -1431,17 +1456,23 @@ def peerInformationBackgroundThread():
     global WireguardConfigurations
     app.logger.info("Background Thread #1 Started")
     app.logger.info("Background Thread #1 PID:" + str(threading.get_native_id()))
-
+    delay = 6
     time.sleep(10)
     while True:
         with app.app_context():
             for c in WireguardConfigurations.values():
                 if c.getStatus():
-                    c.getPeersTransfer()
                     c.getPeersLatestHandshake()
+                    c.getPeersTransfer()
                     c.getPeersEndpoint()
                     c.getPeers()
+                    if delay == 6:
+                        c.logPeersTraffic()
                     c.getRestrictedPeersList()
+        if delay == 6:
+            delay = 1
+        else:
+            delay += 1
         time.sleep(10)
 
 def peerJobScheduleBackgroundThread():

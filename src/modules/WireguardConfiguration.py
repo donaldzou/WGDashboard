@@ -397,14 +397,13 @@ class WireguardConfiguration:
                             if len(split) == 2:
                                 p[pCounter]["name"] = split[1]
                     with self.engine.begin() as conn:
-                        
-                        
                         for i in p:
                             if "PublicKey" in i.keys():
-                                tempPeer = conn.execute(self.peersTable.select().where(
-                                    self.peersTable.columns.id == i['PublicKey']
-                                )).mappings().fetchone()
-
+                                tempPeer = conn.execute(
+                                    self.peersTable.select().where(
+                                        self.peersTable.columns.id == i['PublicKey']
+                                    )
+                                ).mappings().fetchone()
                                 if tempPeer is None:
                                     tempPeer = {
                                         "id": i['PublicKey'],
@@ -439,6 +438,7 @@ class WireguardConfiguration:
                                             self.peersTable.columns.id == i['PublicKey']
                                         )
                                     )
+                                    
                                 tmpList.append(Peer(tempPeer, self))
                 except Exception as e:
                     if __name__ == '__main__':
@@ -449,7 +449,26 @@ class WireguardConfiguration:
                 for i in existingPeers:
                     tmpList.append(Peer(i, self))
         self.Peers = tmpList
-
+    
+    def logPeersTraffic(self):
+        with self.engine.begin() as conn:
+            for tempPeer in self.Peers:
+                if tempPeer.status == "running":
+                    print(tempPeer.id + " running")
+                    conn.execute(
+                        self.peersTransferTable.insert().values({
+                            "id": tempPeer.id,
+                            "total_receive": tempPeer.total_receive,
+                            "total_sent": tempPeer.total_sent,
+                            "total_data": tempPeer.total_data,
+                            "cumu_sent": tempPeer.cumu_sent,
+                            "cumu_receive": tempPeer.cumu_receive,
+                            "cumu_data": tempPeer.cumu_data,
+                            "time": datetime.now()
+                        })
+                    )
+                    
+    
     def addPeers(self, peers: list) -> tuple[bool, dict]:
         result = {
             "message": None,
@@ -750,9 +769,6 @@ class WireguardConfiguration:
                                     )
                                 )
 
-        # except Exception as e:
-        #     print(cur_i, cur_i['total_receive'])
-        #     print(f"[WGDashboard] {self.Name} getPeersTransfer() Error: {str(e)} {str(e.__traceback__)}")
             
 
     def getPeersEndpoint(self):
