@@ -36,7 +36,7 @@ export default {
 				id: this.Peer.id
 			}, (res) => {
 				if (res.status){
-					const blob = new Blob([res.data.file], { type: "text/plain" });
+					const blob = new Blob([res.data.file], { type: "text/conf" });
 					const jsonObjectUrl = URL.createObjectURL(blob);
 					const filename = `${res.data.fileName}.conf`;
 					const anchorEl = document.createElement("a");
