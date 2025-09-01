@@ -29,6 +29,14 @@ const calendarDays = computed(() => {
 		dates.push(cur)
 		cur = cur.add(1, 'day')
 	}
+	if (dates.length < 42){
+		let q = 42 - dates.length
+		for (let i = 0; i < q; i++){
+			console.log('push')
+			dates.push(cur)
+			cur = cur.add(1, 'day')
+		}
+	}
 	return dates
 })
 
@@ -43,7 +51,7 @@ const getSessions = async () => {
 	})
 }
 
-await getSessions()
+getSessions()
 interval.value = setInterval(async () => {
 	await getSessions()
 }, 60000)
@@ -92,10 +100,10 @@ const emits = defineEmits(['selectDate'])
 						'border-bottom': index < calendarDays.length - 7,
 						'extra-day': !day.isSame(today, 'month')}"
 						 v-for="(day, index) in calendarDays">
-						<h5 class="d-flex">
+						<h6 class="d-flex day-label">
 							{{ day.format('D')}}
 							<i class="bi bi-check-circle-fill ms-auto" v-if="selectedDate && selectedDate.isSame(day, 'D')"></i>
-						</h5>
+						</h6>
 						<PeerSessionCalendarDay
 							class="flex-grow-1"
 							@openDetails="args => {dayDetailsData = {day: day, details: args}; dayDetails = true}"
@@ -163,7 +171,7 @@ const emits = defineEmits(['selectDate'])
 	}
 }
 
-.extra-day h5{
+.extra-day .day-label{
 	opacity: 0.5;
 }
 </style>

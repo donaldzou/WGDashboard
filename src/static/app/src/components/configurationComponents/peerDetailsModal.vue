@@ -30,7 +30,6 @@ Chart.register(
 	PointElement,
 	Filler
 );
-import {Line} from "vue-chartjs";
 import PeerSessions from "@/components/peerDetailsModalComponents/peerSessions.vue";
 import PeerTraffics from "@/components/peerDetailsModalComponents/peerTraffics.vue";
 const props = defineProps(['selectedPeer'])
@@ -39,10 +38,10 @@ defineEmits(['close'])
 </script>
 
 <template>
-	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll">
-		<div class=" d-flex h-100 w-100">
-			<div class="w-100 p-2">
-				<div class="card rounded-3 shadow" style="width: 100%">
+	<div class="peerSettingContainer w-100 h-100 position-absolute top-0 start-0 overflow-y-scroll ">
+		<div class="d-flex h-100 w-100 pb-2">
+			<div class="m-auto w-100 p-2">
+				<div class="card rounded-3 shadow h-100" >
 					<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-2">
 						<h4 class="mb-0 fw-normal">
 							<LocaleText t="Peer Details"></LocaleText>
@@ -102,7 +101,7 @@ defineEmits(['close'])
 												<LocaleText t="Latest Handshake Time"></LocaleText>
 											</small></p>
 											<strong class="h4">
-												<LocaleText :t="selectedPeer.latest_handshake + ' ago'"></LocaleText>
+												<LocaleText :t="selectedPeer.latest_handshake !== 'No Handshake' ? selectedPeer.latest_handshake + ' ago': 'No Handshake'"></LocaleText>
 											</strong>
 										</div>
 										<i class="bi bi-person-raised-hand ms-auto h2 text-muted"></i>
@@ -150,19 +149,18 @@ defineEmits(['close'])
 									</div>
 								</div>
 							</div>
-
-
+							<div class="col-12">
+								<PeerTraffics
+									:selectedDate="selectedDate"
+									:selectedPeer="selectedPeer"></PeerTraffics>
+							</div>
 							<div class="col-12">
 								<PeerSessions
 									:selectedDate="selectedDate"
 									@selectDate="args => selectedDate = args"
 									:selectedPeer="selectedPeer"></PeerSessions>
 							</div>
-							<div class="col-12">
-								<PeerTraffics
-									:selectedDate="selectedDate"
-									:selectedPeer="selectedPeer"></PeerTraffics>
-							</div>
+
 						</div>
 
 

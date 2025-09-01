@@ -42,7 +42,7 @@ defineEmits(['openDetails'])
 </script>
 
 <template>
-<div class="d-flex gap-1 flex-column" @click="$emit('openDetails', sessionsOfToday)">
+<div class="d-flex gap-1 flex-column session-list" @click="$emit('openDetails', sessionsOfToday)">
 	<small v-if="sessionsOfToday.length > 0" class="sessions-label">
 		<LocaleText :t="sessionsOfToday.length + ' Session' + (sessionsOfToday.length > 1 ? 's':'')"></LocaleText>
 	</small>
@@ -50,7 +50,7 @@ defineEmits(['openDetails'])
 		<div class="bg-warning"
 			 style="height: 5px; width: 5px; border-radius: 100%; vertical-align: top" v-for="_ in sessionsOfToday.length"></div>
 	</div>
-	<div class="p-1 badge text-bg-warning text-start session-list" v-for="s in sessionsOfToday">
+	<div class="p-1 badge text-bg-warning text-start session-badge-list" v-for="s in sessionsOfToday">
 		<div>
 			<i class="bi bi-stopwatch me-1"></i>{{ s.timestamps[0].format("HH:mm:ss") }}<i class="bi bi-arrow-right mx-1"></i>{{ s.timestamps[s.timestamps.length - 1].format("HH:mm:ss") }}
 		</div>
@@ -63,7 +63,7 @@ defineEmits(['openDetails'])
 
 <style scoped>
 @media screen and (max-width: 992px) {
-	.calendar-day .session-list{
+	.calendar-day .session-badge-list{
 		display: none;
 	}
 
@@ -71,10 +71,21 @@ defineEmits(['openDetails'])
 		display: none;
 	}
 }
-
+.session-list{
+	aspect-ratio: 1 / 1;
+}
 @media screen and (min-width: 992px) {
 	.session-dot{
 		display: none !important;
 	}
+
+	.session-list{
+		height: calc(100vh / 8);
+		overflow: scroll;
+		aspect-ratio: auto !important;
+	}
 }
+
+
+
 </style>

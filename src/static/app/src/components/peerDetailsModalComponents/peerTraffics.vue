@@ -24,7 +24,7 @@ const getTraffic = async () => {
 	})
 }
 const interval = ref(undefined)
-await getTraffic()
+getTraffic()
 interval.value = setInterval(async () => {
 	await getTraffic()
 }, 60000)
