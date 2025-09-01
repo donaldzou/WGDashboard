@@ -236,17 +236,48 @@ class Peer:
             return False
         return True
     
+    def getTraffics(self, interval: int = 30, startDate: datetime.datetime = None, endDate: datetime.datetime = None):
+        if startDate is None and endDate is None:
+            endDate = datetime.datetime.now()
+            startDate = endDate - timedelta(minutes=interval)
+        else:
+            endDate = endDate.replace(hour=23, minute=59, second=59, microsecond=999999)
+            startDate = startDate.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        with self.configuration.engine.connect() as conn:
+            result = conn.execute(
+                db.select(
+                    self.configuration.peersTransferTable.c.cumu_data,
+                    self.configuration.peersTransferTable.c.total_data,
+                    self.configuration.peersTransferTable.c.cumu_receive,
+                    self.configuration.peersTransferTable.c.total_receive,
+                    self.configuration.peersTransferTable.c.cumu_sent,
+                    self.configuration.peersTransferTable.c.total_sent,
+                    self.configuration.peersTransferTable.c.time
+                ).where(
+                    db.and_(
+                        self.configuration.peersTransferTable.c.id == self.id,
+                        self.configuration.peersTransferTable.c.time <= endDate,
+                        self.configuration.peersTransferTable.c.time >= startDate,
+                        )
+                ).order_by(
+                    self.configuration.peersTransferTable.c.time
+                )
+            ).mappings().fetchall()
+        return list(result)
+            
+    
     def getSessions(self, startDate: datetime.datetime = None, endDate: datetime.datetime = None):
         if endDate is None:
             endDate = datetime.datetime.now()
         
         if startDate is None:
-            startDate = (endDate - datetime.timedelta(days=1))
+            startDate = endDate
 
         endDate = endDate.replace(hour=23, minute=59, second=59, microsecond=999999)
         startDate = startDate.replace(hour=0, minute=0, second=0, microsecond=0)
             
-        
+
         with self.configuration.engine.connect() as conn:
             result = conn.execute(
                 db.select(
@@ -261,23 +292,27 @@ class Peer:
                     self.configuration.peersTransferTable.c.time
                 )
             ).fetchall()
+        time = list(map(lambda x : x[0], result))
+        return time
         # sessions = []
-        # current_session = [time[0]]
+        # if len(time) > 1:
+        #     current_session = [time[0]]
         # 
-        # for ts in time[1:]:
-        #     if ts - current_session[-1] <= datetime.timedelta(minutes=3):
-        #         current_session.append(ts)
-        #     else:
-        #         sessions.append({
-        #             "duration": self.__duration(current_session[-1], current_session[0]),
-        #             "timestamps": current_session
-        #         })
-        #         current_session = [ts]
-        # sessions.append({
-        #     "duration": self.__duration(current_session[-1], current_session[0]),
-        #     "timestamps": current_session
-        # })
-        return list(map(lambda x : x[0], result))
+        #     for ts in time[1:]:
+        #         if ts - current_session[-1] <= datetime.timedelta(minutes=3):
+        #             current_session.append(ts)
+        #         else:
+        #             sessions.append({
+        #                 "duration": self.__duration(current_session[-1], current_session[0]),
+        #                 "timestamps": current_session
+        #             })
+        #             current_session = [ts]
+        #     sessions.append({
+        #         "duration": self.__duration(current_session[-1], current_session[0]),
+        #         "timestamps": current_session
+        #     })
+        #     print(sessions)
+        # return sessions
     
     def __duration(self, t1: datetime.datetime, t2: datetime.datetime):
         delta = t1 - t2

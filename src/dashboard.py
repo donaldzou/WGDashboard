@@ -908,6 +908,37 @@ def API_GetPeerSessions():
         return ResponseObject(data=p.getSessions(startDate, endDate))
     return ResponseObject(False, "Peer does not exist")
 
+@app.get(f'{APP_PREFIX}/api/getPeerTraffics')
+def API_GetPeerTraffics():
+    configurationName = request.args.get("configurationName")
+    id = request.args.get('id')
+    try:
+        interval = request.args.get('interval', 30)
+        startDate = request.args.get('startDate', None)
+        endDate = request.args.get('endDate', None)
+        
+        if type(interval) is str:
+            if not interval.isdigit():
+                return ResponseObject(False, "Interval must be integers in minutes")
+            interval = int(interval)
+        
+        if startDate is None:
+            endDate = None
+        else:
+            startDate = datetime.strptime(startDate, "%Y-%m-%d")
+            if endDate:
+                endDate = datetime.strptime(endDate, "%Y-%m-%d")
+                if startDate > endDate:
+                    return ResponseObject(False, "startDate must be smaller than endDate")
+    except Exception as e:
+        return ResponseObject(False, "Dates are invalid" + e)
+    if not configurationName or not id:
+        return ResponseObject(False, "Please provide configurationName and id")
+    fp, p = WireguardConfigurations.get(configurationName).searchPeer(id)
+    if fp:
+        return ResponseObject(data=p.getTraffics(interval, startDate, endDate))
+    return ResponseObject(False, "Peer does not exist")
+
 @app.get(f'{APP_PREFIX}/api/getDashboardTheme')
 def API_getDashboardTheme():
     return ResponseObject(data=DashboardConfig.GetConfig("Server", "dashboard_theme")[1])

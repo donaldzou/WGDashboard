@@ -1,5 +1,5 @@
 <script setup async>
-import {computed, defineAsyncComponent, onBeforeUnmount, ref, watch} from "vue";
+import {computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {fetchGet} from "@/utilities/fetch.js";
 import ProtocolBadge from "@/components/protocolBadge.vue";
@@ -12,6 +12,7 @@ import Peer from "@/components/configurationComponents/peer.vue";
 import PeerListModals from "@/components/configurationComponents/peerListComponents/peerListModals.vue";
 import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
 import ConfigurationDescription from "@/components/configurationComponents/configurationDescription.vue";
+import PeerDetailsModal from "@/components/configurationComponents/peerDetailsModal.vue";
 
 // Async Components
 const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
@@ -72,6 +73,9 @@ const configurationModals = ref({
 		modalOpen: false
 	},
 	assignPeer: {
+		modalOpen: false
+	},
+	peerDetails: {
 		modalOpen: false
 	}
 })
@@ -205,10 +209,6 @@ const searchPeers = computed(() => {
 	}).slice(0, showPeersCount.value)
 })
 
-const dropup = (index) => {
-	return searchPeers.value.length - (index + 1) <= 3
-}
-
 watch(() => route.query.id, (newValue) => {
 	if (newValue){
 		wireguardConfigurationStore.searchString = newValue
@@ -220,7 +220,9 @@ watch(() => route.query.id, (newValue) => {
 })
 
 
-
+// onMounted(() => {
+// 	configurationModalSelectedPeer.value = searchPeers.value[0]
+// })
 </script>
 
 <template>
@@ -393,8 +395,10 @@ watch(() => route.query.id, (newValue) => {
 					  :searchPeersLength="searchPeers.length"
 					  :order="order"
 					  :ConfigurationInfo="configurationInfo"
+					  @details="configurationModals.peerDetails.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @share="configurationModals.peerShare.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @refresh="fetchPeerList()"
+
 				      @jobs="configurationModals.peerScheduleJobs.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @setting="configurationModals.peerSetting.modalOpen = true; configurationModalSelectedPeer = peer"
 				      @qrcode="configurationModalSelectedPeer = peer; configurationModals.peerQRCode.modalOpen = true;"
@@ -456,6 +460,13 @@ watch(() => route.query.id, (newValue) => {
 			:configurationPeers="configurationPeers"
 			@close="configurationModals.selectPeers.modalOpen = false"
 		></SelectPeersModal>
+		<PeerDetailsModal
+			key="PeerDetailsModal"
+			v-if="configurationModals.peerDetails.modalOpen"
+			:selectedPeer="searchPeers.find(x => x.id === configurationModalSelectedPeer.id)"
+			@close="configurationModals.peerDetails.modalOpen = false"
+		>
+		</PeerDetailsModal>
 	</TransitionGroup>
 	<PeerIntersectionObserver
 		:showPeersCount="showPeersCount"

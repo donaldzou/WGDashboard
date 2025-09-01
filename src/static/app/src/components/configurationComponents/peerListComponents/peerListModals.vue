@@ -12,6 +12,8 @@ const PeerJobsModal = defineAsyncComponent(() => import("@/components/configurat
 const PeerQRCodeModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerQRCode.vue"))
 const PeerConfigurationFileModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerConfigurationFile.vue"))
 const PeerSettingsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerSettings.vue"))
+const PeerDetailsModal = defineAsyncComponent(() => import("@/components/configurationComponents/peerDetailsModal.vue"))
+
 </script>
 
 <template>
@@ -43,14 +45,17 @@ const PeerSettingsModal = defineAsyncComponent(() => import("@/components/config
 			:selectedPeer="configurationModalSelectedPeer">
 		</PeerShareLinkModal>
 		<PeerConfigurationFileModal
+			key="PeerConfigurationFileModal"
 			@close="configurationModals.peerConfigurationFile.modalOpen = false"
 			v-if="configurationModals.peerConfigurationFile.modalOpen"
 			:selectedPeer="configurationModalSelectedPeer"
 		></PeerConfigurationFileModal>
 		<PeerAssignModal
+			key="PeerAssignModal"
 			:selectedPeer="configurationModalSelectedPeer"
 			@close="configurationModals.assignPeer.modalOpen = false"
 			v-if="configurationModals.assignPeer.modalOpen"></PeerAssignModal>
+
 	</TransitionGroup>
 
 </template>

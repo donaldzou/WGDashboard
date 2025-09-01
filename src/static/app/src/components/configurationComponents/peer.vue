@@ -17,9 +17,6 @@ export default {
 	props: {
 		Peer: Object, ConfigurationInfo: Object, order: Number, searchPeersLength: Number
 	},
-	mounted() {
-
-	},
 	setup(){
 		const target = ref(null);
 		const subMenuOpened = ref(false)
@@ -136,7 +133,12 @@ export default {
 					</div>
 				</div>
 			</div>
-			
+		</div>
+		<div class="card-footer" role="button" @click="$emit('details')">
+			<small class="d-flex align-items-center">
+				<LocaleText t="Details"></LocaleText>
+				<i class="bi bi-chevron-right ms-auto"></i>
+			</small>
 		</div>
 	</div>
 </template>
