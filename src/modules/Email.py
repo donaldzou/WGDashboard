@@ -35,7 +35,7 @@ class EmailSender:
     def ready(self):
         return all([self.Server(), self.Port(), self.Encryption(), self.Username(), self.Password(), self.SendFrom()])
 
-    def send(self, receiver, subject, body, includeAttachment = False, attachmentName = ""):
+    def send(self, receiver, subject, body, includeAttachment = False, attachmentName = "") -> tuple[bool, str] | tuple[bool, None]:
         if self.ready():
             try:
                 self.smtp = smtplib.SMTP(self.Server(), port=int(self.Port()))

@@ -46,7 +46,7 @@ if (route.query.Email){
 <template>
 	<div>
 		<div class="text-center">
-			<h1 class="display-4">Welcome back</h1>
+			<h1 class="display-4">Welcome</h1>
 			<p class="text-muted">Sign in to access your <strong>WGDashboard Client</strong> account</p>
 		</div>
 		<Oidc></Oidc>
@@ -79,9 +79,11 @@ if (route.query.Email){
 				</label>
 			</div>
 			<div class="d-flex">
-				<a href="#" class="text-body text-decoration-none ms-auto btn btn-sm rounded-3">
+				<RouterLink to="forgotPassword"
+
+				   class="text-body text-decoration-none ms-auto btn btn-sm rounded-3">
 					Forgot Password?
-				</a>
+				</RouterLink>
 			</div>
 			<button
 				:disabled="!formFilled || loading"

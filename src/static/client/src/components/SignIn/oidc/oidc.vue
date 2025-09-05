@@ -7,7 +7,7 @@ import OidcBtn from "@/components/SignIn/oidc/oidcBtn.vue";
 const providerExist = ref(false)
 const providers = ref(undefined)
 const getProviders = await axiosGet("/api/signin/oidc/providers")
-if (getProviders){
+if (getProviders && Object.keys(getProviders.data).length > 0){
 	providerExist.value = true;
 	providers.value = getProviders.data
 	console.log(providers.value)

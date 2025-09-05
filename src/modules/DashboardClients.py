@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import random
 import uuid
 
 import bcrypt
@@ -304,12 +305,46 @@ class DashboardClients:
     
     def GetClientAssignedPeers(self, ClientID):
         return self.DashboardClientsPeerAssignment.GetAssignedPeers(ClientID)
+    
+    def ResetClientPassword(self, ClientID, NewPassword, ConfirmNewPassword) -> tuple[bool, str] | tuple[bool, None]:
+        c = self.GetClient(ClientID)
+        if c is None:
+            return False, "Client does not exist"
+        
+        if NewPassword != ConfirmNewPassword:
+            return False, "New passwords does not match"
+
+        pwStrength, msg = ValidatePasswordStrength(NewPassword)
+        if not pwStrength:
+            return pwStrength, msg
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    self.dashboardClientsTable.update().values({
+                        "TotpKeyVerified": None,
+                        "TotpKey": pyotp.random_base32(),
+                        "Password": bcrypt.hashpw(NewPassword.encode('utf-8'), bcrypt.gensalt()).decode("utf-8"),
+                    }).where(
+                        self.dashboardClientsTable.c.ClientID == ClientID
+                    )
+                )
+                self.logger.log(Message=f"User {ClientID} reset password and TOTP")
+        except Exception as e:
+            self.logger.log(Status="false", Message=f"User {ClientID} reset password failed, reason: {str(e)}")
+            return False, "Reset password failed."
+        
+        
+        return True, None
             
-    def UpdateClientPassword(self, Email, CurrentPassword, NewPassword, ConfirmNewPassword):
+    def UpdateClientPassword(self, ClientID, CurrentPassword, NewPassword, ConfirmNewPassword) -> tuple[bool, str] | tuple[bool, None]:
+        c = self.GetClient(ClientID)
+        if c is None:
+            return False, "Client does not exist"
+        
         if not all([CurrentPassword, NewPassword, ConfirmNewPassword]):
             return False, "Please fill in all fields"
         
-        if not self.SignIn_ValidatePassword(Email, CurrentPassword):
+        if not self.SignIn_ValidatePassword(c.get('Email'), CurrentPassword):
             return False, "Current password does not match"
         
         if NewPassword != ConfirmNewPassword:
@@ -324,13 +359,13 @@ class DashboardClients:
                     self.dashboardClientsTable.update().values({
                         "Password": bcrypt.hashpw(NewPassword.encode('utf-8'), bcrypt.gensalt()).decode("utf-8"),
                     }).where(
-                        self.dashboardClientsTable.c.Email == Email
+                        self.dashboardClientsTable.c.ClientID == ClientID
                     )
                 )
-                self.logger.log(Message=f"User {Email} updated password")
+                self.logger.log(Message=f"User {ClientID} updated password")
         except Exception as e:
-            self.logger.log(Status="false", Message=f"Signed up failed, reason: {str(e)}")
-            return False, "Signed up failed."
+            self.logger.log(Status="false", Message=f"User {ClientID} update password failed, reason: {str(e)}")
+            return False, "Update password failed."
         return True, None
     
     def UpdateClientProfile(self, ClientID, Name):
@@ -381,16 +416,17 @@ class DashboardClients:
     For WGDashboard Admin to Manage Clients
     '''
 
-    def GenerateClientPasswordResetLink(self, ClientID) -> bool | str:
+    def GenerateClientPasswordResetToken(self, ClientID) -> bool | str:
         c = self.GetClient(ClientID)
         if c is None:
             return False
         
-        newToken = str(uuid.uuid4())
+        newToken = str(random.randint(0, 999999)).zfill(6)
         with self.engine.begin() as conn:
             conn.execute(
                 self.dashboardClientsPasswordResetLinkTable.update().values({
-                    "ExpiryDate": db.func.now()
+                    "ExpiryDate": datetime.datetime.now()
+                
                 }).where(
                     db.and_(
                         self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
@@ -402,13 +438,38 @@ class DashboardClients:
                 self.dashboardClientsPasswordResetLinkTable.insert().values({
                     "ResetToken": newToken,
                     "ClientID": ClientID,
+                    "CreatedDate": datetime.datetime.now(),
                     "ExpiryDate": datetime.datetime.now() + datetime.timedelta(minutes=30)
                 })
             )
         
         return newToken
         
-        
+    def ValidateClientPasswordResetToken(self, ClientID, Token):
+        c = self.GetClient(ClientID)
+        if c is None:
+            return False
+        with self.engine.connect() as conn:
+            t = conn.execute(
+                self.dashboardClientsPasswordResetLinkTable.select().where(
+                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
+                    self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token,
+                    self.dashboardClientsPasswordResetLinkTable.c.ExpiryDate > datetime.datetime.now()
+                )
+            ).mappings().fetchone()
+        return t is not None
+    
+    def RevokeClientPasswordResetToken(self, ClientID, Token):
+        with self.engine.begin() as conn:
+            conn.execute(
+                self.dashboardClientsPasswordResetLinkTable.update().values({
+                    "ExpiryDate": datetime.datetime.now()
+                }).where(
+                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
+                    self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token
+                )
+            )
+        return True
     
     def GetAssignedPeerClients(self, ConfigurationName, PeerID):
         c = self.DashboardClientsPeerAssignment.GetAssignedClients(ConfigurationName, PeerID)

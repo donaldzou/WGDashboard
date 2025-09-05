@@ -1,3 +1,5 @@
+import datetime
+
 from tzlocal import get_localzone
 
 from functools import wraps
@@ -7,6 +9,8 @@ import os
 
 from modules.WireguardConfiguration import WireguardConfiguration
 from modules.DashboardConfig import DashboardConfig
+from modules.Email import EmailSender
+
 
 def ResponseObject(status=True, message=None, data=None, status_code = 200) -> Flask.response_class:
     response = Flask.make_response(current_app, {
@@ -46,7 +50,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     
     @client.post(f'{prefix}/api/signup')
     def ClientAPI_SignUp():
-        data = request.json
+        data = request.get_json()
         status, msg = dashboardClients.SignUp(**data)
         return ResponseObject(status, msg)
 
@@ -64,7 +68,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
         if not oidc:
             return ResponseObject(status=False, message="OIDC is disabled")
         
-        data = request.json
+        data = request.get_json()
         status, oidcData = dashboardClients.SignIn_OIDC(**data)
         if not status:
             return ResponseObject(status, oidcData)
@@ -77,13 +81,77 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     
     @client.post(f'{prefix}/api/signin')
     def ClientAPI_SignIn():
-        data = request.json
+        data = request.get_json()
         status, msg = dashboardClients.SignIn(**data)
         if status:
             session['Email'] = data.get('Email')
             session['Role'] = 'client'
             session['TotpVerified'] = False
         return ResponseObject(status, msg)
+
+    @client.post(f'{prefix}/api/resetPassword/generateResetToken')
+    def ClientAPI_ResetPassword_GenerateResetToken():
+        date = datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+        
+        emailSender = EmailSender(dashboardConfig)
+        if not emailSender.ready():
+            return ResponseObject(False, "We can't send you an email due to your Administrator has not setup email service. Please contact your administrator.") 
+        
+        data = request.get_json()
+        email = data.get('Email', None)
+        if not email:
+            return ResponseObject(False, "Please provide a valid Email")
+        
+        u = dashboardClients.SignIn_UserExistence(email)
+        if not u:
+            return ResponseObject(False, "Please provide a valid Email")
+        
+        token = dashboardClients.GenerateClientPasswordResetToken(u.get('ClientID'))
+        
+        status, msg = emailSender.send(
+            email, "[WGDashboard | Client] Reset Password",
+            f"Hi {email}, \n\nIt looks like you're trying to reset your password at {date} \n\nEnter this 6 digits code on the Forgot Password to continue:\n\n{token}\n\nThis code will expire in 30 minutes for your security. If you didn’t request a password reset, you can safely ignore this email—your current password will remain unchanged.\n\nIf you need help, feel free to contact support.\n\nBest regards,\n\nWGDashboard"
+        )
+        
+        return ResponseObject(status, msg)
+    
+    @client.post(f'{prefix}/api/resetPassword/validateResetToken')
+    def ClientAPI_ResetPassword_ValidateResetToken():
+        data = request.get_json()
+        email = data.get('Email', None)
+        token = data.get('Token', None)
+        if not all([email, token]):
+            return ResponseObject(False, "Please provide a valid Email")
+
+        u = dashboardClients.SignIn_UserExistence(email)
+        if not u:
+            return ResponseObject(False, "Please provide a valid Email")
+        
+        return ResponseObject(status=dashboardClients.ValidateClientPasswordResetToken(u.get('ClientID'), token))
+    
+    @client.post(f'{prefix}/api/resetPassword')
+    def ClientAPI_ResetPassword():
+        data = request.get_json()
+        email = data.get('Email', None)
+        token = data.get('Token', None)
+        password = data.get('Password', None)
+        confirmPassword = data.get('ConfirmPassword', None)
+        if not all([email, token, password, confirmPassword]):
+            return ResponseObject(False, "Please provide a valid Email")
+
+        u = dashboardClients.SignIn_UserExistence(email)
+        if not u:
+            return ResponseObject(False, "Please provide a valid Email")
+        
+        if not dashboardClients.ValidateClientPasswordResetToken(u.get('ClientID'), token):
+            return ResponseObject(False, "Verification code is either invalid or expired")
+        
+        status, msg = dashboardClients.ResetClientPassword(u.get('ClientID'), password, confirmPassword)
+        
+        dashboardClients.RevokeClientPasswordResetToken(u.get('ClientID'), token)
+        
+        return ResponseObject(status, msg)
+            
 
     @client.get(f'{prefix}/api/signout')
     def ClientAPI_SignOut():
@@ -103,7 +171,7 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
 
     @client.post(f'{prefix}/api/signin/totp')
     def ClientAPI_SignIn_ValidateTOTP():
-        data = request.json
+        data = request.get_json()
         token = data.get('Token', None)
         userProvidedTotp = data.get('UserProvidedTOTP', None)
         if not all([token, userProvidedTotp]):
@@ -154,8 +222,8 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     @login_required
     def ClientAPI_Settings_UpdatePassword():
         data = request.get_json()
-        status, message = dashboardClients.UpdateClientPassword(session['Email'], **data)
+        status, message = dashboardClients.UpdateClientPassword(session['ClientID'], **data)
     
-        return ResponseObject(status, message)
+        return ResponseObject(status, message)       
     
     return client

@@ -124,7 +124,6 @@ class DashboardOIDC:
             for k in providers.keys():
                 if all([providers[k]['client_id'], providers[k]['client_secret'], providers[k]['issuer']]):
                     try:
-                        print("Requesting " + f"{providers[k]['issuer'].strip('/')}/.well-known/openid-configuration")
                         oidc_config = requests.get(
                             f"{providers[k]['issuer'].strip('/')}/.well-known/openid-configuration",
                             timeout=3,
@@ -136,8 +135,9 @@ class DashboardOIDC:
                             'openid_configuration': oidc_config
                         }
                         self.provider_secret[k] = providers[k]['client_secret']
+                        current_app.logger.info(f"Registered OIDC Provider: {k}")
                     except Exception as e:
-                        current_app.logger.error("Failed to request OIDC config for this provider: " + providers[k]['issuer'].strip('/'), exc_info=e)
+                        current_app.logger.error(f"Failed to register OIDC config for {k}", exc_info=e)
         except Exception as e:
             current_app.logger.error('Read OIDC file failed. Reason: ' + str(e))
             return False

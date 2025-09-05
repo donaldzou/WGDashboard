@@ -6,6 +6,7 @@ import axios from "axios";
 import {axiosGet, requestURl} from "@/utilities/request.js";
 import {clientStore} from "@/stores/clientStore.js";
 import Settings from "@/views/settings.vue";
+import ForgotPassword from "@/views/forgotPassword.vue";
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -39,6 +40,11 @@ const router = createRouter({
 		{
 			path: '/signout',
 			name: "Sign Out"
+		},
+		{
+			path: '/forgotPassword',
+			name: "Forgot Password",
+			component: ForgotPassword
 		}
 	]
 })

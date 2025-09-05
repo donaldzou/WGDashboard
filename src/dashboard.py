@@ -591,6 +591,14 @@ def API_deletePeers(configName: str) -> ResponseObject:
             return ResponseObject(False, "Please specify one or more peers", status_code=400)
         configuration = WireguardConfigurations.get(configName)
         status, msg = configuration.deletePeers(peers, AllPeerJobs, AllPeerShareLinks)
+        
+        # Delete Assignment
+        
+        for p in peers:
+            assignments = DashboardClients.DashboardClientsPeerAssignment.GetAssignedClients(configName, p)
+            for c in assignments:
+                DashboardClients.DashboardClientsPeerAssignment.UnassignClients(c.AssignmentID)
+        
         return ResponseObject(status, msg)
 
     return ResponseObject(False, "Configuration does not exist", status_code=404)
@@ -1412,7 +1420,7 @@ def API_Clients_GeneratePasswordResetLink():
     if not DashboardClients.GetClient(clientId):
         return ResponseObject(False, "Client does not exist")
     
-    token = DashboardClients.GenerateClientPasswordResetLink(clientId)
+    token = DashboardClients.GenerateClientPasswordResetToken(clientId)
     if token:
         return ResponseObject(data=token)
     return ResponseObject(False, "Failed to generate link")
