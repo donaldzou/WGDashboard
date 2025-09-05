@@ -452,9 +452,10 @@ class DashboardClients:
         with self.engine.connect() as conn:
             t = conn.execute(
                 self.dashboardClientsPasswordResetLinkTable.select().where(
-                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
-                    self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token,
-                    self.dashboardClientsPasswordResetLinkTable.c.ExpiryDate > datetime.datetime.now()
+                    db.and_(self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
+                            self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token,
+                            self.dashboardClientsPasswordResetLinkTable.c.ExpiryDate > datetime.datetime.now())
+                    
                 )
             ).mappings().fetchone()
         return t is not None
@@ -465,8 +466,8 @@ class DashboardClients:
                 self.dashboardClientsPasswordResetLinkTable.update().values({
                     "ExpiryDate": datetime.datetime.now()
                 }).where(
-                    self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
-                    self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token
+                    db.and_(self.dashboardClientsPasswordResetLinkTable.c.ClientID == ClientID,
+                            self.dashboardClientsPasswordResetLinkTable.c.ResetToken == Token)
                 )
             )
         return True

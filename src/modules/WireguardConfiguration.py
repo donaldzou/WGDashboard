@@ -291,6 +291,16 @@ class WireguardConfiguration:
                               server_default=sqlalchemy.func.now()),
             extend_existing=True
         )
+        
+        self.peersHistoryEndpointTable = sqlalchemy.Table(
+            f'{dbName}_history_endpoint', self.metadata,
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False),
+            sqlalchemy.Column('endpoint', sqlalchemy.String(255), nullable=False),
+            sqlalchemy.Column('time', 
+                              (sqlalchemy.DATETIME if self.DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else sqlalchemy.TIMESTAMP)),
+            extend_existing=True
+        )
+        
         self.peersDeletedTable = sqlalchemy.Table(
             f'{dbName}_deleted', self.metadata,
             sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False, primary_key=True),
@@ -454,7 +464,6 @@ class WireguardConfiguration:
         with self.engine.begin() as conn:
             for tempPeer in self.Peers:
                 if tempPeer.status == "running":
-                    print(tempPeer.id + " running")
                     conn.execute(
                         self.peersTransferTable.insert().values({
                             "id": tempPeer.id,
@@ -467,8 +476,24 @@ class WireguardConfiguration:
                             "time": datetime.now()
                         })
                     )
-                    
     
+    def logPeersHistoryEndpoint(self):
+        with self.engine.begin() as conn:
+            for tempPeer in self.Peers:
+                if tempPeer.status == "running":
+                    endpoint = tempPeer.endpoint.rsplit(":", 1)
+                    if len(endpoint) == 2 and len(endpoint[0]) > 0:
+                        conn.execute(
+                            self.peersHistoryEndpointTable.insert().values({
+                                "id": tempPeer.id,
+                                "endpoint": endpoint[0],
+                                "time": datetime.now()
+                            })
+                        )
+                        
+                    
+                            
+                    
     def addPeers(self, peers: list) -> tuple[bool, dict]:
         result = {
             "message": None,
@@ -792,7 +817,7 @@ class WireguardConfiguration:
                 )
                 count += 2
 
-    def toggleConfiguration(self) -> [bool, str]:
+    def toggleConfiguration(self) -> tuple[bool, str] | tuple[bool, None]:
         self.getStatus()
         if self.Status:
             try:

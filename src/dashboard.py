@@ -1519,6 +1519,7 @@ def peerInformationBackgroundThread():
                             c.getPeers()
                             if delay == 6:
                                 c.logPeersTraffic()
+                                c.logPeersHistoryEndpoint()
                             c.getRestrictedPeersList()
             except Exception as e:
                 print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
