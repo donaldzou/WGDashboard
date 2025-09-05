@@ -1342,6 +1342,14 @@ def API_OIDC_Status():
 '''
 Client Controller
 '''
+
+@app.get(f'{APP_PREFIX}/api/clients/toggleStatus')
+def API_Clients_ToggleStatus():
+    DashboardConfig.SetConfig("Clients", "enable",
+                              not DashboardConfig.GetConfig("Clients", "enable")[1])
+    return ResponseObject(data=DashboardConfig.GetConfig("Clients", "enable")[1])
+
+
 @app.get(f'{APP_PREFIX}/api/clients/allClients')
 def API_Clients_AllClients():
     return ResponseObject(data=DashboardClients.GetAllClients())

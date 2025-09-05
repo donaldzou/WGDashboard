@@ -2,13 +2,23 @@
 import { ref, reactive } from "vue"
 import LocaleText from "@/components/text/localeText.vue";
 import OidcSettings from "@/components/clientComponents/clientSettingComponents/oidcSettings.vue";
+import { fetchGet } from "@/utilities/fetch.js"
 const emits = defineEmits(['close'])
 import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore"
 const dashboardConfigurationStore = DashboardConfigurationStore()
 const loading = ref(false)
 const values = reactive({
-	allow_local_sign_up: dashboardConfigurationStore.Configuration.Clients.allow_local_sign_up
+	enableClients: dashboardConfigurationStore.Configuration.Clients.enable
 })
+
+const toggling = ref(false)
+const toggleClientSideApp = async () => {
+	toggling.value = true
+	await fetchGet("/api/clients/toggleStatus", {}, (res) => {
+		values.enableClients = res.data
+	})
+	toggling.value = false
+}
 </script>
 
 <template>
@@ -20,27 +30,23 @@ const values = reactive({
 			</h4>
 			<button type="button" class="btn-close ms-auto" @click="emits('close')"></button>
 		</div>
-		<div class="card-body px-4">
-			<div class="py-2">
-				<OidcSettings mode="Client"></OidcSettings>
-<!--				<hr>-->
-<!--				<div>-->
-<!--					<div class="d-flex">-->
-<!--						<h6 class="mb-0">-->
-<!--							<LocaleText t="Allow Local Accounts Sign Up"></LocaleText>-->
-<!--						</h6>-->
-<!--						<div class="form-check form-switch ms-auto">-->
-<!--							<label class="form-check-label" for="allow_local_sign_up">-->
-<!--								<LocaleText :t="values.allow_local_sign_up ? 'Enabled':'Disabled'"></LocaleText>-->
-<!--							</label>-->
-<!--							<input-->
-<!--								:disabled="loading"-->
-<!--								v-model="values.allow_local_sign_up"-->
-<!--								class="form-check-input" type="checkbox" role="switch" id="allow_local_sign_up">-->
-<!--						</div>-->
-<!--					</div>-->
-<!--				</div>-->
+		<div class="card-body px-4 d-flex gap-3 flex-column">
+			<div class="d-flex align-items-center">
+				<h6 class="mb-0">
+					<LocaleText t="Client Side App"></LocaleText>
+				</h6>
+				<div class="form-check form-switch ms-auto">
+					<label class="form-check-label" for="oidc_switch">
+						<LocaleText :t="values.enableClients ? 'Enabled':'Disabled'"></LocaleText>
+					</label>
+					<input
+						:disabled="oidcStatusLoading"
+						v-model="values.enableClients"
+						@change="toggleClientSideApp()"
+						class="form-check-input" type="checkbox" role="switch" id="oidc_switch">
+				</div>
 			</div>
+			<OidcSettings mode="Client"></OidcSettings>
 		</div>
 	</div>
 </div>

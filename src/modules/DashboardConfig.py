@@ -81,7 +81,7 @@ class DashboardConfig:
                 "client_enable": "false"
             },
             "Clients": {
-                "allow_local_sign_up": "true"
+                "enable": "true",
             },
             "WireGuardConfiguration": {
                 "autostart": ""

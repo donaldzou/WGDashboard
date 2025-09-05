@@ -45,6 +45,9 @@ def createClientBlueprint(wireguardConfigurations: dict[WireguardConfiguration],
     
     @client.before_request
     def clientBeforeRequest():
+        if not dashboardConfig.GetConfig("Clients", "enable")[1]:
+            abort(404)
+        
         if request.method.lower() == 'options':
             return ResponseObject(True)
     
