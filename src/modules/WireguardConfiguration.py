@@ -406,41 +406,45 @@ class WireguardConfiguration:
                             split = re.split(r'\s*=\s*', i, 1)
                             if len(split) == 2:
                                 p[pCounter]["name"] = split[1]
-                    with self.engine.begin() as conn:
-                        for i in p:
-                            if "PublicKey" in i.keys():
+                    
+                    for i in p:
+                        if "PublicKey" in i.keys():
+                            with self.engine.connect() as conn:
                                 tempPeer = conn.execute(
                                     self.peersTable.select().where(
                                         self.peersTable.columns.id == i['PublicKey']
                                     )
                                 ).mappings().fetchone()
-                                if tempPeer is None:
-                                    tempPeer = {
-                                        "id": i['PublicKey'],
-                                        "private_key": "",
-                                        "DNS": self.DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
-                                        "endpoint_allowed_ip": self.DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
-                                            1],
-                                        "name": i.get("name"),
-                                        "total_receive": 0,
-                                        "total_sent": 0,
-                                        "total_data": 0,
-                                        "endpoint": "N/A",
-                                        "status": "stopped",
-                                        "latest_handshake": "N/A",
-                                        "allowed_ip": i.get("AllowedIPs", "N/A"),
-                                        "cumu_receive": 0,
-                                        "cumu_sent": 0,
-                                        "cumu_data": 0,
-                                        "mtu": self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1],
-                                        "keepalive": self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1],
-                                        "remote_endpoint": self.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
-                                        "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
-                                    }
+                            
+                            if tempPeer is None:
+                                tempPeer = {
+                                    "id": i['PublicKey'],
+                                    "private_key": "",
+                                    "DNS": self.DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
+                                    "endpoint_allowed_ip": self.DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
+                                        1],
+                                    "name": i.get("name"),
+                                    "total_receive": 0,
+                                    "total_sent": 0,
+                                    "total_data": 0,
+                                    "endpoint": "N/A",
+                                    "status": "stopped",
+                                    "latest_handshake": "N/A",
+                                    "allowed_ip": i.get("AllowedIPs", "N/A"),
+                                    "cumu_receive": 0,
+                                    "cumu_sent": 0,
+                                    "cumu_data": 0,
+                                    "mtu": self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1]) > 0 else None,
+                                    "keepalive": self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]) > 0 else None,
+                                    "remote_endpoint": self.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                                    "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
+                                }
+                                with self.engine.begin() as conn:
                                     conn.execute(
                                         self.peersTable.insert().values(tempPeer)
-                                    )
-                                else:
+                                    )                                    
+                            else:
+                                with self.engine.begin() as conn:
                                     conn.execute(
                                         self.peersTable.update().values({
                                             "allowed_ip": i.get("AllowedIPs", "N/A")
@@ -448,11 +452,11 @@ class WireguardConfiguration:
                                             self.peersTable.columns.id == i['PublicKey']
                                         )
                                     )
-                                    
-                                tmpList.append(Peer(tempPeer, self))
+                                
+                            tmpList.append(Peer(tempPeer, self))
                 except Exception as e:
-                    if __name__ == '__main__':
-                        print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
+                    print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
+                        
         else:
             with self.engine.connect() as conn:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()
