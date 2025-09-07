@@ -121,7 +121,10 @@ const setMapCenter = (endpoint) => {
 				<div class="m-auto" v-if="!loaded">
 					<span class="spinner-border spinner-border-sm me-2"></span><LocaleText t="Loading..."></LocaleText>
 				</div>
-				<div v-else class="w-100 d-flex flex-column gap-3">
+				<div class="m-auto" v-else-if="loaded && endpoints.endpoints.length === 0">
+					<LocaleText t="No Historical Endpoints"></LocaleText>
+				</div>
+				<div v-else-if="loaded && endpoints.endpoints.length > 0" class="w-100 d-flex flex-column gap-3">
 					<div class="bg-body d-flex  w-100 rounded-3" style="height: 500px" id="map">
 						<div class="m-auto" v-if="!mapAvailable">
 							<div v-if="mapAvailable === undefined">
@@ -133,7 +136,7 @@ const setMapCenter = (endpoint) => {
 							</div>
 						</div>
 					</div>
-					<table class="table table-hover">
+					<table class="table table-hover" >
 						<thead>
 							<tr>
 								<th>Endpoint</th>

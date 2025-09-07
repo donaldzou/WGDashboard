@@ -185,10 +185,10 @@ class Peer:
     def getShareLink(self):
         self.ShareLink = self.configuration.AllPeerShareLinks.getLink(self.configuration.Name, self.id)
 
-    def resetDataUsage(self, type):
+    def resetDataUsage(self, mode: str):
         try:
             with self.configuration.engine.begin() as conn:
-                if type == "total":
+                if mode == "total":
                     conn.execute(
                         self.configuration.peersTable.update().values({
                             "total_data": 0,
@@ -207,7 +207,7 @@ class Peer:
                     self.cumu_data = 0
                     self.cumu_sent = 0
                     self.cumu_receive = 0
-                elif type == "receive":
+                elif mode == "receive":
                     conn.execute(
                         self.configuration.peersTable.update().values({
                             "total_receive": 0,
@@ -218,7 +218,7 @@ class Peer:
                     )
                     self.cumu_receive = 0
                     self.total_receive = 0
-                elif type == "sent":
+                elif mode == "sent":
                     conn.execute(
                         self.configuration.peersTable.update().values({
                             "total_sent": 0,
@@ -308,25 +308,6 @@ class Peer:
             ).fetchall()
         time = list(map(lambda x : x[0], result))
         return time
-        # sessions = []
-        # if len(time) > 1:
-        #     current_session = [time[0]]
-        # 
-        #     for ts in time[1:]:
-        #         if ts - current_session[-1] <= datetime.timedelta(minutes=3):
-        #             current_session.append(ts)
-        #         else:
-        #             sessions.append({
-        #                 "duration": self.__duration(current_session[-1], current_session[0]),
-        #                 "timestamps": current_session
-        #             })
-        #             current_session = [ts]
-        #     sessions.append({
-        #         "duration": self.__duration(current_session[-1], current_session[0]),
-        #         "timestamps": current_session
-        #     })
-        #     print(sessions)
-        # return sessions
     
     def __duration(self, t1: datetime.datetime, t2: datetime.datetime):
         delta = t1 - t2

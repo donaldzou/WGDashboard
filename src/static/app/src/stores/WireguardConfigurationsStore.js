@@ -77,7 +77,11 @@ export const WireguardConfigurationsStore = defineStore('WireguardConfigurations
 					{
 						display: GetLocale("Delete Peer"),
 						value: "delete"
-					}
+					},
+                    {
+                        display: GetLocale("Reset Total Data Usage"),
+                        value: "reset_total_data_usage"
+                    }
 				]
 			}
 		}

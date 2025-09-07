@@ -162,6 +162,10 @@ class PeerJobs:
                             s, msg = c.restrictPeers([fp.id])
                         elif job.Action == "delete":
                             s, msg = c.deletePeers([fp.id])
+                        elif job.Action == "reset_total_data_usage":
+                            s = fp.resetDataUsage("total")
+                            c.restrictPeers([fp.id])
+                            c.allowAccessPeers([fp.id])
 
                         if s is True:
                             self.JobLogger.log(job.JobID, s,
