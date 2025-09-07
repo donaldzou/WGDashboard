@@ -88,7 +88,7 @@ watch(livePreview, () => {
 					</div>
 					<div class="col-6" v-if="livePreview">
 						<PeerShareWithEmailBodyPreview
-							:body="email.Body"
+							:email="email"
 							:selectedPeer="selectedPeer"
 						>
 						</PeerShareWithEmailBodyPreview>

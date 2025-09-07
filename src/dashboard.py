@@ -1291,6 +1291,7 @@ def API_Email_Send():
                     template = Template(body)
                     download = p.downloadPeer()
                     body = template.render(peer=p.toJson(), configurationFile=download)
+                    subject = Template(data.get('Subject', '')).render(peer=p.toJson(), configurationFile=download)
                     if data.get('IncludeAttachment', False):
                         u = str(uuid4())
                         attachmentName = f'{u}.conf'
@@ -1298,16 +1299,16 @@ def API_Email_Send():
                             f.write(download['file'])   
                         
     
-    s, m = EmailSender.send(data.get('Receiver'), data.get('Subject', ''), body,  
+    s, m = EmailSender.send(data.get('Receiver'), subject, body,  
                             data.get('IncludeAttachment', False), (attachmentName if download else ''))
     return ResponseObject(s, m)
 
-@app.post(f'{APP_PREFIX}/api/email/previewBody')
+@app.post(f'{APP_PREFIX}/api/email/preview')
 def API_Email_PreviewBody():
     data = request.get_json()
+    subject = data.get('Subject', '')
     body = data.get('Body', '')
-    if len(body) == 0:
-        return ResponseObject(False, "Nothing to preview") 
+    
     if ("ConfigurationName" not in data.keys() 
             or "Peer" not in data.keys() or data.get('ConfigurationName') not in WireguardConfigurations.keys()):
         return ResponseObject(False, "Please specify configuration and peer")
@@ -1320,8 +1321,11 @@ def API_Email_PreviewBody():
     try:
         template = Template(body)
         download = p.downloadPeer()
-        body = template.render(peer=p.toJson(), configurationFile=download)
-        return ResponseObject(data=body)
+        # body = template.render(peer=p.toJson(), configurationFile=download)
+        return ResponseObject(data={
+            "Body": Template(body).render(peer=p.toJson(), configurationFile=download),
+            "Subject": Template(subject).render(peer=p.toJson(), configurationFile=download)
+        })
     except Exception as e:
         return ResponseObject(False, message=str(e))
 
