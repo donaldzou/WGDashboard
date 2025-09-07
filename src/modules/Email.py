@@ -31,9 +31,15 @@ class EmailSender:
     
     def SendFrom(self):
         return self.DashboardConfig.GetConfig("Email", "send_from")[1]
+    
+    # Thank you, @gdeeble from GitHub
+    def AuthenticationRequired(self):
+        return self.DashboardConfig.GetConfig("Email", "authentication_required")[1]
 
     def ready(self):
-        return all([self.Server(), self.Port(), self.Encryption(), self.Username(), self.Password(), self.SendFrom()])
+        if self.AuthenticationRequired():
+            return all([self.Server(), self.Port(), self.Encryption(), self.Username(), self.Password(), self.SendFrom()])
+        return all([self.Server(), self.Port(), self.Encryption(), self.SendFrom()])
 
     def send(self, receiver, subject, body, includeAttachment = False, attachmentName = "") -> tuple[bool, str] | tuple[bool, None]:
         if self.ready():
@@ -42,7 +48,9 @@ class EmailSender:
                 self.smtp.ehlo()
                 if self.Encryption() == "STARTTLS":
                     self.smtp.starttls()
-                self.smtp.login(self.Username(), self.Password())
+                if self.AuthenticationRequired():
+                    print("Login")
+                    self.smtp.login(self.Username(), self.Password())
                 message = MIMEMultipart()
                 message['Subject'] = subject
                 message['From'] = self.SendFrom()

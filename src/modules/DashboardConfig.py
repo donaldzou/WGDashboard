@@ -73,6 +73,7 @@ class DashboardConfig:
                 "encryption": "",
                 "username": "",
                 "email_password": "",
+                "authentication_required": "true",
                 "send_from": "",
                 "email_template": ""
             },
