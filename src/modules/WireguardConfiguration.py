@@ -452,11 +452,9 @@ class WireguardConfiguration:
                                             self.peersTable.columns.id == i['PublicKey']
                                         )
                                     )
-                                
                             tmpList.append(Peer(tempPeer, self))
                 except Exception as e:
                     print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
-                        
         else:
             with self.engine.connect() as conn:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()

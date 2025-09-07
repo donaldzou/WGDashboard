@@ -20,7 +20,6 @@ const getTraffic = async () => {
 		endDate: date.value.format("YYYY-MM-DD")
 	}, (res) => {
 		traffics.value = res.data
-		console.log(traffics.value)
 	})
 }
 const interval = ref(undefined)

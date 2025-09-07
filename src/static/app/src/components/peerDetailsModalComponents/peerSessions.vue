@@ -78,8 +78,11 @@ const emits = defineEmits(['selectDate'])
 				<button class="btn btn-sm rounded-3" v-if="offsetMonth !== 0" @click="offsetMonth = 0; $emit('selectDate', day)">
 					<LocaleText t="Today"></LocaleText>
 				</button>
-				<h5 class="mx-auto mb-0">
-					{{ today.format('YYYY-MM')}}
+				<h5 class="mx-auto mb-0 text-center">
+					<small class="text-muted" style="font-size: 0.9rem">
+						<LocaleText t="Peer Historical Sessions"></LocaleText>
+					</small><br>
+					{{ today.format('YYYY / MM')}}
 				</h5>
 				<button class="btn btn-sm rounded-3" v-if="offsetMonth !== 0" @click="offsetMonth = 0; $emit('selectDate', day)">
 					<LocaleText t="Today"></LocaleText>

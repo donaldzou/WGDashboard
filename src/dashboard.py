@@ -891,6 +891,31 @@ def API_getConfigurationInfo():
         "configurationRestrictedPeers": WireguardConfigurations[configurationName].getRestrictedPeersList()
     })
 
+@app.get(f'{APP_PREFIX}/api/getPeerHistoricalEndpoints')
+def API_GetPeerHistoricalEndpoints():
+    configurationName = request.args.get("configurationName")
+    id = request.args.get('id')
+    if not configurationName or not id:
+        return ResponseObject(False, "Please provide configurationName and id")
+    fp, p = WireguardConfigurations.get(configurationName).searchPeer(id)
+    if fp:
+        result = p.getEndpoints()
+        geo = {}
+        try:
+            r = requests.post(f"http://ip-api.com/batch?fields=city,country,lat,lon,query",
+                              data=json.dumps([x['endpoint'] for x in result]))
+            d = r.json()
+            
+                
+        except Exception as e:
+            return ResponseObject(data=result, message="Failed to request IP address geolocation. " + str(e))
+        
+        return ResponseObject(data={
+            "endpoints": p.getEndpoints(),
+            "geolocation": d
+        })
+    return ResponseObject(False, "Peer does not exist")
+
 @app.get(f'{APP_PREFIX}/api/getPeerSessions')
 def API_GetPeerSessions():
     configurationName = request.args.get("configurationName")

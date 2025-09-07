@@ -159,6 +159,15 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             sqlalchemy.Column('Info', sqlalchemy.Text),
             extend_existing=True
         )
+        
+        self.peersHistoryEndpointTable = sqlalchemy.Table(
+            f'{dbName}_history_endpoint', self.metadata,
+            sqlalchemy.Column('id', sqlalchemy.String(255), nullable=False),
+            sqlalchemy.Column('endpoint', sqlalchemy.String(255), nullable=False),
+            sqlalchemy.Column('time',
+                              (sqlalchemy.DATETIME if self.DashboardConfig.GetConfig("Database", "type")[1] == 'sqlite' else sqlalchemy.TIMESTAMP)),
+            extend_existing=True
+        )
 
         self.metadata.create_all(self.engine)
 

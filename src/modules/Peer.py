@@ -236,6 +236,20 @@ class Peer:
             return False
         return True
     
+    def getEndpoints(self):
+        result = []
+        with self.configuration.engine.connect() as conn:
+            result = conn.execute(
+                db.select(
+                    self.configuration.peersHistoryEndpointTable.c.endpoint
+                ).group_by(
+                    self.configuration.peersHistoryEndpointTable.c.endpoint
+                ).where(
+                    self.configuration.peersHistoryEndpointTable.c.id == self.id
+                )
+            ).mappings().fetchall()
+        return list(result)
+    
     def getTraffics(self, interval: int = 30, startDate: datetime.datetime = None, endDate: datetime.datetime = None):
         if startDate is None and endDate is None:
             endDate = datetime.datetime.now()

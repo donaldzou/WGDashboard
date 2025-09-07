@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import LocaleText from "@/components/text/localeText.vue";
-import {computed, ref, watch} from "vue";
-import dayjs from "dayjs";
-import {GetLocale} from "@/utilities/locale.js"
+import {ref} from "vue";
+
 import {
 	Chart,
 	LineElement,
@@ -32,6 +31,7 @@ Chart.register(
 );
 import PeerSessions from "@/components/peerDetailsModalComponents/peerSessions.vue";
 import PeerTraffics from "@/components/peerDetailsModalComponents/peerTraffics.vue";
+import PeerEndpoints from "@/components/peerDetailsModalComponents/peerEndpoints.vue";
 const props = defineProps(['selectedPeer'])
 const selectedDate = ref(undefined)
 defineEmits(['close'])
@@ -160,7 +160,12 @@ defineEmits(['close'])
 									@selectDate="args => selectedDate = args"
 									:selectedPeer="selectedPeer"></PeerSessions>
 							</div>
-
+							<div class="col-12">
+								<PeerEndpoints
+									:selectedPeer="selectedPeer"
+								>
+								</PeerEndpoints>
+							</div>
 						</div>
 
 
