@@ -140,6 +140,9 @@ class WireguardConfiguration:
         else:
             self.configurationInfo = WireguardConfigurationInfo.model_validate_json(configurationInfoJson.get("Info"))
         
+        if self.Status:
+            self.addAutostart()
+        
 
     def __getProtocolPath(self):
         return self.DashboardConfig.GetConfig("Server", "wg_conf_path")[1] if self.Protocol == "wg" \
@@ -366,6 +369,18 @@ class WireguardConfiguration:
     def getAutostartStatus(self):
         s, d = self.DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
         return self.Name in d
+    
+    def addAutostart(self):
+        s, d = self.DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
+        if self.Name not in d:
+            d.append(self.Name)
+            self.DashboardConfig.SetConfig("WireGuardConfiguration", "autostart", d)
+    
+    def removeAutostart(self):
+        s, d = self.DashboardConfig.GetConfig("WireGuardConfiguration", "autostart")
+        if self.Name in d:
+            d.remove(self.Name)
+            self.DashboardConfig.SetConfig("WireGuardConfiguration", "autostart", d)
 
     def getRestrictedPeers(self):
         self.RestrictedPeers = []
@@ -825,11 +840,13 @@ class WireguardConfiguration:
             try:
                 check = subprocess.check_output(f"{self.Protocol}-quick down {self.Name}",
                                                 shell=True, stderr=subprocess.STDOUT)
+                self.removeAutostart()
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         else:
             try:
                 check = subprocess.check_output(f"{self.Protocol}-quick up {self.Name}", shell=True, stderr=subprocess.STDOUT)
+                self.addAutostart()
             except subprocess.CalledProcessError as exc:
                 return False, str(exc.output.strip().decode("utf-8"))
         self.__parseConfigurationFile()
