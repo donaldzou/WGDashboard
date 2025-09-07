@@ -8,13 +8,13 @@
     "short_name": "WGDashboard",
     "screenshots": [
         {
-            "src": "https://donaldzou.github.io/WGDashboard-Documentation/images/sign-in.png",
+            "src": "https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/sign-in.png",
             "sizes": "2880x1826",
             "type": "image/png",
             "form_factor": "wide"
         },
         {
-            "src": "https://donaldzou.github.io/WGDashboard-Documentation/images/sign-in.png",
+            "src": "https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/index.png",
             "sizes": "2880x1826",
             "type": "image/png"
         }
