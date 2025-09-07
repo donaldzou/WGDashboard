@@ -49,7 +49,6 @@ class EmailSender:
                 if self.Encryption() == "STARTTLS":
                     self.smtp.starttls()
                 if self.AuthenticationRequired():
-                    print("Login")
                     self.smtp.login(self.Username(), self.Password())
                 message = MIMEMultipart()
                 message['Subject'] = subject
