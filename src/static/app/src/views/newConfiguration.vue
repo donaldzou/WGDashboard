@@ -1,5 +1,5 @@
 <script>
-import {parseCidr} from "cidr-tools";
+import {parseCidr, containsCidr, mergeCidr, expandCidr} from "cidr-tools";
 import '@/utilities/wireguard.js'
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js";
 import {fetchGet, fetchPost} from "@/utilities/fetch.js";
@@ -7,10 +7,12 @@ import LocaleText from "@/components/text/localeText.vue";
 import {parseInterface, parsePeers} from "@/utilities/parseConfigurationFile.js";
 import {ref} from "vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
+import {exp} from "qrcode/lib/core/galois-field.js";
+import NewConfigurationTemplates from "@/components/newConfigurationComponents/newConfigurationTemplates.vue";
 
 export default {
 	name: "newConfiguration",
-	components: {LocaleText},
+	components: {NewConfigurationTemplates, LocaleText},
 	async setup(){
 		const store = WireguardConfigurationsStore()
 		const protocols = ref([])
@@ -137,49 +139,57 @@ export default {
 	watch: {
 		'newConfiguration.Address'(newVal){
 			let ele = document.querySelector("#Address");
-			ele.classList.remove("is-invalid", "is-valid")
-			try{
-				if (newVal.trim().split("/").filter(x => x.length > 0).length !== 2){
-					throw Error()
+			if (ele){
+				ele.classList.remove("is-invalid", "is-valid")
+				try{
+					this.numberOfAvailableIPs = 0
+					newVal.replace(" ", "").split(",").forEach(x => {
+						let p = parseCidr(x);
+						let i = Number(p.end - p.start);
+						this.numberOfAvailableIPs += i + 1;
+					})
+					ele.classList.add("is-valid")
+				}catch (e) {
+					console.log(e)
+					this.numberOfAvailableIPs = "0";
+					ele.classList.add("is-invalid")
 				}
-				let p = parseCidr(newVal);
-				let i = p.end - p.start;
-				this.numberOfAvailableIPs = i.toLocaleString();
-				ele.classList.add("is-valid")
-			}catch (e) {
-				this.numberOfAvailableIPs = "0";
-				ele.classList.add("is-invalid")
 			}
 		},
 		'newConfiguration.ListenPort'(newVal){
 			let ele = document.querySelector("#ListenPort");
-			ele.classList.remove("is-invalid", "is-valid")
-			
-			if (newVal < 0 || newVal > 65353 || !Number.isInteger(newVal)){
-				ele.classList.add("is-invalid")
-			}else{
-				ele.classList.add("is-valid")
+			if (ele){
+				ele.classList.remove("is-invalid", "is-valid")
+
+				if (newVal < 0 || newVal > 65353 || !Number.isInteger(newVal)){
+					ele.classList.add("is-invalid")
+				}else{
+					ele.classList.add("is-valid")
+				}
 			}
 		},
 		'newConfiguration.ConfigurationName'(newVal){
-			
 			let ele = document.querySelector("#ConfigurationName");
-			ele.classList.remove("is-invalid", "is-valid")
-			if (!/^[a-zA-Z0-9_=+.-]{1,15}$/.test(newVal) || newVal.length === 0 || this.store.Configurations.find(x => x.Name === newVal)){
-				ele.classList.add("is-invalid")
-			}else{
-				ele.classList.add("is-valid")
+			if (ele){
+				ele.classList.remove("is-invalid", "is-valid")
+				if (!/^[a-zA-Z0-9_=+.-]{1,15}$/.test(newVal) || newVal.length === 0 || this.store.Configurations.find(x => x.Name === newVal)){
+					ele.classList.add("is-invalid")
+				}else{
+					ele.classList.add("is-valid")
+				}
 			}
 		},
 		'newConfiguration.PrivateKey'(newVal){
 			let ele = document.querySelector("#PrivateKey");
-			ele.classList.remove("is-invalid", "is-valid")
-			
-			try{
-				wireguard.generatePublicKey(newVal)
-				ele.classList.add("is-valid")
-			}catch (e) {
-				ele.classList.add("is-invalid")
+			if (ele){
+				ele.classList.remove("is-invalid", "is-valid")
+
+				try{
+					wireguard.generatePublicKey(newVal)
+					ele.classList.add("is-valid")
+				}catch (e) {
+					ele.classList.add("is-invalid")
+				}
 			}
 		}
 	},
@@ -304,6 +314,10 @@ export default {
 						</div>
 					</div>
 				</div>
+				<NewConfigurationTemplates
+					@subnet="args => this.newConfiguration.Address = args"
+					@port="args => this.newConfiguration.ListenPort = args"
+				></NewConfigurationTemplates>
 				<div class="card rounded-3 shadow">
 					<div class="card-header">
 						<LocaleText t="Listen Port"></LocaleText>

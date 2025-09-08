@@ -39,6 +39,7 @@ from logging.config import dictConfig
 from modules.DashboardClients import DashboardClients
 from modules.DashboardPlugins import DashboardPlugins
 from modules.DashboardWebHooks import DashboardWebHooks
+from modules.NewConfigurationTemplates import NewConfigurationTemplates
 
 dictConfig({
     'version': 1,
@@ -214,12 +215,40 @@ def API_SignOut():
     session.clear()
     return resp
 
-@app.route(f'{APP_PREFIX}/api/getWireguardConfigurations', methods=["GET"])
+@app.get(f'{APP_PREFIX}/api/getWireguardConfigurations')
 def API_getWireguardConfigurations():
     InitWireguardConfigurationsList()
     return ResponseObject(data=[wc for wc in WireguardConfigurations.values()])
 
-@app.route(f'{APP_PREFIX}/api/addWireguardConfiguration', methods=["POST"])
+@app.get(f'{APP_PREFIX}/api/newConfigurationTemplates')
+def API_NewConfigurationTemplates():
+    return ResponseObject(data=NewConfigurationTemplates.GetTemplates())
+
+@app.get(f'{APP_PREFIX}/api/newConfigurationTemplates/createTemplate')
+def API_NewConfigurationTemplates_CreateTemplate():
+    return ResponseObject(data=NewConfigurationTemplates.CreateTemplate().model_dump())
+
+@app.post(f'{APP_PREFIX}/api/newConfigurationTemplates/updateTemplate')
+def API_NewConfigurationTemplates_UpdateTemplate():
+    data = request.get_json()
+    template = data.get('Template', None)
+    if not template:
+        return ResponseObject(False, "Please provide template")
+    
+    status, msg = NewConfigurationTemplates.UpdateTemplate(template)
+    return ResponseObject(status, msg)
+
+@app.post(f'{APP_PREFIX}/api/newConfigurationTemplates/deleteTemplate')
+def API_NewConfigurationTemplates_DeleteTemplate():
+    data = request.get_json()
+    template = data.get('Template', None)
+    if not template:
+        return ResponseObject(False, "Please provide template")
+
+    status, msg = NewConfigurationTemplates.DeleteTemplate(template)
+    return ResponseObject(status, msg)
+
+@app.post(f'{APP_PREFIX}/api/addWireguardConfiguration')
 def API_addWireguardConfiguration():
     data = request.get_json()
     requiredKeys = [
@@ -1625,6 +1654,7 @@ AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
 DashboardLogger: DashboardLogger = DashboardLogger()
 DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
 DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
+NewConfigurationTemplates: NewConfigurationTemplates = NewConfigurationTemplates()
 
 InitWireguardConfigurationsList(startup=True)
 
