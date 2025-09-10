@@ -1,30 +1,71 @@
-FROM golang:1.24 AS awg-go
+#
+# AWG GOLANG BUILDING STAGE
+# Base: Debian
+#
+FROM golang:1.25 AS awg-go
 
-RUN git clone https://github.com/WGDashboard/amneziawg-go /awg
-WORKDIR /awg
+# Standard working directory for WGDashboard
+RUN mkdir -p /workspace && \
+    git clone https://github.com/WGDashboard/amneziawg-go /workspace/awg
+
+WORKDIR /workspace/awg
 RUN go mod download && \
     go mod verify && \
     go build -ldflags '-linkmode external -extldflags "-fno-PIC -static"' -v -o /usr/bin
 
-FROM alpine:latest AS awg-tools
+#
+# AWG TOOLS BUILDING STAGE
+# Base: Debian
+#
+FROM debian:stable-slim AS awg-tools
 
-RUN apk update && apk add --no-cache \
-    make git build-base linux-headers \
-  && git clone https://github.com/WGDashboard/amneziawg-tools \
-  && cd amneziawg-tools/src \
-  && make \
-  && chmod +x wg*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    make git build-essential linux-headers-generic ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-FROM alpine:latest
+RUN mkdir -p /workspace && \
+    git clone https://github.com/WGDashboard/amneziawg-tools /workspace/awg-tools
+
+WORKDIR /workspace/awg-tools/src
+RUN make && chmod +x wg*
+
+#
+# PIP DEPENDENCY BUILDING
+# Base: Alpine
+#
+FROM python:3.13-alpine AS pip-builder
+
+RUN apk add --no-cache --virtual .build-deps \
+        build-base \
+        mariadb-dev \
+        pkgconfig \
+        python3-dev \
+        libffi-dev \
+        linux-headers \
+    && mkdir -p /opt/wgdashboard/src \
+    && python3 -m venv /opt/wgdashboard/src/venv
+
+COPY ./src/requirements.txt /opt/wgdashboard/src
+RUN . /opt/wgdashboard/src/venv/bin/activate && \
+    pip3 install --upgrade pip && \
+    pip3 install -r /opt/wgdashboard/src/requirements.txt
+
+RUN apk del .build-deps
+
+#
+# WGDashboard RUNNING STAGE
+# Base: Alpine
+#
+FROM python:3.13-alpine
 LABEL maintainer="dselen@nerthus.nl"
 
 RUN apk update && apk add --no-cache \
-    iproute2 iptables bash curl wget unzip procps sudo \
-    tzdata wireguard-tools python3 py3-psutil py3-bcrypt openresolv
+    iproute2 iptables bash curl wget unzip procps \
+    sudo tzdata wireguard-tools openresolv
 
 COPY --from=awg-go /usr/bin/amneziawg-go /usr/bin/amneziawg-go
-COPY --from=awg-tools /amneziawg-tools/src/wg /usr/bin/awg
-COPY --from=awg-tools /amneziawg-tools/src/wg-quick/linux.bash /usr/bin/awg-quick
+COPY --from=awg-tools /workspace/awg-tools/src/wg /usr/bin/awg
+COPY --from=awg-tools /workspace/awg-tools/src/wg-quick/linux.bash /usr/bin/awg-quick
 
 # Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
 ARG wg_net="10.0.0.1" \
@@ -44,7 +85,10 @@ RUN mkdir /data \
   && mkdir /configs \
   && mkdir -p ${WGDASH}/src \
   && mkdir -p /etc/amnezia/amneziawg
+
 COPY ./src ${WGDASH}/src
+COPY --from=pip-builder /opt/wgdashboard/src/venv /opt/wgdashboard/src/venv
+RUN python3 -m venv /opt/wgdashboard/src/venv
 
 # Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
 # Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
@@ -71,6 +115,7 @@ COPY ./docker/entrypoint.sh /entrypoint.sh
 
 # Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
-WORKDIR $WGDASH
+WORKDIR $WGDASH/src
 
+#ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

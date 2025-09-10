@@ -56,16 +56,7 @@ ensure_installation() {
   fi
 
   # Create the Python virtual environment.
-  python3 -m venv "${WGDASH}"/src/venv
   . "${WGDASH}/src/venv/bin/activate"
-
-  # Due to this pip dependency being available as a system package we can just move it to the venv.
-  echo "Moving PIP dependency from ephemerality to runtime environment: psutil"
-  mv /usr/lib/python3.12/site-packages/psutil* "${WGDASH}"/src/venv/lib/python3.12/site-packages
-
-  # Due to this pip dependency being available as a system package we can just move it to the venv.
-  echo "Moving PIP dependency from ephemerality to runtime environment: bcrypt"
-  mv /usr/lib/python3.12/site-packages/bcrypt* "${WGDASH}"/src/venv/lib/python3.12/site-packages
 
   # Use the bash interpreter to install WGDashboard according to the wgd.sh script.
   /bin/bash ./wgd.sh install
