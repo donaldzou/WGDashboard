@@ -1301,3 +1301,7 @@ samp{
     opacity: 0;
     filter: blur(3px);
 }
+
+[data-bs-theme="dark"] #map{
+    filter: grayscale(80%) invert(100%)
+}

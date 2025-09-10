@@ -41,10 +41,12 @@ const availablePeerSearchString = ref("")
 				<button class="btn btn-sm bg-primary-subtle text-primary-emphasis rounded-3 ms-auto"
 						@click="manage = !manage">
 					<template v-if="!manage">
-						<i class="bi bi-list-check me-2"></i>Manage
+						<i class="bi bi-list-check me-2"></i>
+						<LocaleText t="Manage"></LocaleText>
 					</template>
 					<template v-else>
-						<i class="bi bi-check me-2"></i>Done
+						<i class="bi bi-check me-2"></i>
+						<LocaleText t="Done"></LocaleText>
 					</template>
 				</button>
 			</div>

@@ -28,7 +28,7 @@ onMounted(() => {
 		<div class="card-header d-flex align-items-center rounded-0">
 			<h6 class="my-2">{{ groupName }}</h6>
 			<span class="badge text-bg-primary ms-auto">
-				<LocaleText :t="getClients.length + ' Clients'"></LocaleText>
+				<LocaleText :t="getClients.length + ' Client' + (getClients.length > 1 ? 's': '')"></LocaleText>
 			</span>
 		</div>
 		<div class="card-body p-0">

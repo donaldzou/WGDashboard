@@ -4,6 +4,7 @@ const props = defineProps(['colors', 'group'])
 const emits = defineEmits(['close', 'select', ''])
 const searchString = ref("")
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js"
+import LocaleText from "@/components/text/localeText.vue";
 const store = WireguardConfigurationsStore();
 onMounted(() => {
 	let ele = document.querySelector(".icon-grid div.active")
@@ -33,7 +34,7 @@ onMounted(() => {
 		</div>
 		<div class="p-2 border-top d-flex gap-2">
 			<button class="btn btn-sm btn-success rounded-2 ms-auto" @click="emits('close')">
-				Done
+				<LocaleText t="Done"></LocaleText>
 			</button>
 		</div>
 	</div>

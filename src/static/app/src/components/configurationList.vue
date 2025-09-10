@@ -91,7 +91,7 @@ export default {
 								<small>
 									<i class="bi me-2"
 									   :class="[this.wireguardConfigurationsStore.CurrentSort.order === 'asc' ? 'bi-sort-up' : 'bi-sort-down']"
-									   v-if="this.wireguardConfigurationsStore.CurrentSort.key === sv"></i>{{s}}
+									   v-if="this.wireguardConfigurationsStore.CurrentSort.key === sv"></i><LocaleText :t="s"></LocaleText>
 								</small>
 							</a>
 						</div>

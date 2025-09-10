@@ -173,7 +173,7 @@ class DashboardWebHooks:
             if action not in WebHookActions:
                 return False
             self.__getWebHooks()
-            subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions, self.WebHooks)
+            subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions and webhook.IsActive, self.WebHooks)
             data['action'] = action
             for i in subscribedWebHooks:
                 try:

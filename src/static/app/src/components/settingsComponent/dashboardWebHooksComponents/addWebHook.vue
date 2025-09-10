@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import { GetLocale } from "@/utilities/locale.js"
 import {fetchGet, fetchPost} from "@/utilities/fetch.js"
 import LocaleText from "@/components/text/localeText.vue";
 import { v4 } from "uuid";
@@ -26,9 +27,9 @@ if (!props.webHook){
 }
 
 const Actions = ref({
-	'peer_created': "Peer Created",
-	'peer_deleted': "Peer Deleted",
-	'peer_updated': "Peer Updated"
+	'peer_created': GetLocale("Peer Created"),
+	'peer_deleted': GetLocale("Peer Deleted"),
+	'peer_updated': GetLocale("Peer Updated")
 })
 const emits = defineEmits(['refresh', 'delete'])
 import { DashboardConfigurationStore } from "@/stores/DashboardConfigurationStore"

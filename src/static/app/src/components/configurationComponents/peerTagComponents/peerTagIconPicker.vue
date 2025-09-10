@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
+import { GetLocale } from "@/utilities/locale.js"
 const props = defineProps(['group'])
 import bootstrapIcons from "bootstrap-icons/font/bootstrap-icons.json"
+import LocaleText from "@/components/text/localeText.vue";
 const emits = defineEmits(['close', 'select'])
 onMounted(() => {
 	let ele = document.querySelector(".icon-grid div.active")
@@ -29,7 +31,7 @@ const searchIcon = computed(() => {
 			<i class="bi bi-search"></i>
 		</label>
 		<input v-model="searchString"
-			   placeholder="Search Icon"
+			   :placeholder="GetLocale('Search Icon')"
 			   class="form-control form-control-sm rounded-2">
 	</div>
 	<div class="p-2 d-grid icon-grid"
@@ -47,10 +49,10 @@ const searchIcon = computed(() => {
 		<button
 			@click="group.Icon = ''"
 			class="btn btn-sm btn-secondary rounded-2 ms-auto">
-			Remove Icon
+			<LocaleText t="Remove Icon"></LocaleText>
 		</button>
 		<button class="btn btn-sm btn-success rounded-2" @click="emits('close')">
-			Done
+			<LocaleText t="Done"></LocaleText>
 		</button>
 	</div>
 </div>

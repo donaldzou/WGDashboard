@@ -84,13 +84,17 @@ const view = ref("edit")
 											<a
 												@click="view = 'edit'"
 												:class="{active: view === 'edit'}"
-												class="nav-link  rounded-3" role="button">Edit</a>
+												class="nav-link  rounded-3" role="button">
+												<LocaleText t="Edit"></LocaleText>
+											</a>
 										</li>
 										<li class="nav-item">
 											<a
 												:class="{active: view === 'sessions'}"
 												@click="view = 'sessions'"
-												class="nav-link rounded-3" role="button">Sessions</a>
+												class="nav-link rounded-3" role="button">
+												<LocaleText t="Sessions"></LocaleText>
+											</a>
 										</li>
 									</ul>
 								</div>

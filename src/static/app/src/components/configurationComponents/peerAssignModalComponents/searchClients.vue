@@ -56,7 +56,7 @@ const emits = defineEmits(['assign'])
 						:class="{'active': selectedGroup === groupName}"
 						class="btn bg-primary-subtle text-primary-emphasis btn-sm me-2 rounded-3" 
 						v-for="(_, groupName) in assignmentStore.clients">
-						{{ groupName }} 
+						<LocaleText :t="groupName"></LocaleText>
 							<span class="ms-1 badge" :class="[ groupCount[groupName] > 0 ? 'bg-primary' : 'bg-secondary' ]">
 								{{ groupCount[groupName] }}
 							</span>

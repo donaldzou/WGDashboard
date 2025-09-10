@@ -27,10 +27,10 @@ const calculateIP = ref(256)
 </script>
 
 <template>
-<div class="card">
+<div class="card rounded-3">
 	<div class="card-header">
 		<div class="d-flex align-items-center">
-			<LocaleText t="Templates"></LocaleText>
+			<LocaleText t="Subnets & Listen Ports Templates"></LocaleText>
 			<button
 				type="button"
 				@click="newTemplate()"

@@ -139,8 +139,10 @@ const setMapCenter = (endpoint) => {
 					<table class="table table-hover" >
 						<thead>
 							<tr>
-								<th>Endpoint</th>
-								<th v-if="endpoints.geolocation">Geolocation</th>
+								<th><LocaleText t="Endpoint"></LocaleText></th>
+								<th v-if="endpoints.geolocation">
+									<LocaleText t="Geolocation"></LocaleText>
+								</th>
 							</tr>
 						</thead>
 						<tbody>

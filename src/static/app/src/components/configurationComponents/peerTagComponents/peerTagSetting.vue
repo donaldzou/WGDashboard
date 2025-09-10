@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LocaleText from "@/components/text/localeText.vue";
+import { GetLocale } from "@/utilities/locale.js"
 import {WireguardConfigurationsStore} from "@/stores/WireguardConfigurationsStore.js"
 import {ref} from "vue";
 const store = WireguardConfigurationsStore();
@@ -42,7 +43,7 @@ const toggleTag = () => {
 			:disabled="!edit"
 			v-model="groupName"
 			@change="group.GroupName = groupName"
-			placeholder="Tag Name"
+			:placeholder="GetLocale('Tag Name')"
 			class="form-control form-control-sm p-2 rounded-2 w-100">
 		<button
 			v-if="edit"
@@ -56,7 +57,7 @@ const toggleTag = () => {
 			style="white-space: nowrap"
 			:class="{active: !store.Filter.HiddenTags.includes(groupId)}"
 			@click="toggleTag()"
-			class="rounded-2  p-2 btn btn-sm btn-outline-primary">
+			class="rounded-2 p-2 btn btn-sm btn-outline-primary">
 			<i class="bi"
 				:class="[!store.Filter.HiddenTags.includes(groupId) ? 'bi-eye-fill':'bi-eye-slash-fill']"
 			></i>

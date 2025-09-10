@@ -1,4 +1,3 @@
-import router from "@/router/router.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 const getHeaders = () => {
