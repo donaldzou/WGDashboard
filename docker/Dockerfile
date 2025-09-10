@@ -60,8 +60,8 @@ FROM python:3.13-alpine
 LABEL maintainer="dselen@nerthus.nl"
 
 RUN apk update && apk add --no-cache \
-    iproute2 iptables bash curl wget unzip procps \
-    sudo tzdata wireguard-tools openresolv
+        iproute2 iptables bash curl wget unzip procps \
+        sudo tzdata wireguard-tools openresolv
 
 COPY --from=awg-go /usr/bin/amneziawg-go /usr/bin/amneziawg-go
 COPY --from=awg-tools /workspace/awg-tools/src/wg /usr/bin/awg
@@ -82,9 +82,9 @@ ENV WGDASH=/opt/wgdashboard
 
 # Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
 RUN mkdir /data \
-  && mkdir /configs \
-  && mkdir -p ${WGDASH}/src \
-  && mkdir -p /etc/amnezia/amneziawg
+    && mkdir /configs \
+    && mkdir -p ${WGDASH}/src \
+    && mkdir -p /etc/amnezia/amneziawg
 
 COPY ./src ${WGDASH}/src
 COPY --from=pip-builder /opt/wgdashboard/src/venv /opt/wgdashboard/src/venv
@@ -117,5 +117,4 @@ COPY ./docker/entrypoint.sh /entrypoint.sh
 EXPOSE 10086
 WORKDIR $WGDASH/src
 
-#ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
