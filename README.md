@@ -2,7 +2,7 @@
 > 🎉 I'm excited to announce that WGDashboard is officially listed on DigitalOcean's Marketplace! For more information, please visit [Host WGDashboard & WireGuard with DigitalOcean﻿](https://docs.wgdashboard.dev/host-wgdashboard-wireguard-with-digitalocean.html) for more information!
 
 > [!NOTE]
-> **Help Wanted 🎉**: Localizing WGDashboard to other languages! If you're willing to help, please visit https://github.com/donaldzou/WGDashboard/issues/397. Many thanks!
+> **Help Wanted 🎉**: Localizing WGDashboard to other languages! If you're willing to help, please visit https://github.com/WGDashboard/WGDashboard/issues/397. Many thanks!
 
 
 

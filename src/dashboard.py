@@ -433,29 +433,30 @@ def API_getAllWireguardConfigurationBackup():
             
     for protocol in ProtocolsEnabled():
         directory = os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup')
-        files = [(file, os.path.getctime(os.path.join(directory, file)))
-                 for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
-        files.sort(key=lambda x: x[1], reverse=True)
-    
-        for f, ct in files:
-            if RegexMatch(r"^(.*)_(.*)\.(conf)$", f):
-                s = re.search(r"^(.*)_(.*)\.(conf)$", f)
-                name = s.group(1)
-                if name not in existingConfiguration:
-                    if name not in data['NonExistingConfigurations'].keys():
-                        data['NonExistingConfigurations'][name] = []
-                    
-                    date = s.group(2)
-                    d = {
-                        "protocol": protocol,
-                        "filename": f,
-                        "backupDate": date,
-                        "content": open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
-                    }
-                    if f.replace(".conf", ".sql") in list(os.listdir(directory)):
-                        d['database'] = True
-                        d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
-                    data['NonExistingConfigurations'][name].append(d)
+        if os.path.exists(directory):
+            files = [(file, os.path.getctime(os.path.join(directory, file)))
+                     for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
+            files.sort(key=lambda x: x[1], reverse=True)
+        
+            for f, ct in files:
+                if RegexMatch(r"^(.*)_(.*)\.(conf)$", f):
+                    s = re.search(r"^(.*)_(.*)\.(conf)$", f)
+                    name = s.group(1)
+                    if name not in existingConfiguration:
+                        if name not in data['NonExistingConfigurations'].keys():
+                            data['NonExistingConfigurations'][name] = []
+                        
+                        date = s.group(2)
+                        d = {
+                            "protocol": protocol,
+                            "filename": f,
+                            "backupDate": date,
+                            "content": open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f), 'r').read()
+                        }
+                        if f.replace(".conf", ".sql") in list(os.listdir(directory)):
+                            d['database'] = True
+                            d['databaseContent'] = open(os.path.join(DashboardConfig.GetConfig("Server", f"{protocol}_conf_path")[1], 'WGDashboard_Backup', f.replace(".conf", ".sql")), 'r').read()
+                        data['NonExistingConfigurations'][name].append(d)
     return ResponseObject(data=data)
 
 @app.get(f'{APP_PREFIX}/api/createWireguardConfigurationBackup')
@@ -1192,7 +1193,7 @@ def API_traceroute_execute():
 def API_getDashboardUpdate():
     import urllib.request as req
     try:
-        r = req.urlopen("https://api.github.com/repos/donaldzou/WGDashboard/releases/latest", timeout=5).read()
+        r = req.urlopen("https://api.github.com/repos/WGDashboard/WGDashboard/releases/latest", timeout=5).read()
         data = dict(json.loads(r))
         tagName = data.get('tag_name')
         htmlUrl = data.get('html_url')
