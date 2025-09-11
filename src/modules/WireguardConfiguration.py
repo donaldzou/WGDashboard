@@ -903,7 +903,7 @@ class WireguardConfiguration:
             "backupDate": datetime.now().strftime("%Y%m%d%H%M%S")
         }
 
-    def getBackups(self, databaseContent: bool = False) -> list[dict[str: str, str: str, str: str]]:
+    def getBackups(self, databaseContent: bool = False) -> list[dict[str, str]]:
         backups = []
 
         directory = os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')
