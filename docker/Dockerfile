@@ -41,6 +41,8 @@ RUN apk add --no-cache --virtual .build-deps \
         mariadb-dev \
         pkgconfig \
         python3-dev \
+        libffi-dev \
+        linux-headers \
     && mkdir -p /opt/wgdashboard/src \
     && python3 -m venv /opt/wgdashboard/src/venv
 
