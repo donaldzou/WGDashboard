@@ -2,7 +2,7 @@
 # AWG GOLANG BUILDING STAGE
 # Base: Debian
 #
-FROM golang:1.25 AS awg-go
+FROM golang:1.24 AS awg-go
 
 # Standard working directory for WGDashboard
 RUN mkdir -p /workspace && \
@@ -37,11 +37,10 @@ FROM python:3.13-alpine AS pip-builder
 
 RUN apk add --no-cache --virtual .build-deps \
         build-base \
+        libpq-dev \
         mariadb-dev \
         pkgconfig \
         python3-dev \
-        libffi-dev \
-        linux-headers \
     && mkdir -p /opt/wgdashboard/src \
     && python3 -m venv /opt/wgdashboard/src/venv
 
