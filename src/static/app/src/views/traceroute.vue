@@ -139,7 +139,7 @@ export default {
 										</small>
 									</td>
 									<td>
-										<span v-if="hop.geo.city && hop.geo.country">
+										<span v-if="hop.geo && hop.geo.city && hop.geo.country">
 											<small>{{hop.geo.city}}, {{hop.geo.country}}</small>
 										</span>
 										<span v-else>
