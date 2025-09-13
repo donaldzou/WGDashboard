@@ -1,8 +1,6 @@
-import shutil
-import subprocess
-import time
-import threading
-import psutil
+import shutil, subprocess, time, threading, psutil
+from flask import current_app
+
 class SystemStatus:
     def __init__(self):
         self.CPU = CPU()
@@ -40,28 +38,20 @@ class CPU:
     def __init__(self):
         self.cpu_percent: float = 0
         self.cpu_percent_per_cpu: list[float] = []
-    def getData(self):
-        pass
-        # try:
-        #     self.cpu_percent_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
-        #     
-        # except Exception as e:
-        #     pass
+        
     def getCPUPercent(self):
         try:
             self.cpu_percent = psutil.cpu_percent(interval=1)
         except Exception as e:
-            pass
+            current_app.logger.error("Get CPU Percent error", e)
     
     def getPerCPUPercent(self):
         try:
             self.cpu_percent_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
-
         except Exception as e:
-            pass
+            current_app.logger.error("Get Per CPU Percent error", e)
     
     def toJson(self):
-        self.getData()
         return self.__dict__
 
 class Memory:
@@ -80,7 +70,7 @@ class Memory:
             self.available = memory.available
             self.percent = memory.percent
         except Exception as e:
-            pass
+            current_app.logger.error("Get Memory percent error", e)
     def toJson(self):
         self.getData()
         return self.__dict__
@@ -92,7 +82,7 @@ class Disks:
         try:
             self.disks = list(map(lambda x : Disk(x.mountpoint), psutil.disk_partitions()))
         except Exception as e:
-            pass
+            current_app.logger.error("Get Disk percent error", e)
     def toJson(self):
         self.getData()
         return self.disks
@@ -112,7 +102,7 @@ class Disk:
             self.used = disk.used
             self.percent = disk.percent
         except Exception as e:
-            pass
+            current_app.logger.error("Get Disk percent error", e)
     def toJson(self):
         self.getData()
         return self.__dict__
@@ -149,7 +139,8 @@ class NetworkInterfaces:
                     'recv': round((network[i].bytes_recv - self.interfaces[i]['bytes_recv']) / 1024 / 1024, 4)
                 }
         except Exception as e:
-            print(str(e))
+            current_app.logger.error("Get network error", e)
+
     def toJson(self):
         return self.interfaces
 
@@ -178,7 +169,8 @@ class Processes:
                     key=lambda x : x.percent, reverse=True)[:20]
                 break
             except Exception as e:
-                break
+                current_app.logger.error("Get processes error", e)
+
     def toJson(self):
         self.getData()
         return {

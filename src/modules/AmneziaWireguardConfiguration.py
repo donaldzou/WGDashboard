@@ -2,7 +2,7 @@
 AmneziaWG Configuration
 """
 import random, sqlalchemy, os, subprocess, re, uuid
-
+from flask import current_app
 from .PeerJobs import PeerJobs
 from .AmneziaWGPeer import AmneziaWGPeer
 from .PeerShareLinks import PeerShareLinks
@@ -250,10 +250,8 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                                     )
                                 self.Peers.append(AmneziaWGPeer(tempPeer, self))
                 except Exception as e:
-                    if __name__ == '__main__':
-                        print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
+                    current_app.logger.error(f"{self.Name} getPeers() Error", e)
         else:
-            # checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
             with self.engine.connect() as conn:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()
                 for i in existingPeers:

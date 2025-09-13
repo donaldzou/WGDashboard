@@ -6,7 +6,7 @@ from sqlalchemy_utils import database_exists, create_database
 import sqlalchemy as db
 from datetime import datetime
 from typing import Any
-
+from flask import current_app
 from .ConnectionString import ConnectionString
 from .Utilities import (
     GetRemoteEndpoint, ValidateDNSAddress
@@ -141,7 +141,7 @@ class DashboardConfig:
                     fKeys.append(DashboardAPIKey(k[0], k[1].strftime("%Y-%m-%d %H:%M:%S"), (k[2].strftime("%Y-%m-%d %H:%M:%S") if k[2] else None)))
                 return fKeys
         except Exception as e:
-            print(e)
+            current_app.logger.error("API Keys error", e)
         return []
 
     def createAPIKeys(self, ExpiredAt = None):
