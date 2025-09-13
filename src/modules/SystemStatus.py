@@ -64,10 +64,12 @@ class Memory:
         try:
             if self.__memoryType__ == "virtual":
                 memory = psutil.virtual_memory()
+                self.available = memory.available
             else:
                 memory = psutil.swap_memory()
+                self.available = memory.free
             self.total = memory.total
-            self.available = memory.available
+            
             self.percent = memory.percent
         except Exception as e:
             current_app.logger.error("Get Memory percent error", e)
