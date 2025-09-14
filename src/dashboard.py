@@ -1310,6 +1310,7 @@ def API_Email_Send():
     if "Receiver" not in data.keys() or "Subject" not in data.keys():
         return ResponseObject(False, "Please at least specify receiver and subject")
     body = data.get('Body', '')
+    subject = data.get('Subject','')
     download = None
     if ("ConfigurationName" in data.keys() 
             and "Peer" in data.keys()):
