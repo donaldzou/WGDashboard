@@ -42,10 +42,13 @@ export default {
 						description: this.selectedPeer.name,
 						hostName: this.dashboardStore.Configuration.Peers.remote_endpoint
 					}
-					data = btoa(JSON.stringify(awgQRCodeObject))
-				}else{
-					data = res.data.file
+					QRCode.toCanvas(
+						document.querySelector("#awg_vpn_qrcode"), btoa(JSON.stringify(awgQRCodeObject)), (e) => {
+							if (error) console.error(error)
+						}
+					)
 				}
+				data = res.data.file
 				QRCode.toCanvas(document.querySelector("#qrcode"), data,  (error) => {
 					if (error) console.error(error)
 				})
