@@ -11,7 +11,7 @@ tcconfig
 sqlalchemy
 sqlalchemy_utils
 psycopg
-mysqlclient
+PyMySQL
 tzlocal
 python-jose
 pydantic

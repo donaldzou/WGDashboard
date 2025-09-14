@@ -68,13 +68,13 @@ class Peer:
         if len(dns_addresses) > 0 and not ValidateDNSAddress(dns_addresses):
             return False, f"DNS format is incorrect"
         
-        if type(mtu) is str:
+        if type(mtu) is str or mtu is None:
             mtu = 0
         
         if mtu < 0 or mtu > 1460:
             return False, "MTU format is not correct"
         
-        if type(keepalive) is str:
+        if type(keepalive) is str or keepalive is None:
             keepalive = 0
         
         if keepalive < 0:

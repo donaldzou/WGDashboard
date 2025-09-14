@@ -1,5 +1,5 @@
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-
+import router from "@/router/router.js";
 const getHeaders = () => {
 	let headers = {
 		"Content-Type": "application/json"
@@ -51,7 +51,6 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		})
 		.then(x => callback ? callback(x) : undefined).catch(x => {
 			console.log("Error:", x)
-			// store.newMessage("WGDashboard", `Error: ${x}`, "danger")
 			router.push({path: '/signin'})
 	})
 }
@@ -75,7 +74,6 @@ export const fetchPost = async (url, body, callback) => {
 		}
 	}).then(x => callback ? callback(x) : undefined).catch(x => {
 		console.log("Error:", x)
-		// store.newMessage("WGDashboard", `Error: ${x}`, "danger")
 		router.push({path: '/signin'})
 	})
 }

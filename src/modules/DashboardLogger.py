@@ -3,7 +3,7 @@ Dashboard Logger Class
 """
 import uuid
 import sqlalchemy as db
-
+from flask import current_app
 from .ConnectionString import ConnectionString
 
 
@@ -40,5 +40,5 @@ class DashboardLogger:
                 )
             return True
         except Exception as e:
-            print(f"[WGDashboard] Access Log Error: {str(e)}")
+            current_app.logger.error(f"Access Log Error", e)
             return False

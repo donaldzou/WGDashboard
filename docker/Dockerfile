@@ -2,6 +2,7 @@
 # AWG GOLANG BUILDING STAGE
 # Base: Alpine
 #
+
 FROM golang:1.25-alpine AS awg-go
 
 RUN apk add --no-cache \
@@ -43,6 +44,7 @@ RUN make && chmod +x wg*
 # Base: Alpine
 #
 FROM python:3.13-alpine AS pip-builder
+
 
 RUN apk add --no-cache \
       build-base \

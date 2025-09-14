@@ -69,10 +69,9 @@ class DashboardOIDC:
             try:
                 tokens = requests.post(oidc_config.get('token_endpoint'), data=data).json()
                 if not all([tokens.get('access_token'), tokens.get('id_token')]):
-                    print(oidc_config.get('token_endpoint'), data)
                     return False, tokens.get('error_description', None)
             except Exception as e:
-                print(str(e))
+                current_app.logger.error("Verify token failed", e)
                 return False, str(e)
             
             access_token = tokens.get('access_token')

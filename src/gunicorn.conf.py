@@ -1,5 +1,4 @@
-import os.path
-import dashboard, configparser
+import dashboard
 from datetime import datetime
 global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, JobLogger, Dash
 app_host, app_port = dashboard.gunicornConfig()

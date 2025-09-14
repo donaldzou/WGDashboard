@@ -210,7 +210,6 @@ class DashboardClients:
         if not status:
             return False, "Sign in failed. Reason: " + data
         existingClient = self.SignIn_OIDC_UserExistence(data)
-        print(data)
         if not existingClient:
             status, newClientUUID = self.SignUp_OIDC(data)
             session['ClientID'] = newClientUUID

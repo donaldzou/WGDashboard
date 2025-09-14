@@ -303,7 +303,7 @@ def API_addWireguardConfiguration():
     else:
         WireguardConfigurations[data['ConfigurationName']] = (
             WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data=data)) if data.get('Protocol') == 'wg' else (
-            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, DashboardWebHooks, data=data))
+            AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, data=data))
     return ResponseObject()
 
 @app.get(f'{APP_PREFIX}/api/toggleWireguardConfiguration')
@@ -585,6 +585,7 @@ def API_updatePeerSettings(configName):
             else:
                 status, msg = peer.updatePeer(name, private_key, preshared_key, dns_addresses,
                     allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
+            wireguardConfig.getPeers()
             DashboardWebHooks.RunWebHook('peer_updated', {
                 "configuration": wireguardConfig.Name,
                 "peers": [id]
@@ -1555,7 +1556,6 @@ Index Page
 
 @app.get(f'{APP_PREFIX}/')
 def index():
-    app.logger.info('hi')
     return render_template('index.html')
 
 def peerInformationBackgroundThread():
@@ -1581,7 +1581,7 @@ def peerInformationBackgroundThread():
                                 c.logPeersHistoryEndpoint()
                             c.getRestrictedPeersList()
             except Exception as e:
-                print(f"[WGDashboard] Background Thread #1 Error: {str(e)}", flush=True)
+                app.logger.error(f"[WGDashboard] Background Thread #1 Error", e)
            
         if delay == 6:
             delay = 1
@@ -1595,8 +1595,11 @@ def peerJobScheduleBackgroundThread():
         app.logger.info(f"Background Thread #2 PID:" + str(threading.get_native_id()))
         time.sleep(10)
         while True:
-            AllPeerJobs.runJob()
-            time.sleep(180)
+            try:
+                AllPeerJobs.runJob()
+                time.sleep(180)
+            except Exception as e:
+                app.logger.error("Background Thread #2 Error", e)
 
 def gunicornConfig():
     _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
@@ -1622,11 +1625,13 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 try:
                     if i in WireguardConfigurations.keys():
                         if WireguardConfigurations[i].configurationFileChanged():
-                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
+                            with app.app_context():
+                                WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
                     else:
-                        WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
+                        with app.app_context():
+                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
                 except WireguardConfiguration.InvalidConfigurationFileException as e:
-                    print(f"{i} have an invalid configuration file.")
+                    app.logger.error(f"{i} have an invalid configuration file.")
 
     if "awg" in ProtocolsEnabled():
         confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
@@ -1637,11 +1642,13 @@ def InitWireguardConfigurationsList(startup: bool = False):
                 try:
                     if i in WireguardConfigurations.keys():
                         if WireguardConfigurations[i].configurationFileChanged():
-                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
+                            with app.app_context():
+                                WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
                     else:
-                        WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
+                        with app.app_context():
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
                 except WireguardConfiguration.InvalidConfigurationFileException as e:
-                    print(f"{i} have an invalid configuration file.")
+                    app.logger.error(f"{i} have an invalid configuration file.")
 
 
 _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
@@ -1650,17 +1657,14 @@ _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 WireguardConfigurations: dict[str, WireguardConfiguration] = {}
 
-AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
-AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
-DashboardLogger: DashboardLogger = DashboardLogger()
-DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
-DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
-NewConfigurationTemplates: NewConfigurationTemplates = NewConfigurationTemplates()
-
-InitWireguardConfigurationsList(startup=True)
-
-
 with app.app_context():
+    AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
+    AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
+    DashboardLogger: DashboardLogger = DashboardLogger()
+    DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
+    DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
+    NewConfigurationTemplates: NewConfigurationTemplates = NewConfigurationTemplates()
+    InitWireguardConfigurationsList(startup=True)
     DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
     app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
 
@@ -1673,5 +1677,5 @@ def startThreads():
 if __name__ == "__main__":
     startThreads()
     DashboardPlugins.startThreads()
-    app.logger.addHandler(logging.StreamHandler())
+    # app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

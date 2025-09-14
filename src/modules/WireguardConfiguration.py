@@ -8,6 +8,7 @@ import sqlalchemy, random, shutil, configparser, ipaddress, os, subprocess, time
 from zipfile import ZipFile
 from datetime import datetime, timedelta
 from itertools import islice
+from flask import current_app
 
 from .ConnectionString import ConnectionString
 from .DashboardConfig import DashboardConfig
@@ -120,17 +121,17 @@ class WireguardConfiguration:
                 self.createDatabase()
                 with open(self.configPath, "w+") as configFile:
                     self.__parser.write(configFile)
-                    print(f"[WGDashboard] Configuration file {self.configPath} created")
+                    current_app.logger.info(f"Configuration file {self.configPath} created")
                 self.__initPeersList()
 
         if not os.path.exists(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup')):
             os.mkdir(os.path.join(self.__getProtocolPath(), 'WGDashboard_Backup'))
 
-        print(f"[WGDashboard] Initialized Configuration: {name}")
+        current_app.logger.info(f"Initialized Configuration: {name}")
         self.__dumpDatabase()
         if self.getAutostartStatus() and not self.getStatus() and startup:
             self.toggleConfiguration()
-            print(f"[WGDashboard] Autostart Configuration: {name}")
+            current_app.logger.info(f"Autostart Configuration: {name}")
             
         self.configurationInfo: WireguardConfigurationInfo | None = None
         configurationInfoJson = self.readConfigurationInfo()
@@ -170,7 +171,7 @@ class WireguardConfiguration:
         status, err = self.toggleConfiguration()
         if not status:
             restoreStatus = self.restoreBackup(backup['filename'])
-            print(f"Restore status: {restoreStatus}")
+            current_app.logger.error(f"Backup restore status: {restoreStatus}")
             self.toggleConfiguration()
             return False, err
         return True, None
@@ -228,7 +229,7 @@ class WireguardConfiguration:
                         )
                     )
         except Exception as e:
-            print("[WGDashboard] Error: Drop table failed - " + str(e))
+            current_app.logger.error("Dropping table failed")
             return False
         return True
 
@@ -397,79 +398,83 @@ class WireguardConfiguration:
 
     def getPeers(self):
         tmpList = []
+        current_app.logger.info(f"Refreshing {self.Name} peer list")
         if self.configurationFileChanged():
             with open(self.configPath, 'r') as configFile:
                 p = []
                 pCounter = -1
                 content = configFile.read().split('\n')
                 try:
-                    peerStarts = content.index("[Peer]")
-                    content = content[peerStarts:]
-                    for i in content:
-                        if not RegexMatch("#(.*)", i) and not RegexMatch(";(.*)", i):
-                            if i == "[Peer]":
-                                pCounter += 1
-                                p.append({})
-                                p[pCounter]["name"] = ""
-                            else:
-                                if len(i) > 0:
-                                    split = re.split(r'\s*=\s*', i, 1)
-                                    if len(split) == 2:
-                                        p[pCounter][split[0]] = split[1]
-
-                        if RegexMatch("#Name# = (.*)", i):
-                            split = re.split(r'\s*=\s*', i, 1)
-                            if len(split) == 2:
-                                p[pCounter]["name"] = split[1]
-                    
-                    for i in p:
-                        if "PublicKey" in i.keys():
-                            with self.engine.connect() as conn:
-                                tempPeer = conn.execute(
-                                    self.peersTable.select().where(
-                                        self.peersTable.columns.id == i['PublicKey']
-                                    )
-                                ).mappings().fetchone()
-                            
-                            if tempPeer is None:
-                                tempPeer = {
-                                    "id": i['PublicKey'],
-                                    "private_key": "",
-                                    "DNS": self.DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
-                                    "endpoint_allowed_ip": self.DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
-                                        1],
-                                    "name": i.get("name"),
-                                    "total_receive": 0,
-                                    "total_sent": 0,
-                                    "total_data": 0,
-                                    "endpoint": "N/A",
-                                    "status": "stopped",
-                                    "latest_handshake": "N/A",
-                                    "allowed_ip": i.get("AllowedIPs", "N/A"),
-                                    "cumu_receive": 0,
-                                    "cumu_sent": 0,
-                                    "cumu_data": 0,
-                                    "mtu": self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1]) > 0 else None,
-                                    "keepalive": self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]) > 0 else None,
-                                    "remote_endpoint": self.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
-                                    "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
-                                }
-                                with self.engine.begin() as conn:
-                                    conn.execute(
-                                        self.peersTable.insert().values(tempPeer)
-                                    )                                    
-                            else:
-                                with self.engine.begin() as conn:
-                                    conn.execute(
-                                        self.peersTable.update().values({
-                                            "allowed_ip": i.get("AllowedIPs", "N/A")
-                                        }).where(
+                    if "[Peer]" in content:
+                        peerStarts = content.index("[Peer]")
+                        content = content[peerStarts:]
+                        for i in content:
+                            if not RegexMatch("#(.*)", i) and not RegexMatch(";(.*)", i):
+                                if i == "[Peer]":
+                                    pCounter += 1
+                                    p.append({})
+                                    p[pCounter]["name"] = ""
+                                else:
+                                    if len(i) > 0:
+                                        split = re.split(r'\s*=\s*', i, 1)
+                                        if len(split) == 2:
+                                            p[pCounter][split[0]] = split[1]
+    
+                            if RegexMatch("#Name# = (.*)", i):
+                                split = re.split(r'\s*=\s*', i, 1)
+                                if len(split) == 2:
+                                    p[pCounter]["name"] = split[1]
+                        
+                        for i in p:
+                            if "PublicKey" in i.keys():
+                                with self.engine.connect() as conn:
+                                    tempPeer = conn.execute(
+                                        self.peersTable.select().where(
                                             self.peersTable.columns.id == i['PublicKey']
                                         )
-                                    )
-                            tmpList.append(Peer(tempPeer, self))
+                                    ).mappings().fetchone()
+                                
+                                if tempPeer is None:
+                                    tempPeer = {
+                                        "id": i['PublicKey'],
+                                        "private_key": "",
+                                        "DNS": self.DashboardConfig.GetConfig("Peers", "peer_global_DNS")[1],
+                                        "endpoint_allowed_ip": self.DashboardConfig.GetConfig("Peers", "peer_endpoint_allowed_ip")[
+                                            1],
+                                        "name": i.get("name"),
+                                        "total_receive": 0,
+                                        "total_sent": 0,
+                                        "total_data": 0,
+                                        "endpoint": "N/A",
+                                        "status": "stopped",
+                                        "latest_handshake": "N/A",
+                                        "allowed_ip": i.get("AllowedIPs", "N/A"),
+                                        "cumu_receive": 0,
+                                        "cumu_sent": 0,
+                                        "cumu_data": 0,
+                                        "mtu": self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_mtu")[1]) > 0 else None,
+                                        "keepalive": self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1] if len(self.DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]) > 0 else None,
+                                        "remote_endpoint": self.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
+                                        "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
+                                    }
+                                    with self.engine.begin() as conn:
+                                        conn.execute(
+                                            self.peersTable.insert().values(tempPeer)
+                                        )                                    
+                                else:
+                                    with self.engine.begin() as conn:
+                                        conn.execute(
+                                            self.peersTable.update().values({
+                                                "allowed_ip": i.get("AllowedIPs", "N/A")
+                                            }).where(
+                                                self.peersTable.columns.id == i['PublicKey']
+                                            )
+                                        )
+                                tmpList.append(Peer(tempPeer, self))
+                    else:
+                        current_app.logger.warning(f"{self.Name} is an empty configuration")
                 except Exception as e:
-                    print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
+                    current_app.logger.error(f"{self.Name} getPeers() Error", e)
         else:
             with self.engine.connect() as conn:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()
@@ -1074,7 +1079,7 @@ class WireguardConfiguration:
                         check = ipaddress.ip_network(ppip[0])
                         existedAddress.add(check)
                     except Exception as e:
-                        print(f"[WGDashboard] Error: {self.Name} peer {p.id} have invalid ip")
+                        current_app.logger.error(f"{self.Name} peer {p.id} have invalid ip", e)
         configurationAddresses = self.Address.split(',')
         for ca in configurationAddresses:
             ca = ca.strip()
@@ -1088,8 +1093,7 @@ class WireguardConfiguration:
                         if p.version == network.version and p.subnet_of(network):
                             availableAddress[ca] -= 1
             except Exception as e:
-                print(e)
-                print(f"[WGDashboard] Error: Failed to parse IP address {ca} from {self.Name}")
+                current_app.logger.error(f"Error: Failed to parse IP address {ca} from {self.Name}", e)
         return True, availableAddress
 
     def getAvailableIP(self, threshold = 255):
@@ -1106,7 +1110,7 @@ class WireguardConfiguration:
                         check = ipaddress.ip_network(ppip[0])
                         existedAddress.add(check.compressed)
                     except Exception as e:
-                        print(f"[WGDashboard] Error: {self.Name} peer {p.id} have invalid ip")
+                        current_app.logger.error(f"{self.Name} peer {p.id} have invalid ip", e)
         configurationAddresses = self.Address.split(',')
         for ca in configurationAddresses:
             ca = ca.strip()
@@ -1122,8 +1126,7 @@ class WireguardConfiguration:
                         availableAddress[ca] = list(islice(filter(lambda ip : ip not in existedAddress,
                                                                   map(lambda iph : ipaddress.ip_network(iph).compressed, network.hosts())), threshold))
             except Exception as e:
-                print(e)
-                print(f"[WGDashboard] Error: Failed to parse IP address {ca} from {self.Name}")
+                current_app.logger.error(f"Failed to parse IP address {ca} from {self.Name}", e)
         return True, availableAddress
 
     def getRealtimeTrafficUsage(self):

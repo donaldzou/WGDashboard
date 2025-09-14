@@ -3,7 +3,7 @@ Peer Job Logger
 """
 import uuid
 import sqlalchemy as db
-
+from flask import current_app
 from .ConnectionString import ConnectionString
 from .Log import Log
 
@@ -36,7 +36,7 @@ class PeerJobLogger:
                     )
                 )
         except Exception as e:
-            print(f"[WGDashboard] Peer Job Log Error: {str(e)}")
+            current_app.logger.error(f"Peer Job Log Error", e)
             return False
         return True
 
@@ -54,6 +54,6 @@ class PeerJobLogger:
                     logs.append(
                         Log(l.LogID, l.JobID, l.LogDate.strftime("%Y-%m-%d %H:%M:%S"), l.Status, l.Message))
         except Exception as e:
-            print(e)
+            current_app.logger.error(f"Getting Peer Job Log Error", e)
             return logs
         return logs

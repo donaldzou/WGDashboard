@@ -9,6 +9,15 @@ store.initCrossServerConfiguration();
 if (window.IS_WGDASHBOARD_DESKTOP){
 	store.IsElectronApp = true;
 	store.CrossServerConfiguration.Enable = true;
+	if (store.ActiveServerConfiguration){
+		fetchGet("/api/locale", {}, (res) => {
+			store.Locale = res.data
+		})
+	}
+}else{
+	fetchGet("/api/locale", {}, (res) => {
+		store.Locale = res.data
+	})
 }
 watch(store.CrossServerConfiguration, () => {
 	store.syncCrossServerConfiguration()
@@ -16,9 +25,7 @@ watch(store.CrossServerConfiguration, () => {
 	deep: true
 });
 const route = useRoute()
-fetchGet("/api/locale", {}, (res) => {
-	store.Locale = res.data
-})
+
 </script>
 
 <template>

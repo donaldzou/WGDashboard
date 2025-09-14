@@ -14,16 +14,19 @@ const formattedBody = computed(() => {
 		<small class="text-muted">
 			<LocaleText t="Status"></LocaleText>
 		</small>
-		<h3 :class="{'text-success': session.Status === 0, 'text-danger': session.Status === 1}">
-				<span v-if="session.Status === 0">
-					<i class="bi bi-check-circle-fill me-2"></i><LocaleText t="Success"></LocaleText>
-				</span>
+		<h3 :class="{'text-success': session.Status === 0, 'text-danger': session.Status === 1, 'text-warning': session.Status === 2}">
+			<span v-if="session.Status === 0">
+				<i class="bi bi-check-circle-fill me-2"></i><LocaleText t="Success"></LocaleText>
+			</span>
+			<span v-if="session.Status === 2">
+				<i class="bi bi-trash3-fill me-2"></i><LocaleText t="Timeout"></LocaleText>
+			</span>
 			<span v-else-if="session.Status === 1">
 					<i class="bi bi-x-circle-fill me-2"></i><LocaleText t="Failed"></LocaleText>
 				</span>
 			<span v-else-if="session.Status === -1">
 					<i class="spinner-border me-2"></i><LocaleText t="Requesting..."></LocaleText>
-				</span>
+			</span>
 		</h3>
 		<div class="d-flex gap-4 align-items-center">
 			<div>

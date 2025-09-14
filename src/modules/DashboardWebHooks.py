@@ -3,12 +3,13 @@ import threading
 import time
 import urllib.parse
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from pydantic import BaseModel, field_serializer
 import sqlalchemy as db
 from .ConnectionString import ConnectionString
+from flask import current_app
 
 WebHookActions = ['peer_created', 'peer_deleted', 'peer_updated']
 class WebHook(BaseModel):
@@ -76,6 +77,17 @@ class DashboardWebHooks:
         
         self.metadata.create_all(self.engine)
         self.WebHooks: list[WebHook] = []
+        
+        with self.engine.begin() as conn:
+           conn.execute(
+               self.webHookSessionsTable.update().values({
+                   "EndDate": datetime.now(),
+                   "Status": 2
+               }).where(
+                   self.webHookSessionsTable.c.Status == -1
+               )
+           )
+        
         self.__getWebHooks()
         
     def __getWebHooks(self):
@@ -173,19 +185,19 @@ class DashboardWebHooks:
             if action not in WebHookActions:
                 return False
             self.__getWebHooks()
-            subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions and webhook.IsActive, self.WebHooks)
+            subscribedWebHooks = filter(lambda webhook: action in webhook.SubscribedActions and webhook.IsActive, 
+                                        self.WebHooks)
             data['action'] = action
             for i in subscribedWebHooks:
                 try:
                     ws = WebHookSession(i, data)
                     t = threading.Thread(target=ws.Execute, daemon=True)
                     t.start()
-                    print("Spinning threads...")
+                    current_app.logger.info(f"Requesting {i.PayloadURL}")
                 except Exception as e:
-                    print(e)
+                    current_app.logger.error(f"Requesting {i.PayloadURL} error", e)
         except Exception as e:
-            print(e)
-        return True
+            current_app.logger.error("Error when running WebHook")
 
 class WebHookSession:
     def __init__(self, webHook: WebHook, data: dict[str, str]):

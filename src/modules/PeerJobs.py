@@ -6,6 +6,7 @@ from .PeerJob import PeerJob
 from .PeerJobLogger import PeerJobLogger
 import sqlalchemy as db
 from datetime import datetime
+from flask import current_app
 
 class PeerJobs:
     def __init__(self, DashboardConfig, WireguardConfigurations):
@@ -140,7 +141,7 @@ class PeerJobs:
 
 
     def runJob(self):
-        print("[WGDashboard] Running scheduled jobs")
+        current_app.logger.info("Running scheduled jobs")
         needToDelete = []
         self.__getJobs()
         for job in self.Jobs:
@@ -166,25 +167,24 @@ class PeerJobs:
                             s = fp.resetDataUsage("total")
                             c.restrictPeers([fp.id])
                             c.allowAccessPeers([fp.id])
-
                         if s is True:
                             self.JobLogger.log(job.JobID, s,
                                           f"Peer {fp.id} from {c.Name} is successfully {job.Action}ed."
                                           )
-                            print(f"[WGDashboard] Peer {fp.id} from {c.Name} is successfully {job.Action}ed.")
+                            current_app.logger.info(f"Peer {fp.id} from {c.Name} is successfully {job.Action}ed.")
                             needToDelete.append(job)
                         else:
-                            print(f"[WGDashboard] Peer {fp.id} from {c.Name} is failed {job.Action}ed.")
+                            current_app.logger.info(f"Peer {fp.id} from {c.Name} is failed {job.Action}ed.")
                             self.JobLogger.log(job.JobID, s,
                                           f"Peer {fp.id} from {c.Name} failed {job.Action}ed."
                                           )
                 else:
-                    print(f"[WGDashboard] Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
+                    current_app.logger.warning(f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
                     self.JobLogger.log(job.JobID, False,
                                   f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed."
                                   )
             else:
-                print(f"[WGDashboard] Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
+                current_app.logger.warning(f"Somehow can't find this peer {job.Peer} from {c.Name} failed {job.Action}ed.")
                 self.JobLogger.log(job.JobID, False,
                               f"Somehow can't find this peer {job.Peer} from {job.Configuration} failed {job.Action}ed."
                               )

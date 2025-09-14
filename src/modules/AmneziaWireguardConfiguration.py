@@ -2,7 +2,7 @@
 AmneziaWG Configuration
 """
 import random, sqlalchemy, os, subprocess, re, uuid
-
+from flask import current_app
 from .PeerJobs import PeerJobs
 from .AmneziaWGPeer import AmneziaWGPeer
 from .PeerShareLinks import PeerShareLinks
@@ -52,6 +52,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
             "ConnectedPeers": len(list(filter(lambda x: x.status == "running", self.Peers))),
             "TotalPeers": len(self.Peers),
             "Protocol": self.Protocol,
+            "Table": self.Table,
             "Jc": self.Jc,
             "Jmin": self.Jmin,
             "Jmax": self.Jmax,
@@ -227,20 +228,10 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                                         "remote_endpoint": self.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1],
                                         "preshared_key": i["PresharedKey"] if "PresharedKey" in i.keys() else ""
                                     }
-                                    # sqlUpdate(
-                                    #     """
-                                    #     INSERT INTO '%s'
-                                    #         VALUES (:id, :private_key, :DNS, :advanced_security, :endpoint_allowed_ip, :name, :total_receive, :total_sent, 
-                                    #         :total_data, :endpoint, :status, :latest_handshake, :allowed_ip, :cumu_receive, :cumu_sent, 
-                                    #         :cumu_data, :mtu, :keepalive, :remote_endpoint, :preshared_key);
-                                    #     """ % self.Name
-                                    #     , newPeer)
                                     conn.execute(
                                         self.peersTable.insert().values(tempPeer)
                                     )
                                 else:
-                                    # sqlUpdate("UPDATE '%s' SET allowed_ip = ? WHERE id = ?" % self.Name,
-                                    #           (i.get("AllowedIPs", "N/A"), i['PublicKey'],))
                                     conn.execute(
                                         self.peersTable.update().values({
                                             "allowed_ip": i.get("AllowedIPs", "N/A")
@@ -250,10 +241,8 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                                     )
                                 self.Peers.append(AmneziaWGPeer(tempPeer, self))
                 except Exception as e:
-                    if __name__ == '__main__':
-                        print(f"[WGDashboard] {self.Name} getPeers() Error: {str(e)}")
+                    current_app.logger.error(f"{self.Name} getPeers() Error", e)
         else:
-            # checkIfExist = sqlSelect("SELECT * FROM '%s'" % self.Name).fetchall()
             with self.engine.connect() as conn:
                 existingPeers = conn.execute(self.peersTable.select()).mappings().fetchall()
                 for i in existingPeers:
