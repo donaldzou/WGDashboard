@@ -13,6 +13,7 @@ import PeerListModals from "@/components/configurationComponents/peerListCompone
 import PeerIntersectionObserver from "@/components/configurationComponents/peerIntersectionObserver.vue";
 import ConfigurationDescription from "@/components/configurationComponents/configurationDescription.vue";
 import PeerDetailsModal from "@/components/configurationComponents/peerDetailsModal.vue";
+import {parseCidr} from "cidr-tools";
 
 // Async Components
 const PeerSearchBar = defineAsyncComponent(() => import("@/components/configurationComponents/peerSearchBar.vue"))
@@ -168,6 +169,14 @@ const taggedPeers = computed(() => {
 	return Object.values(configurationInfo.value.Info.PeerGroups).map(x => x.Peers).flat()
 })
 
+const firstAllowedIPCount = (allowed_ip) => {
+	try{
+		return parseCidr(allowed_ip.replace(" ", "").split(",")[0]).start
+	}catch (e){
+		return 0
+	}
+}
+
 const searchPeers = computed(() => {
 	const result = wireguardConfigurationStore.searchString ?
 		configurationPeers.value.filter(x => {
@@ -196,17 +205,36 @@ const searchPeers = computed(() => {
 		}).slice(0, showPeersCount.value);
 	}
 
-	return result.sort((a, b) => {
-		if ( a[dashboardStore.Configuration.Server.dashboard_sort]
-			< b[dashboardStore.Configuration.Server.dashboard_sort] ){
-			return -1;
-		}
-		if ( a[dashboardStore.Configuration.Server.dashboard_sort]
-			> b[dashboardStore.Configuration.Server.dashboard_sort]){
-			return 1;
-		}
-		return 0;
-	}).slice(0, showPeersCount.value)
+	let re = []
+
+	if (dashboardStore.Configuration.Server.dashboard_sort === 'allowed_ip'){
+		re = result.sort((a, b) => {
+			if ( firstAllowedIPCount(a[dashboardStore.Configuration.Server.dashboard_sort])
+				< firstAllowedIPCount(b[dashboardStore.Configuration.Server.dashboard_sort]) ){
+				return -1;
+			}
+			if ( firstAllowedIPCount(a[dashboardStore.Configuration.Server.dashboard_sort])
+				> firstAllowedIPCount(b[dashboardStore.Configuration.Server.dashboard_sort])){
+				return 1;
+			}
+			return 0;
+		}).slice(0, showPeersCount.value)
+	}else{
+		re = result.sort((a, b) => {
+			if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+				< b[dashboardStore.Configuration.Server.dashboard_sort] ){
+				return -1;
+			}
+			if ( a[dashboardStore.Configuration.Server.dashboard_sort]
+				> b[dashboardStore.Configuration.Server.dashboard_sort]){
+				return 1;
+			}
+			return 0;
+		}).slice(0, showPeersCount.value)
+	}
+
+
+	return re
 })
 
 watch(() => route.query.id, (newValue) => {
@@ -218,11 +246,6 @@ watch(() => route.query.id, (newValue) => {
 }, {
 	immediate: true
 })
-
-
-// onMounted(() => {
-// 	configurationModalSelectedPeer.value = searchPeers.value[0]
-// })
 </script>
 
 <template>

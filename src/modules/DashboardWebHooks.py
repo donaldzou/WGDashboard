@@ -3,7 +3,7 @@ import threading
 import time
 import urllib.parse
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from pydantic import BaseModel, field_serializer
@@ -77,6 +77,17 @@ class DashboardWebHooks:
         
         self.metadata.create_all(self.engine)
         self.WebHooks: list[WebHook] = []
+        
+        with self.engine.begin() as conn:
+           conn.execute(
+               self.webHookSessionsTable.update().values({
+                   "EndDate": datetime.now(),
+                   "Status": 2
+               }).where(
+                   self.webHookSessionsTable.c.Status == -1
+               )
+           )
+        
         self.__getWebHooks()
         
     def __getWebHooks(self):

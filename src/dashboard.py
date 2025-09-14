@@ -585,6 +585,7 @@ def API_updatePeerSettings(configName):
             else:
                 status, msg = peer.updatePeer(name, private_key, preshared_key, dns_addresses,
                     allowed_ip, endpoint_allowed_ip, mtu, keepalive, "off")
+            wireguardConfig.getPeers()
             DashboardWebHooks.RunWebHook('peer_updated', {
                 "configuration": wireguardConfig.Name,
                 "peers": [id]

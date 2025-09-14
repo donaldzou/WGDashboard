@@ -149,12 +149,6 @@ class AmneziaWGPeer(Peer):
                                                  shell=True, stderr=subprocess.STDOUT)
             if f"wg showconf {self.configuration.Name}" not in saveConfig.decode().strip('\n'):
                 return False, "Update peer failed when saving the configuration"
-            # sqlUpdate(
-            #     '''UPDATE '%s' SET name = ?, private_key = ?, DNS = ?, endpoint_allowed_ip = ?, mtu = ?, 
-            #     keepalive = ?, preshared_key = ?, advanced_security = ?  WHERE id = ?''' % self.configuration.Name,
-            #     (name, private_key, dns_addresses, endpoint_allowed_ip, mtu,
-            #      keepalive, preshared_key, advanced_security, self.id,)
-            # )
 
             with self.configuration.engine.begin() as conn:
                 conn.execute(
@@ -171,7 +165,7 @@ class AmneziaWGPeer(Peer):
                         self.configuration.peersTable.c.id == self.id
                     )
                 )
-
+            self.configuration.getPeers()
             return True, None
         except subprocess.CalledProcessError as exc:
             return False, exc.output.decode("UTF-8").strip()

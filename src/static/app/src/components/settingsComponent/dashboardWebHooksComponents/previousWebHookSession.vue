@@ -9,9 +9,12 @@ const collapse = ref(true)
 <div class="card">
 	<div class="card-body">
 		<p class="d-flex mb-0" role="button" @click="collapse = !collapse">
-			<span :class="{'text-success': session.Status === 0, 'text-danger': session.Status === 1}">
+			<span :class="{'text-success': session.Status === 0, 'text-danger': session.Status === 1, 'text-warning': session.Status === 2}">
 				<span v-if="session.Status === 0">
 					<i class="bi bi-check-circle-fill me-2"></i>
+				</span>
+				<span v-else-if="session.Status === 2">
+					<i class="bi bi-trash3-fill me-2"></i>
 				</span>
 				<span v-else-if="session.Status === 1">
 					<i class="bi bi-x-circle-fill me-2"></i>
