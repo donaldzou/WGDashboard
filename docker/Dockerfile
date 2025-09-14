@@ -46,7 +46,6 @@ FROM python:3.13-alpine AS pip-builder
 
 RUN apk add --no-cache \
       build-base \
-      mariadb-dev \
       pkgconfig \
       python3-dev \
       libffi-dev \
