@@ -85,11 +85,11 @@
 }
 
 .app-enter-from{
-    transform: scale(1.03);
+    transform: translateY(20px);
 }
 
 .app-leave-to{
-    transform: scale(0.97);
+    transform: translateY(-20px)
 }
 
 .btn-outline-body{
