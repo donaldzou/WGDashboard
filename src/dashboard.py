@@ -1663,5 +1663,4 @@ def startThreads():
 if __name__ == "__main__":
     startThreads()
     DashboardPlugins.startThreads()
-    # app.logger.addHandler(logging.StreamHandler())
     app.run(host=app_ip, debug=False, port=app_port)

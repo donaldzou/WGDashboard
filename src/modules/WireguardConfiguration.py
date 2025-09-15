@@ -12,7 +12,6 @@ from flask import current_app
 
 from .ConnectionString import ConnectionString
 from .DashboardConfig import DashboardConfig
-from .DashboardWebHooks import DashboardWebHooks
 from .Peer import Peer
 from .PeerJobs import PeerJobs
 from .PeerShareLinks import PeerShareLinks
@@ -44,12 +43,10 @@ class WireguardConfiguration:
         self.__parser: configparser.ConfigParser = configparser.RawConfigParser(strict=False)
         self.__parser.optionxform = str
         self.__configFileModifiedTime = None
-
         self.Status: bool = False
         self.Name: str = ""
         self.PrivateKey: str = ""
         self.PublicKey: str = ""
-
         self.ListenPort: str = ""
         self.Address: str = ""
         self.DNS: str = ""
@@ -67,7 +64,7 @@ class WireguardConfiguration:
         self.AllPeerShareLinks = AllPeerShareLinks
         self.DashboardWebHooks = DashboardWebHooks
         self.configPath = os.path.join(self.__getProtocolPath(), f'{self.Name}.conf')
-        self.engine: sqlalchemy.engine = sqlalchemy.create_engine(ConnectionString("wgdashboard"))
+        self.engine: sqlalchemy.Engine = sqlalchemy.create_engine(ConnectionString("wgdashboard"))
         self.metadata: sqlalchemy.MetaData = sqlalchemy.MetaData()
         self.dbType = self.DashboardConfig.GetConfig("Database", "type")[1]
         
@@ -145,9 +142,10 @@ class WireguardConfiguration:
             self.addAutostart()
         
 
-    def __getProtocolPath(self):
-        return self.DashboardConfig.GetConfig("Server", "wg_conf_path")[1] if self.Protocol == "wg" \
-            else self.DashboardConfig.GetConfig("Server", "awg_conf_path")[1]
+    def __getProtocolPath(self) -> str:
+        _, path = self.DashboardConfig.GetConfig("Server", "wg_conf_path") if self.Protocol == "wg" \
+            else self.DashboardConfig.GetConfig("Server", "awg_conf_path")
+        return path
 
     def __initPeersList(self):
         self.Peers: list[Peer] = []
