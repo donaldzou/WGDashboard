@@ -248,7 +248,7 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                 for i in existingPeers:
                     self.Peers.append(AmneziaWGPeer(i, self))
 
-    def addPeers(self, peers: list) -> tuple[bool, dict]:
+    def addPeers(self, peers: list) -> tuple[bool, list, str]:
         result = {
             "message": None,
             "peers": []
@@ -305,10 +305,10 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
                 "configuration": self.Name,
                 "peers": list(map(lambda k : k['id'], peers))
             })
-            return True, result
         except Exception as e:
-            result['message'] = str(e)
-            return False, result
+            current_app.logger.error("Add peers error", e)
+            return False, [], str(e)
+        return True, result['peers'], ""
 
     def getRestrictedPeers(self):
         self.RestrictedPeers = []

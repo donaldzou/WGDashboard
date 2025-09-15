@@ -512,11 +512,8 @@ class WireguardConfiguration:
                                 "time": datetime.now()
                             })
                         )
-                        
-                    
-                            
-                    
-    def addPeers(self, peers: list) -> tuple[bool, dict]:
+                          
+    def addPeers(self, peers: list) -> tuple[bool, list, str]:
         result = {
             "message": None,
             "peers": []
@@ -571,10 +568,10 @@ class WireguardConfiguration:
                 "configuration": self.Name,
                 "peers": list(map(lambda k : k['id'], peers))
             })
-            return True, result
         except Exception as e:
-            result['message'] = str(e)
-            return False, result
+            current_app.logger.error("Add peers error", e)
+            return False, [], str(e)
+        return True, result['peers'], ""
 
     def searchPeer(self, publicKey):
         for i in self.Peers:

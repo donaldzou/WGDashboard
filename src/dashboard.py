@@ -791,12 +791,8 @@ def API_addPeers(configName):
                         break
                 if len(keyPairs) == 0 or (bulkAdd and len(keyPairs) != bulkAddAmount):
                     return ResponseObject(False, "Generating key pairs by bulk failed")
-                status, result = config.addPeers(keyPairs)
-                # DashboardWebHooks.RunWebHook('peer_created', {
-                #     "configuration": config.Name,
-                #     "peers": list(map(lambda p : p['id'], keyPairs))
-                # })
-                return ResponseObject(status=status, message=result['message'], data=result['peers'])
+                status, addedPeers, message = config.addPeers(keyPairs)
+                return ResponseObject(status=status, message=message, data=addedPeers)
     
             else:
                 if config.searchPeer(public_key)[0] is True:
@@ -816,14 +812,6 @@ def API_addPeers(configName):
                         # Check if provided pubkey match provided private key
                         if public_key != genPub:
                             return ResponseObject(False, "Provided Public Key does not match provided Private Key")
-                        
-                # if len(public_key) == 0 and len(private_key) == 0:
-                #     private_key = GenerateWireguardPrivateKey()[1]
-                #     public_key = GenerateWireguardPublicKey(private_key)[1]
-                # elif len(public_key) == 0 and len(private_key) > 0:
-                #     public_key = GenerateWireguardPublicKey(private_key)[1]
-                
-                
                 if len(allowed_ips) == 0:
                     if ipStatus:
                         for subnet in availableIps.keys():
@@ -846,7 +834,7 @@ def API_addPeers(configName):
                         if not found:
                             return ResponseObject(False, f"This IP is not available: {i}")
 
-                status, result = config.addPeers([
+                status, addedPeers, message = config.addPeers([
                     {
                         "name": name,
                         "id": public_key,
@@ -860,14 +848,11 @@ def API_addPeers(configName):
                         "advanced_security": "off"
                     }]
                 )
-                # DashboardWebHooks.RunWebHook('peer_created', {
-                #     "configuration": config.Name,
-                #     "peers": [{"id": public_key}]
-                # })
-                return ResponseObject(status=status, message=result['message'], data=result['peers'])
+                return ResponseObject(status=status, message=message, data=addedPeers)
         except Exception as e:
-            app.logger.error("Add peers failed", data, exc_info=e)
-            return ResponseObject(False, "Add peers failed. Please see data for specific issue")
+            app.logger.error("Add peers failed", e)
+            return ResponseObject(False,
+                                  f"Add peers failed. Reason: {message}")
 
     return ResponseObject(False, "Configuration does not exist")
 
