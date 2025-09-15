@@ -1,7 +1,9 @@
 """
 Peer
 """
+import base64
 import datetime
+import json
 import os, subprocess, uuid, random, re
 from datetime import timedelta
 
@@ -122,6 +124,10 @@ class Peer:
             return False, exc.output.decode("UTF-8").strip()
 
     def downloadPeer(self) -> dict[str, str]:
+        final = {
+            "fileName": "",
+            "file": ""
+        }
         filename = self.name
         if len(filename) == 0:
             filename = "UntitledPeer"
@@ -133,10 +139,9 @@ class Peer:
         for i in illegal_filename:
             filename = filename.replace(i, "")
 
-        finalFilename = ""
         for i in filename:
             if re.match("^[a-zA-Z0-9_=+.-]$", i):
-                finalFilename += i
+                final["fileName"] += i
                 
         interfaceSection = {
             "PrivateKey": self.private_key,
@@ -179,19 +184,33 @@ class Peer:
             "PresharedKey": self.preshared_key
         }
         combine = [interfaceSection.items(), peerSection.items()]
-        peerConfiguration = ""
         for s in range(len(combine)):
             if s == 0:
-                peerConfiguration += "[Interface]\n"
+                final["file"] += "[Interface]\n"
             else:
-                peerConfiguration += "\n[Peer]\n"
+                final["file"] += "\n[Peer]\n"
             for (key, val) in combine[s]:
                 if val is not None and ((type(val) is str and len(val) > 0) or (type(val) is int and val > 0)):
-                    peerConfiguration += f"{key} = {val}\n"
-        return {
-            "fileName": finalFilename,
-            "file": jinja2.Template(peerConfiguration).render(configuration=self.configuration)
-        }
+                    final["file"] += f"{key} = {val}\n"
+        if self.configuration.Protocol == "awg":
+            final["amneziaVPN"] = json.dumps({
+                "containers": [{
+                    "awg": {
+                        "isThirdPartyConfig": True,
+                        "last_config": final['file'],
+                        "port": self.configuration.ListenPort,
+                        "transport_proto": "udp"
+                    },
+                    "container": "amnezia-awg"
+                }],
+                "defaultContainer": "amnezia-awg",
+                "description": self.name,
+                "hostName": (
+                    self.configuration.configurationInfo.OverridePeerSettings.PeerRemoteEndpoint 
+                        if self.configuration.configurationInfo.OverridePeerSettings.PeerRemoteEndpoint 
+                        else self.configuration.DashboardConfig.GetConfig("Peers", "remote_endpoint")[1])
+            })
+        return final
 
     def getJobs(self):
         self.jobs = self.configuration.AllPeerJobs.searchJob(self.configuration.Name, self.id)
