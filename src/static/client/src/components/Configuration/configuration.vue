@@ -55,9 +55,9 @@ window.dayjs = dayjs
 			</small>
 			<span class="badge rounded-3 ms-sm-auto"
 			      :class="[props.config.protocol === 'wg' ? 'wireguardBg' : 'amneziawgBg' ]"
-			      v-if="props.config.protocol === 'wg'">
-							{{ props.config.protocol === 'wg' ? 'WireGuard': 'AmneziaWG' }}
-						</span>
+			>
+				{{ props.config.protocol === 'wg' ? 'WireGuard': 'AmneziaWG' }}
+			</span>
 		</div>
 		<div class="card-body p-3 d-flex gap-3 flex-column">
 			<div>
@@ -92,6 +92,8 @@ window.dayjs = dayjs
 		<Transition name="app">
 			<ConfigurationQRCode
 				v-if="showQRCode"
+				:config="props.config"
+				:protocol="props.config.protocol"
 				@back="showQRCode = false"
 				:qrcode-data="config.peer_configuration_data.file"></ConfigurationQRCode>
 		</Transition>

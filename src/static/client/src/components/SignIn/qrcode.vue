@@ -14,7 +14,7 @@ onMounted(() => {
 </script>
 
 <template>
-<div>
+<div class="d-flex gap-2 flex-column">
 	<canvas :id="'qrcode_' + id" class="rounded-3"></canvas>
 </div>
 </template>

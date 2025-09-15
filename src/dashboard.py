@@ -41,23 +41,6 @@ from modules.DashboardPlugins import DashboardPlugins
 from modules.DashboardWebHooks import DashboardWebHooks
 from modules.NewConfigurationTemplates import NewConfigurationTemplates
 
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] [%(levelname)s] in [%(module)s] %(message)s',
-    }},
-    'root': {
-        'level': 'INFO'
-    }
-})
-
-SystemStatus = SystemStatus()
-
-CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
-app = Flask("WGDashboard", template_folder=os.path.abspath("./static/dist/WGDashboardAdmin"))
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
-app.secret_key = secrets.token_urlsafe(32)
-
 class CustomJsonEncoder(DefaultJSONProvider):
     def __init__(self, app):
         super().__init__(app)
@@ -70,7 +53,8 @@ class CustomJsonEncoder(DefaultJSONProvider):
         if type(o) is datetime:
             return o.strftime("%Y-%m-%d %H:%M:%S")
         return super().default(self)
-app.json = CustomJsonEncoder(app)
+
+
 
 '''
 Response Object
@@ -83,16 +67,151 @@ def ResponseObject(status=True, message=None, data=None, status_code = 200) -> F
     })
     response.status_code = status_code
     response.content_type = "application/json"
-    return response       
+    return response
 
-DashboardConfig = DashboardConfig()
-EmailSender = EmailSender(DashboardConfig)
+'''
+Flask App
+'''
+app = Flask("WGDashboard", template_folder=os.path.abspath("./static/dist/WGDashboardAdmin"))
+
+def peerInformationBackgroundThread():
+    global WireguardConfigurations
+    app.logger.info("Background Thread #1 Started")
+    app.logger.info("Background Thread #1 PID:" + str(threading.get_native_id()))
+    delay = 6
+    time.sleep(10)
+    while True:
+        with app.app_context():
+            try:
+                curKeys = list(WireguardConfigurations.keys())
+                for name in curKeys:
+                    if name in WireguardConfigurations.keys() and WireguardConfigurations.get(name) is not None:
+                        c = WireguardConfigurations.get(name)
+                        if c.getStatus():
+                            c.getPeersLatestHandshake()
+                            c.getPeersTransfer()
+                            c.getPeersEndpoint()
+                            c.getPeers()
+                            if delay == 6:
+                                c.logPeersTraffic()
+                                c.logPeersHistoryEndpoint()
+                            c.getRestrictedPeersList()
+            except Exception as e:
+                app.logger.error(f"[WGDashboard] Background Thread #1 Error", e)
+
+        if delay == 6:
+            delay = 1
+        else:
+            delay += 1
+        time.sleep(10)
+
+def peerJobScheduleBackgroundThread():
+    with app.app_context():
+        app.logger.info(f"Background Thread #2 Started")
+        app.logger.info(f"Background Thread #2 PID:" + str(threading.get_native_id()))
+        time.sleep(10)
+        while True:
+            try:
+                AllPeerJobs.runJob()
+                time.sleep(180)
+            except Exception as e:
+                app.logger.error("Background Thread #2 Error", e)
+
+def gunicornConfig():
+    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
+    return app_ip, app_port
+
+def ProtocolsEnabled() -> list[str]:
+    from shutil import which
+    protocols = []
+    if which('awg') is not None and which('awg-quick') is not None:
+        protocols.append("awg")
+    if which('wg') is not None and which('wg-quick') is not None:
+        protocols.append("wg")
+    return protocols
+
+def InitWireguardConfigurationsList(startup: bool = False):
+    if os.path.exists(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
+        confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
+        confs.sort()
+        for i in confs:
+            if RegexMatch("^(.{1,}).(conf)$", i):
+                i = i.replace('.conf', '')
+                try:
+                    if i in WireguardConfigurations.keys():
+                        if WireguardConfigurations[i].configurationFileChanged():
+                            with app.app_context():
+                                WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
+                    else:
+                        with app.app_context():
+                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
+                except WireguardConfiguration.InvalidConfigurationFileException as e:
+                    app.logger.error(f"{i} have an invalid configuration file.")
+
+    if "awg" in ProtocolsEnabled():
+        confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
+        confs.sort()
+        for i in confs:
+            if RegexMatch("^(.{1,}).(conf)$", i):
+                i = i.replace('.conf', '')
+                try:
+                    if i in WireguardConfigurations.keys():
+                        if WireguardConfigurations[i].configurationFileChanged():
+                            with app.app_context():
+                                WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
+                    else:
+                        with app.app_context():
+                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
+                except WireguardConfiguration.InvalidConfigurationFileException as e:
+                    app.logger.error(f"{i} have an invalid configuration file.")
+
+def startThreads():
+    bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)
+    bgThread.start()
+    scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread, daemon=True)
+    scheduleJobThread.start()
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] [%(levelname)s] in [%(module)s] %(message)s',
+    }},
+    'root': {
+        'level': 'INFO'
+    }
+})
+
+
+WireguardConfigurations: dict[str, WireguardConfiguration] = {}
+CONFIGURATION_PATH = os.getenv('CONFIGURATION_PATH', '.')
+
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 5206928
+app.secret_key = secrets.token_urlsafe(32)
+app.json = CustomJsonEncoder(app)
+with app.app_context():
+    SystemStatus = SystemStatus()
+    DashboardConfig = DashboardConfig()
+    EmailSender = EmailSender(DashboardConfig)
+    AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
+    AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
+    DashboardLogger: DashboardLogger = DashboardLogger()
+    DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
+    DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
+    NewConfigurationTemplates: NewConfigurationTemplates = NewConfigurationTemplates()
+    InitWireguardConfigurationsList(startup=True)
+    DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
+    app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
+
 _, APP_PREFIX = DashboardConfig.GetConfig("Server", "app_prefix")
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",
     "methods": "DELETE, POST, GET, OPTIONS",
     "allow_headers": ["Content-Type", "wg-dashboard-apikey"]
 }})
+_, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
+_, app_port = DashboardConfig.GetConfig("Server", "app_port")
+_, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 
 '''
 API Routes
@@ -1543,122 +1662,6 @@ Index Page
 @app.get(f'{APP_PREFIX}/')
 def index():
     return render_template('index.html')
-
-def peerInformationBackgroundThread():
-    global WireguardConfigurations
-    app.logger.info("Background Thread #1 Started")
-    app.logger.info("Background Thread #1 PID:" + str(threading.get_native_id()))
-    delay = 6
-    time.sleep(10)
-    while True:
-        with app.app_context():
-            try:
-                curKeys = list(WireguardConfigurations.keys())
-                for name in curKeys:
-                    if name in WireguardConfigurations.keys() and WireguardConfigurations.get(name) is not None:
-                        c = WireguardConfigurations.get(name)
-                        if c.getStatus():
-                            c.getPeersLatestHandshake()
-                            c.getPeersTransfer()
-                            c.getPeersEndpoint()
-                            c.getPeers()
-                            if delay == 6:
-                                c.logPeersTraffic()
-                                c.logPeersHistoryEndpoint()
-                            c.getRestrictedPeersList()
-            except Exception as e:
-                app.logger.error(f"[WGDashboard] Background Thread #1 Error", e)
-           
-        if delay == 6:
-            delay = 1
-        else:
-            delay += 1
-        time.sleep(10)
-
-def peerJobScheduleBackgroundThread():
-    with app.app_context():
-        app.logger.info(f"Background Thread #2 Started")
-        app.logger.info(f"Background Thread #2 PID:" + str(threading.get_native_id()))
-        time.sleep(10)
-        while True:
-            try:
-                AllPeerJobs.runJob()
-                time.sleep(180)
-            except Exception as e:
-                app.logger.error("Background Thread #2 Error", e)
-
-def gunicornConfig():
-    _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
-    _, app_port = DashboardConfig.GetConfig("Server", "app_port")
-    return app_ip, app_port
-
-def ProtocolsEnabled() -> list[str]:
-    from shutil import which
-    protocols = []
-    if which('awg') is not None and which('awg-quick') is not None:
-        protocols.append("awg")
-    if which('wg') is not None and which('wg-quick') is not None:
-        protocols.append("wg")
-    return protocols
-    
-def InitWireguardConfigurationsList(startup: bool = False):
-    if os.path.exists(DashboardConfig.GetConfig("Server", "wg_conf_path")[1]):
-        confs = os.listdir(DashboardConfig.GetConfig("Server", "wg_conf_path")[1])
-        confs.sort()
-        for i in confs:
-            if RegexMatch("^(.{1,}).(conf)$", i):
-                i = i.replace('.conf', '')
-                try:
-                    if i in WireguardConfigurations.keys():
-                        if WireguardConfigurations[i].configurationFileChanged():
-                            with app.app_context():
-                                WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
-                    else:
-                        with app.app_context():
-                            WireguardConfigurations[i] = WireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
-                except WireguardConfiguration.InvalidConfigurationFileException as e:
-                    app.logger.error(f"{i} have an invalid configuration file.")
-
-    if "awg" in ProtocolsEnabled():
-        confs = os.listdir(DashboardConfig.GetConfig("Server", "awg_conf_path")[1])
-        confs.sort()
-        for i in confs:
-            if RegexMatch("^(.{1,}).(conf)$", i):
-                i = i.replace('.conf', '')
-                try:
-                    if i in WireguardConfigurations.keys():
-                        if WireguardConfigurations[i].configurationFileChanged():
-                            with app.app_context():
-                                WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i)
-                    else:
-                        with app.app_context():
-                            WireguardConfigurations[i] = AmneziaWireguardConfiguration(DashboardConfig, AllPeerJobs, AllPeerShareLinks, DashboardWebHooks, i, startup=startup)
-                except WireguardConfiguration.InvalidConfigurationFileException as e:
-                    app.logger.error(f"{i} have an invalid configuration file.")
-
-
-_, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
-_, app_port = DashboardConfig.GetConfig("Server", "app_port")
-_, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
-
-WireguardConfigurations: dict[str, WireguardConfiguration] = {}
-
-with app.app_context():
-    AllPeerShareLinks: PeerShareLinks = PeerShareLinks(DashboardConfig, WireguardConfigurations)
-    AllPeerJobs: PeerJobs = PeerJobs(DashboardConfig, WireguardConfigurations)
-    DashboardLogger: DashboardLogger = DashboardLogger()
-    DashboardPlugins: DashboardPlugins = DashboardPlugins(app, WireguardConfigurations)
-    DashboardWebHooks: DashboardWebHooks = DashboardWebHooks(DashboardConfig)
-    NewConfigurationTemplates: NewConfigurationTemplates = NewConfigurationTemplates()
-    InitWireguardConfigurationsList(startup=True)
-    DashboardClients: DashboardClients = DashboardClients(WireguardConfigurations)
-    app.register_blueprint(createClientBlueprint(WireguardConfigurations, DashboardConfig, DashboardClients))
-
-def startThreads():
-    bgThread = threading.Thread(target=peerInformationBackgroundThread, daemon=True)
-    bgThread.start()
-    scheduleJobThread = threading.Thread(target=peerJobScheduleBackgroundThread, daemon=True)
-    scheduleJobThread.start()
 
 if __name__ == "__main__":
     startThreads()

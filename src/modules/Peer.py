@@ -150,6 +150,20 @@ class Peer:
                     if self.configuration.configurationInfo.OverridePeerSettings.DNS else self.DNS
             )
         }
+        
+        if self.configuration.Protocol == "awg":
+            interfaceSection.update({
+                "Jc": self.configuration.Jc,
+                "Jmin": self.configuration.Jmin,
+                "Jmax": self.configuration.Jmax,
+                "S1": self.configuration.S1,
+                "S2": self.configuration.S2,
+                "H1": self.configuration.H1,
+                "H2": self.configuration.H2,
+                "H3": self.configuration.H3,
+                "H4": self.configuration.H4
+            })
+            
         peerSection = {
             "PublicKey": self.configuration.PublicKey,
             "AllowedIPs": (
