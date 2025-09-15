@@ -18,6 +18,7 @@ src/db/wgdashboard.db
 node_modules/**
 */proxy.js
 src/static/app/proxy.js
+.secrets
 
 # Logs
 logs
@@ -49,4 +50,3 @@ coverage
 
 *.tsbuildinfo
 .vite/*
-

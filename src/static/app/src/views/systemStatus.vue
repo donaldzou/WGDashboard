@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, reactive, ref} from "vue";
 import {fetchGet} from "@/utilities/fetch.js";
 import LocaleText from "@/components/text/localeText.vue";
 import CpuCore from "@/components/systemStatusComponents/cpuCore.vue";
@@ -8,9 +8,11 @@ import Process from "@/components/systemStatusComponents/process.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 
 const dashboardStore = DashboardConfigurationStore()
+const loaded = ref(false)
 const data = computed(() => {
-	return dashboardStore.SystemStatus
+	return loaded.value ? dashboardStore.SystemStatus : undefined
 })
+
 let interval = null;
 import {
 	Chart,
@@ -29,6 +31,7 @@ import {
 import {Line} from "vue-chartjs";
 import dayjs from "dayjs";
 import {GetLocale} from "@/utilities/locale.js";
+import NetworkInterface from "@/components/systemStatusComponents/networkInterface.vue";
 Chart.register(
 	LineElement,
 	BarElement,
@@ -58,40 +61,27 @@ const historicalChartTimestamp = ref([])
 const historicalCpuUsage = ref([])
 const historicalVirtualMemoryUsage = ref([])
 const historicalSwapMemoryUsage = ref([])
-const historicalNetworkData = ref({
-	bytes_recv: [],
-	bytes_sent: []
-})
-const historicalNetworkSpeed = ref({
-	bytes_recv: [],
-	bytes_sent: []
-})
+const historicalNetworkSpeed = reactive({})
 
-const getData = () => {
-	fetchGet("/api/systemStatus", {}, (res) => {
+const getData = async () => {
+	await fetchGet("/api/systemStatus", {}, (res) => {
 		historicalChartTimestamp.value.push(dayjs().format("HH:mm:ss A"))
 		dashboardStore.SystemStatus = res.data
 		historicalCpuUsage.value.push(res.data.CPU.cpu_percent)
 		historicalVirtualMemoryUsage.value.push(res.data.Memory.VirtualMemory.percent)
 		historicalSwapMemoryUsage.value.push(res.data.Memory.SwapMemory.percent)
-		
-		historicalNetworkData.value.bytes_recv.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_recv).reduce((x, y) => x + y)
-		)
-		historicalNetworkData.value.bytes_sent.push(
-			Object.values(res.data.NetworkInterfaces).map(x => x.bytes_sent).reduce((x, y) => x + y)
-		)
 
-		if (historicalNetworkData.value.bytes_recv.length === 1 && historicalNetworkData.value.bytes_sent.length === 1){
-			historicalNetworkSpeed.value.bytes_recv.push(0)
-			historicalNetworkSpeed.value.bytes_sent.push(0)
-		}else{
-			let bytes_recv_diff = historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 1] - historicalNetworkData.value.bytes_recv[historicalNetworkData.value.bytes_recv.length - 2]
-			let bytes_sent_diff = historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 1] - historicalNetworkData.value.bytes_sent[historicalNetworkData.value.bytes_sent.length - 2]
-			historicalNetworkSpeed.value.bytes_recv.push(Math.round((bytes_recv_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
-			historicalNetworkSpeed.value.bytes_sent.push(Math.round((bytes_sent_diff / 1024000 + Number.EPSILON) * 10000) / 10000)
+		for (let i of Object.keys(res.data.NetworkInterfaces)){
+			if (!Object.keys(historicalNetworkSpeed).includes(i)){
+				historicalNetworkSpeed[i] = {
+					bytes_recv: [],
+					bytes_sent: []
+				}
+			}
+			historicalNetworkSpeed[i].bytes_recv.push(res.data.NetworkInterfaces[i].realtime.recv)
+			historicalNetworkSpeed[i].bytes_sent.push(res.data.NetworkInterfaces[i].realtime.sent)
 		}
-		
+		loaded.value = true
 	})
 }
 
@@ -123,43 +113,6 @@ const chartOption = computed(() => {
 				ticks: {
 					callback: (val, index) => {
 						return `${val}%`
-					}
-				},
-				grid: {
-					display: false
-				},
-			}
-		}
-	}
-})
-const networkSpeedChartOption = computed(() => {
-	return {
-		responsive: true,
-		plugins: {
-			legend: {
-				display: true
-			},
-			tooltip: {
-				callbacks: {
-					label: (tooltipItem) => {
-						return `${tooltipItem.formattedValue} MB/s`
-					}
-				}
-			}
-		},
-		scales: {
-			x: {
-				ticks: {
-					display: false,
-				},
-				grid: {
-					display: false
-				},
-			},
-			y:{
-				ticks: {
-					callback: (val, index) => {
-						return `${val} MB/s`
 					}
 				},
 				grid: {
@@ -215,33 +168,6 @@ const memoryHistoricalChartData = computed(() => {
 	}
 })
 
-const networkSpeedHistoricalChartData = computed(() => {
-	return {
-		labels: [...historicalChartTimestamp.value],
-		datasets: [
-			{
-				label: GetLocale('Real Time Received Data Usage'),
-				data: [...historicalNetworkSpeed.value.bytes_recv],
-				fill: 'origin',
-				borderColor: '#0dcaf0',
-				backgroundColor: '#0dcaf090',
-				tension: 0,
-				pointRadius: 2,
-				borderWidth: 1,
-			},
-			{
-				label: GetLocale('Real Time Sent Data Usage'),
-				data: [...historicalNetworkSpeed.value.bytes_sent],
-				fill: 'origin',
-				backgroundColor: '#ffc10790',
-				borderColor: '#ffc107',
-				tension: 0,
-				pointRadius: 2,
-				borderWidth: 1,
-			}
-		]
-	}
-})
 </script>
 
 <template>
@@ -381,50 +307,16 @@ const networkSpeedHistoricalChartData = computed(() => {
 					</h3>
 				</div>
 				<div>
-					<h5 class="mb-0 text-end" v-if="data">
-						<span class="text-info">
-								<i class="bi bi-arrow-down"></i>
-								{{ historicalNetworkSpeed.bytes_recv[historicalNetworkSpeed.bytes_recv.length - 1] }} MB/s
-							</span>
-						<span class="text-warning">
-								<i class="bi bi-arrow-up"></i>
-								{{ historicalNetworkSpeed.bytes_sent[historicalNetworkSpeed.bytes_sent.length - 1] }} MB/s
-							</span>
-					</h5>
 				</div>
-				<Line
-					:options="networkSpeedChartOption"
-					:data="networkSpeedHistoricalChartData"
-					style="width: 100%; height: 300px; max-height: 300px"
-				></Line>
-				<div v-if="data" class="row g-3">
-					<div v-for="key in Object.keys(data.NetworkInterfaces).sort()"
-					     class="col-sm-6 fadeIn">
-						<div class="d-flex mb-2">
-							<h6 class="mb-0">
-								<samp>{{key}}</samp>
-							</h6>
-							<h6 class="mb-0 ms-auto d-flex gap-2">
-								<span class="text-info">
-									<i class="bi bi-arrow-down"></i>
-									{{ Math.round((data.NetworkInterfaces[key].bytes_recv / 1024000000 + Number.EPSILON) * 10000) / 10000}} GB
-								</span>
-								<span class="text-warning">
-									<i class="bi bi-arrow-up"></i>
-									{{ Math.round((data.NetworkInterfaces[key].bytes_sent / 1024000000 + Number.EPSILON) * 10000) / 10000}} GB
-								</span>
-
-							</h6>
-						</div>
-						<div class="progress" role="progressbar" style="height: 10px">
-							<div class="progress-bar bg-info"
-							     v-if="data.NetworkInterfaces[key].bytes_recv > 0"
-							     :style="{width: `${(data.NetworkInterfaces[key].bytes_recv / (data.NetworkInterfaces[key].bytes_sent + data.NetworkInterfaces[key].bytes_recv)) * 100}%` }"></div>
-							<div class="progress-bar bg-warning"
-							     v-if="data.NetworkInterfaces[key].bytes_sent > 0"
-							     :style="{width: `${(data.NetworkInterfaces[key].bytes_sent / (data.NetworkInterfaces[key].bytes_sent + data.NetworkInterfaces[key].bytes_recv)) * 100}%` }"></div>
-						</div>
-					</div>
+				<div v-if="data" class="row g-4">
+					<NetworkInterface
+						v-for="key in Object.keys(data.NetworkInterfaces).sort()"
+						:interface="data.NetworkInterfaces[key]"
+						:interfaceName="key"
+						:historicalChartTimestamp="historicalChartTimestamp"
+						:historicalNetworkSpeed="historicalNetworkSpeed[key]"
+						:key="key"
+					></NetworkInterface>
 				</div>
 			</div>
 		</div>

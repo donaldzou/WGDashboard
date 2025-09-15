@@ -56,7 +56,7 @@ export default {
 
 <template>
 	<div class="position-absolute w-100 h-100 top-0 start-0 rounded-bottom-3 p-3 d-flex"
-	     style="background-color: #00000060; backdrop-filter: blur(3px)">
+	     style="background-color: #00000060; backdrop-filter: blur(3px); z-index: 9999">
 		<div class="card m-auto rounded-3 mt-5">
 			<div class="card-header bg-transparent d-flex align-items-center gap-2 border-0 p-4 pb-0">
 				<h6 class="mb-0">
@@ -70,6 +70,7 @@ export default {
 				</small>
 				<div class="d-flex align-items-center gap-2">
 					<VueDatePicker
+						style="z-index: 9999"
 						:is24="true"
 						:min-date="new Date()"
 						:model-value="this.newKeyData.ExpiredAt"

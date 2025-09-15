@@ -108,11 +108,6 @@ export default {
 					}
 				});
 				map.addLayer(vectorLayer);
-				if (this.store.Configuration.Server.dashboard_theme === 'dark'){
-					map.on('postcompose',() => {
-						document.querySelector('#map').style.filter="grayscale(80%) invert(100%)";
-					});
-				}
 			}).catch(e => {
 				this.osmAvailable = false
 			})

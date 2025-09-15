@@ -23,6 +23,7 @@ export default {
 				privateKey: "",
 				presharedKey: ""
 			},
+			view: false,
 			editKey: false,
 			error: false
 		}
@@ -78,18 +79,24 @@ export default {
 <template>
 	<div class="d-flex gap-2 flex-column" :class="{inactiveField: this.bulk}">
 		<div>
-			<label for="peer_private_key_textbox" class="form-label">
+			<label for="peer_private_key_textbox" class="form-label d-flex align-items-center">
 				<small class="text-muted">
 					<LocaleText t="Private Key"></LocaleText> <code><LocaleText t="(Required for QR Code and Download)"></LocaleText></code></small>
+				<a role="button" class="ms-auto text-decoration-none text-body" @click="this.view = !this.view">
+					<small>
+						<i class="bi me-2" :class="[this.view ? 'bi-eye-slash-fill':'bi-eye-fill']"></i><LocaleText :t="this.view ? 'Hide Keys' : 'Show Keys'"></LocaleText>
+					</small>
+				</a>
 			</label>
 			<div class="input-group">
-				<input type="text" class="form-control form-control-sm rounded-start-3"
+				<input :type="this.view ? 'text':'password'" class="form-control form-control-sm rounded-start-3"
 				       v-model="this.keypair.privateKey"
 				       :disabled="!this.editKey || this.bulk"
-				       :class="{'is-invalid': this.error}"
+				       :class="{'is-invalid': this.error, 'rounded-3': !this.view}"
 				       @blur="this.checkMatching()"
 				       id="peer_private_key_textbox">
 				<button class="btn btn-outline-info btn-sm rounded-end-3"
+						v-if="this.view"
 				        @click="this.genKeyPair()"
 				        :disabled="this.bulk"
 				        type="button" id="button-addon2">
@@ -120,7 +127,7 @@ export default {
 			       v-model="this.keypair.publicKey"
 			       @blur="this.checkMatching()" 
 			       :disabled="!this.editKey || this.bulk"
-			       type="text" id="public_key">
+			       :type="this.view ? 'text':'password'" id="public_key">
 		</div>
 	</div>
 </template>

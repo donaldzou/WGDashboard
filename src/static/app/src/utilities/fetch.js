@@ -1,19 +1,27 @@
-import router from "@/router/router.js";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
-
+import router from "@/router/router.js";
 const getHeaders = () => {
 	let headers = {
-		"content-type": "application/json"
+		"Content-Type": "application/json"
 	}
 	const store = DashboardConfigurationStore();
-	const apiKey = store.getActiveCrossServer();
-	if (apiKey){
-		headers['wg-dashboard-apikey'] = apiKey.apiKey
+	const crossServer = store.getActiveCrossServer();
+	if (crossServer){
+		headers['wg-dashboard-apikey'] = crossServer.apiKey
+        if (crossServer.headers){
+            for (let header of Object.values(crossServer.headers)){
+                if (header.key && header.value && !Object.keys(headers).includes(header.key)){
+                    headers[header.key] = header.value
+                }
+            }
+        }
 	}
+
+
 	return headers
 }
 
-const getUrl = (url) => {
+export const getUrl = (url) => {
 	const store = DashboardConfigurationStore();
 	const apiKey = store.getActiveCrossServer();
 	if (apiKey){
@@ -43,7 +51,6 @@ export const fetchGet = async (url, params=undefined, callback=undefined) => {
 		})
 		.then(x => callback ? callback(x) : undefined).catch(x => {
 			console.log("Error:", x)
-			// store.newMessage("WGDashboard", `Error: ${x}`, "danger")
 			router.push({path: '/signin'})
 	})
 }
@@ -67,7 +74,6 @@ export const fetchPost = async (url, body, callback) => {
 		}
 	}).then(x => callback ? callback(x) : undefined).catch(x => {
 		console.log("Error:", x)
-		// store.newMessage("WGDashboard", `Error: ${x}`, "danger")
 		router.push({path: '/signin'})
 	})
 }

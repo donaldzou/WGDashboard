@@ -1,47 +1,103 @@
-FROM golang:1.24 AS awg
+#
+# AWG GOLANG BUILDING STAGE
+# Base: Alpine
+#
 
-RUN git clone https://github.com/amnezia-vpn/amneziawg-go /awg
-WORKDIR /awg
+FROM golang:1.25-alpine AS awg-go
+
+RUN apk add --no-cache \
+    git \
+    gcc \
+    musl-dev
+
+# Standard working directory for WGDashboard
+RUN mkdir -p /workspace && \
+    git clone https://github.com/WGDashboard/amneziawg-go /workspace/awg
+
+ENV CGO_ENABLED=1
+
+WORKDIR /workspace/awg
 RUN go mod download && \
     go mod verify && \
     go build -ldflags '-linkmode external -extldflags "-fno-PIC -static"' -v -o /usr/bin
+#
+# AWG TOOLS BUILDING STAGE
+# Base: Debian
+#
+FROM alpine:latest AS awg-tools
 
-FROM alpine:latest
+RUN apk add --no-cache \
+    make \
+    git \
+    build-base \
+    linux-headers \
+    ca-certificates
+
+RUN mkdir -p /workspace && \
+    git clone https://github.com/WGDashboard/amneziawg-tools /workspace/awg-tools
+
+WORKDIR /workspace/awg-tools/src
+RUN make && chmod +x wg*
+
+#
+# PIP DEPENDENCY BUILDING
+# Base: Alpine
+#
+FROM python:3.13-alpine AS pip-builder
+
+
+RUN apk add --no-cache \
+      build-base \
+      pkgconfig \
+      python3-dev \
+      libffi-dev \
+      linux-headers \
+    && mkdir -p /opt/wgdashboard/src \
+    && python3 -m venv /opt/wgdashboard/src/venv
+
+COPY ./src/requirements.txt /opt/wgdashboard/src
+RUN . /opt/wgdashboard/src/venv/bin/activate && \
+    pip3 install --upgrade pip && \
+    pip3 install -r /opt/wgdashboard/src/requirements.txt
+
+#
+# WGDashboard RUNNING STAGE
+# Base: Alpine
+#
+FROM python:3.13-alpine AS final
 LABEL maintainer="dselen@nerthus.nl"
 
-RUN apk update && apk add \
-    iproute2 iptables bash curl wget unzip procps sudo \
-    tzdata wireguard-tools python3 py3-psutil py3-bcrypt openresolv \
-  && cd /usr/bin/ \
-  && wget $(curl -s https://api.github.com/repos/amnezia-vpn/amneziawg-tools/releases/latest | grep 'alpine' | cut -d : -f 2,3 | tr -d '", ' | tail -n 1) \
-  && unzip -j alpine-3.19-amneziawg-tools.zip \
-  && chmod +x /usr/bin/awg /usr/bin/awg-quick \
-  && rm alpine-3.19-amneziawg-tools.zip
+# Install only the runtime dependencies
+RUN apk add --no-cache \
+    iproute2 iptables \
+    bash curl \
+    wget unzip \
+    procps sudo \
+    tzdata wireguard-tools \
+    openresolv openrc
 
-COPY --from=awg /usr/bin/amneziawg-go /usr/bin/amneziawg-go
+# Copy only the final binaries from the builders
+COPY --from=awg-go /usr/bin/amneziawg-go /usr/bin/amneziawg-go
+COPY --from=awg-tools /workspace/awg-tools/src/wg /usr/bin/awg
+COPY --from=awg-tools /workspace/awg-tools/src/wg-quick/linux.bash /usr/bin/awg-quick
 
-# Declaring environment variables, change Peernet to an address you like, standard is a 24 bit subnet.
-ARG wg_net="10.0.0.1" \
-    wg_port="51820"
-
-# Following ENV variables are changable on container runtime because /entrypoint.sh handles that. See compose.yaml for more info.
+# Environment variables
+ARG wg_net="10.0.0.1"
+ARG wg_port="51820"
 ENV TZ="Europe/Amsterdam" \
     global_dns="9.9.9.9" \
     wgd_port="10086" \
-    public_ip=""
+    public_ip="" \
+    WGDASH=/opt/wgdashboard
 
-# Using WGDASH -- like wg_net functionally as a ARG command. But it is needed in entrypoint.sh so it needs to be exported as environment variable.
-ENV WGDASH=/opt/wgdashboard
+# Create directories
+RUN mkdir /data /configs -p ${WGDASH}/src /etc/amnezia/amneziawg
 
-# Doing WireGuard Dashboard installation measures. Modify the git clone command to get the preferred version, with a specific branch for example.
-RUN mkdir /data \
-  && mkdir /configs \
-  && mkdir -p ${WGDASH}/src \
-  && mkdir -p /etc/amnezia/amneziawg
+# Copy app source and prebuilt venv only (no pip cache)
 COPY ./src ${WGDASH}/src
+COPY --from=pip-builder /opt/wgdashboard/src/venv /opt/wgdashboard/src/venv
 
-# Generate basic WireGuard interface. Echoing the WireGuard interface config for readability, adjust if you want it for efficiency.
-# Also setting the pipefail option, verbose: https://github.com/hadolint/hadolint/wiki/DL4006.
+# WireGuard interface template
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN out_adapt=$(ip -o -4 route show to default | awk '{print $NF}') \
   && echo -e "[Interface]\n\
@@ -56,15 +112,12 @@ SaveConfig = true\n\
 DNS = ${global_dns}" > /configs/wg0.conf.template \
   && chmod 600 /configs/wg0.conf.template
 
-# Defining a way for Docker to check the health of the container. In this case: checking the gunicorn process.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD sh -c 'pgrep gunicorn > /dev/null && pgrep tail > /dev/null' || exit 1
 
-# Copy the basic entrypoint.sh script.
 COPY ./docker/entrypoint.sh /entrypoint.sh
 
-# Exposing the default WireGuard Dashboard port for web access.
 EXPOSE 10086
-WORKDIR $WGDASH
+WORKDIR $WGDASH/src
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

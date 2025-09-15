@@ -133,7 +133,7 @@ Examples:
 To build from source:
 
 ```bash
-git clone https://github.com/donaldzou/WGDashboard.git
+git clone https://github.com/WGDashboard/WGDashboard.git
 cd WGDashboard
 docker build . -f docker/Dockerfile -t yourname/wgdashboard:latest
 ```

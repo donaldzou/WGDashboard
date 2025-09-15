@@ -13,7 +13,8 @@ import {
 	Title,
 	Tooltip,
 	CategoryScale,
-	PointElement
+	PointElement,
+	Filler
 } from 'chart.js';
 Chart.register(
 	LineElement,
@@ -25,13 +26,15 @@ Chart.register(
 	Title,
 	Tooltip,
 	CategoryScale,
-	PointElement
+	PointElement,
+	Filler
 );
 
 import LocaleText from "@/components/text/localeText.vue";
 import {DashboardConfigurationStore} from "@/stores/DashboardConfigurationStore.js";
 import dayjs from "dayjs";
 import {useRoute, useRouter} from "vue-router";
+import {GetLocale} from "@/utilities/locale.js";
 const props = defineProps({
 	configurationPeers: Array,
 	configurationInfo: Object
@@ -124,12 +127,14 @@ const peersRealtimeSentData = computed(() => {
 		labels: [...historySentData.value.timestamp],
 		datasets: [
 			{
-				label: 'Data Sent',
+				label: GetLocale('Data Sent'),
 				data: [...historySentData.value.data],
-				fill: false,
+				fill: 'start',
 				borderColor: '#198754',
-				backgroundColor: '#198754',
-				tension: 0
+				backgroundColor: '#19875490',
+				tension: 0,
+				pointRadius: 2,
+				borderWidth: 1,
 			},
 		],
 	}
@@ -139,12 +144,14 @@ const peersRealtimeReceivedData = computed(() => {
 		labels: [...historyReceivedData.value.timestamp],
 		datasets: [
 			{
-				label: 'Data Received',
+				label: GetLocale('Data Received'),
 				data: [...historyReceivedData.value.data],
-				fill: false,
+				fill: 'start',
 				borderColor: '#0d6efd',
-				backgroundColor: '#0d6efd',
-				tension: 0
+				backgroundColor: '#0d6efd90',
+				tension: 0,
+				pointRadius: 2,
+				borderWidth: 1,
 			},
 		],
 	}

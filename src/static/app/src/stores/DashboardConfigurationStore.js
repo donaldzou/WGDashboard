@@ -20,7 +20,7 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 		ActiveServerConfiguration: undefined,
 		IsElectronApp: false,
 		ShowNavBar: false,
-		Locale: undefined,
+		Locale: null,
 		HelpAgent: {
 			Enable: false
 		}
@@ -41,7 +41,11 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			window.localStorage.setItem('CrossServerConfiguration', JSON.stringify(this.CrossServerConfiguration))
 		},
 		addCrossServerConfiguration(){
-			this.CrossServerConfiguration.ServerList[v4().toString()] = {host: "", apiKey: "", active: false}
+			this.CrossServerConfiguration.ServerList[v4().toString()] = {
+                host: "",
+                apiKey: "",
+                active: false
+            }
 		},
 		deleteCrossServerConfiguration(key){
 			delete this.CrossServerConfiguration.ServerList[key];
@@ -53,9 +57,12 @@ export const DashboardConfigurationStore = defineStore('DashboardConfigurationSt
 			}
 			return undefined
 		},
-		setActiveCrossServer(key){
+		async setActiveCrossServer(key){
 			this.ActiveServerConfiguration = key;
 			localStorage.setItem('ActiveCrossServerConfiguration', key)
+			await fetchGet("/api/locale", {}, (res) => {
+				this.Locale = res.data
+			})
 		},
 		removeActiveCrossServer(){
 			this.ActiveServerConfiguration = undefined;
