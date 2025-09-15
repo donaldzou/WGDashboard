@@ -72,17 +72,17 @@ export default {
 						<button type="button" class="btn-close ms-auto" @click="this.$emit('close')"></button>
 					</div>
 					<div class="card-body p-4">
-						<div class="d-flex gap-2">
+						<div class="d-flex gap-2 flex-column">
 							<div class="d-flex flex-column gap-2 align-items-center">
 								<canvas id="qrcode"
 										style="width: 200px !important; height: 200px !important;"
-										class="rounded-3 shadow animate__animated animate__fadeIn animate__faster"
+										class="rounded-3 shadow animate__animated animate__fadeIn animate__faster qrcode"
 										:class="{'d-none': loading}"></canvas>
 								<LocaleText t="Scan with WireGuard App" class="text-muted" v-if='this.selectedPeer.configuration.Protocol === "wg"'></LocaleText>
 								<LocaleText t="Scan with AmneziaWG App" class="text-muted" v-if='this.selectedPeer.configuration.Protocol === "awg"'></LocaleText>
 							</div>
 							<div v-if='this.selectedPeer.configuration.Protocol === "awg"'>
-								<canvas id="awg_vpn_qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster"
+								<canvas id="awg_vpn_qrcode" class="rounded-3 shadow animate__animated animate__fadeIn animate__faster  qrcode"
 										:class="{'d-none': loading}"></canvas>
 								<LocaleText t="Scan with AmneziaVPN App" class="text-muted"></LocaleText>
 							</div>
@@ -99,14 +99,14 @@ export default {
 
 <style scoped>
 @media screen and (max-width: 768px) {
-	#qrcode{
+	.qrcode{
 		width: 100% !important;
 		height: auto !important;
 		aspect-ratio: 1/1;
 	}
 }
 
-#qrcode{
+.qrcode{
 	width: 200px !important;
 	height: 200px !important;
 }
