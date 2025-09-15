@@ -9,6 +9,8 @@ class PeerShareLink:
         self.Configuration = Configuration
         self.SharedDate = SharedDate
         self.ExpireDate = ExpireDate
+        if not self.ExpireDate:
+            self.ExpireDate = datetime.strptime("2199-12-31","%Y-%m-%d")
 
     def toJson(self):
         return {
