@@ -73,4 +73,28 @@ COPY ./docker/entrypoint.sh /entrypoint.sh
 EXPOSE 10086
 WORKDIR $WGDASH
 
+# 1. Install Node.js and build tools
+RUN apk add --no-cache \
+    nodejs \
+    npm \
+    python3 \
+    make \
+    g++
+
+# 2. Set up frontend with correct versions
+COPY src/static/app /app/src/static/app
+WORKDIR /app/src/static/app
+
+# 3. Install specific compatible versions
+RUN npm install --legacy-peer-deps \
+      pinia@2.1.7 \
+      pinia-plugin-persistedstate@1.6.3 && \
+    npm install && \
+    npm run build && \
+    rm -rf ${WGDASH}/src/static/app/dist && \
+    mkdir -p ${WGDASH}/src/static/app && \
+    cp -r dist ${WGDASH}/src/static/app/dist
+
+WORKDIR $WGDASH
+
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
