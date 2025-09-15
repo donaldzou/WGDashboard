@@ -57,7 +57,7 @@ stop_service() {
 }
 
 echo "------------------------- START ----------------------------"
-echo "Starting the WireGuard Dashboard Docker container."
+echo "Starting the WGDashboard Docker container."
 
 ensure_installation() {
   echo "Quick-installing..."
@@ -139,7 +139,7 @@ set_envvars() {
   set_ini Server app_port "${wgd_port}"
   
   # Account settings - process all parameters
-  echo "Configuring user account:"
+  [[ -n "$username" ]] && echo "Configuring user account:"
   # Basic account variables
   [[ -n "$username" ]] && set_ini Account username "${username}"
   
