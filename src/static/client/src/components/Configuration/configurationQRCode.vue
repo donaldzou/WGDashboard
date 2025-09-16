@@ -48,6 +48,7 @@ const download = computed(() => {
 
 			<hr class="border-white w-100 my-2">
 			<a
+				:download="props.qrcodeData.fileName + '.conf'"
 				:href="download"
 				class="btn bg-primary-subtle border-primary-subtle rounded-3">
 				<i class="bi bi-download me-2"></i>Download
