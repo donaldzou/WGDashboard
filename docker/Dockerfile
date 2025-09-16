@@ -52,6 +52,8 @@ RUN apk add --no-cache \
       python3-dev \
       libffi-dev \
       linux-headers \
+      rust \
+      cargo \
     && mkdir -p /opt/wgdashboard/src \
     && python3 -m venv /opt/wgdashboard/src/venv
 
