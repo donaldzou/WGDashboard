@@ -141,3 +141,8 @@
     background: rgb(125,32,32);
     background: linear-gradient(90deg, rgba(125,32,32,1) 0%, rgba(255,56,56,1) 100%);
 }
+
+.form-control{
+    background-color: rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(8px) !important;
+}

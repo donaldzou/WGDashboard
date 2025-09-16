@@ -5,6 +5,7 @@ import {clientStore} from "@/stores/clientStore.js";
 import Configuration from "@/components/Configuration/configuration.vue";
 import {onBeforeRouteLeave, useRouter} from "vue-router";
 import axios from "axios";
+import ConfigurationQRCode from "@/components/Configuration/configurationQRCode.vue";
 const store = clientStore()
 const loading = ref(true)
 
@@ -37,6 +38,9 @@ const signOut = async () => {
 	});
 	store.newNotification("Sign out successful", "success")
 }
+
+const selectedConfig = ref(undefined)
+
 </script>
 
 <template>
@@ -50,6 +54,8 @@ const signOut = async () => {
 		<div class="ms-auto px-3 d-flex gap-2 nav-links">
 			<RouterLink to="/settings" class=" text-body btn btn-outline-body rounded-3 ms-auto btn-sm" aria-current="page" href="#">
 				<i class="bi bi-gear-fill me-sm-2"></i>
+
+
 				<span>Settings</span>
 			</RouterLink>
 			<a role="button" @click="signOut()" class="btn btn-outline-danger rounded-3 btn-sm"
@@ -66,7 +72,9 @@ const signOut = async () => {
 	<Transition name="app" mode="out-in">
 		<div class="d-flex flex-column gap-3" v-if="!loading">
 			<div class="p-3 d-flex flex-column gap-3" v-if="configurations.length > 0">
-				<Configuration v-for="config in configurations" :config="config"></Configuration>
+				<Configuration
+					@select="selectedConfig = config"
+					v-for="config in configurations" :config="config"></Configuration>
 			</div>
 			<div class="text-center text-muted" v-else>
 				<small>No configuration available</small>
@@ -77,6 +85,17 @@ const signOut = async () => {
 				<div class="spinner-border m-auto"></div>
 			</div>
 		</div>
+	</Transition>
+
+	<Transition name="app">
+		<ConfigurationQRCode
+			v-if="selectedConfig !== undefined"
+			:config="selectedConfig.config"
+			:protocol="selectedConfig.protocol"
+			@back="selectedConfig = undefined"
+			:qrcode-data="selectedConfig.peer_configuration_data"
+			>
+		</ConfigurationQRCode>
 	</Transition>
 </div>
 </template>
@@ -90,5 +109,10 @@ const signOut = async () => {
 	.nav-links a span{
 		display: none;
 	}
+}
+
+.card{
+	background-color: rgba(0, 0, 0, 0.25);
+	backdrop-filter: blur(8px);
 }
 </style>

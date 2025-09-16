@@ -45,6 +45,8 @@ const totalDataPercentage = computed(() => {
 	return ( props.config.data / totalDataLimit.value ) * 100
 })
 window.dayjs = dayjs
+
+const emits = defineEmits(['select'])
 </script>
 
 <template>
@@ -85,18 +87,11 @@ window.dayjs = dayjs
 				</div>
 			</div>
 
-			<button class="btn btn-outline-body rounded-3 flex-grow-1 fw-bold w-100" @click="showQRCode = true">
+			<button class="btn btn-outline-body rounded-3 flex-grow-1 fw-bold w-100" @click="emits('select')">
 				<i class="bi bi-link-45deg me-2"></i><small>Connect</small>
 			</button>
 		</div>
-		<Transition name="app">
-			<ConfigurationQRCode
-				v-if="showQRCode"
-				:config="props.config"
-				:protocol="props.config.protocol"
-				@back="showQRCode = false"
-				:qrcode-data="config.peer_configuration_data"></ConfigurationQRCode>
-		</Transition>
+
 	</div>
 </template>
 

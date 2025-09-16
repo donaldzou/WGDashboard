@@ -64,7 +64,7 @@ const download = computed(() => {
 
 .qrcodeContainer{
 	background-color: #00000050;
-	backdrop-filter: blur(8px) brightness(0.8);
+	backdrop-filter: blur(8px) brightness(0.7);
 	z-index: 9999;
 }
 </style>

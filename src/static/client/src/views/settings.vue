@@ -15,7 +15,6 @@ await store.getClientProfile();
 		</RouterLink>
 		<strong class="ms-auto">Settings</strong>
 	</div>
-	<Profile></Profile>
 	<UpdatePassword v-if="store.clientProfile.SignInMethod === 'local'"></UpdatePassword>
 </div>
 </template>
