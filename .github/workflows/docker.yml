@@ -13,7 +13,7 @@ on:
 env:
   DOCKERHUB_PREFIX: docker.io
   GITHUB_CONTAINER_PREFIX: ghcr.io
-  DOCKER_IMAGE: donaldzou/wgdashboard
+  DOCKER_IMAGE: WGDashboard
 
 jobs:
   docker_build:
@@ -54,11 +54,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.DOCKERHUB_PREFIX }}/${{ env.DOCKER_IMAGE }}
-            ${{ env.GITHUB_CONTAINER_PREFIX }}/${{ env.DOCKER_IMAGE }}
+            ${{ env.DOCKERHUB_PREFIX }}/donaldzou/${{ env.DOCKER_IMAGE }}
+            ${{ env.GITHUB_CONTAINER_PREFIX }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE }}
           tags: |
             type=ref,event=branch
             type=ref,event=tag
+            type=sha,format=short,prefix=
 
       - name: Build and export (multi-arch)
         uses: docker/build-push-action@v6
