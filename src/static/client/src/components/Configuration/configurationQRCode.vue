@@ -16,6 +16,12 @@ const amneziaVPN = computed(() => {
 	}
 	return undefined
 })
+
+const download = computed(() => {
+	return URL.createObjectURL(new Blob([props.qrcodeData.file], {
+		type: 'text/conf'
+	}))
+})
 </script>
 
 <template>
@@ -25,7 +31,7 @@ const amneziaVPN = computed(() => {
 			<i class="me-2 bi bi-chevron-left"></i> Back
 		</a>
 	</div>
-	<div class="m-auto d-flex gap-3 flex-column p-3" style="width: 400px">
+	<div class="m-auto d-flex gap-3 flex-column p-3" style="max-width: 400px">
 
 		<div class="d-flex flex-column gap-2 align-items-center">
 			<Qrcode :content="props.qrcodeData.file"></Qrcode>
@@ -41,9 +47,11 @@ const amneziaVPN = computed(() => {
 			</div>
 
 			<hr class="border-white w-100 my-2">
-			<button class="btn bg-primary-subtle border-primary-subtle rounded-3">
+			<a
+				:href="download"
+				class="btn bg-primary-subtle border-primary-subtle rounded-3">
 				<i class="bi bi-download me-2"></i>Download
-			</button>
+			</a>
 
 		</div>
 	</div>

@@ -65,7 +65,7 @@ window.dayjs = dayjs
 					<small class="text-muted ">
 						<i class="bi bi-bar-chart-fill me-1"></i> Data Usage
 					</small>
-					<small class="fw-bold ms-sm-auto">
+					<small class="fw-bold ms-auto">
 						{{ props.config.data.toFixed(4) }} / {{ totalDataLimit ? parseFloat(totalDataLimit).toFixed(4) : 'Unlimited'}} GB
 					</small>
 				</div>
