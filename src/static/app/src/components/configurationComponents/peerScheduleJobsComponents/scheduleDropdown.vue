@@ -27,10 +27,10 @@ export default {
 		        :class="{'disabled border-transparent': !edit}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 			<samp>{{this.currentSelection.display}}</samp>
 		</button>
-		<ul class="dropdown-menu rounded-3 shadow" style="font-size: 0.875rem; width: 200px">
+		<ul class="dropdown-menu rounded-3 shadow" style="font-size: 0.875rem;">
 			<li v-for="x in this.options" v-if="edit">
 				<a class="dropdown-item d-flex align-items-center" role="button" @click="$emit('update', x.value)">
-					<samp>{{x.display}}</samp>
+					<samp class="pe-5">{{x.display}}</samp>
 					<i class="bi bi-check ms-auto" v-if="x.value === this.currentSelection.value"></i>
 				</a>
 			</li>

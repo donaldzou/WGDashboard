@@ -1,5 +1,6 @@
 <script setup>
 import {computed, ref} from "vue";
+import LocaleText from "@/components/text/localeText.vue";
 
 const props = defineProps({
 	core_number: Number,
@@ -33,7 +34,7 @@ const squareHeight = computed(() => {
 				:class="[align ? 'end-0':'start-0']"
 			>
 				<small class="text-muted me-2">
-					Core #{{core_number + 1}}
+					<LocaleText t="Core"></LocaleText> #{{core_number + 1}}
 				</small>
 				<small class="fw-bold">
 					{{percentage}}%

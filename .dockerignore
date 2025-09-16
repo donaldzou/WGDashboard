@@ -1,0 +1,5 @@
+.git
+.github
+*.md
+tests/
+docs/

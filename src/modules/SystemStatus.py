@@ -1,4 +1,6 @@
-import psutil
+import shutil, subprocess, time, threading, psutil
+from flask import current_app
+
 class SystemStatus:
     def __init__(self):
         self.CPU = CPU()
@@ -8,6 +10,17 @@ class SystemStatus:
         self.NetworkInterfaces = NetworkInterfaces()
         self.Processes = Processes()
     def toJson(self):
+        process = [
+            threading.Thread(target=self.CPU.getCPUPercent), 
+            threading.Thread(target=self.CPU.getPerCPUPercent),
+            threading.Thread(target=self.NetworkInterfaces.getData)
+        ]
+        for p in process:
+            p.start()
+        for p in process:
+            p.join()
+        
+        
         return {
             "CPU": self.CPU,
             "Memory": {
@@ -16,6 +29,7 @@ class SystemStatus:
             },
             "Disks": self.Disks,
             "NetworkInterfaces": self.NetworkInterfaces,
+            "NetworkInterfacesPriority": self.NetworkInterfaces.getInterfacePriorities(),
             "Processes": self.Processes
         }
         
@@ -24,14 +38,20 @@ class CPU:
     def __init__(self):
         self.cpu_percent: float = 0
         self.cpu_percent_per_cpu: list[float] = []
-    def getData(self):
+        
+    def getCPUPercent(self):
         try:
-            self.cpu_percent_per_cpu = psutil.cpu_percent(interval=0.5, percpu=True)
-            self.cpu_percent = psutil.cpu_percent(interval=0.5)
+            self.cpu_percent = psutil.cpu_percent(interval=1)
         except Exception as e:
-            pass
+            current_app.logger.error("Get CPU Percent error", e)
+    
+    def getPerCPUPercent(self):
+        try:
+            self.cpu_percent_per_cpu = psutil.cpu_percent(interval=1, percpu=True)
+        except Exception as e:
+            current_app.logger.error("Get Per CPU Percent error", e)
+    
     def toJson(self):
-        self.getData()
         return self.__dict__
 
 class Memory:
@@ -44,13 +64,15 @@ class Memory:
         try:
             if self.__memoryType__ == "virtual":
                 memory = psutil.virtual_memory()
+                self.available = memory.available
             else:
                 memory = psutil.swap_memory()
+                self.available = memory.free
             self.total = memory.total
-            self.available = memory.available
+            
             self.percent = memory.percent
         except Exception as e:
-            pass
+            current_app.logger.error("Get Memory percent error", e)
     def toJson(self):
         self.getData()
         return self.__dict__
@@ -62,7 +84,7 @@ class Disks:
         try:
             self.disks = list(map(lambda x : Disk(x.mountpoint), psutil.disk_partitions()))
         except Exception as e:
-            pass
+            current_app.logger.error("Get Disk percent error", e)
     def toJson(self):
         self.getData()
         return self.disks
@@ -82,7 +104,7 @@ class Disk:
             self.used = disk.used
             self.percent = disk.percent
         except Exception as e:
-            pass
+            current_app.logger.error("Get Disk percent error", e)
     def toJson(self):
         self.getData()
         return self.__dict__
@@ -90,15 +112,38 @@ class Disk:
 class NetworkInterfaces:
     def __init__(self):
         self.interfaces = {}
+        
+    def getInterfacePriorities(self):
+        if shutil.which("ip"):
+            result = subprocess.check_output(["ip", "route", "show"]).decode()
+            priorities = {}
+            for line in result.splitlines():
+                if "metric" in line and "dev" in line:
+                    parts = line.split()
+                    dev = parts[parts.index("dev")+1]
+                    metric = int(parts[parts.index("metric")+1])
+                    if dev not in priorities:
+                        priorities[dev] = metric
+            return priorities
+        return {}
+
     def getData(self):
+        self.interfaces.clear()
         try:
             network = psutil.net_io_counters(pernic=True, nowrap=True)
             for i in network.keys():
                 self.interfaces[i] = network[i]._asdict()
+            time.sleep(1)
+            network = psutil.net_io_counters(pernic=True, nowrap=True)
+            for i in network.keys():
+                self.interfaces[i]['realtime'] = {
+                    'sent': round((network[i].bytes_sent - self.interfaces[i]['bytes_sent']) / 1024 / 1024, 4),
+                    'recv': round((network[i].bytes_recv - self.interfaces[i]['bytes_recv']) / 1024 / 1024, 4)
+                }
         except Exception as e:
-            pass
+            current_app.logger.error("Get network error", e)
+
     def toJson(self):
-        self.getData()
         return self.interfaces
 
 class Process:
@@ -126,7 +171,8 @@ class Processes:
                     key=lambda x : x.percent, reverse=True)[:20]
                 break
             except Exception as e:
-                break
+                current_app.logger.error("Get processes error", e)
+
     def toJson(self):
         self.getData()
         return {

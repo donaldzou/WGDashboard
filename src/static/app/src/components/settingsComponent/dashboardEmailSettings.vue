@@ -13,7 +13,7 @@ onMounted(() => {
 			await fetchPost("/api/updateDashboardConfigurationItem", {
 				section: "Email",
 				key: id,
-				value: x.value
+				value: store.Configuration.Email[id]
 			}, (res) => {
 				if (res.status){
 					x.classList.remove('is-invalid')
@@ -60,6 +60,7 @@ const sendTestEmail = async () => {
 	<div class="card">
 		<div class="card-header">
 			<h6 class="my-2 d-flex">
+				<i class="bi bi-envelope-fill me-2"></i>
 				<LocaleText t="Email Account"></LocaleText>
 				<span class="text-success ms-auto" v-if="emailIsReady">
 					<i class="bi bi-check-circle-fill me-2"></i>
@@ -70,6 +71,16 @@ const sendTestEmail = async () => {
 		<div class="card-body d-flex flex-column gap-3">
 			<form @submit="(e) => e.preventDefault(e)" id="emailAccount">
 				<div class="row gx-2 gy-2">
+					<div class="col-12">
+						<div class="form-check mb-2 form-switch">
+							<input class="form-check-input" type="checkbox" role="switch"
+								   v-model="store.Configuration.Email.authentication_required"
+								   id="authentication_required">
+							<label class="form-check-label" for="authentication_required">
+								<LocaleText t="Require SMTP Authentication"></LocaleText>
+							</label>
+						</div>
+					</div>
 					<div class="col-12 col-lg-4">
 						<div class="form-group">
 							<label for="server" class="text-muted mb-1">
@@ -79,7 +90,7 @@ const sendTestEmail = async () => {
 							</label>
 							<input id="server" 
 							       v-model="store.Configuration.Email.server"
-							       type="text" class="form-control">
+							       type="text" class="form-control rounded-3">
 						</div>
 					</div>
 					<div class="col-12 col-lg-4">
@@ -91,7 +102,7 @@ const sendTestEmail = async () => {
 							</label>
 							<input id="port"
 							       v-model="store.Configuration.Email.port"
-							       type="text" class="form-control">
+							       type="text" class="form-control rounded-3">
 						</div>
 					</div>
 					<div class="col-12 col-lg-4">
@@ -101,7 +112,7 @@ const sendTestEmail = async () => {
 									<LocaleText t="Encryption"></LocaleText>
 								</small></strong>
 							</label>
-							<select class="form-select"
+							<select class="form-select rounded-3"
 							        v-model="store.Configuration.Email.encryption"
 							        id="encryption">
 								<option value="STARTTLS">
@@ -113,7 +124,7 @@ const sendTestEmail = async () => {
 							</select>
 						</div>
 					</div>
-					<div class="col-12 col-lg-4">
+					<div class="col-12 col-lg-4" v-if="store.Configuration.Email.authentication_required">
 						<div class="form-group">
 							<label for="username" class="text-muted mb-1">
 								<strong><small>
@@ -122,10 +133,10 @@ const sendTestEmail = async () => {
 							</label>
 							<input id="username"
 							       v-model="store.Configuration.Email.username"
-							       type="text" class="form-control">
+							       type="text" class="form-control rounded-3">
 						</div>
 					</div>
-					<div class="col-12 col-lg-4">
+					<div class="col-12 col-lg-4" v-if="store.Configuration.Email.authentication_required">
 						<div class="form-group">
 							<label for="email_password" class="text-muted mb-1">
 								<strong><small>
@@ -134,9 +145,10 @@ const sendTestEmail = async () => {
 							</label>
 							<input id="email_password"
 							       v-model="store.Configuration.Email.email_password"
-							       type="password" class="form-control">
+							       type="password" class="form-control rounded-3">
 						</div>
 					</div>
+
 					<div class="col-12 col-lg-4">
 						<div class="form-group">
 							<label for="send_from" class="text-muted mb-1">
@@ -146,9 +158,10 @@ const sendTestEmail = async () => {
 							</label>
 							<input id="send_from"
 							       v-model="store.Configuration.Email.send_from"
-							       type="text" class="form-control">
+							       type="text" class="form-control rounded-3">
 						</div>
 					</div>
+
 				</div>
 			</form>
 			<hr v-if="emailIsReady">

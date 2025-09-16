@@ -65,6 +65,7 @@ export default {
 	<div class="card rounded-3" >
 		<div class="card-header d-flex align-items-center" :class="{'border-bottom-0 rounded-3': !this.value}">
 			<h6 class="my-2">
+				<i class="bi bi-key-fill me-2"></i>
 				<LocaleText t="API Keys"></LocaleText>
 			</h6>
 			<div class="form-check form-switch ms-auto" v-if="!this.store.getActiveCrossServer()" >
