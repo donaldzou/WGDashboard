@@ -79,6 +79,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker_build
     steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_PREFIX }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+  
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
