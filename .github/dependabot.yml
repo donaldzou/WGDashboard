@@ -9,3 +9,23 @@ updates:
     directory: "/src"
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "npm"
+    directory: "/src"
+    schedule:
+      interval: "daily"
+      
+  - package-ecosystem: "github-actions"
+    directory: "/.github"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/docker"
+    schedule:
+      interval: "daily"
