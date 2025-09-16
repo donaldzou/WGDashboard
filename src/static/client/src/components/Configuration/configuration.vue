@@ -95,7 +95,7 @@ window.dayjs = dayjs
 				:config="props.config"
 				:protocol="props.config.protocol"
 				@back="showQRCode = false"
-				:qrcode-data="config.peer_configuration_data.file"></ConfigurationQRCode>
+				:qrcode-data="config.peer_configuration_data"></ConfigurationQRCode>
 		</Transition>
 	</div>
 </template>

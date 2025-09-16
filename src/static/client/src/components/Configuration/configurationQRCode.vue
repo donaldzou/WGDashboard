@@ -21,17 +21,23 @@ const emits = defineEmits([
 	<div class="m-auto d-flex gap-3 flex-column p-3" style="width: 400px">
 
 		<div class="d-flex flex-column gap-2 align-items-center">
-			<Qrcode :content="props.qrcodeData"></Qrcode>
+			<Qrcode :content="props.qrcodeData.file"></Qrcode>
 			<small>
 				Scan with {{ protocol === "wg" ? 'WireGuard':'AmneziaWG'}} App
 			</small>
+
+			<div v-if="props.qrcodeData.amneziaVPN" class="d-flex flex-column gap-2 align-items-center">
+				<Qrcode :content="btoa(props.qrcodeData.amneziaVPN)"></Qrcode>
+				<small>
+					Scan with AmneziaVPN App
+				</small>
+			</div>
+
 			<hr class="border-white w-100 my-2">
 			<button class="btn bg-primary-subtle border-primary-subtle rounded-3">
 				<i class="bi bi-download me-2"></i>Download
 			</button>
-			<small v-if="protocol === 'wg'" class="text-center text-muted">
-				For AmneziaVPN App, please download the configuration file and import into it.
-			</small>
+
 		</div>
 	</div>
 

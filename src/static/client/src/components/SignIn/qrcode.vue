@@ -20,5 +20,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
+canvas{
+	width: 250px !important;
+	height: 250px !important;
+}
 </style>
