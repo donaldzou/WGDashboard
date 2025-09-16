@@ -174,12 +174,18 @@ class AmneziaWireguardConfiguration(WireguardConfiguration):
 
     def getPeers(self):
         self.Peers.clear()
+        current_app.logger.info(f"Refreshing {self.Name} peer list")
+        
         if self.configurationFileChanged():
             with open(self.configPath, 'r') as configFile:
                 p = []
                 pCounter = -1
                 content = configFile.read().split('\n')
                 try:
+                    if "[Peer]" not in content:
+                        current_app.logger.info(f"{self.Name} config has no [Peer] section")
+                        return
+
                     peerStarts = content.index("[Peer]")
                     content = content[peerStarts:]
                     for i in content:
