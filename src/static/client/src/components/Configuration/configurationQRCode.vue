@@ -9,6 +9,13 @@ const props = defineProps([
 const emits = defineEmits([
 	'back'
 ])
+
+const amneziaVPN = computed(() => {
+	if (props.qrcodeData.amneziaVPN){
+		return btoa(props.qrcodeData.amneziaVPN)
+	}
+	return undefined
+})
 </script>
 
 <template>
@@ -26,8 +33,8 @@ const emits = defineEmits([
 				Scan with {{ protocol === "wg" ? 'WireGuard':'AmneziaWG'}} App
 			</small>
 
-			<div v-if="props.qrcodeData.amneziaVPN" class="d-flex flex-column gap-2 align-items-center">
-				<Qrcode :content="btoa(props.qrcodeData.amneziaVPN)"></Qrcode>
+			<div v-if="amneziaVPN" class="d-flex flex-column gap-2 align-items-center">
+				<Qrcode :content="amneziaVPN"></Qrcode>
 				<small>
 					Scan with AmneziaVPN App
 				</small>
