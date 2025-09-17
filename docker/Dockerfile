@@ -44,7 +44,7 @@ RUN mkdir -p /workspace && \
     git clone https://github.com/WGDashboard/amneziawg-tools /workspace/awg-tools
 
 # Change directory
-WORKDIR /workspaceawg-tools/src
+WORKDIR /workspace/awg-tools/src
 # Compile and change permissions
 RUN make && chmod +x wg*
 
