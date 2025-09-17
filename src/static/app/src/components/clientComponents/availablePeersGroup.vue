@@ -34,7 +34,7 @@ const collapse = ref(false)
 		<div
 			@click="collapse = !collapse"
 			role="button"
-			class="card-header rounded-0 sticky-top z-5 bg-body-secondary border-0 border-bottom text-white d-flex">
+			class="card-header rounded-0 sticky-top  bg-body-secondary border-0 border-bottom text-white d-flex">
 			<small><samp>{{ configuration }}</samp></small>
 			<a role="button" class="ms-auto text-white" >
 				<i class="bi bi-chevron-compact-down" v-if="collapse"></i>

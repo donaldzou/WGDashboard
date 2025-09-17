@@ -30,9 +30,10 @@ const deleteSuccess = async () => {
 
 <template>
 	<div class="text-body w-100 h-100 pb-2 position-relative">
+
 		<div class="w-100 h-100 card rounded-3">
 			<Transition name="zoom">
-				<ClientSettings v-if="settings" @close="settings = false"></ClientSettings>
+				<ClientSettings v-if="settings" @close="settings = false" class="z-5"></ClientSettings>
 			</Transition>
 			<div class="border-bottom z-0">
 				<div class="d-flex text-body align-items-center sticky-top p-3 bg-body-tertiary rounded-top-3" style="border-top-right-radius: 0 !important;">
@@ -64,7 +65,7 @@ const deleteSuccess = async () => {
 				</div>
 				<div
 					:class="{'hide': !route.params.id}"
-					class="col-sm-8 clientViewerContainer">
+					class="col-sm-8 clientViewerContainer z-0">
 					<RouterView></RouterView>
 				</div>
 			</div>
