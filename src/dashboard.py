@@ -1463,7 +1463,6 @@ def API_Email_PreviewBody():
     try:
         template = Template(body)
         download = p.downloadPeer()
-        # body = template.render(peer=p.toJson(), configurationFile=download)
         return ResponseObject(data={
             "Body": Template(body).render(peer=p.toJson(), configurationFile=download),
             "Subject": Template(subject).render(peer=p.toJson(), configurationFile=download)

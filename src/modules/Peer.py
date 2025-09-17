@@ -192,6 +192,10 @@ class Peer:
             for (key, val) in combine[s]:
                 if val is not None and ((type(val) is str and len(val) > 0) or (type(val) is int and val > 0)):
                     final["file"] += f"{key} = {val}\n"
+        
+        final["file"] = jinja2.Template(final["file"]).render(configuration=self.configuration)
+
+
         if self.configuration.Protocol == "awg":
             final["amneziaVPN"] = json.dumps({
                 "containers": [{
