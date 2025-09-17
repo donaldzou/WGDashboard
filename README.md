@@ -74,7 +74,6 @@
 
 
 # Screenshots
-
 <img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/sign-in.png" alt=""/>
 <img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/cross-server.png" alt=""/>
 <img src="https://wgdashboard-resources.tor1.cdn.digitaloceanspaces.com/Documentation%20Images/index.png" alt=""/>
