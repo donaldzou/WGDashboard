@@ -1,22 +1,41 @@
 services:
   wireguard-dashboard:
-    image: donaldzou/wgdashboard:latest
+    # Since the github organisation we recommend the ghcr.io.
+    # Alternatively we also still push to docker.io under donaldzou/wgdashboard.
+    # Both share the exact same tags. So they should be interchangable.
+    image: ghcr.io/wgdashboard/wgdashboard:latest
+
+    # Make sure to set the restart policy. Because for a VPN its important to come back IF it crashes.
     restart: unless-stopped
     container_name: wgdashboard
+
+    # Environment variables can be used to configure certain values at startup. Without having to configure it from the dashboard.
+    # By default its all disabled, but uncomment the following lines to apply these. (uncommenting is removing the # character)
+    # Refer to the documentation on https://wgdashboard.dev/ for more info on what everything means.
     #environment:
       #- tz=                # <--- Set container timezone, default: Europe/Amsterdam.
       #- public_ip=         # <--- Set public IP to ensure the correct one is chosen, defaulting to the IP give by ifconfig.me.
       #- wgd_port=          # <--- Set the port WGDashboard will use for its web-server.
+
+    # The following section, ports is very important for exposing more than one Wireguard/AmneziaWireguard interfaces.
+    # Once you create a new configuration and assign a port in the dashboard, don't forget to add it to the ports as well.
+    # Quick-tip: most Wireguard VPN tunnels use UDP. WGDashboard uses HTTP, so tcp.
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
+
+    # Volumes can be configured however you'd like. The default is using docker volumes.
+    # If you want to use local paths, replace the path before the : with your path.
     volumes:
       - aconf:/etc/amnezia/amneziawg
       - conf:/etc/wireguard
       - data:/data
+
+    # Needed for network administration.
     cap_add:
       - NET_ADMIN
 
+# The following configuration is linked to the above default volumes.
 volumes:
   aconf:
   conf:
