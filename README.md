@@ -1,3 +1,6 @@
+[![Docker Build and Push](https://github.com/WGDashboard/WGDashboard/actions/workflows/docker.yml/badge.svg)](https://github.com/WGDashboard/WGDashboard/actions/workflows/docker.yml)
+[![CodeQL](https://github.com/WGDashboard/WGDashboard/actions/workflows/codeql-analyze.yaml/badge.svg)](https://github.com/WGDashboard/WGDashboard/actions/workflows/codeql-analyze.yaml)
+
 > [!TIP]
 > 🎉 I'm excited to announce that WGDashboard is officially listed on DigitalOcean's Marketplace! For more information, please visit [Host WGDashboard & WireGuard with DigitalOcean﻿](https://docs.wgdashboard.dev/host-wgdashboard-wireguard-with-digitalocean.html) for more information!
 
