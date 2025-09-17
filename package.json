@@ -3,6 +3,6 @@
     "axios": "^1.9.0",
     "marked": "^15.0.7",
     "openai": "^4.89.0",
-    "pinia-plugin-persistedstate": "^4.2.0"
+    "pinia-plugin-persistedstate": "^4.5.0"
   }
 }
