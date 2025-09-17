@@ -1,6 +1,3 @@
-[![Docker Build and Push](https://github.com/WGDashboard/WGDashboard/actions/workflows/docker.yml/badge.svg)](https://github.com/WGDashboard/WGDashboard/actions/workflows/docker.yml)
-[![CodeQL](https://github.com/WGDashboard/WGDashboard/actions/workflows/codeql-analyze.yaml/badge.svg)](https://github.com/WGDashboard/WGDashboard/actions/workflows/codeql-analyze.yaml)
-
 > [!TIP]
 > 🎉 I'm excited to announce that WGDashboard is officially listed on DigitalOcean's Marketplace! For more information, please visit [Host WGDashboard & WireGuard with DigitalOcean﻿](https://docs.wgdashboard.dev/host-wgdashboard-wireguard-with-digitalocean.html) for more information!
 
@@ -29,6 +26,8 @@
   <a href="https://wakatime.com/badge/github/donaldzou/WGDashboard"><img src="https://wakatime.com/badge/github/donaldzou/WGDashboard.svg?style=for-the-badge" alt="wakatime"></a>
   <a href="https://hitscounter.dev"><img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2Fdonaldzou%2FWGDashboard&label=Visitor&icon=github&color=%230a58ca&style=for-the-badge"></a>
   <img src="https://img.shields.io/docker/pulls/donaldzou/wgdashboard?logo=docker&label=Docker%20Image%20Pulls&labelColor=ffffff&style=for-the-badge">
+  <img src="https://github.com/WGDashboard/WGDashboard/actions/workflows/docker.yml/badge.svg?style=for-the-badge">
+  <img src="https://github.com/WGDashboard/WGDashboard/actions/workflows/codeql-analyze.yaml/badge.svg">
 </p>
 <p align="center"><b>This project is supported by</b></p>
 <p align="center">
