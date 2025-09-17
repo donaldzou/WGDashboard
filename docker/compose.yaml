@@ -1,5 +1,5 @@
 services:
-  wireguard-dashboard:
+  wgdashboard:
     # Since the github organisation we recommend the ghcr.io.
     # Alternatively we also still push to docker.io under donaldzou/wgdashboard.
     # Both share the exact same tags. So they should be interchangable.

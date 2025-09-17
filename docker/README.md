@@ -3,8 +3,8 @@ Author: @DaanSelen<br>
 
 This document delves into how the WGDashboard Docker container has been built.<br>
 Of course there are two stages (simply said), one before run-time and one at/after run-time.<br>
-The `Dockerfile` describes how the container image is made, and the `entrypoint.sh` is executed after running the container. <br>
-In this example, WireGuard is integrated into the container itself, so it should be a run-and-go(/out-of-the-box).<br>
+The `Dockerfile` describes how the container image is made, and the `entrypoint.sh` is executed after the container is started. <br>
+In this example, [WireGuard](https://www.wireguard.com/) is integrated into the container itself, so it should be a run-and-go(/out-of-the-box) experience.<br>
 For more details on the source-code specific to this Docker image, refer to the source files, they have lots of comments.
 
 <br>
@@ -18,20 +18,24 @@ For more details on the source-code specific to this Docker image, refer to the 
 />
 <br>
 
-To get the container running you either pull the image from the repository, (docker.io)`donaldzou/wgdashboard:latest`.<br>
-From there either use the environment variables describe below as parameters or use the Docker Compose file: `compose.yaml`.<br>
-Be careful, the default generated WireGuard configuration file uses port 51820/udp. So use this port if you want to use it out of the box.<br>
-Otherwise edit the configuration file in `/etc/wireguard/wg0.conf`.
+To get the container running you either pull the pre-made image from a remote repository, there are 2 official options.<br>
+
+- ghcr.io/wgdashboard/wgdashboard:<tag>
+- docker.io/donaldzou/wgdashboard:<tag>
+
+> tags should be either: latest, main, <version> or <commit-sha>.
+
+From there either use the environment variables described below as parameters or use the Docker Compose file: `compose.yaml`.<br>
+Be careful, the default generated WireGuard configuration file uses port 51820/udp. So make sure to use this port if you want to use it out of the box.<br>
+Otherwise edit the configuration file in WGDashboard under `Configuration Settings` -> `Edit Raw Configuration File`.
+
+> Otherwise you need to enter the container and edit: `/etc/wireguard/wg0.conf`.
 
 # WGDashboard: 🐳 Docker Deployment Guide
 
-To run the container, you can either pull the image from Docker Hub or build it yourself. The image is available at:
+To run the container, you can either pull the image from the Github Container Registry (ghcr.io), Docker Hub (docker.io) or build it yourself. The image is available at:
 
-```
-docker.io/donaldzou/wgdashboard:latest
-```
-
-> `docker.io` is in most cases automatically resolved by the Docker application.
+> `docker.io` is in most cases automatically resolved by the Docker application. Therefor you can ofter specify: `donaldzou/wgdashboard:latest`
 
 ### 🔧 Quick Docker Run Command
 
@@ -44,7 +48,7 @@ docker run -d \
   -p 10086:10086/tcp \
   -p 51820:51820/udp \
   --cap-add NET_ADMIN \
-  donaldzou/wgdashboard:latest
+  ghcr.io/wgdashboard/wgdashboard:latest
 ```
 
 > ⚠️ The default WireGuard port is `51820/udp`. If you change this, update the `/etc/wireguard/wg0.conf` accordingly.
@@ -58,23 +62,24 @@ You can also use Docker Compose for easier configuration:
 ```yaml
 services:
   wgdashboard:
-    image: donaldzou/wgdashboard:latest
+    image: ghcr.io/wgdashboard/wgdashboard:latest
     restart: unless-stopped
     container_name: wgdashboard
-    environment:
-      # - tz=Europe/Amsterdam
-      # - global_dns=1.1.1.1
-      # - public_ip=YOUR_PUBLIC_IP
+
     ports:
       - 10086:10086/tcp
       - 51820:51820/udp
+
     volumes:
+      - aconf:/etc/amnezia/amneziawg
       - conf:/etc/wireguard
       - data:/data
+
     cap_add:
       - NET_ADMIN
 
 volumes:
+  aconf:
   conf:
   data:
 ```
@@ -85,7 +90,7 @@ volumes:
 
 ## 🔄 Updating the Container
 
-Updating WGDashboard is currently in **alpha** stage. While the update process may work, it's still under testing.
+Updating the WGDashboard container should be through 'The Docker Way' - by pulling the newest/newer image and replacing this old one.
 
 ---
 
