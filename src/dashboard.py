@@ -856,15 +856,21 @@ def API_addPeers(configName):
             preshared_key: str = data.get('preshared_key', "")            
     
             if type(mtu) is not int or mtu < 0 or mtu > 1460:
-                default: str = DashboardConfig.GetConfig("Peers", "peer_MTU")[1]
+                default: str = DashboardConfig.GetConfig("Peers", "peer_mtu")[1]
                 if default.isnumeric():
-                    mtu = default
+                    try:
+                        mtu = int(default)
+                    except Exception as e:
+                        mtu = 0
                 else:
                     mtu = 0
             if type(keep_alive) is not int or keep_alive < 0:
                 default = DashboardConfig.GetConfig("Peers", "peer_keep_alive")[1]
                 if default.isnumeric():
-                    keep_alive = default
+                    try:
+                        keep_alive = int(default)
+                    except Exception as e:
+                        keep_alive = 0
                 else:
                     keep_alive = 0
             
