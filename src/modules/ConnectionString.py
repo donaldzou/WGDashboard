@@ -13,7 +13,7 @@ os.makedirs(SQLITE_PATH, exist_ok=True)
 
 DEFAULT_DB = "wgdashboard"
 DEFAULT_LOG_DB = "wgdashboard_log"
-DEFAULT_JOB_DB = "wgdashboard_log"
+DEFAULT_JOB_DB = "wgdashboard_job"
 
 def ConnectionString(database_name: str) -> str:
     """
@@ -22,7 +22,7 @@ def ConnectionString(database_name: str) -> str:
     """
     db_type = parser.get("Database", "type")
     db_prefix = parser.get("Database", "prefix")
-    database_name = f"{db_prefix}_{database_name}"
+    database_name = f"{db_prefix}{database_name}"
 
     if db_type == "postgresql":
         username = parser.get("Database", "username")
