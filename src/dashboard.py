@@ -204,7 +204,6 @@ _, app_ip = DashboardConfig.GetConfig("Server", "app_ip")
 _, app_port = DashboardConfig.GetConfig("Server", "app_port")
 _, WG_CONF_PATH = DashboardConfig.GetConfig("Server", "wg_conf_path")
 _, log_level = DashboardConfig.GetConfig("Server", "log_level")
-print(f"FLASK {log_level}")
 
 cors = CORS(app, resources={rf"{APP_PREFIX}/api/*": {
     "origins": "*",

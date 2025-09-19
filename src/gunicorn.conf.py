@@ -4,8 +4,6 @@ global sqldb, cursor, DashboardConfig, WireguardConfigurations, AllPeerJobs, Job
 app_host, app_port, log_level = dashboard.gunicornConfig()
 date = datetime.today().strftime('%Y_%m_%d_%H_%M_%S')
 
-print(f"GUNICORN {log_level}")
-
 def post_worker_init(worker):
     dashboard.startThreads()
     dashboard.DashboardPlugins.startThreads()

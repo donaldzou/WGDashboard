@@ -19,7 +19,7 @@ def ConnectionString(database) -> str:
         if not database_exists(cn):
             create_database(cn)
     except Exception as e:
-        current_app.logger.error("Database error. Terminating...", e)
+        current_app.logger.critical("Database error. Terminating...", e)
         exit(1)
         
     return cn
